@@ -1,0 +1,239 @@
+---
+# This file is used to generate "Task Manager settings" page in the product docs
+
+product: Kibana
+collection: Task Manager settings in Kibana
+id: task-manager-settings-kb
+page_description: |
+  Task Manager runs background tasks by polling for work on an interval.  You can configure its behavior to tune for performance and throughput.
+
+groups:
+  - group: Task Manager settings
+    id: task-manager-settings
+    # description: |
+    # example: |
+    settings:
+
+      - setting: xpack.task_manager.max_attempts
+        # id:
+        description: |
+          The maximum number of times a task will be attempted before being abandoned as failed.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 3
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.poll_interval
+        # id:
+        description: |
+          How often, in milliseconds, the task manager will look for more work.  Cannot be lower than 100.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 500
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.request_capacity
+        # id:
+        description: |
+          How many requests can Task Manager buffer before it rejects new requests.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 1000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.max_workers
+        # id:
+        description: |
+          The maximum number of tasks that this Kibana instance will run simultaneously. Starting in 8.0, it will not be possible to set the value greater than 100.
+        state: deprecated
+        deprecation_details: "This setting was deprecated in 8.16.0."
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 10
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.monitored_stats_health_verbose_log.enabled
+        # id:
+        description: |
+          This flag will enable automatic warn and error logging if task manager self detects a performance issue, such as the time between when a task is scheduled to execute and when it actually executes.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: false
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.monitored_stats_health_verbose_log.warn_delayed_task_start_in_seconds
+        # id:
+        description: |
+          The amount of seconds we allow a task to delay before printing a warning server log.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 60
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.event_loop_delay.monitor
+        # id:
+        description: |
+          Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_threshold` setting.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: bool
+        default: true
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.event_loop_delay.warn_threshold
+        # id:
+        description: |
+          Sets the amount of event loop delay, in milliseconds, during a task execution which will cause a warning to be logged.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 5000
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+      - setting: xpack.task_manager.capacity
+        # id:
+        description: |
+          Controls the number of tasks that can be run at one time. The minimum value is 5 and the maximum is 50.
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        default: 10
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
+
+  - group: Task Manager Health settings
+    id: task-manager-health-settings
+    description: |
+      Settings that configure the [Health monitoring](docs-content://deploy-manage/monitor/kibana-task-manager-health-monitoring.md) endpoint.
+    # example: |
+    settings:
+
+      - setting: xpack.task_manager.monitored_task_execution_thresholds
+        # id:
+        description: |
+          Configures the threshold of failed task executions at which point the `warn` or `error` health status is set under each task type execution status (under `stats.runtime.value.execution.result_frequency_percent_as_number[${task type}].status`).
+
+          This setting allows configuration of both the default level and a custom task type specific level. By default, this setting is configured to mark the health of every task type as `warning` when it exceeds 80% failed executions, and as `error` at 90%.
+
+          Custom configurations allow you to reduce this threshold to catch failures sooner for task types that you might consider critical, such as alerting tasks.
+
+          This value can be set to any number between 0 to 100, and a threshold is hit when the value **exceeds** this number. This means that you can avoid setting the status to `error` by setting the threshold at 100, or hit `error` the moment any task fails by setting the threshold to 0 (as it will exceed 0 once a single failure occurs).
+
+        # state: deprecated/hidden/tech-preview
+        # deprecation_details: ""
+        # note: ""
+        # tip: ""
+        # warning: ""
+        # important: ""
+        datatype: int
+        # default:
+        # options:
+        #   - option:
+        #     description: ""
+        # type: static/dynamic
+        applies_to:
+          deployment:
+            self: all
+         # example: |
