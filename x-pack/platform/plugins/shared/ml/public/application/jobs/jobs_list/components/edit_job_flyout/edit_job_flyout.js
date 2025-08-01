@@ -38,6 +38,7 @@ import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/cus
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -485,17 +486,7 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (this.state.isConfirmationModalVisible) {
-      // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
-      const returnFocus = () => {
-        setTimeout(() => {
-          const actionButton = document
-            .getElementById(`${this.state.job.job_id}-actions`)
-            ?.querySelector('button');
-          if (actionButton) {
-            actionButton.focus?.();
-          }
-        }, 0);
-      };
+      const returnFocus = createJobActionFocusRestoration(this.state.job.job_id);
       confirmationModal = (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
