@@ -15,6 +15,7 @@ import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
 import { Observable, from as fromRxjs, map } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
@@ -26,8 +27,22 @@ import {
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { SecurityError } from '../../../lib/streams/errors/security_error';
+import type { StreamsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+
+async function assertLicenseAndPricingTier(
+  server: StreamsServer,
+  licensing: LicensingPluginStart
+): Promise<void> {
+  const isAvailableForTier = server.core.pricing.isFeatureAvailable(
+    STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
+  );
+  if (!isAvailableForTier) {
+    throw new SecurityError(`Cannot access API on the current pricing tier`);
+  }
+  await assertEnterpriseLicense(licensing);
+}
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -66,16 +81,10 @@ const previewSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsPreviewResponse> => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-    );
-    if (!isAvailableForTier) {
-      throw new SecurityError(`Cannot access API on the current pricing tier`);
-    }
-
-    const { streamsClient, scopedClusterClient } = await getScopedClients({
+    const { streamsClient, scopedClusterClient, licensing } = await getScopedClients({
       request,
     });
+    await assertLicenseAndPricingTier(server, licensing);
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
@@ -136,17 +145,10 @@ const readSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-    );
-    if (!isAvailableForTier) {
-      throw new SecurityError(`Cannot access API on the current pricing tier`);
-    }
-
     const { streamsClient, assetClient, scopedClusterClient, licensing } = await getScopedClients({
       request,
     });
-    await assertEnterpriseLicense(licensing);
+    await assertLicenseAndPricingTier(server, licensing);
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
@@ -222,17 +224,10 @@ const generateSignificantEventsRoute = createServerRoute({
   }): Promise<
     Observable<ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>>
   > => {
-    const isAvailableForTier = server.core.pricing.isFeatureAvailable(
-      STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
-    );
-    if (!isAvailableForTier) {
-      throw new SecurityError(`Cannot access API on the current pricing tier`);
-    }
-
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
+    await assertLicenseAndPricingTier(server, licensing);
 
-    await assertEnterpriseLicense(licensing);
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
       throw badRequest('Streams are not enabled');
