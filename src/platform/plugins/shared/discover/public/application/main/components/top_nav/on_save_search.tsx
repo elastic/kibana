@@ -97,6 +97,7 @@ export async function onSaveSearch({
   const dataView = savedSearch.searchSource.getField('index');
   const currentTab = state.getCurrentTab();
   const overriddenVisContextAfterInvalidation = currentTab.overriddenVisContextAfterInvalidation;
+  const controlGroupState = currentTab.controlGroupState;
 
   const onSave = async ({
     newTitle,
@@ -143,6 +144,10 @@ export async function onSaveSearch({
 
     if (overriddenVisContextAfterInvalidation) {
       savedSearch.visContext = overriddenVisContextAfterInvalidation;
+    }
+
+    if (controlGroupState) {
+      savedSearch.controlGroupJson = JSON.stringify(controlGroupState);
     }
 
     const saveOptions: SaveSavedSearchOptions = {

@@ -8,17 +8,15 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import {
   internalStateActions,
+  useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../state_management/redux';
-import { CONTROLS_STORAGE_KEY } from '../../../../common/constants';
-import { TABS_ENABLED } from '../../../constants';
 import { useSavedSearch } from '../state_management/discover_state_provider';
 
 /**
@@ -87,51 +85,12 @@ export const useESQLVariables = ({
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
-  const currentTabIdWhenTabsEnabled = useCurrentTabSelector((tab) => tab.id);
-  // When tabs are not enabled, the above hook returns a random string after refresh
-  const currentTabId = TABS_ENABLED ? currentTabIdWhenTabsEnabled : 'default';
+  const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
+  const currentTab = useCurrentTabSelector((tab) => tab);
 
   const savedSearchState = useSavedSearch();
 
-  const [controlsStateMap, setControlsStateMap] = useSessionStorage<ESQLControlSessionStorage>(
-    CONTROLS_STORAGE_KEY,
-    {}
-  );
-
-  // useEffect(() => {
-  //   console.log('controlsStateMap', controlsStateMap);
-  //   console.log('savedSearchState?.controlGroupJson', savedSearchState?.controlGroupJson);
-  //   // Initialize the controls state map with the initial state if it is empty
-  //   if (
-  //     Object.keys(controlsStateMap).length === 0 &&
-  //     isEsqlMode &&
-  //     savedSearchState?.controlGroupJson &&
-  //     Object.keys(savedSearchState?.controlGroupJson).length !== 0
-  //   ) {
-  //     console.log('meow');
-  //     const initialControlsState = savedSearchState?.controlGroupJson
-  //       ? { [currentTabId]: JSON.parse(savedSearchState.controlGroupJson) }
-  //       : undefined;
-  //     if (initialControlsState) {
-  //       setControlsStateMap({
-  //         ...controlsStateMap,
-  //         ...initialControlsState,
-  //       });
-  //     }
-  //   }
-  // }, [
-  //   controlsStateMap,
-  //   currentTabId,
-  //   isEsqlMode,
-  //   savedSearchState,
-  //   savedSearchState.controlGroupJson,
-  //   setControlsStateMap,
-  // ]);
-  // Effect to subscribe to control group input changes
   useEffect(() => {
-    if (!isEsqlMode && Object.keys(controlsStateMap || {}).length > 0) {
-      setControlsStateMap({});
-    }
     // Only proceed if in ESQL mode and controlGroupAPI is available
     if (!controlGroupAPI || !isEsqlMode) {
       return;
@@ -141,26 +100,11 @@ export const useESQLVariables = ({
         const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
-        const newControlsStateMap = { ...(controlsStateMap || {}) };
-
-        // Check if the current tab's state is empty
-        if (Object.keys(currentTabControlState).length === 0) {
-          // If the current tab's state exists in storage, delete it.
-          if (newControlsStateMap[currentTabId]) {
-            delete newControlsStateMap[currentTabId];
-            // Only update if something was actually deleted to avoid unnecessary renders
-            if (!isEqual(controlsStateMap, newControlsStateMap)) {
-              setControlsStateMap(newControlsStateMap);
-            }
-          }
-        } else {
-          // If the state for the current tab has changed, update it.
-          if (!isEqual(newControlsStateMap[currentTabId], currentTabControlState)) {
-            newControlsStateMap[currentTabId] = currentTabControlState;
-            setControlsStateMap(newControlsStateMap);
-          }
-        }
-
+        dispatch(
+          setControlGroupState({
+            controlGroupState: currentTabControlState,
+          })
+        );
         const newVariables = getEsqlVariablesFromState(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           dispatch(internalStateActions.setEsqlVariables(newVariables));
@@ -174,13 +118,11 @@ export const useESQLVariables = ({
     };
   }, [
     controlGroupAPI,
+    setControlGroupState,
     currentEsqlVariables,
-    controlsStateMap,
-    setControlsStateMap,
     dispatch,
     isEsqlMode,
     stateContainer,
-    currentTabId,
   ]);
 
   const onSaveControl = useCallback(
@@ -213,8 +155,11 @@ export const useESQLVariables = ({
 
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
-    return controlsStateMap?.[currentTabId];
-  }, [controlsStateMap, currentTabId]); // Dependencies are important for `useCallback`
+    const savedControlGroupState = JSON.parse(
+      savedSearchState?.controlGroupJson || '{}'
+    ) as ControlPanelsState<ESQLControlState>;
+    return currentTab.controlGroupState ?? savedControlGroupState;
+  }, [currentTab, savedSearchState]);
 
   return {
     onSaveControl,

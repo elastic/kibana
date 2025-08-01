@@ -43,6 +43,7 @@ const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   lastPersistedGlobalState: {},
+  controlGroupState: undefined,
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {
@@ -191,6 +192,16 @@ export const internalStateSlice = createSlice({
           action.payload.overriddenVisContextAfterInvalidation;
       }),
 
+    setControlGroupState: (
+      state,
+      action: TabAction<{
+        controlGroupState: TabState['controlGroupState'];
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.controlGroupState = action.payload.controlGroupState;
+      }),
+
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
@@ -299,6 +310,17 @@ const createMiddleware = ({
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
+    effect: throttle(
+      (action) => {
+        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
+  });
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setControlGroupState,
     effect: throttle(
       (action) => {
         tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);

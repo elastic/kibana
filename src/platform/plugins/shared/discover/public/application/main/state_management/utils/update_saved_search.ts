@@ -14,8 +14,6 @@ import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { CONTROLS_STORAGE_KEY } from '../../../../../common/constants';
-import { TABS_ENABLED } from '../../../../constants';
 
 /**
  * Updates the saved search with a given data view & Appstate
@@ -35,7 +33,6 @@ export function updateSavedSearch({
   globalStateContainer,
   services,
   useFilterAndQueryServices = false,
-  tabId,
 }: {
   savedSearch: SavedSearch;
   dataView?: DataView;
@@ -43,7 +40,6 @@ export function updateSavedSearch({
   globalStateContainer: DiscoverGlobalStateContainer;
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
-  tabId: string;
 }) {
   if (dataView && savedSearch.searchSource.getField('index')?.id !== dataView.id) {
     savedSearch.searchSource.setField('index', dataView);
@@ -111,15 +107,6 @@ export function updateSavedSearch({
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
-
-  // Control group from session storage
-  const controlGroup = sessionStorage.getItem(CONTROLS_STORAGE_KEY);
-  const parsedControlGroup = controlGroup ? JSON.parse(controlGroup) : undefined;
-  const currentTabId = TABS_ENABLED ? tabId : 'default';
-  const controlGroupForCurrentTab = parsedControlGroup?.[currentTabId];
-  if (controlGroupForCurrentTab) {
-    savedSearch.controlGroupJson = JSON.stringify(controlGroupForCurrentTab);
-  }
 
   return savedSearch;
 }

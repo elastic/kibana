@@ -157,17 +157,3 @@ export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
-
-// Addition of controlGroupJson to the schema
-// export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
-//   controlGroupJson: schema.maybe(schema.string()),
-//   // also add the controlGroupJson to the tabs schema
-//   tabs: schema.maybe(
-//     schema.arrayOf(
-//       SCHEMA_DISCOVER_SESSION_TAB.extends({
-//         controlGroupJson: schema.maybe(schema.string()),
-//       }),
-//       { minSize: 1 }
-//     )
-//   ),
-// });
