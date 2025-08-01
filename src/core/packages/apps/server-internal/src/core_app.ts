@@ -429,6 +429,7 @@ export class CoreAppsService {
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot, uiPlugins: UiPlugins) {
     // Expose @elastic/charts' pre-compiled CSS themes
+    // Referenced in `getThemeStylesheetPaths` in src/core/packages/rendering/server-internal/src/render_utils.ts
     core.http.registerStaticDir(
       // We're only interested in exposing 'theme_dark.css' and 'theme_light.css',
       // but this route cannot be limited to a file (not even a pattern like `{file}.css`).
