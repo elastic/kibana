@@ -62,6 +62,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   direction = 'column',
   autoRecoverAlerts,
 }: ComponentOpts) => {
+  console.log('>>> Rule', JSON.stringify(rule, null, 2));
   const {
     notifications: { toasts },
     i18n: i18nStart,
