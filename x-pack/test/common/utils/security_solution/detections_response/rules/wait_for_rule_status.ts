@@ -60,7 +60,14 @@ export const waitForRuleStatus = async (
       const rule = response.body;
       const ruleStatus = rule?.execution_summary?.last_execution.status;
       const ruleStatusDate = rule?.execution_summary?.last_execution.date;
-
+      // eslint-disable-next-line no-console
+      console.log('AfterDate:', afterDate);
+      // eslint-disable-next-line no-console
+      console.log(
+        'lastExecution:',
+        rule?.execution_summary?.last_execution.date,
+        rule?.execution_summary?.last_execution.status
+      );
       return (
         rule != null &&
         ruleStatus === expectedStatus &&
