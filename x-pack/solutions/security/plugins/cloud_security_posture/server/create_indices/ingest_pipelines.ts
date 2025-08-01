@@ -51,7 +51,7 @@ export const latestFindingsPipelineIngestConfig: IngestPutPipelineRequest = {
       },
     },
   ],
-    _meta: {
+  _meta: {
     managed: true,
   },
 };
