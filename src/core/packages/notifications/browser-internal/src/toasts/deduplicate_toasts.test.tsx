@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { render } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
-import { render as rtlRender } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
 import { Toast } from '@kbn/core-notifications-browser';
@@ -106,7 +105,7 @@ describe('TitleWithBadge component', () => {
 
     const titleComponent = <TitleWithBadge title={title} counter={5} />;
 
-    expect(rtlRender(titleComponent).container.innerHTML).toMatchInlineSnapshot(
+    expect(render(titleComponent).container.innerHTML).toMatchInlineSnapshot(
       `"Welcome! <span class=\\"euiNotificationBadge css-1aoydhg-floatTopRight css-rme68u-euiNotificationBadge-m-subdued\\">5</span>"`
     );
   });
@@ -123,5 +122,5 @@ function verifyTextAndTitle(
 
 function getNodeText(node: ReactNode | MountPoint) {
   const rendered = render(node as ReactElement);
-  return rendered.text();
+  return rendered.container.textContent;
 }
