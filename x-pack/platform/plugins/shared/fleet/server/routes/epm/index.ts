@@ -371,7 +371,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: GetInfoRequestSchema,
           response: {
