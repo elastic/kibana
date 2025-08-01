@@ -23,7 +23,7 @@ function toast(title: string | MountPoint, text?: string | MountPoint, id = Math
   };
 }
 
-const fakeMountPoint = () => () => { };
+const fakeMountPoint = () => () => {};
 
 describe('deduplicate toasts', () => {
   it('returns an empty list for an empty input', () => {
