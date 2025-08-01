@@ -155,6 +155,9 @@ export interface CommandDefinition<TMeta = any> {
    * through all of its builtin validations (based on `CommandDefinition`).
    * Example: used it when there are multiple optional arguments but at least one of those
    * must be defined.
+   *
+   * NOTE:  this callback will also be invoked when a user enters the console's built in `--help`
+   *        argument. Ensure the validation code exists early when that is the case.
    */
   validate?: (command: Command) => true | string;
 

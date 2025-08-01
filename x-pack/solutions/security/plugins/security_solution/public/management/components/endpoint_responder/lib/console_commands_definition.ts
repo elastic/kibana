@@ -625,6 +625,7 @@ const adjustCommandsForSentinelOne = ({
             ),
             mustHaveValue: 'non-empty-string',
             SelectorComponent: CustomScriptSelector,
+            selectorShowTextValue: true,
           },
           inputParams: {
             required: false,
@@ -637,10 +638,27 @@ const adjustCommandsForSentinelOne = ({
           },
           ...commandCommentArgument(),
         };
+
+        const priorValidateFn = command.validate;
+
         command.validate = (
           enteredCommand: Command<CommandDefinition, SentinelOneRunScriptActionParameters>
         ) => {
+          // First do the base validation - like authz checks
+          const baseValidation = priorValidateFn ? priorValidateFn(enteredCommand) : true;
+
+          if (baseValidation !== true) {
+            return baseValidation;
+          }
+
           const { argState, args } = enteredCommand;
+
+          // No need to validate display of command help `help`
+          if (args.hasArg('help')) {
+            return true;
+          }
+
+          // Validate the script that was selected
           const scriptInfo = (
             argState?.script?.[0]?.store as CustomScriptSelectorState<SentinelOneScript>
           )?.selectedOption;
