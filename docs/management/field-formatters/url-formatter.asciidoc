@@ -12,7 +12,7 @@ For example, when:
 
 * A field contains a user ID
 * A field uses the `Url` field formatter
-* The URI template is `http://company.net/profiles?user_id={­{value}­}`
+* The URI template is `<BASE_URL>/profiles?user_id={­{value}­}`
 
 The resulting URL replaces `{{value}}` with the user ID from the field.
 
