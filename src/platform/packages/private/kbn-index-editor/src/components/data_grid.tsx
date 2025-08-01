@@ -123,9 +123,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return preservedOrder;
   }, [props.columns, activeColumns]);
 
+  // This effect is needed to ensure that the activeColumns state is always in sync with the rendered columns
+  // This is necessary because DataTable onSetColumns method is not updated when new columns are added.
   useEffect(() => {
-    // Ensure that the activeColumns state is always in sync with the rendered columns
-    // This is necessary because DataTable onSetColumns method is not updated when new columns are added.
     if (!isEqual(activeColumns, renderedColumns)) {
       setActiveColumns(renderedColumns);
     }
