@@ -15,6 +15,10 @@ import type { VisParams } from '@kbn/visualizations-plugin/common';
 
 import type { FormatOverrides } from './helpers';
 
+const TREND_UPWARD = '\u{2191}'; // ↑
+const TREND_DOWNWARD = '\u{2193}'; // ↓
+const TREND_STABLE = '\u{003D}'; // =
+
 export interface TrendConfig {
   showIcon: boolean;
   showValue: boolean;
@@ -101,7 +105,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
 
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.showIcon ? '\u{2193}' : undefined, // ↓
+      icon: trendConfig.showIcon ? TREND_DOWNWARD : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -111,7 +115,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
 
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.showIcon ? '\u{2191}' : undefined, // ↑
+      icon: trendConfig.showIcon ? TREND_UPWARD : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -120,7 +124,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
 
   return {
-    icon: trendConfig.showIcon ? '\u{003D}' : undefined, // =
+    icon: trendConfig.showIcon ? TREND_STABLE : undefined,
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),

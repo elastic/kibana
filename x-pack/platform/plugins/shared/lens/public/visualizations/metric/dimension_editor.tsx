@@ -458,8 +458,8 @@ function SecondaryMetricEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.prefixText.label', {
-          defaultMessage: 'Prefix',
+        label={i18n.translate('xpack.lens.metric.labelText.label', {
+          defaultMessage: 'Label',
         })}
       >
         <>
@@ -522,6 +522,10 @@ function SecondaryMetricEditor({
           )}
         </>
       </EuiFormRow>
+
+      {/* Here: When the label is visible, choose whether before or after the value */}
+      {prefixConfig.mode !== 'none' && 'Change label postion'}
+
       <EuiFormRow
         display="columnCompressed"
         fullWidth
