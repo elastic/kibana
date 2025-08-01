@@ -11,6 +11,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 import type {
   OptionsListDisplaySettings,
   OptionsListSortingType,
@@ -19,7 +20,6 @@ import { initializeSelectionsManager } from '../options_list_control/selections_
 import { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
-import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 export const getOptionsListContextMock = () => {
   const editorStateManager = initializeEditorStateManager({
