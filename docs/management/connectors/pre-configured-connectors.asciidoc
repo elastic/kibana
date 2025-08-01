@@ -30,12 +30,12 @@ connector:
       actionTypeId: .slack      <2>
       name: 'Slack #xyz'        <3>
       secrets:
-        webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz'
+        webhookUrl: '<WEBHOOK_URL>' <1>
     webhook-service:
       actionTypeId: .webhook
       name: 'Email service'
       config:                   <4>
-        url: 'https://email-alert-service.elastic.co'
+        url: '<SERVICE_URL>' <1>
         method: post
         headers:
           header1: value1
@@ -93,7 +93,7 @@ xpack.actions.preconfigured:
     name: preconfigured-webhook-connector-type
     actionTypeId: .webhook
     config:
-      url: https://test.host <1>
+      url: <WEB_SERVICE_URL> <1>
       method: post <2>
       headers: <3>
         testheader: testvalue
