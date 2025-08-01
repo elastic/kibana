@@ -76,6 +76,7 @@ describe('StepRuleActions', () => {
         summaryActionMessageParams={actionMessageParams}
         isLoading={false}
         form={actionsStepForm}
+        ruleInterval="5m"
       />
     );
   };
