@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
   EuiFormRow,
@@ -15,21 +16,23 @@ import {
   EuiText,
   EuiSpacer,
   EuiHorizontalRule,
-  EuiSuperSelect,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { OperatingSystem, TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { OS_TITLES } from '../../../../common/translations';
+import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
 import {
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
@@ -56,10 +59,20 @@ interface ValidationResult {
   warnings: Record<string, string[]>;
 }
 
-const OS_OPTIONS = [OperatingSystem.WINDOWS, OperatingSystem.MAC].map((os) => ({
-  value: os,
-  inputDisplay: OS_TITLES[os],
-}));
+const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
+  {
+    label: OPERATING_SYSTEM_WINDOWS_AND_MAC,
+    value: [OperatingSystem.WINDOWS, OperatingSystem.MAC],
+  },
+  {
+    label: OS_TITLES[OperatingSystem.WINDOWS],
+    value: [OperatingSystem.WINDOWS],
+  },
+  {
+    label: OS_TITLES[OperatingSystem.MAC],
+    value: [OperatingSystem.MAC],
+  },
+];
 
 const DetailsSection = memo<{
   mode: string;
@@ -151,8 +164,8 @@ DetailsSection.displayName = 'DetailsSection';
 
 const ConditionsSection = memo<{
   getTestId: (suffix?: string) => string | undefined;
-  selectedOs: OperatingSystem;
-  handleOsChange: (value: OperatingSystem) => void;
+  selectedOs: OsTypeArray;
+  handleOsChange: (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => void;
   currentEntry: ExceptionListItemSchema['entries'][0];
   handleFieldChange: (value: string) => void;
   handleOperatorChange: (value: string) => void;
@@ -195,14 +208,18 @@ const ConditionsSection = memo<{
             : undefined
         }
       >
-        <EuiSuperSelect
-          name="os"
+        <EuiComboBox
+          isInvalid={formState.visited.os && !!validationResult.errors.os}
+          placeholder="Select an operating system"
+          singleSelection={{ asPlainText: true }}
           options={OS_OPTIONS}
-          valueOfSelected={selectedOs}
+          selectedOptions={OS_OPTIONS.filter(
+            (option) => JSON.stringify(option.value) === JSON.stringify(selectedOs)
+          )}
           onChange={handleOsChange}
-          fullWidth
+          isClearable={false}
           data-test-subj={getTestId('osSelectField')}
-          disabled={disabled}
+          isDisabled={disabled}
         />
       </EuiFormRow>
 
@@ -288,6 +305,18 @@ const OPERATOR_OPTIONS = [
 
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
+    // For new TD items, ensure we start with the correct OS types
+    const initialItem = useMemo(() => {
+      if (
+        mode === 'create' &&
+        item.os_types?.length === 1 &&
+        item.os_types[0] === 'windows' &&
+        !item.name?.trim()
+      ) {
+        return { ...item, os_types: [OperatingSystem.WINDOWS, OperatingSystem.MAC] };
+      }
+      return item;
+    }, [item, mode]);
     const getTestId = useTestIdGenerator('trustedDevices-form');
 
     const [formState, setFormState] = useState<FormState>({
@@ -366,7 +395,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
     const updateField = useCallback(
       (field: string, value: string) => {
-        const updatedItem = { ...item, [field]: value };
+        const updatedItem = { ...initialItem, [field]: value };
         const validation = validateForm(updatedItem);
 
         updateFormState({ isValid: validation.isValid });
@@ -374,7 +403,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [item, onChange, validateForm, updateFormState]
+      [initialItem, onChange, validateForm, updateFormState]
     );
 
     const handleNameChange = useCallback(
@@ -399,10 +428,12 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleOsChange = useCallback(
-      (value: OperatingSystem) => {
+      (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => {
+        const osTypes = selectedOptions[0]?.value || [];
+
         const updatedItem = {
-          ...item,
-          os_types: [value],
+          ...initialItem,
+          os_types: osTypes,
           entries: [
             {
               field: TrustedDeviceConditionEntryField.USERNAME,
@@ -412,6 +443,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
             },
           ],
         };
+
         const validation = validateForm(updatedItem);
 
         updateFormState({
@@ -421,19 +453,19 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [item, onChange, validateForm, updateFormState, formState.visited]
+      [initialItem, onChange, validateForm, updateFormState, formState.visited]
     );
 
     const updateConditionField = useCallback(
       (updates: Record<string, string>) => {
-        const currentEntry = item.entries?.[0] || {
+        const currentEntry = initialItem.entries?.[0] || {
           field: TrustedDeviceConditionEntryField.USERNAME,
           operator: 'included',
           type: 'match',
           value: '',
         };
         const updatedEntry = { ...currentEntry, ...updates };
-        const updatedItem = { ...item, entries: [updatedEntry] };
+        const updatedItem = { ...initialItem, entries: [updatedEntry] };
         const validation = validateForm(updatedItem);
 
         updateFormState({ isValid: validation.isValid });
@@ -441,7 +473,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
-      [item, onChange, validateForm, updateFormState, setValidationResult]
+      [initialItem, onChange, validateForm, updateFormState, setValidationResult]
     );
 
     const handleFieldChange = useCallback(
@@ -480,12 +512,14 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       [onChange, validateForm, updateFormState]
     );
 
-    const selectedOs = useMemo(() => {
-      return (item.os_types?.[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
-    }, [item.os_types]);
+    const selectedOs = useMemo((): OsTypeArray => {
+      return initialItem.os_types?.length
+        ? initialItem.os_types
+        : [OperatingSystem.WINDOWS, OperatingSystem.MAC];
+    }, [initialItem.os_types]);
 
     const currentEntry = useMemo(() => {
-      const entry = item.entries?.[0];
+      const entry = initialItem.entries?.[0];
       if (entry && 'value' in entry) {
         return entry;
       }
@@ -495,7 +529,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         type: 'match' as const,
         value: '',
       };
-    }, [item.entries]);
+    }, [initialItem.entries]);
 
     return (
       <EuiForm
@@ -511,7 +545,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         <DetailsSection
           mode={mode}
           getTestId={getTestId}
-          item={item}
+          item={initialItem}
           handleNameChange={handleNameChange}
           handleNameBlur={handleNameBlur}
           handleDescriptionChange={handleDescriptionChange}
@@ -541,7 +575,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         {/* Assignment Section */}
         <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
           <EffectedPolicySelect
-            item={item}
+            item={initialItem}
             description={POLICY_SELECT_DESCRIPTION}
             data-test-subj={getTestId('effectedPolicies')}
             onChange={handlePolicyChange}
