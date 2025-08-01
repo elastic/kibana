@@ -8,7 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
+import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
 import { CustomScriptSelector } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+import type { SentinelOneRunScriptActionParameters } from '../command_render_components/run_script_action';
 import { RunScriptActionResult } from '../command_render_components/run_script_action';
 import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
@@ -38,7 +40,11 @@ import {
   ExecuteActionResult,
   getExecuteCommandArgAboutInfo,
 } from '../command_render_components/execute_action';
-import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPrivileges,
+  ImmutableArray,
+  SentinelOneScript,
+} from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
@@ -631,9 +637,42 @@ const adjustCommandsForSentinelOne = ({
           },
           ...commandCommentArgument(),
         };
-        command.validate = (enteredCommand) => {
-          // FIXME:PT implement validation once API returns specific data for S1
-          // Ensure that `script` value is a valid script ID from the list retrieved?
+        command.validate = (
+          enteredCommand: Command<CommandDefinition, SentinelOneRunScriptActionParameters>
+        ) => {
+          const { argState, args } = enteredCommand;
+          const scriptInfo = (
+            argState?.script?.[0]?.store as CustomScriptSelectorState<SentinelOneScript>
+          )?.selectedOption;
+          const script = args.args.script[0];
+          const inputParams = args.args?.inputParams?.[0];
+
+          if (!script) {
+            return i18n.translate(
+              'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.scriptArgValueMissing',
+              { defaultMessage: 'A script selection is required' }
+            );
+          }
+
+          if (scriptInfo?.meta.inputRequired && !inputParams) {
+            return i18n.translate(
+              'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.scriptInputParamsMissing',
+              {
+                defaultMessage:
+                  'Script "{name}" requires input parameters to be entered{instructions, select, false {.} other {: {instructions}}}',
+                values: {
+                  name: scriptInfo.name,
+                  instructions:
+                    (
+                      scriptInfo.meta.inputInstructions ||
+                      scriptInfo.meta.inputExample ||
+                      ''
+                    ).trim() || false,
+                },
+              }
+            );
+          }
+
           return true;
         };
       }
