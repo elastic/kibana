@@ -47,6 +47,7 @@ import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inv
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
+import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -79,6 +80,7 @@ export const createMockClients = () => {
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
+    privilegeMonitorDataClient: privilegeMonitorDataClientMock.create(),
     padPackageInstallationClient: padPackageInstallationClientMock.create(),
 
     internalFleetServices: {
