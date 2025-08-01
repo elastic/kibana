@@ -8,7 +8,6 @@
 import _ from 'lodash';
 
 import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
-import { services as apiIntegrationDeploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { SecuritySolutionApiProvider as SecuritySolutionExceptionsApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_exceptions_api.gen';
 
 /*
