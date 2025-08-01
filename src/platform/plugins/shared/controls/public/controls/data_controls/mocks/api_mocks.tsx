@@ -19,9 +19,13 @@ import { initializeSelectionsManager } from '../options_list_control/selections_
 import { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 export const getOptionsListContextMock = () => {
-  const editorStateManager = initializeEditorStateManager({});
+  const editorStateManager = initializeEditorStateManager({
+    valuesSource: ControlValuesSource.DSL,
+    output: ControlOutputOption.DSL,
+  });
   const selectionsManager = initializeSelectionsManager({});
   const temporaryStateManager = initializeTemporayStateManager();
   const field$ = new BehaviorSubject<DataViewField | undefined>({

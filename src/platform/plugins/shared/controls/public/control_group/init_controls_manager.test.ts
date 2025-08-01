@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 import { ControlPanelsState, DefaultDataControlState } from '../../common';
 import type { DefaultControlApi } from '../controls/types';
 import { getLastUsedDataViewId, initControlsManager } from './init_controls_manager';
@@ -226,6 +227,8 @@ describe('getNewControlState', () => {
   test('should start with defaults if there are existing controls', () => {
     const intialControlsState: ControlPanelsState<DefaultDataControlState> = {
       alpha: {
+        output: ControlOutputOption.DSL,
+        valuesSource: ControlValuesSource.DSL,
         type: 'testControl',
         order: 1,
         dataViewId: 'myOtherDataViewId',

@@ -15,6 +15,7 @@ import { OptionsListControlApi } from '../controls/data_controls/options_list_co
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../controls/mocks/control_mocks';
 import { coreServices } from '../services/kibana_services';
 import { DeleteControlAction } from './delete_control_action';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 const dashboardApi = {
   viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -33,6 +34,8 @@ beforeAll(async () => {
   const uuid = 'testControl';
   const control = await controlFactory.buildControl({
     initialState: {
+      output: ControlOutputOption.DSL,
+      valuesSource: ControlValuesSource.DSL,
       dataViewId: 'test-data-view',
       title: 'test',
       fieldName: 'test-field',
