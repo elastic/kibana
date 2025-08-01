@@ -349,7 +349,7 @@ export function validateFunction({
   const definition = getFunctionDefinition(fn.name);
 
   if (!definition) {
-    return [];
+    return [errors.unknownFunction(fn)];
   }
 
   const argTypes = fn.args.map((node) =>
