@@ -23,7 +23,6 @@ The settings are grouped by feature or purpose, for example:
 - [Maps](/reference/configuration-reference/map-settings.md)
 - [Metrics](/reference/configuration-reference/metrics-settings.md)
 - [Monitoring](/reference/configuration-reference/monitoring-settings.md)
-- [Product intercept](/reference/configuration-reference/product-intercept-settings.md)
 - [Reporting](/reference/configuration-reference/reporting-settings.md)
 - [Search sessions](/reference/configuration-reference/search-sessions-settings.md)
 - [Security](/reference/configuration-reference/security-settings.md)
