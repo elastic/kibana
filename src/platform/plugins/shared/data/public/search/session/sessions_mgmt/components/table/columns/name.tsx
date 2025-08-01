@@ -26,10 +26,12 @@ export const nameColumn = ({
   core,
   searchUsageCollector,
   kibanaVersion,
+  onCloseFlyout,
 }: {
   core: CoreStart;
   searchUsageCollector: SearchUsageCollector;
   kibanaVersion: string;
+  onCloseFlyout?: () => void;
 }): EuiBasicTableColumn<UISession> => ({
   field: 'name',
   name: i18n.translate('data.mgmt.searchSessions.table.headerName', {
@@ -86,7 +88,10 @@ export const nameColumn = ({
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiLink
           href={href}
-          onClick={() => trackAction?.()}
+          onClick={() => {
+            trackAction?.();
+            onCloseFlyout?.();
+          }}
           data-test-subj="sessionManagementNameCol"
         >
           <TableText>

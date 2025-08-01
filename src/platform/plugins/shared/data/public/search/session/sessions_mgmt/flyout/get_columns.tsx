@@ -18,11 +18,13 @@ export const getColumns: GetColumnsFn = ({
   api,
   timezone,
   onActionComplete,
+  onCloseFlyout,
 }) => [
   columns.nameColumn({
     core,
     kibanaVersion,
     searchUsageCollector,
+    onCloseFlyout,
   }),
   columns.statusColumn(timezone),
   columns.actionsColumn({

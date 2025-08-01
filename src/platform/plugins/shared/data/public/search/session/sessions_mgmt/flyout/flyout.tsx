@@ -65,6 +65,7 @@ export const Flyout = ({
           locators={locators}
           hideRefreshButton
           getColumns={getColumns}
+          onCloseFlyout={onClose}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

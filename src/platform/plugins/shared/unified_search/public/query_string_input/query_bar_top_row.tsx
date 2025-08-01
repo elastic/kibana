@@ -39,6 +39,7 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   UseEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -46,6 +47,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
@@ -277,6 +279,7 @@ export const QueryBarTopRow = React.memo(
       docLinks,
       http,
       dataViews,
+      rendering,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -345,7 +348,7 @@ export const QueryBarTopRow = React.memo(
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        return propsOnSubmit({ query, dateRange });
       },
       [timeHistory, propsOnSubmit]
     );
@@ -643,12 +646,71 @@ export const QueryBarTopRow = React.memo(
         return button;
       }
 
+      const onClick = async () => {
+        const currentSessionId = data.search.session.getSessionId();
+        if (!props.isLoading) {
+          onSubmit({
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          });
+          const subscription = data.search.session.getSession$().subscribe((sessionId?: string) => {
+            if (currentSessionId !== sessionId) {
+              data.search.session.save();
+              notifications.toasts.addSuccess({
+                title: i18n.translate(
+                  'unifiedSearch.queryBarTopRow.backgroundSearchCreatedToastTitle',
+                  {
+                    defaultMessage: 'Search running in background',
+                  }
+                ),
+                toastLifeTimeMs: 500000000,
+                'data-test-subj': 'sessionSavedToast',
+              });
+              // Unsubscribe after session ID has changed to avoid memory leaks
+              subscription.unsubscribe();
+            }
+          });
+        } else {
+          await data.search.session.save();
+          const toast = notifications.toasts.addSuccess({
+            title: i18n.translate(
+              'unifiedSearch.queryBarTopRow.backgroundSearchCreatedToastTitle',
+              {
+                defaultMessage: 'Search running in background',
+              }
+            ),
+            text: toMountPoint(
+              <EuiLink
+                onClick={() => {
+                  notifications.toasts.remove(toast);
+                  data.search.showSearchSessionsFlyout();
+                }}
+              >
+                Show running background searches
+              </EuiLink>,
+              rendering
+            ),
+            toastLifeTimeMs: 500000000,
+            'data-test-subj': 'backgroundSearchSavedToast',
+          });
+        }
+      };
+
       return (
         <EuiFlexItem grow={false}>
           <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
             <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
               {shouldRenderDatePicker() ? renderDatePicker() : null}
               {shouldRenderUpdatebutton() ? button : null}
+              <EuiFlexItem>
+                <EuiToolTip position="bottom" content="Run in background" disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType={'clock'}
+                    onClick={onClick}
+                    aria-label="Run in background"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </NoDataPopover>
         </EuiFlexItem>

@@ -35,6 +35,7 @@ interface Props {
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
   hideRefreshButton?: boolean;
+  onCloseFlyout?: () => void;
   getColumns?: (params: {
     core: CoreStart;
     api: SearchSessionsMgmtAPI;
@@ -43,6 +44,7 @@ interface Props {
     kibanaVersion: string;
     searchUsageCollector: SearchUsageCollector;
     onActionComplete: OnActionComplete;
+    onCloseFlyout?: () => void;
   }) => Array<EuiBasicTableColumn<UISession>>;
 }
 
@@ -58,6 +60,7 @@ export function SearchSessionsMgmtTable({
   searchUsageCollector,
   hideRefreshButton = false,
   getColumns = getDefaultColumns,
+  onCloseFlyout,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -142,6 +145,7 @@ export function SearchSessionsMgmtTable({
     onActionComplete,
     kibanaVersion,
     searchUsageCollector,
+    onCloseFlyout,
   });
 
   const filters = useMemo(() => {

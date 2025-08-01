@@ -29,6 +29,7 @@ export const getColumns = ({
   onActionComplete,
   kibanaVersion,
   searchUsageCollector,
+  onCloseFlyout,
 }: {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
@@ -37,6 +38,7 @@ export const getColumns = ({
   onActionComplete: OnActionComplete;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
+  onCloseFlyout?: () => void;
 }): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
   return [
@@ -49,6 +51,7 @@ export const getColumns = ({
         core,
         searchUsageCollector,
         kibanaVersion,
+        onCloseFlyout,
       }),
       width: '20%',
     },
