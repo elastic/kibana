@@ -6,6 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import type { DeepMutable } from '../../../endpoint/types';
 import { AgentTypeSchemaLiteral, HostOsTypeSchemaLiteral } from '..';
 
 export const CustomScriptsRequestSchema = {
@@ -30,4 +31,6 @@ export const CustomScriptsRequestSchema = {
   }),
 };
 
-export type CustomScriptsRequestQueryParams = TypeOf<typeof CustomScriptsRequestSchema.query>;
+export type CustomScriptsRequestQueryParams = DeepMutable<
+  TypeOf<typeof CustomScriptsRequestSchema.query>
+>;
