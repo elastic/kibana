@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getGrantedRightsEsqlCount } from './esql_query';
+import { getGrantedRightsEsqlCount, getGrantedRightsEsqlTrendline } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
 export const GrantedRightsTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
@@ -33,6 +33,8 @@ export const GrantedRightsTile: React.FC<{ spaceId: string; sourcerDataView: Dat
           defaultMessage="Granted rights"
         />
       }
+      getTrendEsqlQuery={(namespace) => getGrantedRightsEsqlTrendline(namespace, sourcerDataView)}
+      trendSourceField="event.code"
     />
   );
 };

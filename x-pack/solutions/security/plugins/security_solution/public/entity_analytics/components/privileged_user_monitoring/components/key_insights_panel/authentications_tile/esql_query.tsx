@@ -20,3 +20,20 @@ export const getAuthenticationsEsqlCount = (
 
   return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);
 };
+
+export const getAuthenticationsEsqlTrendline = (
+  namespace: string,
+  sourcerDataView: DataViewSpec
+): EsqlQueryOrInvalidFields => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  const fields = sourcerDataView?.fields ?? {};
+  const esqlSource = getAuthenticationsEsqlSource(namespace, indexPattern, fields);
+
+  return map<string, string>(
+    (src) => `
+    ${src} 
+    | STATS count = COUNT(*) BY time = date_trunc(1d, @timestamp)
+    | SORT time ASC
+  `
+  )(esqlSource);
+};

@@ -13,3 +13,14 @@ export const getAlertsTriggeredEsqlCount = (namespace: string, alertsIndexName: 
     ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
     | STATS count = COUNT(*)`;
 };
+
+export const getAlertsTriggeredEsqlTrendline = (
+  namespace: string,
+  alertsIndexName: string | null
+) => {
+  if (!alertsIndexName) return '';
+  return `FROM ${alertsIndexName}
+    ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
+    | STATS count = COUNT(*) BY time = date_trunc(1d, @timestamp)
+    | SORT time ASC`;
+};

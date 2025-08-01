@@ -15,3 +15,12 @@ export const getAnomaliesDetectedEsqlQuery = (namespace: string) => {
     ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
     | STATS count = COUNT(*)`;
 };
+
+export const getAnomaliesDetectedEsqlTrendline = (namespace: string) => {
+  return `FROM ${ML_ANOMALIES_INDEX}
+    | WHERE record_score IS NOT NULL AND record_score > 0
+    | WHERE user.name IS NOT NULL
+    ${getPrivilegeMonitrUsersJoinNoTimestamp(namespace)}
+    | STATS count = COUNT(*) BY time = date_trunc(1d, @timestamp)
+    | SORT time ASC`;
+};

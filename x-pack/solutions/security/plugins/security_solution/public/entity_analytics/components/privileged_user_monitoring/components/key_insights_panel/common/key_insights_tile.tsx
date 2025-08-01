@@ -26,6 +26,8 @@ interface KeyInsightsTileProps {
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
+  getTrendEsqlQuery?: (namespace: string) => EsqlQueryOrInvalidFields;
+  trendSourceField?: string;
 }
 
 export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
@@ -35,6 +37,8 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   id,
   inspectTitle,
   spaceId: propSpaceId,
+  getTrendEsqlQuery,
+  trendSourceField,
 }) => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
@@ -62,6 +66,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
 
   const esqlQuery = getEsqlQuery(effectiveSpaceId);
+  const trendEsqlQuery = getTrendEsqlQuery ? getTrendEsqlQuery(effectiveSpaceId) : null;
 
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
@@ -69,6 +74,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // 3. We have no tables (indicating an error)
   if (
     isLeft(esqlQuery) ||
+    (trendEsqlQuery && isLeft(trendEsqlQuery)) ||
     (hasStartedLoading &&
       visualizationResponse &&
       visualizationResponse.loading === false &&
@@ -105,6 +111,8 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     esqlQuery: esqlQuery.right,
     dataViewId: 'default-dataview',
     filterQuery,
+    trendEsqlQuery: trendEsqlQuery?.right,
+    trendSourceField,
   });
 
   // If we reach here, either still loading or we have a valid response, so show the embeddable

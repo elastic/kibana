@@ -11,3 +11,9 @@ export const getPrivilegedUsersEsqlCount = (
   namespace: string
 ) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
       | STATS count = COUNT_DISTINCT(user.name)`;
+
+export const getPrivilegedUsersEsqlTrendline = (
+  namespace: string
+) => `FROM ${getPrivilegedMonitorUsersIndex(namespace)}
+      | STATS count = COUNT_DISTINCT(user.name) BY time = date_trunc(1d, @timestamp)
+      | SORT time ASC`;

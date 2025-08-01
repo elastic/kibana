@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { right } from 'fp-ts/Either';
 import { i18n } from '@kbn/i18n';
-import { getAlertsTriggeredEsqlCount } from './esql_query';
+import { getAlertsTriggeredEsqlCount, getAlertsTriggeredEsqlTrendline } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 import { useSignalIndex } from '../../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
@@ -32,6 +32,10 @@ export const AlertsTriggeredTile: React.FC<{ spaceId: string }> = ({ spaceId }) 
           defaultMessage="Alerts triggered"
         />
       }
+      getTrendEsqlQuery={(namespace) =>
+        right(getAlertsTriggeredEsqlTrendline(namespace, alertsIndexName))
+      }
+      trendSourceField="_id"
     />
   );
 };

@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { right } from 'fp-ts/Either';
 import { i18n } from '@kbn/i18n';
-import { getAnomaliesDetectedEsqlQuery } from './esql_query';
+import { getAnomaliesDetectedEsqlQuery, getAnomaliesDetectedEsqlTrendline } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
 export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }) => {
@@ -30,6 +30,8 @@ export const AnomaliesDetectedTile: React.FC<{ spaceId: string }> = ({ spaceId }
           defaultMessage="Anomalies detected"
         />
       }
+      getTrendEsqlQuery={(namespace) => right(getAnomaliesDetectedEsqlTrendline(namespace))}
+      trendSourceField="job_id"
     />
   );
 };
