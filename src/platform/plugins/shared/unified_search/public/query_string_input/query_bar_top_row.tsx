@@ -663,7 +663,6 @@ export const QueryBarTopRow = React.memo(
                     defaultMessage: 'Search running in background',
                   }
                 ),
-                toastLifeTimeMs: 500000000,
                 'data-test-subj': 'sessionSavedToast',
               });
               // Unsubscribe after session ID has changed to avoid memory leaks
@@ -690,7 +689,6 @@ export const QueryBarTopRow = React.memo(
               </EuiLink>,
               rendering
             ),
-            toastLifeTimeMs: 500000000,
             'data-test-subj': 'backgroundSearchSavedToast',
           });
         }
