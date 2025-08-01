@@ -310,6 +310,7 @@ export const SchemaLogic = kea<MakeLogicType<SchemaValues, SchemaActions>>({
         actions.onInitializeSchemaFieldErrors({
           fieldCoercionErrors: response.fieldCoercionErrors,
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         setErrorMessage(SCHEMA_FIELD_ERRORS_ERROR_MESSAGE);
       }

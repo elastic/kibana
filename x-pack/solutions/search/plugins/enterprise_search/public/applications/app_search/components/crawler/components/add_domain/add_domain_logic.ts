@@ -274,6 +274,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
               break;
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         actions.setDomainValidationResult({
           [stepName]: {
