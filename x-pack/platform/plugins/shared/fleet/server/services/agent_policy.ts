@@ -523,7 +523,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
     agentPolicy: NewAgentPolicy;
-    packagePolicies: NewPackagePolicy[];
+    packagePolicies: Array<Omit<NewPackagePolicy, 'policy_id' | 'policy_ids'>>;
     options: {
       hasFleetServer?: boolean;
       withSysMonitoring: boolean;
@@ -534,7 +534,9 @@ class AgentPolicyService {
       force?: boolean;
     };
   }) {
-    const logger = appContextService.getLogger().get('createAgentPolicyAndPackagePolicies');
+    const logger = appContextService.getLogger().get('createWithPackagePolicies');
+
+    logger.debug(`Creating agent policy ${agentPolicy.name} with package policies`);
 
     const newAgentPolicy = await createAgentPolicyWithPackages({
       soClient,
@@ -553,41 +555,20 @@ class AgentPolicyService {
     const createdPackagePolicyIds = [];
 
     try {
-      for (const newPackagePolicy of packagePolicies) {
-        // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
-        const {
-          policy_id: agentPolicyId,
-          policy_ids: agentPolicyIds,
-          ...restOfPackagePolicy
-        } = newPackagePolicy;
-
-        // Warn if the requested agent policy ID does not match the created agent policy ID
-        if (agentPolicyId && agentPolicyId !== newAgentPolicy.id) {
-          logger.warn(
-            `Creating package policy with agent policy ID ${newAgentPolicy.id} instead of requested id ${agentPolicyId}`
-          );
-        }
-        if (
-          agentPolicyIds &&
-          agentPolicyIds.length > 0 &&
-          (!agentPolicyIds.includes(newAgentPolicy.id) || agentPolicyIds.length > 1)
-        ) {
-          logger.warn(
-            `Creating package policy with agent policy ID ${
-              agentPolicy.id
-            } instead of requested id(s) ${agentPolicyIds.join(',')}`
-          );
-        }
-
-        const newPackagePolicyWithPolicyIds = {
-          ...restOfPackagePolicy,
+      for (const packagePolicy of packagePolicies) {
+        const newPackagePolicy: NewPackagePolicy = {
+          ...packagePolicy,
           policy_ids: [newAgentPolicy.id],
         };
 
-        const packagePolicy = await packagePolicyService.create(
+        logger.debug(
+          `Creating package policy ${packagePolicy.name} for agent policy ${newAgentPolicy.name}`
+        );
+
+        const createdPackagePolicy = await packagePolicyService.create(
           soClient,
           esClient,
-          newPackagePolicyWithPolicyIds,
+          newPackagePolicy,
           {
             spaceId,
             user,
@@ -597,7 +578,7 @@ class AgentPolicyService {
           }
         );
 
-        createdPackagePolicyIds.push(packagePolicy.id);
+        createdPackagePolicyIds.push(createdPackagePolicy.id);
       }
 
       const agentPolicyWithPackagePolicies = await this.get(soClient, newAgentPolicy.id);
@@ -610,6 +591,15 @@ class AgentPolicyService {
 
       return agentPolicyWithPackagePolicies;
     } catch (e) {
+      logger.error(
+        `Error creating package policies for agent policy ${newAgentPolicy.id}: ${e.message}`
+      );
+      logger.debug(
+        `Rolling back policy creation: Deleting agent policy ${
+          newAgentPolicy.id
+        } and package policies ${createdPackagePolicyIds.join(', ')}`
+      );
+
       // If there is an error creating package policies, delete any created package policy
       // and the parent agent policy
       const internalSOClient = appContextService.getInternalUserSOClient();
@@ -626,13 +616,10 @@ class AgentPolicyService {
           }
         );
       }
-      if (agentPolicy) {
-        await this.delete(internalSOClient, internalESClient, newAgentPolicy.id, {
-          force: true,
-        });
-      }
+      await this.delete(internalSOClient, internalESClient, newAgentPolicy.id, {
+        force: true,
+      });
 
-      // Rethrow
       throw e;
     }
   }
