@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -25,7 +25,7 @@ const mockRendering = renderingServiceMock.create();
 
 beforeEach(() => (openModal = jest.fn()));
 
-function render(props: ErrorToastProps = {}) {
+function getErrorToast(props: ErrorToastProps = {}) {
   return (
     <ErrorToast
       openModal={openModal}
@@ -38,11 +38,11 @@ function render(props: ErrorToastProps = {}) {
 }
 
 it('renders matching snapshot', () => {
-  expect(shallow(render())).toMatchSnapshot();
+  expect(render(getErrorToast()).container).toMatchSnapshot();
 });
 
 it('should open a modal when clicking button', () => {
-  const wrapper = mountWithIntl(render());
+  const wrapper = mountWithIntl(getErrorToast());
   expect(openModal).not.toHaveBeenCalled();
   wrapper.find('button').simulate('click');
   expect(openModal).toHaveBeenCalled();
