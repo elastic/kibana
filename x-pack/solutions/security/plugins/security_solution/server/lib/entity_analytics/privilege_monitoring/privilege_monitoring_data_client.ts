@@ -868,8 +868,8 @@ export class PrivilegeMonitoringDataClient {
           `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}`
         );
       }
-    } catch (error) {      
-       this.log('error',`Failed to schedule task: ${error.message}`);
+    } catch (error) {
+      this.log('error', `Failed to schedule task: ${error.message}`);
       throw error;
     }
 
