@@ -131,7 +131,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/core-provider-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/core-chrome-browser",
     "@kbn/test-suites-xpack-platform",
     "@kbn/core-chrome-browser",
     "@kbn/core-provider-plugin",
