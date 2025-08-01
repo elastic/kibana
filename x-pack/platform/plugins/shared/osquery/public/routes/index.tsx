@@ -13,6 +13,7 @@ import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
 import { LiveQueries } from './live_queries';
 import { SavedQueries } from './saved_queries';
 import { Packs } from './packs';
+import { Files } from './files';
 
 const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
@@ -27,6 +28,9 @@ const OsqueryAppRoutesComponent = () => {
       </Route>
       <Route path="/live_queries">
         <LiveQueries />
+      </Route>
+      <Route path="/files">
+        <Files />
       </Route>
       <Redirect to="/live_queries" />
     </Routes>

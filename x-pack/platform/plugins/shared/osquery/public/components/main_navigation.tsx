@@ -17,6 +17,7 @@ enum Section {
   LiveQueries = 'live_queries',
   Packs = 'packs',
   SavedQueries = 'saved_queries',
+  Files = 'files',
 }
 
 export const MainNavigation = () => {
@@ -50,6 +51,12 @@ export const MainNavigation = () => {
               <FormattedMessage
                 id="xpack.osquery.appNavigation.savedQueriesLinkText"
                 defaultMessage="Saved queries"
+              />
+            </EuiTab>
+            <EuiTab isSelected={section === Section.Files} {...useRouterNavigate(Section.Files)}>
+              <FormattedMessage
+                id="xpack.osquery.appNavigation.filesLinkText"
+                defaultMessage="Files"
               />
             </EuiTab>
           </EuiTabs>
