@@ -186,8 +186,9 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             services,
           });
 
-          tabStateContainer?.savedSearchState.set(savedSearch);
-          tabStateContainer?.appState.resetInitialState();
+          tabStateContainer.savedSearchState.set(savedSearch);
+          tabStateContainer.actions.undoSavedSearchChanges();
+          tabStateContainer.appState.resetInitialState();
         })
       );
     }
