@@ -26,7 +26,6 @@ import type {
   UpdateObservableRequest,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
-import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
@@ -137,8 +136,7 @@ export interface CasesSubClient {
  */
 export const createCasesSubClient = (
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
+  casesClient: CasesClient
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
     create: (data: CasePostRequest) => create(data, clientArgs, casesClient),

@@ -5,8 +5,23 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import type { AttachmentTotals, Case, CaseAttributes, User } from '../../../common/types/domain';
+import type {
+  SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/server';
+import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
+import { pick } from 'lodash';
+import type {
+  AlertAttachmentPayload,
+  AlertMetadata,
+  AttachmentAttributes,
+  AttachmentTotals,
+  Case,
+  CaseAttributes,
+  CaseMetadata,
+  User,
+} from '../../../common/types/domain';
 import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
@@ -28,7 +43,12 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
+import {
+  countAlertsForID,
+  flattenCaseSavedObject,
+  countUserAttachments,
+  getIDsAndIndicesAsArrays,
+} from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -37,7 +57,8 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseRt } from '../../../common/types/domain';
+import { AttachmentType, CaseRt } from '../../../common/types/domain';
+import { getAlerts } from '../alerts/get';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -148,6 +169,48 @@ export const getCasesByAlertID = async (
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
   stats.get(id) ?? { alerts: 0, userComments: 0 };
 
+const getAlertMetadataFromComments = async (
+  comments: AttachmentAttributes[],
+  clientArgs: CasesClientArgs
+): Promise<AlertMetadata[]> => {
+  const alertAttachments: AlertAttachmentPayload[] = comments.flatMap((props) => {
+    if (props.type === AttachmentType.alert) {
+      return [pick(props, ['type', 'alertId', 'index', 'rule', 'owner'])];
+    }
+    return [];
+  });
+
+  if (alertAttachments.length === 0) {
+    return [];
+  }
+
+  const alertsDocs = await getAlerts(
+    alertAttachments.flatMap((a) => {
+      const { ids, indices } = getIDsAndIndicesAsArrays(a);
+      return ids.map((alertId, index) => ({ id: alertId, index: indices[index] }));
+    }),
+    clientArgs
+  );
+  return alertsDocs.map((alert) => ({
+    id: alert.id,
+    grouping: alert[ALERT_GROUPING],
+    tags: alert[TAGS],
+  }));
+};
+
+const getCaseComments = async (id: string, clientArgs: CasesClientArgs) => {
+  const {
+    services: { caseService },
+  } = clientArgs;
+  return caseService.getAllCaseComments({
+    id,
+    options: {
+      sortField: 'created_at',
+      sortOrder: 'asc',
+    },
+  });
+};
+
 /**
  * The parameters for retrieving a case
  */
@@ -160,6 +223,10 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
+  /**
+   * Whether to include the case metadata for a case in the response
+   */
+  includeMetadata?: boolean;
 }
 
 /**
@@ -168,7 +235,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
-  { id, includeComments }: GetParams,
+  { id, includeComments, includeMetadata }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
@@ -187,6 +254,20 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
+    let metadata: CaseMetadata | undefined;
+    let theComments: SavedObjectsFindResponse<AttachmentAttributes> | undefined;
+
+    if (includeMetadata) {
+      theComments = await getCaseComments(id, clientArgs);
+      const alertMetadata = await getAlertMetadataFromComments(
+        theComments.saved_objects.map((comment) => comment.attributes),
+        clientArgs
+      );
+      metadata = {
+        alerts: alertMetadata,
+      };
+    }
+
     if (!includeComments) {
       const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
@@ -200,23 +281,21 @@ export const get = async (
                 totalComment: commentStats.get(theCase.id)?.userComments,
               }
             : {}),
+          metadata,
         })
       );
     }
 
-    const theComments = await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
-    });
+    if (!theComments) {
+      theComments = await getCaseComments(id, clientArgs);
+    }
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
       totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
+      metadata,
     });
 
     return decodeOrThrow(CaseRt)(res);

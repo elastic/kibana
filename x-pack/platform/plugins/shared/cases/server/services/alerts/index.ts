@@ -9,7 +9,11 @@ import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type {
+  ALERT_GROUPING,
+  STATUS_VALUES,
+  TAGS,
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
@@ -192,7 +196,9 @@ export class AlertService {
     return alerts.filter((alert) => !AlertService.isEmptyAlert(alert));
   }
 
-  public async getAlerts(alertsInfo: AlertInfo[]): Promise<MgetResponse<Alert> | undefined> {
+  public async getAlerts(
+    alertsInfo: AlertInfo[]
+  ): Promise<MgetResponse<Alert['_source']> | undefined> {
     try {
       const docs = alertsInfo
         .filter((alert) => !AlertService.isEmptyAlert(alert))
@@ -203,7 +209,7 @@ export class AlertService {
         return;
       }
 
-      const results = await this.scopedClusterClient.mget<Alert>({ docs });
+      const results = await this.scopedClusterClient.mget<Alert['_source']>({ docs });
 
       return results;
     } catch (error) {
@@ -329,7 +335,11 @@ function updateIndexEntryWithStatus(
 export interface Alert {
   _id: string;
   _index: string;
-  _source: Record<string, unknown>;
+  _source: {
+    [key: string]: unknown;
+    [ALERT_GROUPING]?: Record<string, unknown>;
+    [TAGS]?: string[];
+  };
 }
 
 interface AlertIdIndex {

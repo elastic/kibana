@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { AlertInfo } from '../../common/types';
 
@@ -17,6 +18,8 @@ interface Alert {
   source?: {
     ip: string;
   };
+  [ALERT_GROUPING]?: Record<string, unknown>;
+  [TAGS]?: string[];
 }
 
 export type CasesClientGetAlertsResponse = Alert[];
