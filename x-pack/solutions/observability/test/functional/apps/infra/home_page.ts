@@ -171,9 +171,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
-        await pageObjects.infraHome.clickDismissKubernetesTourButton();
-
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clickDismissKubernetesTourButton();
           await pageObjects.infraHome.ensureKubernetesTourIsClosed();
         });
       });
