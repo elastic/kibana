@@ -176,6 +176,10 @@ export interface Command<
   inputDisplay: string;
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
+
+  /** Object containing state for any argument that is using a Value Selector component */
+  argState?: Record<string, ArgSelectorState[]>;
+
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }

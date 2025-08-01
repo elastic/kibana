@@ -201,6 +201,8 @@ export type ConsoleDataAction =
         command: string;
         /** The display value in the UI's input history popup. Defaults to `command` */
         display?: string;
+        /** Any state for arguments that utilize a value selector component */
+        argState?: Record<string, ArgSelectorState[]>;
       };
     }
   | {
