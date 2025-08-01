@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, type Logger, type AnalyticsServiceSetup } from '@kbn/core/server';
+import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
