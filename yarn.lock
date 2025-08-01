@@ -13495,11 +13495,6 @@
     "@types/node" "*"
     "@types/send" "*"
 
-"@types/set-value@^4.0.3":
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/@types/set-value/-/set-value-4.0.3.tgz#ac7f5f9715c95c7351e02832df672a112428e587"
-  integrity sha512-tSuUcLl6kMzI+l0gG7FZ04xbIcynxNIYgWFj91LPAvRcn7W3L1EveXNdVjqFDgAZPjY1qCOsm8Sb1C70SxAPHw==
-
 "@types/shimmer@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/shimmer/-/shimmer-1.2.0.tgz#9b706af96fa06416828842397a70dfbbf1c14ded"
