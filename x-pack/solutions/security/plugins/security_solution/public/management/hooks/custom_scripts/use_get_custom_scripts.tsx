@@ -8,11 +8,11 @@ import type { UseQueryResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { CustomScriptsRequestQueryParams } from '../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type {
   ResponseActionScript,
   ResponseActionScriptsApiResponse,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { CUSTOM_SCRIPTS_ROUTE } from '../../../../common/endpoint/constants';
 import { useHttp } from '../../../common/lib/kibana';
 
@@ -28,20 +28,26 @@ export interface CustomScriptsErrorType {
 /**
  * Hook to retrieve custom scripts for a specific agent type
  * @param agentType - The type of agent to get scripts for (e.g., 'crowdstrike')
+ * @param query
  * @param options - Additional options for the query
  * @returns Query result containing custom scripts data
  */
 
 export const useGetCustomScripts = (
-  agentType: ResponseActionAgentType,
+  agentType: CustomScriptsRequestQueryParams['agentType'],
+  query: Omit<CustomScriptsRequestQueryParams, 'agentType'> = {},
   options: Omit<
-    UseQueryOptions<ResponseActionScriptsApiResponse, IHttpFetchError<CustomScriptsErrorType>>,
+    UseQueryOptions<
+      ResponseActionScriptsApiResponse['data'],
+      IHttpFetchError<CustomScriptsErrorType>
+    >,
     'queryKey' | 'queryFn'
   > = {}
 ): UseQueryResult<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>> => {
   const http = useHttp();
 
   return useQuery<ResponseActionScript[], IHttpFetchError<CustomScriptsErrorType>>({
+    ...options,
     queryKey: ['get-custom-scripts', agentType],
     queryFn: () => {
       return http
@@ -49,6 +55,7 @@ export const useGetCustomScripts = (
           version: '1',
           query: {
             agentType,
+            ...query,
           },
         })
         .then((response) => response.data);
