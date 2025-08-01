@@ -132,12 +132,12 @@ With PATH_TO_CONFIG and other options as follows.
 
 1. Functional UI tests with `Basic` license:
 
-   | Group                                                 | PATH_TO_CONFIG                                                   |
-   | ----------------------------------------------------- | ---------------------------------------------------------------- |
-   | permissions                                           | `test/functional_basic/apps/ml/permissions/config.ts`            |
-   | data visualizer group1 (file data viz)                | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
-   | data visualizer group2 (index data viz)               | `test/functional_basic/apps/ml/data_visualizer/group2/config.ts` |
-   | data visualizer group3 (actions panel, discover grid) | `test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
+   | Group                                                 | PATH_TO_CONFIG                                                            |
+   | ----------------------------------------------------- | ------------------------------------------------------------------------- |
+   | permissions                                           | `platform/test/functional_basic/apps/ml/permissions/config.ts`            |
+   | data visualizer group1 (file data viz)                | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
+   | data visualizer group2 (index data viz)               | `platform/test/functional_basic/apps/ml/data_visualizer/group2/config.ts` |
+   | data visualizer group3 (actions panel, discover grid) | `platform/test/functional_basic/apps/ml/data_visualizer/group3/config.ts` |
 
 1. API integration tests with `Trial` license:
 
@@ -160,10 +160,10 @@ Run the following commands from the `x-pack` directory and use separate terminal
 for test server and test runner. The test server command starts an Elasticsearch
 and Kibana instance that the tests will be run against.
 
-    node scripts/functional_tests_server.js --config test/screenshot_creation/config.ts
-    node scripts/functional_test_runner.js --config test/screenshot_creation/config.ts --include-tag ml
+    node scripts/functional_tests_server.js --config platform/test/screenshot_creation/config.ts
+    node scripts/functional_test_runner.js --config platform/test/screenshot_creation/config.ts --include-tag ml
 
-The generated screenshots are stored in `x-pack/test/functional/screenshots/session/ml_docs`.
+The generated screenshots are stored in `x-pack/platform/test/functional/screenshots/session/ml_docs`.
 ML screenshot generation tests are located in `x-pack/platform/test/screenshot_creation/apps/ml_docs`.
 
 ## Shared functions
