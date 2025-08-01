@@ -17,7 +17,9 @@ These settings allow you to customize the behavior of URL sharing in {{kib}}.
 URL expiration settings control the behavior of the unused URLs cleanup background task, which runs using the Task Manager plugin. This task allows you to periodically clean up saved objects of type `url` that have not been accessed in the specified period of time, controlled by the `share.url_expiration.duration` configuration option. Each saved object is a representation of a URL generated through the sharing functionality. Those settings are disabled by default. You must manually configure them in order to use this feature.
 
 ::::{warning}
-We do not recommend enabling this on lower tier Elasticsearch instances as it can lead to memory spikes and instability. The Elasticsearch instance should have at least 2 GB RAM to use the default setting. Lower tier instances shouldn’t set `share.url_expiration.url_limit` to more than `1000`.
+The {{es}} instance should have at least 2 GB RAM to use the URLs cleanup background task with its default settings.
+
+For {{es}} instances with less than 2 GB RAM, we do not recommend enabling this feature because it can lead to memory spikes and instability. If you still enable it on an instance with such limited RAM, `share.url_expiration.url_limit` should not exceed `1000`.
 ::::
 
 `share.url_expiration.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
