@@ -40,7 +40,13 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import type {
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+  TabStateGlobalState,
+} from './redux';
 import {
   createTabActionInjector,
   internalStateActions,
@@ -562,33 +568,45 @@ export function getDiscoverStateContainer({
    */
   const undoSavedSearchChanges = async () => {
     addLog('undoSavedSearchChanges');
+
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
     savedSearchContainer.set(nextSavedSearch);
+
+    const globalState = selectTab(internalState.getState(), tabId).globalState;
+    let globalStateUpdate: Partial<TabStateGlobalState> = {};
+
     restoreStateFromSavedSearch({
       savedSearch: nextSavedSearch,
-      timefilter: services.timefilter,
+      updateGlobalState: (update) => {
+        globalStateUpdate = { ...globalStateUpdate, ...update };
+      },
     });
+
+    // a saved search can't have global (pinned) filters so we can reset global filters state
+    if (globalState.filters) {
+      globalStateUpdate.filters = [];
+    }
+
+    if (Object.keys(globalStateUpdate).length > 0) {
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setGlobalState)({
+          globalState: {
+            ...globalState,
+            ...globalStateUpdate,
+          },
+        })
+      );
+    }
+
     const newAppState = getInitialState({
       initialUrlState: undefined,
       savedSearch: nextSavedSearch,
       services,
     });
 
-    // a saved search can't have global (pinned) filters so we can reset global filters state
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
-    if (globalState.filters) {
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setGlobalState)({
-          globalState: {
-            ...globalState,
-            filters: [],
-          },
-        })
-      );
-    }
-
     internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
     await appStateContainer.replaceUrlState(newAppState);
+
     return nextSavedSearch;
   };
 
