@@ -219,7 +219,6 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.add,
         id: 'add',
         iconType: 'plusInCircle',
-        iconOnly: true,
         testId: 'dashboardAddButton',
         disableButton: disableTopNav,
         run: (anchorElement: HTMLElement) =>
