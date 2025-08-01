@@ -40,20 +40,23 @@ export function CopySavedObjectsToSpacePageProvider({
       if (createNewCopies && overwrite) {
         throw new Error('createNewCopies and overwrite options cannot be used together');
       }
+
       if (!createNewCopies) {
         const form = await testSubjects.find('copy-to-space-form');
         // a radio button consists of a div tag that contains an input, a div, and a label
         // we can't click the input directly, need to click the label
         const label = await form.findByCssSelector('label[for="createNewCopiesDisabled"]');
         await label.click();
+
+        if (!overwrite) {
+          const radio = await testSubjects.find('cts-copyModeControl-overwriteRadioGroup');
+          // a radio button consists of a div tag that contains an input, a div, and a label
+          // we can't click the input directly, need to click the label
+          const overwriteLabel = await radio.findByCssSelector('label[for="overwriteDisabled"]');
+          await overwriteLabel.click();
+        }
       }
-      if (!overwrite) {
-        const radio = await testSubjects.find('cts-copyModeControl-overwriteRadioGroup');
-        // a radio button consists of a div tag that contains an input, a div, and a label
-        // we can't click the input directly, need to click the label
-        const label = await radio.findByCssSelector('label[for="overwriteDisabled"]');
-        await label.click();
-      }
+
       await testSubjects.click(`cts-space-selector-row-${destinationSpaceId}`);
     },
 
