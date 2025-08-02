@@ -13,10 +13,10 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsParams,
   MicrosoftDefenderEndpointGetActionsResponse,
-  type MicrosoftDefenderEndpointAgentDetailsParams,
-  type MicrosoftDefenderEndpointIsolateHostParams,
-  type MicrosoftDefenderEndpointMachine,
-  type MicrosoftDefenderEndpointMachineAction,
+  MicrosoftDefenderEndpointAgentDetailsParams,
+  MicrosoftDefenderEndpointIsolateHostParams,
+  MicrosoftDefenderEndpointMachine,
+  MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type {
@@ -40,9 +40,9 @@ import type {
   ResponseActionsClientPendingAction,
   ResponseActionsClientValidateRequestResponse,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-  ResponseActionsClientImpl,
-  type ResponseActionsClientOptions,
+  ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';
+import { ResponseActionsClientImpl } from '../../../lib/base_response_actions_client';
 import { stringify } from '../../../../../../utils/stringify';
 import { ResponseActionsClientError } from '../../../errors';
 import type {

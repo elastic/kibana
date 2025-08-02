@@ -8,9 +8,9 @@
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
 import type {
   UpdateRuleMigrationData,
-  RuleMigrationTranslationResultEnum,
-  type RuleMigrationTranslationResult,
+  RuleMigrationTranslationResult,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { RuleMigrationTranslationResultEnum } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { InternalUpdateRuleMigrationData } from '../../types';
 
 export const isValidEsqlQuery = (esqlQuery: string) => {

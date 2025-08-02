@@ -9,7 +9,7 @@ import React from 'react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import type {
   CloudSecurityPosturePageId,
-  type CspSecuritySolutionContext,
+  CspSecuritySolutionContext,
 } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
