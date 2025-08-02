@@ -14,6 +14,9 @@ import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import type { ISavedObjectsManagement } from '../services';
 
+const MANAGEMENT_API_BASE_PATH = '/api/kibana/management/savedObjects';
+const MANAGEMENT_API_FIND_PATH = `${MANAGEMENT_API_BASE_PATH}/somethingElse/_find`;
+
 export const registerFindRoute = (
   router: IRouter,
   managementServicePromise: Promise<ISavedObjectsManagement>
@@ -33,7 +36,10 @@ export const registerFindRoute = (
 
   router.get(
     {
-      path: '/api/kibana/management/saved_objects/_find',
+      path: '/api/kibana/management/savedObjects/_find',
+      options: {
+        access: 'public',
+      },
       security: {
         authz: {
           enabled: false,
