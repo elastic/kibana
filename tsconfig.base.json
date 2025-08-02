@@ -50,8 +50,8 @@
       "@kbn/alerting-comparators/*": ["x-pack/platform/packages/shared/kbn-alerting-comparators/*"],
       "@kbn/alerting-example-plugin": ["x-pack/examples/alerting_example"],
       "@kbn/alerting-example-plugin/*": ["x-pack/examples/alerting_example/*"],
-      "@kbn/alerting-fixture-plugin": ["x-pack/test/functional_with_es_ssl/plugins/alerts"],
-      "@kbn/alerting-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/alerts/*"],
+      "@kbn/alerting-fixture-plugin": ["x-pack/platform/test/functional_with_es_ssl/plugins/alerts"],
+      "@kbn/alerting-fixture-plugin/*": ["x-pack/platform/test/functional_with_es_ssl/plugins/alerts/*"],
       "@kbn/alerting-plugin": ["x-pack/platform/plugins/shared/alerting"],
       "@kbn/alerting-plugin/*": ["x-pack/platform/plugins/shared/alerting/*"],
       "@kbn/alerting-rule-utils": ["x-pack/platform/packages/shared/alerting-rule-utils"],
@@ -188,8 +188,8 @@
       "@kbn/cloud-experiments-plugin/*": ["x-pack/platform/plugins/private/cloud_integrations/cloud_experiments/*"],
       "@kbn/cloud-full-story-plugin": ["x-pack/platform/plugins/private/cloud_integrations/cloud_full_story"],
       "@kbn/cloud-full-story-plugin/*": ["x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/*"],
-      "@kbn/cloud-integration-saml-provider-plugin": ["x-pack/test/cloud_integration/plugins/saml_provider"],
-      "@kbn/cloud-integration-saml-provider-plugin/*": ["x-pack/test/cloud_integration/plugins/saml_provider/*"],
+      "@kbn/cloud-integration-saml-provider-plugin": ["x-pack/platform/test/cloud_integration/plugins/saml_provider"],
+      "@kbn/cloud-integration-saml-provider-plugin/*": ["x-pack/platform/test/cloud_integration/plugins/saml_provider/*"],
       "@kbn/cloud-links-plugin": ["x-pack/platform/plugins/private/cloud_integrations/cloud_links"],
       "@kbn/cloud-links-plugin/*": ["x-pack/platform/plugins/private/cloud_integrations/cloud_links/*"],
       "@kbn/cloud-plugin": ["x-pack/platform/plugins/shared/cloud"],
@@ -1020,8 +1020,8 @@
       "@kbn/ftr-common-functional-ui-services/*": ["src/platform/packages/shared/kbn-ftr-common-functional-ui-services/*"],
       "@kbn/ftr-screenshot-filename": ["src/platform/packages/private/kbn-ftr-screenshot-filename"],
       "@kbn/ftr-screenshot-filename/*": ["src/platform/packages/private/kbn-ftr-screenshot-filename/*"],
-      "@kbn/functional-with-es-ssl-cases-test-plugin": ["x-pack/test/functional_with_es_ssl/plugins/cases"],
-      "@kbn/functional-with-es-ssl-cases-test-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/cases/*"],
+      "@kbn/functional-with-es-ssl-cases-test-plugin": ["x-pack/platform/test/functional_with_es_ssl/plugins/cases"],
+      "@kbn/functional-with-es-ssl-cases-test-plugin/*": ["x-pack/platform/test/functional_with_es_ssl/plugins/cases/*"],
       "@kbn/gen-ai-functional-testing": ["src/platform/packages/private/kbn-gen-ai-functional-testing"],
       "@kbn/gen-ai-functional-testing/*": ["src/platform/packages/private/kbn-gen-ai-functional-testing/*"],
       "@kbn/gen-ai-streaming-response-example-plugin": ["x-pack/examples/gen_ai_streaming_response_example"],
@@ -1930,8 +1930,8 @@
       "@kbn/sort-predicates/*": ["src/platform/packages/shared/kbn-sort-predicates/*"],
       "@kbn/spaces-plugin": ["x-pack/platform/plugins/shared/spaces"],
       "@kbn/spaces-plugin/*": ["x-pack/platform/plugins/shared/spaces/*"],
-      "@kbn/spaces-test-plugin": ["x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin"],
-      "@kbn/spaces-test-plugin/*": ["x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin/*"],
+      "@kbn/spaces-test-plugin": ["x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin"],
+      "@kbn/spaces-test-plugin/*": ["x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin/*"],
       "@kbn/spaces-utils": ["src/platform/packages/shared/kbn-spaces-utils"],
       "@kbn/spaces-utils/*": ["src/platform/packages/shared/kbn-spaces-utils/*"],
       "@kbn/spec-to-console": ["packages/kbn-spec-to-console"],
@@ -2196,7 +2196,10 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": ["typings/@emotion"],
+      // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
+      // We should be able to remove this once we support cjs/esm interop.
+      "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

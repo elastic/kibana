@@ -16,6 +16,10 @@ disabled:
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
 
+  # Detection Rules Management base configs
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.essentials.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.complete.config.ts
+
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
@@ -93,6 +97,10 @@ disabled:
   - x-pack/test/security_solution_api_integration/test_suites/genai/nlp_cleanup_task/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/genai/knowledge_base/entries/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/genai/attack_discovery/schedules/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/serverless.config.ts
@@ -121,8 +129,6 @@ disabled:
   - x-pack/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
-  # serverless config files that run deployment-agnostic tests
-  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
 
 # Serverless tests only run on main
 defaultQueue: 'n2-4-spot'

@@ -20,6 +20,7 @@ export interface SecuritySolutionUtilsInterface {
   createSuperTest: (role?: string) => Promise<TestAgent<any>>;
   createBsearch: (role?: string) => Promise<SecuritySolutionServerlessBsearch>;
   createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
+  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
   cleanUpCustomRole: () => Promise<void>;
 }
 

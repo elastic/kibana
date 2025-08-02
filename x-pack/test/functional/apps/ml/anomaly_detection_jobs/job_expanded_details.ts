@@ -7,8 +7,8 @@
 
 import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
+import { QuickFilterButtonTypes } from '@kbn/test-suites-xpack-platform/functional/services/ml/job_table';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { QuickFilterButtonTypes } from '../../../services/ml/job_table';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

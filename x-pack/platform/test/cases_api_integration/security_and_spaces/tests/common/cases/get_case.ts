@@ -43,7 +43,6 @@ import {
 import { getUserInfo } from '../../../../common/lib/authentication';
 import { assertWarningHeader } from '../../../../common/lib/validation';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

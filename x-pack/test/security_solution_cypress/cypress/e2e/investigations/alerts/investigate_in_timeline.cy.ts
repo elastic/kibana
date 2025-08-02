@@ -45,7 +45,8 @@ import {
 } from '../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
 import { openInsightsTab } from '../../../tasks/expandable_flyout/alert_details_left_panel';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/209367
+describe.skip(
   'Investigate in timeline',
   {
     tags: ['@ess', '@serverless'],

@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getUrlPrefix, ObjectRemover, AlertUtils } from '../../../../common/lib';
 import { setupSpacesAndUsers } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
