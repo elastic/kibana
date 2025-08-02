@@ -88,13 +88,15 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             spaceBefore: 'm',
           },
           {
-            id: 'apm',
+            id: 'applications',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
+                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:services',
