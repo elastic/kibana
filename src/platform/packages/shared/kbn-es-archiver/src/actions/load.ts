@@ -79,6 +79,7 @@ export async function loadAction({
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+  const targetsWithoutIdGeneration: string[] = [];
 
   // a single stream that emits records from all archive files, in
   // order, so that createIndexStream can track the state of indexes
@@ -98,6 +99,11 @@ export async function loadAction({
   const progress = new Progress();
   progress.activate(log);
 
+  const indexExistsResponseBefore = await client.indices.exists({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - index exists', indexExistsResponseBefore);
+
   await createPromiseFromStreams([
     recordStream,
     createCreateIndexStream({
@@ -107,8 +113,17 @@ export async function loadAction({
       docsOnly,
       isArchiveInExceptionList,
       log,
+      targetsWithoutIdGeneration,
     }),
-    createIndexDocRecordsStream(client, stats, progress, useCreate, performance),
+    createIndexDocRecordsStream(
+      client,
+      stats,
+      progress,
+      log,
+      useCreate,
+      performance,
+      targetsWithoutIdGeneration
+    ),
   ]);
 
   progress.deactivate();
@@ -131,6 +146,16 @@ export async function loadAction({
       headers: ES_CLIENT_HEADERS,
     }
   );
+
+  const indexExistsResponseAfter = await client.indices.exists({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - index exists', indexExistsResponseAfter);
+
+  const searchResponse = await client.search({
+    index: 'myfakeindex-3',
+  });
+  log.info('esArchiver.load - hits.total', searchResponse.hits.total);
 
   // If we affected saved objects indices, we need to ensure they are migrated...
   if (Object.keys(result).some((k) => k.startsWith(MAIN_SAVED_OBJECT_INDEX))) {
