@@ -13,7 +13,7 @@ import { CustomScriptSelector } from './custom_script_selector';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
 import { useCustomScriptsErrorToast } from './use_custom_scripts_error_toast';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { CustomScript } from '../../../../../server/endpoint/services';
+import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type {
   CommandArgumentValueSelectorProps,
   Command,
@@ -39,7 +39,7 @@ describe('CustomScriptSelector', () => {
   const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
   const mockOnChange = jest.fn();
   const mockRequestFocus = jest.fn();
-  const mockScripts: CustomScript[] = [
+  const mockScripts: ResponseActionScript[] = [
     { id: 'script1', name: 'Script 1', description: 'Test script 1' },
     { id: 'script2', name: 'Script 2', description: 'Test script 2' },
   ];

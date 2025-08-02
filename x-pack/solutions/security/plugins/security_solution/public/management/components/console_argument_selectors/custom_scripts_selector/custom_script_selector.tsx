@@ -20,8 +20,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { CustomScript } from '../../../../../server/endpoint/services';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
+import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
+import type { ResponseActionScript } from '../../../../../common/endpoint/types';
 import type { CommandArgumentValueSelectorProps } from '../../console/types';
 import { useGetCustomScripts } from '../../../hooks/custom_scripts/use_get_custom_scripts';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -51,24 +52,36 @@ const TOOLTIP_TEXT = i18n.translate(
 /**
  * State for the custom script selector component
  */
-interface CustomScriptSelectorState {
+export interface CustomScriptSelectorState<TScriptRecordMeta extends {} = {}> {
   isPopoverOpen: boolean;
+  selectedOption: ResponseActionScript<TScriptRecordMeta> | undefined;
 }
 
-type SelectableOption = EuiSelectableOption<Partial<{ description: CustomScript['description'] }>>;
+type SelectableOption = EuiSelectableOption<
+  Partial<{ description: ResponseActionScript['description'] }>
+>;
 export const CustomScriptSelector = memo<
-  CommandArgumentValueSelectorProps<string, CustomScriptSelectorState>
+  CommandArgumentValueSelectorProps<
+    string,
+    CustomScriptSelectorState,
+    EndpointCommandDefinitionMeta
+  >
 >(({ value, valueText, onChange, store: _store, command, requestFocus }) => {
-  // Extract agentType from command.meta instead of direct parameter
-  const agentType = command.commandDefinition.meta?.agentType as ResponseActionAgentType;
+  const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const {
     services: { notifications },
   } = useKibana();
 
   const state = useMemo<CustomScriptSelectorState>(() => {
-    return _store ?? { isPopoverOpen: !value };
+    const { isPopoverOpen = !value, selectedOption } = _store ?? {};
+
+    return {
+      isPopoverOpen,
+      selectedOption,
+    };
   }, [_store, value]);
+
   const setIsPopoverOpen = useCallback(
     (newValue: boolean) => {
       onChange({
@@ -83,19 +96,28 @@ export const CustomScriptSelector = memo<
     [onChange, state, value, valueText]
   );
 
+  const scriptsApiQueryParams: Omit<CustomScriptsRequestQueryParams, 'agentType'> = useMemo(() => {
+    if (agentType === 'sentinel_one' && platform) {
+      return { osType: platform };
+    }
+
+    return {};
+  }, [agentType, platform]);
+
   const {
     data = [],
     isLoading: isLoadingScripts,
     error: scriptsError,
-  } = useGetCustomScripts(agentType);
+  } = useGetCustomScripts(agentType, scriptsApiQueryParams);
 
   const scriptsOptions: SelectableOption[] = useMemo(() => {
-    return data.map((script: CustomScript) => {
+    return data.map((script: ResponseActionScript) => {
       const isChecked = script.name === value;
       return {
         label: script.name,
         description: script.description,
         checked: isChecked ? 'on' : undefined,
+        data: script,
       };
     });
   }, [data, value]);
@@ -155,6 +177,7 @@ export const CustomScriptSelector = memo<
           store: {
             ...state,
             isPopoverOpen: false,
+            selectedOption: changedOption.data as ResponseActionScript,
           },
         });
       } else {
@@ -164,6 +187,7 @@ export const CustomScriptSelector = memo<
           store: {
             ...state,
             isPopoverOpen: false,
+            selectedOption: undefined,
           },
         });
       }
