@@ -8,10 +8,10 @@
 import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
+import {
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+  type SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
@@ -39,12 +39,15 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
+
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../../../constants';
+
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -76,6 +79,7 @@ import { airGappedUtils } from '../airgapped';
 import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
+import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
 import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
@@ -963,5 +967,39 @@ export async function getAgentTemplateAssetsMap({
   } catch (error) {
     logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
+  }
+}
+
+/**
+ * Get knowledge base content for a package
+ * @param options Object with esClient and package name
+ * @returns The knowledge base content or undefined if not found
+ */
+export async function getPackageKnowledgeBase(options: {
+  esClient: ElasticsearchClient;
+  pkgName: string;
+  pkgVersion?: string;
+}): Promise<PackageKnowledgeBase | undefined> {
+  const { esClient, pkgName, pkgVersion } = options;
+
+  try {
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
+      esClient,
+      pkgName,
+      pkgVersion
+    );
+
+    if (knowledgeBaseItems.length === 0) {
+      return undefined;
+    }
+
+    return {
+      package_name: pkgName,
+      version: pkgVersion || 'latest',
+      installed_at: new Date().toISOString(),
+      knowledge_base_content: knowledgeBaseItems,
+    };
+  } catch (error) {
+    return undefined;
   }
 }
