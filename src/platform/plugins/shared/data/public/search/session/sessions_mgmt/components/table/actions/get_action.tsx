@@ -8,18 +8,17 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { IClickActionDescriptor } from '..';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import { IClickActionDescriptor } from './types';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { ACTION, UISession } from '../../../types';
 import { createDeleteActionDescriptor } from './delete_button';
 import { createExtendActionDescriptor } from './extend_button';
 import { createInspectActionDescriptor } from './inspect_button';
-import { ACTION } from './types';
 import { createRenameActionDescriptor } from './rename_button';
 
 export const getAction = (
   api: SearchSessionsMgmtAPI,
-  actionType: string,
+  actionType: ACTION,
   uiSession: UISession,
   core: CoreStart
 ): IClickActionDescriptor | null => {

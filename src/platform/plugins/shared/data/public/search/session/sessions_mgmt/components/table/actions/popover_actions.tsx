@@ -21,16 +21,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
-import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { UISession } from '../../types';
+import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import { ACTION, UISession } from '../../../types';
 import { getAction } from './get_action';
-import { ACTION, OnActionComplete } from './types';
+import { OnActionComplete } from './types';
 
 interface PopoverActionItemsProps {
   session: UISession;
   api: SearchSessionsMgmtAPI;
   onActionComplete: OnActionComplete;
   core: CoreStart;
+  allowedActions?: UISession['actions'];
 }
 
 export const PopoverActionsMenu = ({
@@ -38,6 +39,7 @@ export const PopoverActionsMenu = ({
   onActionComplete,
   session,
   core,
+  allowedActions,
 }: PopoverActionItemsProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -66,7 +68,11 @@ export const PopoverActionsMenu = ({
     </EuiToolTip>
   );
 
-  const actions = session.actions || [];
+  const actions =
+    session.actions?.filter((action) => {
+      if (!allowedActions) return true;
+      return allowedActions.includes(action);
+    }) || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
     const actionDef = getAction(api, actionType, session, core);

@@ -6,12 +6,19 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export * from './ui_session.mock';
-export * from './search_session_saved_object.mock';
 
-import React, { ReactNode } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { SearchSessionStatus } from '../../../../../../../common';
+import { ACTION, UISearchSessionState } from '../../../types';
 
-export function LocaleWrapper({ children }: { children?: ReactNode }) {
-  return <IntlProvider locale="en">{children}</IntlProvider>;
+export function getActions(status: UISearchSessionState) {
+  const actions: ACTION[] = [];
+
+  actions.push(ACTION.INSPECT);
+  actions.push(ACTION.RENAME);
+  if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
+    actions.push(ACTION.EXTEND);
+  }
+  actions.push(ACTION.DELETE);
+
+  return actions;
 }

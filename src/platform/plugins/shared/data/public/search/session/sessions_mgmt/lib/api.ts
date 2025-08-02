@@ -12,109 +12,13 @@ import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ACTION } from '../components/actions';
-import {
-  PersistedSearchSessionSavedObjectAttributes,
-  UISearchSessionState,
-  UISession,
-} from '../types';
+import { SearchSessionStatusResponse } from '../../../../../common';
+import { SearchSessionSavedObject } from '../types';
 import { ISessionsClient } from '../../sessions_client';
 import { SearchUsageCollector } from '../../../collectors';
-import { SearchSessionsFindResponse, SearchSessionStatus } from '../../../../../common';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
-type LocatorsStart = SharePluginStart['url']['locators'];
-
-interface SearchSessionSavedObject {
-  id: string;
-  attributes: PersistedSearchSessionSavedObjectAttributes;
-}
-
-function getActions(status: UISearchSessionState) {
-  const actions: ACTION[] = [];
-  actions.push(ACTION.INSPECT);
-  actions.push(ACTION.RENAME);
-  if (status === SearchSessionStatus.IN_PROGRESS || status === SearchSessionStatus.COMPLETE) {
-    actions.push(ACTION.EXTEND);
-    actions.push(ACTION.DELETE);
-  }
-
-  if (
-    status === SearchSessionStatus.EXPIRED ||
-    status === SearchSessionStatus.ERROR ||
-    status === SearchSessionStatus.CANCELLED
-  ) {
-    actions.push(ACTION.DELETE);
-  }
-
-  return actions;
-}
-
-function getUrlFromState(locators: LocatorsStart, locatorId: string, state: SerializableRecord) {
-  try {
-    const locator = locators.get(locatorId);
-    return locator?.getRedirectUrl(state);
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create URL from restoreState');
-    // eslint-disable-next-line no-console
-    console.error(err);
-  }
-}
-
-// Helper: factory for a function to map server objects to UI objects
-const mapToUISession =
-  (
-    locators: LocatorsStart,
-    config: SearchSessionsConfigSchema,
-    sessionStatuses: SearchSessionsFindResponse['statuses']
-  ) =>
-  async (savedObject: SearchSessionSavedObject): Promise<UISession> => {
-    const {
-      name,
-      appId,
-      created,
-      expires,
-      locatorId,
-      initialState,
-      restoreState,
-      idMapping,
-      version,
-    } = savedObject.attributes;
-
-    const status = sessionStatuses[savedObject.id]?.status;
-    const errors = sessionStatuses[savedObject.id]?.errors;
-    const actions = getActions(status);
-
-    // TODO: initialState should be saved without the searchSessionID
-    if (initialState) delete initialState.searchSessionId;
-    // derive the URL and add it in
-    const reloadUrl = await getUrlFromState(locators, locatorId, initialState);
-    const restoreUrl = await getUrlFromState(locators, locatorId, restoreState);
-
-    return {
-      id: savedObject.id,
-      name,
-      appId,
-      created,
-      expires,
-      status,
-      actions,
-      restoreUrl: restoreUrl!,
-      reloadUrl: reloadUrl!,
-      initialState,
-      restoreState,
-      idMapping,
-      numSearches: Object.keys(idMapping).length,
-      version,
-      errors,
-    };
-  };
-
 interface SearchSessionManagementDeps {
-  locators: LocatorsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
   usageCollector?: SearchUsageCollector;
@@ -127,7 +31,9 @@ export class SearchSessionsMgmtAPI {
     private deps: SearchSessionManagementDeps
   ) {}
 
-  public async fetchTableData(): Promise<UISession[]> {
+  public async fetchTableData(): Promise<
+    [SearchSessionSavedObject[], Record<string, SearchSessionStatusResponse>]
+  > {
     const mgmtConfig = this.config.management;
 
     const refreshTimeout = moment.duration(mgmtConfig.refreshTimeout);
@@ -156,10 +62,7 @@ export class SearchSessionsMgmtAPI {
     try {
       const result = await race(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
-        const savedObjects = result.saved_objects as SearchSessionSavedObject[];
-        return await Promise.all(
-          savedObjects.map(mapToUISession(this.deps.locators, this.config, result.statuses))
-        );
+        return [result.saved_objects as SearchSessionSavedObject[], result.statuses];
       }
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -171,7 +74,7 @@ export class SearchSessionsMgmtAPI {
       });
     }
 
-    return [];
+    return [[], {}];
   }
 
   public getExtendByDuration() {
