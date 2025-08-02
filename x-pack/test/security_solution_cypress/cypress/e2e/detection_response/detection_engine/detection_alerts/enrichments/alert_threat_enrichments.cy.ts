@@ -25,7 +25,6 @@ import {
   expandDocumentDetailsExpandableFlyoutLeftSection,
   openTableTab,
 } from '../../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { filterTableTabTable } from '../../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
 import { DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS } from '../../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import { openThreatIntelligenceTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
@@ -33,10 +32,6 @@ import { openInsightsTab } from '../../../../../tasks/expandable_flyout/alert_de
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  before(() => {
-    installMockPrebuiltRulesPackage();
-  });
-
   beforeEach(() => {
     deleteAlertsAndRules();
 

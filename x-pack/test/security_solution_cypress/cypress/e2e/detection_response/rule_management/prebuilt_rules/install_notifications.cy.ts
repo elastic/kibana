@@ -18,7 +18,6 @@ import {
 import {
   installAllPrebuiltRulesRequest,
   installPrebuiltRuleAssets,
-  installMockEmptyPrebuiltRulesPackage,
   installSpecificPrebuiltRulesRequest,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
@@ -26,13 +25,9 @@ import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
 describe(
-  'Detection rules, Prebuilt Rules Installation and Update Notifications',
+  'Detection rules, Prebuilt Rules Installation Notifications',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
-    before(() => {
-      installMockEmptyPrebuiltRulesPackage();
-    });
-
     beforeEach(() => {
       deleteAlertsAndRules();
       deletePrebuiltRulesAssets();
@@ -43,7 +38,11 @@ describe(
     });
 
     describe('No notifications', () => {
-      it('does NOT display install notifications when no prebuilt assets and no rules are installed', () => {
+      // Skipping this test for now due to mock prebuilt rules package installation in cypress/support/e2e.ts.
+      // The mock package contains a prebuilt rule asset but the test requires no prebuilt rule assets to be present.
+      // Removing the available prebuilt rule assets will cause installing the real prebuilt rules package and may
+      // cause flakiness.
+      it.skip('does NOT display install notifications when no prebuilt assets and no rules are installed', () => {
         visitRulesManagementTable();
 
         cy.get(ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN).should('be.visible');

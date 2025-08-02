@@ -20,7 +20,6 @@ import {
 } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import {
-  installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
   installSpecificPrebuiltRulesRequest,
 } from '../../../../tasks/api_calls/prebuilt_rules';
@@ -33,10 +32,6 @@ describe(
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
-    before(() => {
-      installMockPrebuiltRulesPackage();
-    });
-
     beforeEach(() => {
       login();
       deleteAlertsAndRules();

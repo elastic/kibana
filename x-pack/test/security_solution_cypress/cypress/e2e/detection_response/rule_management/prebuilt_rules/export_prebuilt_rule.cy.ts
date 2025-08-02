@@ -20,10 +20,7 @@ import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../tasks/api_calls/common';
-import {
-  createAndInstallMockedPrebuiltRules,
-  installMockPrebuiltRulesPackage,
-} from '../../../../tasks/api_calls/prebuilt_rules';
+import { createAndInstallMockedPrebuiltRules } from '../../../../tasks/api_calls/prebuilt_rules';
 import { createRule, patchRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
@@ -36,10 +33,6 @@ describe(
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
-    before(() => {
-      installMockPrebuiltRulesPackage();
-    });
-
     beforeEach(() => {
       deletePrebuiltRulesAssets();
       deleteAlertsAndRules();
