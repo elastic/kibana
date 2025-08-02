@@ -56,7 +56,6 @@ interface SyncIntegrationsTaskStartContract {
 export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
@@ -68,14 +67,18 @@ export class SyncIntegrationsTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task cancelled');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -115,7 +118,11 @@ export class SyncIntegrationsTask {
     this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
       return;
@@ -141,14 +148,14 @@ export class SyncIntegrationsTask {
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        this.abortController,
+        abortController,
         this.logger
       );
 
@@ -189,7 +196,8 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClient,
+    abortController: AbortController
   ) => {
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
@@ -262,7 +270,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        this.abortController,
+        abortController,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -280,7 +288,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
   };
 }
