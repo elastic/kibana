@@ -30,8 +30,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retryService = getService('retry');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  // Failing: See https://github.com/elastic/kibana/issues/228944
-  describe.skip('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
+  describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
@@ -68,49 +67,58 @@ export default ({ getService }: FtrProviderContext): void => {
       );
     });
 
-    /**
-     * Unlike other tests that use mocks, this test uses actual rules from the
-     * package storage and checks that they are installed.
-     */
-    it('should install prebuilt rules from the package storage', async () => {
-      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
-      await deleteEndpointFleetPackage({ supertest, es, log, retryService });
+    it('installs prebuilt rules from the package storage', async () => {
+      await retryService.tryWithRetries(
+        'getPrebuiltRulesAndTimelinesStatus',
+        async () => {
+          await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+          await deleteEndpointFleetPackage({ supertest, es, log, retryService });
 
-      // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
-        es,
-        supertest
+          // Verify that status is empty before package installation
+          const statusBeforePackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
+            es,
+            supertest
+          );
+          expect(statusBeforePackageInstallation.rules_installed).toBe(0);
+          expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
+          expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
+
+          await installPrebuiltRulesFleetPackage({
+            es,
+            supertest,
+            overrideExistingPackage: true,
+            retryService,
+          });
+
+          // Verify that status is updated after package installation
+          const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
+            es,
+            supertest
+          );
+          expect(statusAfterPackageInstallation.rules_installed).toBe(0);
+          expect(statusAfterPackageInstallation.rules_not_installed).toBeGreaterThan(0);
+          expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
+
+          // Verify that all previously not installed rules were installed
+          const response = await installPrebuiltRulesAndTimelines(es, supertest);
+          expect(response.rules_installed).toBe(statusAfterPackageInstallation.rules_not_installed);
+          expect(response.rules_updated).toBe(0);
+
+          // Verify that status is updated after rules installation
+          const statusAfterRuleInstallation = await getPrebuiltRulesAndTimelinesStatus(
+            es,
+            supertest
+          );
+          expect(statusAfterRuleInstallation.rules_installed).toBe(response.rules_installed);
+          expect(statusAfterRuleInstallation.rules_not_installed).toBe(0);
+          expect(statusAfterRuleInstallation.rules_not_updated).toBe(0);
+        },
+        {
+          retryCount: 10, // 10s delay * 120 reties = 20 mins
+          retryDelay: 5000,
+          timeout: 60000 * 10, // total timeout applied to all attempts altogether, 10 mins
+        }
       );
-      expect(statusBeforePackageInstallation.rules_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
-
-      await installPrebuiltRulesFleetPackage({
-        es,
-        supertest,
-        overrideExistingPackage: true,
-        retryService,
-      });
-
-      // Verify that status is updated after package installation
-      const statusAfterPackageInstallation = await getPrebuiltRulesAndTimelinesStatus(
-        es,
-        supertest
-      );
-      expect(statusAfterPackageInstallation.rules_installed).toBe(0);
-      expect(statusAfterPackageInstallation.rules_not_installed).toBeGreaterThan(0);
-      expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
-
-      // Verify that all previously not installed rules were installed
-      const response = await installPrebuiltRulesAndTimelines(es, supertest);
-      expect(response.rules_installed).toBe(statusAfterPackageInstallation.rules_not_installed);
-      expect(response.rules_updated).toBe(0);
-
-      // Verify that status is updated after rules installation
-      const statusAfterRuleInstallation = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
-      expect(statusAfterRuleInstallation.rules_installed).toBe(response.rules_installed);
-      expect(statusAfterRuleInstallation.rules_not_installed).toBe(0);
-      expect(statusAfterRuleInstallation.rules_not_updated).toBe(0);
     });
   });
 };
