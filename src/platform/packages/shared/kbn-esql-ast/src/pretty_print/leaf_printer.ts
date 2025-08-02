@@ -11,13 +11,14 @@ import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLColumn,
+  ESQLDatePeriodLiteral,
   ESQLIdentifier,
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
   ESQLSource,
   ESQLStringLiteral,
-  ESQLTimeInterval,
+  ESQLTimeDurationLiteral,
 } from '../types';
 
 const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
@@ -119,6 +120,10 @@ export const LeafPrinter = {
       case 'keyword': {
         return LeafPrinter.string(node);
       }
+      case 'date_period':
+      case 'time_duration': {
+        return LeafPrinter.timespan(node);
+      }
       case 'double': {
         const isRounded = node.value % 1 === 0;
 
@@ -146,7 +151,7 @@ export const LeafPrinter = {
     }
   },
 
-  timeInterval: (node: ESQLTimeInterval) => {
+  timespan: (node: ESQLTimeDurationLiteral | ESQLDatePeriodLiteral) => {
     const { quantity, unit } = node;
 
     if (unit.length === 1) {
@@ -192,9 +197,6 @@ export const LeafPrinter = {
       }
       case 'literal': {
         return LeafPrinter.literal(node);
-      }
-      case 'timeInterval': {
-        return LeafPrinter.timeInterval(node);
       }
       case 'comment': {
         return LeafPrinter.comment(node);

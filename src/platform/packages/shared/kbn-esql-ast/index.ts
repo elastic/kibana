@@ -15,7 +15,7 @@ export type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
-  ESQLTimeInterval,
+  ESQLTimeSpanLiteral,
   ESQLLocation,
   ESQLMessage,
   ESQLSingleAstItem,
@@ -43,6 +43,7 @@ export {
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
+  TIME_SPAN_UNITS,
 } from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
