@@ -44,8 +44,13 @@ export const useStreamEnrichmentEvents = () => {
       addProcessor: (processor?: ProcessorDefinition) => {
         service.send({ type: 'processors.add', processor });
       },
-      reorderProcessors: (from: number, to: number) => {
-        service.send({ type: 'processors.reorder', from, to });
+      reorderProcessors: (
+        from: number,
+        to: number,
+        fromParent: string | undefined,
+        toParent: string | undefined
+      ) => {
+        service.send({ type: 'processors.reorder', from, to, fromParent, toParent });
       },
       resetChanges: () => {
         service.send({ type: 'stream.reset' });

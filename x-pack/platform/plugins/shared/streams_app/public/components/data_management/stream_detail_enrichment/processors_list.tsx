@@ -37,12 +37,14 @@ export const DraggableProcessorListItem = ({
         spacing="none"
         draggableId={props.processorRef.id}
         hasInteractiveChildren
+        disableInteractiveElementBlocking // Allows button to be drag handle
         customDragHandle
         isDragDisabled={isDragDisabled}
       >
         {(provided) => (
           <ProcessorConfiguration
             {...props}
+            idx={idx}
             dragHandleProps={isDragDisabled ? null : provided.dragHandleProps}
           />
         )}

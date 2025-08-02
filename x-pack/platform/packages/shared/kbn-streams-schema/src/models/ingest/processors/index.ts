@@ -41,6 +41,7 @@ export interface ManualIngestPipelineProcessorConfig extends ProcessorBase {
   tag?: string;
   on_failure?: Array<Record<string, unknown>>;
 }
+
 export interface ManualIngestPipelineProcessorDefinition {
   manual_ingest_pipeline: ManualIngestPipelineProcessorConfig;
 }
@@ -55,6 +56,14 @@ export const manualIngestPipelineProcessorDefinitionSchema = z.strictObject({
     })
   ),
 }) satisfies z.Schema<ManualIngestPipelineProcessorDefinition>;
+
+export interface WhereProcessorConfig extends ProcessorBase {
+  steps: ProcessorDefinition[];
+}
+
+export interface WhereProcessorDefinition {
+  where: WhereProcessorConfig;
+}
 
 /**
  * Grok processor
@@ -326,6 +335,7 @@ export type ProcessorDefinition =
   | RenameProcessorDefinition
   | SetProcessorDefinition
   | ManualIngestPipelineProcessorDefinition
+  | WhereProcessorDefinition
   | UrlDecodeProcessorDefinition
   | UserAgentProcessorDefinition;
 
@@ -341,6 +351,37 @@ export type ProcessorType = UnionKeysOf<ProcessorDefinition>;
 export type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
   UnionKeysOf<TProcessorDefinition> & ProcessorType;
 
+const processorDefinitionSchemaWithoutWhereAndMaybeWithId: z.ZodType<ProcessorDefinition> = z.union(
+  [
+    dateProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    dissectProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    grokProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    manualIngestPipelineProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    kvProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    geoIpProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    renameProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    setProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    urlDecodeProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+    userAgentProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+  ]
+);
+
+export const whereProcessorDefinitionSchema = z.strictObject({
+  where: z.intersection(
+    processorBaseSchema,
+    z.object({
+      get steps(): z.ZodAny {
+        return z.array(
+          z.union([
+            processorDefinitionSchemaWithoutWhereAndMaybeWithId,
+            whereProcessorDefinitionSchema.merge(z.object({ id: z.optional(z.string()) })),
+          ])
+        );
+      },
+    })
+  ),
+}) satisfies z.Schema<WhereProcessorDefinition>;
+
 export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union([
   dateProcessorDefinitionSchema,
   dissectProcessorDefinitionSchema,
@@ -352,6 +393,7 @@ export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union
   setProcessorDefinitionSchema,
   urlDecodeProcessorDefinitionSchema,
   userAgentProcessorDefinitionSchema,
+  whereProcessorDefinitionSchema,
 ]);
 
 export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
@@ -365,6 +407,7 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   setProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   urlDecodeProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   userAgentProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  whereProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(

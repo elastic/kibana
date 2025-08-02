@@ -49,5 +49,6 @@ export type ProcessorEvent =
       resources?: ProcessorResources;
     }
   | { type: 'processor.delete' }
+  | { type: 'processor.changeParent'; parentId?: string }
   | { type: 'processor.edit' }
   | { type: 'processor.save' };

@@ -17,7 +17,6 @@ import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
-import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
 import {
   DateTargetField,
@@ -150,8 +149,6 @@ export const DateProcessorForm = () => {
         <DateTimezoneField />
         <DateLocaleField />
         <DateOutputFormatField />
-        <EuiSpacer size="m" />
-        <ProcessorConditionEditor />
       </FieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />

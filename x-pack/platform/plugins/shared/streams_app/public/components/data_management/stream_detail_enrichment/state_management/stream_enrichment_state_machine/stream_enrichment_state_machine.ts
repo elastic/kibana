@@ -22,6 +22,7 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { ProcessorDefinition, Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
+import { htmlIdGenerator } from '@elastic/eui';
 import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
 import {
   StreamEnrichmentContextType,
@@ -94,10 +95,69 @@ export const streamEnrichmentMachine = setup({
     setupProcessors: assign(({ context, spawn, self }) => {
       // Clean-up pre-existing processors
       context.processorsRefs.forEach(stopChild);
-      // Setup processors from the stream definition
-      const processorsRefs = context.definition.stream.ingest.processing.map((processor) =>
-        spawnProcessor(processor, { self, spawn })
-      );
+
+      const createId = htmlIdGenerator();
+
+      // Helper to recursively flatten processors, unpacking "where" steps and setting whereParentId
+      function flattenProcessors(
+        processors: ProcessorDefinition[],
+        parentWhereId?: string
+      ): Array<{ processor: ProcessorDefinition; id: string; whereParentId?: string }> {
+        const result: Array<{
+          processor: ProcessorDefinition;
+          id: string;
+          whereParentId?: string;
+        }> = [];
+        for (const proc of processors) {
+          if ('where' in proc && Array.isArray(proc.where.steps)) {
+            // Generate id for this where processor
+            const whereId = createId();
+            // Clone the where processor and empty its steps
+            const steps = proc.where.steps;
+            const whereProc: ProcessorDefinition = {
+              ...proc,
+              where: {
+                ...proc.where,
+                steps: [],
+              },
+            };
+            result.push({ processor: whereProc, id: whereId });
+            // Recursively flatten steps, setting whereParentId to this where's id
+            if (Array.isArray(steps)) {
+              result.push(...flattenProcessors(steps, whereId));
+            }
+          } else {
+            // Generate id for this processor
+            const procId = createId();
+            if (parentWhereId) {
+              result.push({
+                processor: { ...proc },
+                id: procId,
+                whereParentId: parentWhereId,
+              });
+            } else {
+              result.push({ processor: proc, id: procId });
+            }
+          }
+        }
+        return result;
+      }
+
+      // Flatten all processors from the stream definition
+      const flattenedProcessors = flattenProcessors(context.definition.stream.ingest.processing);
+
+      // Setup processors from the flattened list
+      const processorsRefs = flattenedProcessors.map(({ processor, id, whereParentId }) => {
+        // Pass whereParentId and id via options if present
+        return spawnProcessor(
+          processor,
+          { self, spawn },
+          {
+            ...(whereParentId ? { whereParentId } : {}),
+            id,
+          }
+        );
+      });
 
       return {
         initialProcessorsRefs: processorsRefs,
@@ -111,18 +171,138 @@ export const streamEnrichmentMachine = setup({
         });
       }
 
-      const newProcessorRef = spawnProcessor(processor, assignArgs, { isNew: true });
+      const lastWhereProcessor = [...assignArgs.context.processorsRefs]
+        .reverse()
+        .find((proc) => proc.getSnapshot().context.processor.type === 'where');
+      const lastWhereProcessorId = lastWhereProcessor?.getSnapshot().context.processor.id;
+
+      const newProcessorRef = spawnProcessor(processor, assignArgs, {
+        isNew: true,
+        whereParentId: lastWhereProcessorId,
+      });
 
       return {
         processorsRefs: assignArgs.context.processorsRefs.concat(newProcessorRef),
       };
     }),
-    deleteProcessor: assign(({ context }, params: { id: string }) => ({
-      processorsRefs: context.processorsRefs.filter((proc) => proc.id !== params.id),
-    })),
-    reorderProcessors: assign(({ context }, params: { from: number; to: number }) => ({
-      processorsRefs: moveArrayItem(context.processorsRefs, params.from, params.to),
-    })),
+    deleteProcessor: assign(({ context }, params: { id: string }) => {
+      // Recursively collect all processor ids to delete (the target and all its children)
+      const collectIdsToDelete = (
+        id: string,
+        processorsRefs: typeof context.processorsRefs
+      ): string[] => {
+        const childIds = processorsRefs
+          .filter((proc) => proc.getSnapshot().context.processor.whereParentId === id)
+          .map((proc) => proc.id);
+        return [id, ...childIds.flatMap((childId) => collectIdsToDelete(childId, processorsRefs))];
+      };
+
+      const idsToDelete = collectIdsToDelete(params.id, context.processorsRefs);
+
+      return {
+        processorsRefs: context.processorsRefs.filter((proc) => !idsToDelete.includes(proc.id)),
+      };
+    }),
+    reorderProcessors: assign(
+      (
+        { context },
+        params: { from: number; to: number; fromParent?: string; toParent?: string }
+      ) => {
+        // Helper: group processors by whereParentId
+        const groupByParent = (processorsRefs: typeof context.processorsRefs) => {
+          const groups: Record<string, typeof context.processorsRefs> = {};
+          for (const proc of processorsRefs) {
+            const parentId = proc.getSnapshot().context.processor.whereParentId ?? 'main-list';
+            if (!groups[parentId]) groups[parentId] = [];
+            groups[parentId].push(proc);
+          }
+          return groups;
+        };
+
+        // Helper: get global index from sublist index
+        const getGlobalIndex = (
+          groups: Record<string, typeof context.processorsRefs>,
+          parent: string,
+          idx: number
+        ) => {
+          let globalIdx = 0;
+          for (const proc of context.processorsRefs) {
+            const pid = proc.getSnapshot().context.processor.whereParentId ?? 'main-list';
+            if (pid === parent) {
+              if (idx === 0) return globalIdx;
+              idx--;
+            }
+            globalIdx++;
+          }
+          // fallback
+          return context.processorsRefs.length;
+        };
+
+        // Helper: flatten groups to a single array in correct nested order
+        const flattenGroups = (
+          groups: Record<string, typeof context.processorsRefs>,
+          parentId: string = 'main-list'
+        ): typeof context.processorsRefs => {
+          const result: typeof context.processorsRefs = [];
+          const list = groups[parentId] ?? [];
+          for (const proc of list) {
+            result.push(proc);
+            // Recursively add children of this processor (if any)
+            const childId = proc.id;
+            if (groups[childId]?.length) {
+              result.push(...flattenGroups(groups, childId));
+            }
+          }
+          return result;
+        };
+
+        const { from, to, fromParent = 'main-list', toParent = 'main-list' } = params;
+        const processorsRefs = context.processorsRefs;
+        let actualToParent = toParent;
+        let mergeToEnd = false;
+
+        // If toParent ends with '-merge', strip it and set mergeToEnd
+        if (toParent.endsWith('-merge')) {
+          actualToParent = toParent.slice(0, -6); // remove '-merge'
+          mergeToEnd = true;
+        }
+
+        const groups = groupByParent(processorsRefs);
+
+        // If moving within the same sublist
+        if (fromParent === actualToParent) {
+          const list = groups[fromParent] ?? [];
+          groups[fromParent] = moveArrayItem(list, from, to);
+          return {
+            processorsRefs: flattenGroups(groups),
+          };
+        }
+
+        // Moving between sublists
+        const fromList = groups[fromParent] ?? [];
+        const toList = groups[actualToParent] ?? [];
+        const [moved] = fromList.splice(from, 1);
+
+        if (moved) {
+          // Send event to update whereParentId in the processor actor
+          moved.send({
+            type: 'processor.changeParent',
+            parentId: actualToParent === 'main-list' ? undefined : actualToParent,
+          });
+          // Insert into toList at the correct position
+          if (mergeToEnd) {
+            toList.push(moved);
+          } else {
+            toList.splice(to, 0, moved);
+          }
+        }
+        groups[fromParent] = fromList;
+        groups[actualToParent] = toList;
+        return {
+          processorsRefs: flattenGroups(groups),
+        };
+      }
+    ),
     reassignProcessors: assign(({ context }) => ({
       processorsRefs: [...context.processorsRefs],
     })),

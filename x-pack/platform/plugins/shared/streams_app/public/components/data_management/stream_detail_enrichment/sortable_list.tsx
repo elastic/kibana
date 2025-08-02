@@ -16,12 +16,27 @@ import {
 interface SortableListProps {
   onDragItem: DragDropContextProps['onDragEnd'];
   children: EuiDroppableProps['children'];
+  subId?: string; // Optional subId for the droppable area
 }
 
-export const SortableList = ({ onDragItem, children }: SortableListProps) => {
+export const SortableList = ({ onDragItem, children, subId }: SortableListProps) => {
+  if (!subId) {
+    return (
+      <EuiDragDropContext onDragEnd={onDragItem}>
+        <EuiDroppable
+          isCombineEnabled
+          type={subId || 'main-list'}
+          droppableId={subId || 'main-list'}
+        >
+          {children}
+        </EuiDroppable>
+      </EuiDragDropContext>
+    );
+  }
+  // no context for subId, just return children
   return (
-    <EuiDragDropContext onDragEnd={onDragItem}>
-      <EuiDroppable droppableId="droppable-area">{children}</EuiDroppable>
-    </EuiDragDropContext>
+    <EuiDroppable isCombineEnabled type={subId || 'main-list'} droppableId={subId}>
+      {children}
+    </EuiDroppable>
   );
 };

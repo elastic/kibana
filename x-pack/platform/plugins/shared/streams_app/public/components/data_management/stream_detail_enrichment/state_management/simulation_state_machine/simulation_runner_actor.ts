@@ -13,7 +13,7 @@ import { isEmpty } from 'lodash';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { getFormattedError } from '../../../../../util/errors';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { processorConverter } from '../../utils';
+import { processorsWithUIAttributesToSimulationDefinition } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
 import { SchemaField } from '../../../schema_editor/types';
 import { getMappedSchemaFields } from './utils';
@@ -53,7 +53,7 @@ export const simulateProcessing = ({
       path: { name: input.streamName },
       body: {
         documents: input.documents,
-        processing: input.processors.map(processorConverter.toSimulateDefinition),
+        processing: processorsWithUIAttributesToSimulationDefinition(input.processors),
         detected_fields:
           input.detectedFields && !isEmpty(input.detectedFields)
             ? getMappedSchemaFields(input.detectedFields).map((field) => ({

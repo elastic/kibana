@@ -29,6 +29,7 @@ import {
   DateFormState,
   ManualIngestPipelineFormState,
   EnrichmentDataSourceWithUIAttributes,
+  WhereFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -136,6 +137,12 @@ const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFo
   if: ALWAYS_CONDITION,
 });
 
+const defaultWhereProcessorFormState = (): WhereFormState => ({
+  type: 'where',
+  steps: [],
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -150,6 +157,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  where: defaultWhereProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -207,6 +215,15 @@ export const getFormStateFrom = (
     return structuredClone({
       ...date,
       type: 'date',
+    });
+  }
+
+  if (processor.type === 'where' && 'where' in processor) {
+    const { where } = processor;
+
+    return structuredClone({
+      ...where,
+      type: 'where',
     });
   }
 
@@ -298,6 +315,19 @@ export const convertFormStateToProcessor = (
     };
   }
 
+  if (formState.type === 'where') {
+    const { steps, if: condition } = formState as WhereFormState;
+
+    return {
+      processorDefinition: {
+        where: {
+          if: condition,
+          steps,
+        },
+      },
+    };
+  }
+
   if (configDrivenProcessors[formState.type]) {
     return {
       processorDefinition: configDrivenProcessors[formState.type].convertFormStateToConfig(
@@ -331,20 +361,21 @@ const processorToUIDefinition = <TProcessorDefinition extends ProcessorDefinitio
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
   type: getProcessorType(processor),
+  whereParentId: undefined,
   ...processor,
 });
 
 const processorToAPIDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinition => {
-  const { id, type, ...processorConfig } = processor;
+  const { id, type, whereParentId, ...processorConfig } = processor;
   return processorConfig;
 };
 
 const processorToSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
-  const { type, ...processorConfig } = processor;
+  const { type, whereParentId, ...processorConfig } = processor;
   return processorConfig;
 };
 
@@ -353,6 +384,90 @@ export const processorConverter = {
   toSimulateDefinition: processorToSimulateDefinition,
   toUIDefinition: processorToUIDefinition,
 };
+
+export function processorsWithUIAttributesToSimulationDefinition(
+  processors: ProcessorDefinitionWithUIAttributes[]
+): ProcessorDefinitionWithId[] {
+  // Step 1: Build a map of id -> processor for all processors
+  const processorMap: Record<string, ProcessorDefinitionWithUIAttributes> = {};
+  processors.forEach((p) => {
+    if (p.id) {
+      processorMap[p.id] = p;
+    }
+  });
+
+  // Step 2: Build a map of whereParentId -> child processors
+  const childrenMap: Record<string, ProcessorDefinitionWithUIAttributes[]> = {};
+  processors.forEach((p) => {
+    if (p.whereParentId) {
+      if (!childrenMap[p.whereParentId]) {
+        childrenMap[p.whereParentId] = [];
+      }
+      childrenMap[p.whereParentId].push(p);
+    }
+  });
+
+  // Step 3: Recursively build the nested structure for where processors
+  function buildProcessorTree(
+    processor: ProcessorDefinitionWithUIAttributes
+  ): ProcessorDefinitionWithId {
+    if (processor.type === 'where' && 'where' in processor) {
+      // Recursively build steps for this where processor
+      const steps = (childrenMap[processor.id] || []).map(buildProcessorTree);
+      // Clone the processor and set steps
+      const processorClone = { ...processor, where: { ...processor.where, steps } };
+      return processorConverter.toSimulateDefinition(processorClone);
+    } else {
+      return processorConverter.toSimulateDefinition(processor);
+    }
+  }
+
+  // Step 4: Only include top-level processors (no whereParentId)
+  const topLevelProcessors = processors.filter((p) => !p.whereParentId);
+
+  // Step 5: Build the simulation definition for each top-level processor
+  return topLevelProcessors.map(buildProcessorTree);
+}
+
+export function processorsWithUIAttributesToApiDefinition(
+  processors: ProcessorDefinitionWithUIAttributes[]
+): ProcessorDefinition[] {
+  // Step 1: Build a map of id -> processor for all processors
+  const processorMap: Record<string, ProcessorDefinitionWithUIAttributes> = {};
+  processors.forEach((p) => {
+    if (p.id) {
+      processorMap[p.id] = p;
+    }
+  });
+
+  // Step 2: Build a map of whereParentId -> child processors
+  const childrenMap: Record<string, ProcessorDefinitionWithUIAttributes[]> = {};
+  processors.forEach((p) => {
+    if (p.whereParentId) {
+      if (!childrenMap[p.whereParentId]) {
+        childrenMap[p.whereParentId] = [];
+      }
+      childrenMap[p.whereParentId].push(p);
+    }
+  });
+
+  // Step 3: Recursively build the nested structure for where processors
+  function buildProcessorTree(processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition {
+    if (processor.type === 'where' && 'where' in processor) {
+      const steps = (childrenMap[processor.id] || []).map(buildProcessorTree);
+      const processorClone = { ...processor, where: { ...processor.where, steps } };
+      return processorConverter.toAPIDefinition(processorClone);
+    } else {
+      return processorConverter.toAPIDefinition(processor);
+    }
+  }
+
+  // Step 4: Only include top-level processors (no whereParentId)
+  const topLevelProcessors = processors.filter((p) => !p.whereParentId);
+
+  // Step 5: Build the API definition for each top-level processor
+  return topLevelProcessors.map(buildProcessorTree);
+}
 
 const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
   dataSource: TEnrichementDataSource
