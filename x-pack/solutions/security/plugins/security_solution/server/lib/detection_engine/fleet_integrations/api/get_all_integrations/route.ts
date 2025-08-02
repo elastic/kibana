@@ -16,8 +16,8 @@ import { GET_ALL_INTEGRATIONS_URL } from '../../../../../../common/api/detection
 import { extractIntegrations } from './extract_integrations';
 import { sortPackagesBySecurityCategory } from './sort_packages_by_security_category';
 import { sortIntegrationsByStatus } from './sort_integrations_by_status';
-import { getFleetPackages } from '../../utils/get_fleet_packages';
-import { getFleetPackagePolicies } from '../../utils/get_package_policies';
+import { getFleetPackages } from '../../logic/get_fleet_packages';
+import { getFleetPackagePolicies } from '../../logic/get_package_policies';
 
 /**
  * Returns an array of Fleet integrations and their packages

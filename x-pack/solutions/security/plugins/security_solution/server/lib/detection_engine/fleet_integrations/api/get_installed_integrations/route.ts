@@ -13,8 +13,8 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { GetInstalledIntegrationsResponse } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/api/detection_engine/fleet_integrations';
 import { createInstalledIntegrationSet } from './installed_integration_set';
-import { getFleetPackages } from '../../utils/get_fleet_packages';
-import { getFleetPackagePolicies } from '../../utils/get_package_policies';
+import { getFleetPackages } from '../../logic/get_fleet_packages';
+import { getFleetPackagePolicies } from '../../logic/get_package_policies';
 
 /**
  * Returns an array of installed Fleet integrations and their packages.
