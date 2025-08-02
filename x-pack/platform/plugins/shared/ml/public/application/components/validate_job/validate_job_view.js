@@ -22,6 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -79,21 +80,27 @@ const LoadingSpinner = () => (
   </EuiFlexGroup>
 );
 
-const Modal = ({ close, title, children }) => (
-  <EuiModal onClose={close} style={{ width: '800px' }}>
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-    </EuiModalHeader>
+const Modal = ({ close, title, children }) => {
+  const modalTitleId = useGeneratedHtmlId();
+  return (
+    <EuiModal onClose={close} style={{ width: '800px' }} aria-labelledby={modalTitleId}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-    <EuiModalBody>{children}</EuiModalBody>
+      <EuiModalBody>{children}</EuiModalBody>
 
-    <EuiModalFooter>
-      <EuiButton onClick={close} size="s" fill>
-        <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
-      </EuiButton>
-    </EuiModalFooter>
-  </EuiModal>
-);
+      <EuiModalFooter>
+        <EuiButton onClick={close} size="s" fill>
+          <FormattedMessage
+            id="xpack.ml.validateJob.modal.closeButtonLabel"
+            defaultMessage="Close"
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};
 Modal.propType = {
   close: PropTypes.func.isRequired,
   title: PropTypes.string,
