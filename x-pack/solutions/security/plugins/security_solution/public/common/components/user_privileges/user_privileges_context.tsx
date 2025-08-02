@@ -14,6 +14,7 @@ import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endp
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
 import { extractNotesCapabilities } from '../../utils/notes_capabilities';
+import { extractExceptionsCapabilities } from '../../utils/exceptions_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -22,6 +23,7 @@ export interface UserPrivilegesState {
   kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
   timelinePrivileges: { crud: boolean; read: boolean };
   notesPrivileges: { crud: boolean; read: boolean };
+  exceptionsPrivileges: { crud: boolean; read: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -31,6 +33,7 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
   timelinePrivileges: { crud: false, read: false },
   notesPrivileges: { crud: false, read: false },
+  exceptionsPrivileges: { crud: false, read: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -70,6 +73,13 @@ export const UserPrivilegesProvider = ({
     [kibanaCapabilities]
   );
 
+  const exceptionsPrivileges = useMemo(
+    () => extractExceptionsCapabilities(kibanaCapabilities),
+    [kibanaCapabilities]
+  );
+
+  console.error('WHAT ARE EXCEPTIONS PRIVILEGES', exceptionsPrivileges);
+
   const contextValue = useMemo(
     () => ({
       listPrivileges,
@@ -78,6 +88,7 @@ export const UserPrivilegesProvider = ({
       kibanaSecuritySolutionsPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      exceptionsPrivileges,
     }),
     [
       listPrivileges,
@@ -86,6 +97,7 @@ export const UserPrivilegesProvider = ({
       kibanaSecuritySolutionsPrivileges,
       timelinePrivileges,
       notesPrivileges,
+      exceptionsPrivileges,
     ]
   );
 

@@ -22,9 +22,13 @@ import {
 import {
   APP_ID,
   SECURITY_FEATURE_ID_V3,
+  SECURITY_FEATURE_ID_V4,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
+  RULES_FEATURE_ID,
+  EXCEPTIONS_SUBFEATURE_ID_ALL,
+  EXCEPTIONS_SUBFEATURE_ID_READ,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -49,6 +53,18 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getSecurityV3BaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: SECURITY_FEATURE_ID_V3,
+          latestId: SECURITY_FEATURE_ID_V4,
+        },
+      }
+    ),
+  },
   id: SECURITY_FEATURE_ID_V3,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
@@ -61,10 +77,10 @@ export const getSecurityV3BaseKibanaFeature = ({
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
+  alerting: alertingFeatures,
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: alertingFeatures,
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.securityGroupDescription',
     {
@@ -74,6 +90,26 @@ export const getSecurityV3BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
+      replacedBy: {
+        default: [
+          { feature: RULES_FEATURE_ID, privileges: ['all'] },
+          // { feature: EXCEPTIONS_SUBFEATURE_ID_ALL, privileges: ['all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] },
+        ],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID,
+            privileges: ['minimal_all', EXCEPTIONS_SUBFEATURE_ID_ALL],
+          },
+          // { feature: EXCEPTIONS_SUBFEATURE_ID_ALL, privileges: ['all'] },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          {
+            feature: SECURITY_FEATURE_ID_V4,
+            privileges: ['minimal_all'],
+          },
+        ],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
@@ -91,6 +127,26 @@ export const getSecurityV3BaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
+      replacedBy: {
+        default: [
+          { feature: RULES_FEATURE_ID, privileges: ['read'] },
+          // { feature: EXCEPTIONS_SUBFEATURE_ID_READ, privileges: ['read'] },
+
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
+        ],
+        minimal: [
+          {
+            feature: RULES_FEATURE_ID,
+            privileges: ['minimal_read', EXCEPTIONS_SUBFEATURE_ID_READ],
+          },
+          // note: overriden by product feature endpointArtifactManagement when enabled
+          {
+            feature: SECURITY_FEATURE_ID_V4,
+            privileges: ['minimal_read'],
+          },
+        ],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-read'],

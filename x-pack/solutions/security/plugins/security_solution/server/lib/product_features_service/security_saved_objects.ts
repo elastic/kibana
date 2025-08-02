@@ -12,6 +12,7 @@ import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
   savedObjectTypes,
+  exceptionsSavedObjectTypes,
 } from '../../saved_objects';
 
 // Same as the saved-object type for rules defined by Cloud Security Posture
@@ -21,7 +22,6 @@ const CLOUD_SECURITY_POSTURE_SETTINGS = 'cloud-security-posture-settings';
 const CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE = 'csp-rule-template';
 
 export const securityDefaultSavedObjects = [
-  'exception-list',
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   DATA_VIEW_SAVED_OBJECT_TYPE,
   ...savedObjectTypesWithoutTimelineAndWithoutNotes,
@@ -30,8 +30,20 @@ export const securityDefaultSavedObjects = [
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
 ];
 
-export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
+export const securityV3SavedObjects = [
+  'exception-list',
+  ...securityDefaultSavedObjects,
+  ...savedObjectTypes,
+];
+
+export const securityV1SavedObjects = [
+  'exception-list',
+  ...securityDefaultSavedObjects,
+  ...savedObjectTypes,
+];
 
 export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 
 export const securityNotesSavedObjects = notesSavedObjectTypes;
+
+export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

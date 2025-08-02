@@ -38,29 +38,35 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
         version: '2023-10-31',
       },
       async (context, request, response) => {
+        console.error('HELLO I AM HERE');
         const siemResponse = buildSiemResponse(response);
         try {
+          console.error('HELLO I AM HERE 1');
           const { id, list_id: listId, namespace_type: namespaceType } = request.query;
           const exceptionLists = await getExceptionListClient(context);
-
+          console.error('HELLO I AM HERE 2');
           if (id == null && listId == null) {
             return siemResponse.error({ body: 'id or list_id required', statusCode: 400 });
           }
-
+          console.error('HELLO I AM HERE 3');
           const exceptionList = await exceptionLists.getExceptionList({
             id,
             listId,
             namespaceType,
           });
+          console.error('HELLO I AM HERE 4');
           if (exceptionList == null) {
+            console.error('HELLO I AM HERE 5');
             return siemResponse.error({
               body: getErrorMessageExceptionList({ id, listId }),
               statusCode: 404,
             });
           }
+          console.error('HELLO I AM HERE 6');
 
           return response.ok({ body: ReadExceptionListResponse.parse(exceptionList) });
         } catch (err) {
+          console.error('HELLO I AM HERE 7');
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,
