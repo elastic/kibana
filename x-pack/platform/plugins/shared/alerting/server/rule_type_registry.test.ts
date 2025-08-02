@@ -1043,7 +1043,9 @@ describe('Create Lifecycle', () => {
           mappings: { fieldMap: { foo: { type: 'keyword', required: false } } },
         },
         autoRecoverAlerts: false,
+        internallyManaged: false,
       });
+
       const result = registry.list();
       expect(result).toMatchInlineSnapshot(`
         Map {
@@ -1082,6 +1084,7 @@ describe('Create Lifecycle', () => {
             "enabledInLicense": false,
             "hasAlertsMappings": true,
             "id": "test",
+            "internallyManaged": false,
             "isExportable": true,
             "minimumLicenseRequired": "basic",
             "name": "Test",
