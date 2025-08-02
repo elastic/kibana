@@ -22,6 +22,7 @@ import {
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
@@ -42,6 +43,7 @@ const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   lastPersistedGlobalState: {},
+  controlGroupState: undefined,
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {
@@ -78,6 +80,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
+  esqlVariables: undefined,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabIds: [] },
 };
 
@@ -189,8 +192,22 @@ export const internalStateSlice = createSlice({
           action.payload.overriddenVisContextAfterInvalidation;
       }),
 
+    setControlGroupState: (
+      state,
+      action: TabAction<{
+        controlGroupState: TabState['controlGroupState'];
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.controlGroupState = action.payload.controlGroupState;
+      }),
+
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
+    },
+
+    setEsqlVariables: (state, action: PayloadAction<ESQLControlVariable[] | undefined>) => {
+      state.esqlVariables = action.payload;
     },
 
     setResetDefaultProfileState: {
@@ -293,6 +310,17 @@ const createMiddleware = ({
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
+    effect: throttle(
+      (action) => {
+        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
+  });
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setControlGroupState,
     effect: throttle(
       (action) => {
         tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
