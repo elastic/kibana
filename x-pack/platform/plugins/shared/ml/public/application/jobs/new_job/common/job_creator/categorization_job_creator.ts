@@ -7,12 +7,9 @@
 
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Field,
-  type Aggregation,
-  mlCategory,
-  ML_JOB_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
+import { mlCategory } from '@kbn/ml-anomaly-utils/fields';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   type CategorizationAnalyzer,
@@ -21,20 +18,18 @@ import {
   VALIDATION_RESULT,
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '@kbn/ml-category-validator';
-import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { createBasicDetector } from './util/default_configs';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import {
   JOB_TYPE,
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
   DEFAULT_RARE_BUCKET_SPAN,
-} from '../../../../../../common/constants/new_job';
-import type { MlApi } from '../../../../services/ml_api_service';
+} from '@kbn/ml-common-constants/new_job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+
+import { JobCreator } from './job_creator';
+import { createBasicDetector } from './util/default_configs';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 
 import { getRichDetectors } from './util/general';

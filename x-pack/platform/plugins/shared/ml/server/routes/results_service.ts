@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import type { MlClient } from '@kbn/ml-client';
 import {
   anomaliesTableDataSchema,
   categoryDefinitionSchema,
@@ -18,14 +17,16 @@ import {
   anomalySearchSchema,
   getAnomalyChartsSchema,
   getAnomalyRecordsSchema,
-} from './schemas/results_service_schema';
-import { resultsServiceProvider } from '../models/results_service';
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+} from '@kbn/ml-server-api-schemas/results_service_schema';
+import { jobIdSchema } from '@kbn/ml-server-api-schemas/anomaly_detectors_schema';
 import {
   getCategorizerStatsSchema,
   getCategorizerStoppedPartitionsSchema,
-} from './schemas/results_service_schema';
-import type { MlClient } from '../lib/ml_client';
+} from '@kbn/ml-server-api-schemas/results_service_schema';
+import { resultsServiceProvider } from '@kbn/ml-services/results_service';
+
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 
 function getAnomaliesTableData(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);

@@ -16,8 +16,14 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { IClusterClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { CoreAuditService } from '@kbn/core-security-server';
-import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
-import type { MlLicense } from '../../common/license';
+import type { CompatibleModule, MlFeatures } from '@kbn/ml-common-constants/app';
+import type { ResolveMlCapabilities, MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
+import type { MlLicense } from '@kbn/ml-license';
+import type { MlClient } from '@kbn/ml-client';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
+import { getMlClient, MlAuditLogger } from '@kbn/ml-client';
+import { mlSavedObjectServiceFactory } from '@kbn/ml-saved-objects/service';
 
 import { licenseChecks } from './license_checks';
 import type {
@@ -38,7 +44,6 @@ import {
   getAnomalyDetectorsProvider,
 } from './providers';
 
-import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import type { HasMlCapabilities } from '../lib/capabilities';
 import { hasMlCapabilitiesProvider } from '../lib/capabilities';
 import {
@@ -46,15 +51,10 @@ import {
   MLFieldFormatRegistryUninitialized,
   MLUISettingsClientUninitialized,
 } from './errors';
-import type { MlClient } from '../lib/ml_client';
-import { getMlClient, MlAuditLogger } from '../lib/ml_client';
-import type { MLSavedObjectService } from '../saved_objects';
-import { mlSavedObjectServiceFactory } from '../saved_objects';
 import type { MlAlertingServiceProvider } from './providers/alerting_service';
 import { getAlertingServiceProvider } from './providers/alerting_service';
 import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
 import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
-import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
 

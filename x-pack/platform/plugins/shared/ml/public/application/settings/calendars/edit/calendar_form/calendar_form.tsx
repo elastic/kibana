@@ -25,8 +25,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 import { DstEventGenerator } from './dst_event_generator';

@@ -7,30 +7,32 @@
 
 import React from 'react';
 import { htmlIdGenerator, useEuiTheme } from '@elastic/eui';
-import type { StartServicesAccessor } from '@kbn/core/public';
+import type { CoreStart, StartServicesAccessor } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LayerWizard, RenderWizardArguments } from '@kbn/maps-plugin/public';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common/descriptor_types';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlPluginStart } from '@kbn/ml-plugin-contracts';
+
+import type { MlStartDependencies } from '../plugin';
+
 import { getActualStyle } from './util';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import type { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalySource } from './anomaly_source';
-
-import { HttpService } from '../application/services/http_service';
-import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import type { MlApi } from '../application/services/ml_api_service';
+import { anomalyLayerWizard } from './anomaly_layer_wizard';
 
 export const ML_ANOMALY = 'ML_ANOMALIES';
 
 const AnomalySourceEditorWithTheme: React.FC<{
-  mlJobsService: MlApi['jobs'];
+  coreStart: CoreStart;
   jobsManagementPath?: string;
   canCreateJobs: boolean;
   previewLayers: (layers: VectorLayerDescriptor[]) => void;
-}> = ({ mlJobsService, jobsManagementPath, canCreateJobs, previewLayers }) => {
+}> = ({ coreStart, jobsManagementPath, canCreateJobs, previewLayers }) => {
   const { euiTheme } = useEuiTheme();
 
   const handleSourceConfigChange = (sourceConfig: Partial<AnomalySourceDescriptor> | null) => {
@@ -55,7 +57,7 @@ const AnomalySourceEditorWithTheme: React.FC<{
   return (
     <CreateAnomalySourceEditor
       onSourceConfigChange={handleSourceConfigChange}
-      mlJobsService={mlJobsService}
+      coreStart={coreStart}
       jobsManagementPath={jobsManagementPath}
       canCreateJobs={canCreateJobs}
     />
@@ -75,21 +77,17 @@ export class AnomalyLayerWizardFactory {
   }
 
   private async getServices(): Promise<{
-    mlJobsService: MlApi['jobs'];
+    coreStart: CoreStart;
     mlLocator?: LocatorPublic<SerializableRecord>;
   }> {
     const [coreStart, pluginStart] = await this.getStartServices();
-    const { jobsApiProvider } = await import('../application/services/ml_api_service/jobs');
-
-    const httpService = new HttpService(coreStart.http);
-    const mlJobsService = jobsApiProvider(httpService);
     const mlLocator = pluginStart.share.url.locators.get(ML_APP_LOCATOR);
 
-    return { mlJobsService, mlLocator };
+    return { coreStart, mlLocator };
   }
 
   public async create(): Promise<LayerWizard> {
-    const { mlJobsService, mlLocator } = await this.getServices();
+    const { coreStart, mlLocator } = await this.getServices();
     let jobsManagementPath: string | undefined;
     if (mlLocator) {
       jobsManagementPath = await mlLocator.getUrl({
@@ -99,15 +97,12 @@ export class AnomalyLayerWizardFactory {
       // eslint-disable-next-line no-console
       console.error('Unable to get job management path.');
     }
-
-    const { anomalyLayerWizard } = await import('./anomaly_layer_wizard');
-
     anomalyLayerWizard.getIsDisabled = () => !this.canGetJobs;
 
     anomalyLayerWizard.renderWizard = ({ previewLayers }: RenderWizardArguments) => {
       return (
         <AnomalySourceEditorWithTheme
-          mlJobsService={mlJobsService}
+          coreStart={coreStart}
           jobsManagementPath={jobsManagementPath}
           canCreateJobs={this.canCreateJobs}
           previewLayers={previewLayers}

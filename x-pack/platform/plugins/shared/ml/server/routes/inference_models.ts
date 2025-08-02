@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 
 export function inferenceModelRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,

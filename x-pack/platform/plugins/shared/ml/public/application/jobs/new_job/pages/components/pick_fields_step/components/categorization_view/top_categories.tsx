@@ -7,11 +7,14 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
+
 import { EuiBasicTable, EuiText } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
-import { useMlApi } from '../../../../../../../contexts/kibana';
-import { NUMBER_OF_CATEGORY_EXAMPLES } from '../../../../../../../../../common/constants/new_job';
+import { NUMBER_OF_CATEGORY_EXAMPLES } from '@kbn/ml-common-constants/new_job';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { CategorizationJobCreator } from '../../../../../common/job_creator';
 import type { Results } from '../../../../../common/results_loader';

@@ -7,8 +7,9 @@
 import React, { useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
+
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const DatePicker = () => {
   const {

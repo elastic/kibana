@@ -60,6 +60,9 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/deeplinks-observability",
     "@kbn/streams-app-plugin",
+    "@kbn/ml-common-types",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
