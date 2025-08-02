@@ -8,10 +8,10 @@
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   CreateMonitoringEntitySource,
-  ListEntitySourcesRequestQuery,
   MonitoringEntitySource,
-} from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
+  ListEntitySourcesRequestQuery,
+} from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import { MonitoringEntitySourceDescriptorClient } from '../saved_objects';
 
 interface MonitoringEntitySourceDataClientOpts {
   logger: Logger;
