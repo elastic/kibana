@@ -162,3 +162,16 @@ export interface SentinelOneKillProcessResponseMeta {
   /** The SentinelOne task ID associated with the completion of the kill-process action */
   taskId: string;
 }
+
+export interface SentinelRunScriptRequestMeta extends SentinelOneIsolationRequestMeta {
+  /**
+   * The Parent Task Is that is executing script in SentinelOne.
+   * Used to check on the status of that action
+   */
+  parentTaskId: string;
+}
+
+export interface SentinelOneRunScriptResponseMeta {
+  /** The SentinelOne task ID associated with the completion of the run script action */
+  taskId: string;
+}
