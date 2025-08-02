@@ -10,6 +10,7 @@ import { v4 as uuidV4 } from 'uuid';
 import type { ParsedCommandInterface } from '../../../service/types';
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import type {
+  ArgSelectorState,
   ConsoleDataAction,
   ConsoleDataState,
   ConsoleStoreReducer,
@@ -77,6 +78,18 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
               id: uuidV4(),
               input: payload.command,
               display: payload.display ?? payload.command,
+              // We only store the `value` and `valueText`. `store` property of each argument's state
+              // is component instance specific data.
+              argState: Object.entries(payload.argState || {}).reduce(
+                (acc, [argName, argValuesState]) => {
+                  acc[argName] = argValuesState.map(({ value, valueText }) => {
+                    return { value, valueText };
+                  });
+
+                  return acc;
+                },
+                {} as Record<string, ArgSelectorState[]>
+              ),
             },
             ...state.input.history.slice(0, 99),
           ],
@@ -127,6 +140,7 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
 
           if (commandDefinition) {
             let argsWithValueSelectors: EnteredCommand['argsWithValueSelectors'];
+            const argState: EnteredCommand['argState'] = adjustedArgState ?? {};
 
             for (const [argName, argDef] of Object.entries(commandDefinition.args ?? {})) {
               if (argDef.SelectorComponent) {
@@ -135,11 +149,22 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
                 }
 
                 argsWithValueSelectors[argName] = argDef;
+
+                // Clear selector argument values for clean commands (e.g., from history)
+                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorShowTextValue set to true
+                // BUT: Don't clear if we already have values from preprocessing (paste, history, etc.)
+                if (
+                  parsedInput.hasArg(argName) &&
+                  parsedInput.args[argName]?.includes(true) &&
+                  !argState[argName]?.length
+                ) {
+                  argState[argName] = [];
+                }
               }
             }
 
             enteredCommand = {
-              argState: {},
+              argState,
               commandDefinition,
               argsWithValueSelectors,
             };
@@ -149,12 +174,16 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         // Update parsed input with any values that were selected via argument selectors
         setArgSelectorValueToParsedArgs(parsedInput, enteredCommand);
 
+        // Use original text values for display
+        const displayLeftText = newTextEntered;
+        const displayRightText = newRightOfCursor;
+
         return {
           ...state,
           input: {
             ...state.input,
-            leftOfCursorText: newTextEntered,
-            rightOfCursorText: newRightOfCursor,
+            leftOfCursorText: displayLeftText,
+            rightOfCursorText: displayRightText,
             parsedInput,
             enteredCommand,
           },
