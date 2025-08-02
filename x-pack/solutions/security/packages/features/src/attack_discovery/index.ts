@@ -7,9 +7,11 @@
 
 import { getAttackDiscoveryBaseKibanaFeature } from './kibana_features';
 import type { ProductFeatureParams } from '../types';
+import { attackDiscoveryProductFeaturesConfig } from './product_feature_config';
+import type { ProductFeatureAttackDiscoveryKey } from '../product_features_keys';
 
-export const getAttackDiscoveryFeature = (): ProductFeatureParams => ({
-  baseKibanaFeature: getAttackDiscoveryBaseKibanaFeature(),
-  baseKibanaSubFeatureIds: [],
-  subFeaturesMap: new Map(),
-});
+export const getAttackDiscoveryFeature =
+  (): ProductFeatureParams<ProductFeatureAttackDiscoveryKey> => ({
+    baseKibanaFeature: getAttackDiscoveryBaseKibanaFeature(),
+    productFeatureConfig: attackDiscoveryProductFeaturesConfig,
+  });

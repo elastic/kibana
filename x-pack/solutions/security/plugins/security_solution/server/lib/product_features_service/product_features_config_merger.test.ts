@@ -356,18 +356,14 @@ describe('ProductFeaturesConfigMerger', () => {
     const enabledProductFeaturesConfigs: ProductFeatureKibanaConfig[] = [
       {
         subFeatureIds: ['subFeature3', 'subFeature1'],
-        baseFeatureConfigModifier: jest
-          .fn()
-          .mockImplementation((baseConfig: KibanaFeatureConfig): KibanaFeatureConfig => {
-            return { ...baseConfig, name: 'NEW NAME' };
-          }),
+        featureConfigModifier: jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          baseConfig.name = 'NEW NAME';
+        }),
       },
       {
-        baseFeatureConfigModifier: jest
-          .fn()
-          .mockImplementation((baseConfig: KibanaFeatureConfig): KibanaFeatureConfig => {
-            return { ...baseConfig, order: 666 };
-          }),
+        featureConfigModifier: jest.fn().mockImplementation((baseConfig: KibanaFeatureConfig) => {
+          baseConfig.order = 666;
+        }),
       },
     ];
 
@@ -376,14 +372,6 @@ describe('ProductFeaturesConfigMerger', () => {
       [],
       enabledProductFeaturesConfigs
     );
-
-    expect(enabledProductFeaturesConfigs[0].baseFeatureConfigModifier).toBeCalledWith(
-      baseKibanaFeature
-    );
-    expect(enabledProductFeaturesConfigs[1].baseFeatureConfigModifier).toBeCalledWith({
-      ...baseKibanaFeature,
-      name: 'NEW NAME',
-    });
 
     expect(merged).toEqual({
       ...baseKibanaFeature,
