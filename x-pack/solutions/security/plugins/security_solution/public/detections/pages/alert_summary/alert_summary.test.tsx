@@ -23,7 +23,6 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/hooks/use_create_data_view');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 describe('<AlertSummaryPage />', () => {
   beforeEach(() => {

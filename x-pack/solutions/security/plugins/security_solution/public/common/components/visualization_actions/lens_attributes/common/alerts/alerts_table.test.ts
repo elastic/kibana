@@ -11,6 +11,8 @@ import { wrapper } from '../../../mocks';
 import { useLensAttributes } from '../../../use_lens_attributes';
 
 import { getAlertsTableLensAttributes } from './alerts_table';
+import { getMockDataViewWithMatchedIndices } from '../../../../../../data_view_manager/mocks/mock_data_view';
+import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 
 interface VisualizationState {
   visualization: { columns: {} };
@@ -42,6 +44,16 @@ jest.mock('../../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getAlertsTableLensAttributes', () => {
+  beforeAll(() => {
+    const dataView = getMockDataViewWithMatchedIndices(['signal-index']);
+    dataView.id = 'security-solution-my-test';
+
+    jest.mocked(useDataView).mockReturnValue({
+      dataView,
+      status: 'ready',
+    });
+  });
+
   it('should render without extra options', () => {
     const { result } = renderHook(
       () =>

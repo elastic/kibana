@@ -14,21 +14,13 @@ import {
   SECURITY_FEATURE_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../../../../common/constants';
-import {
-  createMockStore,
-  mockGlobalState,
-  mockIndexPattern,
-  TestProviders,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../common/lib/kibana';
-
-jest.mock('../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -36,14 +28,6 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../common/lib/kibana');
-
-jest.mock('../../../common/containers/source', () => ({
-  useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
-}));
-
-jest.mock('../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
-}));
 
 jest.mock('react-reverse-portal', () => ({
   InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -133,7 +117,7 @@ describe('global header', () => {
     expect(link?.getAttribute('href')).toBe(ADD_THREAT_INTELLIGENCE_DATA_PATH);
   });
 
-  it.each(sourcererPaths)('shows sourcerer on %s page', (pathname) => {
+  it.each(sourcererPaths)('shows data view manager on %s page', (pathname) => {
     (useLocation as jest.Mock).mockReturnValue({ pathname });
 
     const { getByTestId } = render(
@@ -141,10 +125,10 @@ describe('global header', () => {
         <GlobalHeader />
       </TestProviders>
     );
-    expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
+    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('shows sourcerer on rule details page', () => {
+  it('shows data view manager on rule details page', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { getByTestId } = render(
@@ -152,10 +136,10 @@ describe('global header', () => {
         <GlobalHeader />
       </TestProviders>
     );
-    expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
+    expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('shows no sourcerer if timeline is open', () => {
+  it('shows no data view manager if timeline is open', () => {
     const mockstate = {
       ...mockGlobalState,
       timeline: {
@@ -178,7 +162,7 @@ describe('global header', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+    expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('shows AI Assistant header link', () => {
@@ -189,23 +173,5 @@ describe('global header', () => {
     );
 
     waitFor(() => expect(findByTestId('assistantNavLink')).toBeInTheDocument());
-  });
-
-  describe('when new data view picker is enabled', () => {
-    beforeEach(() => {
-      // Mocking location to be alerts page
-      (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[0] });
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
-    });
-
-    it('should render it instead of sourcerer', () => {
-      const { queryByTestId } = render(
-        <TestProviders store={store}>
-          <GlobalHeader />
-        </TestProviders>
-      );
-      expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
-      expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
-    });
   });
 });
