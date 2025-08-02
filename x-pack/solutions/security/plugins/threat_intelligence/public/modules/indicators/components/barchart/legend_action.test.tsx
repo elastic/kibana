@@ -12,6 +12,8 @@ import { IndicatorBarchartLegendAction } from './legend_action';
 
 jest.mock('moment');
 
+const announceFn = jest.fn();
+
 describe('IndicatorBarchartLegendAction', () => {
   const mockDate = '14182940000';
 
@@ -30,7 +32,14 @@ describe('IndicatorBarchartLegendAction', () => {
       label: '@timestamp',
       value: 'date',
     };
-    render(<IndicatorBarchartLegendAction data={mockDate} field={mockField} />);
+
+    render(
+      <IndicatorBarchartLegendAction
+        announceIndicatorActionChange={announceFn}
+        data={mockDate}
+        field={mockField}
+      />
+    );
     expect(mockToIsoString).toHaveBeenCalled();
   });
 
@@ -39,7 +48,14 @@ describe('IndicatorBarchartLegendAction', () => {
       label: 'host.name',
       value: 'string',
     };
-    render(<IndicatorBarchartLegendAction data={mockDate} field={mockField} />);
+
+    render(
+      <IndicatorBarchartLegendAction
+        announceIndicatorActionChange={announceFn}
+        data={mockDate}
+        field={mockField}
+      />
+    );
     expect(mockToIsoString).not.toHaveBeenCalled();
   });
 });
