@@ -155,6 +155,12 @@ export const CONSUMER_SELECT_TITLE: string = i18n.translate(
 );
 
 export const FEATURE_NAME_MAP: Record<string, string> = {
+  [AlertConsumers.OBSERVABILITY]: i18n.translate(
+    'responseOpsRuleForm.ruleForm.ruleFormConsumerSelection.observability',
+    {
+      defaultMessage: 'Observability',
+    }
+  ),
   [AlertConsumers.LOGS]: i18n.translate(
     'responseOpsRuleForm.ruleForm.ruleFormConsumerSelection.logs',
     {

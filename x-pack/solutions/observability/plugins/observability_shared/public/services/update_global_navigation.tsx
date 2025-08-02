@@ -30,6 +30,9 @@ export function updateGlobalNavigation({
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
 
   const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  const observabilityManageRules = Object.entries(capabilities.observabilityManageRules ?? {});
+  const hasManageRules =
+    observabilityManageRules.length > 0 && observabilityManageRules.some(([, value]) => value);
   /* logs is a special case.
    * It is not a nav link but still exists as a
    * Kibana feature privilege with attached rule types */
@@ -42,7 +45,9 @@ export function updateGlobalNavigation({
       uptime,
       synthetics,
       slo,
-    }).some((visible) => visible) || !isCompleteOverviewEnabled;
+    }).some((visible) => visible) ||
+    !isCompleteOverviewEnabled ||
+    hasManageRules;
 
   const updatedDeepLinks = deepLinks
     .map((link) => {

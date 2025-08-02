@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
     this.tags('skipFirefox');
-    loadTestFile(require.resolve('./observability_security'));
+    loadTestFile(require.resolve('./observability_cases_security'));
+    loadTestFile(require.resolve('./observability_rules_security'));
   });
 }

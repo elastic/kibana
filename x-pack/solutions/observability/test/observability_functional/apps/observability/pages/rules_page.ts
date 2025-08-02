@@ -221,6 +221,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           observability.users.defineBasicObservabilityRole({
             logs: ['all'],
             infrastructure: ['all'],
+            observabilityManageRules: ['all'],
           })
         );
 
@@ -239,9 +240,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const consumerOptions = await consumerOptionsList.findAllByClassName(
           'euiComboBoxOption__content'
         );
-        expect(consumerOptions.length).eql(2);
+        expect(consumerOptions.length).eql(3);
         expect(await consumerOptions[0].getVisibleText()).eql('Metrics');
         expect(await consumerOptions[1].getVisibleText()).eql('Logs');
+        expect(await consumerOptions[2].getVisibleText()).eql('Observability');
       });
     });
 

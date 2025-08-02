@@ -15,6 +15,7 @@ export type ObservabilityApp =
   | 'uptime'
   | 'synthetics'
   | 'observability-overview'
+  | 'observabilityManageRules'
   | 'ux'
   | 'fleet'
   | 'universal_profiling';

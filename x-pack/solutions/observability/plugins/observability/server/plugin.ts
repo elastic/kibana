@@ -31,6 +31,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
+import { getManageRulesFeature } from './features/observability_rules';
 import { getLogsFeature } from './features/logs_feature';
 import { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
@@ -98,11 +99,14 @@ export class ObservabilityPlugin
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
+    plugins.features.registerKibanaFeature(getManageRulesFeature());
+
     if (plugins.cases?.config.enabled) {
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
     }
+
     if (
       plugins.cases?.config.enabled &&
       plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled

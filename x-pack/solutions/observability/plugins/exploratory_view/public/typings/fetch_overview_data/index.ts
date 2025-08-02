@@ -81,6 +81,7 @@ export type ObservabilityFetchDataPlugins = Exclude<
   | 'profiling'
   | 'observability-onboarding'
   | 'alerts'
+  | 'observabilityManageRules'
 >;
 
 export interface DataHandler<
