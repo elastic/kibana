@@ -1395,6 +1395,83 @@ describe('Fleet - validationHasErrors()', () => {
 });
 
 describe('Fleet - validatePackagePolicyConfig', () => {
+  describe('Text', () => {
+    it('should return required error message for empty string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should return required error message for undefined variable', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should return required error message for blank spaces', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: '  ',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toEqual(['myvariable is required']);
+    });
+
+    it('should accept string', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'text',
+          value: 'some text',
+        },
+        {
+          name: 'myvariable',
+          type: 'text',
+          multi: false,
+          required: true,
+        },
+        'myvariable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+  });
   describe('Multi Text', () => {
     it('should return required error message for empty string', () => {
       const res = validatePackagePolicyConfig(
