@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export type * from './agent';
+export * from './agent';
 export type * from './agent_policy';
 export type * from './package_policy';
 export type * from './data_stream';
 export type * from './output';
-export type * from './epm';
+export * from './epm';
 export type * from './package_spec';
 export type * from './enrollment_api_key';
 export type * from './settings';

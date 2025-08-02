@@ -12,7 +12,7 @@ import type {
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiText,
-  type EuiFlexGroupProps,
+  EuiFlexGroupProps,
   EuiLink,
   EuiToolTip,
   useEuiTheme,

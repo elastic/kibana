@@ -19,10 +19,12 @@ import type {
   DataProviderResult,
   PinnedEvent,
   Note,
-  DataProviderTypeEnum,
+  TimelineType,
+} from '../../../../common/api/timeline';
+import {
   RowRendererValues,
+  DataProviderTypeEnum,
   TimelineStatusEnum,
-  type TimelineType,
   TimelineTypeEnum,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';

@@ -19,9 +19,9 @@ import { buildFrameworkRequest } from '../../../utils/common';
 import type {
   SavedTimeline,
   ResolvedTimeline,
-  ResolveTimelineRequestQuery,
-  type ResolveTimelineResponse,
+  ResolveTimelineResponse,
 } from '../../../../../../common/api/timeline';
+import { ResolveTimelineRequestQuery } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
 
 export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {

@@ -14,10 +14,10 @@ import type {
   ESProcessorItem,
   Pipeline,
   SamplesFormat,
-  type AnalyzeLogsRequestBody,
-  type CategorizationRequestBody,
-  type EcsMappingRequestBody,
-  type RelatedRequestBody,
+  AnalyzeLogsRequestBody,
+  CategorizationRequestBody,
+  EcsMappingRequestBody,
+  RelatedRequestBody,
 } from '../../../../../../common';
 import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {

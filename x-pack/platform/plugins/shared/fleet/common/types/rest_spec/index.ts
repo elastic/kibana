@@ -6,7 +6,7 @@
  */
 
 export type * from './agent_policy';
-export type * from './agent';
+export * from './agent';
 export type * from './app';
 export type * from './common';
 export type * from './data_stream';

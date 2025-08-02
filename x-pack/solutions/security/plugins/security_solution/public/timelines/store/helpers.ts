@@ -19,7 +19,7 @@ import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_provid
 import type {
   RowRendererId,
   TimelineType,
-  type DataProviderType,
+  DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,
