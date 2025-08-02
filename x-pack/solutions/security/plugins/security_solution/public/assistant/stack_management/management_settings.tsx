@@ -19,17 +19,14 @@ import { useSpaceId } from '../../common/hooks/use_space_id';
 
 export const ManagementSettings = React.memo(() => {
   const {
-    application: {
-      navigateToApp,
-      capabilities: {
-        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
-      },
-    },
+    application: { navigateToApp, capabilities },
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
   const spaceId = useSpaceId();
+  const securityAIAssistantManagementEnabled =
+    capabilities?.management?.ai?.securityAiAssistantManagement;
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -42,7 +39,7 @@ export const ManagementSettings = React.memo(() => {
   const handleTabChange = useCallback(
     (tab: string) => {
       navigateToApp('management', {
-        path: `kibana/securityAiAssistantManagement?tab=${tab}`,
+        path: `ai/securityAiAssistantManagement?tab=${tab}`,
       });
     },
     [navigateToApp]
@@ -55,7 +52,7 @@ export const ManagementSettings = React.memo(() => {
           text: i18n.translate(
             'xpack.securitySolution.assistant.settings.breadcrumb.serverless.security',
             {
-              defaultMessage: 'AI Assistant for Security Settings',
+              defaultMessage: 'AI Assistant',
             }
           ),
         },
@@ -80,7 +77,7 @@ export const ManagementSettings = React.memo(() => {
           }),
           onClick: (e) => {
             e.preventDefault();
-            navigateToApp('management', { path: '/kibana/aiAssistantManagementSelection' });
+            navigateToApp('management', { path: '/ai/aiAssistantManagementSelection' });
           },
         },
         {
@@ -92,7 +89,7 @@ export const ManagementSettings = React.memo(() => {
     }
   }, [navigateToApp, serverless, setBreadcrumbs]);
 
-  if (!securityAIAssistantEnabled) {
+  if (!securityAIAssistantManagementEnabled) {
     navigateToApp('home');
   }
 
@@ -102,6 +99,7 @@ export const ManagementSettings = React.memo(() => {
         dataViews={dataViews}
         onTabChange={handleTabChange}
         currentTab={currentTab}
+        capabilities={capabilities}
       />
     </AssistantSpaceIdProvider>
   ) : null;

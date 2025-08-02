@@ -41,11 +41,13 @@ import { useSelection } from '../../../data_anonymization_editor/context_editor/
 export interface Props {
   modalMode?: boolean;
   onClose?: () => void;
+  canEditAssistantSettings?: boolean;
 }
 
 const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   modalMode = false,
   onClose,
+  canEditAssistantSettings = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { http, toasts, nameSpace } = useAssistantContext();
@@ -150,11 +152,17 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
             handlePageReset={handlePageReset}
             selectionState={selectionState}
             selectionActions={selectionActions}
+            readOnly={!canEditAssistantSettings}
           />
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onCancelClick}>{CANCEL}</EuiButtonEmpty>
-          <EuiButton type="submit" onClick={onSaveButtonClicked} fill disabled={!hasPendingChanges}>
+          <EuiButton
+            type="submit"
+            onClick={onSaveButtonClicked}
+            fill
+            disabled={!hasPendingChanges || !canEditAssistantSettings}
+          >
             {SAVE}
           </EuiButton>
         </EuiModalFooter>
@@ -197,6 +205,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
           handleTableReset={handleTableReset}
           selectionState={selectionState}
           selectionActions={selectionActions}
+          readOnly={!canEditAssistantSettings}
         />
       </EuiPanel>
       <AssistantSettingsBottomBar

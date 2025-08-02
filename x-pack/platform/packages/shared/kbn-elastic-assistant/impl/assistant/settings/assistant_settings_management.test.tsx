@@ -16,7 +16,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantSettingsManagement } from './assistant_settings_management';
 
 import {
-  CONNECTORS_TAB,
   ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
   EVALUATION_TAB,
@@ -25,6 +24,7 @@ import {
   SYSTEM_PROMPTS_TAB,
 } from './const';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { Capabilities } from '@kbn/core/public';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -42,18 +42,21 @@ const mockDataViews = {
   getIndices: jest.fn(),
 } as unknown as DataViewsContract;
 
+const capabilitiesMock = {
+  aiAssistantManagementSelection: {
+    edit: true,
+  },
+} as unknown as Capabilities;
+
 const onTabChange = jest.fn();
 const testProps = {
   selectedConversation: welcomeConvo,
   dataViews: mockDataViews,
   onTabChange,
-  currentTab: CONNECTORS_TAB,
+  currentTab: CONVERSATIONS_TAB,
+  capabilities: capabilitiesMock,
 };
 jest.mock('../../assistant_context');
-
-jest.mock('../../connectorland/connector_settings_management', () => ({
-  ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
-}));
 
 jest.mock('../conversations/conversation_settings_management', () => ({
   ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
@@ -108,7 +111,6 @@ describe('AssistantSettingsManagement', () => {
   });
 
   describe.each([
-    CONNECTORS_TAB,
     ANONYMIZATION_TAB,
     CONVERSATIONS_TAB,
     EVALUATION_TAB,

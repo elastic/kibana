@@ -14,12 +14,14 @@ interface Props {
   assistantStreamingEnabled: boolean;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   compressed?: boolean;
+  disabled?: boolean;
 }
 
 const ConversationStreamingSwitchComponent: React.FC<Props> = ({
   assistantStreamingEnabled,
   compressed,
   setAssistantStreamingEnabled,
+  disabled = false,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -49,6 +51,7 @@ const ConversationStreamingSwitchComponent: React.FC<Props> = ({
         checked={assistantStreamingEnabled}
         onChange={(e) => setAssistantStreamingEnabled(e.target.checked)}
         compressed={compressed}
+        disabled={disabled}
       />
     </EuiFormRow>
   );

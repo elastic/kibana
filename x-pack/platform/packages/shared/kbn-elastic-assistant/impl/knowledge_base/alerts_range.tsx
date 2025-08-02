@@ -30,6 +30,7 @@ interface Props {
   setUpdatedKnowledgeBaseSettings?: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   step?: number;
   value: string | number;
+  disabled?: boolean;
 }
 
 const MAX_ALERTS_RANGE_WIDTH = 649; // px
@@ -44,6 +45,7 @@ export const AlertsRange: React.FC<Props> = React.memo(
     setUpdatedKnowledgeBaseSettings,
     step = TICK_INTERVAL,
     value,
+    disabled = false,
   }) => {
     const inputRangeSliderId = useGeneratedHtmlId({ prefix: 'inputRangeSlider' });
 
@@ -83,6 +85,7 @@ export const AlertsRange: React.FC<Props> = React.memo(
         showTicks
         step={step}
         value={value}
+        disabled={disabled}
       />
     );
   }

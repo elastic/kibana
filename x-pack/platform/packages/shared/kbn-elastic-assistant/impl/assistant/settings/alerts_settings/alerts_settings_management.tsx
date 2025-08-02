@@ -15,6 +15,7 @@ interface Props {
   knowledgeBase: KnowledgeBaseConfig;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   hasBorder?: boolean;
+  canEditAssistantSettings?: boolean;
 }
 
 /**
@@ -22,7 +23,12 @@ interface Props {
  * fully removed we can delete that component in favor of this one.
  */
 export const AlertsSettingsManagement: React.FC<Props> = React.memo(
-  ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, hasBorder = true }) => {
+  ({
+    knowledgeBase,
+    setUpdatedKnowledgeBaseSettings,
+    hasBorder = true,
+    canEditAssistantSettings = false,
+  }) => {
     return (
       <EuiPanel hasShadow={false} hasBorder={hasBorder} paddingSize="l" title={i18n.ALERTS_LABEL}>
         <EuiTitle size="m">
@@ -41,6 +47,7 @@ export const AlertsSettingsManagement: React.FC<Props> = React.memo(
           setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
           compressed={false}
           value={knowledgeBase.latestAlerts}
+          disabled={!canEditAssistantSettings}
         />
       </EuiPanel>
     );
