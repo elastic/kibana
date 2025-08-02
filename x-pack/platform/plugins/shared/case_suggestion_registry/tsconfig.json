@@ -1,0 +1,23 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    "typings/**/*",
+    "../../../../../typings/**/*",
+    ".storybook/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/config-schema",
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/inference-common",
+    "@kbn/zod"
+  ],
+  "exclude": ["target/**/*", ".storybook/**/*.js"]
+}
