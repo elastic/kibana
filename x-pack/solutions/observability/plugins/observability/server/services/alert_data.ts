@@ -11,6 +11,7 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
@@ -64,7 +65,9 @@ export class AlertData {
   }
 
   getRelevantRuleFields(): Set<string> {
+    console.log('GRRF');
     const ruleParameters = this.getRuleParameters();
+    console.log('GRRF ruleParameters', JSON.stringify(ruleParameters, null, 2));
     if (!ruleParameters) {
       throw new Error('No rule parameters found');
     }
@@ -89,6 +92,7 @@ export class AlertData {
   getAllRelevantFields(): string[] {
     const ruleFields = this.getRelevantRuleFields();
     const aadFields = this.getRelevantAADFields();
+    console.log('GARF', JSON.stringify({ rf: ruleFields, af: aadFields }, null, 2));
     return Array.from(new Set([...ruleFields, ...aadFields]));
   }
 
@@ -110,5 +114,12 @@ export class AlertData {
 
   getRuleTypeId(): string | undefined {
     return this.alert[ALERT_RULE_TYPE_ID];
+  }
+
+  getRuleName(): string | undefined {
+    const name = this.alert[ALERT_RULE_NAME];
+    if (typeof name === 'string') {
+      return name;
+    }
   }
 }

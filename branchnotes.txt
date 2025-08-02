@@ -1,0 +1,111 @@
+Notes on old implementation
+
+## Relevant fields are too generic
+
+```
+const relevantFields = alert.getAllRelevantFields();
+console.log('Relevant fields for alert:', relevantFields);
+
+# yields the following fields, which are very generic
+
+Relevant fields for alert: [ 'tags', 'event.action', 'event.kind' ]
+
+Those fields exclusive come from the AAD fields, but have no value given that they will be present on
+all alerts and many many dashboards.
+
+```
+
+RRF Excessive Connection Refusals [ 'message' ]
+Relevant fields for alert: [ 'tags', 'event.action', 'event.kind' ]
+
+
+
+## ARP DATA
+
+Notepad
+
+!!! ARP  {
+  criteria: [
+    {
+      comparator: '>',
+      metrics: [Array],
+      threshold: [Array],
+      timeSize: 10,
+      timeUnit: 'm'
+    }
+  ],
+  alertOnNoData: false,
+  alertOnGroupDisappear: false,
+  searchConfiguration: {
+    query: {
+      query: 'message: "net::ERR_CONNECTION_REFUSED"',
+      language: 'kuery'
+    },
+    index: 'remote_cluster:logs-*'
+  }
+} [
+  {
+    "comparator": ">",
+    "metrics": [
+      {
+        "name": "A",
+        "aggType": "count"
+      }
+    ],
+    "threshold": [
+      2
+    ],
+    "timeSize": 10,
+    "timeUnit": "m"
+  }
+]
+ALERT IS AlertData {
+  alert: {
+    'kibana.alert.reason': 'Document count is 206, above the threshold of 2. (duration: 10 mins, data view: remote_cluster:logs-*)',
+    'kibana.alert.evaluation.values': [ 206 ],
+    'kibana.alert.evaluation.threshold': [ 2 ],
+    tags: [],
+    'kibana.alert.rule.category': 'Custom threshold',
+    'kibana.alert.rule.consumer': 'logs',
+    'kibana.alert.rule.execution.uuid': '73b0f71e-9340-4253-9003-b84c97c04b96',
+    'kibana.alert.rule.name': 'Excessive Connection Refusals',
+    'kibana.alert.rule.parameters': {
+      criteria: [Array],
+      alertOnNoData: false,
+      alertOnGroupDisappear: false,
+      searchConfiguration: [Object]
+    },
+    'kibana.alert.rule.producer': 'observability',
+    'kibana.alert.rule.revision': 1,
+    'kibana.alert.rule.rule_type_id': 'observability.rules.custom_threshold',
+    'kibana.alert.rule.tags': [],
+    'kibana.alert.rule.uuid': 'aa830c90-a52e-4f21-b3ca-e6244208d037',
+    'kibana.space_ids': [ 'default' ],
+    '@timestamp': '2025-07-22T01:10:34.947Z',
+    'event.action': 'active',
+    'event.kind': 'signal',
+    'kibana.alert.rule.execution.timestamp': '2025-07-22T01:10:34.947Z',
+    'kibana.alert.action_group': 'custom_threshold.fired',
+    'kibana.alert.flapping': false,
+    'kibana.alert.flapping_history': [
+      false, false, false, false,
+      false, false, false, false,
+      false, false, false, false,
+      false, false, false, false,
+      false, false, false, false
+    ],
+    'kibana.alert.instance.id': '*',
+    'kibana.alert.maintenance_window_ids': [],
+    'kibana.alert.consecutive_matches': 26,
+    'kibana.alert.pending_recovered_count': 0,
+    'kibana.alert.status': 'active',
+    'kibana.alert.uuid': 'ec49ca72-5604-45bb-9610-edec9c5182ac',
+    'kibana.alert.workflow_status': 'open',
+    'kibana.alert.duration.us': 2198818000,
+    'kibana.alert.start': '2025-07-22T00:33:56.129Z',
+    'kibana.alert.time_range': { gte: '2025-07-22T00:33:56.129Z' },
+    'kibana.version': '9.2.0',
+    'kibana.alert.previous_action_group': 'custom_threshold.fired',
+    _index: '.internal.alerts-observability.threshold.alerts-default-000001'
+  }
+}
