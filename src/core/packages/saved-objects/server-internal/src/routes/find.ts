@@ -62,6 +62,7 @@ export const registerFindRoute = (
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
           sort_field: schema.maybe(schema.string()),
+          sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
           has_reference: schema.maybe(
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
@@ -132,6 +133,7 @@ export const registerFindRoute = (
         searchFields:
           typeof query.search_fields === 'string' ? [query.search_fields] : query.search_fields,
         sortField: query.sort_field,
+        sortOrder: query.sort_order,
         hasReference: query.has_reference,
         hasReferenceOperator: query.has_reference_operator,
         hasNoReference: query.has_no_reference,

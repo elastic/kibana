@@ -8,9 +8,19 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SortOrder, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import {
+  MappingRuntimeFields,
+  MappingRuntimeFieldType,
+  SortCombinations,
+  SortOrder,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsPitParams } from '@kbn/core-saved-objects-api-server/src/apis';
 import { getProperty, type IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  isValidSortingField,
+  normalizeNumericTypes,
+  validateFieldTypeCompatibility,
+} from './sorting_params_utils';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
 
@@ -20,7 +30,7 @@ export function getSortingParams(
   sortField?: string,
   sortOrder?: SortOrder,
   pit?: SavedObjectsPitParams
-): { sort?: SortCombinations[] } {
+): { sort?: SortCombinations[]; runtime_mappings?: MappingRuntimeFields } {
   if (!sortField) {
     // if we are performing a PIT search, we must sort by some criteria
     // in order to get the 'sort' property for each of the results.
@@ -44,19 +54,106 @@ export function getSortingParams(
   }
 
   if (types.length > 1) {
+    // For multi-type queries, use runtime field to merge type and root fields with consistent precedence:
+    // Prefer type-level field if it exists, otherwise fallback to root-level field
     const rootField = getProperty(mappings, sortField);
-    if (!rootField) {
+
+    // Check that ALL types have the field available (either at type level or root level)
+    const allTypesHaveField = types.every((t) => {
+      const typeField = getProperty(mappings, `${t}.${sortField}`);
+      return !!typeField || !!rootField;
+    });
+
+    // Validation: If field is not available for ALL types (either at type or root level), throw an error
+    if (!allTypesHaveField) {
       throw Boom.badRequest(
-        `Unable to sort multiple types by field ${sortField}, not a root property`
+        `Sort field "${sortField}" is not available for all specified types. Each type must have the field defined either at the type level or root level.`
       );
     }
 
+    // Use consistent precedence for multi-type queries:
+    // For each type: prefer type-level field if it exists, otherwise fallback to root-level field
+    // This maintains consistent sorting behavior with single-type queries.
+    const typeFieldChoices = types.map((t) => {
+      const typeField = getProperty(mappings, `${t}.${sortField}`);
+      if (typeField) {
+        return { fieldPath: `${t}.${sortField}`, mapping: typeField }; // Use type-level field if available
+      } else if (rootField) {
+        return { fieldPath: sortField, mapping: rootField }; // Fallback to root-level field
+      } else {
+        throw new Error(`Field ${sortField} not found for type ${t}`); // This should be caught by validation above
+      }
+    });
+
+    // Validate that all chosen fields are sortable (fail fast before optimization decisions)
+    const invalidField = typeFieldChoices.find((choice) => !isValidSortingField(choice.mapping));
+    if (invalidField) {
+      const fieldType = invalidField.mapping.type;
+      throw Boom.badRequest(
+        `Sort field "${invalidField.fieldPath}" is of type "${fieldType}" which is not sortable. If the field has a sortable subfield e.g "keyword" subfield, use "field.keyword" for sorting.`
+      );
+    }
+
+    // Check if all types are using the root field (no type-specific fields)
+    const allUsingRootField = typeFieldChoices.every((choice) => choice.fieldPath === sortField);
+
+    if (allUsingRootField) {
+      // All types use the root field - sort directly on root field without runtime mapping
+      return {
+        sort: [
+          {
+            [sortField]: {
+              order: sortOrder,
+              unmapped_type: rootField!.type,
+            },
+          },
+        ],
+      };
+    }
+
+    // Mixed case: some types use type fields, some use root field - need runtime mapping
+    // Collect the actual field mappings we'll use for type detection
+    const fieldMappings = typeFieldChoices.map((choice) => choice.mapping);
+
+    // First normalize all field types, then validate compatibility
+    const normalizedTypes = fieldMappings.map(normalizeNumericTypes);
+    const validationResult = validateFieldTypeCompatibility(normalizedTypes);
+    if (!validationResult.isValid) {
+      throw Boom.badRequest(
+        `Sort field "${sortField}" has incompatible types across saved object types: [${validationResult.conflictingTypes.join(
+          ', '
+        )}]. All field types must be compatible for sorting (numeric types are considered equivalent).`
+      );
+    }
+
+    const mergedFieldName = `merged_${sortField}`;
+    const mergedFieldType = (normalizedTypes[0] ?? 'keyword') as MappingRuntimeFieldType;
+
+    const scriptLines = types.map((t, idx) => {
+      const chosenField = typeFieldChoices[idx].fieldPath;
+      const prefix = idx === 0 ? 'if' : 'else if';
+      return `${prefix} (doc.containsKey('type') && doc['type'].size() != 0 && doc['type'].value == '${t}') { if (doc.containsKey('${chosenField}') && doc['${chosenField}'].size() != 0) { emit(doc['${chosenField}'].value); } }`;
+    });
+
+    // Only emit empty string for keyword type for proper sorting on other field types
+    if (mergedFieldType === 'keyword') {
+      scriptLines.push('else { emit(""); }');
+    }
+    const scriptSource = scriptLines.join(' ');
+
     return {
+      runtime_mappings: {
+        [mergedFieldName]: {
+          type: mergedFieldType,
+          script: {
+            source: scriptSource,
+          },
+        },
+      },
       sort: [
         {
-          [sortField]: {
+          [mergedFieldName]: {
             order: sortOrder,
-            unmapped_type: rootField.type,
           },
         },
       ],

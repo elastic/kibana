@@ -79,6 +79,50 @@ export class Plugin {
       management,
       mappings,
     });
+    core.savedObjects.registerType({
+      name: 'sortTestingType',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+          missingData: { type: 'keyword' },
+          numericValue: { type: 'short' },
+          created_at: { type: 'keyword' }, // This conflicts with the root field 'created_at'
+          originId: { type: 'keyword' }, // This field exists at type level for sortTestingType only, fallback to root for others
+        },
+      },
+    });
+
+    core.savedObjects.registerType({
+      name: 'sortTestingType2',
+      hidden: false,
+      namespaceType: 'multiple',
+      management,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          titleKeyword: { type: 'keyword' },
+          textWithKeyword: {
+            type: 'text',
+            fields: {
+              keyword: { type: 'keyword' },
+            },
+          },
+          missingData: { type: 'keyword' },
+          numericValue: { type: 'long' },
+          created_at: { type: 'keyword' }, // This conflicts with the root field 'created_at'
+        },
+      },
+    });
   }
 
   public start() {
