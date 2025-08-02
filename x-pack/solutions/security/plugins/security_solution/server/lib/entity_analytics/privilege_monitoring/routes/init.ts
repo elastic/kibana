@@ -53,7 +53,9 @@ export const initPrivilegeMonitoringEngineRoute = (
         );
 
         try {
-          const body = await secSol.getPrivilegeMonitoringDataClient().init();
+          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
+          const body = await privMonDataClient.init();
+          await privMonDataClient.scheduleNow();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
