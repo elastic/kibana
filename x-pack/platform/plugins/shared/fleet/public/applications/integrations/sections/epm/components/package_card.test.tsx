@@ -26,16 +26,6 @@ jest.mock('../../../hooks', () => {
         navigateToUrl: jest.fn(),
       },
     }),
-    useIsGuidedOnboardingActive: jest.fn().mockReturnValue(false),
-  };
-});
-
-jest.mock('../../../components', () => {
-  return {
-    ...jest.requireActual('../../../components'),
-    WithGuidedOnboardingTour: ({ children }: { children: React.ReactNode }) => {
-      return <>{children}</>;
-    },
   };
 });
 

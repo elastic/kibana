@@ -42,7 +42,6 @@
       "telemetry",
       "discover",
       "ingestPipelines",
-      "guidedOnboarding",
       "automaticImport"
     ],
     "requiredBundles": [

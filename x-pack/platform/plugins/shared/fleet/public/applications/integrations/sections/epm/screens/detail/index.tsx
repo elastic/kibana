@@ -50,21 +50,11 @@ import {
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import {
-  useGetPackageInfoByKeyQuery,
-  useLink,
-  useAgentPolicyContext,
-  useIsGuidedOnboardingActive,
-} from '../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import {
-  Error,
-  Loading,
-  HeaderReleaseBadge,
-  WithGuidedOnboardingTour,
-} from '../../../../components';
+import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
@@ -169,7 +159,6 @@ export function Detail() {
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
-  const isOverviewPage = panel === 'overview';
   // edit readme state
 
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -262,7 +251,6 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUserQuery();
-  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -430,7 +418,6 @@ export function Detail() {
         integration,
         isCloud,
         isFirstTimeAgentUser,
-        isGuidedOnboardingActive,
         pkgkey,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
         isAgentlessDefault,
@@ -466,7 +453,6 @@ export function Detail() {
       isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
-      isGuidedOnboardingActive,
       returnAppId,
       returnPath,
       packageInfo,
@@ -571,37 +557,30 @@ export function Detail() {
                     { isDivider: true },
                     {
                       content: (
-                        <WithGuidedOnboardingTour
-                          packageKey={pkgkey}
-                          tourType={'addIntegrationButton'}
-                          isTourVisible={isOverviewPage && isGuidedOnboardingActive}
-                          tourOffset={10}
-                        >
-                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-                            {isCustomPackage && (
-                              <EuiFlexItem grow={false}>
-                                <EditIntegrationButton
-                                  handleEditIntegrationClick={handleEditIntegrationClick}
-                                />
-                              </EuiFlexItem>
-                            )}
+                        <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                          {isCustomPackage && (
                             <EuiFlexItem grow={false}>
-                              <AddIntegrationButton
-                                userCanInstallPackages={userCanInstallPackages}
-                                href={getHref('add_integration_to_policy', {
-                                  pkgkey,
-                                  ...(integration ? { integration } : {}),
-                                  ...(agentPolicyIdFromContext
-                                    ? { agentPolicyId: agentPolicyIdFromContext }
-                                    : {}),
-                                })}
-                                missingSecurityConfiguration={missingSecurityConfiguration}
-                                packageName={integrationInfo?.title || packageInfo.title}
-                                onClick={handleAddIntegrationPolicyClick}
+                              <EditIntegrationButton
+                                handleEditIntegrationClick={handleEditIntegrationClick}
                               />
                             </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </WithGuidedOnboardingTour>
+                          )}
+                          <EuiFlexItem grow={false}>
+                            <AddIntegrationButton
+                              userCanInstallPackages={userCanInstallPackages}
+                              href={getHref('add_integration_to_policy', {
+                                pkgkey,
+                                ...(integration ? { integration } : {}),
+                                ...(agentPolicyIdFromContext
+                                  ? { agentPolicyId: agentPolicyIdFromContext }
+                                  : {}),
+                              })}
+                              missingSecurityConfiguration={missingSecurityConfiguration}
+                              packageName={integrationInfo?.title || packageInfo.title}
+                              onClick={handleAddIntegrationPolicyClick}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
                       ),
                     },
                   ]),
@@ -627,8 +606,6 @@ export function Detail() {
       updateAvailable,
       isInstalled,
       pkgkey,
-      isOverviewPage,
-      isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
       integration,
