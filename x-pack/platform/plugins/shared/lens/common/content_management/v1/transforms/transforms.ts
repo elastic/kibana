@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes, LensItem, LensSavedObject } from '../types';
+import { LensAttributes, LensSavedObject } from '../types';
 import { addVersion } from './add_version';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
@@ -42,22 +42,5 @@ export function transformToV1LensSavedObject(
   return {
     ...so,
     attributes: transformToV1LensItemAttributes(so.attributes as LensAttributesV0 | LensAttributes),
-  };
-}
-
-/**
- * Transforms existing unversioned Lens Item to v1 Lens Item
- *
- * Includes:
- * - Legend value → Legend stats
- * - Stringified color mapping values → Raw color mappings values
- * - Add version property
- */
-export function transformToV1LensItem(item: LensSavedObjectV0 | LensItem): LensItem {
-  return {
-    ...item,
-    attributes: transformToV1LensItemAttributes(
-      item.attributes as LensAttributesV0 | LensAttributes
-    ),
   };
 }

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './visualizations/types';
+export type * from './visualizations/types';
