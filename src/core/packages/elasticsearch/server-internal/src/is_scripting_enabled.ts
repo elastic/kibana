@@ -8,8 +8,7 @@
  */
 
 import { defer, map, retry, timer, firstValueFrom, throwError } from 'rxjs';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { isRetryableEsClientError } from './retryable_es_client_errors';
+import { isRetryableEsClientError, type ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 const scriptAllowedTypesKey = 'script.allowed_types';
 

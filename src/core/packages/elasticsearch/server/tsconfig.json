@@ -14,7 +14,8 @@
     "@kbn/utility-types",
     "@kbn/es-errors",
     "@kbn/core-http-server",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": [
     "target/**/*",
