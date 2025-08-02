@@ -42,8 +42,8 @@ export const inventoryMapBoundsRT = rt.type({
 });
 
 export const inventoryFiltersStateRT = rt.type({
-  kind: rt.literal('kuery'),
-  expression: rt.string,
+  language: rt.string,
+  query: rt.string,
 });
 
 export const inventoryOptionsStateRT = rt.intersection([
@@ -74,13 +74,17 @@ export const inventoryViewBasicAttributesRT = rt.type({
 
 const inventoryViewFlagsRT = rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean });
 
+export const inventoryViewAttributesFilterStateRT = rt.type({
+  kind: rt.literal('kuery'),
+  expression: rt.string,
+});
 export const inventoryViewAttributesRT = rt.intersection([
   inventoryOptionsStateRT,
   inventoryViewBasicAttributesRT,
   inventoryViewFlagsRT,
   rt.type({
     autoReload: rt.boolean,
-    filterQuery: inventoryFiltersStateRT,
+    filterQuery: inventoryViewAttributesFilterStateRT,
   }),
   rt.partial({ time: rt.number }),
 ]);
