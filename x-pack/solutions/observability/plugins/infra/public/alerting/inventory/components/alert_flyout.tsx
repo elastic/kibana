@@ -64,13 +64,13 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
 
 export const PrefilledInventoryAlertFlyout = ({ onClose }: { onClose(): void }) => {
   const { inventoryPrefill } = useAlertPrefillContext();
-  const { nodeType, metric, filterQuery } = inventoryPrefill;
+  const { nodeType, metric, kuery } = inventoryPrefill;
 
   return (
     <AlertFlyout
       options={{ metric }}
       nodeType={nodeType}
-      filter={filterQuery}
+      filter={kuery}
       visible
       setVisible={onClose}
     />
