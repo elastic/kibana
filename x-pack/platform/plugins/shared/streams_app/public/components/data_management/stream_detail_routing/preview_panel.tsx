@@ -22,6 +22,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { PreviewMatches } from './preview_matches';
 import {
+  selectPreviewDocuments,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
@@ -117,18 +118,18 @@ const RuleCreationPanel = () => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const {
-    documents,
-    documentsError,
-    approximateMatchingPercentage,
-    approximateMatchingPercentageError,
-  } = samplesSnapshot.context;
-  const hasDocuments = !isEmpty(documents);
   const isLoadingDocumentCounts = samplesSnapshot.matches({
     fetching: { documentCounts: 'loading' },
   });
+  const { documentsError, approximateMatchingPercentage, approximateMatchingPercentageError } =
+    samplesSnapshot.context;
 
-  let content = null;
+  const documents = useStreamSamplesSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+  const hasDocuments = !isEmpty(documents);
+
+  let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
