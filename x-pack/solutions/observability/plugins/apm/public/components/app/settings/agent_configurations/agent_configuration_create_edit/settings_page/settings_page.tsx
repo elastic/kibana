@@ -7,19 +7,26 @@
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiStat,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
@@ -59,8 +66,23 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const [countRemovedSettings, addRemovedSettings] = useState<number>(0);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  const settingsDefinitionsByAgent = useMemo(
+    () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
+    [newConfig.agent_name]
+  );
+
+  const agentSettingKeys = useMemo(
+    () => settingsDefinitionsByAgent.map((setting) => setting.key),
+    [settingsDefinitionsByAgent]
+  );
+
+  const unknownAgentSettings = useMemo(() => {
+    return Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key));
+  }, [agentSettingKeys, newConfig.settings]);
 
   const isFormValid = useMemo(() => {
     return (
@@ -189,22 +211,169 @@ export function SettingsPage({
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            <>
+              {renderSettings({
+                unsavedChanges,
+                newConfig,
+                setNewConfig,
+                settingsDefinitionsByAgent,
+              })}
+              <EuiHorizontalRule />
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.apm.agentConfig.settingsPage.advancedConfigurationTitle"
+                        defaultMessage="Advanced Configuration"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="m">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.apm.agentConfig.settingsPage.advancedConfigurationDescription"
+                        defaultMessage="Advanced configuration allows you to define custom settings that are not covered by the standard predefined options above. These settings are passed directly to your EDOT collector. Use with caution as incorrect configuration may affect your collector's behavior."
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div>
+                    <EuiButton
+                      data-test-subj="apmSettingsAddAdvancedConfigurationButton"
+                      iconType="plusInCircle"
+                      onClick={() =>
+                        setNewConfig((prev) => {
+                          return {
+                            ...prev,
+                            settings: {
+                              ...prev.settings,
+                              ['']: '',
+                            },
+                          };
+                        })
+                      }
+                    >
+                      {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
+                        defaultMessage: 'Add configuration',
+                      })}
+                    </EuiButton>
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              {unknownAgentSettings.map(([settingKey, settingValue], index) => (
+                <Fragment key={index}>
+                  {index > 0 && <EuiSpacer size="s" />}
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
+                          defaultMessage: 'Key',
+                        })}
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          data-test-subj="apmSettingsAdvancedConfigurationKeyField"
+                          aria-label={i18n.translate(
+                            'xpack.apm.agentConfig.settingsPage.keyAriaLabel',
+                            { defaultMessage: 'Advanced configuration key' }
+                          )}
+                          fullWidth
+                          value={settingKey}
+                          onChange={(e) => {
+                            setNewConfig((prev) => {
+                              delete prev.settings[settingKey];
+                              return {
+                                ...prev,
+                                settings: {
+                                  ...prev.settings,
+                                  [e.target.value]: settingValue,
+                                },
+                              };
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
+                          defaultMessage: 'Value',
+                        })}
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          data-test-subj="apmSettingsAdvancedConfigurationValueField"
+                          aria-label={i18n.translate(
+                            'xpack.apm.agentConfig.settingsPage.valueAriaLabel',
+                            { defaultMessage: 'Advanced configuration value' }
+                          )}
+                          fullWidth
+                          value={settingValue}
+                          onChange={(e) => {
+                            setNewConfig((prev) => {
+                              return {
+                                ...prev,
+                                settings: {
+                                  ...prev.settings,
+                                  [settingKey]: e.target.value,
+                                },
+                              };
+                            });
+                          }}
+                          append={
+                            <EuiButtonIcon
+                              data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
+                              aria-label={i18n.translate(
+                                'xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel',
+                                {
+                                  defaultMessage: 'Remove advanced configuration',
+                                }
+                              )}
+                              iconType="trash"
+                              color={'danger'}
+                              onClick={() => {
+                                if (settingValue && settingKey) {
+                                  addRemovedSettings((prev) => prev + 1);
+                                }
+                                setNewConfig((prev) => {
+                                  const { [settingKey]: deleted, ...rest } = prev.settings;
+                                  return {
+                                    ...prev,
+                                    settings: rest,
+                                  };
+                                });
+                              }}
+                            />
+                          }
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </Fragment>
+              ))}
+            </>
           )}
         </form>
       </EuiForm>
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {unsavedChangesCount > 0 && (
+      {(unsavedChangesCount > 0 || countRemovedSettings > 0) && (
         <BottomBarActions
           isLoading={isSaving}
-          onDiscardChanges={resetSettings}
+          onDiscardChanges={() => {
+            addRemovedSettings(0);
+            resetSettings();
+          }}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount}
+          unsavedChangesCount={unsavedChangesCount + countRemovedSettings}
           appTestSubj="apm"
         />
       )}
@@ -216,33 +385,30 @@ function renderSettings({
   newConfig,
   unsavedChanges,
   setNewConfig,
+  settingsDefinitionsByAgent,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+  settingsDefinitionsByAgent: SettingDefinition[];
 }) {
-  return (
-    settingDefinitions
-
-      // filter out agent specific items that are not applicable
-      // to the selected service
-      .filter(filterByAgent(newConfig.agent_name as AgentName))
-      .map((setting) => (
-        <SettingFormRow
-          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
-          key={setting.key}
-          setting={setting}
-          value={newConfig.settings[setting.key]}
-          onChange={(key, value) => {
-            setNewConfig((prev) => ({
-              ...prev,
-              settings: {
-                ...prev.settings,
-                [key]: value,
-              },
-            }));
-          }}
-        />
-      ))
-  );
+  // filter out agent specific items that are not applicable
+  // to the selected service
+  return settingsDefinitionsByAgent.map((setting) => (
+    <SettingFormRow
+      isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
+      key={setting.key}
+      setting={setting}
+      value={newConfig.settings[setting.key]}
+      onChange={(key, value) => {
+        setNewConfig((prev) => ({
+          ...prev,
+          settings: {
+            ...prev.settings,
+            [key]: value,
+          },
+        }));
+      }}
+    />
+  ));
 }
