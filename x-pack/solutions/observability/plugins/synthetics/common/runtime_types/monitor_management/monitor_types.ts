@@ -358,6 +358,7 @@ const HeartbeatFieldsCodec = t.intersection([
     'monitor.id': t.string,
     'monitor.project.id': t.string,
     'monitor.fleet_managed': t.boolean,
+    'monitor.interval': t.number,
     meta: t.record(t.string, t.union([t.string, t.array(t.string)])),
   }),
 ]);
