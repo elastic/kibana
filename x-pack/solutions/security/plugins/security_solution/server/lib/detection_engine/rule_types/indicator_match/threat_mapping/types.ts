@@ -13,7 +13,12 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { OpenPointInTimeResponse, SortResults, SearchHit, SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  OpenPointInTimeResponse,
+  SortResults,
+  SearchHit,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
