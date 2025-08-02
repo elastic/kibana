@@ -177,6 +177,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       serializeState: () => {
         return serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary);
       },
+      checkRefEquality: true,
       anyStateChange$: merge(
         ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
         savedObjectId$,
