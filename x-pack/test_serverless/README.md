@@ -318,7 +318,7 @@ functional tests server and test runner to config files in this `x-pack/test_ser
 directory, e.g. from the `x-pack` directory run:
 
 ```
-node scripts/functional_tests_server.js --config test_serverless/api_integration/test_suites/search/config.ts
+node scripts/functional_tests_server.js --config x-pack/test_serverless/functional/test_suites/search/config.ts
 
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
 ```
