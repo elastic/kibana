@@ -9,46 +9,48 @@ import { cloneDeep, keys } from 'lodash';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
-import { toRawAlertInstances, processAlerts } from '../lib';
+import { toRawAlertInstances } from '../lib';
+import { mapAlerts } from './mappers';
 
-import { logAlerts } from '../task_runner/log_alerts';
 import type {
-  AlertInstanceContext,
-  AlertInstanceState,
+  AlertInstanceContext as Context,
+  AlertInstanceState as State,
   WithoutReservedActionGroups,
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
-import type {
-  IAlertsClient,
-  InitializeExecutionOpts,
-  LogAlertsOpts,
-  TrackedAlerts,
-  DetermineDelayedAlertsOpts,
+import type { CategorizedAlert } from './types';
+import {
+  filterFor,
+  type AlertRuleData,
+  type AlertsResult,
+  type IAlertsClient,
+  type InitializeExecutionOpts,
+  type TrackedAlerts,
+  AlertCategory,
 } from './types';
 import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
-import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
+import { categorizeAlerts } from '../lib/categorize_alerts';
 
 export interface LegacyAlertsClientParams {
   alertingEventLogger: AlertingEventLogger;
   logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   request: KibanaRequest;
+  rule: AlertRuleData;
   ruleType: UntypedNormalizedRuleType;
   spaceId: string;
 }
 
 export class LegacyAlertsClient<
-  State extends AlertInstanceState,
-  Context extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
+  S extends State,
+  C extends Context,
+  G extends string,
+  R extends string
+> implements IAlertsClient<{}, S, C, G, R>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;
   private flappingSettings: RulesSettingsFlappingProperties = DEFAULT_FLAPPING_SETTINGS;
@@ -56,35 +58,32 @@ export class LegacyAlertsClient<
   private startedAtString: string | null = null;
 
   // Alerts from the previous execution that are deserialized from the task state
-  private trackedAlerts: TrackedAlerts<State, Context> = {
-    active: {},
-    recovered: {},
+  private trackedAlerts: TrackedAlerts<S, C> = {
+    active: new Map(),
+    recovered: new Map(),
   };
 
   // Alerts reported from the rule executor using the alert factory
-  private reportedAlerts: Record<string, Alert<State, Context>> = {};
+  private reportedAlerts: Map<string, Alert<S, C>> = new Map();
 
   private processedAlerts: {
-    new: Record<string, Alert<State, Context, ActionGroupIds>>;
-    active: Record<string, Alert<State, Context, ActionGroupIds>>;
-    trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-    recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-    trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    new: Map<string, Alert<S, C, G>>;
+    active: Map<string, Alert<S, C, G>>;
+    trackedActiveAlerts: Map<string, Alert<S, C, G>>;
+    recovered: Map<string, Alert<S, C, G>>;
+    trackedRecoveredAlerts: Map<string, Alert<S, C, G>>;
   };
 
-  private alertFactory?: AlertFactory<
-    State,
-    Context,
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  private alertFactory?: AlertFactory<S, C, WithoutReservedActionGroups<G, R>>;
+  private mappedAlerts: AlertsResult<S, C, G> = [];
 
   constructor(private readonly options: LegacyAlertsClientParams) {
     this.processedAlerts = {
-      new: {},
-      active: {},
-      trackedActiveAlerts: {},
-      recovered: {},
-      trackedRecoveredAlerts: {},
+      new: new Map(),
+      active: new Map(),
+      trackedActiveAlerts: new Map(),
+      recovered: new Map(),
+      trackedRecoveredAlerts: new Map(),
     };
   }
 
@@ -102,14 +101,11 @@ export class LegacyAlertsClient<
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
 
     for (const id of keys(activeAlertsFromState)) {
-      this.trackedAlerts.active[id] = new Alert<State, Context>(id, activeAlertsFromState[id]);
+      this.trackedAlerts.active.set(id, new Alert<S, C>(id, activeAlertsFromState[id]));
     }
 
     for (const id of keys(recoveredAlertsFromState)) {
-      this.trackedAlerts.recovered[id] = new Alert<State, Context>(
-        id,
-        recoveredAlertsFromState[id]
-      );
+      this.trackedAlerts.recovered.set(id, new Alert<S, C>(id, recoveredAlertsFromState[id]));
     }
 
     // Legacy alerts client creates a copy of the active tracked alerts
@@ -117,11 +113,7 @@ export class LegacyAlertsClient<
     // while the original alert is preserved
     this.reportedAlerts = cloneDeep(this.trackedAlerts.active);
 
-    this.alertFactory = createAlertFactory<
-      State,
-      Context,
-      WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-    >({
+    this.alertFactory = createAlertFactory<S, C, WithoutReservedActionGroups<G, R>>({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
       maxAlerts: this.maxAlerts,
@@ -135,73 +127,66 @@ export class LegacyAlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    return !!this.trackedAlerts.active[id];
+    return !!this.trackedAlerts.active.get(id);
   }
 
-  public async processAlerts() {
-    const {
-      newAlerts: processedAlertsNew,
-      activeAlerts: processedAlertsActive,
-      recoveredAlerts: processedAlertsRecovered,
-    } = processAlerts<State, Context, ActionGroupIds, RecoveryActionGroupId>({
+  public async processAlerts(shouldLogAlerts: boolean) {
+    const currentTime = this.startedAtString ?? new Date().toISOString();
+    const categorizedAlerts = categorizeAlerts<S, C, G>({
       alerts: this.reportedAlerts,
       existingAlerts: this.trackedAlerts.active,
-      hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
-      alertLimit: this.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
-      startedAt: this.startedAtString,
+      startedAt: currentTime,
     });
 
-    if (this.options.maintenanceWindowsService) {
-      // load maintenance windows if there are any any alerts (new, active, recovered)
-      // this is because we need the MW IDs for any active or recovered alerts that may
-      // have started during the MW period.
-      if (
-        keys(processedAlertsNew).length > 0 ||
-        keys(processedAlertsActive).length > 0 ||
-        keys(processedAlertsRecovered).length > 0
-      ) {
-        const { maintenanceWindowsWithoutScopedQueryIds, maintenanceWindows } =
-          await this.options.maintenanceWindowsService.getMaintenanceWindows({
-            eventLogger: this.options.alertingEventLogger,
-            request: this.options.request,
-            ruleTypeCategory: this.options.ruleType.category,
-            spaceId: this.options.spaceId,
-          });
+    const mapperContext = {
+      alertDelay: this.options.rule.alertDelay,
+      alertsClientContext: this.options,
+      flappingSettings: this.flappingSettings,
+      hasReachedAlertLimit: this.alertFactory!.hasReachedAlertLimit(),
+      maxAlerts: this.maxAlerts,
+      previousActiveAlerts: this.trackedAlerts.active,
+      previousRecoveredAlerts: this.trackedAlerts.recovered,
+      ruleLogPrefix: this.ruleLogPrefix,
+      shouldLogAlerts,
+      startedAt: currentTime,
+    };
 
-        this.removeExpiredMaintenanceWindows({
-          processedAlertsActive,
-          processedAlertsRecovered,
-          maintenanceWindows,
-        });
+    this.mappedAlerts = await mapAlerts(categorizedAlerts, mapperContext);
 
-        for (const id in processedAlertsNew) {
-          if (Object.hasOwn(processedAlertsNew, id)) {
-            processedAlertsNew[id].setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
-          }
-        }
-      }
-    }
+    const newAlerts = filterFor(this.mappedAlerts, AlertCategory.New);
+    const ongoingAlerts = filterFor(this.mappedAlerts, AlertCategory.Ongoing);
+    const recoveredAlerts = filterFor(this.mappedAlerts, AlertCategory.Recovered);
+    const ongoingRecoveredAlerts = filterFor(this.mappedAlerts, AlertCategory.OngoingRecovered);
 
-    this.processedAlerts.new = processedAlertsNew;
-    this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.trackedActiveAlerts = processedAlertsActive;
-    this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.trackedRecoveredAlerts = processedAlertsRecovered;
+    const convertToMap = (alerts: Array<CategorizedAlert<S, C, G>>) =>
+      alerts.reduce((map, { alert }) => {
+        map.set(alert.getId(), alert);
+        return map;
+      }, new Map<string, Alert<S, C, G>>());
+
+    this.processedAlerts.new = convertToMap(newAlerts);
+
+    // active is new + ongoing alerts
+    this.processedAlerts.active = convertToMap([...newAlerts, ...ongoingAlerts]);
+    this.processedAlerts.trackedActiveAlerts = convertToMap([...newAlerts, ...ongoingAlerts]);
+    this.processedAlerts.recovered = convertToMap(recoveredAlerts);
+
+    // tracked recovered is recovered + ongoing recovered alerts
+    this.processedAlerts.trackedRecoveredAlerts = convertToMap([
+      ...recoveredAlerts,
+      ...ongoingRecoveredAlerts,
+    ]);
+
+    // TODO - apm.currentTransaction.addLabels();
+    // TODO - ruleRunMetricsStore
   }
 
-  public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
-    logAlerts({
-      logger: this.options.logger,
-      alertingEventLogger: this.options.alertingEventLogger,
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      recoveredAlerts: this.processedAlerts.recovered,
-      ruleLogPrefix: this.ruleLogPrefix,
-      ruleRunMetricsStore,
-      canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
-      shouldPersistAlerts: shouldLogAlerts,
-    });
+  public getMappedAlerts(): AlertsResult<S, C, G> {
+    const newAlerts = filterFor(this.mappedAlerts, AlertCategory.New);
+    const ongoingAlerts = filterFor(this.mappedAlerts, AlertCategory.Ongoing);
+    const recoveredAlerts = filterFor(this.mappedAlerts, AlertCategory.Recovered);
+    return [...newAlerts, ...ongoingAlerts, ...recoveredAlerts];
   }
 
   public getProcessedAlerts(
@@ -211,55 +196,17 @@ export class LegacyAlertsClient<
       return this.processedAlerts[type];
     }
 
-    return {};
+    return new Map();
   }
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
-    return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+    return toRawAlertInstances<S, C, G, R>(
       this.options.logger,
       this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
       this.processedAlerts.trackedRecoveredAlerts,
       shouldOptimizeTaskState
     );
-  }
-
-  public determineFlappingAlerts() {
-    if (this.flappingSettings.enabled) {
-      const alerts = determineFlappingAlerts({
-        newAlerts: this.processedAlerts.new,
-        activeAlerts: this.processedAlerts.active,
-        recoveredAlerts: this.processedAlerts.recovered,
-        flappingSettings: this.flappingSettings,
-        previouslyRecoveredAlerts: this.trackedAlerts.recovered,
-        actionGroupId: this.options.ruleType.defaultActionGroupId,
-      });
-
-      this.processedAlerts.new = alerts.newAlerts;
-      this.processedAlerts.active = alerts.activeAlerts;
-      this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-      this.processedAlerts.recovered = alerts.recoveredAlerts;
-      this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
-    }
-  }
-
-  public determineDelayedAlerts(opts: DetermineDelayedAlertsOpts) {
-    const alerts = determineDelayedAlerts({
-      newAlerts: this.processedAlerts.new,
-      activeAlerts: this.processedAlerts.active,
-      trackedActiveAlerts: this.processedAlerts.trackedActiveAlerts,
-      recoveredAlerts: this.processedAlerts.recovered,
-      trackedRecoveredAlerts: this.processedAlerts.trackedRecoveredAlerts,
-      alertDelay: opts.alertDelay,
-      startedAt: this.startedAtString,
-      ruleRunMetricsStore: opts.ruleRunMetricsStore,
-    });
-
-    this.processedAlerts.new = alerts.newAlerts;
-    this.processedAlerts.active = alerts.activeAlerts;
-    this.processedAlerts.trackedActiveAlerts = alerts.trackedActiveAlerts;
-    this.processedAlerts.recovered = alerts.recoveredAlerts;
-    this.processedAlerts.trackedRecoveredAlerts = alerts.trackedRecoveredAlerts;
   }
 
   public hasReachedAlertLimit(): boolean {
@@ -283,7 +230,7 @@ export class LegacyAlertsClient<
   }
 
   public async persistAlerts() {
-    return null;
+    return;
   }
 
   public async setAlertStatusToUntracked() {
@@ -291,33 +238,5 @@ export class LegacyAlertsClient<
   }
   public getTrackedExecutions() {
     return new Set([]);
-  }
-
-  private removeExpiredMaintenanceWindows({
-    processedAlertsActive,
-    processedAlertsRecovered,
-    maintenanceWindows,
-  }: {
-    processedAlertsActive: Record<string, Alert<State, Context, ActionGroupIds>>;
-    processedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
-    maintenanceWindows: MaintenanceWindow[];
-  }) {
-    const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
-
-    const clearMws = (
-      alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
-    ) => {
-      for (const id in alerts) {
-        if (Object.hasOwn(alerts, id)) {
-          const existingMaintenanceWindowIds = alerts[id].getMaintenanceWindowIds();
-          const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
-            return maintenanceWindowIds.includes(mw);
-          });
-          alerts[id].setMaintenanceWindowIds(activeMaintenanceWindowIds);
-        }
-      }
-    };
-    clearMws(processedAlertsActive);
-    clearMws(processedAlertsRecovered);
   }
 }
