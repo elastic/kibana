@@ -142,6 +142,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={typeRadios}
             idSelected={chartOptions.type}
             onChange={handleTypeChange}
+            name="chartStyle"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -170,6 +171,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}
             onChange={handleYAxisChange}
+            name="yAxisDomain"
           />
         </EuiFormRow>
       </EuiForm>
