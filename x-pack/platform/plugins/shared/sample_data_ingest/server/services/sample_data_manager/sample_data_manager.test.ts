@@ -73,6 +73,7 @@ describe('SampleDataManager', () => {
     mockIndexManager = {
       createAndPopulateIndex: jest.fn(),
       deleteIndex: jest.fn(),
+      isIndexExists: jest.fn(),
       setESClient: jest.fn(),
     } as any;
 
@@ -94,6 +95,7 @@ describe('SampleDataManager', () => {
 
     mockIndexManager.createAndPopulateIndex.mockResolvedValue(undefined);
     mockIndexManager.deleteIndex.mockResolvedValue(undefined);
+    mockIndexManager.isIndexExists.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -141,7 +143,7 @@ describe('SampleDataManager', () => {
     it('should install sample data successfully', async () => {
       const result = await sampleDataManager.installSampleData({ sampleType, esClient });
 
-      expect(mockIndexManager.deleteIndex).toHaveBeenCalledWith({
+      expect(mockIndexManager.isIndexExists).toHaveBeenCalledWith({
         indexName: expectedIndexName,
         esClient,
       });
@@ -160,12 +162,6 @@ describe('SampleDataManager', () => {
       expect(logger.info).toHaveBeenCalledWith(
         `Sample data installation successful for [${sampleType}]`
       );
-    });
-
-    it('should remove existing data before installation', async () => {
-      await sampleDataManager.installSampleData({ sampleType, esClient });
-
-      expect(mockIndexManager.deleteIndex).toHaveBeenCalled();
     });
 
     it('should call cleanup when artifact preparation fails', async () => {
@@ -209,7 +205,7 @@ describe('SampleDataManager', () => {
         indexName: expectedIndexName,
         esClient,
       });
-      expect(mockIndexManager.deleteIndex).toHaveBeenCalledTimes(2); // Once in removeSampleData, once in error handler
+      expect(mockIndexManager.deleteIndex).toHaveBeenCalled();
     });
 
     it('should handle different sample types correctly', async () => {
@@ -226,6 +222,23 @@ describe('SampleDataManager', () => {
         archive: mockArchive,
         esClient,
       });
+    });
+
+    it('should not install anything if index already exists', async () => {
+      mockIndexManager.isIndexExists.mockResolvedValue(true);
+
+      const result = await sampleDataManager.installSampleData({ sampleType, esClient });
+
+      expect(mockIndexManager.isIndexExists).toHaveBeenCalledWith({
+        indexName: expectedIndexName,
+        esClient,
+      });
+
+      expect(result).toBe(expectedIndexName);
+      expect(mockArtifactManager.prepareArtifact).not.toHaveBeenCalled();
+      expect(mockIndexManager.createAndPopulateIndex).not.toHaveBeenCalled();
+      expect(mockIndexManager.deleteIndex).not.toHaveBeenCalled();
+      expect(mockArtifactManager.cleanup).toHaveBeenCalled();
     });
   });
 
@@ -351,13 +364,6 @@ describe('SampleDataManager', () => {
       status = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
       expect(status.status).toBe('installed');
       expect(status.indexName).toBe('sample-data-kibana');
-
-      // Remove sample data
-      await sampleDataManager.removeSampleData({ sampleType, esClient });
-      expect(mockIndexManager.deleteIndex).toHaveBeenCalledWith({
-        indexName: 'sample-data-kibana',
-        esClient,
-      });
     });
   });
 });

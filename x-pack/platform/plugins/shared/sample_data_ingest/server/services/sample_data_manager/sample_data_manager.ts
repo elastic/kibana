@@ -68,7 +68,10 @@ export class SampleDataManager {
     const indexName = this.getSampleDataIndexName(sampleType);
 
     try {
-      await this.removeSampleData({ sampleType, esClient });
+      if (await this.indexManager.isIndexExists({ indexName, esClient })) {
+        this.log.warn(`Sample data already installed for [${sampleType}]`);
+        return indexName;
+      }
 
       const {
         archive: artifactsArchive,
