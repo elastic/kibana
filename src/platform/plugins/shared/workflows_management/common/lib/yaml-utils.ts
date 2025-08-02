@@ -9,7 +9,6 @@
 
 import { parseDocument, Document, Scalar, visit, isPair, isSeq } from 'yaml';
 import { z } from '@kbn/zod';
-import { WorkflowSchema } from '@kbn/workflows';
 
 const YAML_STRINGIFY_OPTIONS = {
   indent: 2,
@@ -23,15 +22,10 @@ export function getYamlStringFromJSON(json: any) {
 
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   yamlString: string,
-  schema: T = WorkflowSchema as unknown as T
+  schema: T
 ): z.SafeParseReturnType<z.input<T>, z.output<T>> {
   const doc = parseDocument(yamlString);
-  let json = doc.toJSON();
-  if (!json.workflow) {
-    json = {
-      workflow: json,
-    };
-  }
+  const json = doc.toJSON();
   return schema.safeParse(json);
 }
 

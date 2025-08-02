@@ -7,25 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { WORKFLOW_ZOD_SCHEMA } from '../../../../common';
+import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
 import { navigateToErrorPosition } from '../lib/utils';
 import { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
-
-const useWorkflowSecrets = (workflowId: string | null | undefined) => {
-  // TODO: Implement real Kibana workflow secrets hook
-  return { data: {} };
-};
 
 const useWorkflowJsonSchema = () => {
   return jsonSchema;
@@ -41,16 +37,9 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   ...props
 }: WorkflowYAMLEditorProps) => {
-  const monacoRef = useRef<typeof monaco | null>(null);
+  const { euiTheme } = useEuiTheme();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
-  );
-  const { data: secrets } = useWorkflowSecrets(workflowId);
-
-  const { validationErrors, validateMustacheExpressions, handleMarkersChanged } = useYamlValidation(
-    {
-      onValidationErrors,
-    }
   );
 
   const workflowJsonSchema = useWorkflowJsonSchema();
@@ -64,22 +53,22 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
+  const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
+    workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
+    onValidationErrors,
+  });
+
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
   const validateMustacheExpressionsEverywhere = useCallback(() => {
-    if (editorRef.current && monacoRef.current) {
+    if (editorRef.current) {
       const model = editorRef.current.getModel();
       if (!model) {
         return;
       }
-      if ('original' in model) {
-        validateMustacheExpressions(model.original, monacoRef.current, secrets ?? {});
-        validateMustacheExpressions(model.modified, monacoRef.current, secrets ?? {});
-      } else {
-        validateMustacheExpressions(model, monacoRef.current, secrets ?? {});
-      }
+      validateVariables(editorRef.current);
     }
-  }, [validateMustacheExpressions, secrets]);
+  }, [validateVariables]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
@@ -108,12 +97,17 @@ export const WorkflowYAMLEditor = ({
       handleMarkersChanged(editor, model.uri, markers, owner);
     };
 
+    monaco.languages.registerCompletionItemProvider(
+      'yaml',
+      getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE)
+    );
+
     setIsEditorMounted(true);
   };
 
   useEffect(() => {
     // After editor is mounted, validate the initial content
-    if (isEditorMounted && editorRef.current && monacoRef.current) {
+    if (isEditorMounted && editorRef.current) {
       validateMustacheExpressionsEverywhere();
     }
   }, [validateMustacheExpressionsEverywhere, isEditorMounted]);
@@ -147,6 +141,14 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%', minHeight: 0 }}>
+      <style>{`
+        .template-variable-valid {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+        .template-variable-error {
+          background-color: ${euiTheme.colors.backgroundLightWarning};
+        }
+      `}</style>
       <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
