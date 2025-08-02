@@ -1,3 +1,4 @@
+
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
@@ -110,7 +111,10 @@
     "@kbn/core-pricing-browser-mocks",
     "@kbn/css-utils",
     "@kbn/restorable-state",
-    "@kbn/esql-editor"
+    "@kbn/esql-editor",
+    "@kbn/grouping",
+    "@kbn/core-notifications-browser",
+    "@kbn/shared-ux-document-data-cascade",
   ],
   "exclude": ["target/**/*"]
 }
