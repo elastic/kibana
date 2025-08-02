@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type {
   RuleToImport,
   ValidatedRuleToImport,
@@ -37,6 +38,7 @@ describe('ruleSourceImporter', () => {
       context,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
       prebuiltRuleObjectsClient: ruleObjectsClientMock,
+      logger: loggerMock.create(),
     });
   });
 

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { findLatestPackageVersion } from './find_latest_package_version';
+import { ensureInstalledPackage } from './ensure_installed_package';
 
 /**
  * Installs the prebuilt rules package of the config's specified or latest version.
@@ -16,17 +18,18 @@ import { findLatestPackageVersion } from './find_latest_package_version';
  * @param context Request handler context
  */
 export async function installPrebuiltRulesPackage(
-  context: SecuritySolutionApiRequestHandlerContext
+  context: SecuritySolutionApiRequestHandlerContext,
+  logger: Logger
 ) {
   const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
 
   if (!pkgVersion) {
-    // Find latest package if the version isn't specified in the config
-    pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME);
+    logger.debug(`installPrebuiltRulesPackage: no package version specified in config.`);
+    pkgVersion = await findLatestPackageVersion(context, PREBUILT_RULES_PACKAGE_NAME, logger);
+  } else {
+    logger.debug(`installPrebuiltRulesPackage: package version specified in config: ${pkgVersion}`);
   }
 
-  return context
-    .getInternalFleetServices()
-    .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+  return ensureInstalledPackage(context, PREBUILT_RULES_PACKAGE_NAME, pkgVersion, logger);
 }

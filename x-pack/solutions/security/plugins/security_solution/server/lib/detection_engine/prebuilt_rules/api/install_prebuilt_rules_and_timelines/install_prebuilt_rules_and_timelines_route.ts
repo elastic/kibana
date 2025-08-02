@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PREBUILT_RULES_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
@@ -14,7 +15,10 @@ import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 // eslint-disable-next-line no-restricted-imports
 import { legacyCreatePrepackagedRules } from './legacy_create_prepackaged_rules';
 
-export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
+export const installPrebuiltRulesAndTimelinesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .put({
       access: 'public',
@@ -44,6 +48,7 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
           const validated = await legacyCreatePrepackagedRules(
             await context.securitySolution,
             rulesClient,
+            logger,
             undefined
           );
           return response.ok({ body: validated ?? {} });
