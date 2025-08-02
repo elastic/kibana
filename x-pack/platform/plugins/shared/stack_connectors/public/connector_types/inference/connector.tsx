@@ -20,6 +20,7 @@ const solutionMap = {
 
 const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   isEdit,
+  actionTypeModel,
 }) => {
   const {
     cloud,
@@ -65,6 +66,7 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
       enforceAdaptiveAllocations={isServerless}
       currentSolution={currentSolution}
       toasts={toasts}
+      providerInContext={actionTypeModel.id}
     />
   );
 };

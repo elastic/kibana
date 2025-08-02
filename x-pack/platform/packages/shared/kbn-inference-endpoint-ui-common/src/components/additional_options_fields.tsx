@@ -70,7 +70,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
 
   const taskTypeSettings = useMemo(
     () =>
-      selectedTaskType || config.taskType?.length ? (
+      selectedTaskType || config?.taskType?.length ? (
         <>
           <EuiTitle size="xxs" data-test-subj="task-type-details-label">
             <h4>
@@ -110,15 +110,15 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                 <EuiFormRow id="taskType" fullWidth isInvalid={isInvalid} error={errorMessage}>
                   {isEdit ? (
                     <EuiButton data-test-subj="taskTypeSelectDisabled" isDisabled>
-                      {config.taskType}
+                      {config?.taskType}
                     </EuiButton>
                   ) : taskTypeOptions.length === 1 ? (
                     <EuiButton
                       data-test-subj="taskTypeSelectSingle"
                       isDisabled
-                      onClick={() => onTaskTypeOptionsSelect(config.taskType)}
+                      onClick={() => onTaskTypeOptionsSelect(config?.taskType)}
                     >
-                      {config.taskType}
+                      {config?.taskType}
                     </EuiButton>
                   ) : (
                     <EuiButtonGroup
@@ -126,7 +126,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                       buttonSize="m"
                       legend="Task type"
                       defaultValue={DEFAULT_TASK_TYPE}
-                      idSelected={config.taskType}
+                      idSelected={config?.taskType}
                       onChange={(id) => onTaskTypeOptionsSelect(id)}
                       options={taskTypeOptions}
                       color="text"
@@ -141,7 +141,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       ) : null,
     [
       selectedTaskType,
-      config.taskType,
+      config?.taskType,
       xsFontSize,
       euiTheme.colors.textSubdued,
       isEdit,
@@ -183,7 +183,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       <EuiPanel hasBorder={true}>
         {optionalProviderFormFields.length > 0 ? (
           <>
-            {internalProviderKeys.includes(config.provider) ? null : (
+            {internalProviderKeys.includes(config?.provider) ? null : (
               <>
                 <EuiTitle size="xxs" data-test-subj="provider-optional-settings-label">
                   <h4>
@@ -258,7 +258,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                   data-test-subj="inference-endpoint-input-field"
                   fullWidth
                   disabled={isEdit}
-                  value={config.inferenceId}
+                  value={config?.inferenceId}
                   onChange={(e) => {
                     setFieldValue('config.inferenceId', e.target.value);
                   }}
@@ -267,7 +267,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
                     <EuiCopy
                       beforeMessage={LABELS.COPY_TOOLTIP}
                       afterMessage={LABELS.COPIED_TOOLTIP}
-                      textToCopy={`${inferenceUri}${config.inferenceId}`}
+                      textToCopy={`${inferenceUri}${config?.inferenceId}`}
                     >
                       {(copy) => (
                         <EuiButtonEmpty
