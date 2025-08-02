@@ -8,7 +8,8 @@
  */
 
 import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/data-view-utils';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../../profiles';
+import type { DataSourceProfileProvider } from '../../../../profiles';
+import { DataSourceCategory } from '../../../../profiles';
 import { extractIndexPatternFrom } from '../../../extract_index_pattern_from';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 

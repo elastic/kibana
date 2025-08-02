@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 

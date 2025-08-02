@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createLogsContextService, LogsContextService } from '@kbn/discover-utils';
+import type { LogsContextService } from '@kbn/discover-utils';
+import { createLogsContextService } from '@kbn/discover-utils';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverServices } from '../../build_services';
 

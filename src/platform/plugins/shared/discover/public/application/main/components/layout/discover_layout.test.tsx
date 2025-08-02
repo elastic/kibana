@@ -22,7 +22,7 @@ import {
 } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import {
+import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,

@@ -18,13 +18,13 @@ import type {
   DataProviderResult,
   PinnedEvent,
   Note,
+  TimelineType,
 } from '../../../../common/api/timeline';
 import {
   DataProviderTypeEnum,
   RowRendererValues,
-  TimelineStatusEnum,
-  type TimelineType,
   TimelineTypeEnum,
+  TimelineStatusEnum,
 } from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useUpdateTimeline } from './use_update_timeline';

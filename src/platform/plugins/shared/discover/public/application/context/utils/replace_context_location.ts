@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiscoverContextAppLocator, DiscoverContextAppLocatorParams } from '../services/locator';
+import type {
+  DiscoverContextAppLocator,
+  DiscoverContextAppLocatorParams,
+} from '../services/locator';
 
 export const replaceContextLocation = (
   contextLocator: DiscoverContextAppLocator,

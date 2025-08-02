@@ -8,8 +8,10 @@
  */
 
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
-import { Redirect, RouteProps } from 'react-router-dom';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
+import type { RouteProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
@@ -18,7 +20,7 @@ import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import { MainRouteProps } from './main/discover_main_route';
+import type { MainRouteProps } from './main/discover_main_route';
 
 let pathMap: Record<string, never> = {};
 

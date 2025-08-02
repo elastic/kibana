@@ -11,7 +11,6 @@ import {
   isActionType,
   isAgentType,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
-import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -19,6 +18,7 @@ import {
   type ResponseActionAgentType,
   type ResponseActionsApiCommandNames,
   type ResponseActionStatus,
+  type ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
