@@ -87,6 +87,12 @@ const InactiveAgentsTourStep: React.FC<{
   setInactiveAgentsCalloutHasBeenDismissed: (val: boolean) => void;
 }> = ({ children, isOpen, setInactiveAgentsCalloutHasBeenDismissed }) => (
   <EuiTourStep
+    title={
+      <FormattedMessage
+        id="xpack.fleet.agentList.inactiveAgentsTourStepTitle"
+        defaultMessage="Inactive agents"
+      />
+    }
     content={
       <EuiText size="s">
         <FormattedMessage
@@ -99,7 +105,6 @@ const InactiveAgentsTourStep: React.FC<{
     minWidth={300}
     step={1}
     stepsTotal={0}
-    title=""
     onFinish={() => {}}
     anchorPosition="upCenter"
     maxWidth={280}
