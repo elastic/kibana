@@ -13,7 +13,6 @@ import type {
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
-import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { addComment } from './add';
 import type {
@@ -92,8 +91,7 @@ export interface AttachmentsSubClient {
  */
 export const createAttachmentsSubClient = (
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient,
-  casesClientInternal: CasesClientInternal
+  casesClient: CasesClient
 ): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
     add: (params: AddArgs) => addComment(params, clientArgs),

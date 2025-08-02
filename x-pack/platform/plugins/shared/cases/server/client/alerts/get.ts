@@ -9,11 +9,10 @@ import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/
 import type { CasesClientGetAlertsResponse } from './types';
 import type { CasesClientArgs } from '..';
 import type { AlertInfo } from '../../common/types';
-import type { Alert } from '../../services/alerts';
 
 function isAlert(
-  doc?: MgetResponseItem<unknown>
-): doc is Omit<GetGetResult<Alert>, '_source'> & { _source: Alert } {
+  doc?: MgetResponseItem<Record<string, unknown>>
+): doc is GetGetResult<Record<string, unknown>> {
   return Boolean(doc && !('error' in doc) && '_source' in doc);
 }
 

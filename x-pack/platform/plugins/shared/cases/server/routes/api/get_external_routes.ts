@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { getCasesByAlertIdRoute } from './cases/alerts/get_cases';
 import { deleteCaseRoute } from './cases/delete_cases';
 import { findCaseRoute } from './cases/find_cases';
@@ -30,13 +29,7 @@ import { getAllAlertsAttachedToCaseRoute } from './comments/get_alerts';
 import { findUserActionsRoute } from './user_actions/find_user_actions';
 import { postFileRoute } from './files/post_file';
 
-export const getExternalRoutes = ({
-  isServerless,
-  docLinks,
-}: {
-  isServerless?: boolean;
-  docLinks: DocLinksServiceSetup;
-}) =>
+export const getExternalRoutes = () =>
   [
     deleteCaseRoute,
     findCaseRoute,
