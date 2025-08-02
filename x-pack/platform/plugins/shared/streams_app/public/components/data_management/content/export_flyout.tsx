@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { Streams } from '@kbn/streams-schema';
-import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
+import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,10 +27,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
-import { ContentPackObjectsList } from './content_pack_objects_list';
+import { ContentPackObjectsList } from './objects_list';
 import { previewContent } from './requests';
-import { ContentPackMetadata } from './content_pack_manifest';
-import { prepareIncludePayload } from './utils';
+import { ContentPackMetadata } from './manifest';
+import { hasSelectedObjects } from './helpers';
 
 export function ExportContentPackFlyout({
   definition,
@@ -69,7 +69,7 @@ export function ExportContentPackFlyout({
               name: definition.stream.name,
               description: '',
               version: '1.0.0',
-              include: { all: {} },
+              include: { objects: { all: {} } },
             },
           },
           signal,
@@ -95,9 +95,9 @@ export function ExportContentPackFlyout({
     [definition, streamsRepositoryClient, http]
   );
 
-  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
-    []
-  );
+  const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
+    objects: { all: {} },
+  });
   const [isExporting, setIsExporting] = useState(false);
 
   return (
@@ -131,7 +131,7 @@ export function ExportContentPackFlyout({
             <ContentPackObjectsList
               definition={definition}
               objects={exportResponse.contentPack.entries}
-              onSelectionChange={setSelectedContentPackObjects}
+              onSelectionChange={setIncludedObjects}
             />
           </>
         ) : null}
@@ -140,14 +140,18 @@ export function ExportContentPackFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => onClose()}>
+              {i18n.translate('xpack.streams.exportContentPackFlyout.cancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
               isLoading={isExporting}
-              isDisabled={isLoadingContentPack || manifest?.name.length === 0}
+              isDisabled={isLoadingContentPack || !manifest || !hasSelectedObjects(includedObjects)}
               fill
               onClick={async () => {
                 if (!exportResponse || !manifest) {
@@ -162,13 +166,7 @@ export function ExportContentPackFlyout({
                     {
                       params: {
                         path: { name: definition.stream.name },
-                        body: {
-                          ...manifest,
-                          include: prepareIncludePayload(
-                            exportResponse.contentPack.entries,
-                            selectedContentPackObjects
-                          ),
-                        },
+                        body: { ...manifest, include: includedObjects },
                       },
                       signal: new AbortController().signal,
                     }
