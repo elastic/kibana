@@ -46,6 +46,7 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { AccessControl } from '../dashboard_app/access_control';
 import { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import {
@@ -150,6 +151,7 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<AccessControl>;
   };
 
 export interface DashboardInternalApi {
