@@ -39,6 +39,7 @@ export const SyntheticsSharedContext: React.FC<
         ...coreStart,
         ...setupPlugins,
         storage,
+        contentManagement: startPlugins.contentManagement,
         data: startPlugins.data,
         inspector: startPlugins.inspector,
         triggersActionsUi: startPlugins.triggersActionsUi,

@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('skipFirefox');
     loadTestFile(require.resolve('./apm_security'));
     loadTestFile(require.resolve('./apm_spaces'));
+    loadTestFile(require.resolve('./apm_rules'));
   });
 }
