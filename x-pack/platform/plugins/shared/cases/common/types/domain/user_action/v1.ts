@@ -36,6 +36,10 @@ const UserActionCommonAttributesRt = rt.strict({
   action: UserActionActionsRt,
 });
 
+const UserActionWithIsGeneratedByAssistantRt = rt.exact(
+  rt.partial({ is_generated_by_assistant: rt.union([rt.boolean, rt.null]) })
+);
+
 /**
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsRt instead
@@ -83,11 +87,13 @@ const UserActionsWithoutIdsRt = rt.union([
 export const CaseUserActionBasicRt = rt.intersection([
   UserActionPayloadRt,
   UserActionCommonAttributesRt,
+  UserActionWithIsGeneratedByAssistantRt,
 ]);
 
 export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
   UserActionsWithoutIdsRt,
   UserActionCommonAttributesRt,
+  UserActionWithIsGeneratedByAssistantRt,
 ]);
 
 /**
