@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
@@ -18,7 +21,14 @@ export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+  const { filterQuery } = useWaffleFiltersContext();
+  const config = usePluginConfig();
+
+  const { inventoryPrefill } = useAlertPrefillContext();
+
+  useEffect(() => {
+    return () => inventoryPrefill.reset();
+  }, [inventoryPrefill]);
 
   const {
     loading,
@@ -27,7 +37,7 @@ export const SnapshotContainer = React.memo(() => {
     interval = '60s',
   } = useSnapshot(
     {
-      filterQuery: filterQueryAsJson,
+      kuery: filterQuery.expression,
       metrics: [metric],
       groupBy,
       nodeType,
@@ -35,6 +45,7 @@ export const SnapshotContainer = React.memo(() => {
       currentTime,
       accountId,
       region,
+      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
     },
     { sendRequestImmediately: true }
   );

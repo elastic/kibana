@@ -6,6 +6,7 @@
  */
 
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { GetInfraMetricsResponsePayload } from '../../../../../common/http_api/infra';
 import { getFilteredHostNames, getHasDataFromSystemIntegration } from './get_filtered_hosts';
 import type { GetHostParameters } from '../types';
@@ -95,7 +96,7 @@ const getHostNames = async ({
   to,
   limit,
   query,
-  schema,
+  schema = DataSchemaFormat.ECS,
 }: Pick<
   GetHostParameters,
   'apmDataAccessServices' | 'infraMetricsClient' | 'from' | 'to' | 'limit' | 'query' | 'schema'
