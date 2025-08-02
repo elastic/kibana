@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiText, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -18,8 +17,7 @@ import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { useVisualizationResponse } from '../../../../../../common/components/visualization_actions/use_visualization_response';
 import type { EsqlQueryOrInvalidFields } from '../../../queries/helpers';
 
-const LENS_VISUALIZATION_HEIGHT = 150;
-const LENS_VISUALIZATION_MIN_WIDTH = 220;
+const LENS_VISUALIZATION_HEIGHT = 100;
 
 interface KeyInsightsTileProps {
   title: string;
@@ -28,6 +26,8 @@ interface KeyInsightsTileProps {
   id: string;
   inspectTitle: ReactElement;
   spaceId?: string;
+  getTrendEsqlQuery?: (namespace: string) => EsqlQueryOrInvalidFields;
+  trendSourceField?: string;
 }
 
 export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
@@ -37,6 +37,8 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   id,
   inspectTitle,
   spaceId: propSpaceId,
+  getTrendEsqlQuery,
+  trendSourceField,
 }) => {
   const filterQuery = useEsqlGlobalFilterQuery();
   const timerange = useGlobalTime();
@@ -64,6 +66,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   }, [timerange.from, timerange.to, filterQuery, effectiveSpaceId]);
 
   const esqlQuery = getEsqlQuery(effectiveSpaceId);
+  const trendEsqlQuery = getTrendEsqlQuery ? getTrendEsqlQuery(effectiveSpaceId) : null;
 
   // Only show error state if:
   // 1. Loading has started at least once (hasStartedLoading)
@@ -71,6 +74,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
   // 3. We have no tables (indicating an error)
   if (
     isLeft(esqlQuery) ||
+    (trendEsqlQuery && isLeft(trendEsqlQuery)) ||
     (hasStartedLoading &&
       visualizationResponse &&
       visualizationResponse.loading === false &&
@@ -91,15 +95,9 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="alert" color="warning" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.keyInsightsTile.dataNotAvailable"
-                  defaultMessage="Data not available"
-                />
-              </EuiText>
+              <EuiTitle>
+                <h3>{'N/A'}</h3>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -113,6 +111,8 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
     esqlQuery: esqlQuery.right,
     dataViewId: 'default-dataview',
     filterQuery,
+    trendEsqlQuery: trendEsqlQuery?.right,
+    trendSourceField,
   });
 
   // If we reach here, either still loading or we have a valid response, so show the embeddable
@@ -123,7 +123,7 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
       lensAttributes={lensAttributes}
       id={id}
       timerange={timerange}
-      width={LENS_VISUALIZATION_MIN_WIDTH}
+      width={'100%'}
       height={LENS_VISUALIZATION_HEIGHT}
       disableOnClickFilter
       inspectTitle={inspectTitle}

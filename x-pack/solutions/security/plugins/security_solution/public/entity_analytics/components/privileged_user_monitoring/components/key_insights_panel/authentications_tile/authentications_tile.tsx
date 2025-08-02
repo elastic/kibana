@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { getAuthenticationsEsqlCount } from './esql_query';
+import { getAuthenticationsEsqlCount, getAuthenticationsEsqlTrendline } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
 export const AuthenticationsTile: React.FC<{ spaceId: string; sourcerDataView: DataViewSpec }> = ({
@@ -33,6 +33,8 @@ export const AuthenticationsTile: React.FC<{ spaceId: string; sourcerDataView: D
           defaultMessage="Authentications"
         />
       }
+      getTrendEsqlQuery={(namespace) => getAuthenticationsEsqlTrendline(namespace, sourcerDataView)}
+      trendSourceField="event.action"
     />
   );
 };

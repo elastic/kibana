@@ -16,3 +16,20 @@ export const getAccountSwitchesEsqlCount = (namespace: string, sourcerDataView: 
 
   return map<string, string>((src) => `${src} | STATS count = COUNT(*)`)(esqlSource);
 };
+
+export const getAccountSwitchesEsqlTrendline = (
+  namespace: string,
+  sourcerDataView: DataViewSpec
+) => {
+  const indexPattern = sourcerDataView?.title ?? '';
+  const fields = sourcerDataView?.fields ?? {};
+  const esqlSource = getAccountSwitchesEsqlSource(namespace, indexPattern, fields);
+
+  return map<string, string>(
+    (src) => `
+    ${src} 
+    | STATS count = COUNT(*) BY time = date_trunc(1d, @timestamp)
+    | SORT time ASC
+  `
+  )(esqlSource);
+};
