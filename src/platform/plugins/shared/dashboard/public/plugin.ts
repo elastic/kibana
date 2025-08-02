@@ -8,7 +8,6 @@
  */
 
 import { BehaviorSubject, filter, map } from 'rxjs';
-
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -72,6 +71,7 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
+import { registerDashboardExportIntegration } from './dashboard_top_nav/dashboard_export_provider';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 
 export interface DashboardSetupDependencies {
@@ -162,6 +162,8 @@ export class DashboardPlugin
           },
         })
       );
+
+      registerDashboardExportIntegration(share);
     }
 
     const {

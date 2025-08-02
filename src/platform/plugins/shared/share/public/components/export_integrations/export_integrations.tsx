@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useState, Fragment, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Global } from '@emotion/react';
+import { Global, css } from '@emotion/react';
 import {
   EuiWrappingPopover,
   EuiListGroup,
@@ -29,11 +29,20 @@ import {
   type EuiSwitchEvent,
   EuiSwitch,
   EuiHorizontalRule,
+  euiFullHeight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+
+const flyoutBodyCss = css`
+  ${euiFullHeight()}
+
+  .euiFlyoutBody__overflowContent {
+    ${euiFullHeight()}
+  }
+`;
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -157,8 +166,8 @@ function ManagedFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiFlexGroup direction="column">
+      <EuiFlyoutBody css={flyoutBodyCss}>
+        <EuiFlexGroup css={{ height: '100%' }} direction="column">
           <Fragment>
             {exportIntegration.config.renderLayoutOptionSwitch && (
               <EuiFlexItem>
