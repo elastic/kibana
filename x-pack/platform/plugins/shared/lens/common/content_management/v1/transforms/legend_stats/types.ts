@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './cm_services';
+import { DeprecatedLegendValuePieVisualizationState } from './partition';
+import { DeprecatedLegendValueXYState } from './xy';
+
+export type DeprecatedLegendValueState =
+  | DeprecatedLegendValueXYState
+  | DeprecatedLegendValuePieVisualizationState;

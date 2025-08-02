@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { boomify, isBoom } from '@hapi/boom';
 
-import { CONTENT_ID, type LensSavedObject } from '../../../../common/content_management';
+import { TypeOf } from '@kbn/config-schema';
+import { omit } from 'lodash';
+import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import {
-  PUBLIC_API_PATH,
-  PUBLIC_API_VERSION,
-  PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
-  PUBLIC_API_ACCESS,
-} from '../../constants';
-import {
-  lensAttributesSchema,
-  lensCreateOptionsSchema,
-  lensSavedObjectSchema,
-} from '../../../content_management/v1';
+  LENS_CONTENT_TYPE,
+  LensUpdateIn,
+  type LensSavedObject,
+} from '../../../../common/content_management';
 import { RegisterAPIRouteFn } from '../../types';
+import { ConfigBuilderStub } from '../../../../common/transforms';
+import {
+  lensUpdateRequestBodySchema,
+  lensUpdateRequestParamsSchema,
+  lensUpdateResponseBodySchema,
+} from './schema';
+import { getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
   { contentManagement }
 ) => {
   const updateRoute = router.put({
-    path: `${PUBLIC_API_PATH}/visualizations/{id}`,
-    access: PUBLIC_API_ACCESS,
+    path: `${LENS_VIS_API_PATH}/{id}`,
+    access: LENS_API_ACCESS,
     enableQueryVersion: true,
     summary: 'Update Lens visualization',
     description: 'Update an existing Lens visualization.',
@@ -48,24 +50,15 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
   updateRoute.addVersion(
     {
-      version: PUBLIC_API_VERSION,
+      version: LENS_API_VERSION,
       validate: {
         request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'The saved object id of a Lens visualization.',
-              },
-            }),
-          }),
-          body: schema.object({
-            options: lensCreateOptionsSchema,
-            data: lensAttributesSchema,
-          }),
+          params: lensUpdateRequestParamsSchema,
+          body: lensUpdateRequestBodySchema,
         },
         response: {
           200: {
-            body: () => lensSavedObjectSchema,
+            body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
           },
           400: {
@@ -87,20 +80,39 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) => {
-      let result;
-      const { data, options } = req.body;
+      // TODO fix IContentClient to type this client based on the actual
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
+        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+
+      // TODO: Find a better way to conditionally omit id
+      const { references, ...lensItem } = omit(
+        ConfigBuilderStub.in({
+          id: '',
+          ...req.body.data,
+        }),
+        'id'
+      );
 
       try {
-        ({ result } = await client.update(req.params.id, data, options));
+        // Note: these types are to enforce loose param typings of client methods
+        const data: LensUpdateIn['data'] = lensItem;
+        const options: LensUpdateIn['options'] = { references };
+        const { result } = await client.update(req.params.id, data, options);
+
+        if (result.item.error) {
+          throw result.item.error;
+        }
+
+        return res.ok<TypeOf<typeof lensUpdateResponseBodySchema>>({
+          body: getLensResponseItem(result.item),
+        });
       } catch (error) {
         if (isBoom(error)) {
           if (error.output.statusCode === 404) {
             return res.notFound({
               body: {
-                message: `A Lens visualization with saved object id [${req.params.id}] was not found.`,
+                message: `A Lens visualization with id [${req.params.id}] was not found.`,
               },
             });
           }
@@ -111,8 +123,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         return boomify(error); // forward unknown error
       }
-
-      return res.ok({ body: result.item });
     }
   );
 };

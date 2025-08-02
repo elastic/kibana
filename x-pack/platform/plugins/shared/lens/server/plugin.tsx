@@ -28,7 +28,7 @@ import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 import type { CustomVisualizationMigrations } from './migrations/types';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/content_management';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
 
@@ -84,13 +84,13 @@ export class LensServerPlugin
     }
 
     plugins.contentManagement.register({
-      id: CONTENT_ID,
+      id: LENS_CONTENT_TYPE,
       storage: new LensStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.initializerContext.logger.get('storage'),
       }),
       version: {
-        latest: LATEST_VERSION,
+        latest: LENS_ITEM_LATEST_VERSION,
       },
     });
 

@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type LensContentType = 'lens';
+import { lensCommonSavedObjectSchema } from './common';
+
+export const lensCMMSearchResultSchema = lensCommonSavedObjectSchema;

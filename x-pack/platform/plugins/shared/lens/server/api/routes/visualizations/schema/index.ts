@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const PUBLIC_API_VERSION = '1';
-export const PUBLIC_API_CONTENT_MANAGEMENT_VERSION = 1;
-export const PUBLIC_API_PATH = '/api/lens';
-export const PUBLIC_API_ACCESS = 'internal';
+export * from './get';
+export * from './create';
+export * from './update';
+export * from './delete';
+export * from './search';
