@@ -36,6 +36,7 @@ import type {
   DeleteDotStreamsDocumentAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
+  DeleteQueriesAction,
   ElasticsearchAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
@@ -74,6 +75,7 @@ export class ExecutionPlan {
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
+      delete_queries: [],
     };
   }
 
@@ -158,6 +160,7 @@ export class ExecutionPlan {
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
+        delete_queries,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -192,6 +195,7 @@ export class ExecutionPlan {
       await Promise.all([
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
+        this.deleteQueries(delete_queries),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -203,6 +207,16 @@ export class ExecutionPlan {
         `Failed to execute Elasticsearch actions: ${error.message}`
       );
     }
+  }
+
+  private async deleteQueries(actions: DeleteQueriesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.name))
+    );
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
