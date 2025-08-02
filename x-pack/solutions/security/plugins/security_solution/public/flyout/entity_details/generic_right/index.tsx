@@ -147,7 +147,9 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         insightsField={'related.entity'}
         insightsValue={source.entity.id}
       />
-      {assetInventoryEnabled && <GenericEntityFlyoutFooter entityId={entity.id} />}
+      {assetInventoryEnabled && (
+        <GenericEntityFlyoutFooter entityId={entity.id} entityData={source} />
+      )}
     </>
   );
 };
