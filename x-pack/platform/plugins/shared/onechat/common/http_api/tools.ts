@@ -27,3 +27,5 @@ export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'ta
 export type CreateToolResponse = ToolDefinitionWithSchema;
 
 export type UpdateToolResponse = ToolDefinitionWithSchema;
+
+export type BulkDeleteToolResponse = Record<string, boolean>;

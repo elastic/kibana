@@ -18,6 +18,7 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
+  BulkDeleteToolResponse,
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
 import {
@@ -227,7 +228,50 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         });
       })
     );
+  // bulk delete tools
+  router.versioned
+    .delete({
+      path: '/api/chat/tools/_bulk_delete',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      access: 'public',
+      summary: 'Bulk delete tools',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: schema.object({
+              ids: schema.arrayOf(schema.string()),
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { ids } = request.body;
+        const { tools: toolService } = getInternalServices();
+        const registry = await toolService.getRegistry({ request });
+        const results = await Promise.allSettled(ids.map((id) => registry.delete(id)));
 
+        const toolStatusMap = results.reduce((statusMap, result, index) => {
+          statusMap[ids[index]] = result.status === 'fulfilled';
+          return statusMap;
+        }, {} as Record<string, boolean>);
+
+        return response.ok<BulkDeleteToolResponse>({
+          body: toolStatusMap,
+        });
+      })
+    );
   // execute a tool
   router.versioned
     .post({
