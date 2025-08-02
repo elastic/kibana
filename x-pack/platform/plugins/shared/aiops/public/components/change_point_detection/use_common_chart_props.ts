@@ -8,6 +8,7 @@
 import { FilterStateStore } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -200,6 +201,7 @@ export const useCommonChartProps = ({
           },
         },
       },
+      version: LENS_ITEM_LATEST_VERSION,
     } as TypedLensByValueInput['attributes'];
   }, [
     annotation.group?.value,

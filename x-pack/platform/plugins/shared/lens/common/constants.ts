@@ -8,7 +8,10 @@
 import rison from '@kbn/rison';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+
 import { LENS_ITEM_VERSION } from './content_management/v1';
+
+export { LENS_ITEM_LATEST_VERSION, LENS_CONTENT_TYPE } from './content_management/constants';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = PLUGIN_ID;
