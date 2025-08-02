@@ -19,5 +19,5 @@ export type * from './download_sources';
 export type * from './fleet_server_policy_config';
 export type * from './fleet_proxy';
 export type * from './secret';
-export type * from './setup_technology';
+export * from './setup_technology';
 export type * from './fleet_setup_lock';
