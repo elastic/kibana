@@ -15,11 +15,11 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/shared-ux-prompt-no-data-views-mocks",
     "@kbn/deeplinks-analytics",
+    "@kbn/i18n",
   ],
   "exclude": [
     "target/**/*",

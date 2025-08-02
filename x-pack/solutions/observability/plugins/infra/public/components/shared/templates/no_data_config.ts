@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiCardProps } from '@elastic/eui';
+import type { NoDataCardComponentProps } from '@kbn/shared-ux-card-no-data-types';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -30,7 +30,7 @@ interface NoDataConfigDetails {
 const createCardConfig = (
   onboardingFlow: OnboardingFlow,
   locators: LocatorClient
-): Pick<EuiCardProps, 'title' | 'description' | 'href'> => {
+): NoDataCardComponentProps => {
   const onboardingLocator = locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
@@ -88,9 +88,6 @@ const getNoDataConfigDetails = ({
 }: NoDataConfigDetails): NoDataConfig => {
   return {
     ...createPageConfig(onboardingFlow, docsLink),
-    solution: i18n.translate('xpack.infra.metrics.noDataConfig.solutionName', {
-      defaultMessage: 'Observability',
-    }),
     action: {
       beats: {
         ...createCardConfig(onboardingFlow, locators),

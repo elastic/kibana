@@ -58,7 +58,6 @@ exports[`KibanaPageTemplate render noDataConfig && solutionNav 1`] = `
         "elasticAgent": Object {},
       },
       "docsLink": "test",
-      "solution": "Elastic",
     }
   }
   solutionNav={
@@ -116,7 +115,6 @@ exports[`KibanaPageTemplate render noDataConfig 1`] = `
         "elasticAgent": Object {},
       },
       "docsLink": "test",
-      "solution": "Elastic",
     }
   }
 />

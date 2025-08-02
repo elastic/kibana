@@ -18,9 +18,6 @@
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-no-data-mocks",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-avatar-solution",
   ],
   "exclude": [
     "target/**/*",

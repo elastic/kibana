@@ -60,7 +60,6 @@ const solutionNav = {
 };
 
 const noDataConfig: NoDataPageProps = {
-  solution: 'Elastic',
   action: {
     elasticAgent: {},
   },

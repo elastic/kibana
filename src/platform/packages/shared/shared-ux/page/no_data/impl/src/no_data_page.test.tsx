@@ -20,16 +20,13 @@ describe('NoDataPage', () => {
     const component = mountWithIntl(
       <NoDataPageProvider {...getNoDataPageServicesMock()}>
         <NoDataPage
-          solution="Analytics"
           action={{
             elasticAgent: {},
           }}
-          logo={'logoKibana'}
           docsLink="test"
         />
       </NoDataPageProvider>
     );
-    expect(component.find('h1').html()).toContain('Welcome to Elastic Analytics!');
     expect(component.find(NoDataCard).length).toBe(1);
   });
 });

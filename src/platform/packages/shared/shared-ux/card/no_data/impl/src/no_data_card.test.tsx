@@ -53,12 +53,7 @@ describe('NoDataCard', () => {
 
     test('extends EuiCardProps', () => {
       const component = render(
-        <NoDataCard
-          button="Button"
-          title="Card title"
-          description="Description"
-          className="custom_class"
-        />
+        <NoDataCard button="Button" title="Card title" description="Description" />
       );
       expect(component).toMatchSnapshot();
     });

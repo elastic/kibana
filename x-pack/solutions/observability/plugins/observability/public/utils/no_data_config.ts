@@ -20,9 +20,6 @@ export function getNoDataConfig({
 }): NoDataConfig | undefined {
   if (hasData === false) {
     return {
-      solution: i18n.translate('xpack.observability.noDataConfig.solutionName', {
-        defaultMessage: 'Observability',
-      }),
       action: {
         elasticAgent: {
           title: i18n.translate('xpack.observability.noDataConfig.beatsCard.title', {

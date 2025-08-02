@@ -26,9 +26,6 @@ export function useNoDataConfig(): NoDataConfig | undefined {
   // Returns no data config when there is no historical data
   if (data && !data.indexExists) {
     return {
-      solution: i18n.translate('xpack.uptime.noDataConfig.solutionName', {
-        defaultMessage: 'Observability',
-      }),
       action: {
         beats: {
           title: i18n.translate('xpack.uptime.noDataConfig.beatsCard.title', {
