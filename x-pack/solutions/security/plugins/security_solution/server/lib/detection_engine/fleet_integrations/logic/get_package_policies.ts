@@ -15,13 +15,11 @@ export async function getFleetPackagePolicies(
   options: ListWithKuery & { spaceId?: string } = {}
 ) {
   try {
-    logger.debug('getFleetPackagePolicies: Fetching package policies from Fleet');
-    const packagePolicies = await fleet.packagePolicy.list(
-      fleet.savedObjects.createInternalScopedSoClient(),
-      options
-    );
+    logger.debug('getFleetPackagePolicies: Fetching Fleet package policies');
+    const soClient = fleet.savedObjects.createInternalScopedSoClient();
+    const packagePolicies = await fleet.packagePolicy.list(soClient, options);
     logger.debug(
-      `getFleetPackagePolicies: Successfully fetched ${packagePolicies.total} Fleet package policies`
+      `getFleetPackagePolicies: Fetched Fleet package policies: ${packagePolicies.total} items`
     );
     return packagePolicies;
   } catch (error) {

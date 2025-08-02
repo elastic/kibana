@@ -15,16 +15,16 @@ export function getFleetPackageInstallation(
 ) {
   try {
     logger.debug(
-      `getFleetPackageInstallation: Fetching Fleet package installation for integration ${integrationName}.`
+      `getFleetPackageInstallation: Fetching Fleet package installation for integration: "${integrationName}"`
     );
     const packageInstallation = fleet.packages.getInstallation(integrationName);
     logger.debug(
-      `getFleetPackageInstallation: Successfully fetched Fleet package installation for integration ${integrationName}.`
+      `getFleetPackageInstallation: Fetched Fleet package installation for integration: "${integrationName}"`
     );
     return packageInstallation;
   } catch (error) {
     logger.error(
-      `getFleetPackageInstallation: Error fetching Fleet package installation for integration ${integrationName}`,
+      `getFleetPackageInstallation: Error fetching Fleet package installation for integration: "${integrationName}"`,
       error
     );
     throw error;

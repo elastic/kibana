@@ -17,7 +17,7 @@ export async function ensureInstalledPackage(
 ) {
   try {
     logger.debug(
-      `ensureInstalledPackage: requesting Fleet to install package "${pkgName}" version ${pkgVersion} if it's not already installed.`
+      `ensureInstalledPackage: Ensuring Fleet package is installed: "${pkgName}" v${pkgVersion}`
     );
 
     const packageInstallationResult = await context
@@ -25,13 +25,13 @@ export async function ensureInstalledPackage(
       .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
 
     logger.info(
-      `ensureInstalledPackage: "${PREBUILT_RULES_PACKAGE_NAME}" version ${pkgVersion} is ${packageInstallationResult.status}`
+      `ensureInstalledPackage: Fleet package is ${packageInstallationResult.status}: "${pkgName}" v${pkgVersion}`
     );
 
     return packageInstallationResult;
   } catch (error) {
     logger.error(
-      `ensureInstalledPackage: error installing package "${PREBUILT_RULES_PACKAGE_NAME}" version: ${pkgVersion}}`,
+      `ensureInstalledPackage: Error ensuring Fleet package is installed: "${pkgName}" v${pkgVersion}}`,
       error
     );
     throw error;

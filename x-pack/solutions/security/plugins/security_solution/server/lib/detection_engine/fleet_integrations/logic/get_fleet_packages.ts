@@ -15,7 +15,7 @@ export async function getFleetPackages(
   try {
     logger.debug('getFleetPackages: Fetching Fleet packages');
     const packages = await fleet.packages.getPackages();
-    logger.debug(`getFleetPackages: Successfully fetched ${packages.length} Fleet packages`);
+    logger.debug(`getFleetPackages: Fetched Fleet packages: ${packages.length} items`);
     return packages;
   } catch (error) {
     logger.error(`getFleetPackages: Error fetching Fleet packages`, error);

@@ -24,20 +24,20 @@ export async function findLatestPackageVersion(
 
   try {
     logger.debug(
-      `fetchFindLatestPackage: Querying Fleet for latest available version of package "${packageName}" with prerelease=${isPrerelease}`
+      `fetchFindLatestPackage: Finding latest version of Fleet package: "${packageName}", prerelease=${isPrerelease}`
     );
     const result = await packageClient.fetchFindLatestPackage(packageName, {
       prerelease: isPrerelease,
     });
 
     logger.debug(
-      `fetchFindLatestPackage: Found latest version ${result.version} for package "${packageName}" with prerelease=${isPrerelease}`
+      `fetchFindLatestPackage: Found latest version of Fleet package: "${packageName}" v${result.version}, prerelease=${isPrerelease}`
     );
 
     return result.version;
   } catch (error) {
     logger.error(
-      `fetchFindLatestPackage: Error finding latest package version for "${packageName}" with prerelease=${isPrerelease}`,
+      `fetchFindLatestPackage: Error finding latest version of Fleet package: "${packageName}", prerelease=${isPrerelease}`,
       error
     );
     throw error;
