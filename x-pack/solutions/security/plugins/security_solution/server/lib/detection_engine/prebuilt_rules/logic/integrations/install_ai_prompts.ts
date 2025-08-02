@@ -22,7 +22,12 @@ export async function installSecurityAiPromptsPackage(
       logger
     );
 
-    return ensureInstalledPackage(context, SECURITY_AI_PROMPTS_PACKAGE_NAME, pkgVersion, logger);
+    return await ensureInstalledPackage(
+      context,
+      SECURITY_AI_PROMPTS_PACKAGE_NAME,
+      pkgVersion,
+      logger
+    );
   } catch (e) {
     // fail silently
     return null;
