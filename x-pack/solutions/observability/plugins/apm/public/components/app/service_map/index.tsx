@@ -134,7 +134,6 @@ export function ServiceMap({
   }, []);
 
   const { fields, isSaving, saveSingleSetting } = useEditableSettings([apmEnableServiceMapApiV2]);
-
   const settingsField = fields[apmEnableServiceMapApiV2];
   const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
 

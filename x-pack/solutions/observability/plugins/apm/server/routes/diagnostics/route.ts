@@ -20,6 +20,15 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import type { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
+import {
+  getDestinationParentIds,
+  getExitSpansFromSourceNode,
+  getSourceSpanIds,
+} from './service_map/get_exit_spans_from_node';
+import { getTraceCorrelation } from './service_map/get_trace_correlation';
+import { rangeRt } from '../default_api_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import type { ServiceMapDiagnosticResponse } from '../../../common/service_map_diagnostic_types';
 
 export interface IndiciesItem {
   index: string;
@@ -75,8 +84,95 @@ export type DiagnosticsBundle = Promise<{
       templateName: string;
     }>;
   }>;
-  params: { start: number; end: number; kuery?: string };
+  params: { start: number; end: number };
 }>;
+
+const getServiceMapDiagnosticsRoute = createApmServerRoute({
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  endpoint: 'POST /internal/apm/diagnostics/service-map',
+  params: t.type({
+    body: t.intersection([
+      rangeRt,
+      t.type({
+        sourceNode: t.string,
+        destinationNode: t.string,
+      }),
+      t.partial({
+        traceId: t.string,
+      }),
+    ]),
+  }),
+  handler: async (resources): Promise<ServiceMapDiagnosticResponse> => {
+    const { start, end, destinationNode, traceId, sourceNode } = resources.params.body;
+    const apmEventClient = await getApmEventClient(resources);
+
+    const [exitSpans, sourceSpanIds, traceCorrelation] = await Promise.all([
+      getExitSpansFromSourceNode({
+        apmEventClient,
+        start,
+        end,
+        sourceNode,
+        destinationNode,
+      }),
+      getSourceSpanIds({
+        apmEventClient,
+        start,
+        end,
+        sourceNode,
+      }),
+      getTraceCorrelation({
+        apmEventClient,
+        start,
+        end,
+        traceId,
+        sourceNode,
+        destinationNode,
+      }),
+    ]);
+
+    const destinationParentIds = await getDestinationParentIds({
+      apmEventClient,
+      start,
+      end,
+      ids: sourceSpanIds.spanIds,
+      destinationNode,
+    });
+
+    return {
+      analysis: {
+        exitSpans: {
+          found: exitSpans.apmExitSpans.length > 0,
+          totalConnections: exitSpans.totalConnections,
+          apmExitSpans: exitSpans.apmExitSpans,
+          hasMatchingDestinationResources: exitSpans.hasMatchingDestinationResources,
+        },
+        parentRelationships: {
+          found: destinationParentIds.hasParent,
+          documentCount: destinationParentIds.rawResponse?.hits?.hits?.length || 0,
+          sourceSpanIds: [...sourceSpanIds.spanIds],
+        },
+        ...(traceId && {
+          traceCorrelation: {
+            found: traceCorrelation?.foundInBothNodes,
+            foundInSourceNode: traceCorrelation?.foundInSourceNode,
+            foundInDestinationNode: traceCorrelation?.foundInDestinationNode,
+            sourceNodeDocumentCount: traceCorrelation?.sourceNodeDocumentCount,
+            destinationNodeDocumentCount: traceCorrelation?.destinationNodeDocumentCount,
+          },
+        }),
+      },
+      // Include raw Elasticsearch responses for debugging and advanced analysis
+      elasticsearchResponses: {
+        exitSpansQuery: exitSpans.rawResponse,
+        sourceSpanIdsQuery: sourceSpanIds.sourceSpanIdsRawResponse,
+        destinationParentIdsQuery: destinationParentIds.rawResponse,
+        ...(traceId && {
+          traceCorrelationQuery: traceCorrelation?.rawResponse,
+        }),
+      },
+    };
+  },
+});
 
 const getDiagnosticsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/diagnostics',
@@ -154,4 +250,5 @@ const getDiagnosticsRoute = createApmServerRoute({
 
 export const diagnosticsRepository = {
   ...getDiagnosticsRoute,
+  ...getServiceMapDiagnosticsRoute,
 };
