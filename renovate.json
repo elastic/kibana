@@ -511,11 +511,9 @@
         "prop-types",
         "react",
         "react-dom",
-        "react-is",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is",
         "csstype"
       ],
       "reviewers": [
