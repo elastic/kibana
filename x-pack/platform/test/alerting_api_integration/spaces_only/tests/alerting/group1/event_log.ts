@@ -25,6 +25,7 @@ import {
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
+import { runSoon } from '../../helpers';
 
 const InstanceActions = new Set<string | undefined>([
   'new-instance',
@@ -39,10 +40,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/209911
-  // FLAKY: https://github.com/elastic/kibana/issues/217356
-  // FLAKY: https://github.com/elastic/kibana/issues/217357
-  describe.skip('eventLog', () => {
+  describe('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -86,8 +84,8 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '2s' },
-                throttle: '1s',
+                schedule: { interval: '24h' },
+                throttle: null,
                 params: {
                   pattern,
                 },
@@ -105,7 +103,38 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           const alertId = response.body.id;
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
-          // get the events we're expecting
+          await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
+          });
+
+          // Run 3 more times
+          for (let runs = 2; runs <= 4; runs++) {
+            await runSoon({
+              id: alertId,
+              supertest,
+              retry,
+              spaceId: space.id,
+            });
+
+            await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: space.id,
+                type: 'alert',
+                id: alertId,
+                provider: 'actions',
+                actions: new Map([['execute', { gte: Math.min(runs - 1, 2) }]]),
+              });
+            });
+          }
+
           const events = await retry.try(async () => {
             return await getEventLog({
               getService,
