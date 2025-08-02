@@ -10,5 +10,5 @@ import path from 'path';
 
 export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
   REPO_ROOT,
-  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshots/'
+  'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant/knowledge_base/snapshots/'
 );
