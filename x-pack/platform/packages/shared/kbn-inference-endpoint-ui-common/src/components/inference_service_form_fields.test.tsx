@@ -42,7 +42,7 @@ describe('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -52,7 +52,7 @@ describe('Inference Services', () => {
   it('renders Selectable', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -63,7 +63,7 @@ describe('Inference Services', () => {
   it('renders Elastic at top', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -75,7 +75,7 @@ describe('Inference Services', () => {
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
@@ -95,7 +95,7 @@ describe('Inference Services', () => {
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} config={{}} />
       </MockFormProvider>
     );
 
