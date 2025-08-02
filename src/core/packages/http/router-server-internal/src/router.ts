@@ -28,6 +28,7 @@ import type {
   RouteRegistrar,
   PostValidationMetadata,
   IKibanaResponse,
+  KibanaRequestState,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
@@ -211,8 +212,11 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     handler: InternalRouteHandler;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
+    let apmSpan = (request.app as KibanaRequestState).span;
     try {
+      apmSpan = apm.startSpan('route handler');
       const kibanaResponse = await handler(request);
+      apmSpan?.end();
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
@@ -225,6 +229,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     } catch (error) {
       // capture error
       apm.captureError(error);
+      apmSpan?.end();
 
       // forward 401 errors from ES client
       if (isElasticsearchUnauthorizedError(error)) {
