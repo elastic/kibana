@@ -244,4 +244,7 @@ export class RulesClient {
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
+
+  public getTaskManager = () => this.context.taskManager;
+  public getEventLogClient = () => this.context.getEventLogClient();
 }

@@ -117,6 +117,7 @@ import { createGetAlertIndicesAliasFn, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
 import { AlertDeletionClient } from './alert_deletion';
+import { registerGapFillAutoSchedulerTask } from './lib/rule_gaps/gap_fill_auto_scheduler_task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -131,6 +132,7 @@ export const EVENT_LOG_ACTIONS = {
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
   deleteAlerts: 'delete-alerts',
+  gapFillAutoSchedule: 'gap-fill-auto-schedule',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -241,6 +243,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
+  private getRulesClientWithRequest: (request: KibanaRequest) => Promise<RulesClientApi> = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -424,6 +427,15 @@ export class AlertingPlugin {
       plugins.taskManager,
       core.getStartServices
     );
+
+    // Register the gap-fill-auto-scheduler task definition
+    registerGapFillAutoSchedulerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      getRulesClientWithRequest: (request: KibanaRequest) =>
+        this.getRulesClientWithRequest(request),
+      eventLogger: this.eventLogger!,
+    });
 
     core.http.registerRouteHandlerContext<AlertingRequestHandlerContext, 'alerting'>(
       'alerting',
@@ -665,6 +677,8 @@ export class AlertingPlugin {
       }
       return rulesClientFactory!.create(request, core.savedObjects);
     };
+
+    this.getRulesClientWithRequest = getRulesClientWithRequest;
 
     const getAlertingAuthorizationWithRequest = async (request: KibanaRequest) => {
       return alertingAuthorizationClientFactory!.create(request);
