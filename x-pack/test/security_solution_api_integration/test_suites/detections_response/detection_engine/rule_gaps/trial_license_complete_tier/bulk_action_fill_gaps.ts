@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { BulkActionTypeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import moment from 'moment';
 import { getCustomQueryRuleParams, getSimpleRule } from '../../../utils';
 import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 
