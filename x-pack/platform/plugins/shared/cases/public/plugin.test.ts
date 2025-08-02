@@ -23,6 +23,7 @@ import { CasesUiPlugin } from './plugin';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { CASE_PAGE_VIEW_EVENT_TYPE } from '../common/constants';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 function getConfig(overrides = {}) {
   return {
@@ -85,6 +86,7 @@ describe('Cases Ui Plugin', () => {
       },
       triggersActionsUi: triggersActionsUiMock.createStart(),
       fieldFormats: fieldFormatsMock,
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
     };
   });
 

@@ -44,6 +44,10 @@ export const ASSIGNEES = i18n.translate('xpack.cases.userProfile.assigneesTitle'
   defaultMessage: 'Assignees',
 });
 
+export const CASE_SUMMARY = i18n.translate('xpack.cases.userProfile.caseSummary', {
+  defaultMessage: 'Case summary',
+});
+
 export const USER_DOES_NOT_EXIST = i18n.translate('xpack.cases.userProfiles.userDoesNotExist', {
   defaultMessage: "User doesn't exist or is unavailable",
 });
