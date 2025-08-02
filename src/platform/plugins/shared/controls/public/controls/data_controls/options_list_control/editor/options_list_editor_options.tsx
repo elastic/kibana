@@ -11,6 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import { EuiFormRow, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 import type {
   OptionsListControlState,
@@ -73,12 +74,19 @@ export const OptionsListEditorOptions = ({
   field,
   updateState,
   controlGroupApi,
+  output,
+  valuesSource,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
   const allowExpensiveQueries = useStateFromPublishingSubject(
     controlGroupApi.allowExpensiveQueries$
   );
 
-  const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
+  const isESQLOutputMode = useMemo(() => output === ControlOutputOption.ESQL, [output]);
+  const isDSLValuesSource = useMemo(() => valuesSource === ControlValuesSource.DSL, [valuesSource]);
+
+  const [singleSelect, setSingleSelect] = useState<boolean>(
+    isESQLOutputMode || (initialState.singleSelect ?? false)
+  );
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
     initialState.runPastTimeout ?? false
   );
@@ -86,10 +94,11 @@ export const OptionsListEditorOptions = ({
     initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
   );
 
-  const compatibleSearchTechniques = useMemo(
-    () => getCompatibleSearchTechniques(field.type),
-    [field.type]
-  );
+  const compatibleSearchTechniques = useMemo(() => {
+    if (!isDSLValuesSource) return ['wildcard' as OptionsListSearchTechnique];
+    if (!field) return [];
+    return getCompatibleSearchTechniques(field.type);
+  }, [field, isDSLValuesSource]);
 
   const searchOptions = useMemo(() => {
     return allSearchOptions.filter((searchOption) => {
@@ -126,21 +135,23 @@ export const OptionsListEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow
-        label={OptionsListStrings.editor.getSelectionOptionsTitle()}
-        data-test-subj="optionsListControl__selectionOptionsRadioGroup"
-      >
-        <EuiRadioGroup
-          compressed
-          options={selectionOptions}
-          idSelected={singleSelect ? 'single' : 'multi'}
-          onChange={(id) => {
-            const newSingleSelect = id === 'single';
-            setSingleSelect(newSingleSelect);
-            updateState({ singleSelect: newSingleSelect });
-          }}
-        />
-      </EuiFormRow>
+      {!isESQLOutputMode && (
+        <EuiFormRow
+          label={OptionsListStrings.editor.getSelectionOptionsTitle()}
+          data-test-subj="optionsListControl__selectionOptionsRadioGroup"
+        >
+          <EuiRadioGroup
+            compressed
+            options={selectionOptions}
+            idSelected={singleSelect ? 'single' : 'multi'}
+            onChange={(id) => {
+              const newSingleSelect = id === 'single';
+              setSingleSelect(newSingleSelect);
+              updateState({ singleSelect: newSingleSelect });
+            }}
+          />
+        </EuiFormRow>
+      )}
       {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
         <EuiFormRow
           label={OptionsListStrings.editor.getSearchOptionsTitle()}
@@ -158,24 +169,27 @@ export const OptionsListEditorOptions = ({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
-        <EuiSwitch
-          compressed
-          label={
-            <ControlSettingTooltipLabel
-              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-              tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-            />
-          }
-          checked={runPastTimeout}
-          onChange={() => {
-            const newRunPastTimeout = !runPastTimeout;
-            setRunPastTimeout(newRunPastTimeout);
-            updateState({ runPastTimeout: newRunPastTimeout });
-          }}
-          data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
-        />
-      </EuiFormRow>
+      {/* TODO Remove !isESQLOutputMode when runPastTimeout is implemented for ES|QL queries */}
+      {!isESQLOutputMode && (
+        <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
+          <EuiSwitch
+            compressed
+            label={
+              <ControlSettingTooltipLabel
+                label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+                tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+              />
+            }
+            checked={runPastTimeout}
+            onChange={() => {
+              const newRunPastTimeout = !runPastTimeout;
+              setRunPastTimeout(newRunPastTimeout);
+              updateState({ runPastTimeout: newRunPastTimeout });
+            }}
+            data-test-subj={'optionsListControl__runPastTimeoutAdditionalSetting'}
+          />
+        </EuiFormRow>
+      )}
     </>
   );
 };

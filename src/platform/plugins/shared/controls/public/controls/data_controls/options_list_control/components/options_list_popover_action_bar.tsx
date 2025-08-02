@@ -28,8 +28,12 @@ import {
 import { lastValueFrom, take } from 'rxjs';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { ControlValuesSource } from '@kbn/controls-constants';
 import { OptionsListSuggestions } from '../../../../../common/options_list';
-import { getCompatibleSearchTechniques } from '../../../../../common/options_list/suggestions_searching';
+import {
+  OptionsListSearchTechnique,
+  getCompatibleSearchTechniques,
+} from '../../../../../common/options_list/suggestions_searching';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
 import { OptionsListStrings } from '../options_list_strings';
@@ -79,6 +83,7 @@ export const OptionsListPopoverActionBar = ({
   const searchString = useStateFromPublishingSubject(componentApi.searchString$);
 
   const [
+    valuesSource,
     searchTechnique,
     searchStringValid,
     selectedOptions = [],
@@ -90,6 +95,7 @@ export const OptionsListPopoverActionBar = ({
     dataLoading,
     singleSelect,
   ] = useBatchedPublishingSubjects(
+    componentApi.valuesSource$,
     componentApi.searchTechnique$,
     componentApi.searchStringValid$,
     componentApi.selectedOptions$,
@@ -103,9 +109,10 @@ export const OptionsListPopoverActionBar = ({
   );
 
   const compatibleSearchTechniques = useMemo(() => {
+    if (valuesSource !== ControlValuesSource.DSL) return ['wildcard' as OptionsListSearchTechnique];
     if (!field) return [];
     return getCompatibleSearchTechniques(field.type);
-  }, [field]);
+  }, [field, valuesSource]);
 
   const defaultSearchTechnique = useMemo(
     () => searchTechnique ?? compatibleSearchTechniques[0],

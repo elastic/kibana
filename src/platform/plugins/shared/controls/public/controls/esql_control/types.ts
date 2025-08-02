@@ -32,4 +32,4 @@ export type OptionsListESQLUnusedState = HideExcludeUnusedState &
   DisableLoadSuggestionsUnusedState &
   DisableMultiSelectUnusedState &
   DisableInvalidSelectionsUnusedState &
-  Pick<OptionsListState, 'fieldName'>;
+  Pick<OptionsListState, 'fieldName' | 'valuesSource' | 'output'>;

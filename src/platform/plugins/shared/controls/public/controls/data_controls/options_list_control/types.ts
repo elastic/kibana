@@ -18,7 +18,7 @@ import type {
   OptionsListSortingType,
   OptionsListSuggestions,
 } from '../../../../common/options_list';
-import type { DataControlApi, PublishesField } from '../types';
+import type { DataControlApi, PublishesControlInputOutput, PublishesField } from '../types';
 import { SelectionsState } from './selections_manager';
 import { DefaultDataControlState } from '../../../../common';
 import { TemporaryState } from './temporay_state_manager';
@@ -40,7 +40,10 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+export type OptionsListState = Pick<
+  DefaultDataControlState,
+  'fieldName' | 'valuesSource' | 'output'
+> &
   SelectionsState &
   EditorState &
   TemporaryState & { sort: OptionsListSortingType | undefined };
@@ -50,6 +53,7 @@ type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
   SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
 
 export type OptionsListComponentApi = PublishesField &
+  PublishesControlInputOutput &
   PublishesOptions &
   PublishesOptionsListState &
   Pick<PublishesTitle, 'title$'> &

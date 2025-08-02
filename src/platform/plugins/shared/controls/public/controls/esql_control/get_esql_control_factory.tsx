@@ -13,7 +13,7 @@ import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesESQLVariables, ESQLControlState } from '@kbn/esql-types';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { ControlOutputOption, ControlValuesSource, ESQL_CONTROL } from '@kbn/controls-constants';
 import { OptionsListSelection } from '../../../common/options_list';
 import type { ESQLControlApi, OptionsListESQLUnusedState } from './types';
 import { ControlFactory } from '../types';
@@ -122,6 +122,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         runPastTimeout: false,
         invalidSelections: new Set<OptionsListSelection>(),
         fieldName: initialState.variableName,
+        output: ControlOutputOption.ESQL,
+        valuesSource: ControlValuesSource.ESQL,
       };
       // Generate a state manager for all the props this control isn't expected to use, so the getters and setters are available
       const componentStaticStateManager = initializeStateManager<OptionsListESQLUnusedState>(

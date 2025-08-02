@@ -16,6 +16,8 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { ESQLControlVariable } from '@kbn/esql-types';
+import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
 import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
 import { ControlFactory, DefaultControlApi } from '../types';
@@ -28,21 +30,44 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
+export interface PublishesControlInputOutput {
+  valuesSource$: PublishingSubject<ControlValuesSource>;
+  output$: PublishingSubject<ControlOutputOption>;
+}
+
+interface PublishesESQLQuery {
+  esqlQuery$: PublishingSubject<string | undefined>;
+}
+
+interface PublishesStaticValues {
+  staticValues$: PublishingSubject<Array<{ value: string; text: string }> | undefined>;
+}
+
+interface PublishesMaybeESQLVariable {
+  esqlVariable$: PublishingSubject<ESQLControlVariable | undefined>;
+}
+
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
   HasEditCapabilities &
   PublishesDataViews &
   PublishesField &
-  PublishesAsyncFilters;
+  PublishesAsyncFilters &
+  PublishesMaybeESQLVariable &
+  PublishesESQLQuery &
+  PublishesControlInputOutput &
+  PublishesStaticValues;
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
 > {
   initialState: Partial<State>;
-  field: DataViewField;
+  field?: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
+  output: ControlOutputOption;
+  valuesSource: ControlValuesSource;
 }
 
 export interface DataControlFactory<

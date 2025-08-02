@@ -27,6 +27,7 @@ export interface OptionsListDisplaySettings {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+  awaitInitialAvailableOptions?: boolean;
 }
 
 export interface OptionsListControlState
@@ -47,7 +48,11 @@ export interface OptionsListControlState
  * ----------------------------------------------------------------
  */
 
-export type OptionsListSuggestions = Array<{ value: OptionsListSelection; docCount?: number }>;
+export type OptionsListSuggestions = Array<{
+  value: OptionsListSelection;
+  docCount?: number;
+  key?: string; // For static values, this allows the value text to be changed and updated in the UI automatically
+}>;
 
 /**
  * The Options list response is returned from the serverside Options List route.
@@ -76,15 +81,41 @@ export type OptionsListResponse = OptionsListSuccessResponse | OptionsListFailur
 /**
  * The Options list request type taken in by the public Options List service.
  */
-export type OptionsListRequest = Omit<
+type OptionsListRequestBase = Omit<
   OptionsListRequestBody,
   'filters' | 'fieldName' | 'fieldSpec'
 > & {
   timeRange?: TimeRange;
-  dataView: DataView;
+  dataView?: DataView;
   filters?: Filter[];
-  field: FieldSpec;
+  field?: FieldSpec;
   query?: Query | AggregateQuery;
+};
+
+export type OptionsListDSLRequest = OptionsListRequestBase &
+  Required<Pick<OptionsListRequestBase, 'dataView' | 'field'>>;
+
+export type OptionsListESQLRequest = Omit<
+  OptionsListRequestBase,
+  'query' | 'size' | 'allowExpensiveQueries'
+> & {
+  query: AggregateQuery;
+};
+
+export type OptionsListRequest = OptionsListDSLRequest | OptionsListESQLRequest;
+
+export const isOptionsListDSLRequest = (request: unknown): request is OptionsListDSLRequest => {
+  const req = request as OptionsListDSLRequest;
+  return Object.hasOwn(req, 'dataView') && Object.hasOwn(req, 'field');
+};
+export const isOptionsListESQLRequest = (request: unknown): request is OptionsListESQLRequest => {
+  const req = request as OptionsListESQLRequest;
+  return (
+    !Object.hasOwn(req, 'dataView') &&
+    !Object.hasOwn(req, 'field') &&
+    Object.hasOwn(req, 'query') &&
+    Object.hasOwn(req.query, 'esql')
+  );
 };
 
 /**

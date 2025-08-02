@@ -29,4 +29,8 @@ export {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
   ESQL_CONTROL,
+  DEFAULT_CONTROL_OUTPUT,
+  DEFAULT_CONTROL_VALUES_SOURCE,
+  ControlOutputOption,
+  ControlValuesSource,
 } from './src/control_constants';

@@ -11,6 +11,7 @@ import {
   StateComparators,
   initializeStateManager,
 } from '@kbn/presentation-publishing/state_manager';
+import { ControlValuesSource, ControlOutputOption } from '@kbn/controls-constants';
 import { OptionsListControlState } from '../../../../common/options_list';
 import { DEFAULT_SEARCH_TECHNIQUE } from './constants';
 
@@ -31,6 +32,16 @@ const defaultEditorState = {
   runPastTimeout: undefined,
 };
 
-export const initializeEditorStateManager = (initialState: EditorState) => {
-  return initializeStateManager<EditorState>(initialState, defaultEditorState, editorComparators);
+export const initializeEditorStateManager = ({
+  output,
+  valuesSource,
+  ...initialState
+}: EditorState & Pick<OptionsListControlState, 'output' | 'valuesSource'>) => {
+  const state = {
+    ...initialState,
+    searchTechnique:
+      valuesSource !== ControlValuesSource.DSL ? 'wildcard' : initialState.searchTechnique,
+    singleSelect: output === ControlOutputOption.ESQL || initialState.singleSelect,
+  };
+  return initializeStateManager<EditorState>(state, defaultEditorState, editorComparators);
 };

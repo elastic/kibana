@@ -21,7 +21,7 @@ import {
 } from '../../../common';
 import type { OptionsListControlState } from '../../../common/options_list';
 import { dataViewsService } from '../../services/kibana_services';
-import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
+import { getDataControlFieldRegistry } from '../../controls/data_controls/editor/data_control_editor_utils';
 import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

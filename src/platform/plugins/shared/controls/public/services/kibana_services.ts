@@ -13,27 +13,45 @@ import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { ControlsPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
 export let dataService: DataPublicPluginStart;
 export let dataViewsService: DataViewsPublicPluginStart;
 export let uiActionsService: UiActionsStart;
+export let expressionsService: ExpressionsStart;
+export let storageService: Storage;
+
+export let fieldsMetadataService: FieldsMetadataPublicStart | undefined;
+export let usageCollectionService: UsageCollectionStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
-export const setKibanaServices = (kibanaCore: CoreStart, deps: ControlsPluginStartDeps) => {
+export const setKibanaServices = (
+  kibanaCore: CoreStart,
+  deps: ControlsPluginStartDeps,
+  storage: Storage
+) => {
   coreServices = kibanaCore;
   dataService = deps.data;
   dataViewsService = deps.dataViews;
   uiActionsService = deps.uiActions;
+  expressionsService = deps.expressions;
+  fieldsMetadataService = deps.fieldsMetadata;
+  usageCollectionService = deps.usageCollection;
+
+  storageService = storage;
 
   servicesReady$.next(true);
 };
 
 export const untilPluginStartServicesReady = () => {
-  if (servicesReady$.value) return Promise.resolve();
+  if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
   return new Promise<void>((resolve) => {
     const subscription = servicesReady$.subscribe((isInitialized) => {
       if (isInitialized) {

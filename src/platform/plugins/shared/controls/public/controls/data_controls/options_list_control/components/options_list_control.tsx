@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInputPopover,
+  EuiLoadingSpinner,
   EuiToken,
   EuiToolTip,
   UseEuiTheme,
@@ -112,6 +113,7 @@ export const OptionsListControl = ({
     panelTitle,
     fieldFormatter,
     defaultPanelTitle,
+    availableOptions,
   ] = useBatchedPublishingSubjects(
     componentApi.exclude$,
     componentApi.existsSelected$,
@@ -121,7 +123,8 @@ export const OptionsListControl = ({
     componentApi.dataLoading$,
     componentApi.title$,
     componentApi.fieldFormatter,
-    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
+    componentApi.availableOptions$
   );
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
@@ -144,7 +147,12 @@ export const OptionsListControl = ({
                   </span>{' '}
                 </>
               )}
-              {existsSelected ? (
+              {!selectedOptions ||
+              (displaySettings.awaitInitialAvailableOptions && !availableOptions) ? (
+                <span>
+                  <EuiLoadingSpinner size="s" />
+                </span>
+              ) : existsSelected ? (
                 <span css={styles.optionsListExistsFilter}>
                   {OptionsListStrings.controlAndPopover.getExists(+Boolean(excludeSelected))}
                 </span>
@@ -200,13 +208,20 @@ export const OptionsListControl = ({
     };
   }, [
     selectedOptions,
+    styles.selectionWrapper,
+    styles.excludeSelected,
+    styles.optionsListExistsFilter,
+    styles.invalidSelectionsToken,
+    styles.invalidOption,
+    styles.validOption,
     excludeSelected,
     existsSelected,
-    fieldFormatter,
-    delimiter,
+    displaySettings.awaitInitialAvailableOptions,
+    availableOptions,
     invalidSelections,
     componentApi.uuid,
-    styles,
+    fieldFormatter,
+    delimiter,
   ]);
 
   const button = (
