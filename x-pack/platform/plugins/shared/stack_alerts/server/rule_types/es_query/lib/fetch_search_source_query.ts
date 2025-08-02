@@ -30,7 +30,7 @@ import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types'
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { OnlySearchSourceRuleParams } from '../types';
 import { getComparatorScript } from '../../../../common';
-import { checkForShardFailures } from '../util';
+import { checkForShardFailures, getSourceFields } from '../util';
 
 export interface FetchSearchSourceQueryOpts {
   ruleId: string;
@@ -63,6 +63,7 @@ export async function fetchSearchSourceQuery({
   const searchSourceClient = await getSearchSourceClient();
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
+  const sourceFields = getSourceFields();
 
   let initialSearchSource;
   try {
@@ -83,6 +84,7 @@ export async function fetchSearchSourceQuery({
     dateStart,
     dateEnd,
     logger,
+    sourceFields,
     alertLimit
   );
 
@@ -119,7 +121,7 @@ export async function fetchSearchSourceQuery({
       isCountAgg,
       isGroupAgg,
       esResult: searchResult,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       termField: params.termField,
     }),
     index: [index.name],
@@ -134,6 +136,7 @@ export async function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   logger: Logger,
+  sourceFields: Array<{ label: string; searchPath: string }>,
   alertLimit?: number
 ): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -190,7 +193,7 @@ export async function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(
