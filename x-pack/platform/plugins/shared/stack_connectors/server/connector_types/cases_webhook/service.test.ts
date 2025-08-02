@@ -189,6 +189,33 @@ describe('Cases webhook service', () => {
       });
     });
 
+    it('adds the secret headers to the basic headers authentication', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: {
+            ...secrets,
+            user: 'username',
+            password: 'password',
+            secretHeaders: { secretKey: 'secretValue' },
+          },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+          foo: 'bar',
+          secretKey: 'secretValue',
+        },
+      });
+    });
+
     it('does not add the basic auth header for authentication if hasAuth=false', () => {
       createExternalService(
         actionId,
