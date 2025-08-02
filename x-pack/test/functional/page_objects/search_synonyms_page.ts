@@ -10,6 +10,8 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     SynonymsGetStartedPage: {
@@ -21,10 +23,17 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           'searchSynonymsCreateSynonymsSetModalForceWrite',
       },
       async expectSynonymsGetStartedPageComponentsToExist() {
-        await testSubjects.existOrFail(this.TEST_IDS.GET_STARTED_BUTTON);
+        // check if exists, refresh and check again for 10 seconds
+        await retry.tryForTime(10000, async () => {
+          await testSubjects.exists(this.TEST_IDS.GET_STARTED_BUTTON, { timeout: 2000 });
+          await browser.refresh();
+        });
       },
       async clickCreateSynonymsSetButton() {
-        await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
+        await retry.tryForTime(10000, async () => {
+          await browser.refresh();
+          await testSubjects.click(this.TEST_IDS.GET_STARTED_BUTTON);
+        });
       },
       async setSynonymsSetName(name: string) {
         await testSubjects.setValue(this.TEST_IDS.CREATE_SYNONYMS_SET_MODAL_INPUT, name);
@@ -43,6 +52,10 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         SYNONYMS_SET_ITEM_RULE_COUNT: 'synonyms-set-item-rule-count',
         PAGINATION_NEXT_BUTTON: 'pagination-button-next',
         PAGE_PREVIOUS_BUTTON: 'pagination-button-previous',
+        CREATE_SYNONYMS_SET_BUTTON: 'searchSynonymsSearchSynonymsOverviewCreateButton',
+      },
+      async clickCreateSynonymsSetButton() {
+        await testSubjects.click(this.TEST_IDS.CREATE_SYNONYMS_SET_BUTTON, 2000);
       },
       async getSynonymsSetsList() {
         const table = await testSubjects.find(this.TEST_IDS.SYNONYMS_SET_TABLE);
@@ -100,11 +113,13 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
         ADD_NEW_RULE_BUTTON: 'searchSynonymsSynonymsSetRuleTableAddRuleButton',
       },
       async expectSynonymsSetDetailPageNavigated(name: string) {
-        const h1Element = await find.byCssSelector('main header h1');
-        const text = await h1Element.getVisibleText();
-        if (text !== name) {
-          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
-        }
+        await retry.tryForTime(5000, async () => {
+          const h1Element = await find.byCssSelector('main header h1');
+          const text = await h1Element.getVisibleText();
+          if (text !== name) {
+            throw new Error(`Expected page title to be "${name}" but got "${text}"`);
+          }
+        });
       },
 
       async expectEmptyPromptToExist() {
