@@ -73,6 +73,7 @@ export {
 
 export {
   useGroupedFields,
+  createFilterCriteriaForDataViewFilters,
   type GroupedFieldsParams,
   type GroupedFieldsResult,
 } from './src/hooks/use_grouped_fields';

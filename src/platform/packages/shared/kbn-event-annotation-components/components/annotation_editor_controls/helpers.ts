@@ -10,6 +10,7 @@
 import { transparentize } from '@elastic/eui';
 import { pick } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import chroma from 'chroma-js';
 import type {
@@ -18,6 +19,9 @@ import type {
   PointInTimeEventAnnotationConfig,
   QueryPointEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
+import { useMemo } from 'react';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import { createFilterCriteriaForDataViewFilters } from '@kbn/unified-field-list/src/hooks/use_grouped_fields';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';
 
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
@@ -91,4 +95,37 @@ export const sanitizeProperties = (annotation: EventAnnotationConfig) => {
     'textVisibility',
   ]);
   return lineAnnotation;
+};
+
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value != null;
+}
+
+export const useAvailableFields = (
+  dataView: DataView,
+  currentAnnotation?: EventAnnotationConfig
+) => {
+  const annotationUsedFields = useMemo(() => {
+    if (isQueryAnnotationConfig(currentAnnotation)) {
+      const { extraFields, textField, timeField } = currentAnnotation;
+      return [textField, timeField]
+        .concat(extraFields)
+        .filter(nonNullable)
+        .map((name) => dataView.getFieldByName(name))
+        .filter(nonNullable);
+    }
+    return [];
+  }, [currentAnnotation, dataView]);
+  const filterByDataViewFilters = useMemo(
+    () => createFilterCriteriaForDataViewFilters(dataView, annotationUsedFields),
+    [annotationUsedFields, dataView]
+  );
+  const availableFields = useMemo(
+    () =>
+      dataView.fields.filter(
+        (field) => isFieldLensCompatible(field) && filterByDataViewFilters(field.name)
+      ),
+    [dataView.fields, filterByDataViewFilters]
+  );
+  return availableFields;
 };
