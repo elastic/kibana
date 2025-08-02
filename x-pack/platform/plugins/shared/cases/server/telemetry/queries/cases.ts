@@ -22,6 +22,7 @@ import type {
   CaseAggregationResult,
   AttachmentAggregationResult,
   FileAttachmentAggregationResults,
+  AlertsTelemetryAggregationsByOwnerResults,
 } from '../types';
 import {
   findValueInBuckets,
@@ -34,6 +35,8 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getTotalWithAlerts,
+  processWithAlertsByOwner,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
@@ -90,6 +93,7 @@ export const getCasesTelemetryData = async ({
       totalCasesForOwner: casesRes.total,
       filesAggregations: filesRes.aggregations,
     });
+    const withAlertsByOwner = processWithAlertsByOwner(totalAlertsRes.aggregations);
 
     return {
       all: {
@@ -108,8 +112,7 @@ export const getCasesTelemetryData = async ({
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants: commentsRes.aggregations?.participants?.value ?? 0,
         totalTags: casesRes.aggregations?.tags?.value ?? 0,
-        totalWithAlerts:
-          totalAlertsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
+        totalWithAlerts: getTotalWithAlerts(totalAlertsRes.aggregations),
         totalWithConnectors:
           totalConnectorsRes.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0,
         latestDates,
@@ -125,18 +128,21 @@ export const getCasesTelemetryData = async ({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
         owner: 'securitySolution',
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
         owner: 'observability',
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
         attachmentAggregations: commentsRes.aggregations,
         filesAggregations: filesRes.aggregations,
+        totalWithAlertsAggregationsByOwner: totalAlertsRes.aggregations,
         owner: 'cases',
       }),
     };
@@ -343,19 +349,28 @@ const getFilesTelemetry = async (
 
 const getAlertsTelemetry = async (
   savedObjectsClient: TelemetrySavedObjectsClient
-): Promise<SavedObjectsFindResponse<unknown, ReferencesAggregation>> => {
-  return savedObjectsClient.find<unknown, ReferencesAggregation>({
+): Promise<SavedObjectsFindResponse<unknown, AlertsTelemetryAggregationsByOwnerResults>> => {
+  return savedObjectsClient.find<unknown, AlertsTelemetryAggregationsByOwnerResults>({
     page: 0,
     perPage: 0,
     type: CASE_COMMENT_SAVED_OBJECT,
     namespaces: ['*'],
     filter: getOnlyAlertsCommentsFilter(),
     aggs: {
-      ...getReferencesAggregationQuery({
-        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
-        referenceType: 'cases',
-        agg: 'cardinality',
-      }),
+      by_owner: {
+        terms: {
+          field: 'cases.owner',
+          size: 3,
+          include: ['securitySolution', 'observability', 'cases'],
+        },
+        aggs: {
+          ...getReferencesAggregationQuery({
+            savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+            referenceType: 'cases',
+            agg: 'cardinality',
+          }),
+        },
+      },
     },
   });
 };

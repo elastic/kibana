@@ -28,6 +28,7 @@ import type {
   AttachmentFrameworkAggsResult,
   CustomFieldsTelemetry,
   AlertBuckets,
+  AlertsTelemetryAggregationsByOwnerResults,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -289,22 +290,23 @@ export const getSolutionValues = ({
   caseAggregations,
   attachmentAggregations,
   filesAggregations,
+  totalWithAlertsAggregationsByOwner,
   owner,
 }: {
   caseAggregations?: CaseAggregationResult;
   attachmentAggregations?: AttachmentAggregationResult;
   filesAggregations?: FileAttachmentAggregationResults;
+  totalWithAlertsAggregationsByOwner?: AlertsTelemetryAggregationsByOwnerResults;
   owner: Owner;
 }): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
     aggs: caseAggregations,
     keys: ['totalsByOwner', 'securitySolution.counts', 'observability.counts', 'cases.counts'],
   });
-
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
   const attachmentsAggsForOwner = attachmentAggregations?.[owner];
   const fileAttachmentsForOwner = filesAggregations?.[owner];
-
+  const totalWithAlerts = processWithAlertsByOwner(totalWithAlertsAggregationsByOwner);
   return {
     total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
@@ -313,6 +315,7 @@ export const getSolutionValues = ({
       filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
     }),
+    totalWithAlerts: totalWithAlerts[owner],
     assignees: {
       total: caseAggregations?.[owner].totalAssignees.value ?? 0,
       totalWithZero: caseAggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
@@ -492,3 +495,30 @@ const emptyFileAttachment = (): FileAttachmentStats => ({
   total: 0,
   topMimeTypes: [],
 });
+
+export const getTotalWithAlerts = (
+  aggregations?: AlertsTelemetryAggregationsByOwnerResults
+): number => {
+  return (
+    aggregations?.by_owner?.buckets.reduce((sum, item) => sum + Object.values(item)[0].value, 0) ||
+    0
+  );
+};
+
+export const processWithAlertsByOwner = (
+  aggregations?: AlertsTelemetryAggregationsByOwnerResults
+): Record<Owner, number> => {
+  const result: Record<Owner, number> = {
+    securitySolution: 0,
+    observability: 0,
+    cases: 0,
+  };
+
+  if (aggregations) {
+    aggregations.by_owner.buckets.forEach((item) => {
+      result[item.key as Owner] = item.doc_count;
+    });
+  }
+
+  return result;
+};
