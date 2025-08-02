@@ -7,4 +7,4 @@
 
 export * from './datasets_client';
 export * from './datasets_service';
-export * from './types';
+export type * from './types';

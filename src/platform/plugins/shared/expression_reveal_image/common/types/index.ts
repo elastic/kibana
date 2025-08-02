@@ -8,4 +8,4 @@
  */
 
 export * from './expression_functions';
-export * from './expression_renderers';
+export type * from './expression_renderers';
