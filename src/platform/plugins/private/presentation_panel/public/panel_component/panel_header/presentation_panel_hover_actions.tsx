@@ -79,6 +79,7 @@ const QUICK_ACTION_IDS = {
     'ACTION_CUSTOMIZE_PANEL',
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
+    'CONVERT_LEGACY_MARKDOWN',
   ],
   view: [
     'ACTION_SHOW_CONFIG_PANEL',
@@ -109,6 +110,19 @@ const createClickHandler =
     action.execute(context);
   };
 
+export interface PresentationPanelHoverActionsProps {
+  api: DefaultPresentationPanelApi | null;
+  index?: number;
+  getActions: PresentationPanelInternalProps['getActions'];
+  setDragHandle: (id: string, ref: HTMLElement | null) => void;
+  actionPredicate?: (actionId: string) => boolean;
+  children: ReactElement;
+  className?: string;
+  viewMode?: ViewMode;
+  showNotifications?: boolean;
+  showBorder?: boolean;
+}
+
 export const PresentationPanelHoverActions = ({
   api,
   index,
@@ -120,18 +134,7 @@ export const PresentationPanelHoverActions = ({
   viewMode,
   showNotifications = true,
   showBorder,
-}: {
-  index?: number;
-  api: DefaultPresentationPanelApi | null;
-  getActions: PresentationPanelInternalProps['getActions'];
-  setDragHandle: (id: string, ref: HTMLElement | null) => void;
-  actionPredicate?: (actionId: string) => boolean;
-  children: ReactElement;
-  className?: string;
-  viewMode?: ViewMode;
-  showNotifications?: boolean;
-  showBorder?: boolean;
-}) => {
+}: PresentationPanelHoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [showNotification, setShowNotification] = useState<boolean>(false);

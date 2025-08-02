@@ -25,6 +25,7 @@ mapped_pages:
 | [controls](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/controls/README.mdx) | The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps. |
 | [customIntegrations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/custom_integrations/README.md) | Register add-data cards |
 | [dashboard](kibana-dashboard-plugin.md) | - Registers the dashboard application. - Adds a dashboard embeddable that can be used in other applications. |
+| [dashboardMarkdown](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/dashboard_markdown/README.md) | This plugin provides a simple Markdown component for embedding editable Markdown content in Kibana dashboards. |
 | [data](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data/README.mdx) | The data plugin provides common data access services, such as search and query, for solutions and application developers. |
 | [dataViewEditor](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_view_editor/README.md) | Create data views from within Kibana apps. |
 | [dataViewFieldEditor](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_view_field_editor/README.md) | The reusable field editor across Kibana! |
