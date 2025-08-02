@@ -33,6 +33,8 @@ export {
   contentReferenceBlock,
   removeContentReferences,
   pruneContentReferences,
+  enrichDocument,
+  sanitizeMessages,
 } from './impl/content_references';
 
 export type {
