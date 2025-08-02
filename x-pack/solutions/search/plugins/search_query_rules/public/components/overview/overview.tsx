@@ -60,7 +60,7 @@ export const QueryRulesOverview = () => {
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Query Rules"
+          pageTitle="Query rules"
           restrictWidth
           color="primary"
           rightSideItems={[

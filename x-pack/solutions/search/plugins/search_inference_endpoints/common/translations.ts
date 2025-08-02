@@ -61,7 +61,7 @@ export const UNABLE_TO_CREATE_INFERENCE_ENDPOINT = i18n.translate(
 export const INFERENCE_ENDPOINT_ALREADY_EXISTS = i18n.translate(
   'xpack.searchInferenceEndpoints.inferenceFlyoutWrapperComponent.inferenceEndpointAlreadyExistsError',
   {
-    defaultMessage: 'Inference Endpoint id already exists',
+    defaultMessage: 'Inference endpoint id already exists',
   }
 );
 
@@ -121,7 +121,7 @@ export const BREADCRUMB_RELEVANCE = i18n.translate(
 export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
   'xpack.searchInferenceEndpoints.breadcrumbs.inferenceEndpoints',
   {
-    defaultMessage: 'Inference Endpoints',
+    defaultMessage: 'Inference endpoints',
   }
 );
 

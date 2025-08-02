@@ -57,7 +57,7 @@ export const RulesetDetailEmptyPrompt = () => {
         <EuiFlexItem grow css={positionRelative}>
           <img
             src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
-            alt="Query Rules"
+            alt="Query rules"
             css={imgProps}
           />
           <div css={gradientOverlay}>&nbsp;</div>
