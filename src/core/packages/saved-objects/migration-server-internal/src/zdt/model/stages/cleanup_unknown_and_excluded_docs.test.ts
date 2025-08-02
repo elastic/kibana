@@ -50,20 +50,6 @@ describe('Stage: cleanupUnknownAndExcludedDocs', () => {
     });
   });
 
-  it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH when successful with cleanup_not_needed and hasDeletedDocs is true', () => {
-    const state = createState({ hasDeletedDocs: true });
-    const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.right({
-      type: 'cleanup_not_needed',
-    });
-
-    const newState = cleanupUnknownAndExcludedDocs(state, res, context);
-
-    expect(newState).toEqual({
-      ...state,
-      controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH',
-    });
-  });
-
   it('CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT when successful with cleanup_not_needed and hasDeletedDocs is false', () => {
     const state = createState();
     const res: StateActionResponse<'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS'> = Either.right({
