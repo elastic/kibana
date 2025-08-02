@@ -26,6 +26,7 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   TRUSTED_APPS_PATH,
+  ENDPOINT_EXCEPTIONS_PATH,
 } from '../../common/constants';
 import {
   BLOCKLIST,
@@ -38,6 +39,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
+  ENDPOINT_EXCEPTIONS,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -71,6 +73,7 @@ const categories = [
     linkIds: [
       SecurityPageName.endpoints,
       SecurityPageName.policies,
+      SecurityPageName.endpointExceptions,
       SecurityPageName.trustedApps,
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
@@ -123,6 +126,19 @@ export const links: LinkItem = {
       path: POLICIES_PATH,
       skipUrlState: true,
       hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.endpointExceptions,
+      title: ENDPOINT_EXCEPTIONS,
+      description: i18n.translate('xpack.securitySolution.appLinks.endpointExceptionsDescription', {
+        defaultMessage: 'Add exceptions to your hosts.',
+      }),
+      landingIcon: IconTool,
+      path: ENDPOINT_EXCEPTIONS_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+
+      experimentalKey: 'endpointExceptionsMovedUnderManagement',
     },
     {
       id: SecurityPageName.trustedApps,
@@ -229,6 +245,7 @@ export const getManagementFilteredLinks = async (
     canAccessHostIsolationExceptions,
     canReadHostIsolationExceptions,
     canReadEndpointList,
+    canReadEndpointExceptions,
     canReadTrustedApplications,
     canReadEventFilters,
     canReadBlocklist,
@@ -253,6 +270,10 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
+  }
+
+  if (!canReadEndpointExceptions) {
+    linksToExclude.push(SecurityPageName.endpointExceptions);
   }
 
   if (!canReadActionsLogManagement) {
