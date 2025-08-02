@@ -137,11 +137,23 @@ export const useCasesAddToExistingCaseModal = ({
     }: {
       getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
     } = {}) => {
+      // Extract alert IDs from attachments to show indicators in the modal
+      const attachments = getAttachments?.({ theCase: undefined }) ?? [];
+      const alertIds = attachments
+        .filter((attachment): attachment is Extract<typeof attachment, { type: 'alert' }> =>
+          attachment.type === 'alert'
+        )
+        .flatMap((attachment) => {
+          const { alertId } = attachment;
+          return alertId ? (Array.isArray(alertId) ? alertId : [alertId]) : [];
+        });
+
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {
           hiddenStatuses: [CaseStatuses.closed],
           onCreateCaseClicked,
+          alertIds,
           onRowClick: (theCase?: CaseUI) => {
             handleOnRowClick(theCase, getAttachments);
           },

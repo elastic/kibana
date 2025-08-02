@@ -66,6 +66,8 @@ export interface GetCasesColumn {
   connectors?: ActionConnector[];
   onRowClick?: (theCase: CaseUI) => void;
   disableActions?: boolean;
+  alertIds?: string[];
+  hasAlertAttached?: (caseId: string) => boolean;
 }
 
 export interface UseCasesColumnsReturnValue {
@@ -81,6 +83,8 @@ export const useCasesColumns = ({
   onRowClick,
   disableActions = false,
   selectedColumns,
+  alertIds = [],
+  hasAlertAttached,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
@@ -311,16 +315,29 @@ export const useCasesColumns = ({
         align: RIGHT_ALIGNMENT,
         render: (theCase: CaseUI) => {
           if (theCase.id != null) {
-            return (
+            const isAlreadyAttached = hasAlertAttached?.(theCase.id);
+            const button = (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => {
                   assignCaseAction(theCase);
                 }}
                 size="s"
+                disabled={isAlreadyAttached}
               >
-                {i18n.SELECT}
+                {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
+            );
+
+            return isAlreadyAttached ? (
+              <EuiToolTip
+                content="This alert is already attached to this case"
+                position="top"
+              >
+                {button}
+              </EuiToolTip>
+            ) : (
+              button
             );
           }
           return getEmptyCellValue();
@@ -328,7 +345,7 @@ export const useCasesColumns = ({
         width: '120px',
       },
     }),
-    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]
+    [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles, hasAlertAttached]
   );
 
   // we need to extend the columnsDict with the columns of
