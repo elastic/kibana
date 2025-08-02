@@ -90,6 +90,7 @@ import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
+import { BACKGROUND_SEARCH_ENABLED } from '../session/constants';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -654,7 +655,13 @@ export class SearchInterceptor {
   private showRestoreWarningToast = (_sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
-        title: 'Your search session is still running',
+        title: BACKGROUND_SEARCH_ENABLED
+          ? i18n.translate('data.searchService.backgroundSearchRestoreWarning', {
+              defaultMessage: 'Your background search is still running',
+            })
+          : i18n.translate('data.searchService.restoreWarning', {
+              defaultMessage: 'Your search session is still running',
+            }),
         text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), this.startRenderServices),
       },
       {

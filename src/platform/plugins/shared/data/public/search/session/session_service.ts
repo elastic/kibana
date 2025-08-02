@@ -53,7 +53,7 @@ import {
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { NowProviderInternalContract } from '../../now_provider';
-import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { BACKGROUND_SEARCH_ENABLED, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 
 /**
@@ -618,9 +618,13 @@ export class SessionService {
         renamed = true;
       } catch (e) {
         this.toastService?.addError(e, {
-          title: i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
-            defaultMessage: 'Failed to edit name of the search session',
-          }),
+          title: BACKGROUND_SEARCH_ENABLED
+            ? i18n.translate('data.searchSessions.sessionService.backgroundSearchEditNameError', {
+                defaultMessage: 'Failed to edit name of the background search',
+              })
+            : i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
+                defaultMessage: 'Failed to edit name of the search session',
+              }),
         });
       }
 
@@ -711,9 +715,16 @@ export class SessionService {
         }
       } catch (e) {
         this.toastService?.addError(e, {
-          title: i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
-            defaultMessage: 'Failed to fetch search session info',
-          }),
+          title: BACKGROUND_SEARCH_ENABLED
+            ? i18n.translate(
+                'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
+                {
+                  defaultMessage: 'Failed to fetch background search info',
+                }
+              )
+            : i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
+                defaultMessage: 'Failed to fetch search session info',
+              }),
         });
       }
     }

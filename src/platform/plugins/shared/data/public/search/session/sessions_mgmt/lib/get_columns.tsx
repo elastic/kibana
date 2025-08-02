@@ -32,6 +32,7 @@ import { getExpirationStatus } from './get_expiration_status';
 import { UISession } from '../types';
 import { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
+import { BACKGROUND_SEARCH_ENABLED } from '../../constants';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {
@@ -110,10 +111,17 @@ export const getColumns = (
             <EuiIconTip
               type="warning"
               content={
-                <FormattedMessage
-                  id="data.mgmt.searchSessions.table.notRestorableWarning"
-                  defaultMessage="The search session will be executed again. You can then save it for future use."
-                />
+                BACKGROUND_SEARCH_ENABLED ? (
+                  <FormattedMessage
+                    id="data.mgmt.searchSessions.table.backgroundSearchNotRestorableWarning"
+                    defaultMessage="The background search will be executed again. You can then save it for future use."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="data.mgmt.searchSessions.table.notRestorableWarning"
+                    defaultMessage="The search session will be executed again. You can then save it for future use."
+                  />
+                )
               }
             />
           </>
@@ -131,10 +139,17 @@ export const getColumns = (
                 type="warning"
                 iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
                 content={
-                  <FormattedMessage
-                    id="data.mgmt.searchSessions.table.versionIncompatibleWarning"
-                    defaultMessage="This search session was created in a Kibana instance running a different version. It may not restore correctly."
-                  />
+                  BACKGROUND_SEARCH_ENABLED ? (
+                    <FormattedMessage
+                      id="data.mgmt.searchSessions.table.backgroundSearchVersionIncompatibleWarning"
+                      defaultMessage="This background search was created in a Kibana instance running a different version. It may not restore correctly."
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.mgmt.searchSessions.table.versionIncompatibleWarning"
+                      defaultMessage="This search session was created in a Kibana instance running a different version. It may not restore correctly."
+                    />
+                  )
                 }
               />
             </>
