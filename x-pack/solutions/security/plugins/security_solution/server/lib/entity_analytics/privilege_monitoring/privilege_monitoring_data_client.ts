@@ -79,7 +79,9 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
+import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
+
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -90,6 +92,7 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
+  config?: MonitoringSyncIntervalConfig;
 }
 
 export class PrivilegeMonitoringDataClient {
@@ -166,11 +169,11 @@ export class PrivilegeMonitoringDataClient {
       if (this.apiKeyGenerator) {
         await this.apiKeyGenerator.generate();
       }
-
       await startPrivilegeMonitoringTask({
         logger: this.opts.logger,
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
+        interval: this.opts.config?.privileges.developer.syncInterval,
       });
 
       const setupEndTime = moment().utc().toISOString();
@@ -200,7 +203,6 @@ export class PrivilegeMonitoringDataClient {
         },
       });
     }
-
     return descriptor;
   }
 

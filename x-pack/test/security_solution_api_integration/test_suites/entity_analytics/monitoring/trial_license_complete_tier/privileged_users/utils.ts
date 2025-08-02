@@ -20,6 +20,7 @@ export const PrivMonUtils = (
   const api = getService('securitySolutionApi');
   const log = getService('log');
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
@@ -33,6 +34,22 @@ export const PrivMonUtils = (
     }
 
     expect(res.status).to.eql(200);
+  };
+
+  const initPrivMonEngineWithoutAuth = async ({
+    username,
+    password,
+  }: {
+    username: string;
+    password: string;
+  }) => {
+    return await supertestWithoutAuth
+      .post(routeWithNamespace('/api/entity_analytics/monitoring/engine/init', namespace))
+      .auth(username, password)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', API_VERSIONS.public.v1)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send();
   };
 
   const bulkUploadUsersCsv = async (
@@ -62,5 +79,5 @@ export const PrivMonUtils = (
     }
   };
 
-  return { initPrivMonEngine, bulkUploadUsersCsv, retry };
+  return { initPrivMonEngine, initPrivMonEngineWithoutAuth, bulkUploadUsersCsv, retry };
 };

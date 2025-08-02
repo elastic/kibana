@@ -78,7 +78,6 @@ export const monitoringEntitySourceRoute = (
         }
       }
     );
-
   router.versioned
     .get({
       access: 'public',
