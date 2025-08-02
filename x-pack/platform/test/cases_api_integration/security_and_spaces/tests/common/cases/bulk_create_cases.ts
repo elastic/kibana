@@ -195,6 +195,7 @@ export default ({ getService }: FtrProviderContext): void => {
         created_by: defaultUser,
         comment_id: null,
         owner: 'securitySolutionFixture',
+        is_generated_by_assistant: false,
         payload: {
           description: firstCase.description,
           title: firstCase.title,
@@ -216,6 +217,7 @@ export default ({ getService }: FtrProviderContext): void => {
         created_by: defaultUser,
         comment_id: null,
         owner: 'securitySolutionFixture',
+        is_generated_by_assistant: false,
         payload: {
           description: secondCase.description,
           title: secondCase.title,
