@@ -10,7 +10,6 @@ import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView } from '@kbn/data-views-plugin/public';
-import { EXPLORE_DATA_VIEW_PREFIX } from '../../../../common/constants';
 import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
@@ -19,7 +18,6 @@ import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../constants';
-import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
@@ -54,7 +52,6 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [dataViewEditor]
   );
 
-  const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
   const { dataView, status } = useDataView(scope);
@@ -62,12 +59,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
     useSelector(sharedStateSelector);
   const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs
-      .filter((spec) => !spec.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
-      .map((spec) => new DataView({ spec, fieldFormats }));
+    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
 
-  const managedDataViews = useManagedDataViews();
   const savedDataViews = useSavedDataViews();
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
@@ -95,19 +89,16 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [isDefaultSourcerer, scope, selectDataView, updateUrlParam]
   );
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (newDataView) => {
-        if (!newDataView.id) {
-          return;
-        }
+  const handleCreateNewDataView = useMemo(() => {
+    return (newDataView: DataView) => {
+      if (!newDataView.id) {
+        return;
+      }
 
-        dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
-        handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
-      },
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, dispatch, handleChangeDataView]);
+      dispatch(sharedDataViewManagerSlice.actions.addDataView(newDataView));
+      handleChangeDataView(newDataView.id, newDataView.getIndexPattern());
+    };
+  }, [dispatch, handleChangeDataView]);
 
   const editField = useCallback(
     async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
@@ -182,10 +173,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         onChangeDataView={handleChangeDataView}
         onEditDataView={handleDataViewModified}
         onAddField={handleAddField}
-        onDataViewCreated={createNewDataView}
+        onDataViewCreated={handleCreateNewDataView}
         adHocDataViews={adhocDataViews}
         savedDataViews={savedDataViews}
-        managedDataViews={managedDataViews}
         onClosePopover={onClosePopover}
       />
     </div>
