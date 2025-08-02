@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('lens metric', () => {
-    const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`;
+    const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge"]`;
     // get a reference to the badge element
     const getBadge = async () => await find.byCssSelector(BADGE_SELECTOR);
 

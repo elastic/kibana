@@ -20,6 +20,7 @@ export function useGetProductDoc(inferenceId: string | undefined) {
   const { mutateAsync: uninstallProductDoc, isLoading: isUninstalling } = useUninstallProductDoc();
 
   const { isLoading, data, refetch } = useQuery({
+    networkMode: 'always',
     queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId],
     queryFn: async () => {
       return productDocBase!.installation.getStatus({ inferenceId });

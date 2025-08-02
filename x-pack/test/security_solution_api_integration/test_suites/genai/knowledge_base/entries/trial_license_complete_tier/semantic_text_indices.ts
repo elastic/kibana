@@ -17,16 +17,20 @@ export default ({ getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/208603
   describe.skip('@ess Security AI Assistant - Indices with `semantic_text` fields', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ignore_fields');
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/semantic_text_fields'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ignore_fields'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/semantic_text_fields'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ignore_fields');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/semantic_text_fields'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ignore_fields'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/semantic_text_fields'
       );
     });
 

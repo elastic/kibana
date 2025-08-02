@@ -110,15 +110,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name, argType: out.argType },
         }),
       };
-    case 'shadowFieldType':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.typeOverwrite', {
-          defaultMessage:
-            'Column [{field}] of type {fieldType} has been overwritten as new type: {newType}',
-          values: { field: out.field, fieldType: out.fieldType, newType: out.newType },
-        }),
-        type: 'warning',
-      };
     case 'unsupportedColumnTypeForCommand':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.unsupportedColumnTypeForCommand', {
@@ -214,25 +205,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: {
             type: out.type,
             value: out.value,
-          },
-        }),
-      };
-    case 'wildcardNotSupportedForCommand':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForCommand', {
-          defaultMessage: 'Using wildcards (*) in {command} is not allowed [{value}]',
-          values: {
-            command: out.command,
-            value: out.value,
-          },
-        }),
-      };
-    case 'noWildcardSupportAsArg':
-      return {
-        message: i18n.translate('kbn-esql-ast.esql.validation.wildcardNotSupportedForFunction', {
-          defaultMessage: 'Using wildcards (*) in {name} is not allowed',
-          values: {
-            name: out.name,
           },
         }),
       };

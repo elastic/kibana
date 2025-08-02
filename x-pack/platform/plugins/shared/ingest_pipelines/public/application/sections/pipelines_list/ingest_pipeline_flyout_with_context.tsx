@@ -37,6 +37,13 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
     INGEST_PIPELINES_APP_LOCATOR
   );
 
+  const createPipeline = useCallback(
+    (name: string) => {
+      locator?.navigate({ page: INGEST_PIPELINES_PAGES.CREATE, pipelineId: name });
+    },
+    [locator]
+  );
+
   const editPipeline = useCallback(
     (name: string) => {
       locator?.navigate({ page: INGEST_PIPELINES_PAGES.EDIT, pipelineId: name });
@@ -61,9 +68,9 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
       >
         <KibanaContextProvider services={services}>
           <PipelineFlyout
-            embedded
-            pipeline={ingestPipelineName}
+            ingestPipeline={ingestPipelineName}
             onClose={onClose}
+            onCreateClick={createPipeline}
             onEditClick={editPipeline}
             onCloneClick={clonePipeline}
             onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}

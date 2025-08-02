@@ -76,7 +76,9 @@ export class IngestPipelinesLocatorDefinition implements LocatorDefinition<Inges
         });
         break;
       case INGEST_PIPELINES_PAGES.CREATE:
-        path = getCreatePath();
+        path = getCreatePath({
+          pipelineName: params.pipelineId,
+        });
         break;
       case INGEST_PIPELINES_PAGES.LIST:
         path = getListPath({

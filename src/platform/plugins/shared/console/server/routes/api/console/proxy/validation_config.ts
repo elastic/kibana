@@ -31,6 +31,7 @@ export const routeValidationConfig = {
     method: acceptedHttpVerb,
     path: nonEmptyString,
     withProductOrigin: schema.maybe(schema.boolean()),
+    host: schema.maybe(schema.string()),
   }),
   body: schema.stream(),
 };

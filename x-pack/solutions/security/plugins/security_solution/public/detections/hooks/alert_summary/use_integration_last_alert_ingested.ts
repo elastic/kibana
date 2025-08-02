@@ -48,7 +48,7 @@ export const useIntegrationLastAlertIngested = ({
   // We only keep the event.ingested field as it contains the time we want to display on the Integration card.
   const query = useMemo(
     () => `FROM ${`logs-${integrationName}.alert-default`}
-    | WHERE event.kind == "alert"
+    | WHERE event.kind == "alert" OR event.kind == "event"
     | SORT ${FIELD} DESC
     | KEEP ${FIELD}
     | LIMIT 1`,

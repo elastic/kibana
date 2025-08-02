@@ -43,14 +43,36 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: 'logs-failure-enabled@mappings',
         dataStreamOptions: { failure_store: { enabled: true } },
       });
+      await client.createComponentTemplate({
+        name: 'logs-failure-disabled@mappings',
+        dataStreamOptions: { failure_store: { enabled: false } },
+      });
       await es.indices.putIndexTemplate({
         name: enabledDs,
         index_patterns: [enabledDs],
         composed_of: [
-          'logs-failure-enabled@mappings',
           'logs@mappings',
           'logs@settings',
           'ecs@mappings',
+          'logs-failure-enabled@mappings',
+        ],
+        priority: 500,
+        allow_auto_create: true,
+        data_stream: { hidden: false },
+      });
+
+      await client.createComponentTemplate({
+        name: 'logs-failure-disabled@mappings',
+        dataStreamOptions: { failure_store: { enabled: true } },
+      });
+      await es.indices.putIndexTemplate({
+        name: disabledDs,
+        index_patterns: [disabledDs],
+        composed_of: [
+          'logs@mappings',
+          'logs@settings',
+          'ecs@mappings',
+          'logs-failure-disabled@mappings',
         ],
         priority: 500,
         allow_auto_create: true,
@@ -77,7 +99,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await es.indices.deleteIndexTemplate({ name: enabledDs });
+      await es.indices.deleteIndexTemplate({ name: disabledDs });
       await client.deleteComponentTemplate('logs-failure-enabled@mappings');
+      await client.deleteComponentTemplate('logs-failure-disabled@mappings');
       await client.clean();
     });
 

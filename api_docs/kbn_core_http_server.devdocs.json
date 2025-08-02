@@ -15125,6 +15125,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/stats.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/status.ts"
               },
               {
@@ -15685,6 +15693,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/create.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -16808,6 +16820,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/dashboards/create.ts"
               },
               {
                 "plugin": "securitySolution",

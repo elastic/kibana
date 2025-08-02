@@ -8,6 +8,8 @@
 import { mockAvailableDataViews } from '../../test_utils/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
+import { assertDiffAfterSavingUnchangedValue } from '../../test_utils/assert_diff_after_saving_unchanged_value';
+import { assertFieldValidation } from '../../test_utils/assert_field_validation';
 
 describe('Upgrade diffable rule "threshold" (threshold rule type) after preview in flyout', () => {
   beforeAll(() => {
@@ -38,6 +40,26 @@ describe('Upgrade diffable rule "threshold" (threshold rule type) after preview 
       customized,
       upgrade,
       resolvedValue,
+    },
+  });
+
+  assertDiffAfterSavingUnchangedValue({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      upgrade,
+    },
+  });
+
+  assertFieldValidation({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      upgrade,
+      // zero is invalid value
+      invalidValue: { value: 0, field: ['resolved'] },
     },
   });
 

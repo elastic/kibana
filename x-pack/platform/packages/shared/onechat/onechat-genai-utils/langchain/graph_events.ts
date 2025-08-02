@@ -14,6 +14,7 @@ import {
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -57,14 +58,14 @@ export const createToolCallEvent = (data: {
 export const createToolResultEvent = (data: {
   toolCallId: string;
   toolId: string;
-  result: string;
+  results: ToolResult[];
 }): ToolResultEvent => {
   return {
     type: ChatEventType.toolResult,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
-      result: data.result,
+      results: data.results,
     },
   };
 };

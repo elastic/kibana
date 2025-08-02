@@ -49,12 +49,16 @@ export default ({ getService }: FtrProviderContext) => {
           },
           schedule: { interval: '1m' },
         });
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
         await rulesService.api.deleteAllRules();
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('navigate and open alerts section', async () => {

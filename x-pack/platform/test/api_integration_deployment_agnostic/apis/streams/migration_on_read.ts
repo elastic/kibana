@@ -57,7 +57,7 @@ const streamDefinition = {
         },
       },
     ],
-    classic: {},
+    unwired: {},
   },
 };
 

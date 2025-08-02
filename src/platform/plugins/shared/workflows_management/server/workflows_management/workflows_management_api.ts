@@ -145,18 +145,31 @@ export class WorkflowsManagementApi {
 
     // Transform the logs to match our API format
     return {
-      logs: result.logs.map((log: any) => ({
-        id: log.id,
-        timestamp: log.source['@timestamp'],
-        level: log.source.level,
-        message: log.source.message,
-        stepId: log.source.workflow?.step_id,
-        stepName: log.source.workflow?.step_name,
-        connectorType: log.source.workflow?.step_type,
-        duration: log.source.duration,
-        additionalData: log.source.additionalData,
-      })),
-      total: typeof result.total === 'number' ? result.total : result.total?.value || 0,
+      logs: result.logs
+        .filter((log: any) => log) // Filter out undefined/null logs
+        .map((log: any) => ({
+          id:
+            log.id ||
+            `${log['@timestamp']}-${log.workflow?.execution_id}-${
+              log.workflow?.step_id || 'workflow'
+            }`,
+          timestamp: log['@timestamp'],
+          level: log.level,
+          message: log.message,
+          stepId: log.workflow?.step_id,
+          stepName: log.workflow?.step_name,
+          connectorType: log.workflow?.step_type,
+          duration: log.event?.duration,
+          additionalData: {
+            workflowId: log.workflow?.id,
+            workflowName: log.workflow?.name,
+            executionId: log.workflow?.execution_id,
+            event: log.event,
+            tags: log.tags,
+            error: log.error,
+          },
+        })),
+      total: result.total,
       limit: params.limit || 100,
       offset: params.offset || 0,
     };

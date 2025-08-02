@@ -38,11 +38,15 @@ export default ({ getService }: FtrProviderContext) => {
       const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
 
       before(async () => {
-        await esArchiver.load(`x-pack/test/functional/es_archives/security_solution/${index}`);
+        await esArchiver.load(
+          `x-pack/solutions/security/test/fixtures/es_archives/security_solution/${index}`
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(`x-pack/test/functional/es_archives/security_solution/${index}`);
+        await esArchiver.unload(
+          `x-pack/solutions/security/test/fixtures/es_archives/security_solution/${index}`
+        );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
@@ -181,11 +185,15 @@ export default ({ getService }: FtrProviderContext) => {
       const timestamp = '2020-10-28T06:00:00.000Z';
 
       before(async () => {
-        await esArchiver.load(`x-pack/test/functional/es_archives/security_solution/${index}`);
+        await esArchiver.load(
+          `x-pack/solutions/security/test/fixtures/es_archives/security_solution/${index}`
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(`x-pack/test/functional/es_archives/security_solution/${index}`);
+        await esArchiver.unload(
+          `x-pack/solutions/security/test/fixtures/es_archives/security_solution/${index}`
+        );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });

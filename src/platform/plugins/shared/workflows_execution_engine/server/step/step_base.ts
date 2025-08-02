@@ -61,10 +61,8 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
   public async run(): Promise<void> {
     const stepId = (this.step as any).id || this.getName();
-    const stepName = this.getName();
 
-    // Log step start
-    this.contextManager.logStepStart(stepName);
+    // RuntimeManager handles logging via startStep()
     await this.workflowState.startStep(stepId);
 
     // const stepEvent = {
@@ -84,7 +82,7 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       //   event: { ...stepEvent.event, outcome: 'success' },
       // });
 
-      this.contextManager.logStepComplete(stepName, stepName, true);
+      // RuntimeManager handles logging via finishStep()
       await this.workflowState.setStepResult(stepId, result);
     } catch (error) {
       // Log failure
@@ -97,13 +95,11 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
       //   event: { ...stepEvent.event, outcome: 'failure' },
       // });
 
-      this.contextManager.logStepComplete(stepName, stepName, false);
-
+      // RuntimeManager handles logging via finishStep()
       const result = await this.handleFailure(error);
       await this.workflowState.setStepResult(stepId, result);
     } finally {
-      // Clear step context
-      this.contextManager.clearCurrentStep();
+      // RuntimeManager handles all logging and cleanup
       await this.workflowState.finishStep(stepId);
     }
   }

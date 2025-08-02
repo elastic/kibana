@@ -56,7 +56,7 @@ export function ProfilingHeaderActionMenu() {
         color="primary"
       >
         {i18n.translate('xpack.profiling.headerActionMenu.addData', {
-          defaultMessage: 'Add Data',
+          defaultMessage: 'Add data',
         })}
       </EuiHeaderLink>
     </EuiHeaderLinks>

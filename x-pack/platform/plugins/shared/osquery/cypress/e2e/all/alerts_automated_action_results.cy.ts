@@ -11,8 +11,7 @@ import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../..
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-// FLAKY: https://github.com/elastic/kibana/issues/218208
-describe.skip(
+describe(
   'Alert Flyout Automated Action Results',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
@@ -55,7 +54,7 @@ describe.skip(
           // @ts-expect-error-next-line href string - check types
           cy.visit($href);
           cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-            cy.contains(/action_data\{[^}]*"query":[^}]*\}/);
+            cy.contains(/action_data\.query\s*.+;/);
           });
           cy.contains(discoverRegex);
         });

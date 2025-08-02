@@ -97,9 +97,9 @@ describe('APMSection', () => {
       <APMSection bucketSize={bucketSize} />
     );
 
-    expect(getByRole('heading')).toHaveTextContent('Services');
+    expect(getByRole('heading')).toHaveTextContent('Service inventory');
     expect(getByText('Show service inventory')).toBeInTheDocument();
-    assertServiceStat('Services', '11');
+    assertServiceStat('Service inventory', '11');
     expect(getByText('900.0 tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
@@ -114,9 +114,9 @@ describe('APMSection', () => {
       <APMSection bucketSize={bucketSize} />
     );
 
-    expect(getByRole('heading')).toHaveTextContent('Services');
+    expect(getByRole('heading')).toHaveTextContent('Service inventory');
     expect(getByText('Show service inventory')).toBeInTheDocument();
-    assertServiceStat('Services', '11');
+    assertServiceStat('Service inventory', '11');
     expect(getByText('312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
@@ -130,7 +130,7 @@ describe('APMSection', () => {
       <APMSection bucketSize={bucketSize} />
     );
 
-    expect(getByRole('heading')).toHaveTextContent('Services');
+    expect(getByRole('heading')).toHaveTextContent('Service inventory');
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('Show service inventory')).toEqual([]);
     expect(getAllByLabelText('Statistic is loading').length).toEqual(2);

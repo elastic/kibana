@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '@kbn/alerts-ui-shared/src/common/types/rule_types';
+export type * from '@kbn/alerts-ui-shared/src/common/types/rule_types';

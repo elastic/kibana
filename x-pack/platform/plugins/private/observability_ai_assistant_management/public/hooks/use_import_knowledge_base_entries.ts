@@ -46,6 +46,7 @@ export function useImportKnowledgeBaseEntries() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { entries }) => {
         toasts.addSuccess(
           i18n.translate(

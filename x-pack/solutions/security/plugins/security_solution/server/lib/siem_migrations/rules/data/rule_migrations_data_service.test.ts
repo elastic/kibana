@@ -10,19 +10,20 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
 import { Subject } from 'rxjs';
-import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
+import type { RuleMigrationIndexNameProviders } from '../types';
 import type { SetupParams } from './rule_migrations_data_service';
 import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 import { RuleMigrationIndexMigrator } from '../index_migrators';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('../index_migrators');
 
 jest.mock('@kbn/index-adapter');
 
 // This mock is required to have a way to await the index pattern name promise
-let mockIndexNameProviders: IndexNameProviders;
+let mockIndexNameProviders: RuleMigrationIndexNameProviders;
 jest.mock('./rule_migrations_data_client', () => ({
-  RuleMigrationsDataClient: jest.fn((indexNameProviders: IndexNameProviders) => {
+  RuleMigrationsDataClient: jest.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
     mockIndexNameProviders = indexNameProviders;
   }),
 }));
@@ -32,7 +33,7 @@ const MockedIndexPatternAdapter = IndexPatternAdapter as unknown as jest.MockedC
 >;
 const MockedIndexAdapter = IndexAdapter as unknown as jest.MockedClass<typeof IndexAdapter>;
 
-const dependencies = {} as SiemRuleMigrationsClientDependencies;
+const dependencies = {} as SiemMigrationsClientDependencies;
 const esClient = elasticsearchServiceMock.createStart().client.asInternalUser;
 
 describe('SiemRuleMigrationsDataService', () => {

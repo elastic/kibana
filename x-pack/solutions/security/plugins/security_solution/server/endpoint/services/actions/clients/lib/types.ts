@@ -6,6 +6,7 @@
  */
 
 import type { Readable } from 'stream';
+import type { CustomScriptsRequestQueryParams } from '../../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
@@ -157,7 +158,9 @@ export interface ResponseActionsClient {
   /**
    * Retrieves a list of all custom scripts for a given agent type - ** not a Response Action **
    */
-  getCustomScripts: () => Promise<CustomScriptsResponse>;
+  getCustomScripts: (
+    options?: Omit<CustomScriptsRequestQueryParams, 'agentType'>
+  ) => Promise<CustomScriptsResponse>;
 
   /**
    * Retrieve a file for download
@@ -202,5 +205,5 @@ export interface ResponseActionsClient {
  */
 export type ResponseActionsClientMethods = keyof Omit<
   ResponseActionsClient,
-  'processPendingActions' | 'getFileInfo' | 'getFileDownload'
+  'processPendingActions' | 'getFileInfo' | 'getFileDownload' | 'getCustomScripts'
 >;

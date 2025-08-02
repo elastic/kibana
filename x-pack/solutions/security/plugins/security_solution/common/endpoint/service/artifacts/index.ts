@@ -13,4 +13,4 @@ export {
   getArtifactTagsByPolicySelection,
 } from './utils';
 
-export { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';
+export { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG, ADVANCED_MODE_TAG } from './constants';

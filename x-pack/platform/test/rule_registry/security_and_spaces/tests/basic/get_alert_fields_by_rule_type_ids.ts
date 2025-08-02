@@ -42,8 +42,12 @@ export default ({ getService }: FtrProviderContext) => {
     let securityRuleId: string;
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
+      );
 
       await installKibanaSampleData();
 
@@ -80,8 +84,12 @@ export default ({ getService }: FtrProviderContext) => {
         .set('x-elastic-internal-origin', 'foo')
         .expect(204);
 
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
+      );
     });
 
     describe('Users:', () => {

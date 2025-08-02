@@ -43,6 +43,7 @@ import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './
 import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
 import { PrivilegeMonitoringApiKeyType } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
+import { getSiemMigrationClients } from './lib/siem_migrations';
 
 export interface IRequestContextFactory {
   create(
@@ -212,21 +213,19 @@ export class RequestContextFactory implements IRequestContextFactory {
         })
       ),
 
-      getSiemRuleMigrationsClient: memoize(() =>
-        siemMigrationsService.createRulesClient({
-          request,
-          currentUser: coreContext.security.authc.getCurrentUser(),
-          spaceId: getSpaceId(),
-          dependencies: {
-            inferenceClient: startPlugins.inference.getClient({ request }),
-            rulesClient,
-            actionsClient,
-            savedObjectsClient: coreContext.savedObjects.client,
-            packageService: startPlugins.fleet?.packageService,
-            telemetry: core.analytics,
-          },
-        })
-      ),
+      siemMigrations: getSiemMigrationClients(siemMigrationsService, {
+        request,
+        currentUser: coreContext.security.authc.getCurrentUser(),
+        spaceId: getSpaceId(),
+        dependencies: {
+          inferenceClient: startPlugins.inference.getClient({ request }),
+          rulesClient,
+          actionsClient,
+          savedObjectsClient: coreContext.savedObjects.client,
+          packageService: startPlugins.fleet?.packageService,
+          telemetry: core.analytics,
+        },
+      }),
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),
 

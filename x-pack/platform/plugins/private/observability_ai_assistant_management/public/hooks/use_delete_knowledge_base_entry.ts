@@ -38,6 +38,7 @@ export function useDeleteKnowledgeBaseEntry() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { id, isUserInstruction }) => {
         if (isUserInstruction) {
           toasts.addSuccess(
