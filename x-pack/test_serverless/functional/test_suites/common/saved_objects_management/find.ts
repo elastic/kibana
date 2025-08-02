@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/hidden_saved_objects'
         );
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/hidden_saved_objects'
         );
         // emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",

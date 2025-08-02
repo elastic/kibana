@@ -24,24 +24,24 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('all cases metrics', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
         { space: 'space1' }
       );
 
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
         { space: 'space2' }
       );
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
         { space: 'space1' }
       );
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
         { space: 'space2' }
       );
       await deleteAllCaseItems(es);
