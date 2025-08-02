@@ -211,3 +211,9 @@ actions:
               examples:
                 getRolesResponse1:
                   $ref: '../examples/get_roles_response1.yaml'
+  - target: '$.paths[*][*]'
+    description: Add x-metaTags for Kibana product name
+    update:
+      x-metaTags:
+        - content: Kibana
+          name: product_name
