@@ -36,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'bulkEditAlertSuppressionEnabled',
+          'doesNotMatchForIndicatorMatchRuleEnabled',
         ])}`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',

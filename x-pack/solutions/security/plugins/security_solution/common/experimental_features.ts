@@ -211,6 +211,11 @@ export const allowedExperimentalValues = Object.freeze({
   bulkEditAlertSuppressionEnabled: true,
 
   /**
+   * Enables the ability to use does not match condition for indicator match rules
+   */
+  doesNotMatchForIndicatorMatchRuleEnabled: true, // enabled for PR testing purposes only. Will be set to false before merge
+
+  /**
    * Enables the new data ingestion hub
    */
   dataIngestionHubEnabled: false,

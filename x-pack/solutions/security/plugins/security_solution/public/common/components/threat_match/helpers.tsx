@@ -7,9 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { addIdToItem } from '@kbn/securitysolution-utils';
-import type { ThreatMap } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
+
 import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './types';
 
 /**
@@ -46,6 +47,7 @@ export const getFormattedEntry = (
       type: 'string',
     },
     entryIndex: itemIndex,
+    negate: item.negate ?? false, // Default to false if negate is not provided
   };
 };
 
@@ -101,6 +103,7 @@ export const getEntryOnFieldChange = (
       field: newField != null ? newField.name : '',
       type: 'mapping',
       value: item.value != null ? item.value.name : '',
+      negate: item.negate ?? false,
     } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
     index: entryIndex,
   };
@@ -124,7 +127,25 @@ export const getEntryOnThreatFieldChange = (
       field: item.field != null ? item.field.name : '',
       type: 'mapping',
       value: newField != null ? newField.name : '',
+      negate: item.negate ?? false,
     } as Entry, // Cast to Entry since id is only used as a react key prop and can be ignored elsewhere
+    index: entryIndex,
+  };
+};
+
+export const getEntryOnMatchChange = (
+  item: FormattedEntry,
+  newNegate: boolean
+): { updatedEntry: Entry & { id: string }; index: number } => {
+  const { entryIndex, field, value, id } = item;
+  return {
+    updatedEntry: {
+      id,
+      field: field?.name ?? '',
+      type: 'mapping',
+      value: value?.name ?? '',
+      negate: newNegate ?? false,
+    },
     index: entryIndex,
   };
 };
@@ -134,16 +155,18 @@ export const createAndNewEntryItem = (): EmptyEntry => {
     field: '',
     type: 'mapping',
     value: '',
+    negate: false,
   });
 };
 
-export const createOrNewEntryItem = (): ThreatMap => {
+export const createOrNewEntryItem = (): ThreatMapping['0'] => {
   return addIdToItem({
     entries: [
       addIdToItem({
         field: '',
         type: 'mapping',
         value: '',
+        negate: false,
       }),
     ],
   });

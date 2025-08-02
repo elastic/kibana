@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import {
   filterThreatMapping,
   buildThreatMappingFilter,
@@ -25,7 +21,7 @@ import {
   getThreatMappingFilterShouldMock,
   getThreatListSearchResponseMock,
 } from './build_threat_mapping_filter.mock';
-import type { BooleanFilter, ThreatListItem } from './types';
+import type { BooleanFilter, ThreatListItem, ThreatMappingEntries } from './types';
 
 describe('build_threat_mapping_filter', () => {
   describe('buildThreatMappingFilter', () => {
@@ -208,6 +204,82 @@ describe('build_threat_mapping_filter', () => {
         },
       } = getThreatMappingFilterShouldMock();
       expect(innerClause).toEqual(filter);
+    });
+
+    test('it should create a correct query for negate=true mapping entry', () => {
+      const threatListItem = getThreatListSearchResponseMock().hits.hits[0];
+      const innerClause = createInnerAndClauses({
+        threatMappingEntries: [
+          {
+            field: 'host.name',
+            type: 'mapping',
+            value: 'host.name',
+          },
+          {
+            field: 'host.ip',
+            type: 'mapping',
+            value: 'host.ip',
+            negate: true,
+          },
+        ],
+        threatListItem,
+        entryKey: 'value',
+      });
+
+      expect(innerClause).toEqual([
+        {
+          match: {
+            'host.name': {
+              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
+              query: 'host-1',
+            },
+          },
+        },
+        {
+          bool: {
+            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
+            must_not: { match: { 'host.ip': { query: '192.168.0.0.1' } } },
+          },
+        },
+      ]);
+    });
+
+    test('it should create a correct query for negate=true mapping entry when not matching field is undefined', () => {
+      const threatListItem = getThreatListItemMock({ fields: { 'host.name': ['host-a'] } });
+      const innerClause = createInnerAndClauses({
+        threatMappingEntries: [
+          {
+            field: 'host.name',
+            type: 'mapping',
+            value: 'host.name',
+          },
+          {
+            field: 'host.ip',
+            type: 'mapping',
+            value: 'host.ip',
+            negate: true,
+          },
+        ],
+        threatListItem,
+        entryKey: 'value',
+      });
+
+      expect(innerClause).toEqual([
+        {
+          match: {
+            'host.name': {
+              _name: '123__SEP__threat_index__SEP__host.name__SEP__host.name__SEP__mq',
+              query: 'host-a',
+            },
+          },
+        },
+        {
+          exists: {
+            _name: '123__SEP__threat_index__SEP__host.ip__SEP__host.ip__SEP__mq__SEP__negate',
+            field: 'host.ip',
+          },
+        },
+      ]);
     });
 
     test('it should return an empty array given an empty array', () => {

@@ -15,6 +15,10 @@ import type { FormData, ValidationFunc } from '../../../../../shared_imports';
 import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
 import { THREAT_MATCH_MAPPING_ERROR_CODES } from './error_codes';
 import { getUnknownThreatMatchMappingFieldNames } from './get_unknown_threat_match_mapping_field_names';
+import {
+  containsDoesNotMatchEntriesOnly,
+  containsInvalidDoesNotMatchEntries,
+} from '../../../../../../common/utils/request_validation/indicator_match';
 
 interface ThreatMatchMappingValidatorFactoryParams {
   indexPatterns: DataViewBase;
@@ -108,6 +112,34 @@ export function threatMatchMappingValidatorFactory({
             values: {
               unknownThreatMatchIndicesFields: `"${unknownThreatMatchIndicesFields.join('", "')}"`,
             },
+          }
+        ),
+      };
+    }
+
+    if (containsDoesNotMatchEntriesOnly(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_SINGLE_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.singleNotMatchClauseError',
+          {
+            defaultMessage:
+              'DOES NOT MATCH cannot be used as a single entry in AND condition. It must be used with at least one MATCHES entry.',
+          }
+        ),
+      };
+    }
+
+    if (containsInvalidDoesNotMatchEntries(value)) {
+      return {
+        code: THREAT_MATCH_MAPPING_ERROR_CODES.ERR_INVALID_NOT_MATCH_CLAUSE,
+        path,
+        message: i18n.translate(
+          'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.invalidNotMatchClauseError',
+          {
+            defaultMessage:
+              'DOES NOT MATCH entry can not use the same mapping fields as MATCHES entry in the same AND condition.',
           }
         ),
       };
