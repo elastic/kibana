@@ -44,6 +44,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const importedRule = await fetchRule(supertest, { ruleId: 'rule-1' });
 
       expect(importedRule.name).toBe('Rule 2');
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
 
     it('DOES NOT report a conflict if there is an attempt to import a rule twice', async () => {
@@ -74,6 +78,10 @@ export default ({ getService }: FtrProviderContext): void => {
         success_count: 1,
         rules_count: 1,
       });
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
 
     it('overwrites an existing rule', async () => {
@@ -110,6 +118,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const importedRule = await fetchRule(supertest, { ruleId: 'existing-rule' });
 
       expect(importedRule.name).toBe('Imported rule');
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
 
     /**
@@ -186,6 +198,10 @@ export default ({ getService }: FtrProviderContext): void => {
           throttle: expect.anything(),
         })
       );
+
+      log.debug('THIS IS A DEBUG LOG FROM TEST SUITE');
+      log.error('THIS IS AN ERROR LOG FROM TEST SUITE');
+      expect(true).toBe(false);
     });
   });
 };

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 
 export async function findLatestPackageVersion(
   context: SecuritySolutionApiRequestHandlerContext,
-  packageName: string
+  packageName: string,
+  logger: Logger
 ) {
   const securityAppClient = context.getAppClient();
   const packageClient = context.getInternalFleetServices().packages;
@@ -20,9 +22,24 @@ export async function findLatestPackageVersion(
     (securityAppClient.getKibanaVersion().includes('-SNAPSHOT') ||
       securityAppClient.getKibanaBranch() === 'main');
 
-  const result = await packageClient.fetchFindLatestPackage(packageName, {
-    prerelease: isPrerelease,
-  });
+  try {
+    logger.debug(
+      `fetchFindLatestPackage: Querying Fleet for latest available version of package "${packageName}" with prerelease=${isPrerelease}`
+    );
+    const result = await packageClient.fetchFindLatestPackage(packageName, {
+      prerelease: isPrerelease,
+    });
 
-  return result.version;
+    logger.debug(
+      `fetchFindLatestPackage: Found latest version ${result.version} for package "${packageName}" with prerelease=${isPrerelease}`
+    );
+
+    return result.version;
+  } catch (error) {
+    logger.error(
+      `fetchFindLatestPackage: Error finding latest package version for "${packageName}" with prerelease=${isPrerelease}`,
+      error
+    );
+    throw error;
+  }
 }

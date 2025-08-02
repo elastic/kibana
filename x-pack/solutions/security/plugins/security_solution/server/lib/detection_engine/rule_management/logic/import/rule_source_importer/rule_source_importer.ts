@@ -12,6 +12,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
 import type {
   RuleResponse,
@@ -101,19 +102,23 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private currentRulesById: Record<string, RuleResponse> = {};
   private rulesToImport: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
+  private logger: Logger;
 
   constructor({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logger,
   }: {
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+    logger: Logger;
   }) {
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
+    this.logger = logger;
   }
 
   /**
@@ -122,8 +127,17 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    * package is installed and fetching the associated prebuilt rule assets.
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
+    try {
+      throw new Error('MY TEST ERROR');
+    } catch (error) {
+      this.logger.error('THIS IS A THROWN ERROR', error);
+    }
+    this.logger.error('THIS IS A TEST ERROR');
+    this.logger.warn('THIS IS A TEST WARN');
+    this.logger.info('THIS IS A TEST INFO');
+    this.logger.debug('THIS IS A TEST DEBUG');
     if (!this.latestPackagesInstalled) {
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context);
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logger);
       this.latestPackagesInstalled = true;
     }
 
@@ -207,14 +221,17 @@ export const createRuleSourceImporter = ({
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
+  logger,
 }: {
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+  logger: Logger;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logger,
   });
 };
