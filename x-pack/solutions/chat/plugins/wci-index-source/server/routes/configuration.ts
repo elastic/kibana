@@ -8,7 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
-import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
+import { getDefaultConnector } from '@kbn/wc-genai-utils'; // remove getConnectList file
+import { getConnectorList } from '@kbn/inference-common';
 import type {
   GenerateConfigurationResponse,
   SearchIndicesResponse,

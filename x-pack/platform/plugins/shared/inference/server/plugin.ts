@@ -12,6 +12,7 @@ import {
   InferenceClient,
   aiAnonymizationSettings,
   AnonymizationSettings,
+  getConnectorList,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
@@ -108,6 +109,10 @@ export class InferencePlugin
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           logger: this.logger,
         });
+      },
+
+      getConnectorList: async (request: KibanaRequest) => {
+        return getConnectorList({ actions: pluginsStart.actions, request });
       },
     };
   }
