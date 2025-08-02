@@ -10,7 +10,7 @@
 import { parse } from '../../parser';
 import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer2';
 
 const reprint = (src: string) => {
   const { root } = parse(src);
