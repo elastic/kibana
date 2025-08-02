@@ -2424,8 +2424,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/224699
-    describe.skip('shard failures', () => {
+    describe('shard failures', () => {
       const config = getService('config');
       const isServerless = config.get('serverless');
       const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -2474,7 +2473,7 @@ export default ({ getService }: FtrProviderContext) => {
           ])
         );
 
-        expect(previewAlerts?.length).toBeGreaterThan(0);
+        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {
