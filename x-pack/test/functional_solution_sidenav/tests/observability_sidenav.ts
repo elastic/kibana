@@ -49,16 +49,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           deepLinkId: 'observabilityOnboarding',
         });
 
-        // open apm (Application) panel using the link button (not the button icon)
-        await solutionNavigation.sidenav.openPanel('apm', { button: 'link' });
+        // open application panel
+        await solutionNavigation.sidenav.openPanel('applications');
         {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
           expect(isOpen).to.be(true);
         }
 
-        await solutionNavigation.sidenav.closePanel('apm', { button: 'link' });
+        await solutionNavigation.sidenav.closePanel('applications');
         {
-          const isOpen = await solutionNavigation.sidenav.isPanelOpen('apm');
+          const isOpen = await solutionNavigation.sidenav.isPanelOpen('applications');
           expect(isOpen).to.be(false);
         }
 

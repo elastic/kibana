@@ -76,13 +76,15 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            id: 'apm',
+            id: 'applications',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
+                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:services',
