@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/defaults';

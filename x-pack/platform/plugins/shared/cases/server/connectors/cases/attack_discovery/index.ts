@@ -7,4 +7,4 @@
 
 export * from './constants';
 export * from './group_alerts';
-export * from './types';
+export type * from './types';

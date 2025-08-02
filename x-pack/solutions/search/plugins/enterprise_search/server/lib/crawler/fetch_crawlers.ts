@@ -28,6 +28,7 @@ export const fetchMostRecentCrawlerRequestByConfigurationId = async (
     const result = crawlRequestResult.hits.hits[0]?._source;
 
     return result;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return undefined;
   }
@@ -44,6 +45,7 @@ export const fetchCrawlerByIndexName = async (
       query: { term: { index_name: indexName } },
     });
     crawler = crawlerResult.hits.hits[0]?._source;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return undefined;
   }
@@ -59,6 +61,7 @@ export const fetchCrawlerByIndexName = async (
         ...crawler,
         most_recent_crawl_request_status: mostRecentCrawlRequest?.status,
       };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       return crawler;
     }
@@ -77,6 +80,7 @@ export const fetchCrawlers = async (
   let crawlers: Crawler[];
   try {
     crawlers = await fetchAll<Crawler>(client, CRAWLER_CONFIGURATIONS_INDEX, query);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return [];
   }
@@ -97,6 +101,7 @@ export const fetchCrawlers = async (
       })
     );
     return crawlersWithStatuses;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return crawlers;
   }

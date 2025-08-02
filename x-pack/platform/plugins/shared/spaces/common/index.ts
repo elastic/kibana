@@ -21,4 +21,4 @@ export type {
   GetSpaceResult,
   SolutionView,
 } from './types/latest';
-export { spaceV1 } from './types';
+export type { spaceV1 } from './types';

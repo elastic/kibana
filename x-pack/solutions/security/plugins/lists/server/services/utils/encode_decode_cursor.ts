@@ -124,6 +124,7 @@ export const decodeCursor = ({
 export const parseOrUndefined = (input: string): ContextCursor | undefined => {
   try {
     return JSON.parse(input);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return undefined;
   }
