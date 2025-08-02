@@ -31,11 +31,17 @@ jest.mock('./tasks/privilege_monitoring_task', () => {
   };
 });
 
+const mockFind = jest.fn().mockResolvedValue({
+  saved_objects: [],
+  total: 0,
+});
+
 jest.mock('./saved_objects', () => {
   return {
     MonitoringEntitySourceDescriptorClient: jest.fn().mockImplementation(() => ({
       findByIndex: jest.fn().mockResolvedValue([]),
       create: jest.fn(),
+      find: mockFind,
     })),
     PrivilegeMonitoringEngineDescriptorClient: jest.fn().mockImplementation(() => ({
       init: jest.fn().mockResolvedValue({ status: 'success' }),
