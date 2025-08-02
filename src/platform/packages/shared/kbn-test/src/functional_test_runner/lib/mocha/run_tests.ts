@@ -8,6 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
+import agent from 'elastic-apm-node';
 import { Lifecycle } from '../lifecycle';
 import { Mocha } from '../../fake_mocha_types';
 
@@ -24,6 +25,10 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?:
   let runComplete = false;
   const runner = mocha.run(() => {
     runComplete = true;
+  });
+
+  lifecycle.cleanup.add(async () => {
+    await agent.flush().catch((error) => {});
   });
 
   Rx.race(
