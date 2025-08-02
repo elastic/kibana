@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../../../tasks/navigation';
-import { getNewRule } from '../../../../../objects/rule';
+import { visitWithTimeRange } from '../../../../tasks/navigation';
+import { getNewRule } from '../../../../objects/rule';
 import {
   closeAlertFlyout,
   closeAlerts,
@@ -14,13 +14,13 @@ import {
   selectFirstPageAlerts,
   selectNumberOfAlerts,
   selectPageFilterValue,
-} from '../../../../../tasks/alerts';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { login } from '../../../../../tasks/login';
-import { getDefaultUsername } from '../../../../../tasks/common/users';
-import { ALERTS_URL } from '../../../../../urls/navigation';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
+} from '../../../../tasks/alerts';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { login } from '../../../../tasks/login';
+import { getDefaultUsername } from '../../../../tasks/common/users';
+import { ALERTS_URL } from '../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   alertDetailsFlyoutShowsAssignees,
   alertsTableShowsAssigneesForAlert,
@@ -37,8 +37,8 @@ import {
   updateAssigneesViaAddButtonInFlyout,
   updateAssigneesViaTakeActionButtonInFlyout,
   removeAllAssigneesViaTakeActionButtonInFlyout,
-} from '../../../../../tasks/alert_assignments';
-import { ALERTS_COUNT } from '../../../../../screens/alerts';
+} from '../../../../tasks/alert_assignments';
+import { ALERTS_COUNT } from '../../../../screens/alerts';
 
 // FLAKY: https://github.com/elastic/kibana/issues/183787
 describe.skip('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverless'] }, () => {
