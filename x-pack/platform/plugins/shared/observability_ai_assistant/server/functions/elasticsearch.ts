@@ -9,6 +9,24 @@ import type { FunctionRegistrationParameters } from '.';
 
 export const ELASTICSEARCH_FUNCTION_NAME = 'elasticsearch';
 
+/**
+ * Determines if the given HTTP method and path are allowed for the Elasticsearch tool.
+ * Only GET requests and POST requests to the "_search" endpoint are permitted.
+ *
+ * @param method - The HTTP method (GET, POST, PUT, DELETE, PATCH)
+ * @param path - The Elasticsearch API path
+ * @returns true if the operation is allowed, false otherwise
+ */
+function isOperationAllowed(method: string, path: string): boolean {
+  // Allowlist: (1) all GET requests, (2) POST requests whose *final* path segment is exactly "_search".
+  const [pathWithoutQuery] = path.split('?');
+  const pathSegments = pathWithoutQuery.replace(/^\//, '').split('/');
+  const lastPathSegment = pathSegments[pathSegments.length - 1];
+  const isSearchEndpoint = lastPathSegment === '_search';
+
+  return method === 'GET' || (method === 'POST' && isSearchEndpoint);
+}
+
 export function registerElasticsearchFunction({
   functions,
   resources,
@@ -52,13 +70,7 @@ export function registerElasticsearchFunction({
       },
     },
     async ({ arguments: { method, path, body } }) => {
-      // Allowlist: (1) all GET requests, (2) POST requests whose *final* path segment is exactly "_search".
-      const [pathWithoutQuery] = path.split('?');
-      const pathSegments = pathWithoutQuery.replace(/^\//, '').split('/');
-      const lastPathSegment = pathSegments[pathSegments.length - 1];
-      const isSearchEndpoint = lastPathSegment === '_search';
-
-      if (method !== 'GET' && !(method === 'POST' && isSearchEndpoint)) {
+      if (!isOperationAllowed(method, path)) {
         throw new Error(
           'Only GET requests or POST requests to the "_search" endpoint are permitted through this assistant function.'
         );
