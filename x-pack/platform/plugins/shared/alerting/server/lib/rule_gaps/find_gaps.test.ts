@@ -32,6 +32,12 @@ const createMockGapEvent = () => ({
         },
       },
     },
+    saved_objects: [
+      {
+        type: 'alert',
+        id: 'rule-id',
+      },
+    ],
   },
 });
 
@@ -176,7 +182,7 @@ describe('findGapsSearchAfter', () => {
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
       params: {
-        ruleId: 'test-rule',
+        ruleIds: ['test-rule'],
         start: '2024-01-01',
         end: '2024-01-02',
         perPage: 10,
@@ -207,7 +213,7 @@ describe('findGapsSearchAfter', () => {
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
       params: {
-        ruleId: 'test-rule',
+        ruleIds: ['test-rule'],
         start: '2024-01-01',
         end: '2024-01-02',
         perPage: 10,
@@ -240,7 +246,7 @@ describe('findGapsSearchAfter', () => {
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
       params: {
-        ruleId: 'test-rule',
+        ruleIds: ['test-rule'],
         perPage: 10,
         start: '2024-01-01',
         end: '2024-01-02',
@@ -270,7 +276,7 @@ describe('findGapsSearchAfter', () => {
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
       params: {
-        ruleId: 'test-rule',
+        ruleIds: ['test-rule'],
         perPage: 10,
         sortField: 'kibana.alert.rule.gap.total_gap_duration_ms',
         sortOrder: 'asc',
@@ -297,7 +303,7 @@ describe('findGapsSearchAfter', () => {
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         params: {
-          ruleId: 'test-rule',
+          ruleIds: ['test-rule'],
           perPage: 10,
           start: '2024-01-01',
           end: '2024-01-02',
@@ -306,7 +312,9 @@ describe('findGapsSearchAfter', () => {
     ).rejects.toThrow(error);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to find gaps with search after for rule test-rule')
+      expect.stringContaining(
+        'Failed to find gaps with search after for rules test-rule: Test error'
+      )
     );
   });
 });
