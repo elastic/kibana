@@ -17,6 +17,7 @@ import type {
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AiAssistantManagementObservabilityPluginSetup {}
@@ -36,6 +37,7 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
+  licensing: LicensingPluginStart;
 }
 
 export interface ConfigSchema {
@@ -96,6 +98,19 @@ export class AiAssistantManagementObservabilityPlugin
             config: this.config,
           });
         },
+      });
+
+      void core.getStartServices().then(([_, depsStart]) => {
+        depsStart.licensing.license$.subscribe((next) => {
+          const isValidLicense = next.hasAtLeast('enterprise');
+
+          if (!isValidLicense) {
+            const app = management.sections.section.kibana.getApp(
+              'observabilityAiAssistantManagement'
+            );
+            app?.disable();
+          }
+        });
       });
     }
 

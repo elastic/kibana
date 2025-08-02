@@ -33,14 +33,19 @@ export function AiAssistantSelectionPage() {
     buildFlavor,
     kibanaBranch,
     securityAIAssistantEnabled,
+    observabilityAIAssistantEnabled,
   } = useAppContext();
   const aiAssistantManagementSelection =
     capabilities.management.kibana.aiAssistantManagementSelection;
-  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
+  const observabilityAIAssistantCapabilityEnabled = capabilities.observabilityAIAssistant?.show;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
   const isSecurityAIAssistantEnabled = securityAIAssistantEnabled && aiAssistantManagementSelection;
+  const isObservabilityAIAssistantEnabled =
+    observabilityAIAssistantCapabilityEnabled &&
+    observabilityAIAssistantEnabled &&
+    aiAssistantManagementSelection;
 
   useEffect(() => {
     setBreadcrumbs([
@@ -85,7 +90,7 @@ export function AiAssistantSelectionPage() {
             data-test-subj="aiAssistantSelectionPageObservabilityCard"
             description={
               <div>
-                {!observabilityAIAssistantEnabled ? (
+                {!isObservabilityAIAssistantEnabled ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
@@ -124,7 +129,7 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {observabilityAIAssistantEnabled && (
+                {isObservabilityAIAssistantEnabled && (
                   <EuiButton
                     iconType="gear"
                     data-test-subj="pluginsAiAssistantSelectionPageButton"
@@ -145,7 +150,7 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={<EuiIcon size="xxl" type="logoObservability" />}
-            isDisabled={!observabilityAIAssistantEnabled}
+            isDisabled={!isObservabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
               { defaultMessage: 'Elastic AI Assistant for Observability and Search' }

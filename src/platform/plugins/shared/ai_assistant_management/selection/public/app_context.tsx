@@ -21,6 +21,7 @@ interface ContextValue extends StartDependencies {
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
   securityAIAssistantEnabled: boolean;
+  observabilityAIAssistantEnabled: boolean;
 }
 
 const AppContext = createContext<ContextValue>(null as any);

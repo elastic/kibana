@@ -27,6 +27,7 @@ interface MountParams {
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
   securityAIAssistantEnabled: boolean;
+  observabilityAIAssistantEnabled: boolean;
 }
 
 export const mountManagementSection = async ({
@@ -35,6 +36,7 @@ export const mountManagementSection = async ({
   kibanaBranch,
   buildFlavor,
   securityAIAssistantEnabled,
+  observabilityAIAssistantEnabled,
 }: MountParams) => {
   const [coreStart, startDeps] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -59,6 +61,7 @@ export const mountManagementSection = async ({
               kibanaBranch,
               buildFlavor,
               securityAIAssistantEnabled,
+              observabilityAIAssistantEnabled,
             }}
           >
             <RouterProvider history={history} router={aIAssistantManagementSelectionRouter as any}>

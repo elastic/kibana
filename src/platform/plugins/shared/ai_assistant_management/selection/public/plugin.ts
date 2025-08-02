@@ -14,6 +14,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginSetup } from '@kbn/serverless/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { BuildFlavor } from '@kbn/config';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
 
@@ -30,8 +31,9 @@ export interface SetupDependencies {
   serverless?: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
+export interface StartDependencies {
+  licensing: LicensingPluginStart;
+}
 
 export class AIAssistantManagementPlugin
   implements
@@ -87,14 +89,30 @@ export class AIAssistantManagementPlugin
           .getAppsEnabled()
           .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
 
+        const observabilityAIAssistantEnabled = !!management?.sections.section.kibana
+          .getAppsEnabled()
+          .find((app) => app.id === 'observabilityAiAssistantManagement' && app.enabled);
+
         return mountManagementSection({
           core,
           mountParams,
           kibanaBranch: this.kibanaBranch,
           buildFlavor: this.buildFlavor,
           securityAIAssistantEnabled,
+          observabilityAIAssistantEnabled,
         });
       },
+    });
+
+    void core.getStartServices().then(([_, depsStart]) => {
+      depsStart.licensing.license$.subscribe((next) => {
+        const isValidLicense = next.hasAtLeast('enterprise');
+
+        if (!isValidLicense) {
+          const app = management.sections.section.kibana.getApp('aiAssistantManagementSelection');
+          app?.disable();
+        }
+      });
     });
 
     return {};
