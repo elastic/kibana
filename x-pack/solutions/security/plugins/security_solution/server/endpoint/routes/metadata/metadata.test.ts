@@ -62,7 +62,10 @@ import type {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
-import type { TransformGetTransformStatsResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  TransformGetTransformStatsResponse,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
