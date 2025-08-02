@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
-import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
-import { LocatorParams } from '@kbn/reporting-common/types';
-import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
-import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
-import type { ExportModalShareOpts } from '.';
-import { checkLicense } from '../..';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ShareContext, ExportShare } from '@kbn/share-plugin/public';
+import type { LocatorParams } from '@kbn/reporting-common/types';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../../types';
+import { CsvSearchModeParams, getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
+import { ExportModalShareOpts } from '../../share_context_menu';
 
 export const getCsvReportParams: ReportParamsGetter<
   ReportParamsGetterOptions & { forShareUrl?: boolean },
@@ -51,14 +50,15 @@ export const getCsvReportParams: ReportParamsGetter<
   };
 };
 
-export const reportingCsvExportProvider = ({
-  apiClient,
-  startServices$,
-}: ExportModalShareOpts): ExportShare => {
-  const getShareMenuItems = ({
+/**
+ * @description Returns config for the CSV export integration
+ */
+export const getShareMenuItems =
+  ({ apiClient, startServices$ }: ExportModalShareOpts) =>
+  ({
     objectType,
     sharingData,
-  }: ShareContext): ReturnType<ExportShare['config']> => {
+  }: ShareContext): ReturnType<ExportShare['config']> extends Promise<infer R> ? R : never => {
     const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
       getCsvReportParams({ sharingData, forShareUrl });
 
@@ -168,28 +168,3 @@ export const reportingCsvExportProvider = ({
       },
     };
   };
-
-  return {
-    shareType: 'integration',
-    id: 'csvReports',
-    groupId: 'export',
-    config: getShareMenuItems,
-    prerequisiteCheck: ({ license, capabilities }) => {
-      if (!license) {
-        return false;
-      }
-
-      const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-
-      const licenseHasCsvReporting = licenseCheck.showLinks;
-
-      const capabilityHasCsvReporting = capabilities.discover_v2?.generateCsv === true;
-
-      if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
-        return false;
-      }
-
-      return true;
-    },
-  };
-};
