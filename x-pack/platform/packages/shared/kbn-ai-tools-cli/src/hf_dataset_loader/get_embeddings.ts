@@ -44,7 +44,7 @@ export async function getEmbeddings({
         Object.entries(source._inference_fields ?? {}).forEach(([fieldName, config]) => {
           delete (config as Record<string, any>).inference.model_settings.service;
         });
-        return source;
+        return { ...source, _id: hit._id };
       })
     );
 
