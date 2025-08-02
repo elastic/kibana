@@ -11,11 +11,12 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { Alert } from '@kbn/alerting-types';
 import { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
-
+import { useKibana } from '../../utils/kibana_react';
 export const useCaseActions = ({
   alerts,
   refresh,
   services,
+  caseContext,
 }: {
   alerts: Alert[];
   refresh?: () => void;
@@ -25,15 +26,22 @@ export const useCaseActions = ({
      */
     cases?: CasesService;
   };
+  caseContext?: string;
 }) => {
   const { cases } = services;
+  const { telemetryClient } = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onSuccess = useCallback(() => {
     refresh?.();
-  }, [refresh]);
+    if (caseContext) {
+      telemetryClient.reportCaseSelectedFromObservability(caseContext);
+    }
+  }, [caseContext, refresh, telemetryClient]);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess,
+  });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
     return alerts.map((alert) => ({

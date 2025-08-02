@@ -56,13 +56,22 @@ export function HeaderActions({
   const {
     cases,
     triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
+    telemetryClient,
     http,
   } = services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const onSuccess = useCallback(() => {
+    telemetryClient.reportCaseSelectedFromObservability(
+      'observability_alert_details_page_header_actions'
+    );
+  }, [telemetryClient]);
+
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    onSuccess,
+  });
 
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
 

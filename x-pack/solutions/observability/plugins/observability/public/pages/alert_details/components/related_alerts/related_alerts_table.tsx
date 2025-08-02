@@ -83,6 +83,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
           observabilityRuleTypeRegistry,
           config,
           parentAlert: alert,
+          caseContext: 'observability_alert_details_page_related_alerts_table',
         }}
         toolbarVisibility={{
           showSortSelector: false,
