@@ -50,6 +50,7 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
+import { hasRemovedFields } from './has_removed_fields';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -582,6 +583,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         type: 'upsert_write_index_or_rollover',
         request: {
           name: this._definition.name,
+          forceRollover: this.fieldsRemoved(startingState),
         },
       });
     }
@@ -637,6 +639,20 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     return actions;
+  }
+
+  private fieldsRemoved(startingState: State): boolean {
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
+    if (
+      !startingStateStreamDefinition ||
+      !Streams.WiredStream.Definition.is(startingStateStreamDefinition)
+    ) {
+      return false;
+    }
+    return hasRemovedFields(
+      startingStateStreamDefinition.ingest.wired.fields,
+      this._definition.ingest.wired.fields
+    );
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {

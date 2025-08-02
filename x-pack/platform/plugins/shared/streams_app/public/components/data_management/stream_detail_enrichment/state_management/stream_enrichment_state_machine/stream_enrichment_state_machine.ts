@@ -46,8 +46,8 @@ import {
   getConfiguredProcessors,
   getDataSourcesSamples,
   getDataSourcesUrlState,
+  getUpsertFields,
   getProcessorsForSimulation,
-  getUpsertWiredFields,
   spawnDataSource,
   spawnProcessor,
 } from './utils';
@@ -291,10 +291,7 @@ export const streamEnrichmentMachine = setup({
                 },
                 'stream.update': {
                   guard: 'canUpdateStream',
-                  actions: [
-                    { type: 'sendResetEventToSimulator' },
-                    raise({ type: 'simulation.viewDataPreview' }),
-                  ],
+                  actions: [raise({ type: 'simulation.viewDataPreview' })],
                   target: 'updating',
                 },
               },
@@ -306,11 +303,15 @@ export const streamEnrichmentMachine = setup({
                 input: ({ context }) => ({
                   definition: context.definition,
                   processors: getConfiguredProcessors(context),
-                  fields: getUpsertWiredFields(context),
+                  fields: getUpsertFields(context),
                 }),
                 onDone: {
                   target: 'idle',
-                  actions: [{ type: 'notifyUpsertStreamSuccess' }, { type: 'refreshDefinition' }],
+                  actions: [
+                    { type: 'sendResetEventToSimulator' },
+                    { type: 'notifyUpsertStreamSuccess' },
+                    { type: 'refreshDefinition' },
+                  ],
                 },
                 onError: {
                   target: 'idle',

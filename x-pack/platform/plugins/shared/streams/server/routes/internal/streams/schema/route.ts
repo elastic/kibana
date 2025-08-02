@@ -7,6 +7,10 @@
 import { getFlattenedObject } from '@kbn/std';
 import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { SearchHit } from '@kbn/es-types';
+import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -60,6 +64,12 @@ export const unmappedFieldsRoute = createServerRoute({
 
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
+
+    if (Streams.ClassicStream.Definition.is(streamDefinition)) {
+      Object.keys(streamDefinition.ingest.classic.field_overrides || {}).forEach((name) =>
+        mappedFields.add(name)
+      );
+    }
 
     if (Streams.WiredStream.Definition.is(streamDefinition)) {
       Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
@@ -179,32 +189,12 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       ),
     }));
 
-    const simulationBody = {
-      docs: sampleResultsAsSimulationDocs,
-      component_template_substitutions: {
-        [`${params.path.name}@stream.layer`]: {
-          template: {
-            mappings: {
-              dynamic: 'strict',
-              properties: propertiesForSimulation,
-            },
-          },
-        },
-      },
-      // prevent double-processing
-      pipeline_substitutions: {
-        [`${params.path.name}@stream.processing`]: {
-          processors: [],
-        },
-      },
-    };
-
-    // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
-    const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
-      method: 'POST',
-      path: `_ingest/_simulate`,
-      body: simulationBody,
-    })) as any;
+    const simulation = await simulateIngest(
+      sampleResultsAsSimulationDocs,
+      params.path.name,
+      propertiesForSimulation,
+      scopedClusterClient
+    );
 
     const hasErrors = simulation.docs.some((doc: any) => doc.doc.error !== undefined);
 
@@ -276,3 +266,74 @@ export const internalSchemaRoutes = {
   ...unmappedFieldsRoute,
   ...schemaFieldsSimulationRoute,
 };
+
+const DUMMY_PIPELINE_NAME = '__dummy_pipeline__';
+
+async function simulateIngest(
+  sampleResultsAsSimulationDocs: Array<SearchHit<unknown>>,
+  dataStreamName: string,
+  propertiesForSimulation: StreamsMappingProperties,
+  scopedClusterClient: IScopedClusterClient
+) {
+  // fetch the index template to get the base mappings
+  const dataStream = await scopedClusterClient.asCurrentUser.indices.getDataStream({
+    name: dataStreamName,
+  });
+  const indexTemplate = (
+    await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+      name: dataStream.data_streams[0].template,
+    })
+  ).index_templates[0].index_template;
+
+  // We need to build a patched index template instead of using mapping_addition
+  // because of https://github.com/elastic/elasticsearch/issues/131608
+  const patchedIndexTemplate = {
+    ...indexTemplate,
+    priority:
+      indexTemplate.priority && indexTemplate.priority > MAX_PRIORITY
+        ? // max priority passed as a string so we don't lose precision
+          (`${MAX_PRIORITY}` as unknown as number)
+        : indexTemplate.priority,
+    composed_of: [...(indexTemplate.composed_of || []), '__DUMMY_COMPONENT_TEMPLATE__'],
+    template: {
+      ...indexTemplate.template,
+      mappings: {
+        ...indexTemplate.template?.mappings,
+        properties: {
+          ...indexTemplate.template?.mappings?.properties,
+          ...propertiesForSimulation,
+        },
+      },
+    },
+  };
+  const simulationBody = {
+    docs: sampleResultsAsSimulationDocs,
+    index_template_substitutions: {
+      [dataStream.data_streams[0].template]: patchedIndexTemplate,
+    },
+    component_template_substitutions: {
+      __DUMMY_COMPONENT_TEMPLATE__: {
+        template: {
+          mappings: {
+            properties: propertiesForSimulation,
+          },
+        },
+      },
+    },
+    // prevent double-processing
+    pipeline_substitutions: {
+      [DUMMY_PIPELINE_NAME]: {
+        processors: [],
+      },
+    },
+  };
+
+  // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
+  const simulation = (await scopedClusterClient.asCurrentUser.transport.request({
+    method: 'POST',
+    path: `_ingest/_simulate?pipeline=${DUMMY_PIPELINE_NAME}`,
+    body: simulationBody,
+  })) as any;
+
+  return simulation;
+}

@@ -13,6 +13,7 @@ import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
+import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -26,15 +27,20 @@ import type {
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
+import { validateClassicFields } from '../../helpers/validate_fields';
+import { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
+import { hasRemovedFields } from './has_removed_fields';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
+  field_overrides: boolean;
   lifecycle: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
   protected _changes: ClassicStreamChanges = {
     processing: false,
+    field_overrides: false,
     lifecycle: false,
   };
 
@@ -80,6 +86,13 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     this._changes.lifecycle =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+
+    this._changes.field_overrides =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.classic.field_overrides,
+        startingStateStreamDefinition.ingest.classic.field_overrides
+      );
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -138,6 +151,43 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       }
     }
 
+    if (this._changes.field_overrides) {
+      const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request(
+        {
+          method: 'PUT',
+          path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
+          body: {
+            properties: this._definition.ingest.classic.field_overrides,
+            _meta: {
+              managed_by: 'streams',
+            },
+          },
+        }
+      )) as DataStreamMappingsUpdateResponse;
+      if (response.data_streams.length === 0) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create Classic stream ${this.definition.name} due to existing Data Stream mappings`
+            ),
+          ],
+        };
+      }
+      if (response.data_streams[0].error) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create Classic stream ${this.definition.name} due to error in Data Stream mappings: ${response.data_streams[0].error}`
+            ),
+          ],
+        };
+      }
+    }
+
+    validateClassicFields(this._definition);
+
     return { isValid: true, errors: [] };
   }
 
@@ -163,6 +213,18 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+    if (
+      this._definition.ingest.classic.field_overrides &&
+      isMappingProperties(this._definition.ingest.classic.field_overrides)
+    ) {
+      actions.push({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: this._definition.name,
+          mappings: this._definition.ingest.classic.field_overrides,
         },
       });
     }
@@ -224,12 +286,41 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
+    if (this._changes.field_overrides) {
+      const mappings = this._definition.ingest.classic.field_overrides || {};
+      if (!isMappingProperties(mappings)) {
+        throw new Error('Field overrides must be a valid mapping properties object');
+      }
+      actions.push({
+        type: 'update_data_stream_mappings',
+        request: {
+          name: this._definition.name,
+          mappings,
+          forceRollover: this.fieldOverridesRemoved(startingState),
+        },
+      });
+    }
+
     actions.push({
       type: 'upsert_dot_streams_document',
       request: this._definition,
     });
 
     return actions;
+  }
+
+  private fieldOverridesRemoved(startingState: State): boolean {
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
+    if (
+      !startingStateStreamDefinition ||
+      !Streams.ClassicStream.Definition.is(startingStateStreamDefinition)
+    ) {
+      return false;
+    }
+    return hasRemovedFields(
+      startingStateStreamDefinition.ingest.classic.field_overrides,
+      this._definition.ingest.classic.field_overrides
+    );
   }
 
   private async createUpsertPipelineActions(): Promise<ElasticsearchAction[]> {

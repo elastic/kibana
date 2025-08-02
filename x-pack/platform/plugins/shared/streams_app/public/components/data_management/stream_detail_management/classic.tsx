@@ -16,12 +16,14 @@ import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
+import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 
 const classicStreamManagementSubTabs = [
   'enrich',
   'advanced',
   'lifecycle',
   'significantEvents',
+  'schemaEditor',
 ] as const;
 
 type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
@@ -134,6 +136,14 @@ export function ClassicStreamDetailManagement({
           </span>
         </EuiToolTip>
       ),
+    };
+    tabs.schemaEditor = {
+      content: (
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+        defaultMessage: 'Schema editor',
+      }),
     };
   }
 
