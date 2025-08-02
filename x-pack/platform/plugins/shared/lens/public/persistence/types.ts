@@ -14,8 +14,8 @@ export interface LensDocument {
   savedObjectId?: string;
   type?: string;
   title: string;
-  description?: string | null;
-  visualizationType?: string | null;
+  description?: string;
+  visualizationType: string | null;
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;

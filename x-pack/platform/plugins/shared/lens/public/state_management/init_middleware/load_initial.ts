@@ -8,7 +8,14 @@
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { setState, initExisting, initEmpty, LensStoreDeps, LensAppState } from '..';
+import {
+  setState,
+  initExisting,
+  initEmpty,
+  LensStoreDeps,
+  LensAppState,
+  VisualizationState,
+} from '..';
 import { type InitialAppState, disableAutoApply, getPreloadedState } from '../lens_slice';
 import { SharingSavedObjectProps } from '../../types';
 import { getInitialDatasourceId, getInitialDataViewsObject } from '../../utils';
@@ -252,7 +259,7 @@ async function loadFromSavedObject(
     data.query.filterManager.setAppFilters(filters);
   }
 
-  const docVisualizationState = {
+  const docVisualizationState: VisualizationState = {
     activeId: doc.visualizationType,
     state: doc.state.visualization,
   };
