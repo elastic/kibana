@@ -877,12 +877,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiMark.highlightEnd': i18n.translate('core.euiMark.highlightEnd', {
       defaultMessage: 'highlight end',
     }),
-    'euiMarkdownEditorFooter.closeButton': i18n.translate(
-      'core.euiMarkdownEditorFooter.closeButton',
-      {
-        defaultMessage: 'Close',
-      }
-    ),
     'euiMarkdownEditorFooter.uploadingFiles': i18n.translate(
       'core.euiMarkdownEditorFooter.uploadingFiles',
       {
@@ -912,47 +906,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Show errors',
       }
     ),
-    'euiMarkdownEditorFooter.showMarkdownHelp': i18n.translate(
-      'core.euiMarkdownEditorFooter.showMarkdownHelp',
-      {
-        defaultMessage: 'Show markdown help',
-      }
-    ),
     'euiMarkdownEditorFooter.errorsTitle': i18n.translate(
       'core.euiMarkdownEditorFooter.errorsTitle',
       {
         defaultMessage: 'Errors',
-      }
-    ),
-    'euiMarkdownEditorFooter.syntaxTitle': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxTitle',
-      {
-        defaultMessage: 'Syntax help',
-      }
-    ),
-    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
-      'core.euiMarkdownEditorFooter.mdSyntaxLink',
-      {
-        defaultMessage: 'GitHub flavored markdown',
-      }
-    ),
-    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
-      {
-        defaultMessage: 'This editor uses',
-      }
-    ),
-    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
-      {
-        defaultMessage:
-          'You can also utilize these additional syntax plugins to add rich content to your text.',
-      }
-    ),
-    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
-      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
-      {
-        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
@@ -1847,5 +1804,49 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
       defaultMessage: 'Selected color',
     }),
+
+    'euiMarkdownEditorHelpButton.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.mdSyntaxLink',
+      {
+        defaultMessage: 'GitHub flavored markdown',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxTitle': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxTitle',
+      {
+        defaultMessage: 'Syntax help',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.showMarkdownHelp': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.showMarkdownHelp',
+      {
+        defaultMessage: 'Show markdown help',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxModalDescriptionPrefix',
+      {
+        defaultMessage: 'This editor uses',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxModalDescriptionSuffix',
+      {
+        defaultMessage:
+          'You can also utilize these additional syntax plugins to add rich content to your text.',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.closeButton': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.closeButton',
+      {
+        defaultMessage: 'Close',
+      }
+    ),
+    'euiMarkdownEditorHelpButton.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorHelpButton.syntaxPopoverDescription',
+      {
+        defaultMessage: 'This editor uses',
+      }
+    ),
   };
 };

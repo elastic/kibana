@@ -1,0 +1,20 @@
+.testing {
+  padding: $euiSizeM;
+  background: $euiColorBackgroundBaseSuccess;
+}
+
+.testing__content {
+  padding: $euiSizeS;
+  border: $euiBorderWidthThick solid $euiBorderColor;
+  @include fontSize($euiFontSizeS);
+  line-height: lineHeightFromBaseline(2);
+
+  h2 {
+    @include euiTitle('l');
+    line-height: lineHeightFromBaseline(3);
+  }
+
+  p {
+    border: $euiBorderThin;
+  }
+}
