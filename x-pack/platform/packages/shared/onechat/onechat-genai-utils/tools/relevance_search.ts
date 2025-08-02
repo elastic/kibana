@@ -9,7 +9,14 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
 import { flattenMappings, MappingField } from './utils';
-import { getIndexMappings, performMatchSearch, PerformMatchSearchResponse } from './steps';
+import {
+  getIndexMappings,
+  performMatchSearch,
+  MatchResult,
+  PerformMatchSearchResponse,
+  scoreRelevance,
+  RelevanceScore,
+} from './steps';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
@@ -18,6 +25,7 @@ export const relevanceSearch = async ({
   index,
   fields = [],
   size = 10,
+  relevanceFiltering = { enabled: true, threshold: RelevanceScore.Context },
   model,
   esClient,
 }: {
@@ -25,6 +33,7 @@ export const relevanceSearch = async ({
   index?: string;
   fields?: string[];
   size?: number;
+  relevanceFiltering?: { enabled: boolean; threshold: RelevanceScore };
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
@@ -60,11 +69,28 @@ export const relevanceSearch = async ({
     );
   }
 
-  return performMatchSearch({
+  const { results: unfilteredResults } = await performMatchSearch({
     term,
     fields: selectedFields,
     index: selectedIndex,
     size,
     esClient,
   });
+
+  let filteredResults: MatchResult[] = unfilteredResults;
+
+  if (relevanceFiltering.enabled) {
+    const relevanceScores = await scoreRelevance({
+      query: term,
+      resources: unfilteredResults.map((result) => ({ content: result.highlights.join('\n\n') })),
+      model,
+    });
+
+    filteredResults = unfilteredResults.filter((result, idx) => {
+      const resultScore = relevanceScores[idx];
+      return resultScore.score >= relevanceFiltering.threshold;
+    });
+  }
+
+  return { results: filteredResults };
 };
