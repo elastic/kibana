@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -58,6 +59,7 @@ const ConditionalWrap = ({
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+    const confirmModalTitleId = useGeneratedHtmlId();
     const { euiTheme } = useEuiTheme();
     const {
       assistantAvailability,
@@ -155,6 +157,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
 
     const selectedConversationHasAnonymizedValues = useMemo(
       () => conversationContainsAnonymizedValues(selectedConversation),
+      [selectedConversation]
+    );
+
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
       [selectedConversation]
     );
 
@@ -325,20 +332,23 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiTheme.colors.textDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -355,6 +365,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
@@ -396,7 +407,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.RESET_CONVERSATION}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={closeDestroyModal}
             onConfirm={handleReset}
             cancelButtonText={i18n.CANCEL_BUTTON_TEXT}

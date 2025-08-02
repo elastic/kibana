@@ -27,6 +27,7 @@ export const fetchMlInferencePipelines = async (client: ElasticsearchClient) => 
     return await client.ingest.getPipeline({
       id: getInferencePipelineNameFromIndexName('*'),
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If there are no `@ml-inference`
     // pipelines then return an empty record of pipelines
