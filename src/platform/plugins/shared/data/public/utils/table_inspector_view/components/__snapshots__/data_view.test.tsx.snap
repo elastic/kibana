@@ -207,7 +207,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    class="euiBasicTable eui-xScroll css-h1oavb-table"
     data-test-subj="inspectorTable"
   >
     <table
@@ -491,7 +491,7 @@ Array [
     class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />,
   <div
-    class="euiBasicTable insDataTableFormat__table eui-xScroll css-bhtp2o-DataTableFormatClass"
+    class="euiBasicTable eui-xScroll css-h1oavb-table"
     data-test-subj="inspectorTable"
   >
     <table

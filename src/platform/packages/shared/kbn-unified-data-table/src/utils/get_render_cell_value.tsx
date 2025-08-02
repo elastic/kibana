@@ -75,7 +75,7 @@ export const getRenderCellValueFn = ({
     });
     const ctx = useContext(UnifiedDataTableContext);
     const { euiTheme } = useEuiTheme();
-    const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
+    const { backgroundBaseWarning: anchorColor, highlight: highlightColor } = euiTheme.colors;
 
     useEffect(() => {
       if (row?.isAnchor) {
@@ -86,12 +86,13 @@ export const getRenderCellValueFn = ({
       } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
         setCellProps({
           className: 'unifiedDataTable__cell--expanded',
+          css: { backgroundColor: highlightColor },
         });
       } else {
         setCellProps({ style: undefined });
       }
       // re-apply styles if `columnId` changes, e.g. when reordering columns in the grid
-    }, [ctx, row, setCellProps, anchorColor, columnId]);
+    }, [ctx, row, setCellProps, anchorColor, highlightColor, columnId]);
 
     if (typeof row === 'undefined') {
       return <span className={CELL_CLASS}>-</span>;

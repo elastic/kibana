@@ -22,7 +22,7 @@ export const useControlColumn = ({
   const { expanded, getRowByIndex } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
   const { euiTheme } = useEuiTheme();
-  const { backgroundBaseWarning: anchorColor } = euiTheme.colors;
+  const { backgroundBaseWarning: anchorColor, highlight: highlightColor } = euiTheme.colors;
 
   useEffect(() => {
     if (record?.isAnchor) {
@@ -33,13 +33,14 @@ export const useControlColumn = ({
     } else if (expanded && record && expanded.id === record.id) {
       setCellProps({
         className: 'unifiedDataTable__cell--expanded',
+        css: { backgroundColor: highlightColor },
       });
     } else {
       setCellProps({
         className: '',
       });
     }
-  }, [expanded, record, setCellProps, anchorColor]);
+  }, [expanded, record, setCellProps, anchorColor, highlightColor]);
 
   return useMemo(() => ({ record, rowIndex }), [record, rowIndex]);
 };
