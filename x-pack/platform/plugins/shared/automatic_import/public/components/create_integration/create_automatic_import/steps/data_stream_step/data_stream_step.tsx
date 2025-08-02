@@ -63,9 +63,10 @@ interface DataStreamStepProps {
   celInputResult: State['celInputResult'];
   connector: State['connector'];
   isGenerating: State['isGenerating'];
+  isShown?: boolean;
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
-  ({ integrationSettings, celInputResult, connector, isGenerating }) => {
+  ({ integrationSettings, celInputResult, connector, isGenerating, isShown }) => {
     const {
       setIntegrationSettings,
       setIsGenerating,
@@ -177,6 +178,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           e.preventDefault();
           completeStep();
         }}
+        style={{ display: isShown ? 'block' : 'none' }}
       >
         <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="dataStreamStep">
           <EuiFlexItem>
