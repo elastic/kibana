@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type {
+  Logger,
+  IScopedClusterClient,
+  UiSettingsRequestHandlerContext,
+} from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
-export interface GraphContextServices {
+interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
+  uiSettings: UiSettingsRequestHandlerContext;
 }
 
 export interface GetGraphParams {
@@ -31,7 +37,7 @@ export interface GetGraphParams {
 }
 
 export const getGraph = async ({
-  services: { esClient, logger },
+  services: { esClient, logger, uiSettings },
   query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,
@@ -44,6 +50,10 @@ export const getGraph = async ({
     )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
+  const isAssetInventoryEnabled = await uiSettings.client.get(
+    SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+  );
+
   const results = await fetchGraph({
     esClient,
     showUnknownTarget,
@@ -52,7 +62,9 @@ export const getGraph = async ({
     end,
     originEventIds,
     indexPatterns,
+    spaceId,
     esQuery,
+    isAssetInventoryEnabled,
   });
 
   // Convert results into set of nodes and edges

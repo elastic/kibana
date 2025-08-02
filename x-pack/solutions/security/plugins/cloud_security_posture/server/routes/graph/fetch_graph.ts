@@ -10,9 +10,20 @@ import {
   DOCUMENT_TYPE_ALERT,
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
+
+interface BuildEsqlQueryParams {
+  indexPatterns: string[];
+  originEventIds: OriginEventId[];
+  originAlertIds: OriginEventId[];
+  isAssetInventoryEnabled?: boolean;
+  isEnrichPolicyExists: boolean;
+  enrichPolicyName: string;
+  alertsMappingsIncluded: boolean;
+}
 
 export const fetchGraph = async ({
   esClient,
@@ -22,7 +33,9 @@ export const fetchGraph = async ({
   originEventIds,
   showUnknownTarget,
   indexPatterns,
+  spaceId,
   esQuery,
+  isAssetInventoryEnabled,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -31,7 +44,9 @@ export const fetchGraph = async ({
   originEventIds: OriginEventId[];
   showUnknownTarget: boolean;
   indexPatterns: string[];
+  spaceId: string;
   esQuery?: EsQuery;
+  isAssetInventoryEnabled?: boolean;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
@@ -44,57 +59,22 @@ export const fetchGraph = async ({
     }
   });
 
+  const isEnrichPolicyExists = await checkEnrichPolicyExists(esClient, logger, spaceId);
+
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const alertsMappingsIncluded = indexPatterns.some((indexPattern) =>
     indexPattern.includes(SECURITY_ALERTS_PARTIAL_IDENTIFIER)
   );
 
-  const query = `FROM ${indexPatterns
-    .filter((indexPattern) => indexPattern.length > 0)
-    .join(',')} METADATA _id, _index
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
-// Origin event and alerts allow us to identify the start position of graph traversal
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isOriginAlert = isOrigin AND ${
-    originAlertIds.length > 0
-      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
-      : 'false'
-  }
-| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
-// Aggregate document's data for popover expansion and metadata enhancements
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
-| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
-| EVAL docData = CONCAT("{",
-    "\\"id\\":\\"", _id, "\\"",
-    ",\\"type\\":\\"", docType, "\\"",
-    ",\\"index\\":\\"", _index, "\\"",
-  "}")
-    ${
-      // ESQL complains about missing field's mapping when we don't fetch from alerts index
-      alertsMappingsIncluded
-        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
-      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
-    "}"), ""),`
-        : ''
-    }
-| STATS badge = COUNT(*),
-  docs = VALUES(docData),
-  ips = VALUES(related.ip),
-  // hosts = VALUES(related.hosts),
-  users = VALUES(related.user),
-  isAlert = MV_MAX(VALUES(isAlert))
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      isOrigin,
-      isOriginAlert
-| LIMIT 1000
-| SORT isOrigin DESC, action`;
+  const query = buildEsqlQuery({
+    indexPatterns,
+    originEventIds,
+    originAlertIds,
+    isAssetInventoryEnabled,
+    isEnrichPolicyExists,
+    enrichPolicyName: getEnrichPolicyId(spaceId),
+    alertsMappingsIncluded,
+  });
 
   logger.trace(`Executing query [${query}]`);
 
@@ -162,3 +142,144 @@ const buildDslFilter = (
     ],
   },
 });
+
+const checkEnrichPolicyExists = async (
+  esClient: IScopedClusterClient,
+  logger: Logger,
+  spaceId: string
+): Promise<boolean> => {
+  try {
+    const { policies } = await esClient.asInternalUser.enrich.getPolicy({
+      name: getEnrichPolicyId(spaceId),
+    });
+
+    return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
+  } catch (error) {
+    logger.error(`Error fetching enrich policy ${error.message}`);
+    logger.error(error);
+    return false;
+  }
+};
+
+const buildEsqlQuery = ({
+  indexPatterns,
+  originEventIds,
+  originAlertIds,
+  isAssetInventoryEnabled,
+  isEnrichPolicyExists,
+  enrichPolicyName,
+  alertsMappingsIncluded,
+}: BuildEsqlQueryParams): string => {
+  const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
+
+  // Common parts of the query
+  const originEventClause =
+    originEventIds.length > 0
+      ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
+      : 'false';
+
+  const originAlertClause =
+    originAlertIds.length > 0
+      ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
+      : 'false';
+
+  const fromClause = `FROM ${indexPatterns
+    .filter((indexPattern) => indexPattern.length > 0)
+    .join(',')} METADATA _id, _index`;
+
+  const whereAndOriginClause = `| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+// Origin event and alerts allow us to identify the start position of graph traversal
+| EVAL isOrigin = ${originEventClause}
+| EVAL isOriginAlert = isOrigin AND ${originAlertClause}`;
+
+  const documentMetadataClause = `// Aggregate document's data for popover expansion and metadata enhancements
+| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
+| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docData = CONCAT("{",
+    "\\"id\\":\\"", _id, "\\"",
+    ",\\"type\\":\\"", docType, "\\"",
+    ",\\"index\\":\\"", _index, "\\"",
+  "}")
+    ${
+      // ESQL complains about missing field's mapping when we don't fetch from alerts index
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
+    "}"), ""),`
+        : ''
+    }`;
+
+  const statsClause = `| STATS badge = COUNT(*),
+  docs = VALUES(docData),
+  ips = VALUES(related.ip),
+  // hosts = VALUES(related.hosts),
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
+    BY actorIds = actor.entity.id,
+      action = event.action,
+      targetIds = target.entity.id,
+      isOrigin,
+      isOriginAlert`;
+
+  const limitSortClause = `| LIMIT 1000
+| SORT isOrigin DESC, action`;
+
+  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
+    // Enrichment-specific parts
+    // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
+    // TODO: We should use the appropriate specific index for each entity type once it's fixed
+    const enrichClause = `
+| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
+| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`;
+
+    const entityDataClause = `// contact actor and target entities data
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actor.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", actorEntityName, "\\"",
+      ",\\"type\\":\\"", actorEntityType, "\\"",
+    "}",
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", target.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", targetEntityName, "\\"",
+      ",\\"type\\":\\"", targetEntityType, "\\"",
+    "}",
+  "}")`;
+
+    const enrichedStatsClause = `| STATS badge = COUNT(*),
+  docs = VALUES(docData),
+  actorsDocData = VALUES(actorDocData),
+  targetsDocData = VALUES(targetDocData),
+  ips = VALUES(related.ip),
+  // hosts = VALUES(related.hosts),
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
+    BY actorIds = actor.entity.id,
+      action = event.action,
+      targetIds = target.entity.id,
+      isOrigin,
+      isOriginAlert`;
+
+    // Query with entity enrichment
+    return `${fromClause}
+${enrichClause}
+${whereAndOriginClause}
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+${documentMetadataClause}
+${entityDataClause}
+${enrichedStatsClause}
+${limitSortClause}`;
+  } else {
+    // Query without entity enrichment - simpler case
+    return `${fromClause}
+${whereAndOriginClause}
+// Aggregate document's data for popover expansion and metadata enhancements
+${documentMetadataClause}
+${statsClause}`;
+  }
+};

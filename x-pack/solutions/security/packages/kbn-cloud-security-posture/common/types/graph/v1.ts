@@ -18,6 +18,7 @@ import {
   nodeColorSchema,
   nodeShapeSchema,
   nodeDocumentDataSchema,
+  entitySchema,
 } from '../../schema/graph/v1';
 
 export { DOCUMENT_TYPE_ALERT, DOCUMENT_TYPE_EVENT } from '../../schema/graph/v1';
@@ -39,6 +40,8 @@ export enum ApiMessageCode {
 }
 
 export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;
+
+export type EntityDetailsModel = TypeOf<typeof entitySchema>;
 
 export type GroupNodeDataModel = TypeOf<typeof groupNodeDataSchema>;
 
