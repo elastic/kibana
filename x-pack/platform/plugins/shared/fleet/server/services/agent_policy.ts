@@ -120,6 +120,7 @@ import { getPackagePolicySavedObjectType, packagePolicyService } from './package
 import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
+import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
 import {
   getFullAgentPolicy,
@@ -502,6 +503,125 @@ class AgentPolicyService {
     });
     logger.debug(`Created new agent policy with id ${newSo.id}`);
     return { id: newSo.id, ...newSo.attributes };
+  }
+
+  public async createWithPackagePolicies({
+    soClient,
+    esClient,
+    agentPolicy,
+    packagePolicies,
+    options: {
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    },
+  }: {
+    soClient: SavedObjectsClientContract;
+    esClient: ElasticsearchClient;
+    agentPolicy: NewAgentPolicy;
+    packagePolicies: Array<Omit<NewPackagePolicy, 'policy_id' | 'policy_ids'>>;
+    options: {
+      hasFleetServer?: boolean;
+      withSysMonitoring: boolean;
+      monitoringEnabled?: string[];
+      spaceId: string;
+      user?: AuthenticatedUser;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+      force?: boolean;
+    };
+  }) {
+    const logger = appContextService.getLogger().get('createWithPackagePolicies');
+
+    logger.debug(`Creating agent policy ${agentPolicy.name} with package policies`);
+
+    const newAgentPolicy = await createAgentPolicyWithPackages({
+      soClient,
+      esClient,
+      agentPolicyService: this,
+      newPolicy: agentPolicy,
+      hasFleetServer,
+      withSysMonitoring,
+      monitoringEnabled,
+      spaceId,
+      user,
+      authorizationHeader,
+      force,
+    });
+
+    const createdPackagePolicyIds = [];
+
+    try {
+      for (const packagePolicy of packagePolicies) {
+        const newPackagePolicy: NewPackagePolicy = {
+          ...packagePolicy,
+          policy_ids: [newAgentPolicy.id],
+        };
+
+        logger.debug(
+          `Creating package policy ${packagePolicy.name} for agent policy ${newAgentPolicy.name}`
+        );
+
+        const createdPackagePolicy = await packagePolicyService.create(
+          soClient,
+          esClient,
+          newPackagePolicy,
+          {
+            spaceId,
+            user,
+            bumpRevision: false,
+            authorizationHeader,
+            force,
+          }
+        );
+
+        createdPackagePolicyIds.push(createdPackagePolicy.id);
+      }
+
+      const agentPolicyWithPackagePolicies = await this.get(soClient, newAgentPolicy.id);
+
+      if (!agentPolicyWithPackagePolicies) {
+        throw new AgentPolicyNotFoundError(
+          `Could not retrieve created agent policy ${newAgentPolicy.id} after creating its package policies`
+        );
+      }
+
+      return agentPolicyWithPackagePolicies;
+    } catch (e) {
+      logger.error(
+        `Error creating package policies for agent policy ${newAgentPolicy.id}: ${e.message}`
+      );
+      logger.debug(
+        `Rolling back policy creation: Deleting agent policy ${
+          newAgentPolicy.id
+        } and package policies ${createdPackagePolicyIds.join(', ')}`
+      );
+
+      // If there is an error creating package policies, delete any created package policy
+      // and the parent agent policy
+      const internalSOClient = appContextService.getInternalUserSOClient();
+      const internalESClient = appContextService.getInternalUserESClient();
+
+      if (createdPackagePolicyIds.length > 0) {
+        await packagePolicyService.delete(
+          internalSOClient,
+          internalESClient,
+          createdPackagePolicyIds,
+          {
+            force: true,
+            skipUnassignFromAgentPolicies: true,
+          }
+        );
+      }
+      await this.delete(internalSOClient, internalESClient, newAgentPolicy.id, {
+        force: true,
+      });
+
+      throw e;
+    }
   }
 
   public async requireUniqueName(
