@@ -26,6 +26,7 @@ export class FindService extends FtrService {
   private readonly POLLING_TIME = 500;
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   private readonly fixedHeaderHeight = this.config.get('layout.fixedHeaderHeight');
+  private readonly fixedFooterHeight = this.config.get('layout.fixedFooterHeight');
 
   public currentWait = this.defaultFindTimeout;
 
@@ -522,6 +523,7 @@ export class FindService extends FtrService {
       this.driver,
       this.defaultFindTimeout,
       this.fixedHeaderHeight,
+      this.fixedFooterHeight,
       this.log,
       this.browserType
     );
