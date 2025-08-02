@@ -102,6 +102,12 @@ if (ctx.entity?.metadata?.sourceIndex?.data != null) {
       "value": ".entities.v1.latest.builtin_mock_entity_definition",
     },
   },
+  Object {
+    "remove": Object {
+      "field": "synthetic_ingest_ts",
+      "ignore_missing": true,
+    },
+  },
 ]
 `;
 
@@ -205,6 +211,12 @@ if (ctx.entity?.metadata?.sourceIndex?.data != null) {
     "set": Object {
       "field": "_index",
       "value": ".entities.v1.latest.admin-console-services",
+    },
+  },
+  Object {
+    "remove": Object {
+      "field": "synthetic_ingest_ts",
+      "ignore_missing": true,
     },
   },
   Object {
