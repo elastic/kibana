@@ -10,7 +10,7 @@
 }
 
 .unifiedDataTable__cell--expanded {
-  background-color: $euiColorHighlight;
+  background-color: $euiColorBackgroundBaseInteractiveSelect;
 }
 
 .unifiedDataTable__cell--selected {
@@ -76,10 +76,6 @@
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
     border-bottom: 0;
-  }
-
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
-    background-color: $euiColorLightestShade; // we keep using a deprecated shade until a proper token is available
   }
 
   .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight {
