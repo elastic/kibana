@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CharStreams, type Token } from 'antlr4';
+import { CharStreams, type Token, ErrorListener } from 'antlr4';
 import { CommonTokenStream, type CharStream } from 'antlr4';
 import { ESQLErrorListener } from './esql_error_listener';
-import { attachDecorations, collectDecorations } from './formatting';
+import { attachDecorations, collectDecorations } from './decorations';
 import { Builder } from '../builder';
 import { CstToAstConverter } from './cst_to_ast_converter';
 import { default as ESQLLexer } from '../antlr/esql_lexer';
@@ -292,7 +292,7 @@ export class Parser {
     const parser = (this.parser = new ESQLParser(tokens));
 
     lexer.removeErrorListeners();
-    lexer.addErrorListener(this.errors);
+    lexer.addErrorListener(this.errors as {} as ErrorListener<number>);
 
     parser.removeErrorListeners();
     parser.addErrorListener(this.errors);
@@ -372,19 +372,6 @@ export class Parser {
   }
 }
 
-/**
- * @deprecated Use `Parser.create` instead.
- */
-export const createParser = Parser.create;
-
-/**
- * @deprecated Use `Parser.parseErrors` instead.
- */
-export const parseErrors = Parser.parseErrors;
-
-/**
- * @deprecated Use `Parser.parse` instead.
- */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
   if (src == null) {
     const commands: ESQLAstQueryExpression['commands'] = [];

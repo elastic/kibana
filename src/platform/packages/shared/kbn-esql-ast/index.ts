@@ -35,15 +35,7 @@ export * from './src/ast/is';
 
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
-export {
-  createParser,
-  parse,
-  Parser,
-  parseErrors,
-  type ParseOptions,
-  type ParseResult,
-  ESQLErrorListener,
-} from './src/parser';
+export * from './src/parser';
 
 export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 
