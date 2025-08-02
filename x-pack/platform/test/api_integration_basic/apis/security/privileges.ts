@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
             actions: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fileUpload: ['all', 'read', 'minimal_all', 'minimal_read'],
             rulesSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
             maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
             streams: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -394,6 +395,7 @@ export default function ({ getService }: FtrProviderContext) {
             indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+            fileUpload: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             savedQueryManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
             osquery: [

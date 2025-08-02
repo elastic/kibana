@@ -16,6 +16,20 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: jest.fn(() => ({
+    services: {
+      application: {
+        capabilities: {
+          fileUpload: {
+            show: true, // Mocking the capability to show the upload button
+          },
+        },
+      },
+    },
+  })),
+}));
+
 jest.mock('../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({}),
 }));

@@ -13,10 +13,13 @@ import { EuiBetaBadge, EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiTitle } from '
 import { MLOverviewCard } from './overview_ml_page';
 import { ML_PAGES } from '../../locator';
 
-export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabled: boolean }> = ({
-  buttonType,
-  isEsqlEnabled,
-}) => (
+interface Props {
+  buttonType?: 'empty' | 'full';
+  isEsqlEnabled: boolean;
+  canUploadFile: boolean;
+}
+
+export const DataVisualizerGrid: FC<Props> = ({ buttonType, isEsqlEnabled, canUploadFile }) => (
   <EuiFlexGrid gutterSize="m" columns={2}>
     {isEsqlEnabled ? (
       <MLOverviewCard
@@ -67,24 +70,26 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
         buttonType={buttonType}
       />
     ) : null}
-    <MLOverviewCard
-      layout="horizontal"
-      path="/filedatavisualizer"
-      title={i18n.translate('xpack.ml.datavisualizer.selector.importDataTitle', {
-        defaultMessage: 'Visualize data from a file',
-      })}
-      description={i18n.translate('xpack.ml.datavisualizer.selector.importDataDescription', {
-        defaultMessage:
-          'Upload your file, analyze its data, and optionally import the data into an index.',
-      })}
-      iconType="addDataApp"
-      buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.uploadFileButtonLabel', {
-        defaultMessage: 'Select file',
-      })}
-      cardDataTestSubj="mlDataVisualizerCardImportData"
-      buttonDataTestSubj="mlDataVisualizerUploadFileButton"
-      buttonType={buttonType}
-    />
+    {canUploadFile ? (
+      <MLOverviewCard
+        layout="horizontal"
+        path="/filedatavisualizer"
+        title={i18n.translate('xpack.ml.datavisualizer.selector.importDataTitle', {
+          defaultMessage: 'Visualize data from a file',
+        })}
+        description={i18n.translate('xpack.ml.datavisualizer.selector.importDataDescription', {
+          defaultMessage:
+            'Upload your file, analyze its data, and optionally import the data into an index.',
+        })}
+        iconType="addDataApp"
+        buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.uploadFileButtonLabel', {
+          defaultMessage: 'Select file',
+        })}
+        cardDataTestSubj="mlDataVisualizerCardImportData"
+        buttonDataTestSubj="mlDataVisualizerUploadFileButton"
+        buttonType={buttonType}
+      />
+    ) : null}
     <MLOverviewCard
       layout="horizontal"
       path="/datavisualizer_index_select"

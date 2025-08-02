@@ -494,5 +494,10 @@ export function MachineLearningCommonUIProvider({
         `Expected ${label ?? selector} value should be '${expectedValue}' (got '${actualValue}')`
       );
     },
+
+    async assertAccessDenied() {
+      await testSubjects.existOrFail('mlAccessDenied', { timeout: 5000 });
+      log.debug('ML access denied message displayed as expected');
+    },
   };
 }
