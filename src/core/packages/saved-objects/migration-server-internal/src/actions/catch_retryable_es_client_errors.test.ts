@@ -102,20 +102,41 @@ describe('catchRetryableSearchPhaseExecutionException', () => {
   it('retries search phase execution exception ', async () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        body: { error: { type: 'search_phase_execution_exception' } },
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            caused_by: {
+              type: 'search_phase_execution_exception',
+              reason:
+                'Search rejected due to missing shards [.kibana]. Consider using `allow_partial_search_results` setting to bypass this error.',
+            },
+          },
+        },
       })
     );
     expect(
       ((await Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)) as any).left
-    ).toMatchObject({
-      message: 'search_phase_execution_exception',
-      type: 'retryable_es_client_error',
-    });
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": [ResponseError: search_phase_execution_exception
+      	Caused by:
+      		search_phase_execution_exception: Search rejected due to missing shards [.kibana]. Consider using \`allow_partial_search_results\` setting to bypass this error.],
+        "message": "search_phase_execution_exception
+      	Caused by:
+      		search_phase_execution_exception: Search rejected due to missing shards [.kibana]. Consider using \`allow_partial_search_results\` setting to bypass this error.",
+        "type": "retryable_es_client_error",
+      }
+    `);
   });
   it('does not retry other errors', async () => {
     const error = new esErrors.ResponseError(
       elasticsearchClientMock.createApiResponse({
-        body: { error: { type: 'cluster_block_exception' } },
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'Malformed search query.',
+          },
+        },
       })
     );
     await expect(
