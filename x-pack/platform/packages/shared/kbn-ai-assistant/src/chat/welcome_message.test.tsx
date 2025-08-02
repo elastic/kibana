@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { WelcomeMessage } from './welcome_message';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
@@ -58,10 +58,11 @@ const createMockKnowledgeBase = (
     value: {
       enabled: true,
       errorMessage: undefined,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: InferenceModelState.NOT_INSTALLED,
       concreteWriteIndex: undefined,
       currentInferenceId: undefined,
       isReIndexing: false,
+      productDocStatus: 'uninstalled',
     },
     loading: false,
     error: undefined,
@@ -79,11 +80,12 @@ describe('WelcomeMessage', () => {
     const knowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: true,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         error: undefined,
@@ -111,11 +113,12 @@ describe('WelcomeMessage', () => {
     const updatedKnowledgeBase = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         error: undefined,

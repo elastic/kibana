@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ChangeKbModel } from './change_kb_model';
 import {
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
@@ -66,7 +66,7 @@ const createMockStatus = (
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    kbState: KnowledgeBaseState.READY,
+    inferenceModelState: InferenceModelState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',
@@ -76,6 +76,7 @@ const createMockStatus = (
       service: 'my-service',
       service_settings: {},
     },
+    productDocStatus: 'uninstalled',
     ...overrides,
   },
   loading: false,

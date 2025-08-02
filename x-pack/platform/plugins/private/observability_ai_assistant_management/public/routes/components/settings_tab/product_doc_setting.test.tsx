@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import { ProductDocEntry } from './product_doc_entry';
+import { ProductDocsSetting } from './product_doc_setting';
 import {
   APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
-  KnowledgeBaseState,
+  InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
@@ -34,7 +34,7 @@ const createMockStatus = (
 ): UseKnowledgeBaseResult['status'] => ({
   value: {
     enabled: true,
-    kbState: KnowledgeBaseState.READY,
+    inferenceModelState: InferenceModelState.READY,
     isReIndexing: false,
     currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
     concreteWriteIndex: 'index_1',
@@ -44,6 +44,7 @@ const createMockStatus = (
       service: 'my-service',
       service_settings: {},
     },
+    productDocStatus: 'uninstalled',
     ...overrides,
   },
   loading: false,
@@ -62,7 +63,7 @@ const createMockKnowledgeBase = (
   ...overrides,
 });
 
-describe('ProductDocEntry', () => {
+describe('ProductDocsSetting', () => {
   it('calls useGetProductDocStatus with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
     (useGetProductDoc as jest.Mock).mockReturnValue({
       status: 'installed',
@@ -80,7 +81,7 @@ describe('ProductDocEntry', () => {
       }),
     });
 
-    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
+    render(<ProductDocsSetting knowledgeBase={mockKnowledgeBase} />);
 
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('ProductDocEntry', () => {
       status: 'installed',
     });
 
-    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
+    render(<ProductDocsSetting knowledgeBase={mockKnowledgeBase} />);
 
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();

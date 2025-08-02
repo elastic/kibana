@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
@@ -31,10 +31,11 @@ function createMockKnowledgeBase(
       value: {
         enabled: true,
         errorMessage: undefined,
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
         concreteWriteIndex: undefined,
         currentInferenceId: undefined,
         isReIndexing: false,
+        productDocStatus: 'uninstalled',
       },
       loading: false,
       error: undefined,
@@ -59,11 +60,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.NOT_INSTALLED,
+          inferenceModelState: InferenceModelState.NOT_INSTALLED,
           errorMessage: 'no model',
           concreteWriteIndex: undefined,
           currentInferenceId: undefined,
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -83,10 +85,11 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: InferenceModelState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -106,10 +109,11 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.NOT_INSTALLED,
+          inferenceModelState: InferenceModelState.NOT_INSTALLED,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -129,10 +133,11 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           ...kb.status.value,
           enabled: true,
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -154,7 +159,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: InferenceModelState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -169,6 +174,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
               start_time: 0,
             },
           },
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -187,7 +193,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.ERROR,
+          inferenceModelState: InferenceModelState.ERROR,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -203,6 +209,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
               start_time: 0,
             },
           },
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -222,7 +229,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           enabled: true,
-          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          inferenceModelState: InferenceModelState.DEPLOYING_MODEL,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
@@ -237,6 +244,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
               start_time: 0,
             },
           },
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         refresh: jest.fn(),
@@ -252,11 +260,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
     const kb = createMockKnowledgeBase({
       status: {
         value: {
-          kbState: KnowledgeBaseState.READY,
+          inferenceModelState: InferenceModelState.READY,
           enabled: true,
           concreteWriteIndex: 'my-index',
           currentInferenceId: 'inference_id',
           isReIndexing: false,
+          productDocStatus: 'uninstalled',
         },
         loading: false,
         error: undefined,

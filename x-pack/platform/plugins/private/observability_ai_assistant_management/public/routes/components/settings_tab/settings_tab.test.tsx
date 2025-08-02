@@ -10,7 +10,7 @@ import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   useKnowledgeBase,
   useGenAIConnectors,
@@ -56,7 +56,7 @@ describe('SettingsTab', () => {
       },
     });
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: false,
       isPolling: false,
       isWarmingUpModel: false,
@@ -121,7 +121,7 @@ describe('SettingsTab', () => {
 
   it('should show loading state when knowledge base is being updated', () => {
     useKnowledgeBaseMock.mockReturnValue({
-      status: { value: { enabled: true, kbState: KnowledgeBaseState.READY } },
+      status: { value: { enabled: true, inferenceModelState: InferenceModelState.READY } },
       isInstalling: true,
       isPolling: true,
       isWarmingUpModel: false,

@@ -19,12 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
 
-export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
+export function ProductDocsSetting({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
   const { overlays } = useKibana().services;
 
   const selectedInferenceId = getMappedInferenceId(knowledgeBase.status.value?.currentInferenceId);
@@ -71,10 +71,10 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
   }, [overlays, uninstallProductDoc, selectedInferenceId]);
 
   const content = useMemo(() => {
-    if (isStatusLoading) {
+    if (isStatusLoading || knowledgeBase.isInstalling) {
       return <EuiLoadingSpinner size="m" />;
     }
-    if (status === 'installing') {
+    if (status === 'installing' || knowledgeBase.status.value?.productDocStatus === 'installing') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiLoadingSpinner size="m" />
@@ -87,7 +87,7 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
         </EuiFlexGroup>
       );
     }
-    if (status === 'installed') {
+    if (status === 'installed' || knowledgeBase.status.value?.productDocStatus === 'installed') {
       return (
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -148,7 +148,14 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [canInstallProductDoc, isStatusLoading, onClickInstall, onClickUninstall, status]);
+  }, [
+    canInstallProductDoc,
+    isStatusLoading,
+    onClickInstall,
+    onClickUninstall,
+    status,
+    knowledgeBase,
+  ]);
 
   return (
     <EuiDescribedFormGroup
