@@ -131,6 +131,29 @@ describe('useAlertsDataView', () => {
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 
+  it('does not fetch anything if enableNewAPIForFields is true', async () => {
+    const { result } = renderHook(
+      () =>
+        useAlertsDataView({
+          ...mockServices,
+          ruleTypeIds: ['apm', 'logs'],
+          enableNewAPIForFields: true,
+        }),
+      {
+        wrapper,
+      }
+    );
+
+    await waitFor(() =>
+      expect(result.current).toEqual({
+        isLoading: false,
+        dataView: undefined,
+      })
+    );
+    expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(0);
+    expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
+  });
+
   it('does not fetch anything with empty array nor create a virtual data view', async () => {
     const { result } = renderHook(
       () =>
