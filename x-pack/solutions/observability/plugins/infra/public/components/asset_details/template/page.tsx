@@ -20,7 +20,8 @@ import type { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
-import { PageTitleWithPopover } from '../header/page_title_with_popover';
+import { HostHeaderTitle } from '../header/host_header_title';
+import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
@@ -32,6 +33,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+  const [state] = useAssetDetailsUrlState();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
@@ -77,7 +79,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
         ) : entity.type === 'host' ? (
-          <PageTitleWithPopover name={entity.name} />
+          <HostHeaderTitle title={entity.name} schema={state?.schema} />
         ) : (
           entity.name
         ),
