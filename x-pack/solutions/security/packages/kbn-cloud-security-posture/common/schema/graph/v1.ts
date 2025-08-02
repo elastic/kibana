@@ -112,6 +112,9 @@ export const entityNodeDataSchema = schema.allOf([
       schema.literal('diamond'),
     ]),
     tag: schema.maybe(schema.string()),
+    count: schema.maybe(schema.number()),
+    ips: schema.maybe(schema.arrayOf(schema.string())),
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);

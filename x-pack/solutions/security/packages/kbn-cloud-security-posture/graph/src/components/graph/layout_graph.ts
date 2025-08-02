@@ -8,7 +8,15 @@
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
 import type { EdgeViewModel, NodeViewModel, Size } from '../types';
-import { ACTUAL_LABEL_HEIGHT, GroupStyleOverride } from '../node/styles';
+import {
+  ACTUAL_LABEL_HEIGHT,
+  GroupStyleOverride,
+  NODE_COUNTRY_FLAGS_HEIGHT,
+  NODE_DETAILS_GAP,
+  NODE_IPS_HEIGHT,
+  NODE_LABEL_HEIGHT,
+  NODE_TAG_HEIGHT,
+} from '../node/styles';
 import { isStackedLabel } from '../utils';
 import {
   GRID_SIZE,
@@ -17,7 +25,6 @@ import {
   STACK_NODE_MIN_HEIGHT,
   NODE_HEIGHT,
   NODE_WIDTH,
-  NODE_LABEL_HEIGHT,
   NODE_LABEL_WIDTH,
 } from '../constants';
 
@@ -71,6 +78,27 @@ export const layoutGraph = (
       res.children.forEach((child) => {
         nodesById[child.data.id] = child;
       });
+    } else {
+      // Any other shape i.e. hexagon, diamond, ...
+      const hasLabelOrId = !!node.data.label || !!node.data.id;
+      const hasIps = node.data.ips && node.data.ips.length > 0;
+      const hasCountryCodes = node.data.countryCodes && node.data.countryCodes.length > 0;
+
+      size.height += NODE_TAG_HEIGHT;
+
+      if (hasLabelOrId) {
+        size.height += NODE_LABEL_HEIGHT;
+      }
+      if (hasLabelOrId || hasIps || hasCountryCodes) {
+        size.height += NODE_DETAILS_GAP;
+      }
+      if (hasIps) {
+        size.height += NODE_IPS_HEIGHT;
+      }
+      if (hasCountryCodes) {
+        // TODO What if countryCodes contains invalid ones and actual array is empty?
+        size.height += NODE_COUNTRY_FLAGS_HEIGHT;
+      }
     }
 
     if (!nodesById[node.id]) {

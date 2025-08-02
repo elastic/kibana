@@ -34,6 +34,7 @@ import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
 
 export interface GraphProps extends CommonProps {
@@ -173,6 +174,7 @@ export const Graph = memo<GraphProps>(
           {children}
           <Background id={backgroundId} />
         </ReactFlow>
+        <GlobalGraphStyles />
       </div>
     );
   }
