@@ -37,6 +37,7 @@ import { getCommonAlertFields } from './get_common_alert_fields';
 import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import type { CommonAlertFields870, SuppressionFields870 } from '../../common/schemas';
+import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings
@@ -422,6 +423,14 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   };
                 }
 
+                const suppressionBehaviorOnAlertClosure = await options.services.uiSettingsClient.get(
+    SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
+  );
+
+                const shouldIgnoreClosedAlerts = suppressionBehaviorOnAlertClosure === 'continue-until-window-ends'
+
+                console.log(">>> shouldIgnoreClosedAlerts", shouldIgnoreClosedAlerts)
+
                 const suppressionAlertSearchRequest = {
                   size: filteredDuplicates.length,
                   query: {
@@ -441,7 +450,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                             ),
                           },
                         },
-                        {
+                        ...(shouldIgnoreClosedAlerts ? [] : [
+                          {
                           bool: {
                             must_not: {
                               term: {
@@ -450,6 +460,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                             },
                           },
                         },
+                        ])
                       ],
                     },
                   },
