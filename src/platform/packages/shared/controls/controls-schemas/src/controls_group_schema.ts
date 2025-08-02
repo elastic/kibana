@@ -18,7 +18,10 @@ import {
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
-import { controlSchema } from './control_schema';
+import { esqlControl } from './esql_control';
+import { optionsListControl } from './options_list_control';
+import { rangeSliderControl } from './range_slider_control';
+import { timeSliderControl } from './time_slider_control';
 
 export const labelPositionSchema = schema.oneOf(
   [
@@ -72,10 +75,13 @@ export const ignoreParentSettingsSchema = schema.object({
 });
 
 export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(controlSchema, {
-    defaultValue: [],
-    meta: { description: 'An array of control panels and their state in the control group.' },
-  }),
+  controls: schema.arrayOf(
+    schema.oneOf([esqlControl, optionsListControl, rangeSliderControl, timeSliderControl]),
+    {
+      defaultValue: [],
+      meta: { description: 'An array of control panels and their state in the control group.' },
+    }
+  ),
   labelPosition: labelPositionSchema,
   chainingSystem: chainingSchema,
   enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),

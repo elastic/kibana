@@ -11,6 +11,7 @@ import React from 'react';
 import { of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
@@ -18,7 +19,6 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -207,7 +207,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
       expect(serializedState.rawState.step).toBe(1);
     });
 
@@ -222,7 +222,7 @@ describe('RangesliderControlApi', () => {
         uuid,
         controlGroupApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
+      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
       expect(serializedState.rawState.step).toBe(1024);
     });
   });
@@ -232,7 +232,7 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          initialState={{} as RangesliderControlState}
+          initialState={{} as RangeSliderControlState}
           field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={jest.fn()}
@@ -249,7 +249,7 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
-          initialState={{} as RangesliderControlState}
+          initialState={{} as RangeSliderControlState}
           field={{} as DataViewField}
           updateState={jest.fn()}
           setControlEditorValid={setControlEditorValid}

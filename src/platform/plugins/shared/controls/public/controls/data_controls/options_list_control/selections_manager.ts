@@ -10,7 +10,7 @@
 import deepEqual from 'react-fast-compare';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { OptionsListControlState } from '../../../../common/options_list';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
 
 function areSelectedOptionsEqual(

@@ -12,7 +12,8 @@ import { render, within, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
 import { ESQLControlsFlyout } from '.';
 
 jest.mock('@kbn/esql-utils', () => ({

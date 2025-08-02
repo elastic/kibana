@@ -20,10 +20,10 @@ import {
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
 import {
   ESQLVariableType,
   EsqlControlType,
-  type ESQLControlState,
   type ControlWidthOptions,
   ESQLControlVariable,
 } from '@kbn/esql-types';

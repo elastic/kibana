@@ -11,9 +11,8 @@ import { Subject } from 'rxjs';
 
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
 import { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { OptionsListDisplaySettings, OptionsListControlState } from '@kbn/controls-schemas';
 import type {
-  OptionsListControlState,
-  OptionsListDisplaySettings,
   OptionsListSelection,
   OptionsListSortingType,
   OptionsListSuggestions,

@@ -13,8 +13,8 @@ import { BehaviorSubject } from 'rxjs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { act, render as rtlRender, RenderResult, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 
-import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';

@@ -25,8 +25,8 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type {
-  OptionsListControlState,
   OptionsListSortingType,
   OptionsListSuccessResponse,
 } from '../../../../common/options_list';

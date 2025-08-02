@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/controls-schemas';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';

@@ -41,7 +41,6 @@ export type {
   ControlPanelsState,
   DefaultDataControlState,
 } from '../common';
-export type { OptionsListControlState } from '../common/options_list';
 
 export { serializeRuntimeState } from './control_group/utils/serialize_runtime_state';
 
