@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AxiosError } from 'axios';
+import type { estypes } from '@elastic/elasticsearch';
 
-export class KbnClientRequesterError extends Error {
-  axiosError?: AxiosError;
-  constructor(message: string, error: unknown) {
-    super(message);
-    this.name = 'KbnClientRequesterError';
-    if (error instanceof AxiosError) this.axiosError = clean(error);
-  }
-}
-function clean(error: Error): AxiosError {
-  const _ = AxiosError.from(error);
-  delete _.cause;
-  delete _.config;
-  delete _.request;
-  delete _.response;
-  return _;
+export function dateRangeQuery(
+  start?: number,
+  end?: number,
+  field = '@timestamp'
+): estypes.QueryDslQueryContainer[] {
+  return [
+    {
+      range: {
+        [field]: {
+          gte: start,
+          lte: end,
+          format: 'epoch_millis',
+        },
+      },
+    },
+  ];
 }

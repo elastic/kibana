@@ -14,9 +14,9 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { ChangePointType } from '@kbn/es-types/src';
 import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
-import { getRuleIdFromQueryLink } from '../../../lib/streams/assets/query/helpers/query';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
+import { AssetClient } from '../streams/assets/asset_client';
+import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
+import { SecurityError } from '../streams/errors/security_error';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { name: string; from: Date; to: Date; bucketSize: string },
