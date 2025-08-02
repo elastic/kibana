@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
-import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 
 export async function ensureInstalledPackage(
   context: SecuritySolutionApiRequestHandlerContext,
@@ -22,7 +21,7 @@ export async function ensureInstalledPackage(
 
     const packageInstallationResult = await context
       .getInternalFleetServices()
-      .packages.ensureInstalledPackage({ pkgName: PREBUILT_RULES_PACKAGE_NAME, pkgVersion });
+      .packages.ensureInstalledPackage({ pkgName, pkgVersion });
 
     logger.info(
       `ensureInstalledPackage: Fleet package is ${packageInstallationResult.status}: "${pkgName}" v${pkgVersion}`
