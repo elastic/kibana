@@ -32,6 +32,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
+import { ScreenReaderAnnouncements } from '../a11y_announcements/containers/screen_reader_a11y';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -57,23 +58,25 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
           <EuiThemeProvider darkMode={darkMode}>
             <MlCapabilitiesProvider>
               <UserPrivilegesProvider kibanaCapabilities={capabilities}>
-                <ManageUserInfo>
-                  <NavigationProvider core={services}>
-                    <ReactQueryClientProvider>
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
-                      >
-                        <UpsellingProvider upsellingService={upselling}>
-                          <DiscoverInTimelineContextProvider>
-                            <PageRouter history={history}>
-                              <AssistantProvider>{children}</AssistantProvider>
-                            </PageRouter>
-                          </DiscoverInTimelineContextProvider>
-                        </UpsellingProvider>
-                      </CellActionsProvider>
-                    </ReactQueryClientProvider>
-                  </NavigationProvider>
-                </ManageUserInfo>
+                <ScreenReaderAnnouncements>
+                  <ManageUserInfo>
+                    <NavigationProvider core={services}>
+                      <ReactQueryClientProvider>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                        >
+                          <UpsellingProvider upsellingService={upselling}>
+                            <DiscoverInTimelineContextProvider>
+                              <PageRouter history={history}>
+                                <AssistantProvider>{children}</AssistantProvider>
+                              </PageRouter>
+                            </DiscoverInTimelineContextProvider>
+                          </UpsellingProvider>
+                        </CellActionsProvider>
+                      </ReactQueryClientProvider>
+                    </NavigationProvider>
+                  </ManageUserInfo>
+                </ScreenReaderAnnouncements>
               </UserPrivilegesProvider>
             </MlCapabilitiesProvider>
           </EuiThemeProvider>
