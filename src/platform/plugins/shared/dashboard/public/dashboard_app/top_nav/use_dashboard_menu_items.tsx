@@ -19,7 +19,7 @@ import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_setti
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { coreServices, shareService } from '../../services/kibana_services';
+import { coreServices, dataService, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
@@ -148,7 +148,17 @@ export const useDashboardMenuItems = ({
         },
         disableButton: disableTopNav,
       } as TopNavMenuData,
-
+      backgroundSearch: {
+        id: 'background-search',
+        label: 'Background search',
+        description: 'Manage background search sessions',
+        iconType: 'clock',
+        iconOnly: true,
+        testId: 'backgroundSearchTopNavButton',
+        run: () => {
+          dataService.search.showSearchSessionsFlyout();
+        },
+      },
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -285,6 +295,7 @@ export const useDashboardMenuItems = ({
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
       ...shareMenuItem,
+      menuItems.backgroundSearch,
       ...editMenuItem,
     ];
   }, [
@@ -297,6 +308,7 @@ export const useDashboardMenuItems = ({
     menuItems.fullScreen,
     hasExportIntegration,
     dashboardApi.isManaged,
+    menuItems.backgroundSearch,
     showResetChange,
     resetChangesMenuItem,
   ]);
@@ -319,12 +331,12 @@ export const useDashboardMenuItems = ({
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
       }
-
+      editModeItems.push(menuItems.backgroundSearch);
       editModeItems.push(menuItems.quickSave);
     } else {
+      editModeItems.push(menuItems.backgroundSearch);
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-
     const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
 
     // insert share menu item before the last item in edit mode
@@ -339,6 +351,7 @@ export const useDashboardMenuItems = ({
     menuItems.settings,
     menuItems.interactiveSave,
     menuItems.switchToViewMode,
+    menuItems.backgroundSearch,
     menuItems.quickSave,
     hasExportIntegration,
     lastSavedId,
