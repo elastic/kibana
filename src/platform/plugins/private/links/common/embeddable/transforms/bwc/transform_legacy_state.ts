@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
-import { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from '@kbn/presentation-publishing';
-import { CONTENT_ID } from '../../common/content_management';
+import type { StoredLinksState } from '../../../../server';
+import type { StoredLinksByValueState910 } from './types';
 
-export function createLinksSavedObjectRef(libraryId: string) {
+export function transformLegacyState(state: StoredLinksByValueState910): StoredLinksState {
+  // 9.1.0 by-value state stored state under attributes
+  const { attributes, ...rest } = state;
   return {
-    name: SAVED_OBJECT_REF_NAME,
-    type: CONTENT_ID,
-    id: libraryId,
+    ...attributes,
+    ...rest,
   };
-}
-
-export function findLinksSavedObjectRef(references?: Reference[]) {
-  return findSavedObjectRef(CONTENT_ID, references);
 }

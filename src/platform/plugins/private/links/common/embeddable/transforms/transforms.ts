@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableTransforms } from '../common';
+import { transformIn } from './transform_in';
+import { transformOut } from './transform_out';
 
-const registry: { [key: string]: EmbeddableTransforms<any, any> } = {};
-
-export function registerTransforms(type: string, transforms: EmbeddableTransforms<any, any>) {
-  if (registry[type]) {
-    throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
-  }
-
-  registry[type] = transforms;
-}
-
-export function getTransforms(type: string) {
-  return registry[type];
-}
+export const transforms = {
+  transformIn,
+  transformOut,
+};
