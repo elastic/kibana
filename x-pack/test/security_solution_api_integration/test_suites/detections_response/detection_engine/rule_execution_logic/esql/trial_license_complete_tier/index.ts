@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ESQL execution logic API', function () {
-    //loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./esql_suppression'));
   });
 }

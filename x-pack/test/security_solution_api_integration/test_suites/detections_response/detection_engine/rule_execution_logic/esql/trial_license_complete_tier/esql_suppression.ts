@@ -1976,6 +1976,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should apply exceptions', async () => {
         const id = uuidv4();
+        console.log(">>> generated id ", id)
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.2' };
         const doc2 = { agent: { name: 'test-1' } };
@@ -2012,6 +2013,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        const {records} = await es.helpers.esql({query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`}).toRecords()
+
+        console.log(">>> CURRENT RECORDS", JSON.stringify(records, null, 2))
 
         expect(previewAlerts.length).toBe(1);
         expect(previewAlerts[0]._source).toEqual({
