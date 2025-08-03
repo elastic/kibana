@@ -40,6 +40,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                   operationType: 'formula',
                   params: {
                     format: { id: 'custom', params: { decimals: 0, pattern: '$0,0.[000]' } },
+                    // @ts-expect-error - fix type error
                     formula: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                     isFormulaBroken: false,
                   },
@@ -51,6 +52,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                   isBucketed: false,
                   label: 'Part of Cost Savings',
                   operationType: 'count',
+                  // @ts-expect-error - fix type error
                   params: { emptyAsNull: false },
                   sourceField: '___records___',
                 },
@@ -61,6 +63,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                   label: 'Part of Cost Savings',
                   operationType: 'math',
                   params: {
+                    // @ts-expect-error - fix type error
                     tinymathAst: {
                       args: [
                         'countColumnX0',
@@ -118,8 +121,6 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
-  } as LensAttributes;
+    version: 1 as const,
+  } satisfies LensAttributes;
 };

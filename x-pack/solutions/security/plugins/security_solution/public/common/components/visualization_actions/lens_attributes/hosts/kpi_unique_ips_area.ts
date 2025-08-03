@@ -33,7 +33,10 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
                   isBucketed: true,
                   label: '@timestamp',
                   operationType: 'date_histogram',
-                  params: { interval: 'auto' },
+                  params: {
+                    // @ts-expect-error - fix type error
+                    interval: 'auto',
+                  },
                   scale: 'interval',
                   sourceField: '@timestamp',
                 },
@@ -66,7 +69,10 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
                   isBucketed: true,
                   label: '@timestamp',
                   operationType: 'date_histogram',
-                  params: { interval: 'auto' },
+                  params: {
+                    // @ts-expect-error - fix type error
+                    interval: 'auto',
+                  },
                   scale: 'interval',
                   sourceField: '@timestamp',
                 },
@@ -128,8 +134,6 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2022-02-09T17:44:03.359Z',
-    version: 'WzI5MTI5OSwzXQ==',
-  } as LensAttributes;
+    version: 1 as const,
+  } satisfies LensAttributes;
 };
