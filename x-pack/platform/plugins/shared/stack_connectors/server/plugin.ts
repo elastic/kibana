@@ -5,27 +5,15 @@
  * 2.0.
  */
 
+import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-
-import {
-  parseExperimentalConfigValue,
-  type ExperimentalFeatures,
-} from '../common/experimental_features';
-import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypes } from './connector_types';
-import { getWellKnownEmailServiceRoute, validSlackApiChannelsRoute } from './routes';
-
+import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ConfigSchema as StackConnectorsConfigType } from './config';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
-  alerting: AlertingServerSetup;
 }
 
 export interface ConnectorsPluginsStart {
@@ -47,7 +35,7 @@ export class StackConnectorsPlugin
 
   public setup(core: CoreSetup<ConnectorsPluginsStart>, plugins: ConnectorsPluginsSetup) {
     const router = core.http.createRouter();
-    const { actions, alerting } = plugins;
+    const { actions } = plugins;
 
     const awsSesConfig = actions.getActionsConfigurationUtilities().getAwsSesConfig();
     getWellKnownEmailServiceRoute(router, awsSesConfig);
@@ -58,10 +46,8 @@ export class StackConnectorsPlugin
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
     });
-
-    // Workflows connector adapter is now registered by workflows_management plugin
   }
 
-  public start(core: CoreStart, deps: ConnectorsPluginsStart) {}
+  public start() {}
   public stop() {}
 }
