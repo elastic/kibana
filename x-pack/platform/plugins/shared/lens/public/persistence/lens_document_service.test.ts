@@ -55,7 +55,7 @@ describe('LensStore', () => {
       };
 
       jest.mocked(client.create).mockImplementation(async (item, references) => ({
-        item: { id: 'new-id', ...item, references },
+        item: { id: 'new-id', ...item, references, extraProp: 'test' },
         meta: { type: 'lens' },
       }));
       const doc = await service.save(docToSave);
@@ -63,6 +63,7 @@ describe('LensStore', () => {
       expect(doc).toEqual({
         savedObjectId: 'new-id',
         ...docToSave,
+        extraProp: 'test', // should replace doc with response properties
       });
 
       expect(client.create).toHaveBeenCalledTimes(1);
@@ -87,12 +88,13 @@ describe('LensStore', () => {
       };
 
       jest.mocked(client.update).mockImplementation(async (id, item, references) => ({
-        item: { id, ...item, references },
+        item: { id, ...item, references, extraProp: 'test' },
         meta: { type: 'lens' },
       }));
 
       const doc = await service.save(docToUpdate);
-      expect(doc).toEqual(docToUpdate);
+      // should replace doc with response properties
+      expect(doc).toEqual({ ...docToUpdate, extraProp: 'test' });
 
       expect(client.update).toHaveBeenCalledTimes(1);
       const { savedObjectId, references, ...attributes } = docToUpdate;
