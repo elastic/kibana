@@ -71,7 +71,6 @@
     "@kbn/rison",
     "@kbn/dataset-quality-plugin",
     "@kbn/metrics-data-access-plugin",
-    "@kbn/observability-onboarding-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/streams-schema",
