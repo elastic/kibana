@@ -17,6 +17,14 @@ import {
   lensItemAttributesSchema as lensItemAttributesSchemaV1,
 } from '../common/content_management/v1';
 
+// Allow old lens SO with unknown version
+const lensItemAttributesSchemaV0 = lensItemAttributesSchemaV1.extends(
+  {
+    version: undefined,
+  },
+  { unknowns: 'allow' }
+);
+
 export function setupSavedObjects(
   core: CoreSetup,
   getFilterMigrations: () => MigrateFunctionsObject,
@@ -57,8 +65,8 @@ export function setupSavedObjects(
           },
         ],
         schemas: {
-          forwardCompatibility: lensItemAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-          create: lensItemAttributesSchemaV1,
+          forwardCompatibility: lensItemAttributesSchemaV1.extendsDeep({ unknowns: 'ignore' }),
+          create: lensItemAttributesSchemaV0,
         },
       },
     },
