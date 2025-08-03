@@ -17,7 +17,7 @@ const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-override
  */
 
 /** @type {Array.<RestrictedImportPath>} */
-const RESTRICTED_IMPORTS = [
+const RESTRICTED_IMPORTS_PATHS = [
   {
     name: 'enzyme',
     message: 'Please use @testing-library/react instead',
@@ -26,7 +26,7 @@ const RESTRICTED_IMPORTS = [
 
 const overrides = createNoRestrictedImportsOverride({
   childConfigDir: __dirname,
-  restrictedImports: RESTRICTED_IMPORTS,
+  restrictedImports: RESTRICTED_IMPORTS_PATHS,
 });
 
 /** @type {import('eslint').Linter.Config} */
