@@ -23,7 +23,7 @@ export function getConnectorType(): ConnectorTypeModel<
   return {
     id: '.workflows',
     // TODO: workflows icon
-    iconClass: 'logoWebhook',
+    iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.workflows.selectMessageText', {
       defaultMessage: 'Execute workflows when alerts are triggered.',
     }),
