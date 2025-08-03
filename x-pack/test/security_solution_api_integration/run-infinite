@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Replace this with the command you want to run
+COMMAND="node ../../../scripts/functional_test_runner --config=test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/configs/ess.config.ts"
+
+# Run the command in an infinite loop until it fails
+while $COMMAND; do
+    echo "Command succeeded, running again..."
+done
+
+echo "Command failed. Exiting."
+
