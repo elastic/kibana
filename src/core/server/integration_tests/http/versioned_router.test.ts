@@ -10,7 +10,7 @@
 import { captureErrorMock } from './versioned_router.test.mocks';
 
 import Supertest from 'supertest';
-import apm from 'elastic-apm-node';
+import apm, { type Span } from 'elastic-apm-node';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -34,13 +34,13 @@ describe('Routing versioned requests', () => {
   let router: IRouter;
   let supertest: Supertest.Agent;
   const endMock = jest.fn();
-  jest.spyOn(apm, 'startSpan').mockReturnValue({ end: endMock });
+  jest.spyOn(apm, 'startSpan').mockReturnValue({ end: endMock } as Span);
 
   const assertSpanCloseCalled = (numberofOfCalls: number = 2) => {
     expect(apm.startSpan).toHaveBeenCalledTimes(numberofOfCalls);
     expect(endMock).toHaveBeenCalledTimes(numberofOfCalls);
     endMock.mockClear();
-    apm.startSpan.mockClear();
+    (apm.startSpan as jest.Mock).mockClear();
   };
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
@@ -74,7 +74,7 @@ describe('Routing versioned requests', () => {
 
   beforeEach(async () => {
     endMock.mockClear();
-    apm.startSpan.mockClear();
+    (apm.startSpan as jest.Mock).mockClear();
     await setupServer();
   });
 
