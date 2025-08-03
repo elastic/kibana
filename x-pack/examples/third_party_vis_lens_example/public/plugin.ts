@@ -12,7 +12,7 @@ import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/pub
 import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
 import { RotatingNumberState } from '../common/types';

@@ -15,7 +15,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import image from './image.png';
 
 export interface SetupDependencies {
