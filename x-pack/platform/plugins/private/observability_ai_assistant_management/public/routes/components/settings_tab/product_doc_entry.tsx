@@ -19,9 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
-import { getMappedInferenceId } from '../../../helpers/inference_utils';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
+import { UseProductDoc } from '../../../hooks/use_product_doc';
 
 const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
   installing: i18n.translate(
@@ -45,29 +44,30 @@ const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'load
   }),
 };
 
-export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseResult }) {
+export function ProductDocEntry({
+  knowledgeBase,
+  productDoc,
+  currentlyDeployedInferenceId,
+}: {
+  knowledgeBase: UseKnowledgeBaseResult;
+  productDoc: UseProductDoc;
+  currentlyDeployedInferenceId: string | undefined;
+}) {
   const { overlays } = useKibana().services;
 
-  const selectedInferenceId = getMappedInferenceId(knowledgeBase.status.value?.currentInferenceId);
-
   const canInstallProductDoc =
-    selectedInferenceId !== undefined &&
+    currentlyDeployedInferenceId !== undefined &&
     !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
     knowledgeBase.status?.value?.kbState === KnowledgeBaseState.READY;
 
-  const {
-    status,
-    isLoading: isStatusLoading,
-    installProductDoc,
-    uninstallProductDoc,
-  } = useGetProductDoc(selectedInferenceId);
+  const { status, isLoading: isStatusLoading, installProductDoc, uninstallProductDoc } = productDoc;
 
   const onClickInstall = useCallback(() => {
-    if (!selectedInferenceId) {
+    if (!currentlyDeployedInferenceId) {
       throw new Error('Inference ID is required to install product documentation');
     }
-    installProductDoc(selectedInferenceId);
-  }, [installProductDoc, selectedInferenceId]);
+    installProductDoc(currentlyDeployedInferenceId);
+  }, [installProductDoc, currentlyDeployedInferenceId]);
 
   const onClickUninstall = useCallback(() => {
     overlays
@@ -88,17 +88,17 @@ export function ProductDocEntry({ knowledgeBase }: { knowledgeBase: UseKnowledge
         }
       )
       .then((confirmed) => {
-        if (confirmed && selectedInferenceId) {
-          uninstallProductDoc(selectedInferenceId);
+        if (confirmed && currentlyDeployedInferenceId) {
+          uninstallProductDoc(currentlyDeployedInferenceId);
         }
       });
-  }, [overlays, uninstallProductDoc, selectedInferenceId]);
+  }, [overlays, uninstallProductDoc, currentlyDeployedInferenceId]);
 
   const buttonText = useMemo(() => {
     if (!status || status === 'error' || !canInstallProductDoc) {
       return statusToButtonTextMap.uninstalled;
     }
-    if (isStatusLoading) {
+    if (isStatusLoading && status !== 'installing' && status !== 'uninstalling') {
       return statusToButtonTextMap.loading;
     }
     return statusToButtonTextMap[status];
