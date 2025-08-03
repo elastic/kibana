@@ -18,6 +18,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsPluginSetup {
@@ -32,6 +33,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
+  security?: SecurityPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {

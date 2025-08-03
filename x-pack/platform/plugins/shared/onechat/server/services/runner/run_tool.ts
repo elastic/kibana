@@ -19,13 +19,13 @@ import { createToolEventEmitter } from './utils/events';
 import type { RunnerManager } from './runner';
 import type { InternalToolDefinition } from '../tools/tool_provider';
 
-export const runTool = async <TParams = Record<string, unknown>, TResult = unknown>({
+export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
   parentManager,
 }: {
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   parentManager: RunnerManager;
-}): Promise<RunToolReturn<TResult>> => {
+}): Promise<RunToolReturn> => {
   const { toolId, toolParams } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
@@ -33,11 +33,7 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
   const { toolsService, request } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
-    any,
-    ZodObject<any>,
-    TResult
-  >;
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<any, ZodObject<any>>;
 
   const toolReturn = await withExecuteToolSpan({ name: tool.id, input: toolParams }, async () => {
     const validation = tool.schema.safeParse(toolParams);
