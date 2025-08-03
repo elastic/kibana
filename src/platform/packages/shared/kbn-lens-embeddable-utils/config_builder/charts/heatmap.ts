@@ -13,7 +13,6 @@ import type {
   HeatmapVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensHeatmapConfig } from '../types';
 import {
   addLayerColumn,
@@ -129,7 +128,7 @@ export async function buildHeatmap(
     title: config.title,
     visualizationType: 'lnsHeatmap',
     references: buildReferences(dataviews),
-    version: LENS_ITEM_LATEST_VERSION,
+    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

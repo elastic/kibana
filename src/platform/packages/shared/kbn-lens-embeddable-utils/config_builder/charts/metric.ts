@@ -14,7 +14,6 @@ import type {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
 import {
   addLayerColumn,
@@ -226,7 +225,7 @@ export async function buildMetric(
     title: config.title,
     visualizationType: 'lnsMetric',
     references: buildReferences(dataviews),
-    version: LENS_ITEM_LATEST_VERSION,
+    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

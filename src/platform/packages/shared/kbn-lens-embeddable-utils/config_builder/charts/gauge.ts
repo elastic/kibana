@@ -13,7 +13,6 @@ import type {
   GaugeVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } from '../types';
 import {
   addLayerFormulaColumns,
@@ -143,7 +142,7 @@ export async function buildGauge(
     title: config.title,
     visualizationType: 'lnsGauge',
     references: buildReferences(dataviews),
-    version: LENS_ITEM_LATEST_VERSION,
+    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

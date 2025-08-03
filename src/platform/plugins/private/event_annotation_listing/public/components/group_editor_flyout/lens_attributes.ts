@@ -9,7 +9,6 @@
 
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { FieldBasedIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 
 export const DATA_LAYER_ID = 'data-layer-id';
 export const DATE_HISTOGRAM_COLUMN_ID = 'date-histogram-column-id';
@@ -144,7 +143,7 @@ export const getLensAttributes = (group: EventAnnotationGroupConfig, timeField: 
             name: `indexpattern-datasource-layer-${DATA_LAYER_ID}`,
           },
         ],
-    version: LENS_ITEM_LATEST_VERSION,
+    version: 1 as const,
   } as TypedLensByValueInput['attributes']);
 
 export const getCurrentTimeField = (attributes: TypedLensByValueInput['attributes']) => {
