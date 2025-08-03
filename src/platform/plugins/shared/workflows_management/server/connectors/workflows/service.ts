@@ -14,8 +14,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   ExternalService,
   ExternalServiceCredentials,
-  ExternalServiceIncidentResponse,
   RunWorkflowParams,
+  WorkflowExecutionResponse,
 } from './types';
 import { createServiceError } from './utils';
 
@@ -39,7 +39,7 @@ export const createExternalService = (
   const runWorkflow = async ({
     workflowId,
     inputs = {},
-  }: RunWorkflowParams): Promise<ExternalServiceIncidentResponse> => {
+  }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
       logger.info(`Attempting to run workflow ${workflowId} via internal service`);
 

@@ -15,6 +15,5 @@ export interface WorkflowsActionParams {
   subAction: string;
   subActionParams: {
     workflowId: string;
-    inputs?: Record<string, any>;
   };
 }

@@ -8,12 +8,13 @@
  */
 
 import {
-  EuiFormRow,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiSuperSelect,
   EuiText,
-  EuiTextArea,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -34,7 +35,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   index,
   errors,
 }) => {
-  const { workflowId, inputs } = actionParams.subActionParams ?? {};
+  const { workflowId } = actionParams.subActionParams ?? {};
   const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -46,45 +47,29 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       editAction('subAction', 'run', index);
     }
     if (!actionParams?.subActionParams) {
-      editAction('subActionParams', { workflowId: '', inputs: {} }, index);
+      editAction('subActionParams', { workflowId: '' }, index);
     }
   }, [actionParams, editAction, index]);
 
   const editSubActionParams = useCallback(
-    (key: string, value: any) => {
-      const newParams = {
-        ...actionParams,
-        subAction: 'run',
-        subActionParams: {
-          ...actionParams.subActionParams,
-          [key]: value,
-        },
-      };
-      editAction('subAction', 'run', index);
-      editAction('subActionParams', newParams.subActionParams, index);
+    (key: string, value: unknown) => {
+      const oldParams = actionParams.subActionParams ?? {};
+      const updatedParams = { ...oldParams, [key]: value };
+      editAction('subActionParams', updatedParams, index);
     },
-    [actionParams, editAction, index]
+    [actionParams.subActionParams, editAction, index]
   );
 
   const onWorkflowIdChange = useCallback(
-    (value: string) => {
-      editSubActionParams('workflowId', value);
+    (selectedValue: string) => {
+      editSubActionParams('workflowId', selectedValue);
     },
     [editSubActionParams]
   );
 
-  const onInputsChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      try {
-        const parsedInputs = e.target.value ? JSON.parse(e.target.value) : {};
-        editSubActionParams('inputs', parsedInputs);
-      } catch (error) {
-        // Keep the raw value if JSON is invalid
-        editSubActionParams('inputs', e.target.value);
-      }
-    },
-    [editSubActionParams]
-  );
+  const handleCreateNewWorkflow = useCallback(() => {
+    window.open(`/rzm/app/workflows`, '_blank');
+  }, []);
 
   // Fetch workflows from internal Kibana API
   useEffect(() => {
@@ -145,40 +130,39 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   return (
     <>
-      <EuiFormRow
-        id="workflowId"
-        fullWidth
-        error={displayError}
-        isInvalid={displayError !== undefined}
-        label={i18n.WORKFLOW_ID_LABEL}
-        helpText={helpText}
-      >
-        {isLoading ? (
-          <EuiLoadingSpinner size="m" />
-        ) : (
-          <EuiSuperSelect
-            fullWidth
-            options={workflowOptions}
-            valueOfSelected={workflowId || ''}
-            onChange={onWorkflowIdChange}
-            data-test-subj="workflowIdSelect"
-            placeholder={i18n.SELECT_WORKFLOW_PLACEHOLDER}
-            isInvalid={displayError !== undefined}
-            disabled={workflows.length === 0}
-          />
-        )}
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow id="inputs" fullWidth label={i18n.INPUTS_LABEL} helpText={i18n.INPUTS_HELP_TEXT}>
-        <EuiTextArea
+      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <span>{i18n.WORKFLOW_ID_LABEL}</span>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink onClick={handleCreateNewWorkflow} external>
+            {/* Todo: add real icon from figma, doesn't exist in eui? */}
+            {i18n.CREATE_NEW_WORKFLOW} <EuiIcon type="plusInCircle" size="s" />
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isLoading ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        <EuiSuperSelect
           fullWidth
-          value={inputs ? JSON.stringify(inputs, null, 2) : '{}'}
-          onChange={onInputsChange}
-          data-test-subj="workflowInputsEditor"
-          rows={6}
-          placeholder='{"key": "value"}'
+          style={{ marginTop: '5px' }}
+          options={workflowOptions}
+          valueOfSelected={workflowId || ''}
+          onChange={onWorkflowIdChange}
+          data-test-subj="workflowIdSelect"
+          placeholder={i18n.SELECT_WORKFLOW_PLACEHOLDER}
+          isInvalid={displayError !== undefined}
+          disabled={workflows.length === 0}
         />
-      </EuiFormRow>
+      )}
+
+      {(displayError || helpText) && (
+        <EuiText size="s" color={displayError ? 'danger' : 'subdued'}>
+          {displayError || helpText}
+        </EuiText>
+      )}
     </>
   );
 };

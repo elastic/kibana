@@ -42,7 +42,6 @@ export interface WorkflowsRuleActionParams {
   subAction: 'run';
   subActionParams: {
     workflowId: string;
-    inputs?: Record<string, unknown>;
   };
   [key: string]: unknown;
 }
@@ -164,7 +163,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const { workflowId, inputs } = subActionParams;
+        const { workflowId } = subActionParams;
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
@@ -186,16 +185,11 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           spaceId,
         };
 
-        const userInputs = inputs || {};
-        const eventData = userInputs.event
-          ? { ...alertContext, ...userInputs.event }
-          : alertContext;
-
         return {
           subAction: 'run' as const,
           subActionParams: {
             workflowId,
-            inputs: { ...userInputs, event: eventData },
+            inputs: { event: alertContext },
           },
         };
       } catch (error) {
@@ -203,7 +197,6 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
-            inputs: params?.subActionParams?.inputs || {},
           },
         };
       }

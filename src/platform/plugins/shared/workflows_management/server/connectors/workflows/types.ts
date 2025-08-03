@@ -43,13 +43,13 @@ export interface WorkflowsExecutorResultData {
   status: string;
 }
 
-export interface ExternalServiceIncidentResponse {
+export interface WorkflowExecutionResponse {
   workflowRunId: string;
   status: string;
 }
 
 export interface ExternalService {
-  runWorkflow: (params: RunWorkflowParams) => Promise<ExternalServiceIncidentResponse>;
+  runWorkflow: (params: RunWorkflowParams) => Promise<WorkflowExecutionResponse>;
 }
 
 export interface ExternalServiceApiHandlerArgs {

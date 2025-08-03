@@ -24,20 +24,6 @@ export const WORKFLOW_ID_LABEL = i18n.translate(
   }
 );
 
-export const INPUTS_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.workflows.inputsTextFieldLabel',
-  {
-    defaultMessage: 'Inputs (JSON)',
-  }
-);
-
-export const INPUTS_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.workflows.inputsHelpText',
-  {
-    defaultMessage: 'JSON object containing inputs to pass to the workflow',
-  }
-);
-
 export const WORKFLOW_ID_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.workflows.error.requiredWorkflowIdText',
   {
@@ -70,5 +56,12 @@ export const FAILED_TO_LOAD_WORKFLOWS = i18n.translate(
   'xpack.stackConnectors.components.workflows.failedToLoadWorkflows',
   {
     defaultMessage: 'Failed to load workflows. Please check your connector configuration.',
+  }
+);
+
+export const CREATE_NEW_WORKFLOW = i18n.translate(
+  'xpack.stackConnectors.components.workflows.createNewWorkflow',
+  {
+    defaultMessage: 'Create new',
   }
 );
