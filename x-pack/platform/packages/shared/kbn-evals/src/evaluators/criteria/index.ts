@@ -10,6 +10,7 @@ import { ShortIdTable } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { sumBy, uniqBy } from 'lodash';
 import pRetry from 'p-retry';
+import dedent from 'dedent';
 import type { Evaluator } from '../../types';
 import { LlmCriteriaEvaluationPrompt } from './prompt';
 
@@ -113,7 +114,8 @@ export function createCriteriaEvaluator({
       return {
         explanation: results
           .map(({ evaluation, criterion }) => {
-            return `"${criterion.id}": ${evaluation.reason ?? 'No explanation given'}`;
+            return dedent(`"${criterion.text}":
+              ${evaluation.result} - ${evaluation.reason ?? 'No explanation given'}`);
           })
           .join('\n'),
         label: null,

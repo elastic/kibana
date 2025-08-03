@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
 import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
@@ -26,14 +27,22 @@ const evaluate = base.extend<{
   evaluateEsqlDataset: EvaluateEsqlDataset;
 }>({
   evaluateEsqlDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
+    async ({ chatClient, evaluators, phoenixClient, inferenceClient, esClient, log }, use) => {
+      const controller = new AbortController();
+
+      await use(
         createEvaluateEsqlDataset({
           chatClient,
           evaluators,
           phoenixClient,
+          inferenceClient,
+          signal: controller.signal,
+          esClient,
+          logger: toolingLogToLogger({ log }),
         })
       );
+
+      controller.abort();
     },
     { scope: 'test' },
   ],
@@ -130,7 +139,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From logs-my_app-*, show the 20 most frequent error messages in the last six hours.',
+                  'From logs-my_app-*, show the 20 most frequent error messages in the last six hours. Use `logs-my-app*` verbatim, and write a single query.',
               },
               output: {
                 expected: `FROM logs-my_app-*
@@ -146,6 +155,11 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                     - ERROR: Payment gateway returned status 503
                     - ERROR: Invalid API key provided
                     - ERROR: Disk space is critically low`,
+                  `The query filters on log.level == "error"`,
+                  `The index pattern used in the query is "logs-my_app-*"`,
+                  `The query excludes documents > or >= 6 hours`,
+                  `The query groups by "message" using STATS or CATEGORIZE_TEXT`,
+                  `The query sorts the groups by count descending`,
                 ],
               },
               metadata: {},
@@ -153,7 +167,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset.',
+                  'Show the total count of error-level logs from all log datasets in the last 24 hours, grouped by dataset. Use a single query, targeting "logs-*" verbatim.',
               },
               output: {
                 expected: `FROM logs-*
@@ -163,6 +177,9 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                 execute: true,
                 criteria: [
                   `Should identify errors in 'apache.error', 'my_app', 'my_service_app' and 'my_test_app' datasets.`,
+                  `The query filters on log.level == "error"`,
+                  `The index pattern used in the query is "logs-my_app-*"`,
+                  `The query excludes documents > or >= 6 hours`,
                   'The highest number of errors should be in in the apache.error dataset',
                   'The lowest number of errors should be in in the my_test_app dataset',
                 ],
