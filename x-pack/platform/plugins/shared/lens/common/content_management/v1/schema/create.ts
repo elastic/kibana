@@ -8,12 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas, createResultSchema } from '@kbn/content-management-utils';
 
+import { lensItemAttributesSchemaV0 as lensItemAttributesSchemaV0 } from '../../v0/schema';
 import { lensItemAttributesSchema, lensSavedObjectSchema } from './common';
 import { pickFromObjectSchema } from './utils';
 
-/**
- * If a document with the given `id` already exists, overwrite it's contents.
- */
 export const lensCMCreateOptionsSchema = schema.object(
   {
     ...pickFromObjectSchema(createOptionsSchemas, ['overwrite', 'references']),
@@ -24,7 +22,8 @@ export const lensCMCreateOptionsSchema = schema.object(
 export const lensCMCreateBodySchema = schema.object(
   {
     options: lensCMCreateOptionsSchema,
-    data: lensItemAttributesSchema,
+    // Permit passing old SO attributes on create
+    data: schema.oneOf([lensItemAttributesSchema, lensItemAttributesSchemaV0]),
   },
   {
     unknowns: 'forbid',
