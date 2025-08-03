@@ -9,9 +9,10 @@
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ProcRunner } from '@kbn/dev-proc-runner';
-jest.mock('./metrics');
 
-import { FlagsReader } from './flags_reader';
+jest.mock('../metrics');
+
+import { FlagsReader } from '../flags/flags_reader';
 import { RunWithCommands } from './run_with_commands';
 
 const testLog = new ToolingLog();

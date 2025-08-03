@@ -9,31 +9,7 @@
 
 import getopts from 'getopts';
 import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
-
-import { RunOptions } from './run';
-
-export interface Flags {
-  verbose: boolean;
-  quiet: boolean;
-  silent: boolean;
-  debug: boolean;
-  help: boolean;
-  _: string[];
-  unexpected: string[];
-
-  [key: string]: undefined | boolean | string | string[];
-}
-
-export interface FlagOptions {
-  allowUnexpected?: boolean;
-  guessTypesForUnexpectedFlags?: boolean;
-  help?: string;
-  examples?: string;
-  alias?: { [key: string]: string | string[] };
-  boolean?: string[];
-  string?: string[];
-  default?: { [key: string]: any };
-}
+import { FlagOptions, Flags } from './types';
 
 export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = {}): FlagOptions {
   return {
@@ -62,7 +38,7 @@ export const DEFAULT_FLAG_ALIASES = {
 
 export function getFlags(
   argv: string[],
-  flagOptions: RunOptions['flags'] = {},
+  flagOptions: FlagOptions = {},
   defaultLogLevel: string = DEFAULT_LOG_LEVEL
 ): Flags {
   const unexpectedNames = new Set<string>();

@@ -4,6 +4,10 @@ Profile Kibana (or any other Node.js processes) while it's running, and open the
 
 ## Usage
 
+### Running processes
+
+By default, the script looks for Kibana (or any Node process) running at 5603 or 5601. It will then either wait or run a command until completion.
+
 Run a command by either preceding it with the profiler script:
 `node scripts/profile.js -- $command`
 
@@ -37,6 +41,14 @@ Or, use `--grep` to list Node.js processes you can attach to:
 You can also already specify a filter:
 
 `node scripts/profile.js --grep myProcess`
+
+### Spawning a new process
+
+You can also spawn a new process, so you can profile start to finish. This is useful for shorter-lived processes. Use the `--spawn` flag for this purpose:
+
+`node scripts/profile.js --spawn -- node scripts/my_expensive_script`
+
+The script will be executed with `NODE_OPTIONS=inspect-wait`, which will pause the script until the profiler script has attached to the debugger.
 
 ## Examples
 

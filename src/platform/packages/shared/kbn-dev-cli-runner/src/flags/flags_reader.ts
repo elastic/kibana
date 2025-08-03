@@ -12,7 +12,7 @@ import Path from 'path';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { LOG_LEVEL_FLAGS } from '@kbn/tooling-log';
 
-type FlagValue = string | string[] | boolean;
+type FlagValue = string | string[] | boolean | number;
 const FORCED_FLAGS = new Set([...LOG_LEVEL_FLAGS.map((l) => l.name), 'help']);
 
 const makeAbsolute = (rel: string) => Path.resolve(process.cwd(), rel);
@@ -78,6 +78,7 @@ export class FlagsReader {
 
     switch (typeof value) {
       case 'boolean':
+      case 'number':
         throw createFlagError(`expected --${key} to be a string`);
       case 'string':
         return value ? [value] : [];

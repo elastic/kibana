@@ -7,37 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pickLevelFromFlags, ToolingLog, LogLevel } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import { withProcRunner } from '@kbn/dev-proc-runner';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
+import { Cleanup } from '../cleanup';
+import { DEFAULT_FLAG_ALIASES, getFlags } from '../flags/flags';
+import { FlagsReader } from '../flags/flags_reader';
+import { getHelp } from '../help';
+import { Metrics } from '../metrics';
+import { RunFn, RunOptions } from './types';
+import { FlagOptions, Flags, FlagsOf } from '../flags/types';
 
-import { Flags, getFlags, FlagOptions, DEFAULT_FLAG_ALIASES } from './flags';
-import { FlagsReader } from './flags_reader';
-import { getHelp } from './help';
-import { CleanupTask, Cleanup } from './cleanup';
-import { Metrics, MetricsMeta } from './metrics';
+export async function run<T, TFlagOptions extends FlagOptions = FlagOptions>(
+  fn: RunFn<T, FlagsOf<TFlagOptions>>,
+  options?: RunOptions<TFlagOptions>
+): Promise<T | undefined>;
 
-export interface RunContext {
-  log: ToolingLog;
-  flags: Flags;
-  procRunner: ProcRunner;
-  statsMeta: MetricsMeta;
-  addCleanupTask: (task: CleanupTask) => void;
-  flagsReader: FlagsReader;
-}
-export type RunFn<T = void> = (context: RunContext) => Promise<T> | void;
-
-export interface RunOptions {
-  usage?: string;
-  description?: string;
-  log?: {
-    defaultLevel?: LogLevel;
-    context?: string;
-  };
-  flags?: FlagOptions;
-}
-
-export async function run<T>(fn: RunFn<T>, options: RunOptions = {}): Promise<T | undefined> {
+export async function run<T>(
+  fn: RunFn<T, Flags>,
+  options: RunOptions = {}
+): Promise<T | undefined> {
   const flags = getFlags(process.argv.slice(2), options.flags, options.log?.defaultLevel);
   const log = new ToolingLog(
     {
