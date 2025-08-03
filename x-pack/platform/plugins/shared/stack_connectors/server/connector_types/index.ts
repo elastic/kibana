@@ -7,79 +7,74 @@
 
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
-import type { ExperimentalFeatures } from '../../common/experimental_features';
-import { getConnectorType as getBedrockConnectorType } from './bedrock';
+import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
-import { getCrowdstrikeConnectorType } from './crowdstrike';
-import { getConnectorType as getD3SecurityConnectorType } from './d3security';
+import { getConnectorType as getJiraConnectorType } from './jira';
+import { getServiceNowITSMConnectorType } from './servicenow_itsm';
+import { getServiceNowSIRConnectorType } from './servicenow_sir';
+import { getServiceNowITOMConnectorType } from './servicenow_itom';
+import { getTinesConnectorType } from './tines';
+import { getResilientConnectorType } from './resilient';
+import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
+import { getConnectorType as getOpenAIConnectorType } from './openai';
+import { getConnectorType as getBedrockConnectorType } from './bedrock';
 import { getConnectorType as getGeminiConnectorType } from './gemini';
 import { getConnectorType as getInferenceConnectorType } from './inference';
-import { getConnectorType as getJiraConnectorType } from './jira';
-import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
-import { getConnectorType as getOpenAIConnectorType } from './openai';
-import { getOpsgenieConnectorType } from './opsgenie';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
-import { getResilientConnectorType } from './resilient';
-import { getSentinelOneConnectorType } from './sentinelone';
+import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
-import { getServiceNowITOMConnectorType } from './servicenow_itom';
-import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
-import { getServiceNowITSMConnectorType } from './servicenow_itsm';
-import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
-import { getServiceNowSIRConnectorType } from './servicenow_sir';
 import { getConnectorType as getSlackWebhookConnectorType } from './slack';
 import { getConnectorType as getSlackApiConnectorType } from './slack_api';
-import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
-import { getConnectorType as getTeamsConnectorType } from './teams';
-import { getConnectorType as getTheHiveConnectorType } from './thehive';
-import { getTinesConnectorType } from './tines';
-import { getActionType as getTorqConnectorType } from './torq';
 import { getConnectorType as getWebhookConnectorType } from './webhook';
-import { getConnectorType as getWorkflowsConnectorType } from './workflows';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
+import { getConnectorType as getTeamsConnectorType } from './teams';
+import { getConnectorType as getD3SecurityConnectorType } from './d3security';
+import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
+import { getOpsgenieConnectorType } from './opsgenie';
+import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
+import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
+import { getSentinelOneConnectorType } from './sentinelone';
+import { getCrowdstrikeConnectorType } from './crowdstrike';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
-export { SLACK_API_CONNECTOR_ID as SlackApiConnectorTypeId } from '../../common/slack_api/constants';
-export type { SlackApiActionParams as SlackApiActionParams } from '../../common/slack_api/types';
 export { ConnectorTypeId as CasesWebhookConnectorTypeId } from './cases_webhook';
 export type { ActionParamsType as CasesWebhookActionParams } from './cases_webhook';
+export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
+export type { ActionParamsType as JiraActionParams } from './jira';
+export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
+export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ConnectorTypeId as EmailConnectorTypeId } from './email';
 export type { ActionParamsType as EmailActionParams } from './email';
 export { ConnectorTypeId as IndexConnectorTypeId } from './es_index';
 export type { ActionParamsType as IndexActionParams } from './es_index';
-export { ConnectorTypeId as JiraConnectorTypeId } from './jira';
-export type { ActionParamsType as JiraActionParams } from './jira';
-export { OpsgenieConnectorTypeId } from './opsgenie';
 export { ConnectorTypeId as PagerDutyConnectorTypeId } from './pagerduty';
 export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
 export { ConnectorTypeId as ServerLogConnectorTypeId } from './server_log';
 export type { ActionParamsType as ServerLogActionParams } from './server_log';
 export { ServiceNowITOMConnectorTypeId } from './servicenow_itom';
-export { ServiceNowITSMConnectorTypeId } from './servicenow_itsm';
-export { ServiceNowSIRConnectorTypeId } from './servicenow_sir';
 export { ConnectorTypeId as SlackWebhookConnectorTypeId } from './slack';
 export type { ActionParamsType as SlackWebhookActionParams } from './slack';
+export { SLACK_API_CONNECTOR_ID as SlackApiConnectorTypeId } from '../../common/slack_api/constants';
+export type { SlackApiActionParams as SlackApiActionParams } from '../../common/slack_api/types';
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
 export type { ActionParamsType as WebhookActionParams } from './webhook/types';
-export {
-  getWorkflowsConnectorAdapter,
-  getConnectorType as getWorkflowsConnectorType,
-} from './workflows';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
+export { OpsgenieConnectorTypeId } from './opsgenie';
 
 export type {
   OpsgenieActionConfig,
-  OpsgenieActionParams,
   OpsgenieActionSecrets,
-  OpsgenieCloseAlertParams,
+  OpsgenieActionParams,
   OpsgenieCloseAlertSubActionParams,
-  OpsgenieCreateAlertParams,
   OpsgenieCreateAlertSubActionParams,
+  OpsgenieCloseAlertParams,
+  OpsgenieCreateAlertParams,
 } from './opsgenie';
 
 export type ServiceNowActionParams = ServiceNowITSMActionParams | ServiceNowSIRActionParams;
@@ -111,9 +106,6 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
-  if (experimentalFeatures.workflowsConnectorOn) {
-    actions.registerType(getWorkflowsConnectorType());
-  }
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());

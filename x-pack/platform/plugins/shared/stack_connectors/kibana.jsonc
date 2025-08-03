@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "actions",
-      "alerting",
       "esUiShared",
       "kibanaReact",
       "triggersActionsUi"

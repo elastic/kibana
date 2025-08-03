@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -12,6 +14,7 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { api } from './api';
 import {
   ExecutorParamsSchema,
@@ -19,7 +22,7 @@ import {
   ExternalWorkflowServiceSecretConfigurationSchema,
   WorkflowsRuleActionParamsSchema,
 } from './schema';
-import { createExternalService } from './service';
+import { createExternalService, type WorkflowsServiceFunction } from './service';
 import * as i18n from './translations';
 import type {
   ExecutorParams,
@@ -44,8 +47,15 @@ export interface WorkflowsRuleActionParams {
   [key: string]: unknown;
 }
 
+// Interface for dependency injection, similar to GetCasesConnectorTypeArgs
+export interface GetWorkflowsConnectorTypeArgs {
+  getWorkflowsService?: (request: KibanaRequest) => Promise<WorkflowsServiceFunction>;
+}
+
 // connector type definition
-export function getConnectorType(): ConnectorType<
+export function getConnectorType(
+  deps?: GetWorkflowsConnectorTypeArgs
+): ConnectorType<
   WorkflowsPublicConfigurationType,
   WorkflowsSecretConfigurationType,
   ExecutorParams,
@@ -68,7 +78,7 @@ export function getConnectorType(): ConnectorType<
       },
       connector: validateConnector,
     },
-    executor,
+    executor: (execOptions) => executor(execOptions, deps),
     supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     isSystemActionType: true,
   };
@@ -80,13 +90,25 @@ export async function executor(
     WorkflowsPublicConfigurationType,
     WorkflowsSecretConfigurationType,
     WorkflowsActionParamsType
-  >
+  >,
+  deps?: GetWorkflowsConnectorTypeArgs
 ): Promise<ConnectorTypeExecutorResult<WorkflowsExecutorResultData>> {
-  const { actionId, configurationUtilities, params, logger, connectorUsageCollector } = execOptions;
+  const { actionId, configurationUtilities, params, logger, connectorUsageCollector, request } =
+    execOptions;
 
   const { subAction, subActionParams } = params;
 
   let data: WorkflowsExecutorResultData | undefined;
+
+  // Get the workflows service function if available
+  let workflowsServiceFunction: WorkflowsServiceFunction | undefined;
+  if (deps?.getWorkflowsService && request) {
+    try {
+      workflowsServiceFunction = await deps.getWorkflowsService(request as KibanaRequest);
+    } catch (error) {
+      logger.error(`Failed to get workflows service: ${error.message}`);
+    }
+  }
 
   const externalService = createExternalService(
     actionId,
@@ -96,7 +118,9 @@ export async function executor(
     },
     logger,
     configurationUtilities,
-    connectorUsageCollector
+    connectorUsageCollector,
+    request as KibanaRequest,
+    workflowsServiceFunction
   );
 
   if (!api[subAction]) {

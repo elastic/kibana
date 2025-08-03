@@ -14,10 +14,13 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
+
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
-import { getWorkflowsConnectorAdapter, registerConnectorTypes } from './connector_types';
+import { registerConnectorTypes } from './connector_types';
 import { getWellKnownEmailServiceRoute, validSlackApiChannelsRoute } from './routes';
 
 export interface ConnectorsPluginsSetup {
@@ -56,8 +59,7 @@ export class StackConnectorsPlugin
       experimentalFeatures: this.experimentalFeatures,
     });
 
-    // Register workflows connector adapter for system action
-    alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
+    // Workflows connector adapter is now registered by workflows_management plugin
   }
 
   public start(core: CoreStart, deps: ConnectorsPluginsStart) {}
