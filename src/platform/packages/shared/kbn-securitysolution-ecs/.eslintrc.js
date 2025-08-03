@@ -18,7 +18,6 @@ const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-override
  * @property {string[]} [allowImportNames] - Named imports to allow (restricts all others).
  */
 
-/**
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS_PATHS = [
   {
