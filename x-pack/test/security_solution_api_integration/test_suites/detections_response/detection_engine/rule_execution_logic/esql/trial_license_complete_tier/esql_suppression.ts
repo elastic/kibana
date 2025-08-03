@@ -1982,7 +1982,15 @@ export default ({ getService }: FtrProviderContext) => {
         const doc2 = { agent: { name: 'test-1' } };
         const doc3 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.1' };
 
+        const {records: recordsBeforeDocsIndexing} = await es.helpers.esql({query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`}).toRecords()
+
+        console.log(">>> CURRENT RECORDS BEFORE DOC INDEXING", JSON.stringify(recordsBeforeDocsIndexing, null, 2))
+
         await indexEnhancedDocuments({ documents: [doc1, doc2, doc3], interval, id });
+
+        const {records: recordAfterDocsIndexing} = await es.helpers.esql({query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`}).toRecords()
+
+        console.log(">>> RECORDS AFTER DOCS INDEXING", JSON.stringify(recordAfterDocsIndexing, null, 2))
 
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),
@@ -2016,7 +2024,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const {records} = await es.helpers.esql({query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`}).toRecords()
 
-        console.log(">>> CURRENT RECORDS", JSON.stringify(records, null, 2))
+        console.log(">>> CURRENT RECORDS AFTER RULE PREVIEW", JSON.stringify(records, null, 2))
 
         expect(previewAlerts.length).toBe(1);
         expect(previewAlerts[0]._source).toEqual({
