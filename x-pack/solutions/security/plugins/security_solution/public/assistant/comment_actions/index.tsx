@@ -11,8 +11,9 @@ import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
+import { useAssistantContext } from '@kbn/elastic-assistant';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
+import { useAssistantAvailability } from '../use_assistant_availability';
 import { useKibana, useToasts } from '../../common/lib/kibana';
 import type { Note } from '../../common/lib/note';
 import { appActions } from '../../common/store/actions';
@@ -40,7 +41,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   const { cases } = useKibana().services;
   const dispatch = useDispatch();
   const isModelEvaluationEnabled = useIsExperimentalFeatureEnabled('assistantModelEvaluation');
-
+  const { hasSearchAILakeConfigurations } = useAssistantAvailability();
   const { traceOptions } = useAssistantContext();
 
   const associateNote = useCallback(
@@ -104,8 +105,8 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed
     <EuiFlexGroup alignItems="center" gutterSize="none">
-      {isModelEvaluationEnabled && apmTraceLink != null && (
-        <EuiFlexItem grow={false}>
+      {isModelEvaluationEnabled && apmTraceLink != null && !hasSearchAILakeConfigurations && (
+        <EuiFlexItem grow={false} data-test-subj="apmTraceButton">
           <EuiToolTip position="top" content={i18n.VIEW_APM_TRACE} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.VIEW_APM_TRACE}
@@ -117,17 +118,19 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
-          <EuiButtonIcon
-            aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
-            color="primary"
-            iconType="editorComment"
-            onClick={onAddNoteToTimeline}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      {!hasSearchAILakeConfigurations && (
+        <EuiFlexItem grow={false} data-test-subj="addMessageContentAsTimelineNote">
+          <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
+            <EuiButtonIcon
+              aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
+              color="primary"
+              iconType="editorComment"
+              onClick={onAddNoteToTimeline}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false} data-test-subj="addToExistingCaseButton">
         <EuiToolTip
           position="top"
           content={i18n.ADD_TO_CASE_EXISTING_CASE}
