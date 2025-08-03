@@ -23,7 +23,6 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
     title: 'Authentication',
     description: '',
     visualizationType: 'lnsXY',
-    version: 1 as const,
     state: {
       visualization: {
         title: 'Empty XY chart',

@@ -116,7 +116,6 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
                     isBucketed: true,
                     scale: 'interval',
                     params: {
-                      // @ts-expect-error - fix type error
                       interval: interval?.expression,
                       includeEmptyRows: true,
                       dropPartials: false,
@@ -132,7 +131,6 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
                     scale: 'ratio',
                     sourceField: '___records___',
                     params: {
-                      // @ts-expect-error - fix type error
                       emptyAsNull: false,
                       format: {
                         id: 'number',
@@ -161,8 +159,7 @@ export const AnomalyDetectionAlertsOverviewChart: FC<AnomalyDetectionAlertsOverv
           },
         },
       },
-      version: 1 as const,
-    } satisfies TypedLensByValueInput['attributes'];
+    } as TypedLensByValueInput['attributes'];
   }, [interval?.expression, seriesType]);
 
   if (!interval) return null;

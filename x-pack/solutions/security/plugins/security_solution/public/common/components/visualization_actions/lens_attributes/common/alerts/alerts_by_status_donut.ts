@@ -18,7 +18,6 @@ export const getAlertsByStatusAttributes: GetLensAttributes = ({
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsPie',
-    version: 1 as const,
     state: {
       visualization: {
         shape: 'donut',

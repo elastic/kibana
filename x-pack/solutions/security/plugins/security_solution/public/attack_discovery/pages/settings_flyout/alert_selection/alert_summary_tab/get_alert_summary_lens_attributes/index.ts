@@ -85,5 +85,4 @@ export const getAlertSummaryLensAttributes = ({
   },
   title: i18n.ALERTS_SUMMARY,
   visualizationType: 'lnsDatatable',
-  version: 1 as const,
 });

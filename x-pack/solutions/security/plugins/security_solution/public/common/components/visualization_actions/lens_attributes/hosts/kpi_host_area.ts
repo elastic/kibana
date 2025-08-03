@@ -28,10 +28,7 @@ export const getKpiHostAreaLensAttributes: GetLensAttributes = () => {
                   isBucketed: true,
                   label: '@timestamp',
                   operationType: 'date_histogram',
-                  params: {
-                    // @ts-expect-error - fix type error
-                    interval: 'auto',
-                  },
+                  params: { interval: 'auto' },
                   scale: 'interval',
                   sourceField: '@timestamp',
                 },
@@ -88,6 +85,5 @@ export const getKpiHostAreaLensAttributes: GetLensAttributes = () => {
         type: 'index-pattern',
       },
     ],
-    version: 1 as const,
-  } satisfies LensAttributes;
+  } as LensAttributes;
 };

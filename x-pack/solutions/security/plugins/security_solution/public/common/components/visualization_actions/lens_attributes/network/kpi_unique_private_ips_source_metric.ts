@@ -60,5 +60,4 @@ export const kpiUniquePrivateIpsSourceMetricLensAttributes: LensAttributes = {
       type: 'index-pattern',
     },
   ],
-  version: 1 as const,
-};
+} as LensAttributes;

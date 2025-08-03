@@ -128,7 +128,6 @@ export function getLensAttributes({
         },
       },
     },
-    version: 1 as const,
   } as TypedLensByValueInput['attributes'];
 }
 

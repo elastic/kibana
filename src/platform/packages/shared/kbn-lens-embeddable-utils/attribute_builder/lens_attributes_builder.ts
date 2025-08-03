@@ -30,7 +30,6 @@ export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
       title: visualization.getTitle(),
       visualizationType: visualization.getVisualizationType(),
       references: visualization.getReferences(),
-      version: 1 as const,
       state: {
         datasourceStates: {
           formBased: {

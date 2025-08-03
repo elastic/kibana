@@ -51,7 +51,6 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                         pattern: '$0,0.[000]',
                       },
                     },
-                    // @ts-expect-error - fix type error
                     formula: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                     isFormulaBroken: false,
                   },
@@ -64,7 +63,6 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                   label: 'Part of count() * ((8/60)*75)',
                   operationType: 'count',
                   params: {
-                    // @ts-expect-error - fix type error
                     emptyAsNull: false,
                   },
                   sourceField: '___records___',
@@ -76,7 +74,6 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                   label: 'Part of count() * ((8/60)*75)',
                   operationType: 'math',
                   params: {
-                    // @ts-expect-error - fix type error
                     tinymathAst: {
                       args: [
                         xColumn0,
@@ -120,7 +117,6 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                   label: '@timestamp',
                   operationType: 'date_histogram',
                   params: {
-                    // @ts-expect-error - fix type error
                     interval: 'auto',
                   },
                   scale: 'interval',
@@ -190,6 +186,8 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    version: 1 as const,
-  } satisfies LensAttributes;
+    type: 'lens',
+    updated_at: '2025-07-21T15:51:38.660Z',
+    version: 'WzI0LDFd',
+  } as LensAttributes;
 };

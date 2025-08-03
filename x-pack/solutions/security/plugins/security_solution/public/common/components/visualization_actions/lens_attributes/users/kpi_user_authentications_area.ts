@@ -21,7 +21,6 @@ export const getKpiUserAuthenticationsAreaLensAttributes: GetLensAttributes = ({
     title: '[Host] User authentications - area ',
     description: '',
     visualizationType: 'lnsXY',
-    version: 1 as const,
     state: {
       visualization: {
         axisTitlesVisibilitySettings: {

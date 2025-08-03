@@ -39,7 +39,6 @@ export const kpiNetworkEventsLensAttributes: LensAttributes = {
           },
         },
         $state: {
-          // @ts-expect-error - fix type error
           store: 'appState',
         },
       },
@@ -59,7 +58,6 @@ export const kpiNetworkEventsLensAttributes: LensAttributes = {
           },
         },
         $state: {
-          // @ts-expect-error - fix type error
           store: 'appState',
         },
       },
@@ -108,5 +106,4 @@ export const kpiNetworkEventsLensAttributes: LensAttributes = {
       id: '{dataViewId}',
     },
   ],
-  version: 1 as const,
-};
+} as LensAttributes;

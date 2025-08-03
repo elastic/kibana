@@ -184,6 +184,5 @@ export const getRiskScoreSummaryAttributes: (
       },
     },
     references: [],
-    version: 1 as const,
   };
 };

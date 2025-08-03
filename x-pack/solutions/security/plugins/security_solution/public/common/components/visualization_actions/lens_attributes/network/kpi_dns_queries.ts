@@ -36,7 +36,6 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
             '{"bool":{"should":[{"exists":{"field":"dns.question.name"}},{"term":{"suricata.eve.dns.type":{"value":"query"}}},{"exists":{"field":"zeek.dns.query"}}],"minimum_should_match":1}}',
         },
         $state: {
-          // @ts-expect-error - fix type error
           store: 'appState',
         },
         query: {
@@ -104,5 +103,4 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
       id: '{dataViewId}',
     },
   ],
-  version: 1 as const,
-};
+} as LensAttributes;

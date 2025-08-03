@@ -337,7 +337,6 @@ export const AnalyticsCollectionCardWithLens = withLensData<
         },
       },
       title: '',
-      version: 1 as const,
       visualizationType: 'lnsMetric',
     };
   },

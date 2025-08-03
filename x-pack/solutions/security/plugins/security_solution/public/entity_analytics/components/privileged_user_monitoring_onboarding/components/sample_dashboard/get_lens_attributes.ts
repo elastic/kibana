@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { GetLensAttributes } from '../../../../../common/components/visualization_actions/types';
 
 const layerId = uuidv4();
@@ -123,6 +122,5 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
       },
     },
     references: [],
-    version: 1 as const,
-  } satisfies TypedLensByValueInput['attributes'];
+  };
 };

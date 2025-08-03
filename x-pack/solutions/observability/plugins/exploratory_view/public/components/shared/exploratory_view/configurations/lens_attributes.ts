@@ -37,7 +37,7 @@ import {
   MetricState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -1312,7 +1312,6 @@ export class LensAttributes {
         query: query || { query: '', language: 'kuery' },
         filters: this.getFilters(),
       },
-      version: 1 as const,
     };
   }
 }

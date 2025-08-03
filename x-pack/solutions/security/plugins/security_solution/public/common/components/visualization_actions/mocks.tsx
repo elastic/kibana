@@ -102,7 +102,6 @@ export const mockAttributes: LensAttributes = {
     },
   },
   title: '',
-  version: 1 as const,
   visualizationType: 'lnsLegacyMetric',
   references: [
     {

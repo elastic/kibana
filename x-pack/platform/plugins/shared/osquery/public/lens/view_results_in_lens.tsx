@@ -224,7 +224,6 @@ function getLensAttributes(
       query: { language: 'kuery', query: '' },
       visualization: xyConfig,
     },
-    version: 1 as const,
   };
 }
 

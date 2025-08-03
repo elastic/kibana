@@ -299,7 +299,6 @@ export const AnalyticsCollectionChartWithLens = withLensData<
         },
       },
       title: '',
-      version: 1 as const,
       visualizationType: 'lnsXY',
     };
   },

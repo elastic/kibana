@@ -19,7 +19,6 @@ export const getAlertsHistogramLensAttributes: GetLensAttributes = ({
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsXY',
-    version: 1 as const,
     state: {
       visualization: {
         title: 'Empty XY chart',

@@ -35,7 +35,6 @@ export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
             '{"bool":{"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}',
         },
         $state: {
-          // @ts-expect-error - fix type error
           store: 'appState',
         },
         query: {
@@ -91,5 +90,4 @@ export const kpiUniqueFlowIdsLensAttributes: LensAttributes = {
       name: 'indexpattern-datasource-layer-5d46d48f-6ce8-46be-a797-17ad50642564',
     },
   ],
-  version: 1 as const,
-};
+} as LensAttributes;

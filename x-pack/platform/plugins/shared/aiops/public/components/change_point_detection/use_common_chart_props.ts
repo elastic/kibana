@@ -163,14 +163,13 @@ export const useCommonChartProps = ({
               '2d61a885-abb0-4d4e-a5f9-c488caec3c22': {
                 columns: {
                   '877e6638-bfaa-43ec-afb9-2241dc8e1c86': {
-                    label: dataView.timeFieldName ?? '',
+                    label: dataView.timeFieldName,
                     dataType: 'date',
                     operationType: 'date_histogram',
                     sourceField: dataView.timeFieldName,
                     isBucketed: true,
                     scale: 'interval',
                     params: {
-                      // @ts-expect-error - fix type error
                       interval: bucketInterval,
                       includeEmptyRows: true,
                       dropPartials: false,
@@ -184,7 +183,6 @@ export const useCommonChartProps = ({
                     isBucketed: false,
                     scale: 'ratio',
                     params: {
-                      // @ts-expect-error - fix type error
                       emptyAsNull: true,
                     },
                   },
@@ -202,8 +200,7 @@ export const useCommonChartProps = ({
           },
         },
       },
-      version: 1 as const,
-    } satisfies TypedLensByValueInput['attributes'];
+    } as TypedLensByValueInput['attributes'];
   }, [
     annotation.group?.value,
     annotation.timestamp,

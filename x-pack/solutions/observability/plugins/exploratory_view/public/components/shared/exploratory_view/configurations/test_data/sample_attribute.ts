@@ -329,5 +329,4 @@ export const sampleAttribute = {
   },
   title: 'Prefilled from exploratory view app',
   visualizationType: 'lnsXY',
-  version: 1 as const,
 };

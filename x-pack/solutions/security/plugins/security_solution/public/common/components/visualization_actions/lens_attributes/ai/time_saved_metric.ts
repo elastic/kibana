@@ -38,7 +38,6 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
                   operationType: 'formula',
                   params: {
                     format: { id: 'number', params: { decimals: 0 } },
-                    // @ts-expect-error - fix type error
                     formula: `(count()*${minutesPerAlert}/60)`,
                     isFormulaBroken: false,
                   },
@@ -50,7 +49,6 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
                   isBucketed: false,
                   label: `Part of (count()*${minutesPerAlert}/60)`,
                   operationType: 'count',
-                  // @ts-expect-error - fix type error
                   params: { emptyAsNull: false },
                   sourceField: '___records___',
                 },
@@ -61,7 +59,6 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
                   label: `Part of (count()*${minutesPerAlert}/60)`,
                   operationType: 'math',
                   params: {
-                    // @ts-expect-error - fix type error
                     tinymathAst: {
                       args: [
                         { args: ['countColumnX0', 8], name: 'multiply', type: 'function' },
@@ -109,6 +106,8 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    version: 1 as const,
-  } satisfies LensAttributes;
+    type: 'lens',
+    updated_at: '2025-07-21T15:51:38.660Z',
+    version: 'WzI0LDFd',
+  } as LensAttributes;
 };

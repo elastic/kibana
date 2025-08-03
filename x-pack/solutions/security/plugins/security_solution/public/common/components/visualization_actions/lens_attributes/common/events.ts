@@ -22,7 +22,6 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = ({
     title: 'Events',
     description: '',
     visualizationType: 'lnsXY',
-    version: 1 as const,
     state: {
       visualization: {
         title: 'Empty XY chart',

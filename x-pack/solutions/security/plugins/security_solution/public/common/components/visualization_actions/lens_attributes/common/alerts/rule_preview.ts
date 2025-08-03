@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import type { GetLensAttributes, LensAttributes } from '../../../types';
+import type { GetLensAttributes } from '../../../types';
 
 const layerId = `layer-id-${uuidv4()}`;
 const internalReferenceId = `internal-reference-id-${uuidv4()}`;
@@ -62,7 +62,6 @@ export const getRulePreviewLensAttributes: GetLensAttributes = ({
             alias: null,
             index: internalReferenceId,
             key: 'kibana.alert.rule.uuid',
-            // @ts-expect-error - fix type error
             field: 'kibana.alert.rule.uuid',
             params: {
               query: extraOptions?.ruleId,
@@ -89,7 +88,6 @@ export const getRulePreviewLensAttributes: GetLensAttributes = ({
                   scale: 'ratio',
                   sourceField: '___records___',
                   params: {
-                    // @ts-expect-error - fix type error
                     emptyAsNull: true,
                   },
                 },
@@ -164,6 +162,5 @@ export const getRulePreviewLensAttributes: GetLensAttributes = ({
       },
     },
     references: [],
-    version: 1 as const,
-  } satisfies LensAttributes;
+  };
 };

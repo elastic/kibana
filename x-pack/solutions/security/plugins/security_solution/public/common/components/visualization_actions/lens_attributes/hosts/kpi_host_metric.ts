@@ -53,5 +53,4 @@ export const kpiHostMetricLensAttributes: LensAttributes = {
       type: 'index-pattern',
     },
   ],
-  version: 1 as const,
-} satisfies LensAttributes;
+} as LensAttributes;
