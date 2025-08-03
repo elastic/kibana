@@ -15,7 +15,7 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { UseProductDoc, useProductDoc } from '../../../hooks/use_product_doc';
+import { UseProductDoc } from '../../../hooks/use_product_doc';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 
 const createMockStatus = (
@@ -60,7 +60,7 @@ const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
 });
 
 describe('ProductDocEntry', () => {
-  it('calls useProductDoc with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
+  it('should render the installed state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       status: createMockStatus({
         currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -73,7 +73,9 @@ describe('ProductDocEntry', () => {
       }),
     });
 
-    const productDoc = createProductDoc();
+    const productDoc = createProductDoc({
+      status: 'installed',
+    });
 
     render(
       <ProductDocEntry
@@ -86,11 +88,9 @@ describe('ProductDocEntry', () => {
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();
     });
-
-    expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
   });
 
-  it('calls useProductDoc with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
+  it('should render the uninstalled state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase();
     const productDoc = createProductDoc();
 
@@ -103,9 +103,7 @@ describe('ProductDocEntry', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Installed')).toBeInTheDocument();
+      expect(screen.getByText('Install')).toBeInTheDocument();
     });
-
-    expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
   });
 });

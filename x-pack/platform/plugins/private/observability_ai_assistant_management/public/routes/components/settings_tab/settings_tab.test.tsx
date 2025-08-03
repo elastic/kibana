@@ -14,6 +14,7 @@ import {
   E5_SMALL_INFERENCE_ID,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   KnowledgeBaseState,
+  LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   useKnowledgeBase,
@@ -24,6 +25,7 @@ import { useProductDoc } from '../../../hooks/use_product_doc';
 
 jest.mock('../../../hooks/use_app_context');
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_product_doc');
 jest.mock('@kbn/ai-assistant/src/hooks');
 
 const useAppContextMock = useAppContext as jest.Mock;
@@ -151,18 +153,54 @@ describe('SettingsTab', () => {
 
   describe('should call useProductDoc with the correct inference ID', () => {
     it('calls useProductDoc with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: ELSER_ON_ML_NODE_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
       render(<SettingsTab />);
 
       expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
     });
 
     it('calls useProductDoc with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
       render(<SettingsTab />);
 
       expect(useProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
     });
 
     it('calls useProductDoc with the current inference ID when inference ID is not E5_SMALL_INFERENCE_ID"', async () => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            enabled: true,
+            kbState: KnowledgeBaseState.READY,
+            currentInferenceId: E5_SMALL_INFERENCE_ID,
+          },
+        },
+        isInstalling: false,
+        isPolling: false,
+        isWarmingUpModel: false,
+      });
       render(<SettingsTab />);
 
       expect(useProductDoc).toHaveBeenCalledWith(E5_SMALL_INFERENCE_ID);
