@@ -13,6 +13,7 @@ import type {
   DatatableVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTableConfig } from '../types';
 import {
   addLayerColumn,
@@ -120,6 +121,7 @@ export async function buildTable(
     title: config.title,
     visualizationType: 'lnsDatatable',
     references: buildReferences(dataviews),
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates,
       internalReferences: [],

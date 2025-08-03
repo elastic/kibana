@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import type {
   LensAttributes,
   LensVisualizationState,
@@ -30,6 +31,7 @@ export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
       title: visualization.getTitle(),
       visualizationType: visualization.getVisualizationType(),
       references: visualization.getReferences(),
+      version: LENS_ITEM_LATEST_VERSION,
       state: {
         datasourceStates: {
           formBased: {

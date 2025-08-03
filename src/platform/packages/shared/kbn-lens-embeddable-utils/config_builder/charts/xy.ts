@@ -18,6 +18,7 @@ import type {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import {
   addLayerColumn,
@@ -238,6 +239,7 @@ export async function buildXY(
     title: config.title,
     visualizationType: 'lnsXY',
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates,
       internalReferences: [],

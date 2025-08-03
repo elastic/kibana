@@ -13,6 +13,7 @@ import type {
   PieVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
@@ -131,6 +132,7 @@ export async function buildPartitionChart(
     title: config.title,
     visualizationType: 'lnsPie',
     references: buildReferences(dataviews),
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates,
       internalReferences: [],

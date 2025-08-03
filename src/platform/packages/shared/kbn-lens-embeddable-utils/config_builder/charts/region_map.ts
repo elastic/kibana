@@ -10,6 +10,7 @@
 import type { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
@@ -105,6 +106,7 @@ export async function buildRegionMap(
     title: config.title,
     visualizationType: 'lnsChoropleth',
     references: buildReferences(dataviews),
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates,
       internalReferences: [],
