@@ -21,9 +21,8 @@ import {
   DragDropBuckets,
   DraggableBucketContainer,
   FieldsBucketContainer,
-  isFieldLensCompatible,
 } from '@kbn/visualization-ui-components';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 3;
@@ -35,6 +34,7 @@ export interface FieldInputsProps {
   setConfig: (config: QueryPointEventAnnotationConfig) => void;
   dataView: DataView;
   invalidFields?: string[];
+  availableFields?: DataViewField[];
 }
 
 function removeNewEmptyField(v: string) {
@@ -52,7 +52,12 @@ interface LocalFieldEntry {
   id: string;
 }
 
-export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInputsProps) {
+export function TooltipSection({
+  currentConfig,
+  setConfig,
+  dataView,
+  availableFields,
+}: FieldInputsProps) {
   const { hasFieldData } = useExistingFieldsReader();
 
   // This is a local list that governs the state of UI, including empty fields which
@@ -115,27 +120,29 @@ export function TooltipSection({ currentConfig, setConfig, dataView }: FieldInpu
     );
   }
 
-  const options = dataView.fields
-    .filter(isFieldLensCompatible)
-    .filter(
-      ({ displayName, type }) =>
-        displayName && !currentConfig.extraFields?.includes(displayName) && supportedTypes.has(type)
-    )
-    .map(
-      (field) =>
-        ({
-          label: field.displayName,
-          value: {
-            type: 'field',
-            field: field.name,
-            dataType: getFieldIconType(field),
-          },
-          exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
-          compatible: true,
-          'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
-        } as FieldOption<FieldOptionValue>)
-    )
-    .sort((a, b) => a.label.localeCompare(b.label));
+  const options =
+    availableFields
+      ?.filter(
+        ({ displayName, type }) =>
+          displayName &&
+          !currentConfig.extraFields?.includes(displayName) &&
+          supportedTypes.has(type)
+      )
+      .map(
+        (field) =>
+          ({
+            label: field.displayName,
+            value: {
+              type: 'field',
+              field: field.name,
+              dataType: getFieldIconType(field),
+            },
+            exists: dataView.id ? hasFieldData(dataView.id, field.name) : false,
+            compatible: true,
+            'data-test-subj': `lnsXY-annotation-tooltip-fieldOption-${field.name}`,
+          } as FieldOption<FieldOptionValue>)
+      )
+      .sort((a, b) => a.label.localeCompare(b.label)) ?? [];
 
   return (
     <>

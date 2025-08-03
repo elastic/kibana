@@ -17,11 +17,11 @@ import {
   FieldOptionValue,
   FieldPicker,
   FilterQueryInput,
-  isFieldLensCompatible,
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { useAvailableFields } from './helpers';
 
 export const defaultQuery: Query = {
   query: '',
@@ -44,9 +44,9 @@ export const ConfigPanelQueryAnnotation = ({
   appName: string;
 }) => {
   const { hasFieldData } = useExistingFieldsReader();
+  const availableFields = useAvailableFields(dataView, annotation);
   // list only date fields
-  const options = dataView.fields
-    .filter(isFieldLensCompatible)
+  const options = availableFields
     .filter((field) => field.type === 'date' && field.displayName)
     .map((field) => {
       return {
