@@ -8,7 +8,6 @@
 import { FilterStateStore } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
-import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -164,13 +163,14 @@ export const useCommonChartProps = ({
               '2d61a885-abb0-4d4e-a5f9-c488caec3c22': {
                 columns: {
                   '877e6638-bfaa-43ec-afb9-2241dc8e1c86': {
-                    label: dataView.timeFieldName,
+                    label: dataView.timeFieldName ?? '',
                     dataType: 'date',
                     operationType: 'date_histogram',
                     sourceField: dataView.timeFieldName,
                     isBucketed: true,
                     scale: 'interval',
                     params: {
+                      // @ts-expect-error - fix type error
                       interval: bucketInterval,
                       includeEmptyRows: true,
                       dropPartials: false,
@@ -184,6 +184,7 @@ export const useCommonChartProps = ({
                     isBucketed: false,
                     scale: 'ratio',
                     params: {
+                      // @ts-expect-error - fix type error
                       emptyAsNull: true,
                     },
                   },
@@ -201,8 +202,8 @@ export const useCommonChartProps = ({
           },
         },
       },
-      version: LENS_ITEM_LATEST_VERSION,
-    } as TypedLensByValueInput['attributes'];
+      version: 1 as const,
+    } satisfies TypedLensByValueInput['attributes'];
   }, [
     annotation.group?.value,
     annotation.timestamp,
