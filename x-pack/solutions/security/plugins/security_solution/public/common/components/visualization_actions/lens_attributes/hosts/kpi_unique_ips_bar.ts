@@ -41,6 +41,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
                   label: 'Filters',
                   operationType: 'filters',
                   params: {
+                    // @ts-expect-error - fix type error
                     filters: [
                       {
                         input: { language: 'kuery', query: 'source.ip: *' },
@@ -71,6 +72,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
                   label: DESTINATION_CHART_LABEL,
                   operationType: 'filters',
                   params: {
+                    // @ts-expect-error - fix type error
                     filters: [
                       { input: { language: 'kuery', query: 'destination.ip: *' }, label: 'Dest.' },
                     ],
@@ -135,5 +137,6 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
         type: 'index-pattern',
       },
     ],
-  } as LensAttributes;
+    version: 1 as const,
+  } satisfies LensAttributes;
 };

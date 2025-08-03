@@ -23,6 +23,7 @@ export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ eui
     title: '[Network] Unique private IPs - bar chart',
     description: '',
     visualizationType: 'lnsXY',
+    version: 1 as const,
     state: {
       visualization: {
         legend: {
@@ -120,6 +121,7 @@ export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ eui
                   scale: 'ordinal',
                   isBucketed: true,
                   params: {
+                    // @ts-expect-error - fix type error
                     filters: [
                       {
                         input: { language: 'kuery', query: 'source.ip: *' },
@@ -187,5 +189,5 @@ export const getKpiUniquePrivateIpsBarLensAttributes: GetLensAttributes = ({ eui
         name: `indexpattern-datasource-layer-${layerDestinationIp}`,
       },
     ],
-  } as LensAttributes;
+  } satisfies LensAttributes;
 };

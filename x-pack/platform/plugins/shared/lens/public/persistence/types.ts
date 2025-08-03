@@ -30,6 +30,5 @@ export interface LensDocument {
     internalReferences?: Reference[];
   };
   references: Reference[];
-  // TODO make this required
-  version?: LENS_ITEM_LATEST_VERSION;
+  version: LENS_ITEM_LATEST_VERSION;
 }

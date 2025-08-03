@@ -27,6 +27,7 @@ export const createKeyInsightsPanelLensAttributes = ({
     title,
     description: '',
     visualizationType: 'lnsMetric',
+    version: 1 as const,
     state: {
       visualization: {
         layerId: 'layer1',

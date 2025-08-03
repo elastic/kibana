@@ -16,6 +16,7 @@ const layerUserName = '416b6fad-1923-4f6a-a2df-b223bb287e30';
 export const getKpiTotalUsersAreaLensAttributes: GetLensAttributes = () =>
   ({
     description: '',
+    version: 1 as const,
     state: {
       datasourceStates: {
         formBased: {
@@ -28,7 +29,10 @@ export const getKpiTotalUsersAreaLensAttributes: GetLensAttributes = () =>
                   isBucketed: true,
                   label: '@timestamp',
                   operationType: 'date_histogram',
-                  params: { interval: 'auto' },
+                  params: {
+                    // @ts-expect-error - fix type error
+                    interval: 'auto',
+                  },
                   scale: 'interval',
                   sourceField: '@timestamp',
                 },
@@ -85,4 +89,4 @@ export const getKpiTotalUsersAreaLensAttributes: GetLensAttributes = () =>
         type: 'index-pattern',
       },
     ],
-  } as LensAttributes);
+  } satisfies LensAttributes);

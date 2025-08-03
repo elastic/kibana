@@ -19,6 +19,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
     title: 'Events',
     description: '',
     visualizationType: 'lnsXY',
+    version: 1 as const,
     state: {
       visualization: {
         legend: {

@@ -35,6 +35,7 @@ export const kpiTlsHandshakesLensAttributes: LensAttributes = {
             '{"bool":{"should":[{"exists":{"field":"source.ip"}},{"exists":{"field":"destination.ip"}}],"minimum_should_match":1}}',
         },
         $state: {
+          // @ts-expect-error - fix type error
           store: 'appState',
         },
         query: {
@@ -67,6 +68,7 @@ export const kpiTlsHandshakesLensAttributes: LensAttributes = {
             '{"bool":{"should":[{"exists":{"field":"tls.version"}},{"exists":{"field":"suricata.eve.tls.version"}},{"exists":{"field":"zeek.ssl.version"}}],"minimum_should_match":1}}',
         },
         $state: {
+          // @ts-expect-error - fix type error
           store: 'appState',
         },
         query: {
@@ -127,4 +129,5 @@ export const kpiTlsHandshakesLensAttributes: LensAttributes = {
       name: 'indexpattern-datasource-layer-1f48a633-8eee-45ae-9471-861227e9ca03',
     },
   ],
-} as LensAttributes;
+  version: 1 as const,
+};

@@ -117,4 +117,5 @@ export const getAlertsPreviewLensAttributes = ({
   },
   title: i18n.ALERTS_PREVIEW,
   visualizationType: 'lnsDatatable',
+  version: 1 as const,
 });

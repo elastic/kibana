@@ -226,6 +226,7 @@ export const AnalyticsCollectionViewMetricWithLens = withLensData<
         },
       },
       title: '',
+      version: 1 as const,
       visualizationType: 'lnsMetric',
     };
   },

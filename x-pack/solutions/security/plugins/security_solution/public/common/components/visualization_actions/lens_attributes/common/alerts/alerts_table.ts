@@ -121,6 +121,7 @@ export const getAlertsTableLensAttributes: GetLensAttributes = ({
     title: 'Alerts',
     description: '',
     visualizationType: 'lnsDatatable',
+    version: 1 as const,
     state: {
       visualization: {
         columns: breakdownFieldProvided

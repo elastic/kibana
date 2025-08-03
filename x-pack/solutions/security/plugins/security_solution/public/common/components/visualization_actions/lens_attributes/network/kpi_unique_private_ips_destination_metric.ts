@@ -61,4 +61,5 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
       type: 'index-pattern',
     },
   ],
-} as LensAttributes;
+  version: 1 as const,
+};

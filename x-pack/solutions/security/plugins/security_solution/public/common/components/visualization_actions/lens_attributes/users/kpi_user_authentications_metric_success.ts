@@ -11,6 +11,7 @@ export const kpiUserAuthenticationsMetricSuccessLensAttributes: LensAttributes =
   title: '[Host] User authentications - metric success ',
   description: '',
   visualizationType: 'lnsLegacyMetric',
+  version: 1 as const,
   state: {
     visualization: {
       accessor: '0eb97c09-a351-4280-97da-944e4bd30dd7',

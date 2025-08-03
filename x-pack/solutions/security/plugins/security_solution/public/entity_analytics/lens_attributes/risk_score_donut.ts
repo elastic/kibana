@@ -23,6 +23,7 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = ({
     title: `${stackByField} risk donut`,
     description: '',
     visualizationType: 'lnsPie',
+    version: 1 as const,
     state: {
       visualization: {
         shape: 'donut',

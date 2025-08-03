@@ -21,6 +21,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
     title: '[Network] Unique private IPs - area chart',
     description: '',
     visualizationType: 'lnsXY',
+    version: 1 as const,
     state: {
       visualization: {
         legend: {
@@ -104,6 +105,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
                   isBucketed: true,
                   scale: 'interval',
                   params: {
+                    // @ts-expect-error - fix type error
                     interval: 'auto',
                   },
                 },
@@ -135,6 +137,7 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
                   isBucketed: true,
                   scale: 'interval',
                   params: {
+                    // @ts-expect-error - fix type error
                     interval: 'auto',
                   },
                 },
@@ -176,5 +179,5 @@ export const getKpiUniquePrivateIpsAreaLensAttributes: GetLensAttributes = ({ eu
         name: `indexpattern-datasource-layer-${layerDestinationIp}`,
       },
     ],
-  } as LensAttributes;
+  } satisfies LensAttributes;
 };

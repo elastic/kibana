@@ -170,6 +170,7 @@ export function getVisitorBreakdownLensAttributes({
   };
 
   return {
+    version: 1 as const,
     visualizationType: 'lnsPie',
     title: `ux-visitor-breakdown-${metric}`,
     references: [],

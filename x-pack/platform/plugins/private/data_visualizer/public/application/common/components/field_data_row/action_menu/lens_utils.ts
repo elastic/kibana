@@ -277,6 +277,7 @@ export function getLensAttributes(
       defaultMessage: 'Lens for {fieldName}',
       values: { fieldName: item.fieldName },
     }),
+    version: 1 as const,
     references: [
       {
         id: defaultDataView.id!,

@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { GetLensAttributes } from '../../common/components/visualization_actions/types';
 
 const internalReferenceIdMapping: Record<string, string> = {
@@ -110,6 +111,7 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
                   isBucketed: true,
                   scale: 'interval',
                   params: {
+                    // @ts-expect-error - fix type error
                     interval: 'auto',
                     includeEmptyRows: true,
                     dropPartials: false,
@@ -195,5 +197,6 @@ export const getRiskScoreOverTimeAreaAttributes: GetLensAttributes = ({
       },
     },
     references: [],
-  };
+    version: 1 as const,
+  } satisfies TypedLensByValueInput['attributes'];
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
+import type { Filter } from '@kbn/es-query';
 import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
@@ -89,7 +90,6 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
                 params: {
                   query: 'PTR',
                 },
-                // @ts-expect-error upgrade typescript v4.9.5
                 indexRefName: 'filter-index-pattern-0',
               },
               query: {
@@ -100,7 +100,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
               $state: {
                 store: 'appState',
               },
-            },
+            } as Filter,
           ],
       datasourceStates: {
         formBased: {
@@ -115,6 +115,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
                   sourceField: stackByField,
                   isBucketed: true,
                   params: {
+                    // @ts-expect-error - fix type error
                     size: 10,
                     orderBy: {
                       type: 'column',
@@ -168,4 +169,5 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
         name: `indexpattern-datasource-layer-${layerId}`,
       },
     ],
-  } as LensAttributes);
+    version: 1 as const,
+  } satisfies LensAttributes);
