@@ -18,7 +18,7 @@
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { getConnectorType as getWorkflowsConnectorType } from './connectors/workflows';
+import { getWorkflowsConnectorType } from './connectors/workflows';
 import type {
   AppPluginStartDependencies,
   WorkflowsPluginSetup,

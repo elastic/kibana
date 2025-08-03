@@ -20,6 +20,9 @@
       "security",
       "triggersActionsUi",
       "spaces"
+    ],
+    "optionalPlugins": [
+      "alerting"
     ]
   }
 }
