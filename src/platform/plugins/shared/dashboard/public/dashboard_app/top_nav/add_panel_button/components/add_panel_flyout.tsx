@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n as i18nFn } from '@kbn/i18n';
 import {
@@ -33,13 +33,13 @@ import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
 
 export function AddPanelFlyout({
+  ariaLabelledBy,
   dashboardApi,
   closeFlyout,
-  ariaLabelledBy,
 }: {
+  ariaLabelledBy: string;
   dashboardApi: DashboardApi;
   closeFlyout: () => void;
-  ariaLabelledBy: string;
 }) {
   const { euiTheme } = useEuiTheme();
 

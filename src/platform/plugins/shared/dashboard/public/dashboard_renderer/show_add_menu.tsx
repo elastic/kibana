@@ -29,7 +29,7 @@ import {
 } from '../dashboard_app/_dashboard_app_strings';
 import { uiActionsService } from '../services/kibana_services';
 
-interface ShowAddMenuProps {
+interface AddMenuProps {
   dashboardApi: DashboardApi;
   anchorElement: HTMLElement;
   coreServices: CoreStart;
@@ -47,7 +47,7 @@ function cleanup() {
   isOpen = false;
 }
 
-const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps) => {
+const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) => {
   const onSave = () => {
     dashboardApi.scrollToTop();
   };
@@ -82,6 +82,8 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
                       closeFlyout={() => {
                         dashboardApi.clearOverlays();
                         overlayRef.close();
+                        // Focus the anchor element after closing the flyout
+                        setTimeout(() => anchorElement.focus(), 0);
                       }}
                       ariaLabelledBy="addPanelsFlyout"
                     />
@@ -94,6 +96,12 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
                 maxWidth: 500,
                 paddingSize: 'm',
                 'data-test-subj': 'dashboardPanelSelectionFlyout',
+                onClose: () => {
+                  dashboardApi.clearOverlays();
+                  overlayRef.close();
+                  // Focus the anchor element after closing the flyout
+                  setTimeout(() => anchorElement.focus(), 0);
+                }
               }
             );
 
@@ -206,7 +214,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps
   );
 };
 
-export function ShowAddMenu({ dashboardApi, anchorElement, coreServices }: ShowAddMenuProps) {
+export function ShowAddMenu({ dashboardApi, anchorElement, coreServices }: AddMenuProps) {
   if (isOpen) {
     cleanup();
     return;
