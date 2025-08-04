@@ -405,7 +405,7 @@ export class SettingsPageObject extends FtrService {
 
     await this.find.clickByCssSelector(
       `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-        td:nth-last-child(2) button`
+        td:last-child button`
     );
     await this.retry.waitFor('flyout to open', async () => {
       return await this.testSubjects.exists('flyoutTitle');
