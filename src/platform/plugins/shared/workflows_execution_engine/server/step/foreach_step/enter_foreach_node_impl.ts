@@ -18,13 +18,13 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    const evaluatedItems = this.step.configuration.foreach; // must be real items from step definition
     const foreachState = this.workflowState.getStepState(this.step.id);
 
     if (!foreachState) {
+      const evaluatedItems = this.getItems();
       await this.workflowState.startStep(this.step.id);
       // Initialize foreach state
-      void this.workflowState.setStepState(this.step.id, {
+      this.workflowState.setStepState(this.step.id, {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
@@ -34,9 +34,9 @@ export class EnterForeachNodeImpl implements StepImplementation {
       // Update items and index if they have changed
       const items = foreachState.items;
       const index = foreachState.index + 1;
-      const item = evaluatedItems[index];
+      const item = items[index];
       const total = foreachState.total;
-      void this.workflowState.setStepState(this.step.id, {
+      this.workflowState.setStepState(this.step.id, {
         items,
         index,
         item,
@@ -44,6 +44,12 @@ export class EnterForeachNodeImpl implements StepImplementation {
       });
     }
 
-    void this.workflowState.goToNextStep();
+    this.workflowState.goToNextStep();
+  }
+
+  private getItems(): any[] {
+    return Array.isArray(this.step.configuration.foreach)
+      ? this.step.configuration.foreach
+      : JSON.parse(this.step.configuration.foreach); // must be real items from step definition
   }
 }
