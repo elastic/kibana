@@ -6554,7 +6554,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/metrics-config@link:src/platform/packages/private/opentelemetry/kbn-metrics-config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
+  version "0.0.0"
+  uid ""
+
+"@kbn/metrics@link:src/platform/packages/private/opentelemetry/kbn-metrics":
   version "0.0.0"
   uid ""
 
@@ -8678,26 +8686,26 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.18.0":
-  version "2.18.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.18.0.tgz#252b1d7f57fbc0dc6975169eff0940b4a54b130e"
-  integrity sha512-ojfkS8H92qkSmnMkJoIRjL1uh7iLLthVWDiZv4oxHduVurpNP+Eq4ByteaRlfyX1PpXZAgDvnELTyNKU1ZG9mA==
+"@launchdarkly/js-sdk-common@2.19.0":
+  version "2.19.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.19.0.tgz#aca7cb277a28ddcbeb9bb457ad4d6b7e82bad77c"
+  integrity sha512-p4MU3VxFSxj1T5yGm3OeJAS034nAiISGUF9Av3r9tClRCElcIdj159hADBYCE4VpiH6q+6KJ3cbvXF8v1200+g==
 
-"@launchdarkly/js-server-sdk-common@2.16.0":
-  version "2.16.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.16.0.tgz#56ec3690d116f991c806bcafd2449644835ca62f"
-  integrity sha512-CnCRv/qCwNVpVItxZdqq+jzL3LWy1VsApMIgcMWL5ddozZvfSwu2eHGxjnMadRqTE1gGCsgzQyZsFL127YpLgQ==
+"@launchdarkly/js-server-sdk-common@2.16.1":
+  version "2.16.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.16.1.tgz#70e1dac65b03551bdb2ef1edcec47ca77d6fa0f1"
+  integrity sha512-+040T/Wuvbhh1TJc2XdTjOpPtNOx6SLWpACJ920g188IG59RdOjwFrnuj000noygkmhc7vkgkjfTteSLtMiBrQ==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.18.0"
+    "@launchdarkly/js-sdk-common" "2.19.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.10.0":
-  version "9.10.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.0.tgz#19131a83d426aab7f8ab6a5be922fea3bb4dd988"
-  integrity sha512-0keHXmzRjY4Q3Bg0MqMilepgQcg/h2VD6lT7PEYIoa2BNYKX05l31xOINd/5ll24zUXIXDluTdPrS4deR2DgcQ==
+"@launchdarkly/node-server-sdk@^9.10.1":
+  version "9.10.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.10.1.tgz#387e3099f1d8701a84fd86df5f330d93161e93b3"
+  integrity sha512-A+d7AqKo0a0N2yk1/hEzpuO8tLpriB72GcJK9RpK918jHzLQin/Nab7pbIqojjodgweo4r5XHlOGe0WNpl4w2w==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.16.0"
-    https-proxy-agent "^5.0.1"
+    "@launchdarkly/js-server-sdk-common" "2.16.1"
+    https-proxy-agent "^7.0.6"
     launchdarkly-eventsource "2.2.0"
 
 "@launchdarkly/openfeature-node-server@^1.1.0":
@@ -9492,7 +9500,7 @@
     "@opentelemetry/resources" "2.0.1"
     "@opentelemetry/sdk-metrics" "2.0.1"
 
-"@opentelemetry/exporter-metrics-otlp-http@0.203.0":
+"@opentelemetry/exporter-metrics-otlp-http@0.203.0", "@opentelemetry/exporter-metrics-otlp-http@^0.203.0":
   version "0.203.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-metrics-otlp-http/-/exporter-metrics-otlp-http-0.203.0.tgz#90d6e157ee93f5408a4af52e1c9250e6282ef8d0"
   integrity sha512-HFSW10y8lY6BTZecGNpV3GpoSy7eaO0Z6GATwZasnT4bEsILp8UJXNG5OmEsz4SdwCSYvyCbTJdNbZP3/8LGCQ==
@@ -10517,6 +10525,20 @@
   dependencies:
     legacy-javascript latest
     third-party-web latest
+
+"@pdf-lib/standard-fonts@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@pdf-lib/standard-fonts/-/standard-fonts-1.0.0.tgz#8ba691c4421f71662ed07c9a0294b44528af2d7f"
+  integrity sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA==
+  dependencies:
+    pako "^1.0.6"
+
+"@pdf-lib/upng@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@pdf-lib/upng/-/upng-1.0.1.tgz#7dc9c636271aca007a9df4deaf2dd7e7960280cb"
+  integrity sha512-dQK2FUMQtowVP00mtIksrlZhdFXQZPC+taih1q4CvPZ5vqdxR/LKBaFg0oAfzd1GlHZXXSPdQfzQnt+ViGvEIQ==
+  dependencies:
+    pako "^1.0.10"
 
 "@peggyjs/from-mem@1.3.5":
   version "1.3.5"
@@ -16023,9 +16045,9 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001335, caniuse-lite@^1.0.30001718:
   integrity sha512-Ec/2yV2nNPwb4DnTANEV99ZWwm3ZWfdlfkQbWSDDt+PsXEVYwlhPH8tdMaPunYTKKmz7AnHi2oNEi1GcmKCD8g==
 
 canvg@^3.0.9:
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/canvg/-/canvg-3.0.9.tgz#9ba095f158b94b97ca2c9c1c40785b11dc08df6d"
-  integrity sha512-rDXcnRPuz4QHoCilMeoTxql+fvGqNAxp+qV/KHD8rOiJSAfVjFclbdUNHD2Uqfthr+VMg17bD2bVuk6F07oLGw==
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/canvg/-/canvg-3.0.11.tgz#4b4290a6c7fa36871fac2b14e432eff33b33cf2b"
+  integrity sha512-5ON+q7jCTgMp9cjpu4Jo6XbvfYwSB2Ow3kzHKfIyJfaCAOHLbdKPQqGKgfED/R5B+3TFFfe8pegYA+b423SRyA==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@types/raf" "^3.4.0"
@@ -16975,9 +16997,9 @@ core-js-pure@^3.23.3:
   integrity sha512-LiN6fylpVBVwT8twhhluD9TzXmZQQsr2I2eIKtWNbZI1XMfBT7CV18itaN6RA7EtQd/SDdRx/wzvAShX2HvhQA==
 
 core-js@^3.32.1, core-js@^3.42.0, core-js@^3.8.3:
-  version "3.42.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.42.0.tgz#edbe91f78ac8cfb6df8d997e74d368a68082fe37"
-  integrity sha512-Sz4PP4ZA+Rq4II21qkNqOEDTDrCvcANId3xpIgB34NDkWc3UduWj2dqEtN9yZIq8Dk3HyPI33x9sqqU5C8sr0g==
+  version "3.44.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.44.0.tgz#db4fd4fa07933c1d6898c8b112a1119a9336e959"
+  integrity sha512-aFCtd4l6GvAXwVEh3XbbVqJGHDJt0OZRa+5ePGx3LLwi12WfexqQxcsohb2wgsa/92xtl19Hd66G/L+TaAxDMw==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -18534,6 +18556,11 @@ dom-serializer@^2.0.0:
     domelementtype "^2.3.0"
     domhandler "^5.0.2"
     entities "^4.2.0"
+
+dom-to-image-more@^3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/dom-to-image-more/-/dom-to-image-more-3.6.0.tgz#76ec03b6e1adaf117c88c72090b2dd3dcfb6532b"
+  integrity sha512-0BB0M9gRRP7znKBNLRAvNyWnkDIzSgMSDcS7WdPDzPnWhW2YJqxUR/dCHiJ2HdCV3K2rVky5Vba8UF31mvrCuQ==
 
 domain-browser@4.22.0:
   version "4.22.0"
@@ -26784,7 +26811,7 @@ pako@^0.2.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha1-8/dSL073gjSNqBYbrZ7P1Rv4OnU=
 
-pako@^1.0.3, pako@~1.0.2, pako@~1.0.5:
+pako@^1.0.10, pako@^1.0.11, pako@^1.0.3, pako@^1.0.6, pako@~1.0.2, pako@~1.0.5:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
@@ -27015,6 +27042,16 @@ pbkdf2@^3.1.2:
     safe-buffer "^5.2.1"
     sha.js "^2.4.11"
     to-buffer "^1.2.0"
+
+pdf-lib@^1.17.1:
+  version "1.17.1"
+  resolved "https://registry.yarnpkg.com/pdf-lib/-/pdf-lib-1.17.1.tgz#9e7dd21261a0c1fb17992580885b39e7d08f451f"
+  integrity sha512-V/mpyJAoTsN4cnP31vc0wfNA1+p20evqqnap0KLoRUN0Yk/p3wN52DOEsL4oBFcLdb76hlpKPtzJIgo67j/XLw==
+  dependencies:
+    "@pdf-lib/standard-fonts" "^1.0.0"
+    "@pdf-lib/upng" "^1.0.1"
+    pako "^1.0.11"
+    tslib "^1.11.1"
 
 pdfmake@^0.2.15:
   version "0.2.15"
@@ -32147,7 +32184,7 @@ tslib@2.6.2:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.6.2.tgz#703ac29425e7b37cd6fd456e92404d46d1f3e4ae"
   integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
 
-tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
+tslib@^1.11.1, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==

@@ -384,6 +384,8 @@ src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
+src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core
+src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -2442,6 +2444,8 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/security/plugins/security_solution/public/app/home @elastic/security-solution
 
 # GenAI in Security Solution
+/x-pack/solutions/security/plugins/security_solution/public/reports @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/public/common/components/visualization_actions/lens_attributes/ai @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
