@@ -77,7 +77,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
             throw new Error(`Workflow not found: ${workflowId}`);
           }
 
-          // Run the workflow
+          // Run the workflow, @tb: maybe switch to scheduler?
           return await this.api.runWorkflow(workflow, inputs);
         };
       };
