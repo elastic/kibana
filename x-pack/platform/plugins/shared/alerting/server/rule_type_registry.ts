@@ -426,6 +426,7 @@ export class RuleTypeRegistry {
         ...(_ruleType.priority ? { priority: _ruleType.priority } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
         autoRecoverAlerts: _ruleType.autoRecoverAlerts,
+        internallyManaged: _ruleType.internallyManaged,
       };
 
       ruleTypesMap.set(ruleType.id, ruleType);
