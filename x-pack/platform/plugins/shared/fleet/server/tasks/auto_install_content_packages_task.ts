@@ -28,9 +28,10 @@ import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
 import { getInstalledPackages } from '../services/epm/packages';
+import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -163,8 +164,9 @@ export class AutoInstallContentPackagesTask {
         this.logger.debug(
           `[AutoInstallContentPackagesTask] Fetching content packages to get discovery fields`
         );
-        this.discoveryMap = await this.getContentPackagesDiscoveryMap();
+        this.discoveryMap = await this.getContentPackagesDiscoveryMap(soClient);
       }
+      // console.log(JSON.stringify(this.discoveryMap, null, 2));
 
       const installedPackages = await getInstalledPackages({
         savedObjectsClient: soClient,
@@ -315,11 +317,15 @@ export class AutoInstallContentPackagesTask {
     return `${value} ${unit}`;
   }
 
-  private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
+  private async getContentPackagesDiscoveryMap(
+    soClient: SavedObjectsClient
+  ): Promise<DiscoveryMap> {
     const type = 'content';
-    const prerelease = false;
+    const prerelease = await getPrereleaseFromSettings(soClient);
     const discoveryMap: DiscoveryMap = {};
     const registryItems = await Registry.fetchList({ prerelease, type });
+
+    // console.log(registryItems.map((item) => item.name));
 
     registryItems.forEach((item) => {
       if (item.discovery?.datasets) {
