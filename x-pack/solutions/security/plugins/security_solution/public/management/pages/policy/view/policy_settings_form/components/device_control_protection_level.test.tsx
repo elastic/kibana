@@ -36,11 +36,11 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
     policy.windows.device_control = {
       enabled: true,
-      usb_storage: DeviceControlAccessLevelEnum.block,
+      usb_storage: DeviceControlAccessLevelEnum.deny_all,
     };
     policy.mac.device_control = {
       enabled: true,
-      usb_storage: DeviceControlAccessLevelEnum.block,
+      usb_storage: DeviceControlAccessLevelEnum.deny_all,
     };
 
     formProps = {
@@ -87,8 +87,9 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
     formProps.policy.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.audit;
 
     const expectedPolicyUpdate = cloneDeep(formProps.policy);
-    expectedPolicyUpdate.windows.device_control!.usb_storage = DeviceControlAccessLevelEnum.block;
-    expectedPolicyUpdate.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.block;
+    expectedPolicyUpdate.windows.device_control!.usb_storage =
+      DeviceControlAccessLevelEnum.deny_all;
+    expectedPolicyUpdate.mac.device_control!.usb_storage = DeviceControlAccessLevelEnum.deny_all;
 
     render();
 

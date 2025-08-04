@@ -74,11 +74,11 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
           label: READ_ONLY_LABEL,
         },
         {
-          id: DeviceControlAccessLevelEnum.execute_only,
+          id: DeviceControlAccessLevelEnum.no_execute,
           label: BLOCK_EXECUTE_LABEL,
         },
         {
-          id: DeviceControlAccessLevelEnum.block,
+          id: DeviceControlAccessLevelEnum.deny_all,
           label: BLOCK_LABEL,
         },
       ];

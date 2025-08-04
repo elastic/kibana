@@ -150,8 +150,12 @@ describe('Policy Device Control Card', () => {
     });
 
     it('should display correctly with block protection level', () => {
-      set(formProps.policy, 'windows.device_control.access_level', DeviceControlAccessLevel.block);
-      set(formProps.policy, 'mac.device_control.access_level', DeviceControlAccessLevel.block);
+      set(
+        formProps.policy,
+        'windows.device_control.access_level',
+        DeviceControlAccessLevel.deny_all
+      );
+      set(formProps.policy, 'mac.device_control.access_level', DeviceControlAccessLevel.deny_all);
 
       const { getByTestId } = render();
 

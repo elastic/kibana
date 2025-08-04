@@ -79,7 +79,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return this.update({ status });
   }
 
-  async find() {
+  async find(): Promise<SavedObjectsFindResponse<PrivilegedMonitoringEngineDescriptor>> {
     return this.deps.soClient.find<PrivilegedMonitoringEngineDescriptor>({
       type: privilegeMonitoringTypeName,
       namespaces: [this.deps.namespace],
