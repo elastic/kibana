@@ -24013,6 +24013,16 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            datasets:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                             fields:
                               items:
                                 additionalProperties: true
@@ -25182,6 +25192,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -25813,6 +25833,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
