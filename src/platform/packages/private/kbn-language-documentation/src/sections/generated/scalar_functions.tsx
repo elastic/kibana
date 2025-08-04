@@ -29,6 +29,7 @@ export const functions = {
         defaultMessage: 'ABS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -57,6 +58,7 @@ export const functions = {
         defaultMessage: 'ACOS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -85,6 +87,7 @@ export const functions = {
         defaultMessage: 'ASIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -114,6 +117,7 @@ export const functions = {
         defaultMessage: 'ATAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -143,6 +147,7 @@ export const functions = {
         defaultMessage: 'ATAN2',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -175,6 +180,7 @@ export const functions = {
         defaultMessage: 'BIT_LENGTH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -210,6 +216,7 @@ export const functions = {
         defaultMessage: 'BYTE_LENGTH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -245,6 +252,7 @@ export const functions = {
         defaultMessage: 'CASE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -282,6 +290,7 @@ export const functions = {
         defaultMessage: 'CBRT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -311,6 +320,7 @@ export const functions = {
         defaultMessage: 'CEIL',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -341,6 +351,7 @@ export const functions = {
         defaultMessage: 'CIDR_MATCH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -373,6 +384,7 @@ export const functions = {
         defaultMessage: 'COALESCE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -404,6 +416,7 @@ export const functions = {
         defaultMessage: 'CONCAT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -436,6 +449,7 @@ export const functions = {
         defaultMessage: 'COS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -464,6 +478,7 @@ export const functions = {
         defaultMessage: 'COSH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -492,6 +507,7 @@ export const functions = {
         defaultMessage: 'DATE_DIFF',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -525,6 +541,7 @@ export const functions = {
         defaultMessage: 'DATE_EXTRACT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -556,6 +573,7 @@ export const functions = {
         defaultMessage: 'DATE_FORMAT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -588,6 +606,7 @@ export const functions = {
         defaultMessage: 'DATE_PARSE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -619,6 +638,7 @@ export const functions = {
         defaultMessage: 'DATE_TRUNC',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -651,6 +671,7 @@ export const functions = {
         defaultMessage: 'E',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -678,6 +699,7 @@ export const functions = {
         defaultMessage: 'ENDS_WITH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -710,6 +732,7 @@ export const functions = {
         defaultMessage: 'EXP',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -738,6 +761,7 @@ export const functions = {
         defaultMessage: 'FLOOR',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -773,6 +797,7 @@ export const functions = {
         defaultMessage: 'FROM_BASE64',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -804,6 +829,7 @@ export const functions = {
         defaultMessage: 'GREATEST',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -838,6 +864,7 @@ export const functions = {
         defaultMessage: 'HASH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -868,6 +895,7 @@ export const functions = {
         defaultMessage: 'HYPOT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -900,6 +928,7 @@ export const functions = {
         defaultMessage: 'IP_PREFIX',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -931,6 +960,7 @@ export const functions = {
         defaultMessage: 'KQL',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -959,6 +989,7 @@ export const functions = {
         defaultMessage: 'LEAST',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -990,6 +1021,7 @@ export const functions = {
         defaultMessage: 'LEFT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1019,6 +1051,7 @@ export const functions = {
         defaultMessage: 'LENGTH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1054,6 +1087,7 @@ export const functions = {
         defaultMessage: 'LOCATE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1087,6 +1121,7 @@ export const functions = {
         defaultMessage: 'LOG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1117,6 +1152,7 @@ export const functions = {
         defaultMessage: 'LOG10',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1150,6 +1186,7 @@ export const functions = {
         defaultMessage: 'LTRIM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1184,6 +1221,7 @@ export const functions = {
         defaultMessage: 'MATCH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1216,6 +1254,7 @@ export const functions = {
         defaultMessage: 'MATCH_PHRASE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1249,6 +1288,7 @@ export const functions = {
         defaultMessage: 'MD5',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1257,7 +1297,7 @@ export const functions = {
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.md5.markdown', {
             defaultMessage: `
   ### MD5
-  Computes the MD5 hash of the input (if the MD5 hash is available on the JVM).
+  Computes the MD5 hash of the input.
 
   \`\`\`esql
   FROM sample_data
@@ -1279,6 +1319,7 @@ export const functions = {
         defaultMessage: 'MULTI_MATCH',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1314,6 +1355,7 @@ export const functions = {
         defaultMessage: 'MV_APPEND',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1348,6 +1390,7 @@ export const functions = {
         defaultMessage: 'MV_AVG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1379,6 +1422,7 @@ export const functions = {
         defaultMessage: 'MV_CONCAT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1410,6 +1454,7 @@ export const functions = {
         defaultMessage: 'MV_COUNT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1441,6 +1486,7 @@ export const functions = {
         defaultMessage: 'MV_DEDUPE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1474,6 +1520,7 @@ export const functions = {
         defaultMessage: 'MV_FIRST',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1507,6 +1554,7 @@ export const functions = {
         defaultMessage: 'MV_LAST',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1540,6 +1588,7 @@ export const functions = {
         defaultMessage: 'MV_MAX',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1571,6 +1620,7 @@ export const functions = {
         defaultMessage: 'MV_MEDIAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1605,6 +1655,7 @@ export const functions = {
         }
       ),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1640,6 +1691,7 @@ export const functions = {
         defaultMessage: 'MV_MIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1671,6 +1723,7 @@ export const functions = {
         defaultMessage: 'MV_PERCENTILE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1702,6 +1755,7 @@ export const functions = {
         defaultMessage: 'MV_PSERIES_WEIGHTED_SUM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1734,6 +1788,7 @@ export const functions = {
         defaultMessage: 'MV_SLICE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1767,6 +1822,7 @@ export const functions = {
         defaultMessage: 'MV_SORT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1798,6 +1854,7 @@ export const functions = {
         defaultMessage: 'MV_SUM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1829,6 +1886,7 @@ export const functions = {
         defaultMessage: 'MV_ZIP',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1861,6 +1919,7 @@ export const functions = {
         defaultMessage: 'NOW',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1888,6 +1947,7 @@ export const functions = {
         defaultMessage: 'PI',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1915,6 +1975,7 @@ export const functions = {
         defaultMessage: 'POW',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1945,6 +2006,7 @@ export const functions = {
         defaultMessage: 'QSTR',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -1973,6 +2035,7 @@ export const functions = {
         defaultMessage: 'REPEAT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2004,6 +2067,7 @@ export const functions = {
         defaultMessage: 'REPLACE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2037,6 +2101,7 @@ export const functions = {
         defaultMessage: 'REVERSE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2067,6 +2132,7 @@ export const functions = {
         defaultMessage: 'RIGHT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2099,6 +2165,7 @@ export const functions = {
         defaultMessage: 'ROUND',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2134,6 +2201,7 @@ export const functions = {
         defaultMessage: 'ROUND_TO',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2175,6 +2243,7 @@ export const functions = {
         defaultMessage: 'RTRIM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2209,6 +2278,7 @@ export const functions = {
         defaultMessage: 'SCALB',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2242,6 +2312,7 @@ export const functions = {
         defaultMessage: 'SHA1',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2272,6 +2343,7 @@ export const functions = {
         defaultMessage: 'SHA256',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2305,6 +2377,7 @@ export const functions = {
         defaultMessage: 'SIGNUM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2337,6 +2410,7 @@ export const functions = {
         defaultMessage: 'SIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2365,6 +2439,7 @@ export const functions = {
         defaultMessage: 'SINH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2393,6 +2468,7 @@ export const functions = {
         defaultMessage: 'SPACE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2423,6 +2499,7 @@ export const functions = {
         defaultMessage: 'SPLIT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2454,6 +2531,7 @@ export const functions = {
         defaultMessage: 'SQRT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2483,6 +2561,7 @@ export const functions = {
         defaultMessage: 'ST_CONTAINS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2516,6 +2595,7 @@ export const functions = {
         defaultMessage: 'ST_DISJOINT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2550,6 +2630,7 @@ export const functions = {
         defaultMessage: 'ST_DISTANCE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2585,6 +2666,7 @@ export const functions = {
         defaultMessage: 'ST_ENVELOPE',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2618,6 +2700,7 @@ export const functions = {
         defaultMessage: 'ST_INTERSECTS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2653,6 +2736,7 @@ export const functions = {
         defaultMessage: 'ST_WITHIN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2686,6 +2770,7 @@ export const functions = {
         defaultMessage: 'ST_X',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2715,6 +2800,7 @@ export const functions = {
         defaultMessage: 'ST_XMAX',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2750,6 +2836,7 @@ export const functions = {
         defaultMessage: 'ST_XMIN',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2785,6 +2872,7 @@ export const functions = {
         defaultMessage: 'ST_Y',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2814,6 +2902,7 @@ export const functions = {
         defaultMessage: 'ST_YMAX',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2849,6 +2938,7 @@ export const functions = {
         defaultMessage: 'ST_YMIN',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2884,6 +2974,7 @@ export const functions = {
         defaultMessage: 'STARTS_WITH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2916,6 +3007,7 @@ export const functions = {
         defaultMessage: 'SUBSTRING',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2948,6 +3040,7 @@ export const functions = {
         defaultMessage: 'TAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -2976,6 +3069,7 @@ export const functions = {
         defaultMessage: 'TANH',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3004,6 +3098,7 @@ export const functions = {
         defaultMessage: 'TAU',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3031,6 +3126,7 @@ export const functions = {
         defaultMessage: 'TO_AGGREGATE_METRIC_DOUBLE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3062,6 +3158,7 @@ export const functions = {
         defaultMessage: 'TO_BASE64',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3093,6 +3190,7 @@ export const functions = {
         defaultMessage: 'TO_BOOLEAN',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3127,6 +3225,7 @@ export const functions = {
         defaultMessage: 'TO_CARTESIANPOINT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3161,6 +3260,7 @@ export const functions = {
         defaultMessage: 'TO_CARTESIANSHAPE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3195,6 +3295,7 @@ export const functions = {
         defaultMessage: 'TO_DATE_NANOS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3230,6 +3331,7 @@ export const functions = {
         defaultMessage: 'TO_DATEPERIOD',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3261,6 +3363,7 @@ export const functions = {
         defaultMessage: 'TO_DATETIME',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3296,6 +3399,7 @@ export const functions = {
         defaultMessage: 'TO_DEGREES',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3327,6 +3431,7 @@ export const functions = {
         defaultMessage: 'TO_DOUBLE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3360,6 +3465,7 @@ export const functions = {
         defaultMessage: 'TO_GEOPOINT',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3393,6 +3499,7 @@ export const functions = {
         defaultMessage: 'TO_GEOSHAPE',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3426,6 +3533,7 @@ export const functions = {
         defaultMessage: 'TO_INTEGER',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3460,6 +3568,7 @@ export const functions = {
         defaultMessage: 'TO_IP',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3492,6 +3601,7 @@ export const functions = {
         defaultMessage: 'TO_LONG',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3525,6 +3635,7 @@ export const functions = {
         defaultMessage: 'TO_LOWER',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3556,6 +3667,7 @@ export const functions = {
         defaultMessage: 'TO_RADIANS',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3587,6 +3699,7 @@ export const functions = {
         defaultMessage: 'TO_STRING',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3618,6 +3731,7 @@ export const functions = {
         defaultMessage: 'TO_TIMEDURATION',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3649,6 +3763,7 @@ export const functions = {
         defaultMessage: 'TO_UNSIGNED_LONG',
       }),
       preview: true,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3682,6 +3797,7 @@ export const functions = {
         defaultMessage: 'TO_UPPER',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3713,6 +3829,7 @@ export const functions = {
         defaultMessage: 'TO_VERSION',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -3743,6 +3860,7 @@ export const functions = {
         defaultMessage: 'TRIM',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab

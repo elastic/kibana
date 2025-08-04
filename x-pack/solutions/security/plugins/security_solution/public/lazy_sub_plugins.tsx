@@ -18,6 +18,7 @@ import { Exceptions } from './exceptions';
 import { Explore } from './explore';
 import { Onboarding } from './onboarding';
 import { Overview } from './overview';
+import { Reports } from './reports';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
@@ -49,5 +50,6 @@ const subPluginClasses = {
   EntityAnalytics,
   Configurations,
   SiemMigrations,
+  Reports,
 };
 export { subPluginClasses };
