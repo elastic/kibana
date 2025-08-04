@@ -63,7 +63,7 @@ export function DocumentsColumn({
         `}
         aria-live="polite"
         aria-label={i18n.translate('xpack.streams.documentsColumn.loadingAriaLabel', {
-          defaultMessage: 'Loading document count and chart data for {indexPattern}',
+          defaultMessage: 'Loading information for {indexPattern}',
           values: { indexPattern },
         })}
       >
@@ -152,29 +152,6 @@ export function DocumentsColumn({
     <EuiIcon type="visLine" size="m" />
   );
 
-  const chartDescription = React.useMemo(() => {
-    if (!hasData) {
-      return i18n.translate('xpack.streams.documentsColumn.noDataDescription', {
-        defaultMessage: 'No document data available for {indexPattern}',
-        values: { indexPattern },
-      });
-    }
-
-    const timeRange = i18n.translate('xpack.streams.documentsColumn.timeRangeDescription', {
-      defaultMessage: 'from {start} to {end}',
-      values: {
-        start: xFormatter(timeState.start),
-        end: xFormatter(timeState.end),
-      },
-    });
-
-    return i18n.translate('xpack.streams.documentsColumn.chartDescription', {
-      defaultMessage:
-        'Document count chart for {indexPattern} showing {docCount} total documents {timeRange}',
-      values: { indexPattern, docCount, timeRange },
-    });
-  }, [hasData, indexPattern, docCount, xFormatter, timeState.start, timeState.end]);
-
   const cellAriaLabel = hasData
     ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
         defaultMessage: '{docCount} documents in {indexPattern}',
@@ -220,42 +197,30 @@ export function DocumentsColumn({
             `}
           >
             {hasData ? (
-              <div
-                aria-hidden="true"
-                className={css`
-                  width: 100%;
-                  &:focus {
-                    outline: 2px solid ${euiTheme.colors.primary};
-                    outline-offset: 2px;
-                  }
-                `}
-              >
-                <Chart size={{ width: '100%', height: euiTheme.size.l }}>
-                  <Settings
-                    locale={i18n.getLocale()}
-                    baseTheme={chartBaseTheme}
-                    theme={{ background: { color: 'transparent' } }}
-                    xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
-                    noResults={<div />}
-                    ariaLabel={chartDescription}
+              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+                <Settings
+                  locale={i18n.getLocale()}
+                  baseTheme={chartBaseTheme}
+                  theme={{ background: { color: 'transparent' } }}
+                  xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
+                  noResults={<div />}
+                />
+                <Tooltip
+                  stickTo={TooltipStickTo.Middle}
+                  headerFormatter={({ value }) => xFormatter(value)}
+                />
+                {allTimeseries.map((serie) => (
+                  <BarSeries
+                    key={serie.id}
+                    id={serie.id}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['doc_count']}
+                    data={serie.data}
                   />
-                  <Tooltip
-                    stickTo={TooltipStickTo.Middle}
-                    headerFormatter={({ value }) => xFormatter(value)}
-                  />
-                  {allTimeseries.map((serie) => (
-                    <BarSeries
-                      key={serie.id}
-                      id={serie.id}
-                      xScaleType={ScaleType.Time}
-                      yScaleType={ScaleType.Linear}
-                      xAccessor="x"
-                      yAccessors={['doc_count']}
-                      data={serie.data}
-                    />
-                  ))}
-                </Chart>
-              </div>
+                ))}
+              </Chart>
             ) : (
               noHistogramData
             )}

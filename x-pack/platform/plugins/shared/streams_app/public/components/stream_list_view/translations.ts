@@ -42,7 +42,7 @@ export const STREAMS_TABLE_CAPTION_ARIA_LABEL = i18n.translate(
   'xpack.streams.streamsTreeTable.tableCaptionAriaLabel',
   {
     defaultMessage:
-      'Streams data table showing stream names, document counts with charts, and retention policies. Use Tab to navigate between columns and Enter to interact with elements.',
+      'Streams data table, listing stream names with links, document counts, and retention policies with links',
   }
 );
 
