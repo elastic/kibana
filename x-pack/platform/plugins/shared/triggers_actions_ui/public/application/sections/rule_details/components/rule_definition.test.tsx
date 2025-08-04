@@ -186,9 +186,9 @@ describe('Rule Definition', () => {
         ruleTypeId: 'attack-discovery',
       },
     });
-    const ruleDescription = wrapper.find('[data-test-subj="ruleSummaryRuleDescription"]');
-    expect(ruleDescription).toBeTruthy();
-    expect(ruleDescription.find('div.euiText').text()).toEqual('Attack Discovery rule');
+    const ruleDescription = screen.getByTestId('ruleSummaryRuleDescription');
+    expect(ruleDescription).toBeInTheDocument();
+    expect(ruleDescription).toHaveTextContent('Attack Discovery rule');
   });
 
   it('show rule conditions only if the rule allows multiple conditions', async () => {
