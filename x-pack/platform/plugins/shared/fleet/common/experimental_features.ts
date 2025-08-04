@@ -19,6 +19,7 @@ const _allowedExperimentalValues = {
   enablePackageRollback: false,
   enableAutoInstallContentPackages: false,
   enableOtelIntegrations: false,
+  enableAgentStatusAlerting: false,
 };
 
 /**

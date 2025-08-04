@@ -22832,6 +22832,20 @@ paths:
                             - updating
                             - starting
                           type: string
+                        last_known_status:
+                          enum:
+                            - offline
+                            - error
+                            - online
+                            - inactive
+                            - enrolling
+                            - unenrolling
+                            - unenrolled
+                            - updating
+                            - degraded
+                            - uninstalled
+                            - orphaned
+                          type: string
                         local_metadata:
                           additionalProperties: {}
                           type: object
@@ -23291,6 +23305,20 @@ paths:
                           - updating
                           - starting
                         type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
+                        type: string
                       local_metadata:
                         additionalProperties: {}
                         type: object
@@ -23631,6 +23659,20 @@ paths:
                           - degraded
                           - updating
                           - starting
+                        type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       local_metadata:
                         additionalProperties: {}

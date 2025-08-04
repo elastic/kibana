@@ -90,12 +90,16 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.load(auditPath);
       await setupMlModulesWithRetry({ module: siemModule, supertest, retry });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(auditPath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -306,11 +310,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('@skipInServerlessMKI should be enriched with host risk score', async () => {
@@ -326,11 +330,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('@skipInServerlessMKI should be enriched alert with criticality_level', async () => {
