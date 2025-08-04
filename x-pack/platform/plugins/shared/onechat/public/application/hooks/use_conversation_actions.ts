@@ -1,15 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 
 import { Conversation } from '@kbn/onechat-common';
 import { useQueryClient } from '@tanstack/react-query';
+import produce from 'immer';
+import { useEffect, useRef } from 'react';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useConversationId } from './use_conversation_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { queryKeys } from '../query_keys';
-import produce from 'immer';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
-import { useEffect, useRef } from 'react';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export const useConversationActions = () => {
   const queryClient = useQueryClient();
