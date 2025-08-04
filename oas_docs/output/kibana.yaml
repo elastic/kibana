@@ -13378,11 +13378,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -76891,12 +76887,10 @@ components:
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object
