@@ -47,6 +47,9 @@ const renderEmbeddable = async (
 
   await act(async () => render(<embeddable.Component />));
 
+  // Switch to edit mode, but not yet editing
+  act(() => parentApiStub.viewMode$.next('edit'));
+
   return { embeddable, parentApi: parentApiStub };
 };
 
@@ -75,12 +78,10 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('shows renderer in view mode, shows editor in edit mode', async () => {
-    const { embeddable, parentApi } = await renderEmbeddable({
+    const { embeddable } = await renderEmbeddable({
       initialState: { rawState: { content: 'HELLO' } },
     });
 
-    // Switch to edit mode, but not yet editing
-    act(() => parentApi.viewMode$.next('edit'));
     expect(screen.getByTestId('markdownRenderer')).toBeInTheDocument();
     expect(screen.queryByLabelText(/Dashboard markdown editor/i)).not.toBeInTheDocument();
 
@@ -99,7 +100,6 @@ describe('MarkdownEmbeddable', () => {
         initialState: { rawState: { content: 'HELLO' } },
       });
 
-      act(() => parentApi.viewMode$.next('edit'));
       await act(async () => {
         await embeddable.api.onEdit({ isNewPanel: true });
       });
@@ -112,8 +112,6 @@ describe('MarkdownEmbeddable', () => {
       const { embeddable, parentApi } = await renderEmbeddable({
         initialState: { rawState: { content: 'HELLO' } },
       });
-
-      act(() => parentApi.viewMode$.next('edit'));
       await act(async () => {
         await embeddable.api.onEdit({ isNewPanel: false });
       });
@@ -124,11 +122,10 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('saves content when Apply clicked', async () => {
-    const { embeddable, parentApi } = await renderEmbeddable({
+    const { embeddable } = await renderEmbeddable({
       initialState: { rawState: { content: 'HELLO' } },
     });
 
-    act(() => parentApi.viewMode$.next('edit'));
     await act(async () => {
       await embeddable.api.onEdit({ isNewPanel: true });
     });
@@ -152,11 +149,15 @@ describe('MarkdownEmbeddable', () => {
     expect(parentApi.setFocusedPanelId).toHaveBeenCalledWith('test-uuid');
   });
 
-  it('overrides hover actions when editing', async () => {
+  it('overrides hover actions only when editing', async () => {
     const { embeddable } = await renderEmbeddable();
-
     expect(embeddable.api.overrideHoverActions$.getValue()).toBe(false);
+
     await embeddable.api.onEdit();
     expect(embeddable.api.overrideHoverActions$.getValue()).toBe(true);
+
+    const discardButton = await screen.findByRole('button', { name: /Discard/i });
+    await userEvent.click(discardButton);
+    expect(embeddable.api.overrideHoverActions$.getValue()).toBe(false);
   });
 });
