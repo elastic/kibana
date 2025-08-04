@@ -37,7 +37,7 @@ export const MAIN_CONTENT_SELECTORS = [
  */
 export const euiIncludeSelectorInFocusTrap = {
   prop: {
-    'data-eui-includes-in-focus-trap': true,
+    'data-eui-includes-in-flyout-focus-trap': true,
   },
-  selector: `[data-eui-includes-in-focus-trap="true"]`,
+  selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
 };

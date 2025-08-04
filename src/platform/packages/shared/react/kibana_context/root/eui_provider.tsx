@@ -11,7 +11,10 @@ import * as Rx from 'rxjs';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+
+// we can use the import because the package isn't included in the shared bundle,
+// but we still check in tests to make sure selector is correct
+// import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
@@ -76,7 +79,7 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
 
 const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
   EuiFlyout: {
-    includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+    includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
   },
 };
 
