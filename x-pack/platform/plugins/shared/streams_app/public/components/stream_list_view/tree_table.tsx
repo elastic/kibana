@@ -110,7 +110,7 @@ export function StreamsTreeTable({
                   data-test-subj="streamsAppStreamNodeLink"
                   href={router.link('/{key}', { path: { key: item.stream.name } })}
                 >
-                   <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
+                  <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
