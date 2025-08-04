@@ -3057,7 +3057,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => { },
+            setState: () => {},
           })
         ).toMatchInlineSnapshot(`
           Array [
