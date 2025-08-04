@@ -20,7 +20,8 @@
       "ruleRegistry",
       "security",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "fleet"
     ],
     "optionalPlugins": ["cloud", "serverless"],
     "requiredBundles": [],

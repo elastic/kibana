@@ -353,7 +353,7 @@ export async function ensureFleetEventIngestedPipelineIsInstalled(
 
 const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');
 
-const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
+export const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   const pathParts = getPathParts(path);
   return (
     !isDirectory({ path }) &&
