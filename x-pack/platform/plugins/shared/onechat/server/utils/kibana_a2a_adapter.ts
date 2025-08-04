@@ -18,8 +18,16 @@ import {
 } from '@a2a-js/sdk/server';
 
 import type { AgentCard } from '@a2a-js/sdk';
-import { oneChatDefaultAgentId, AgentMode } from '@kbn/onechat-common';
-import { firstValueFrom } from 'rxjs';
+import {
+  oneChatDefaultAgentId,
+  AgentMode,
+  isRoundCompleteEvent,
+  ConversationCreatedEvent,
+  isConversationCreatedEvent,
+  isConversationUpdatedEvent,
+  ConversationUpdatedEvent,
+} from '@kbn/onechat-common';
+import { firstValueFrom, toArray } from 'rxjs';
 import type { InternalStartServices } from '../services';
 import { createAgentCard } from './create_agent_card';
 
@@ -75,14 +83,20 @@ class KibanaAgentExecutor {
         request: this.kibanaRequest,
       });
 
-      // Get first response (simplified for now)
-      const firstEvent = await firstValueFrom(chatEvents$);
+      const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+      const {
+        data: { round },
+      } = events.find(isRoundCompleteEvent)!;
+      // const {
+      //   data: { conversation_id: convId },
+      // } = events.find(
+      //   (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
+      //     isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
+      // )!;
 
-      // Extract response text (simplified)
-      let responseText = 'Task completed successfully.';
-      if ((firstEvent as any)?.type === 'roundComplete') {
-        responseText = (firstEvent as any)?.round?.response?.content?.message || responseText;
-      }
+      this.logger.info(`Kibana A2A: Conversation ID: ${round.response}`);
+
+      const responseText = round.response.message;
 
       // Publish response as A2A message
       eventBus.publish({
