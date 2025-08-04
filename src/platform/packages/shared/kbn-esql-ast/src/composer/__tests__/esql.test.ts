@@ -156,4 +156,60 @@ ComposerQuery
       `"Invalid parameter name \\"123\\". Parameter names cannot start with a digit or space."`
     );
   });
+
+  test('can specify params using shorthand object syntax', () => {
+    const limit = 123;
+    const field = 'test_field';
+    const query = esql`FROM index | LIMIT ${{ limit }} | KEEP ${{ field }}`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | LIMIT ?limit | KEEP ?field');
+
+    expect('\n' + query).toBe(`
+ComposerQuery
+├─ query
+│  └─ FROM index | LIMIT ?limit | KEEP ?field
+│
+└─ params
+   ├─ limit: 123
+   └─ field: "test_field"`);
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM index | LIMIT ?limit | KEEP ?field',
+      params: [{ limit: 123 }, { field: 'test_field' }],
+    });
+  });
+
+  test('shorthand syntax renames second parameter, if it is already used', () => {
+    const limit = 123;
+    const limit2 = 456;
+    const query = esql`FROM index | LIMIT ${{ limit }} | LIMIT ${{ limit: limit2 }}`;
+
+    expect(query).toBeInstanceOf(ComposerQuery);
+    expect(query.print()).toBe('FROM index | LIMIT ?limit | LIMIT ?p1');
+
+    expect('\n' + query).toBe(`
+ComposerQuery
+├─ query
+│  └─ FROM index | LIMIT ?limit | LIMIT ?p1
+│
+└─ params
+   ├─ limit: 123
+   └─ p1: 456`);
+
+    expect(query.toRequest()).toEqual({
+      query: 'FROM index | LIMIT ?limit | LIMIT ?p1',
+      params: [{ limit: 123 }, { p1: 456 }],
+    });
+  });
+
+  test('throws on invalid shorthand syntax', () => {
+    const limit = 123;
+
+    expect(
+      () => esql`FROM index | LIMIT ${{ limit, noMoreFields: true }}`
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Unexpected synth hole: {\\"limit\\":123,\\"noMoreFields\\":true}"`
+    );
+  });
 });

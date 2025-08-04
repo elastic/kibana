@@ -12,7 +12,20 @@ import type { ESQLOrderExpression } from '../types';
 import type { ComposerQuery } from './composer_query';
 import type { ParameterHole } from './parameter_hole';
 
-export type ComposerQueryTagHole = synth.SynthTemplateHole | ParameterHole;
+export type ComposerQueryTagHole = synth.SynthTemplateHole | ParameterHole | ParameterShorthandHole;
+
+export type ParameterShorthandHole = Record<string, unknown>;
+
+// const asdf: ParameterShorthandHole = { a: 13 };
+
+// export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+//   k: infer I
+// ) => void
+//   ? I
+//   : never;
+// export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
+// export type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
+
 export type ComposerQueryTag = (
   template: TemplateStringsArray,
   ...holes: ComposerQueryTagHole[]
