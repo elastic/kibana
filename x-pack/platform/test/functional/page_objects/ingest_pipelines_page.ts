@@ -14,6 +14,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
   const pageObjects = getPageObjects(['header', 'common']);
   const aceEditor = getService('aceEditor');
   const retry = getService('retry');
+  const log = getService('log');
 
   return {
     async sectionHeadingText() {
@@ -110,6 +111,29 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async detailsFlyoutExists() {
       return await testSubjects.exists('pipelineDetails');
+    },
+
+    async getDetailsFlyoutTitle() {
+      return await testSubjects.getVisibleText('detailsPanelTitle');
+    },
+
+    async pipelineTreeExists() {
+      return await testSubjects.exists('pipelineTreePanel');
+    },
+
+    async pipelineTreeNodesExist(pipelines: string[]) {
+      for (const pipeline of pipelines) {
+        const pipelineTreeNodeExists = await testSubjects.exists(`pipelineTreeNode-${pipeline}`);
+        if (!pipelineTreeNodeExists) {
+          log.debug(`Tree node pipelineTreeNode-${pipeline} doesn't exist.`);
+          return false;
+        }
+      }
+      return true;
+    },
+
+    async clickTreeNode(pipeline: string) {
+      await testSubjects.click(`pipelineTreeNode-${pipeline}`);
     },
 
     async increasePipelineListPageSize() {
