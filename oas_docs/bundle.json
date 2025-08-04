@@ -15363,9 +15363,18 @@
                               ],
                               "type": "object"
                             },
-                            "connectors": {},
-                            "exporters": {},
-                            "extensions": {},
+                            "connectors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "exporters": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "extensions": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "fleet": {
                               "anyOf": [
                                 {
@@ -15654,8 +15663,14 @@
                               },
                               "type": "object"
                             },
-                            "processors": {},
-                            "receivers": {},
+                            "processors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "receivers": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "revision": {
                               "type": "number"
                             },
@@ -15674,7 +15689,46 @@
                               },
                               "type": "array"
                             },
-                            "service": {},
+                            "service": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "extensions": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "pipelines": {
+                                  "additionalProperties": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "exporters": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "processors": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "receivers": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "type": "object",
+                                    "x-oas-optional": true
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "signed": {
                               "additionalProperties": false,
                               "properties": {
@@ -15695,13 +15749,7 @@
                           "required": [
                             "id",
                             "outputs",
-                            "inputs",
-                            "extensions",
-                            "receivers",
-                            "processors",
-                            "service",
-                            "connectors",
-                            "exporters"
+                            "inputs"
                           ],
                           "type": "object"
                         }
