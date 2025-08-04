@@ -322,7 +322,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
             <>
               <EuiSpacer size="m" />
               <SetupTechnologySelector
-                showLimitationsMessage={!isServerless}
+                showLimitationsMessage={false}
                 disabled={isEditPage}
                 setupTechnology={setupTechnology}
                 allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
