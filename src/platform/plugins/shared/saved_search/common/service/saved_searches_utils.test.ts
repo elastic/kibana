@@ -29,6 +29,7 @@ describe('saved_searches_utils', () => {
         rowsPerPage: 250,
         sampleSize: 1000,
         breakdownField: 'extension.keyword',
+        controlGroupJson: undefined,
       };
 
       expect(
@@ -48,6 +49,7 @@ describe('saved_searches_utils', () => {
             "a",
             "b",
           ],
+          "controlGroupJson": undefined,
           "density": undefined,
           "description": "foo",
           "grid": Object {},

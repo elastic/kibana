@@ -47,6 +47,7 @@ describe('toSavedSearch', () => {
           "message",
           "extension",
         ],
+        "controlGroupJson": undefined,
         "density": undefined,
         "description": "",
         "grid": Object {},
