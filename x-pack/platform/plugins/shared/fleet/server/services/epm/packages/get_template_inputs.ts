@@ -27,8 +27,6 @@ import type {
   RegistryStream,
   PackagePolicyConfigRecordEntry,
   RegistryInput,
-  FullAgentPolicyInputStream,
-  OTelCollectorConfig,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
@@ -181,7 +179,7 @@ export async function getTemplateInputs(
     packageInfo,
     emptyPackagePolicy.vars || {},
     inputsWithStreamIds,
-    assetsMap,
+    assetsMap
   );
   const packagePolicyWithInputs: NewPackagePolicy = {
     ...emptyPackagePolicy,
@@ -196,7 +194,6 @@ export async function getTemplateInputs(
     inputIdsDestinationMap
   ).filter(isInputIncluded);
 
-
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
     otelcolConfig = generateOtelcolConfig(inputs);
@@ -205,16 +202,16 @@ export async function getTemplateInputs(
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
 
   if (format === 'json') {
-    return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}), };
+    return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
   } else if (format === 'yml') {
     const yaml = dump(
-      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}), },
-        {
-          skipInvalid: true,
-          sortKeys: _sortYamlKeys,
-        }
-      );
-      return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
+      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) },
+      {
+        skipInvalid: true,
+        sortKeys: _sortYamlKeys,
+      }
+    );
+    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };
