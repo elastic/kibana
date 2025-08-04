@@ -133,7 +133,10 @@ export class QueryClient {
       return;
     }
 
-    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const { [stream]: currentQueryLinks } = await this.dependencies.assetClient.getAssetLinks(
+      [stream],
+      ['query']
+    );
     const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
     await this.bulk(stream, queriesToDelete);
   }
