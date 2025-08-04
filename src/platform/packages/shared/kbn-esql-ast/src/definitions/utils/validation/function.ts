@@ -130,8 +130,8 @@ class FunctionValidator {
    */
   private get validForLicense(): boolean {
     const hasMinimumLicenseRequired = this.callbacks.hasMinimumLicenseRequired;
-    if (hasMinimumLicenseRequired) {
-      return hasMinimumLicenseRequired(this.definition?.license as ESQLLicenseType);
+    if (hasMinimumLicenseRequired && this.definition?.license) {
+      return hasMinimumLicenseRequired(this.definition.license as ESQLLicenseType);
     }
     return true;
   }
