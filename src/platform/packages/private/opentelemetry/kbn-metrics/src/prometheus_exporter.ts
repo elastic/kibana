@@ -1,30 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { metrics } from '@elastic/opentelemetry-node/sdk';
 import {
   PrometheusExporter as OpenTelemetryPrometheusExporter,
-  ExporterConfig,
   PrometheusSerializer,
 } from '@opentelemetry/exporter-prometheus';
-import { KibanaResponseFactory } from '@kbn/core/server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
 
 export class PrometheusExporter extends metrics.MetricReader {
-  private readonly prefix?: string;
+  static #instance?: PrometheusExporter;
+
+  static get() {
+    if (!this.#instance) {
+      this.#instance = new PrometheusExporter();
+    }
+    return this.#instance;
+  }
+
+  static destroy() {
+    this.#instance?.shutdown();
+    this.#instance = undefined;
+  }
+
+  private readonly prefix: string;
   private readonly appendTimestamp: boolean;
   private serializer: PrometheusSerializer;
 
-  constructor(config: ExporterConfig = {}) {
+  private constructor() {
     super();
-    this.prefix = config.prefix || OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.prefix;
-    this.appendTimestamp =
-      typeof config.appendTimestamp === 'boolean'
-        ? config.appendTimestamp
-        : OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.appendTimestamp;
+    this.prefix = OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.prefix;
+    this.appendTimestamp = OpenTelemetryPrometheusExporter.DEFAULT_OPTIONS.appendTimestamp;
 
     this.serializer = new PrometheusSerializer(this.prefix, this.appendTimestamp);
   }

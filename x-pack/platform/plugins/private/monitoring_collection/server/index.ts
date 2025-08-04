@@ -19,4 +19,15 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 };
 export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    // The logging of the OTel instrumentation is handled by core
+    // https://github.com/elastic/kibana/blob/afb35a5f5e47c49a20c355b87239c731bf891931/src/core/packages/root/server-internal/src/root/index.ts#L142
+    unused('opentelemetry.metrics.otlp.logLevel', {
+      level: 'warning',
+      message:
+        'This setting is unused. Please, configure the level via the loggers interface for the logger name "telemetry"',
+      documentationUrl:
+        'https://www.elastic.co/docs/reference/kibana/configuration-reference/logging-settings',
+    }),
+  ],
 };
