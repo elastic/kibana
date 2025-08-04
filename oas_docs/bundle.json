@@ -21521,6 +21521,21 @@
                           "discovery": {
                             "additionalProperties": true,
                             "properties": {
+                              "datasets": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
                               "fields": {
                                 "items": {
                                   "additionalProperties": true,
@@ -23654,6 +23669,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,
@@ -24587,6 +24617,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,
