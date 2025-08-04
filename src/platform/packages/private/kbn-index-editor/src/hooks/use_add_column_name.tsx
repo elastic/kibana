@@ -40,14 +40,14 @@ export const useAddColumnName = (initialColumnName = '') => {
     return null;
   }, [columnName, columns, initialColumnName]);
 
-  const saveColumn = useCallback(async () => {
+  const saveColumn = useCallback(() => {
     if (validationError) {
       return;
     }
     if (initialColumnName) {
       indexUpdateService.editColumn(columnName, initialColumnName);
     } else {
-      indexUpdateService.addNewColumn(columnName);
+      indexUpdateService.addNewColumn();
     }
   }, [columnName, indexUpdateService, initialColumnName, validationError]);
 
