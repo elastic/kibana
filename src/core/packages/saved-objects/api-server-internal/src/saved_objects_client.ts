@@ -46,6 +46,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { SearchClient } from '@kbn/core-saved-objects-api-server/src/search_client';
 
 /**
  * Core internal implementation of {@link SavedObjectsClientContract}
@@ -101,6 +102,11 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
+  }
+
+  /** TODO(@jloleysens) */
+  getSearchClient(): SearchClient {
+    return this._repository.getSearchClient();
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
