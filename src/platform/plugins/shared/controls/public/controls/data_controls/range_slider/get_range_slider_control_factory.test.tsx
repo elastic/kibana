@@ -19,6 +19,7 @@ import { dataService, dataViewsService } from '../../../services/kibana_services
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { RangesliderControlState } from './types';
+import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -232,6 +233,8 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
+          output={ControlOutputOption.DSL}
+          valuesSource={ControlValuesSource.DSL}
           initialState={{} as RangesliderControlState}
           field={{} as DataViewField}
           updateState={jest.fn()}
@@ -249,6 +252,8 @@ describe('RangesliderControlApi', () => {
       const CustomSettings = factory.CustomOptionsComponent!;
       const component = render(
         <CustomSettings
+          output={ControlOutputOption.DSL}
+          valuesSource={ControlValuesSource.DSL}
           initialState={{} as RangesliderControlState}
           field={{} as DataViewField}
           updateState={jest.fn()}
