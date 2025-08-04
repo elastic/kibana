@@ -6,7 +6,7 @@
  */
 
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-export * from '../common/types';
+export type * from '../common/types';
 
 export interface SearchQueryRulesPluginSetupDependencies {
   features: FeaturesPluginSetup;

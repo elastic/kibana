@@ -6,4 +6,4 @@
  */
 
 export * from './rule_data_client';
-export * from './types';
+export type * from './types';
