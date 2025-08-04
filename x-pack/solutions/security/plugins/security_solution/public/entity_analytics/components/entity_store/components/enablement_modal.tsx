@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
@@ -118,6 +119,8 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
   const { AdditionalChargesMessage } = useContractComponents();
 
+  const modalTitleId = useGeneratedHtmlId();
+
   if (!visible) {
     return null;
   }
@@ -133,9 +136,13 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     </EuiCallOut>
   );
   return (
-    <EuiModal onClose={() => toggle(false)} data-test-subj="entityStoreEnablementModal">
+    <EuiModal
+      onClose={() => toggle(false)}
+      aria-labelledby={modalTitleId}
+      data-test-subj="entityStoreEnablementModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.enablements.modal.title"
             defaultMessage="Entity Analytics Enablement"

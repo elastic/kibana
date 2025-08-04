@@ -35,11 +35,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Rule detects against a keyword of event.dataset', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_keyword_family/keyword'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_keyword_family/keyword');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_keyword_family/keyword'
+      );
     });
 
     beforeEach(async () => {
