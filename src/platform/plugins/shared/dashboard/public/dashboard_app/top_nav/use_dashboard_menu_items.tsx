@@ -239,6 +239,8 @@ export const useDashboardMenuItems = ({
     setIsLabsShown,
     showShare,
     viewMode,
+    isResetting,
+    resetChanges,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {

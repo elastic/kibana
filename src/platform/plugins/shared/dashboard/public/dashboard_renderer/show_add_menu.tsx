@@ -30,6 +30,7 @@ import {
 } from '../dashboard_app/_dashboard_app_strings';
 import { uiActionsService } from '../services/kibana_services';
 import { i18n } from '@kbn/i18n';
+import { ControlState } from '@kbn/controls-schemas';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -64,7 +65,6 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
       id: 0,
       items: [
         {
-          id: 'dashboardCreateNewVisButton',
           name: getCreateVisualizationButtonTitle(),
           icon: 'lensApp',
           'data-test-subj': 'dashboardCreateNewVisButton',
@@ -74,7 +74,6 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           },
         },
         {
-          id: 'dashboardOpenAddPanelFlyoutButton',
           name: i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
             defaultMessage: 'Add panel',
           }),
@@ -135,7 +134,6 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           panel: 1,
         },
         {
-          id: 'addFromLibraryButton',
           name: i18n.translate('sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
             defaultMessage: 'Add from library',
           }),
@@ -192,7 +190,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
                 variableType: ESQLVariableType.VALUES,
                 controlType: EsqlControlType.VALUES_FROM_QUERY,
                 esqlVariables: variablesInParent,
-                onSaveControl: (controlState) => {
+                onSaveControl: (controlState: ControlState) => {
                   controlGroupApi?.addNewPanel({
                     panelType: 'esqlControl',
                     serializedState: {
