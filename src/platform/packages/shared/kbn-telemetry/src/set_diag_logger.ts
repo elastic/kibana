@@ -11,6 +11,11 @@ import { DiagLogLevel, DiagLogger, diag } from '@opentelemetry/api';
 import { LogLevelId, Logger } from '@kbn/logging';
 import { format } from 'util';
 
+/**
+ * Helper to make it easier to configure OTel's {@link DiagLogger}.
+ * @param logger {@link Logger}
+ * @param logLevel The {@link LogLevelId} to set the Diag logger to.
+ */
 export function setDiagLogger(logger: Logger, logLevel?: LogLevelId) {
   const diagLogger: DiagLogger = {
     debug: (message, ...args) => {

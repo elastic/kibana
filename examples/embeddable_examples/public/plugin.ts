@@ -22,16 +22,15 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
-import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
-import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
+import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import {
   ADD_EUI_MARKDOWN_ACTION_ID,
   EUI_MARKDOWN_ID,
 } from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
-import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
@@ -117,9 +116,19 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerAddSearchPanelAction(deps.uiActions);
 
-    registerCreateDataTableAction(deps.uiActions);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
+      const { createDataTableAction } = await import(
+        './react_embeddables/data_table/create_data_table_action'
+      );
+      return createDataTableAction;
+    });
 
-    registerCreateSavedBookAction(deps.uiActions, core);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
+      const { createSavedBookAction } = await import(
+        './react_embeddables/saved_book/create_saved_book_action'
+      );
+      return createSavedBookAction(core);
+    });
   }
 
   public stop() {}
