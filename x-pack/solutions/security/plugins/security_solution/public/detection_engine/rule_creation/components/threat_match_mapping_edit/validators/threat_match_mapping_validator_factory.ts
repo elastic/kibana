@@ -124,8 +124,7 @@ export function threatMatchMappingValidatorFactory({
         message: i18n.translate(
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.singleNotMatchClauseError',
           {
-            defaultMessage:
-              'DOES NOT MATCH cannot be used as a single entry in AND condition. It must be used with at least one MATCHES entry.',
+            defaultMessage: 'Conditions in AND clauses must have at least one MATCHES entry.',
           }
         ),
       };
@@ -139,7 +138,7 @@ export function threatMatchMappingValidatorFactory({
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.invalidNotMatchClauseError',
           {
             defaultMessage:
-              'DOES NOT MATCH entry can not use the same mapping fields as MATCHES entry in the same AND condition.',
+              'When forming an AND statement with MATCHES and DOES NOT MATCH entries, avoid selecting identical field values for comparison from the source and indicator indices.',
           }
         ),
       };
