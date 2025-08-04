@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -42,6 +42,65 @@ export function AdvancedConfiguration({
     return Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key));
   }, [agentSettingKeys, newConfig.settings]);
 
+  const updateValue = (key: string, value: string) => {
+    setNewConfig((prev) => {
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          [key]: value,
+        },
+      };
+    });
+  };
+
+  const updateKey = (oldKey: string, newKey: string, value: string) => {
+    setNewConfig((prev) => {
+      // Maintain the order by recreating the settings object while preserving key positions
+      const newSettings: Record<string, string> = {};
+
+      Object.entries(prev.settings).forEach(([key, val]) => {
+        if (key === oldKey) {
+          // Replace the old key with the new key at the same position
+          newSettings[newKey] = value;
+        } else {
+          // Keep other keys in their original positions
+          newSettings[key] = val;
+        }
+      });
+
+      return {
+        ...prev,
+        settings: newSettings,
+      };
+    });
+  };
+
+  const addNewRow = () => {
+    setNewConfig((prev) => {
+      return {
+        ...prev,
+        settings: {
+          ['']: '',
+          ...prev.settings,
+        },
+      };
+    });
+  };
+
+  const deleteRow = (key: string) => {
+    if (newConfig.settings[key]) {
+      setRemovedSettingsCount((prev) => prev + 1);
+    }
+    setNewConfig((prev) => {
+      const { [key]: deleted, ...rest } = prev.settings;
+      return {
+        ...prev,
+        settings: rest,
+      };
+    });
+  };
+
   return (
     <>
       <EuiFlexGroup>
@@ -69,17 +128,7 @@ export function AdvancedConfiguration({
             <EuiButton
               data-test-subj="apmSettingsAddAdvancedConfigurationButton"
               iconType="plusInCircle"
-              onClick={() =>
-                setNewConfig((prev) => {
-                  return {
-                    ...prev,
-                    settings: {
-                      ...prev.settings,
-                      ['']: '',
-                    },
-                  };
-                })
-              }
+              onClick={addNewRow}
             >
               {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
                 defaultMessage: 'Add configuration',
@@ -94,39 +143,24 @@ export function AdvancedConfiguration({
           {index > 0 && <EuiSpacer size="s" />}
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow
-                label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
-                  defaultMessage: 'Key',
-                })}
-                fullWidth
-              >
-                <EuiFieldText
-                  data-test-subj="apmSettingsAdvancedConfigurationKeyField"
-                  aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyAriaLabel', {
-                    defaultMessage: 'Advanced configuration key',
-                  })}
-                  fullWidth
-                  value={settingKey}
-                  onChange={(e) => {
-                    setNewConfig((prev) => {
-                      const { [settingKey]: deleted, ...rest } = prev.settings;
-                      return {
-                        ...prev,
-                        settings: {
-                          ...rest,
-                          [e.target.value]: settingValue,
-                        },
-                      };
-                    });
-                  }}
-                />
-              </EuiFormRow>
+              <AdvancedConfigKeyInput
+                settingKey={settingKey}
+                settingValue={settingValue}
+                index={index}
+                agentSettingKeys={agentSettingKeys}
+                unknownAgentSettings={unknownAgentSettings}
+                onUpdate={updateKey}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow
-                label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
-                  defaultMessage: 'Value',
-                })}
+                label={
+                  index === 0
+                    ? i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
+                        defaultMessage: 'value',
+                      })
+                    : undefined
+                }
                 fullWidth
               >
                 <EuiFieldText
@@ -136,17 +170,7 @@ export function AdvancedConfiguration({
                   })}
                   fullWidth
                   value={settingValue}
-                  onChange={(e) => {
-                    setNewConfig((prev) => {
-                      return {
-                        ...prev,
-                        settings: {
-                          ...prev.settings,
-                          [settingKey]: e.target.value,
-                        },
-                      };
-                    });
-                  }}
+                  onChange={(e) => updateValue(settingKey, e.target.value)}
                   append={
                     <EuiButtonIcon
                       data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
@@ -158,18 +182,7 @@ export function AdvancedConfiguration({
                       )}
                       iconType="trash"
                       color={'danger'}
-                      onClick={() => {
-                        if (newConfig.settings[settingKey]) {
-                          setRemovedSettingsCount((prev) => prev + 1);
-                        }
-                        setNewConfig((prev) => {
-                          const { [settingKey]: deleted, ...rest } = prev.settings;
-                          return {
-                            ...prev,
-                            settings: rest,
-                          };
-                        });
-                      }}
+                      onClick={() => deleteRow(settingKey)}
                     />
                   }
                 />
@@ -178,6 +191,92 @@ export function AdvancedConfiguration({
           </EuiFlexGroup>
         </Fragment>
       ))}
+      <EuiSpacer size="m" />
     </>
+  );
+}
+
+function AdvancedConfigKeyInput({
+  settingKey,
+  settingValue,
+  index,
+  agentSettingKeys,
+  unknownAgentSettings,
+  onUpdate,
+}: {
+  settingKey: string;
+  settingValue: string;
+  index: number;
+  agentSettingKeys: string[];
+  unknownAgentSettings: Array<[string, string]>;
+  onUpdate: (oldKey: string, newKey: string, value: string) => void;
+}) {
+  // Handle key inputs with local state to avoid duplicated keys overwriting each other
+  const [localKey, setLocalKey] = useState(settingKey);
+
+  useEffect(() => {
+    setLocalKey(settingKey);
+  }, [settingKey]);
+
+  const isInvalidInput = (key: string) => {
+    return (
+      key === '' ||
+      agentSettingKeys.includes(key) ||
+      unknownAgentSettings.some(([k], idx) => k === key && idx !== index)
+    );
+  };
+
+  const getKeyValidationError = (key: string) => {
+    if (key === '') {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+        defaultMessage: 'Key cannot be empty',
+      });
+    }
+    if (agentSettingKeys.includes(key)) {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
+        defaultMessage: 'This key is already predefined in the standard configuration above',
+      });
+    }
+    if (unknownAgentSettings.some(([k], idx) => k === key && idx !== index)) {
+      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
+        defaultMessage: 'This key is already used in another advanced configuration',
+      });
+    }
+    return null;
+  };
+
+  const handleKeyChange = (newKey: string) => {
+    setLocalKey(newKey);
+
+    // Only update the parent state if the key is valid
+    if (!isInvalidInput(newKey)) {
+      onUpdate(settingKey, newKey, settingValue);
+    }
+  };
+
+  return (
+    <EuiFormRow
+      label={
+        index === 0
+          ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
+              defaultMessage: 'key',
+            })
+          : undefined
+      }
+      error={getKeyValidationError(localKey)}
+      isInvalid={isInvalidInput(localKey)}
+      fullWidth
+    >
+      <EuiFieldText
+        data-test-subj="apmSettingsAdvancedConfigurationKeyField"
+        aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyAriaLabel', {
+          defaultMessage: 'Advanced configuration key',
+        })}
+        fullWidth
+        value={localKey}
+        isInvalid={isInvalidInput(localKey)}
+        onChange={(e) => handleKeyChange(e.target.value)}
+      />
+    </EuiFormRow>
   );
 }
