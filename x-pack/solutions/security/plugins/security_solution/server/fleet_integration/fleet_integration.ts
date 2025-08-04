@@ -326,7 +326,7 @@ export const getPackagePolicyUpdateCallback = (
     }
     if (
       !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointTrustedDevices) ||
-      !experimentalFeatures.trustedDevicesEnabled
+      !experimentalFeatures.trustedDevices
     ) {
       endpointIntegrationData.inputs[0].config.policy.value =
         removeDeviceControl(newEndpointPackagePolicy);

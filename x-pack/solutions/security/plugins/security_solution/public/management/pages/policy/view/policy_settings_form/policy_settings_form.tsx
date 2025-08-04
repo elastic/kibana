@@ -49,11 +49,10 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   const { storage } = useKibana().services;
 
-  const { eventCollectionDataReductionBannerEnabled, trustedDevicesEnabled } =
-    useEnableExperimental();
+  const { eventCollectionDataReductionBannerEnabled, trustedDevices } = useEnableExperimental();
 
   const renderDeviceControlSection = () => {
-    if (!trustedDevicesEnabled) {
+    if (!trustedDevices) {
       return null;
     }
 
