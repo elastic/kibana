@@ -39,7 +39,13 @@ export const getSiemMigrationClients = (
         request: params.request,
         currentUser: params.currentUser,
         spaceId: params.spaceId,
-        dependencies: params.dependencies,
+        dependencies: {
+          inferenceClient: params.dependencies.inferenceClient,
+          actionsClient: params.dependencies.actionsClient,
+          savedObjectsClient: params.dependencies.savedObjectsClient,
+          packageService: params.dependencies.packageService,
+          telemetry: params.dependencies.telemetry,
+        },
       })
     ),
   };
