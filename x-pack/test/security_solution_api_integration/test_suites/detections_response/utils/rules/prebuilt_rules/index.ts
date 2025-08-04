@@ -20,3 +20,5 @@ export * from './install_prebuilt_rules';
 export * from './review_install_prebuilt_rules';
 export * from './review_upgrade_prebuilt_rules';
 export * from './perform_upgrade_prebuilt_rules';
+export * from './create_prebuilt_rules_package';
+export * from './known_fleet_package_names';
