@@ -47,7 +47,7 @@ export const useAddColumnName = (initialColumnName = '') => {
     if (initialColumnName) {
       indexUpdateService.editColumn(columnName, initialColumnName);
     } else {
-      indexUpdateService.addNewColumn(columnName);
+      indexUpdateService.addNewColumn();
     }
   }, [columnName, indexUpdateService, initialColumnName, validationError]);
 
