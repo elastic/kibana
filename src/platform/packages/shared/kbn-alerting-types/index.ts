@@ -17,7 +17,7 @@ export * from './circuit_breaker_message_header';
 export type * from './r_rule_types';
 export * from './rule_notify_when_type';
 export type * from './rule_type_types';
-export type * from './rule_types';
+export * from './rule_types';
 export type * from './rule_settings';
 export type * from './search_strategy_types';
 export type * from './alert_delete_types';
