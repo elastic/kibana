@@ -8,7 +8,6 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EuiSpacer } from '@elastic/eui';
 import { useGetProtectionsUnavailableComponent } from '../../../hooks/use_get_protections_unavailable_component';
 import { ReputationService } from './components/reputation_service';
 import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
@@ -115,8 +114,6 @@ export const BehaviourProtectionCard = memo<BehaviourProtectionCardProps>(
           osList={BEHAVIOUR_OS_VALUES}
           data-test-subj={getTestId('notifyUser')}
         />
-
-        <EuiSpacer size="m" />
       </SettingCard>
     );
   }
