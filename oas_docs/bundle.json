@@ -48380,18 +48380,12 @@
                                                                 "type": {
                                                                   "enum": [
                                                                     "keyword",
-                                                                    "constant_keyword",
                                                                     "match_only_text",
                                                                     "long",
                                                                     "double",
                                                                     "date",
                                                                     "boolean",
-                                                                    "ip",
-                                                                    "text",
-                                                                    "flattened",
-                                                                    "float",
-                                                                    "short",
-                                                                    "geo_point"
+                                                                    "ip"
                                                                   ],
                                                                   "type": "string"
                                                                 }
@@ -56396,18 +56390,12 @@
                                                 "type": {
                                                   "enum": [
                                                     "keyword",
-                                                    "constant_keyword",
                                                     "match_only_text",
                                                     "long",
                                                     "double",
                                                     "date",
                                                     "boolean",
-                                                    "ip",
-                                                    "text",
-                                                    "flattened",
-                                                    "float",
-                                                    "short",
-                                                    "geo_point"
+                                                    "ip"
                                                   ],
                                                   "type": "string"
                                                 }
