@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
 import {
   ContentPackEntry,
@@ -24,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -32,7 +33,6 @@ import { importContent, previewContent } from './requests';
 import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
 import { hasSelectedObjects } from './helpers';
-import { Suggestions } from './suggestions';
 
 export function ImportContentPackFlyout({
   definition,
@@ -46,50 +46,22 @@ export function ImportContentPackFlyout({
   const {
     core: { http, notifications },
   } = useKibana();
+
+  const modalTitleId = useGeneratedHtmlId();
+
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
     objects: { all: {} },
   });
-  const [manifest, setManifest] = useState<ContentPackManifest | null>(null);
-
-  const previewExportedFile = useCallback(
-    async (exportedFile: File) => {
-      setFile(exportedFile);
-
-      try {
-        const contentPackParsed = await previewContent({
-          http,
-          definition,
-          file: exportedFile,
-        });
-
-        setManifest({
-          name: contentPackParsed.name,
-          version: contentPackParsed.version,
-          description: contentPackParsed.description,
-        });
-        setContentPackObjects(contentPackParsed.entries);
-      } catch (err) {
-        setFile(null);
-
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.streams.failedToPreviewContentError', {
-            defaultMessage: 'Failed to preview content pack',
-          }),
-          toastMessage: getFormattedError(err).message,
-        });
-      }
-    },
-    [http, definition, notifications]
-  );
+  const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
               defaultMessage: 'Import content pack',
             })}
@@ -98,41 +70,54 @@ export function ImportContentPackFlyout({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {manifest ? null : (
+        <EuiFilePicker
+          id={'streams-content-import'}
+          multiple={false}
+          initialPromptText="Select a streams content file"
+          fullWidth
+          onChange={async (files) => {
+            if (files?.length) {
+              const archiveFile = files.item(0);
+              if (!archiveFile) return;
+
+              setFile(archiveFile);
+
+              try {
+                const contentPackParsed = await previewContent({
+                  http,
+                  definition,
+                  file: archiveFile,
+                });
+
+                setManifest({
+                  name: contentPackParsed.name,
+                  version: contentPackParsed.version,
+                  description: contentPackParsed.description,
+                });
+                setContentPackObjects(contentPackParsed.entries);
+              } catch (err) {
+                setFile(null);
+
+                notifications.toasts.addError(err, {
+                  title: i18n.translate('xpack.streams.failedToPreviewContentError', {
+                    defaultMessage: 'Failed to preview content pack',
+                  }),
+                  toastMessage: getFormattedError(err).message,
+                });
+              }
+            } else {
+              setFile(null);
+            }
+          }}
+          display={'large'}
+        />
+
+        {file && manifest ? (
           <>
-            <EuiFilePicker
-              id={'streams-content-import'}
-              multiple={false}
-              initialPromptText="Select a streams content file"
-              fullWidth
-              onChange={async (files) => {
-                if (files?.length) {
-                  const archiveFile = files.item(0);
-                  if (!archiveFile) return;
-
-                  previewExportedFile(archiveFile);
-                } else {
-                  setFile(null);
-                }
-              }}
-              display={'large'}
-            />
-
             <EuiSpacer />
-
-            <Suggestions
-              definition={definition}
-              onPackageExport={(file) => {
-                previewExportedFile(file);
-              }}
-            />
-          </>
-        )}
-
-        {manifest ? (
-          <>
             <ContentPackMetadata manifest={manifest} readonly={true} />
             <EuiSpacer />
+
             <ContentPackObjectsList
               definition={definition}
               objects={contentPackObjects}
@@ -155,11 +140,11 @@ export function ImportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              isDisabled={!hasSelectedObjects(includedObjects)}
+              isDisabled={!file || !hasSelectedObjects(includedObjects)}
               isLoading={isLoading}
               fill
               onClick={async () => {
-                if (!file || !manifest || !hasSelectedObjects(includedObjects)) return;
+                if (!file) return;
 
                 setIsLoading(true);
 
@@ -174,7 +159,6 @@ export function ImportContentPackFlyout({
                   setIsLoading(false);
                   setContentPackObjects([]);
                   setFile(null);
-                  setManifest(null);
                   onImport();
                 } catch (err) {
                   setIsLoading(false);
