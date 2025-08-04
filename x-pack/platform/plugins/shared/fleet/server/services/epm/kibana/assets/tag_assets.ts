@@ -55,8 +55,9 @@ const TAG_COLORS = [
   '#A0A0A0',
 ];
 
-const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
-const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
+export const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
+export const getPackageTagId = (spaceId: string, pkgName: string) =>
+  `fleet-pkg-${pkgName}-${spaceId}`;
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
 
 /*
