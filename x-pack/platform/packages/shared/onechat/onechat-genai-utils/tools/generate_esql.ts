@@ -21,13 +21,13 @@ export interface GenerateEsqlResponse {
 }
 
 export const generateEsql = async ({
-  query,
+  nlQuery,
   context,
   index,
   model,
   esClient,
 }: {
-  query: string;
+  nlQuery: string;
   context?: string;
   index?: string;
   model: ScopedModel;
@@ -47,7 +47,7 @@ export const generateEsql = async ({
     const {
       indices: [firstIndex],
     } = await indexExplorer({
-      query,
+      nlQuery,
       esClient,
       limit: 1,
       model,
@@ -62,9 +62,9 @@ export const generateEsql = async ({
     client: model.inferenceClient,
     logger: { debug: () => undefined },
     input: `
-        Your task is to generate an ES|QL query.
+        Your task is to generate an ES|QL query given a natural language query from the user.
 
-        - User query: "${query}",
+        - Natural language query: "${nlQuery}",
         - Additional context: "${context ?? 'N/A'}
         - Index to use: "${selectedIndex}"
         - Mapping of this index:

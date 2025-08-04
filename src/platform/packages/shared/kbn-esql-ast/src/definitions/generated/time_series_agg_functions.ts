@@ -73,7 +73,6 @@ const avgOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(avg_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -642,7 +641,6 @@ const countDistinctOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS distincts=count_distinct(count_distinct_over_time(network.cost)),\n        distincts_imprecise=count_distinct(count_distinct_over_time(network.cost, 100))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -811,7 +809,6 @@ const countOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS count=count(count_over_time(network.cost))\n  BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -861,7 +858,6 @@ const firstOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(first_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -911,7 +907,6 @@ const lastOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max_cost=max(last_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -1040,7 +1035,6 @@ const maxOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS cost=sum(max_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -1169,7 +1163,6 @@ const minOverTimeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS cost=sum(min_over_time(network.cost)) BY cluster, time_bucket = bucket(@timestamp,1minute)',
   ],
@@ -1218,7 +1211,6 @@ const rateDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS_TIMESERIES],
-  validate: undefined,
   examples: [
     'TS k8s\n| STATS max(rate(network.total_bytes_in)) BY time_bucket = bucket(@timestamp,5minute)',
   ],

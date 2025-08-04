@@ -29,6 +29,7 @@ import {
   toolIdentifierFromToolCall,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import { Logger } from '@kbn/logging';
 import type { StateType } from './graph';
 
 export type ConvertedEvents =
@@ -40,9 +41,11 @@ export type ConvertedEvents =
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  logger,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  logger: Logger;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
@@ -109,7 +112,7 @@ export const convertGraphEvents = ({
               createToolResultEvent({
                 toolCallId: toolMessage.tool_call_id,
                 toolId: toolId ?? 'unknown',
-                result: JSON.stringify(toolReturn.result),
+                results: toolReturn.results,
               })
             );
           }

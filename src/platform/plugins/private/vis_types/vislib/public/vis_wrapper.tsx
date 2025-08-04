@@ -17,12 +17,13 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { css } from '@emotion/react';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
 
-import './index.scss';
 import { getUsageCollectionStart } from './services';
+import { GlobalVislibWrapperStyles } from './vis_wrapper.styles';
 
 type VislibWrapperProps = VislibRenderValue & {
   core: VisTypeVislibCoreSetup;
@@ -42,6 +43,25 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
     };
     return recursiveGet(context)?.type;
   }
+};
+
+const visWrapperStyles = {
+  base: css({
+    display: 'flex',
+    flex: '1 1 auto',
+    minHeight: 0,
+    minWidth: 0,
+  }),
+  wrapper: css({
+    position: 'relative',
+  }),
+  container: css({
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  }),
 };
 
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
@@ -110,13 +130,24 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   }, [handlers.uiState, renderChart]);
 
   return (
-    <EuiResizeObserver onResize={onResize}>
-      {(resizeRef) => (
-        <div className="vislib__wrapper" ref={resizeRef}>
-          <div className="vislib__container" ref={chartDiv} />
-        </div>
-      )}
-    </EuiResizeObserver>
+    <>
+      <GlobalVislibWrapperStyles />
+      <EuiResizeObserver onResize={onResize}>
+        {(resizeRef) => (
+          <div
+            className="vislib__wrapper"
+            ref={resizeRef}
+            css={[visWrapperStyles.base, visWrapperStyles.wrapper]}
+          >
+            <div
+              className="vislib__container"
+              ref={chartDiv}
+              css={[visWrapperStyles.base, visWrapperStyles.container]}
+            />
+          </div>
+        )}
+      </EuiResizeObserver>
+    </>
   );
 };
 
