@@ -345,7 +345,7 @@ export const validatePackagePolicyConfig = (
   safeLoadYaml: (yaml: string) => any,
   packageType?: string
 ): string[] | null => {
-  const errors = [];
+  const errors: string[] = [];
 
   const value = configEntry?.value;
 
@@ -364,10 +364,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.required) {
-    if (
-      parsedValue === undefined ||
-      ((varDef.type === 'yaml' || varDef.type === 'text') && parsedValue === '')
-    ) {
+    if (parsedValue === undefined || (varDef.type === 'yaml' && parsedValue === '')) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
