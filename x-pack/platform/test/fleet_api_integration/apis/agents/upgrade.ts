@@ -1064,10 +1064,17 @@ export default function (providerContext: FtrProviderContext) {
               reject(new Error('action timed out'));
             }
             ++attempts;
-            const {
-              body: { items: actionStatuses },
-            } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-            const action = actionStatuses.find((a: any) => a.actionId === actionId);
+            let actionStatuses;
+            try {
+              const response = await supertest
+                .get(`/api/fleet/agents/action_status`)
+                .set('kbn-xsrf', 'xxx');
+              actionStatuses =
+                response.body && Array.isArray(response.body.items) ? response.body.items : [];
+            } catch (err) {
+              actionStatuses = [];
+            }
+            const action = actionStatuses.find((a: any) => a && a.actionId === actionId);
             // 2 upgradeable
             if (action && action.nbAgentsActionCreated === 2 && action.nbAgentsFailed === 3) {
               clearInterval(intervalId);
