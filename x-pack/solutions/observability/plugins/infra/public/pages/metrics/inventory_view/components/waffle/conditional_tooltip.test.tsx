@@ -10,11 +10,13 @@ import { render, screen } from '@testing-library/react';
 import { ConditionalToolTip } from './conditional_tooltip';
 import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 
 jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
 }));
 
+jest.mock('../../../../../containers/plugin_config_context');
 jest.mock('../../hooks/use_snaphot');
 import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
@@ -80,6 +82,11 @@ const mockedUseWaffleOptionsContextReturnValue = {
 
 describe('ConditionalToolTip', () => {
   const currentTime = Date.now();
+  const usePluginConfigMock = usePluginConfig as jest.MockedFunction<typeof usePluginConfig>;
+
+  usePluginConfigMock.mockReturnValue({
+    featureFlags: { hostOtelEnabled: false },
+  } as unknown as ReturnType<typeof usePluginConfig>);
 
   beforeEach(() => {
     jest.clearAllMocks();

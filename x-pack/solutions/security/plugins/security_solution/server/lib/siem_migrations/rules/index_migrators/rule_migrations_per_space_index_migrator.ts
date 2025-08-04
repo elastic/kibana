@@ -12,7 +12,7 @@ import type {
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Adapters, StoredSiemMigration } from '../types';
+import type { RuleMigrationAdapters, StoredSiemMigration } from '../types';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export class RuleMigrationSpaceIndexMigrator {
@@ -20,7 +20,7 @@ export class RuleMigrationSpaceIndexMigrator {
     private spaceId: string,
     private esClient: ElasticsearchClient,
     private logger: Logger,
-    private ruleMigrationIndexAdapters: Adapters
+    private ruleMigrationIndexAdapters: RuleMigrationAdapters
   ) {}
 
   /**

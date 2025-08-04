@@ -126,7 +126,9 @@ export const createMockTelemetryReceiver = (
     fetchEndpointMetricsAbstract: jest.fn().mockReturnValue(stubEndpointMetricsAbstractResponse),
     fetchEndpointMetricsById: jest.fn().mockReturnValue(stubEndpointMetricsByIdResponse),
     fetchEndpointPolicyResponses: jest.fn().mockReturnValue(Promise.resolve(new Map())),
-    fetchPrebuiltRuleAlertsBatch: jest.fn().mockReturnValue(prebuiltRuleAlertsResponse),
+    fetchPrebuiltRuleAlertsBatch: jest.fn().mockImplementation(async function* () {
+      yield prebuiltRuleAlertsResponse.events;
+    }),
     fetchDetectionRulesPackageVersion: jest.fn(),
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
