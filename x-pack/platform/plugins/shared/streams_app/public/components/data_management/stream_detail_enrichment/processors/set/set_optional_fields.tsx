@@ -11,11 +11,12 @@ import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ToggleField } from '../toggle_field';
+import { ExtractBooleanFields, ProcessorFormState } from '../../types';
 
 export const OverrideField = () => {
   return (
     <ToggleField
-      name="override"
+      name={'override' as ExtractBooleanFields<ProcessorFormState>}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.setOverrideLabel',
         { defaultMessage: 'Override' }
@@ -33,7 +34,7 @@ export const OverrideField = () => {
 export const IgnoreEmptyValueField = () => {
   return (
     <ToggleField
-      name="ignore_empty_value"
+      name={'ignore_empty_value' as ExtractBooleanFields<ProcessorFormState>}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.setIgnoreEmptyValueLabel',
         { defaultMessage: 'Ignore empty value' }
