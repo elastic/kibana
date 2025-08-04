@@ -1385,67 +1385,56 @@ const componentStyles = {
       flexDirection: 'column',
       flexWrap: 'nowrap',
       height: '100%',
-
-      '& .euiDataGrid__content': {
+      '.euiDataGrid__content': {
         background: 'transparent',
       },
-
-      '& .euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+      '.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
       },
-
-      '& .euiDataGrid--headerUnderline .euiDataGridHeader': {
+      '.euiDataGrid--headerUnderline .euiDataGridHeader': {
         borderBottom: euiTheme.border.thin,
       },
-
-      '& .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content, & .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="openDetails"], & .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="select"], & .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"], & .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"]':
+      '.euiDataGridRowCell--controlColumn .euiDataGridRowCell__content, .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="openDetails"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="select"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"], .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id^="additionalRowControl_"]':
         {
           paddingLeft: 0,
           paddingRight: 0,
           borderLeft: 0,
           borderRight: 0,
         },
-
-      '& .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="additionalRowControl_menuControl"] .euiDataGridRowCell__content':
+      '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="additionalRowControl_menuControl"] .euiDataGridRowCell__content':
         {
           paddingBottom: 0,
         },
-
-      '& .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="select"]':
+      '.euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="select"]':
         {
           paddingLeft: euiTheme.size.xs,
           paddingRight: 0,
         },
-
-      '& .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="colorIndicator"], & .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"]':
+      '.euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id="colorIndicator"], .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"]':
         {
           padding: 0,
           borderLeft: 0,
           borderRight: 0,
         },
-
-      '& .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"] .euiDataGridRowCell__content':
+      '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"] .euiDataGridRowCell__content':
         {
           height: '100%',
           borderBottom: 0,
         },
-
-      '& .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover': {
+      '.euiDataGrid--rowHoverHighlight .euiDataGridRow:hover': {
         backgroundColor: euiTheme.colors.lightestShade, // we keep using a deprecated shade until a proper token is available
       },
-
-      '& .euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
+      '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
         backgroundColor: 'transparent', // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
       },
-
-      '& .euiDataGridRowCell__content--autoHeight, & .euiDataGridRowCell__content--lineCountHeight, & .euiDataGridHeaderCell__content':
+      '.euiDataGridRowCell__content--autoHeight, .euiDataGridRowCell__content--lineCountHeight, .euiDataGridHeaderCell__content':
         {
           whiteSpace: 'pre-wrap',
         },
     }),
   dataTable: css({
     flexGrow: 1,
-    flexShrink: 0,
+    flexShrink: 1,
     minHeight: 0,
   }),
 };
