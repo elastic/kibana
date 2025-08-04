@@ -156,12 +156,29 @@ export function registerMigrateDataStreamRoutes({
       });
 
       try {
+        return response.ok({
+          body: {
+            dataStreamName: 'kibana_sample_data_logs',
+            documentationUrl: 'https://ela.st/es-deprecation-ds-reindex',
+            allIndices: ['.ds-kibana_sample_data_logs-2025.07.30-000001'],
+            allIndicesCount: 1,
+            indicesRequiringUpgrade: ['.ds-kibana_sample_data_logs-2025.07.30-000001'],
+            indicesRequiringUpgradeCount: 1,
+            lastIndexRequiringUpgradeCreationDate: 1753906213125,
+            indicesRequiringUpgradeDocsSize: 8814,
+            indicesRequiringUpgradeDocsCount: 3,
+            oldestIncompatibleDocTimestamp: 4081767675000,
+          },
+        });
+        /*
         const dataStreamMetadata = await migrationService.getDataStreamMetadata(dataStreamName);
 
         return response.ok({
           body: dataStreamMetadata || undefined,
         });
+        */
       } catch (err) {
+        console.log(err);
         if (err instanceof errors.ResponseError) {
           return handleEsError({ error: err, response });
         }

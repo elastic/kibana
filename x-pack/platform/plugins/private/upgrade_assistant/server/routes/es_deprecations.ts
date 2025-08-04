@@ -46,7 +46,74 @@ export function registerESDeprecationRoutes({
         await cleanupReindexOperations(indexNames);
 
         return response.ok({
-          body: status,
+          // body: status,
+          body: {
+            totalCriticalDeprecations: 3,
+            migrationsDeprecations: [
+              {
+                index: 'kibana_sample_data_ecommerce',
+                type: 'index_settings',
+                details: 'This index has version: 7.17.28',
+                message: 'Old index with a compatibility version < 8.0',
+                url: 'https://ela.st/es-deprecation-9-index-version',
+                level: 'critical',
+                resolveDuringUpgrade: false,
+                correctiveAction: {
+                  type: 'reindex',
+                  metadata: {
+                    isClosedIndex: false,
+                    isFrozenIndex: false,
+                    isInDataStream: false,
+                  },
+                  excludedActions: ['readOnly'],
+                  indexSizeInBytes: 4550530,
+                },
+              },
+              {
+                index: 'kibana_sample_data_logs',
+                type: 'data_streams',
+                details:
+                  'This data stream has backing indices that were created before Elasticsearch 8.0',
+                message: 'Old data stream with a compatibility version < 8.0',
+                url: 'https://ela.st/es-deprecation-ds-reindex',
+                level: 'critical',
+                resolveDuringUpgrade: false,
+                correctiveAction: {
+                  type: 'dataStream',
+                  metadata: {
+                    ignoredIndicesRequiringUpgrade: [],
+                    ignoredIndicesRequiringUpgradeCount: 0,
+                    totalBackingIndices: 1,
+                    indicesRequiringUpgradeCount: 1,
+                    indicesRequiringUpgrade: ['.ds-kibana_sample_data_logs-2025.07.30-000001'],
+                    reindexRequired: true,
+                    excludedActions: [],
+                  },
+                },
+              },
+              {
+                index: 'kibana_sample_data_flights',
+                type: 'index_settings',
+                details: 'This index has version: 7.17.28',
+                message: 'Old index with a compatibility version < 8.0',
+                url: 'https://ela.st/es-deprecation-9-index-version',
+                level: 'critical',
+                resolveDuringUpgrade: false,
+                correctiveAction: {
+                  type: 'reindex',
+                  metadata: {
+                    isClosedIndex: false,
+                    isFrozenIndex: false,
+                    isInDataStream: false,
+                  },
+                  excludedActions: ['readOnly'],
+                  indexSizeInBytes: 6391375,
+                },
+              },
+            ],
+            totalCriticalHealthIssues: 0,
+            enrichedHealthIndicators: [],
+          },
         });
       } catch (error) {
         log.error(error);
@@ -55,3 +122,8 @@ export function registerESDeprecationRoutes({
     })
   );
 }
+
+/**
+ *
+ {"dataStreamName":"my-data-stream","documentationUrl":"https://ela.st/es-deprecation-ds-reindex","allIndices":[".ds-my-data-stream-2025.07.30-000001"],"allIndicesCount":1,"indicesRequiringUpgrade":[".ds-my-data-stream-2025.07.30-000001"],"indicesRequiringUpgradeCount":1,"lastIndexRequiringUpgradeCreationDate":1753906213125,"indicesRequiringUpgradeDocsSize":8814,"indicesRequiringUpgradeDocsCount":3,"oldestIncompatibleDocTimestamp":4081767675000}
+ */
