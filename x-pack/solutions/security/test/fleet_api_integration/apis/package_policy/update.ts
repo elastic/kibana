@@ -8,7 +8,6 @@ import expect from '@kbn/expect';
 import { policyFactory } from '@kbn/security-solution-plugin/common/endpoint/models/policy_config';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { sortBy } from 'lodash';
-import { getInstallationInfo } from '@kbn/test-suites-xpack-platform/fleet_api_integration/apis/package_policy/helper';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import {
   skipIfNoDockerRegistry,
