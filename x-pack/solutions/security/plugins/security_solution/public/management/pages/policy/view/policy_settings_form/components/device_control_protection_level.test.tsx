@@ -21,11 +21,11 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
-  const clickAccessLevel = async (level: 'audit' | 'block') => {
+  const clickAccessLevel = async (level: 'audit' | 'deny_all') => {
     await userEvent.click(renderResult.getByTestId(`test-${level}Radio`).querySelector('label')!);
   };
 
-  const isAccessLevelChecked = (level: 'audit' | 'block'): boolean => {
+  const isAccessLevelChecked = (level: 'audit' | 'deny_all'): boolean => {
     return renderResult.getByTestId(`test-${level}Radio`)!.querySelector('input')!.checked ?? false;
   };
 
@@ -59,10 +59,10 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
   it('should render expected options', () => {
     const { getByTestId } = render();
-    expect(getByTestId('test-execute_onlyRadio'));
+    expect(getByTestId('test-no_executeRadio'));
     expect(getByTestId('test-read_onlyRadio'));
     expect(getByTestId('test-auditRadio'));
-    expect(getByTestId('test-blockRadio'));
+    expect(getByTestId('test-deny_allRadio'));
   });
 
   it('should allow audit mode to be selected', async () => {
@@ -72,7 +72,7 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
     render();
 
-    expect(isAccessLevelChecked('block')).toBe(true);
+    expect(isAccessLevelChecked('deny_all')).toBe(true);
 
     await clickAccessLevel('audit');
 
@@ -94,7 +94,7 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
 
     expect(isAccessLevelChecked('audit')).toBe(true);
 
-    await clickAccessLevel('block');
+    await clickAccessLevel('deny_all');
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -119,14 +119,16 @@ describe('Policy form DeviceControlProtectionLevel component', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId('test'));
-      expect(renderResult.getByTestId('test')).toHaveTextContent('Allow Read and Write');
+      expect(renderResult.getByTestId('test')).toHaveTextContent(
+        'USB storage access levelAllow all'
+      );
     });
 
     it('should not render radio buttons', () => {
       render();
 
       expect(renderResult.queryByTestId('test-auditRadio')).toBeNull();
-      expect(renderResult.queryByTestId('test-blockRadio')).toBeNull();
+      expect(renderResult.queryByTestId('test-deny_allRadio')).toBeNull();
     });
   });
 });

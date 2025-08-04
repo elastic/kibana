@@ -1079,10 +1079,10 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactory();
         // Add some device control settings to test removal
         if (!mockPolicy.windows.device_control) {
-          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
         } else {
           mockPolicy.windows.device_control.enabled = true;
-          mockPolicy.windows.device_control.usb_storage = 'block';
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
         const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
@@ -1115,10 +1115,10 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactory();
         // Add some device control settings to test removal
         if (!mockPolicy.windows.device_control) {
-          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
         } else {
           mockPolicy.windows.device_control.enabled = true;
-          mockPolicy.windows.device_control.usb_storage = 'block';
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
         const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
@@ -1153,10 +1153,10 @@ describe('Fleet integrations', () => {
 
         const mockPolicy = policyFactory();
         if (!mockPolicy.windows.device_control) {
-          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'block' };
+          mockPolicy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
         } else {
           mockPolicy.windows.device_control.enabled = true;
-          mockPolicy.windows.device_control.usb_storage = 'block';
+          mockPolicy.windows.device_control.usb_storage = 'deny_all';
         }
 
         const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');

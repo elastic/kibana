@@ -42,8 +42,8 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       .config.policy.value;
 
     // Enable device control and notifications by default
-    policy.windows.device_control = { enabled: true, usb_storage: 'block' };
-    policy.mac.device_control = { enabled: true, usb_storage: 'block' };
+    policy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+    policy.mac.device_control = { enabled: true, usb_storage: 'deny_all' };
     policy.windows.popup.device_control = { enabled: true, message: 'hello world' };
     policy.mac.popup.device_control = { enabled: true, message: 'hello world' };
 
