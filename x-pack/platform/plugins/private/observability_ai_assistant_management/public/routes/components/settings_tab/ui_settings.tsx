@@ -42,7 +42,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);
 
-  const canEditAssistantSettings = capabilities.aiAssistantManagementSelection?.edit;
+  const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
   async function handleSave() {
     try {
@@ -82,7 +82,7 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
           >
             <FieldRow
               field={field}
-              isSavingEnabled={!!canEditAssistantSettings}
+              isSavingEnabled={!!canEditAdvancedSettings}
               onFieldChange={handleFieldChange}
               unsavedChange={unsavedChanges[settingKey]}
             />
