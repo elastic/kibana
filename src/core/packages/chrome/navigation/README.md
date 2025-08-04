@@ -71,10 +71,12 @@ function App() {
     <div className="app">
       <TopBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <Navigation
-        title="Observability"
-        logo="observabilityApp"
-        items={navigationItems}
         isCollapsed={isCollapsed}
+        items={navigationItems}
+        logoLabel="Observability"
+        logoType="observabilityApp"
+        logoHref="/observability"
+        setWidth={setNavigationWidth}
       />
       <main className="app-content">{/* Your application content */}</main>
     </div>

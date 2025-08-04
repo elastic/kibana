@@ -23,10 +23,29 @@ import { focusMainContent } from '../utils/focus_main_content';
 const FOOTER_ITEM_LIMIT = 5;
 
 interface NavigationProps {
+  /**
+   * Whether the navigation is collapsed. This can be controlled by the parent component.
+   */
   isCollapsed: boolean;
+  /**
+   * The navigation structure containing primary, secondary, and footer items.
+   */
   items: NavigationStructure;
+  /**
+   * The label for the logo, typically the product name.
+   */
   logoLabel: string;
+  /**
+   * The logo type, e.g. `appObservability`, `appSecurity`, etc.
+   */
   logoType: string;
+  /**
+   * The href for the logo link, typically the home page.
+   */
+  logoHref: string;
+  /**
+   * Required by the grid layout to set the width of the navigation slot.
+   */
   setWidth: (width: number) => void;
 }
 
@@ -35,6 +54,7 @@ export const Navigation = ({
   items,
   logoLabel,
   logoType,
+  logoHref,
   setWidth,
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -80,7 +100,12 @@ export const Navigation = ({
   return (
     <>
       <SideNav isCollapsed={isCollapsed}>
-        <SideNav.Logo isCollapsed={isCollapsed} label={logoLabel} logoType={logoType} />
+        <SideNav.Logo
+          isCollapsed={isCollapsed}
+          label={logoLabel}
+          logoType={logoType}
+          href={logoHref}
+        />
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
           {visibleMenuItems.map((item) => (

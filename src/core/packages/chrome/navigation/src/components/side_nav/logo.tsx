@@ -8,24 +8,33 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, useEuiFocusRing, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 export interface SideNavLogoProps {
+  href: string;
   isCollapsed: boolean;
   label: string;
   logoType: string;
 }
 
 /**
- * It's not clickable or focusable.
  * It's used to communicate what solution the user is currently in.
  */
-export const SideNavLogo = ({ isCollapsed, label, logoType }: SideNavLogoProps): JSX.Element => {
+export const SideNavLogo = ({
+  href,
+  isCollapsed,
+  label,
+  logoType,
+}: SideNavLogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
+    <a
+      // TODO: translate
+      aria-label={`${label} homepage`}
+      href={href}
       css={css`
+        ${useEuiFocusRing()}
         align-items: center;
         border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
@@ -71,6 +80,6 @@ export const SideNavLogo = ({ isCollapsed, label, logoType }: SideNavLogoProps):
           {label}
         </EuiText>
       )}
-    </div>
+    </a>
   );
 };

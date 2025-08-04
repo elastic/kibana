@@ -11,7 +11,8 @@ import { MenuItem } from '../../types';
 
 export const LOGO = {
   label: 'Elasticsearch',
-  logoType: 'logoElasticsearch',
+  type: 'logoElasticsearch',
+  href: '/elasticsearch',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [

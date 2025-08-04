@@ -11,7 +11,8 @@ import { MenuItem } from '../../types';
 
 export const LOGO = {
   label: 'Security',
-  logoType: 'logoSecurity',
+  type: 'logoSecurity',
+  href: '/security',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [

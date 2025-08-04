@@ -38,6 +38,7 @@ interface StoryArgs {
   isCollapsed: boolean;
   logoLabel: string;
   logoType: string;
+  logoHref: string;
   items: NavigationStructure;
 }
 
@@ -52,7 +53,8 @@ export default {
   args: {
     isCollapsed: false,
     logoLabel: LOGO.label,
-    logoType: LOGO.logoType,
+    logoType: LOGO.type,
+    logoHref: LOGO.href,
     items: {
       primaryItems: PRIMARY_MENU_ITEMS,
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
@@ -215,6 +217,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               items={props.items}
               logoLabel={props.logoLabel}
               logoType={props.logoType}
+              logoHref={props.logoHref}
               setWidth={setNavigationWidth}
             />
           }

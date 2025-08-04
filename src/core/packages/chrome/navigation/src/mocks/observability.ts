@@ -11,7 +11,8 @@ import { MenuItem } from '../../types';
 
 export const LOGO = {
   label: 'Observability',
-  logoType: 'logoObservability',
+  type: 'logoObservability',
+  href: '/observability',
 };
 
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
