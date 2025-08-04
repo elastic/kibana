@@ -129,7 +129,7 @@ export function getDateHistogramInterval(
   if (!dateHistogramColumn && !indexPattern.timeFieldName) {
     return { canShift: false, hasDateHistogram: false };
   }
-  if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
+  if (dateHistogramColumn && activeData && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
     if (column) {
       const expression = datatableUtilities.getDateHistogramMeta(column)?.interval || '';

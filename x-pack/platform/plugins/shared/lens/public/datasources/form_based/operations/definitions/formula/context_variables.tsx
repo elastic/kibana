@@ -65,6 +65,9 @@ export interface ContextValues {
   now?: Date;
   dateHistogramColumn?: string;
   columnId: string;
+  targetBars?: number;
+  maxBars?: number;
+  columns: Record<string, GenericIndexPatternColumn>;
 }
 
 export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -167,11 +170,30 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ dateHistogramColumn, columnId }: ContextValues) =>
-    buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
+  getExpressionFunction: ({
+    dateHistogramColumn,
+    targetBars,
+    maxBars,
+    columnId,
+    columns,
+  }: ContextValues) => {
+    const dateHistogramColumnParams =
+      dateHistogramColumn &&
+      isColumnOfType<DateHistogramIndexPatternColumn>(
+        'date_histogram',
+        columns[dateHistogramColumn]
+      )
+        ? columns[dateHistogramColumn].params
+        : undefined;
+    return buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       id: columnId,
       dateHistogramColumn,
-    }),
+      targetBars,
+      maxBars,
+      customInterval: dateHistogramColumnParams?.interval,
+      dropPartials: dateHistogramColumnParams?.dropPartials,
+    });
+  },
 
   getErrorMessage: getIntervalErrorMessages,
   options: { unwrapExpressionFunction: true },
@@ -236,6 +258,7 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         ...context,
         dateHistogramColumn: dateHistogramColumnId,
         columnId,
+        columns: layer.columns,
       });
       // Interval operation doesn't need to be wrapped in a math column function
       const finalExpressionFunction = options?.unwrapExpressionFunction
