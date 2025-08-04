@@ -14,7 +14,7 @@ import {
   DataStreamStat,
   NonAggregatableDatasets,
 } from '../../../../common/api_types';
-import { DEFAULT_DATASET_TYPE, KNOWN_TYPES } from '../../../../common/constants';
+import { KNOWN_TYPES } from '../../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsTypesPrivilegesResponse,
