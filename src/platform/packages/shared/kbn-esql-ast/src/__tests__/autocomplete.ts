@@ -57,7 +57,8 @@ export const suggest = (
   ) => Promise<ISuggestionItem[]>,
   offset?: number
 ): Promise<ISuggestionItem[]> => {
-  const correctedQuery = correctQuerySyntax(query);
+  const innerText = query.substring(0, offset ?? query.length);
+  const correctedQuery = correctQuerySyntax(innerText);
   const { ast } = parse(correctedQuery, { withFormatting: true });
   const cursorPosition = offset ?? query.length;
   const { command } = findAstPosition(ast, cursorPosition);
