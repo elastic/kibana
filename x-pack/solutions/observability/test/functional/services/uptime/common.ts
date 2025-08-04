@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import {
-  settingsObjectType,
-  settingsObjectId,
-} from '@kbn/uptime-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeCommonProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const server = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
@@ -122,28 +117,6 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
     },
     async hasMappingsError() {
       return testSubjects.exists('xpack.synthetics.mappingsErrorPage');
-    },
-
-    async deleteUptimeSettingsObject() {
-      // delete the saved object
-      try {
-        await server.savedObjects.delete({
-          type: settingsObjectType,
-          id: settingsObjectId,
-        });
-      } catch (e) {
-        // a 404 just means the doc is already missing
-        if (e.response.status !== 404) {
-          const { status, statusText, data, headers, config } = e.response;
-          throw new Error(
-            `error attempting to delete settings:\n${JSON.stringify(
-              { status, statusText, data, headers, config },
-              null,
-              2
-            )}`
-          );
-        }
-      }
     },
   };
 }
