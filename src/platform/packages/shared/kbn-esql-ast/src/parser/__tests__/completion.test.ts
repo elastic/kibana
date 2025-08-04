@@ -270,13 +270,6 @@ describe('COMPLETION command', () => {
       });
     });
 
-    it('throws on inferenceId wrapped in double quotes', () => {
-      const text = `FROM index | COMPLETION prompt WITH "inferenceId"`;
-      const { errors } = EsqlQuery.fromSrc(text);
-
-      expect(errors.length).toBe(1);
-    });
-
     it('throws on missing WITH argument with AS argument', () => {
       const text = `FROM index | COMPLETION prompt WITH AS targetField`;
       const { errors } = EsqlQuery.fromSrc(text);

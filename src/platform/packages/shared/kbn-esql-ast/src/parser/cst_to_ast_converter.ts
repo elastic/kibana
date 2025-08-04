@@ -1195,7 +1195,7 @@ export class CstToAstConverter {
 
       if (inferenceIdParam) {
         inferenceId = inferenceIdParam;
-        inferenceId.incomplete = false;
+        inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
       }
 
       command.args.push(namedParametersOption);
@@ -2140,24 +2140,32 @@ export class CstToAstConverter {
 
     for (const entryCtx of entryCtxs) {
       const entry = this.fromMapEntryExpression(entryCtx);
-
-      map.entries.push(entry);
+      if (entry) {
+        map.entries.push(entry);
+      } else {
+        map.incomplete = true;
+      }
     }
 
     return map;
   }
 
-  private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry {
+  private fromMapEntryExpression(ctx: cst.EntryExpressionContext): ast.ESQLMapEntry | undefined {
     const keyCtx = ctx._key;
     const valueCtx = ctx._value;
-    const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
-    const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
-    const entry = Builder.expression.entry(key, value, {
-      location: getPosition(ctx.start, ctx.stop),
-      incomplete: Boolean(ctx.exception),
-    });
 
-    return entry;
+    if (keyCtx && valueCtx) {
+      const key = this.toStringLiteral(keyCtx) as ast.ESQLStringLiteral;
+
+      const value = this.fromConstant(valueCtx) as ast.ESQLAstExpression;
+
+      const entry = Builder.expression.entry(key, value, {
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception),
+      });
+
+      return entry;
+    }
   }
 
   // ----------------------------------------------------- constant expressions

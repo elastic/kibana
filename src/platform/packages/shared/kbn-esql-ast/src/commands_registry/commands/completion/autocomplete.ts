@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import { ESQLCommand, ESQLAstCompletionCommand, ESQLCommandOption } from '../../../types';
 import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
@@ -21,6 +21,7 @@ import {
   findFinalWord,
   handleFragment,
   columnExists,
+  getCommandNamedParametersSuggestions,
 } from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
@@ -35,11 +36,12 @@ import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autoco
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
+  AFTER_TARGET_ID = 'after_target_id',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
   AFTER_WITH = 'after_with',
-  AFTER_INFERENCE_ID = 'after_inference_id',
-  AFTER_TARGET_ID = 'after_target_id',
+  WITHIN_NAMED_PARAMS = 'within_named_params',
+  AFTER_COMMAND = 'after_command',
 }
 
 function getPosition(
@@ -48,13 +50,18 @@ function getPosition(
   context?: ICommandContext
 ): CompletionPosition | undefined {
   const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
+  const namedParams = command.args[1] as ESQLCommandOption;
 
   if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
     return CompletionPosition.AFTER_WITH;
   }
 
-  if (!inferenceId.incomplete) {
-    return CompletionPosition.AFTER_INFERENCE_ID;
+  if (namedParams.incomplete || /WITH\s*{\s*[^}]*$/i.test(query)) {
+    return CompletionPosition.WITHIN_NAMED_PARAMS;
+  }
+
+  if (!inferenceId.incomplete && !namedParams.incomplete) {
+    return CompletionPosition.AFTER_COMMAND;
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
@@ -105,6 +112,23 @@ const withCompletionItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
+const namedParamsCompletionItem: ISuggestionItem = {
+  detail: i18n.translate('kbn-esql-ast.esql.definitions.completionNamedParamsDoc', {
+    defaultMessage: 'Parameters for the LLM prompt.',
+  }),
+  documentation: {
+    value: i18n.translate('kbn-esql-ast.esql.definitions.completionNamedParamsDocValue', {
+      defaultMessage: 'inference_id: The ID of the inference endpoint to use for the completion.',
+    }),
+  },
+  kind: 'Reference',
+  label: 'Parameters',
+  sortText: '1',
+  asSnippet: true,
+  text: '{ $0 }',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
 function inferenceEndpointToCompletionItem(
   inferenceEndpoint: InferenceEndpointAutocompleteItem
 ): ISuggestionItem {
@@ -115,7 +139,7 @@ function inferenceEndpointToCompletionItem(
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
     sortText: '1',
-    text: `\`${inferenceEndpoint.inference_id}\` `,
+    text: inferenceEndpoint.inference_id,
     command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
@@ -133,6 +157,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
   const position = getPosition(innerText, command, context);
+  const endpoints = context?.inferenceEndpoints;
 
   const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
     innerText,
@@ -140,7 +165,8 @@ export async function autocomplete(
     callbacks,
     context
   );
-  if (functionsSpecificSuggestions) {
+
+  if (functionsSpecificSuggestions?.length) {
     return functionsSpecificSuggestions;
   }
 
@@ -212,10 +238,16 @@ export async function autocomplete(
     }
 
     case CompletionPosition.AFTER_WITH:
-      const endpoints = context?.inferenceEndpoints;
-      return endpoints?.map(inferenceEndpointToCompletionItem) || [];
+      return [namedParamsCompletionItem];
 
-    case CompletionPosition.AFTER_INFERENCE_ID:
+    case CompletionPosition.WITHIN_NAMED_PARAMS:
+      const availableParameters = {
+        inference_id: endpoints?.map(inferenceEndpointToCompletionItem) || [],
+      };
+
+      return getCommandNamedParametersSuggestions(innerText, availableParameters);
+
+    case CompletionPosition.AFTER_COMMAND:
       return [pipeCompleteItem];
 
     default:
