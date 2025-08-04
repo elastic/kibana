@@ -89,7 +89,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
           },
           canViewIntegrations: true,
-          canReadFailureStore: true,
         });
       });
 
