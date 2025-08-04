@@ -75,5 +75,6 @@ export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 
+// space plachoder - to be replaced by the specific kibana space
 export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
-  'entity_store_field_retention_generic_<namespace>_v1.0.0';
+  'entity_store_field_retention_generic_<space>_v1.0.0';

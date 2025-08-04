@@ -172,7 +172,6 @@ const buildEsqlQuery = ({
 }: BuildEsqlQueryParams): string => {
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
 
-  // Common parts of the query
   const originEventClause =
     originEventIds.length > 0
       ? `event.id in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
@@ -183,16 +182,24 @@ const buildEsqlQuery = ({
       ? `event.id in (${originAlertIds.map((_id, idx) => `?og_alrt_id${idx}`).join(', ')})`
       : 'false';
 
-  const fromClause = `FROM ${indexPatterns
+  const formattedIndexPatterns = indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
-    .join(',')} METADATA _id, _index`;
+    .join(',');
 
-  const whereAndOriginClause = `| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
+    return `FROM ${formattedIndexPatterns} METADATA _id, _index
+
+| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
+| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type
+
+| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${originEventClause}
-| EVAL isOriginAlert = isOrigin AND ${originAlertClause}`;
+| EVAL isOriginAlert = isOrigin AND ${originAlertClause}
 
-  const documentMetadataClause = `// Aggregate document's data for popover expansion and metadata enhancements
+// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
+// but it flattens the data and we lose the structure
+// Aggregate document's data for popover expansion and metadata enhancements
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
 | EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
 | EVAL docData = CONCAT("{",
@@ -201,38 +208,14 @@ const buildEsqlQuery = ({
     ",\\"index\\":\\"", _index, "\\"",
   "}")
     ${
-      // ESQL complains about missing field's mapping when we don't fetch from alerts index
       alertsMappingsIncluded
         ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
       "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
     "}"), ""),`
         : ''
-    }`;
+    }
 
-  const statsClause = `| STATS badge = COUNT(*),
-  docs = VALUES(docData),
-  ips = VALUES(related.ip),
-  // hosts = VALUES(related.hosts),
-  users = VALUES(related.user),
-  isAlert = MV_MAX(VALUES(isAlert))
-    BY actorIds = actor.entity.id,
-      action = event.action,
-      targetIds = target.entity.id,
-      isOrigin,
-      isOriginAlert`;
-
-  const limitSortClause = `| LIMIT 1000
-| SORT isOrigin DESC, action`;
-
-  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
-    // Enrichment-specific parts
-    // For now, we query only the generic entity index to infer types of entities (hosts/users/ips)
-    // TODO: We should use the appropriate specific index for each entity type once it's fixed
-    const enrichClause = `
-| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`;
-
-    const entityDataClause = `// contact actor and target entities data
+// Contact actor and target entities data
 | EVAL actorDocData = CONCAT("{",
     "\\"id\\":\\"", actor.entity.id, "\\"",
     ",\\"type\\":\\"", "entity", "\\"",
@@ -248,9 +231,9 @@ const buildEsqlQuery = ({
       "\\"name\\":\\"", targetEntityName, "\\"",
       ",\\"type\\":\\"", targetEntityType, "\\"",
     "}",
-  "}")`;
+  "}")
 
-    const enrichedStatsClause = `| STATS badge = COUNT(*),
+| STATS badge = COUNT(*),
   docs = VALUES(docData),
   actorsDocData = VALUES(actorDocData),
   targetsDocData = VALUES(targetDocData),
@@ -262,24 +245,48 @@ const buildEsqlQuery = ({
       action = event.action,
       targetIds = target.entity.id,
       isOrigin,
-      isOriginAlert`;
+      isOriginAlert
 
-    // Query with entity enrichment
-    return `${fromClause}
-${enrichClause}
-${whereAndOriginClause}
-// We format it as JSON string, the best alternative so far. Tried to use tuple using MV_APPEND
-// but it flattens the data and we lose the structure
-${documentMetadataClause}
-${entityDataClause}
-${enrichedStatsClause}
-${limitSortClause}`;
+| LIMIT 1000
+| SORT isOrigin DESC, action`;
   } else {
-    // Query without entity enrichment - simpler case
-    return `${fromClause}
-${whereAndOriginClause}
+    // Query WITHOUT entity enrichment - simpler case
+    return `FROM ${formattedIndexPatterns} METADATA _id, _index
+
+| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
+// Origin event and alerts allow us to identify the start position of graph traversal
+| EVAL isOrigin = ${originEventClause}
+| EVAL isOriginAlert = isOrigin AND ${originAlertClause}
+
 // Aggregate document's data for popover expansion and metadata enhancements
-${documentMetadataClause}
-${statsClause}`;
+| EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"
+| EVAL docType = CASE (isAlert, "${DOCUMENT_TYPE_ALERT}", "${DOCUMENT_TYPE_EVENT}")
+| EVAL docData = CONCAT("{",
+    "\\"id\\":\\"", _id, "\\"",
+    ",\\"type\\":\\"", docType, "\\"",
+    ",\\"index\\":\\"", _index, "\\"",
+  "}")
+    ${
+      alertsMappingsIncluded
+        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
+      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
+    "}"), ""),`
+        : ''
+    }
+
+| STATS badge = COUNT(*),
+  docs = VALUES(docData),
+  ips = VALUES(related.ip),
+  // hosts = VALUES(related.hosts),
+  users = VALUES(related.user),
+  isAlert = MV_MAX(VALUES(isAlert))
+    BY actorIds = actor.entity.id,
+      action = event.action,
+      targetIds = target.entity.id,
+      isOrigin,
+      isOriginAlert
+
+| LIMIT 1000
+| SORT isOrigin DESC, action`;
   }
 };

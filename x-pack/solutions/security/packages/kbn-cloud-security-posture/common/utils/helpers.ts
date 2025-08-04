@@ -197,7 +197,7 @@ export const buildEntityAlertsQuery = ({
   };
 };
 
-export const getEnrichPolicyId = (namespace: string = 'default'): string => {
-  // Get the last part of the input type, input type structure: cloudbeat/<benchmark_id>
-  return GENERIC_ENTITY_INDEX_ENRICH_POLICY.replace('<namespace>', namespace);
+// Get the enrich policy ID for a specific space
+export const getEnrichPolicyId = (space: string = 'default'): string => {
+  return GENERIC_ENTITY_INDEX_ENRICH_POLICY.replace('<space>', space);
 };

@@ -19,13 +19,7 @@ export const transformEntityTypeToIcon = (entityType: string | undefined): strin
     return undefined;
   }
 
-  // Convert to lowercase for case-insensitive comparison
   const entityTypeLower = entityType.toLowerCase();
 
-  // Find the first matching mapping where the entity type is in the values array
-  const mappingResult = entityTypeMappings.find((mapping) =>
-    mapping.values.some((type) => entityTypeLower === type.toLowerCase())
-  );
-  // Return the icon name if found, otherwise we return undefined
-  return mappingResult?.icon ?? undefined;
+  return entityTypeMappings[entityTypeLower] ?? undefined;
 };
