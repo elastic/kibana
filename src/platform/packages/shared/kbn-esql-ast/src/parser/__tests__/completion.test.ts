@@ -217,27 +217,27 @@ describe('COMPLETION command', () => {
       });
     });
 
-    // it('uses an unknown node if the command is ambiguous, its not clear if the user is using a column as a prompt or trying to define a new one ', () => {
-    //   const text = `FROM index | COMPLETION columnName`; //HD
-    //   const { errors, ast } = EsqlQuery.fromSrc(text);
-    //   expect(errors.length).toBe(0);
-    //
-    //   expect(ast.commands).toHaveLength(2);
-    //
-    //   const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
-    //   expect(completionCommand.incomplete).toBe(true);
-    //
-    //   expect(completionCommand.args[1]).toMatchObject({
-    //     type: 'option',
-    //     name: 'with',
-    //     incomplete: true,
-    //   });
-    //
-    //   expect(completionCommand.prompt).toMatchObject({
-    //     type: 'unknown',
-    //     name: 'unknown',
-    //   });
-    // });
+    it('define a new column name as target of the completion', () => {
+      const text = `FROM index | COMPLETION columnName`; // HD
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      expect(errors.length).toBe(0);
+
+      expect(ast.commands).toHaveLength(2);
+
+      const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
+      expect(completionCommand.incomplete).toBe(true);
+
+      expect(completionCommand.args[1]).toMatchObject({
+        type: 'option',
+        name: 'with',
+        incomplete: true,
+      });
+
+      expect(completionCommand.prompt).toMatchObject({
+        type: 'column',
+        name: 'columnName',
+      });
+    });
 
     it('sets incomplete flag on WITH argument if not inferenceId provided', () => {
       const text = `FROM index | COMPLETION prompt WITH `;

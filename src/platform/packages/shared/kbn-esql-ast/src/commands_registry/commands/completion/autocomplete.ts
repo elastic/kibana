@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import { ESQLCommand, ESQLAstCompletionCommand, ESQLCommandOption } from '../../../types';
+import { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
   getNewUserDefinedColumnSuggestion,
@@ -50,17 +50,17 @@ function getPosition(
   context?: ICommandContext
 ): CompletionPosition | undefined {
   const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
-  const namedParams = command.args[1] as ESQLCommandOption;
 
   if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
     return CompletionPosition.AFTER_WITH;
   }
 
-  if (namedParams.incomplete || /WITH\s*{\s*[^}]*$/i.test(query)) {
+  // Checking for open bracket after WITH and not a closing one
+  if (/WITH\s*{\s*[^}]*$/i.test(query)) {
     return CompletionPosition.WITHIN_NAMED_PARAMS;
   }
 
-  if (!inferenceId.incomplete && !namedParams.incomplete) {
+  if (!inferenceId.incomplete) {
     return CompletionPosition.AFTER_COMMAND;
   }
 
@@ -85,7 +85,7 @@ function getPosition(
   }
 
   // We don't know if the expression is a prompt or a target field
-  if (prompt.type === 'unknown' && prompt.name === 'unknown') {
+  if (prompt.type === 'column' || (prompt.type === 'unknown' && prompt.name === 'unknown')) {
     return CompletionPosition.AFTER_PROMPT_OR_TARGET;
   }
 
@@ -138,7 +138,7 @@ function inferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: '1',
+    sortText: inferenceEndpoint.inference_id,
     text: inferenceEndpoint.inference_id,
     command: TRIGGER_SUGGESTION_COMMAND,
   };

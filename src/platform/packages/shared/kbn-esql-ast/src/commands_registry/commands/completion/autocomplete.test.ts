@@ -84,13 +84,53 @@ describe('COMPLETION Autocomplete', () => {
     await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
   });
 
-  it('suggests inference endpoints after WITH', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['`inference_1` ']);
+  it('suggests named parameters map after WITH', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['{ $0 }']);
+  });
+
+  it('suggests inference_id parameter within the named parameters map', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH {`, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { `, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH {
+      `,
+      ['"inference_id": "$0"']
+    );
+  });
+
+  it('suggests inference endpoints as the values for inference_id', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "`, [
+      'inference_1',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "i/`, [
+      'inference_1',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "inf/`, [
+      'inference_1',
+    ]);
+  });
+
+  it('does not suggest anything if all the parameters are already provided', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1", `,
+      []
+    );
+  });
+
+  it('does not suggest anything if the parameter name is unsupported', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "unsupported_param": "`,
+      []
+    );
   });
 
   it('suggests pipe after complete command', async () => {
     await completionExpectSuggestions(
-      `FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`,
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1" }`,
       ['| ']
     );
   });

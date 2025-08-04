@@ -800,8 +800,8 @@ export function getCommandNamedParametersSuggestions(
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
-  if (/:\s*(")?$/i.test(innerText)) {
-    const match = innerText.match(/"([^"]+)"\s*:\s*(")?$/);
+  if (/:\s*"[^"]*$/i.test(innerText)) {
+    const match = innerText.match(/"([^"]+)"\s*:\s*"[^"]*$/);
     const paramName = match ? match[1] : undefined;
     if (paramName && availableParams[paramName]) {
       return availableParams[paramName];
