@@ -5,4 +5,6 @@
  * 2.0.
  */
 
+export type { EMSTMSSourceDescriptor } from './schema/v1/types'; 
+
 export { MapsStorage } from './maps_storage';

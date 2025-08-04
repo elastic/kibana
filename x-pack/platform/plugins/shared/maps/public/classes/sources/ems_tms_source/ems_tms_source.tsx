@@ -52,11 +52,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
       id: descriptor.id,
       isAutoSelect:
         typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
-      lightModeDefault:
-        descriptor.lightModeDefault === undefined ||
-        descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
-          ? getEmsTileLayerId().desaturated
-          : DEFAULT_EMS_ROADMAP_ID,
+      lightModeDefault: descriptor.lightModeDefault,
     };
   }
 
@@ -170,7 +166,14 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
       return this._descriptor.id;
     }
 
-    return getIsDarkMode() ? getEmsTileLayerId().dark : this._descriptor.lightModeDefault;
+    if (getIsDarkMode()) {
+      return getEmsTileLayerId().dark;
+    }
+
+    return this._descriptor.lightModeDefault === undefined ||
+      this._descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
+      ? getEmsTileLayerId().desaturated
+      : getEmsTileLayerId().bright;
   }
 
   async getLicensedFeatures() {

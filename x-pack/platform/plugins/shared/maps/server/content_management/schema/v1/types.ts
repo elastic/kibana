@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Writable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
 import {
   mapAttributesSchema,
@@ -14,6 +15,9 @@ import {
   mapsSearchOptionsSchema,
   mapsUpdateOptionsSchema,
 } from './cm_services';
+import {
+  EMSTMSSourceSchema
+} from './source_schemas';
 
 export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
 
@@ -24,3 +28,5 @@ export type MapsSearchOptions = TypeOf<typeof mapsSearchOptionsSchema>;
 export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
 export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
+
+export type EMSTMSSourceDescriptor = Writable<TypeOf<typeof EMSTMSSourceSchema>>;
