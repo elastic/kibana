@@ -53,7 +53,6 @@ export interface Props {
   handleTableReset: () => void;
   selectionState: UseSelectionReturn['selectionState'];
   selectionActions: UseSelectionReturn['selectionActions'];
-  readOnly?: boolean;
 }
 
 const ContextEditorComponent: React.FC<Props> = ({
@@ -72,13 +71,10 @@ const ContextEditorComponent: React.FC<Props> = ({
   handleTableReset,
   selectionState,
   selectionActions,
-  readOnly = false,
 }) => {
   const {
     assistantAvailability: { hasUpdateAIAssistantAnonymization },
   } = useAssistantContext();
-
-  const canEdit = !readOnly && hasUpdateAIAssistantAnonymization;
 
   const tablePagination = useMemo(
     () => ({
@@ -125,14 +121,14 @@ const ContextEditorComponent: React.FC<Props> = ({
         handleRowChecked,
         handleRowReset,
         handleRowUnChecked,
-        hasUpdateAIAssistantAnonymization: canEdit,
+        hasUpdateAIAssistantAnonymization,
         selectedFields,
         totalItemCount: anonymizationPageFields.total,
       }),
       ...getColumns({
         compressed,
         handleRowChecked,
-        hasUpdateAIAssistantAnonymization: canEdit,
+        hasUpdateAIAssistantAnonymization,
         onListUpdated,
         rawData,
         selectedFields,
@@ -141,17 +137,17 @@ const ContextEditorComponent: React.FC<Props> = ({
     [
       anonymizationPageFields.data,
       anonymizationPageFields.total,
-      compressed,
       handlePageChecked,
       handlePageReset,
       handlePageUnchecked,
       handleRowChecked,
       handleRowReset,
       handleRowUnChecked,
-      canEdit,
+      hasUpdateAIAssistantAnonymization,
+      selectedFields,
+      compressed,
       onListUpdated,
       rawData,
-      selectedFields,
     ]
   );
   const toolbar = useMemo(
@@ -180,7 +176,7 @@ const ContextEditorComponent: React.FC<Props> = ({
   return (
     <Wrapper>
       <EuiSearchBar box={search.box} filters={search.filters} onChange={handleSearch} />
-      {canEdit ? toolbar : undefined}
+      {hasUpdateAIAssistantAnonymization ? toolbar : undefined}
       <EuiBasicTable
         columns={columns}
         compressed={compressed}

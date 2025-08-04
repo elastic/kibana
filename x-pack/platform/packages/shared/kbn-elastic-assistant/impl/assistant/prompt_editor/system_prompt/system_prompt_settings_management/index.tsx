@@ -42,14 +42,9 @@ import { useSystemPromptTable } from './use_system_prompt_table';
 interface Props {
   connectors?: AIConnector[];
   defaultConnector?: AIConnector;
-  canEditAssistantSettings?: boolean;
 }
 
-const SystemPromptSettingsManagementComponent = ({
-  connectors,
-  defaultConnector,
-  canEditAssistantSettings = false,
-}: Props) => {
+const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector }: Props) => {
   const {
     currentAppId,
     nameSpace,
@@ -204,20 +199,13 @@ const SystemPromptSettingsManagementComponent = ({
   const columns = useMemo(
     () =>
       getColumns({
-        isActionsDisabled: isTableLoading || !canEditAssistantSettings,
+        isActionsDisabled: isTableLoading,
         onEditActionClicked,
         onDeleteActionClicked,
-        isDeleteEnabled: (prompt: PromptResponse) =>
-          canEditAssistantSettings && prompt.isDefault !== true,
-        isEditEnabled: () => canEditAssistantSettings,
+        isDeleteEnabled: (prompt: PromptResponse) => prompt.isDefault !== true,
+        isEditEnabled: () => true,
       }),
-    [
-      getColumns,
-      isTableLoading,
-      onEditActionClicked,
-      onDeleteActionClicked,
-      canEditAssistantSettings,
-    ]
+    [getColumns, isTableLoading, onEditActionClicked, onDeleteActionClicked]
   );
 
   return (
@@ -228,11 +216,7 @@ const SystemPromptSettingsManagementComponent = ({
             <EuiText size="m">{i18n.SYSTEM_PROMPTS_TABLE_SETTINGS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="plusInCircle"
-              onClick={onCreate}
-              disabled={isTableLoading || !canEditAssistantSettings}
-            >
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={isTableLoading}>
               {i18n.CREATE_SYSTEM_PROMPT_LABEL}
             </EuiButton>
           </EuiFlexItem>

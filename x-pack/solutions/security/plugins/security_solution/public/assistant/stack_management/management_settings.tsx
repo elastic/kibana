@@ -19,14 +19,17 @@ import { useSpaceId } from '../../common/hooks/use_space_id';
 
 export const ManagementSettings = React.memo(() => {
   const {
-    application: { navigateToApp, capabilities },
+    application: {
+      navigateToApp,
+      capabilities: {
+        securitySolutionAssistant: { 'ai-assistant': securityAIAssistantEnabled },
+      },
+    },
     data: { dataViews },
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
   const spaceId = useSpaceId();
-  const securityAIAssistantManagementEnabled =
-    capabilities?.management?.ai?.securityAiAssistantManagement;
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -89,7 +92,7 @@ export const ManagementSettings = React.memo(() => {
     }
   }, [navigateToApp, serverless, setBreadcrumbs]);
 
-  if (!securityAIAssistantManagementEnabled) {
+  if (!securityAIAssistantEnabled) {
     navigateToApp('home');
   }
 
@@ -99,7 +102,6 @@ export const ManagementSettings = React.memo(() => {
         dataViews={dataViews}
         onTabChange={handleTabChange}
         currentTab={currentTab}
-        capabilities={capabilities}
       />
     </AssistantSpaceIdProvider>
   ) : null;

@@ -31,11 +31,7 @@ import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_conte
 import { useAssistantContext } from '../../../assistant_context';
 import { useFetchPrompts } from '../../api';
 
-const QuickPromptSettingsManagementComponent = ({
-  canEditAssistantSettings = false,
-}: {
-  canEditAssistantSettings?: boolean;
-}) => {
+const QuickPromptSettingsManagementComponent = () => {
   const { currentAppId, http, nameSpace, basePromptContexts, toasts } = useAssistantContext();
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
@@ -129,13 +125,12 @@ const QuickPromptSettingsManagementComponent = ({
 
   const { getColumns } = useQuickPromptTable();
   const columns = getColumns({
-    isActionsDisabled: !promptsLoaded || !canEditAssistantSettings,
+    isActionsDisabled: !promptsLoaded,
     basePromptContexts,
     onEditActionClicked,
     onDeleteActionClicked,
-    isDeleteEnabled: (prompt: PromptResponse) =>
-      canEditAssistantSettings && prompt.isDefault !== true,
-    isEditEnabled: () => canEditAssistantSettings,
+    isDeleteEnabled: (prompt: PromptResponse) => prompt.isDefault !== true,
+    isEditEnabled: () => true,
   });
 
   const { onTableChange, pagination, sorting } = useSessionPagination<PromptResponse, true>({
@@ -160,11 +155,7 @@ const QuickPromptSettingsManagementComponent = ({
             <EuiText size="m">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="plusInCircle"
-              onClick={onCreate}
-              disabled={!promptsLoaded || !canEditAssistantSettings}
-            >
+            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>

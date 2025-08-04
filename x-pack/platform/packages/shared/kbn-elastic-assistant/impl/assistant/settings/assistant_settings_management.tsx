@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { Capabilities } from '@kbn/core/public';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -42,7 +41,6 @@ interface Props {
   dataViews: DataViewsContract;
   onTabChange?: (tabId: string) => void;
   currentTab: ManagementSettingsTabs;
-  capabilities: Capabilities;
 }
 
 /**
@@ -50,7 +48,7 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab, capabilities }) => {
+  ({ dataViews, onTabChange, currentTab: selectedSettingsTab }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
@@ -59,8 +57,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled },
     } = useAssistantContext();
-
-    const canEditAssistantSettings = Boolean(capabilities.aiAssistantManagementSelection?.edit);
 
     useEffect(() => {
       if (contextSettingsTab) {
@@ -173,27 +169,18 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             <ConversationSettingsManagement
               connectors={connectors}
               defaultConnector={defaultConnector}
-              canEditAssistantSettings={canEditAssistantSettings}
             />
           )}
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
             <SystemPromptSettingsManagement
               connectors={connectors}
               defaultConnector={defaultConnector}
-              canEditAssistantSettings={canEditAssistantSettings}
             />
           )}
-          {selectedSettingsTab === QUICK_PROMPTS_TAB && (
-            <QuickPromptSettingsManagement canEditAssistantSettings={canEditAssistantSettings} />
-          )}
-          {selectedSettingsTab === ANONYMIZATION_TAB && (
-            <AnonymizationSettingsManagement canEditAssistantSettings={canEditAssistantSettings} />
-          )}
+          {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
+          {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
           {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
-            <KnowledgeBaseSettingsManagement
-              dataViews={dataViews}
-              canEditAssistantSettings={canEditAssistantSettings}
-            />
+            <KnowledgeBaseSettingsManagement dataViews={dataViews} />
           )}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
