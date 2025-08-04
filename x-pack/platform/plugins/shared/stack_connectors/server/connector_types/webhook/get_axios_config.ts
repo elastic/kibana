@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import axios from 'axios';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { Logger } from '@kbn/logging/src/logger';
-import type { Services } from '@kbn/actions-plugin/server/types';
+import type { SSLSettings, Services } from '@kbn/actions-plugin/server/types';
 import { getOauth2DeleteTokenAxiosInterceptor } from '../../../common/auth/oauth2_delete_token_axios_interceptor';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 import { AuthType } from '../../../common/auth/constants';
@@ -41,29 +42,34 @@ const getOAuth2AxiosConfig = async ({
   try {
     parsedAdditionalFields = additionalFields ? JSON.parse(additionalFields) : undefined;
   } catch (error) {
-    logger.error(`Error parsing additional fields for connectorId: "${connectorId}"`);
+    logger.error(`Connector ${connectorId}: error parsing additional fields`);
   }
 
-  const accessToken = await getOAuthClientCredentialsAccessToken({
-    connectorId,
-    logger,
-    configurationUtilities,
-    oAuthScope: scope,
-    credentials: {
-      secrets: { clientSecret: clientSecret! },
-      config: {
-        clientId: clientId!,
-        ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
+  let accessToken;
+  try {
+    accessToken = await getOAuthClientCredentialsAccessToken({
+      connectorId,
+      logger,
+      configurationUtilities,
+      oAuthScope: scope,
+      credentials: {
+        secrets: { clientSecret: clientSecret! },
+        config: {
+          clientId: clientId!,
+          ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
+        },
       },
-    },
-    tokenUrl: accessTokenUrl!,
-    connectorTokenClient,
-  });
+      tokenUrl: accessTokenUrl!,
+      connectorTokenClient,
+    });
+  } catch (error) {
+    throw new Error(`Unable to retrieve/refresh the access token: ${error.message}`);
+  }
 
   if (!accessToken) {
-    throw new Error(`Unable to retrieve new access token for connectorId: ${connectorId}`);
+    throw new Error(`Unable to retrieve new access token`);
   }
-  logger.debug(`Successfully retrieved access token for connectorId: "${connectorId}"`);
+  logger.debug(`Successfully retrieved access token`);
 
   const { onFulfilled, onRejected } = getOauth2DeleteTokenAxiosInterceptor({
     connectorTokenClient,
@@ -86,7 +92,7 @@ interface GetDefaultAxiosConfig {
   secrets: ConnectorTypeSecretsType;
   headers: Record<string, string> | null;
 }
-const getDefaultAxiosConfig = ({ config, secrets, headers }: GetDefaultAxiosConfig) => {
+const getDefaultAxiosConfig = async ({ config, secrets, headers }: GetDefaultAxiosConfig) => {
   const { hasAuth, authType, verificationMode, ca } = config;
 
   const axiosInstance = axios.create();
@@ -107,6 +113,12 @@ const getDefaultAxiosConfig = ({ config, secrets, headers }: GetDefaultAxiosConf
   return { axiosInstance, headers: headersWithAuth, sslOverrides };
 };
 
+export interface GetAxiosConfigResponse {
+  axiosInstance: AxiosInstance;
+  headers: Record<string, AxiosHeaderValue> | undefined;
+  sslOverrides: SSLSettings;
+}
+
 export interface GetAxiosConfigParams {
   config: ConnectorTypeConfigType;
   secrets: ConnectorTypeSecretsType;
@@ -115,23 +127,32 @@ export interface GetAxiosConfigParams {
   services: Services;
   configurationUtilities: ActionsConfigurationUtilities;
 }
-export const getAxiosConfig = ({
+export const getAxiosConfig = async ({
   config,
   secrets,
   connectorId,
   services,
   configurationUtilities,
   logger,
-}: GetAxiosConfigParams) => {
-  if (config.authType === AuthType.OAuth2ClientCredentials) {
-    return getOAuth2AxiosConfig({
-      connectorId,
-      logger,
-      configurationUtilities,
-      services,
-      config,
-      secrets,
-    });
+}: GetAxiosConfigParams): Promise<[GetAxiosConfigResponse, null] | [null, Error]> => {
+  let axiosConfig: GetAxiosConfigResponse;
+
+  try {
+    if (config.authType === AuthType.OAuth2ClientCredentials) {
+      axiosConfig = await getOAuth2AxiosConfig({
+        connectorId,
+        logger,
+        configurationUtilities,
+        services,
+        config,
+        secrets,
+      });
+    } else {
+      axiosConfig = await getDefaultAxiosConfig({ config, secrets, headers: config.headers });
+    }
+
+    return [axiosConfig, null];
+  } catch (error) {
+    return [null, error];
   }
-  return getDefaultAxiosConfig({ config, secrets, headers: config.headers });
 };

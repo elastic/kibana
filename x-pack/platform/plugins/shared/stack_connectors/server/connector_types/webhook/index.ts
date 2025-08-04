@@ -187,7 +187,7 @@ export async function executor(
   const { method, url } = config;
   const { body: data } = params;
 
-  const { axiosInstance, headers, sslOverrides } = await getAxiosConfig({
+  const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
     services,
     config,
@@ -195,6 +195,15 @@ export async function executor(
     configurationUtilities,
     logger,
   });
+
+  if (!axiosConfig) {
+    logger.error(
+      `ConnectorId "${actionId}": error "${axiosConfigError?.message ?? 'unknown error'}"`
+    );
+    return errorResultUnexpectedError(actionId);
+  }
+
+  const { axiosInstance, headers, sslOverrides } = axiosConfig;
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({

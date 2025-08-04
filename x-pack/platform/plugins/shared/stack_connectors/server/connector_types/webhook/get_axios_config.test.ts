@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthType, WebhookMethods } from '../../../common/auth/constants';
 import { getAxiosConfig } from './get_axios_config';
-import type { GetAxiosConfigParams } from './get_axios_config';
+import type { GetAxiosConfigParams, GetAxiosConfigResponse } from './get_axios_config';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -95,7 +95,7 @@ describe('getAxiosConfig', () => {
     ]);
 
     const config = await getAxiosConfig(params);
-    const { axiosInstance, headers } = config;
+    const { axiosInstance, headers } = config[0] as GetAxiosConfigResponse;
     const requestPromise = promiseResult(
       request({
         axios: axiosInstance,
@@ -126,7 +126,7 @@ describe('getAxiosConfig', () => {
     ]);
 
     const config = await getAxiosConfig(params);
-    const { axiosInstance, headers } = config;
+    const { axiosInstance, headers } = config[0] as GetAxiosConfigResponse;
 
     const requestPromise = promiseResult(
       request({
@@ -145,5 +145,15 @@ describe('getAxiosConfig', () => {
     expect(services.connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'test-action-id',
     });
+  });
+
+  it('should return error when access token retrieval fails', async () => {
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+      new Error('Failed to retrieve access token')
+    );
+
+    expect(((await getAxiosConfig(params))[1] as Error).message).toBe(
+      'Unable to retrieve/refresh the access token: Failed to retrieve access token'
+    );
   });
 });

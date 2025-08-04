@@ -820,83 +820,125 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
-  it('oauth2 - throws if refresh token fails', async () => {
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(undefined);
+  describe('oauth2 client credentials', () => {
+    it('throws if refresh token fails', async () => {
+      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(undefined);
 
-    const execOptions: WebhookConnectorTypeExecutorOptions = {
-      actionId: 'test-id',
-      config: {
-        method: WebhookMethods.POST,
-        url: 'https://test.com',
-        hasAuth: true,
-        authType: AuthType.OAuth2ClientCredentials,
-        accessTokenUrl: 'https://token.url',
-        clientId: 'client',
-        headers: null,
-      },
-      params: { body: '{}' },
-      secrets: {
-        clientSecret: 'secret',
-        key: null,
-        user: null,
-        password: null,
-        crt: null,
-        pfx: null,
-      },
-      configurationUtilities,
-      logger: mockedLogger,
-      services,
-      connectorUsageCollector,
-    };
+      const execOptions: WebhookConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          method: WebhookMethods.POST,
+          url: 'https://test.com',
+          hasAuth: true,
+          authType: AuthType.OAuth2ClientCredentials,
+          accessTokenUrl: 'https://token.url',
+          clientId: 'client',
+          headers: null,
+        },
+        params: { body: '{}' },
+        secrets: {
+          clientSecret: 'secret',
+          key: null,
+          user: null,
+          password: null,
+          crt: null,
+          pfx: null,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
 
-    try {
+      try {
+        await connectorType.executor(execOptions);
+      } catch (error) {
+        expect(error).toMatchInlineSnapshot(
+          `[Error: Unable to retrieve new access token for connectorId: test-id]`
+        );
+      }
+    });
+
+    it('adds access token to headers', async () => {
+      const accessToken = 'Bearer my-access-token';
+      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: WebhookConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          method: WebhookMethods.POST,
+          url: 'https://test.com',
+          hasAuth: true,
+          authType: AuthType.OAuth2ClientCredentials,
+          accessTokenUrl: 'https://token.url',
+          clientId: 'client',
+          headers: null,
+        },
+        params: { body: '{}' },
+        secrets: {
+          clientSecret: 'secret',
+          key: null,
+          user: null,
+          password: null,
+          crt: null,
+          pfx: null,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
       await connectorType.executor(execOptions);
-    } catch (error) {
-      expect(error).toMatchInlineSnapshot(
-        `[Error: Unable to retrieve new access token for connectorId: test-id]`
-      );
-    }
+
+      expect((utils.request as jest.Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
+    });
+
+    it('merges custom headers with Authorization header', async () => {
+      const accessToken = 'Bearer token123';
+      (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: WebhookConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          method: WebhookMethods.POST,
+          url: 'https://test.com',
+          hasAuth: true,
+          authType: AuthType.OAuth2ClientCredentials,
+          accessTokenUrl: 'https://token.url',
+          clientId: 'client',
+          headers: { 'X-Custom': 'value' },
+        },
+        params: { body: '{}' },
+        secrets: {
+          clientSecret: 'secret',
+          key: null,
+          user: null,
+          password: null,
+          crt: null,
+          pfx: null,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      await connectorType.executor(execOptions);
+
+      const headers = (utils.request as jest.Mock).mock.calls[0][0].headers;
+      expect(headers.Authorization).toBe(accessToken);
+      expect(headers['X-Custom']).toBe('value');
+    });
   });
 
-  it('oauth2 - adds access token to headers', async () => {
-    const accessToken = 'Bearer my-access-token';
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
-    createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
-
-    const execOptions: WebhookConnectorTypeExecutorOptions = {
-      actionId: 'test-id',
-      config: {
-        method: WebhookMethods.POST,
-        url: 'https://test.com',
-        hasAuth: true,
-        authType: AuthType.OAuth2ClientCredentials,
-        accessTokenUrl: 'https://token.url',
-        clientId: 'client',
-        headers: null,
-      },
-      params: { body: '{}' },
-      secrets: {
-        clientSecret: 'secret',
-        key: null,
-        user: null,
-        password: null,
-        crt: null,
-        pfx: null,
-      },
-      configurationUtilities,
-      logger: mockedLogger,
-      services,
-      connectorUsageCollector,
-    };
-
-    await connectorType.executor(execOptions);
-
-    expect((utils.request as jest.Mock).mock.calls[0][0].headers.Authorization).toBe(accessToken);
-  });
-
-  it('oauth2 - merges custom headers with Authorization header', async () => {
-    const accessToken = 'Bearer token123';
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(accessToken);
+  it('should log an error if refreshing access token fails', async () => {
+    const errorMessage = 'Invalid client or Invalid client credentials';
+    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+      new Error(errorMessage)
+    );
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
     const execOptions: WebhookConnectorTypeExecutorOptions = {
@@ -927,8 +969,8 @@ describe('execute()', () => {
 
     await connectorType.executor(execOptions);
 
-    const headers = (utils.request as jest.Mock).mock.calls[0][0].headers;
-    expect(headers.Authorization).toBe(accessToken);
-    expect(headers['X-Custom']).toBe('value');
+    expect(mockedLogger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+      `"ConnectorId \\"test-id\\": error \\"Unable to retrieve/refresh the access token: Invalid client or Invalid client credentials\\""`
+    );
   });
 });

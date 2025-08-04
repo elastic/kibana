@@ -37,7 +37,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
       paramsProperty={'additional_fields'}
       inputTargetValue={value}
       errors={errors ?? []}
-      dataTestSubj={'additionalFields'}
+      dataTestSubj="additionalFields"
       label={
         <>
           {i18n.ADDITIONAL_FIELDS}
