@@ -18,12 +18,10 @@ import { z } from '@kbn/zod';
 
 export type PrivilegeMonitoringEngineStatus = z.infer<typeof PrivilegeMonitoringEngineStatus>;
 export const PrivilegeMonitoringEngineStatus = z.enum([
-  'installing',
   'started',
-  'stopped',
-  'updating',
   'error',
   'disabled',
+  'not_installed',
 ]);
 export type PrivilegeMonitoringEngineStatusEnum = typeof PrivilegeMonitoringEngineStatus.enum;
 export const PrivilegeMonitoringEngineStatusEnum = PrivilegeMonitoringEngineStatus.enum;
