@@ -67,7 +67,8 @@ export class ComposerQuery {
    * Column name parts are automatically escaped if they contain special
    * characters.
    *
-   * @param columns The columns to keep in the result set.
+   * @param column The first column to keep.
+   * @param columns Additional columns to keep.
    * @returns The updated ComposerQuery instance.
    */
   public readonly keep = (
@@ -81,6 +82,36 @@ export class ComposerQuery {
     return this.pipe`KEEP ${nodes}`;
   };
 
+  /**
+   * Specifies the columns to sort by. Appends a `SORT` command. Equivalent to
+   * calling `.pipe` with a `SORT` command.
+   *
+   * ```typescript
+   * query.pipe `SORT order.id,
+   *   order.date DESC, user.name NULLS LAST`;
+   * ```
+   *
+   * Order conditions are specified as a 3-tuple [column, order, nulls].
+   * `column` can be specified as a string or as an array of column parts.
+   *
+   * For example:
+   *
+   * ```typescript
+   * query.sort([['order', 'id'], 'ASC', 'NULLS FIRST']);
+   *   // SORT order.id ASC NULLS FIRST
+   * ```
+   *
+   * If you your column is not nested, you can simply pass a string:
+   *
+   * ```typescript
+   * query.sort(['column', '', 'NULLS FIRST']); // SORT column NULLS FIRST
+   * query.sort('abc'); // SORT abc
+   * ```
+   *
+   * @param expression The primary sort expression.
+   * @param expressions Additional sort expressions.
+   * @returns The updated ComposerQuery instance.
+   */
   public readonly sort = (
     expression: ComposerSortShorthand,
     ...expressions: ComposerSortShorthand[]
