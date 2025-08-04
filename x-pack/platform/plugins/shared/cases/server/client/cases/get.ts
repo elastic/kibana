@@ -10,11 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
-import { pick } from 'lodash';
 import type {
-  AlertAttachmentPayload,
-  AlertMetadata,
   AttachmentAttributes,
   AttachmentTotals,
   Case,
@@ -43,12 +39,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import {
-  countAlertsForID,
-  flattenCaseSavedObject,
-  countUserAttachments,
-  getIDsAndIndicesAsArrays,
-} from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -57,8 +48,8 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { AttachmentType, CaseRt } from '../../../common/types/domain';
-import { getAlerts } from '../alerts/get';
+import { CaseRt } from '../../../common/types/domain';
+import { getAlertMetadataFromComments } from '../alerts/get';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -169,35 +160,6 @@ export const getCasesByAlertID = async (
 const getAttachmentTotalsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
   stats.get(id) ?? { alerts: 0, userComments: 0 };
 
-const getAlertMetadataFromComments = async (
-  comments: AttachmentAttributes[],
-  clientArgs: CasesClientArgs
-): Promise<AlertMetadata[]> => {
-  const alertAttachments: AlertAttachmentPayload[] = comments.flatMap((props) => {
-    if (props.type === AttachmentType.alert) {
-      return [pick(props, ['type', 'alertId', 'index', 'rule', 'owner'])];
-    }
-    return [];
-  });
-
-  if (alertAttachments.length === 0) {
-    return [];
-  }
-
-  const alertsDocs = await getAlerts(
-    alertAttachments.flatMap((a) => {
-      const { ids, indices } = getIDsAndIndicesAsArrays(a);
-      return ids.map((alertId, index) => ({ id: alertId, index: indices[index] }));
-    }),
-    clientArgs
-  );
-  return alertsDocs.map((alert) => ({
-    id: alert.id,
-    grouping: alert[ALERT_GROUPING],
-    tags: alert[TAGS],
-  }));
-};
-
 const getCaseComments = async (id: string, clientArgs: CasesClientArgs) => {
   const {
     services: { caseService },
@@ -209,6 +171,19 @@ const getCaseComments = async (id: string, clientArgs: CasesClientArgs) => {
       sortOrder: 'asc',
     },
   });
+};
+
+const getCaseMetadata = async (
+  theComments: SavedObjectsFindResponse<AttachmentAttributes>,
+  clientArgs: CasesClientArgs
+): Promise<CaseMetadata> => {
+  const alertMetadata = await getAlertMetadataFromComments(
+    theComments.saved_objects.map((comment) => comment.attributes),
+    clientArgs
+  );
+  return {
+    alerts: alertMetadata,
+  };
 };
 
 /**
@@ -259,13 +234,7 @@ export const get = async (
 
     if (includeMetadata) {
       theComments = await getCaseComments(id, clientArgs);
-      const alertMetadata = await getAlertMetadataFromComments(
-        theComments.saved_objects.map((comment) => comment.attributes),
-        clientArgs
-      );
-      metadata = {
-        alerts: alertMetadata,
-      };
+      metadata = await getCaseMetadata(theComments, clientArgs);
     }
 
     if (!includeComments) {

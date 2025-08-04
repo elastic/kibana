@@ -6,9 +6,14 @@
  */
 
 import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
-import type { CasesClientGetAlertsResponse } from './types';
-import type { CasesClientArgs } from '..';
+import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
+import type { AlertMetadata } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
+import type { AttachmentAttributes } from '../../../common';
 import type { AlertInfo } from '../../common/types';
+import type { CasesClientArgs } from '..';
+import type { CasesClientGetAlertsResponse } from './types';
+import { getIDsAndIndicesAsArrays } from '../../common/utils';
 
 function isAlert(
   doc?: MgetResponseItem<Record<string, unknown>>
@@ -34,5 +39,26 @@ export const getAlerts = async (
     id: alert._id,
     index: alert._index,
     ...alert._source,
+  }));
+};
+
+export const getAlertMetadataFromComments = async (
+  comments: AttachmentAttributes[],
+  clientArgs: CasesClientArgs
+): Promise<AlertMetadata[]> => {
+  const alertInfo: AlertInfo[] = comments.flatMap((c) => {
+    if (c.type === AttachmentType.alert) {
+      const { ids, indices } = getIDsAndIndicesAsArrays(c);
+      return ids.map((alertId, index) => ({ id: alertId, index: indices[index] }));
+    }
+    return [];
+  });
+
+  const alertsDocs = await getAlerts(alertInfo, clientArgs);
+
+  return alertsDocs.map((alert) => ({
+    id: alert.id,
+    grouping: alert[ALERT_GROUPING],
+    tags: alert[TAGS],
   }));
 };
