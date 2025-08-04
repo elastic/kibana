@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export const KBN_ARCHIVES = {
-  DASHBOARD: 'x-pack/test/functional/fixtures/kbn_archiver/dashboard/simple.json',
-};
+import { indexNamePrefix as sampleIndexNamePrefix, DatasetSampleType } from '.';
+
+export const getSampleDataIndexName = (sampleType: DatasetSampleType): string =>
+  `${sampleIndexNamePrefix}${sampleType.toLowerCase()}`;
