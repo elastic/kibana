@@ -609,20 +609,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval textField = 5",
-      "error": [],
-      "warning": [
-        "Column [textField] of type text has been overwritten as new type: integer"
-      ]
-    },
-    {
-      "query": "from a_index | eval doubleField = \"5\"",
-      "error": [],
-      "warning": [
-        "Column [doubleField] of type double has been overwritten as new type: keyword"
-      ]
-    },
-    {
       "query": "from a_index | eval round(doubleField) + 1 | eval `round(doubleField) + 1` + 1 | keep ```round(doubleField) + 1`` + 1`",
       "error": [],
       "warning": []
