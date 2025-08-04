@@ -106,7 +106,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 <FormattedMessage
                   id="genAiSettings.aiConnectorDescriptionWithLink"
                   defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-                    showSpacesIntegration
+                    showSpacesIntegration && canManageSpaces
                       ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
                       : ''
                   }`}
@@ -130,16 +130,17 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                         />
                       </strong>
                     ),
-                    ...(showSpacesIntegration && {
-                      aiFeatureVisibility: (
-                        <strong>
-                          <FormattedMessage
-                            id="genAiSettings.aiFeatureVisibilityText"
-                            defaultMessage="AI feature visibility"
-                          />
-                        </strong>
-                      ),
-                    }),
+                    ...(showSpacesIntegration &&
+                      canManageSpaces && {
+                        aiFeatureVisibility: (
+                          <strong>
+                            <FormattedMessage
+                              id="genAiSettings.aiFeatureVisibilityText"
+                              defaultMessage="AI feature visibility"
+                            />
+                          </strong>
+                        ),
+                      }),
                   }}
                 />
               </p>
