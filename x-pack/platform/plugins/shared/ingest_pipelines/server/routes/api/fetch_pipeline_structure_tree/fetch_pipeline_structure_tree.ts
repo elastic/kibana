@@ -31,10 +31,15 @@ export const fetchPipelineStructureTree = (
   rootPipelineId: string,
   level: number = 1,
   createdNodes: Record<string, PipelineTreeNode> = {}
-): PipelineTreeNode | undefined => {
+): PipelineTreeNode => {
   const rootPipeline = allPipelines[rootPipelineId];
   if (!rootPipeline) {
-    return;
+    return {
+      pipelineName: rootPipelineId,
+      isManaged: false,
+      isDeprecated: false,
+      children: [],
+    };
   }
 
   const pipelineNode: PipelineTreeNode = {
