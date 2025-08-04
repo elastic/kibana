@@ -21,13 +21,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       tagModal = tagManagementPage.tagModal;
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
       await tagManagementPage.navigateTo();
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
       );
     });
 

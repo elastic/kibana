@@ -20,19 +20,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
       await esArchiver.loadIfNeeded(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
       );
       await kibanaServer.savedObjects.clean({ types: ['tag'] });
       await esArchiver.unload(
-        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
+        'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
 
