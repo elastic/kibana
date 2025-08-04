@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { DatasetSampleType, getSampleDataIndexName } from '../../common';
+import { indexNamePrefix as sampleIndexNamePrefix, DatasetSampleType } from '.';
 
-export const isSampleIndex = (indexName: string) =>
-  Object.values(DatasetSampleType).some(
-    (sampleType) => indexName === getSampleDataIndexName(sampleType)
-  );
+export const getSampleDataIndexName = (sampleType: DatasetSampleType): string =>
+  `${sampleIndexNamePrefix}${sampleType.toLowerCase()}`;
