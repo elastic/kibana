@@ -296,13 +296,13 @@ describe('IndexManager', () => {
     });
   });
 
-  describe('isIndexExists', () => {
+  describe('hasIndex', () => {
     const indexName = 'test-index';
 
     it('should return true when index exists', async () => {
       esClient.indices.exists.mockResolvedValue(true);
 
-      const result = await indexManager.isIndexExists({ indexName, esClient });
+      const result = await indexManager.hasIndex({ indexName, esClient });
 
       expect(result).toBe(true);
       expect(esClient.indices.exists).toHaveBeenCalledWith({ index: indexName });

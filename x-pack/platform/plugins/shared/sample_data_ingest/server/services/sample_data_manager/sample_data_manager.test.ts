@@ -73,7 +73,7 @@ describe('SampleDataManager', () => {
     mockIndexManager = {
       createAndPopulateIndex: jest.fn(),
       deleteIndex: jest.fn(),
-      isIndexExists: jest.fn(),
+      hasIndex: jest.fn(),
       setESClient: jest.fn(),
     } as any;
 
@@ -95,7 +95,7 @@ describe('SampleDataManager', () => {
 
     mockIndexManager.createAndPopulateIndex.mockResolvedValue(undefined);
     mockIndexManager.deleteIndex.mockResolvedValue(undefined);
-    mockIndexManager.isIndexExists.mockResolvedValue(false);
+    mockIndexManager.hasIndex.mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -143,7 +143,7 @@ describe('SampleDataManager', () => {
     it('should install sample data successfully', async () => {
       const result = await sampleDataManager.installSampleData({ sampleType, esClient });
 
-      expect(mockIndexManager.isIndexExists).toHaveBeenCalledWith({
+      expect(mockIndexManager.hasIndex).toHaveBeenCalledWith({
         indexName: expectedIndexName,
         esClient,
       });
@@ -225,15 +225,14 @@ describe('SampleDataManager', () => {
     });
 
     it('should not install anything if index already exists', async () => {
-      mockIndexManager.isIndexExists.mockResolvedValue(true);
+      mockIndexManager.hasIndex.mockResolvedValue(true);
 
       const result = await sampleDataManager.installSampleData({ sampleType, esClient });
 
-      expect(mockIndexManager.isIndexExists).toHaveBeenCalledWith({
+      expect(mockIndexManager.hasIndex).toHaveBeenCalledWith({
         indexName: expectedIndexName,
         esClient,
       });
-
       expect(result).toBe(expectedIndexName);
       expect(mockArtifactManager.prepareArtifact).not.toHaveBeenCalled();
       expect(mockIndexManager.createAndPopulateIndex).not.toHaveBeenCalled();
@@ -273,11 +272,10 @@ describe('SampleDataManager', () => {
     const expectedIndexName = 'kibana_sample_data_kibana';
 
     it('should return installed status when index exists', async () => {
-      esClient.indices.exists.mockResolvedValue(true);
+      mockIndexManager.hasIndex.mockResolvedValue(true);
 
       const result = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
 
-      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: expectedIndexName });
       expect(result).toEqual({
         status: 'installed',
         indexName: expectedIndexName,
@@ -285,11 +283,10 @@ describe('SampleDataManager', () => {
     });
 
     it('should return uninstalled status when index does not exist', async () => {
-      esClient.indices.exists.mockResolvedValue(false);
+      mockIndexManager.hasIndex.mockResolvedValue(false);
 
       const result = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
 
-      expect(esClient.indices.exists).toHaveBeenCalledWith({ index: expectedIndexName });
       expect(result).toEqual({
         status: 'uninstalled',
         indexName: undefined,
@@ -298,7 +295,7 @@ describe('SampleDataManager', () => {
 
     it('should handle elasticsearch client errors gracefully', async () => {
       const error = new Error('Elasticsearch error');
-      esClient.indices.exists.mockRejectedValue(error);
+      mockIndexManager.hasIndex.mockRejectedValue(error);
 
       const result = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
 
@@ -325,7 +322,7 @@ describe('SampleDataManager', () => {
       expect(indexName).toBe('kibana_sample_data_kibana');
 
       // Check status after installation
-      esClient.indices.exists.mockResolvedValue(true);
+      mockIndexManager.hasIndex.mockResolvedValue(true);
       status = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
       expect(status.status).toBe('installed');
       expect(status.indexName).toBe('kibana_sample_data_kibana');

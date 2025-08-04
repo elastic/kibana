@@ -94,7 +94,7 @@ export class IndexManager {
     }
   }
 
-  async isIndexExists({
+  async hasIndex({
     indexName,
     esClient,
   }: {

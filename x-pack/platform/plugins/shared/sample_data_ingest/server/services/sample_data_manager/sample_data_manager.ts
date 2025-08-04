@@ -65,7 +65,7 @@ export class SampleDataManager {
     const indexName = getSampleDataIndexName(sampleType);
 
     try {
-      if ((await this.indexManager.isIndexExists({ indexName, esClient })) || this.isInstalling) {
+      if ((await this.indexManager.hasIndex({ indexName, esClient })) || this.isInstalling) {
         this.log.warn(`Sample data already installed for [${sampleType}]`);
         return indexName;
       }
@@ -127,10 +127,10 @@ export class SampleDataManager {
   }): Promise<StatusResponse> {
     const indexName = getSampleDataIndexName(sampleType);
     try {
-      const isIndexExists = await esClient.indices.exists({ index: indexName });
+      const hasIndex = await this.indexManager.hasIndex({ indexName, esClient });
       return {
-        status: isIndexExists ? 'installed' : 'uninstalled',
-        indexName: isIndexExists ? indexName : undefined,
+        status: hasIndex ? 'installed' : 'uninstalled',
+        indexName: hasIndex ? indexName : undefined,
       };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
