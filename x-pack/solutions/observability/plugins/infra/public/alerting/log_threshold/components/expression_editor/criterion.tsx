@@ -196,6 +196,9 @@ export const Criterion: React.FC<Props> = ({
               <div>
                 <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
                 <EuiFormRow
+                  aria-label={i18n.translate('xpack.infra.criterion.comboBox.ariaLabel', {
+                    defaultMessage: '',
+                  })}
                   style={{ minWidth: '300px' }}
                   // @ts-expect-error upgrade typescript v5.1.6
                   isInvalid={errors.field.length > 0}
@@ -223,7 +226,8 @@ export const Criterion: React.FC<Props> = ({
                 <EuiExpression
                   description={
                     criterion.comparator
-                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`] ??
+                      ? // @ts-expect-error upgrade typescript v5.4.5
+                        ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`] ??
                         ComparatorToi18nMap[criterion.comparator] ??
                         ''
                       : ''
@@ -254,6 +258,9 @@ export const Criterion: React.FC<Props> = ({
                 <EuiFlexGroup gutterSize="l">
                   <EuiFlexItem grow={false}>
                     <EuiFormRow
+                      aria-label={i18n.translate('xpack.infra.criterion.select.ariaLabel', {
+                        defaultMessage: '',
+                      })}
                       isInvalid={
                         // @ts-expect-error upgrade typescript v5.1.6
                         errors.comparator.length > 0

@@ -16,7 +16,7 @@ Example CODEOWNERS Block:
 _notice the coverage delimiter `#CC# ...`_
 
 ```
-/x-pack/test/functional/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/siem
+/x-pack/solutions/security/test/fixtures/es_archives/endpoint/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/platform/test/plugin_functional/plugins/resolver_test/ @elastic/endpoint-app-team @elastic/siem
 /x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/endpoint-app-team @elastic/siem
 #CC# /x-pack/legacy/plugins/siem/ @elastic/siem

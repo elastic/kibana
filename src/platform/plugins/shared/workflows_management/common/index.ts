@@ -13,3 +13,7 @@ export const PLUGIN_NAME = 'Workflows';
 export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
 export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export {
+  convertToWorkflowGraph,
+  convertToSerializableGraph,
+} from './lib/build_execution_graph/build_execution_graph';

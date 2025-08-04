@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor/ui').then((module) => ({
@@ -82,12 +82,14 @@ export function WorkflowEditor({ workflowId, value, onChange, hasChanges }: Work
         )}
       </EuiFlexItem>
       <EuiFlexItem css={{ flex: 1, minHeight: 0, height: '100%' }}>
-        <WorkflowYAMLEditor
-          workflowId={workflowId}
-          filename={`${workflowId}.yaml`}
-          value={value}
-          onChange={(v) => onChange(v ?? '')}
-        />
+        <React.Suspense fallback={<EuiLoadingSpinner />}>
+          <WorkflowYAMLEditor
+            workflowId={workflowId}
+            filename={`${workflowId}.yaml`}
+            value={value}
+            onChange={(v) => onChange(v ?? '')}
+          />
+        </React.Suspense>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
