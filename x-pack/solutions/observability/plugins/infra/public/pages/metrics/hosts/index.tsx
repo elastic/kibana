@@ -6,23 +6,17 @@
  */
 
 import React from 'react';
-import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
-import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostsContainer } from './components/hosts_container';
 
-const HOSTS_FEEDBACK_LINK =
-  'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
-
 export const HostsPage = () => {
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
-
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
@@ -50,15 +44,6 @@ export const HostsPage = () => {
               <h1>{hostsTitle}</h1>
             </div>
           ),
-          rightSideItems: [
-            <FeatureFeedbackButton
-              data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-              formUrl={HOSTS_FEEDBACK_LINK}
-              kibanaVersion={kibanaVersion}
-              isCloudEnv={isCloudEnv}
-              isServerlessEnv={isServerlessEnv}
-            />,
-          ],
         }}
         pageSectionProps={{
           contentProps: {
