@@ -47575,30 +47575,68 @@
                                                               "type": "object"
                                                             },
                                                             {
-                                                              "properties": {
-                                                                "field": {
-                                                                  "minLength": 1,
-                                                                  "type": "string"
+                                                              "anyOf": [
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "copy_from": {
+                                                                      "not": {}
+                                                                    },
+                                                                    "field": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "ignore_empty_value": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "media_type": {
+                                                                      "type": "string"
+                                                                    },
+                                                                    "override": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "value": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "field",
+                                                                    "value"
+                                                                  ],
+                                                                  "type": "object"
                                                                 },
-                                                                "ignore_empty_value": {
-                                                                  "type": "boolean"
-                                                                },
-                                                                "media_type": {
-                                                                  "type": "string"
-                                                                },
-                                                                "override": {
-                                                                  "type": "boolean"
-                                                                },
-                                                                "value": {
-                                                                  "minLength": 1,
-                                                                  "type": "string"
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "copy_from": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "field": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "ignore_empty_value": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "media_type": {
+                                                                      "type": "string"
+                                                                    },
+                                                                    "override": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "value": {
+                                                                      "not": {}
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "field",
+                                                                    "copy_from"
+                                                                  ],
+                                                                  "type": "object"
                                                                 }
-                                                              },
-                                                              "required": [
-                                                                "field",
-                                                                "value"
-                                                              ],
-                                                              "type": "object"
+                                                              ]
                                                             }
                                                           ]
                                                         }
@@ -49666,30 +49704,68 @@
                                                           "type": "object"
                                                         },
                                                         {
-                                                          "properties": {
-                                                            "field": {
-                                                              "minLength": 1,
-                                                              "type": "string"
+                                                          "anyOf": [
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "copy_from": {
+                                                                  "not": {}
+                                                                },
+                                                                "field": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_empty_value": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "media_type": {
+                                                                  "type": "string"
+                                                                },
+                                                                "override": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "value": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "field",
+                                                                "value"
+                                                              ],
+                                                              "type": "object"
                                                             },
-                                                            "ignore_empty_value": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "media_type": {
-                                                              "type": "string"
-                                                            },
-                                                            "override": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "value": {
-                                                              "minLength": 1,
-                                                              "type": "string"
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "copy_from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "field": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_empty_value": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "media_type": {
+                                                                  "type": "string"
+                                                                },
+                                                                "override": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "value": {
+                                                                  "not": {}
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "field",
+                                                                "copy_from"
+                                                              ],
+                                                              "type": "object"
                                                             }
-                                                          },
-                                                          "required": [
-                                                            "field",
-                                                            "value"
-                                                          ],
-                                                          "type": "object"
+                                                          ]
                                                         }
                                                       ]
                                                     }
@@ -51512,30 +51588,68 @@
                                                               "type": "object"
                                                             },
                                                             {
-                                                              "properties": {
-                                                                "field": {
-                                                                  "minLength": 1,
-                                                                  "type": "string"
+                                                              "anyOf": [
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "copy_from": {
+                                                                      "not": {}
+                                                                    },
+                                                                    "field": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "ignore_empty_value": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "media_type": {
+                                                                      "type": "string"
+                                                                    },
+                                                                    "override": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "value": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "field",
+                                                                    "value"
+                                                                  ],
+                                                                  "type": "object"
                                                                 },
-                                                                "ignore_empty_value": {
-                                                                  "type": "boolean"
-                                                                },
-                                                                "media_type": {
-                                                                  "type": "string"
-                                                                },
-                                                                "override": {
-                                                                  "type": "boolean"
-                                                                },
-                                                                "value": {
-                                                                  "minLength": 1,
-                                                                  "type": "string"
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "copy_from": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "field": {
+                                                                      "minLength": 1,
+                                                                      "type": "string"
+                                                                    },
+                                                                    "ignore_empty_value": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "media_type": {
+                                                                      "type": "string"
+                                                                    },
+                                                                    "override": {
+                                                                      "type": "boolean"
+                                                                    },
+                                                                    "value": {
+                                                                      "not": {}
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "field",
+                                                                    "copy_from"
+                                                                  ],
+                                                                  "type": "object"
                                                                 }
-                                                              },
-                                                              "required": [
-                                                                "field",
-                                                                "value"
-                                                              ],
-                                                              "type": "object"
+                                                              ]
                                                             }
                                                           ]
                                                         }
@@ -53350,30 +53464,68 @@
                                                           "type": "object"
                                                         },
                                                         {
-                                                          "properties": {
-                                                            "field": {
-                                                              "minLength": 1,
-                                                              "type": "string"
+                                                          "anyOf": [
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "copy_from": {
+                                                                  "not": {}
+                                                                },
+                                                                "field": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_empty_value": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "media_type": {
+                                                                  "type": "string"
+                                                                },
+                                                                "override": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "value": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "field",
+                                                                "value"
+                                                              ],
+                                                              "type": "object"
                                                             },
-                                                            "ignore_empty_value": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "media_type": {
-                                                              "type": "string"
-                                                            },
-                                                            "override": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "value": {
-                                                              "minLength": 1,
-                                                              "type": "string"
+                                                            {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "copy_from": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "field": {
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "ignore_empty_value": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "media_type": {
+                                                                  "type": "string"
+                                                                },
+                                                                "override": {
+                                                                  "type": "boolean"
+                                                                },
+                                                                "value": {
+                                                                  "not": {}
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "field",
+                                                                "copy_from"
+                                                              ],
+                                                              "type": "object"
                                                             }
-                                                          },
-                                                          "required": [
-                                                            "field",
-                                                            "value"
-                                                          ],
-                                                          "type": "object"
+                                                          ]
                                                         }
                                                       ]
                                                     }
@@ -55594,30 +55746,68 @@
                                               "type": "object"
                                             },
                                             {
-                                              "properties": {
-                                                "field": {
-                                                  "minLength": 1,
-                                                  "type": "string"
+                                              "anyOf": [
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "copy_from": {
+                                                      "not": {}
+                                                    },
+                                                    "field": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "ignore_empty_value": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "media_type": {
+                                                      "type": "string"
+                                                    },
+                                                    "override": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "value": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "field",
+                                                    "value"
+                                                  ],
+                                                  "type": "object"
                                                 },
-                                                "ignore_empty_value": {
-                                                  "type": "boolean"
-                                                },
-                                                "media_type": {
-                                                  "type": "string"
-                                                },
-                                                "override": {
-                                                  "type": "boolean"
-                                                },
-                                                "value": {
-                                                  "minLength": 1,
-                                                  "type": "string"
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "copy_from": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "field": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "ignore_empty_value": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "media_type": {
+                                                      "type": "string"
+                                                    },
+                                                    "override": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "value": {
+                                                      "not": {}
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "field",
+                                                    "copy_from"
+                                                  ],
+                                                  "type": "object"
                                                 }
-                                              },
-                                              "required": [
-                                                "field",
-                                                "value"
-                                              ],
-                                              "type": "object"
+                                              ]
                                             }
                                           ]
                                         }
@@ -57547,30 +57737,68 @@
                                               "type": "object"
                                             },
                                             {
-                                              "properties": {
-                                                "field": {
-                                                  "minLength": 1,
-                                                  "type": "string"
+                                              "anyOf": [
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "copy_from": {
+                                                      "not": {}
+                                                    },
+                                                    "field": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "ignore_empty_value": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "media_type": {
+                                                      "type": "string"
+                                                    },
+                                                    "override": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "value": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "field",
+                                                    "value"
+                                                  ],
+                                                  "type": "object"
                                                 },
-                                                "ignore_empty_value": {
-                                                  "type": "boolean"
-                                                },
-                                                "media_type": {
-                                                  "type": "string"
-                                                },
-                                                "override": {
-                                                  "type": "boolean"
-                                                },
-                                                "value": {
-                                                  "minLength": 1,
-                                                  "type": "string"
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "copy_from": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "field": {
+                                                      "minLength": 1,
+                                                      "type": "string"
+                                                    },
+                                                    "ignore_empty_value": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "media_type": {
+                                                      "type": "string"
+                                                    },
+                                                    "override": {
+                                                      "type": "boolean"
+                                                    },
+                                                    "value": {
+                                                      "not": {}
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "field",
+                                                    "copy_from"
+                                                  ],
+                                                  "type": "object"
                                                 }
-                                              },
-                                              "required": [
-                                                "field",
-                                                "value"
-                                              ],
-                                              "type": "object"
+                                              ]
                                             }
                                           ]
                                         }
