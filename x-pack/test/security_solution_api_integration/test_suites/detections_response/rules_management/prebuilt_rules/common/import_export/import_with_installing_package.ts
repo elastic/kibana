@@ -68,8 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/228844
-  describe.skip('@ess @serverless @skipInServerlessMKI Import prebuilt rules when the package is not installed', () => {
+  describe('@ess @serverless @skipInServerlessMKI Import prebuilt rules when the package is not installed', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
       await deleteAllRules(supertest, log);
