@@ -143,9 +143,11 @@ export const renderCustomToolbar: UnifiedDataTableRenderCustomToolbar = internal
 export const getRenderCustomToolbarWithElements = ({
   leftSide,
   bottomSection,
+  gridProps,
 }: {
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  gridProps?: UnifiedDataTableRenderCustomToolbarProps['gridProps'];
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
@@ -153,5 +155,6 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
+      ...(gridProps ? { gridProps } : {}),
     });
 };

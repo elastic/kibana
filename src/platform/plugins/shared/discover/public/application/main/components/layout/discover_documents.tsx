@@ -8,9 +8,12 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import { buildEsQuery } from '@kbn/es-query';
 import {
+  EuiButtonEmpty,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
   EuiProgress,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -83,6 +86,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useNewEntriesWatcher } from '../../../../hooks/use_new_entries_watcher';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
@@ -385,6 +389,44 @@ function DiscoverDocumentsComponent({
     [isDataLoading]
   );
 
+  const lastLoadedTimestampISO =
+    Array.isArray(documents?.result) && documents && documents.result.length > 0
+      ? Array.isArray((documents.result[0] as DataTableRecord)?.flattened?.['@timestamp'])
+        ? ((documents.result[0] as DataTableRecord)?.flattened?.['@timestamp'] as number[])[0] ?? 0
+        : 0
+      : 0;
+
+  const lastLoadedTimestamp = Date.parse(String(lastLoadedTimestampISO));
+
+  const kqlQuery = query ?? { language: 'kuery', query: '' };
+  const esQuery = buildEsQuery(dataView, [kqlQuery], filters ?? []);
+
+  const { count, reset } = useNewEntriesWatcher({
+    lastLoadedTimestamp,
+    query: esQuery,
+    dataView,
+    timeField: '@timestamp',
+    timefilter: services.timefilter,
+  });
+
+  // Help me write a reset function which uses useCallback and resets the count to 0
+  const resetCount = useCallback(() => {
+    reset();
+    stateContainer.actions.fetchData();
+  }, [reset, stateContainer.actions]);
+
+  const newEntryAvailableControl = useMemo(
+    () => (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={resetCount}>
+          <EuiNotificationBadge color="success">{count}</EuiNotificationBadge> new documents
+          available
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    ),
+    [count, resetCount]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
@@ -395,8 +437,11 @@ function DiscoverDocumentsComponent({
             {loadingIndicator}
           </>
         ),
+        gridProps: {
+          additionalControls: count > 0 ? newEntryAvailableControl : null,
+        },
       }),
-    [viewModeToggle, callouts, loadingIndicator]
+    [viewModeToggle, callouts, loadingIndicator, newEntryAvailableControl, count]
   );
 
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
