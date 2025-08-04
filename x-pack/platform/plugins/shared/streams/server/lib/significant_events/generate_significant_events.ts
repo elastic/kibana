@@ -291,6 +291,8 @@ ${JSON.stringify(
       } finally {
         subscriber.complete();
       }
-    })();
+    })().catch((error) => {
+      subscriber.error(error);
+    });
   });
 }
