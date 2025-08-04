@@ -263,6 +263,8 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
           result: this.translationResultAggCount(translationResultsAgg),
           installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
           prebuilt: (successAgg.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0,
+          hasPlaceholder:
+            (successAgg.hasPlaceholder as AggregationsFilterAggregate)?.doc_count ?? 0,
         },
         failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },
@@ -462,5 +464,70 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
         _index: index,
       },
     }));
+  }
+
+  async updateIndexPattern(
+    id: string,
+    indexPattern: string,
+    translatedRuleIds?: string[]
+  ): Promise<number | undefined> {
+    const index = await this.getIndexName();
+    const query = translatedRuleIds
+      ? {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'elastic_rule.query:"FROM [indexPattern]"',
+                },
+              },
+              {
+                terms: {
+                  'elastic_rule.id': translatedRuleIds,
+                },
+              },
+            ],
+          },
+        }
+      : {
+          bool: {
+            filter: [
+              {
+                query_string: {
+                  query: 'elastic_rule.query:"FROM [indexPattern]"',
+                },
+              },
+              {
+                terms: {
+                  migration_id: [id],
+                },
+              },
+            ],
+          },
+        };
+
+    const result = await this.esClient
+      .updateByQuery({
+        index,
+        script: {
+          source: `
+                def originalQuery = ctx._source.elastic_rule.query;
+                def newIndex = params.new_index;
+                def newQuery = originalQuery.replace('FROM [indexPattern]', 'FROM ' + newIndex);
+                ctx._source.elastic_rule.query = newQuery;
+              `,
+          lang: 'painless',
+          params: {
+            new_index: indexPattern,
+          },
+        },
+        query,
+      })
+      .catch((error) => {
+        this.logger.error(`Error updating index pattern for migration ${id}: ${error}`);
+        throw error;
+      });
+
+    return result.updated;
   }
 }

@@ -390,6 +390,10 @@ export const RuleMigrationTranslationStats = z.object({
        * The number of rules that have been successfully translated and matched Elastic prebuilt rules.
        */
       prebuilt: z.number().int(),
+      /**
+       * The number of rules that have a placeholder in the query.
+       */
+      hasPlaceholder: z.number().int(),
     }),
     /**
      * The number of rules that have failed translation.
