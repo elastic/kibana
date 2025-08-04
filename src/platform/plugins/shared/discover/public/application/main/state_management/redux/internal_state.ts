@@ -323,7 +323,7 @@ const createMiddleware = ({
     actionCreator: internalStateSlice.actions.setControlGroupState,
     effect: throttle(
       (action) => {
-        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+        tabsStorageManager.updateTabControlStateLocally(action.payload.tabId, action.payload);
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS

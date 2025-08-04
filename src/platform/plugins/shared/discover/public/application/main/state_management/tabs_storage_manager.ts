@@ -69,7 +69,11 @@ export interface TabsStorageManager {
   ) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabStateInLocalStorage, 'appState' | 'globalState' | 'controlGroupState'>
+    tabState: Pick<TabStateInLocalStorage, 'appState' | 'globalState'>
+  ) => void;
+  updateTabControlStateLocally: (
+    tabId: string,
+    tabState: Pick<TabStateInLocalStorage, 'controlGroupState'>
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -306,6 +310,33 @@ export const createTabsStorageManager = ({
             ...tab,
             appState: tabStatePartial.appState,
             globalState: tabStatePartial.globalState,
+          };
+        }
+        return tab;
+      }),
+    };
+
+    if (hasModifications) {
+      storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
+    }
+  };
+
+  const updateTabControlStateLocally: TabsStorageManager['updateTabControlStateLocally'] = (
+    tabId,
+    tabStatePartial
+  ) => {
+    if (!enabled) {
+      return;
+    }
+    let hasModifications = false;
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      openTabs: storedTabsState.openTabs.map((tab) => {
+        if (tab.id === tabId) {
+          hasModifications = true;
+          return {
+            ...tab,
             controlGroupState: tabStatePartial.controlGroupState,
           };
         }
@@ -382,6 +413,7 @@ export const createTabsStorageManager = ({
   return {
     startUrlSync,
     persistLocally,
+    updateTabControlStateLocally,
     updateTabStateLocally,
     loadLocally,
     getNRecentlyClosedTabs,

@@ -63,10 +63,6 @@ const getEsqlVariablesFromState = (
  * and a getter function to retrieve the currently active control panels state for the current tab.
  */
 
-interface ESQLControlSessionStorage {
-  [key: string]: ControlPanelsState<ESQLControlState>;
-}
-
 export const useESQLVariables = ({
   isEsqlMode,
   controlGroupAPI,
@@ -96,7 +92,11 @@ export const useESQLVariables = ({
       return;
     }
     const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
-      if (input && input.initialChildControlState) {
+      if (
+        input &&
+        input.initialChildControlState &&
+        Object.keys(input.initialChildControlState).length > 0
+      ) {
         const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
@@ -108,6 +108,7 @@ export const useESQLVariables = ({
         const newVariables = getEsqlVariablesFromState(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
           dispatch(internalStateActions.setEsqlVariables(newVariables));
+          // handling the unsaved changes badge
           stateContainer.savedSearchState.updateControlState({
             nextControlState: currentTabControlState,
           });
