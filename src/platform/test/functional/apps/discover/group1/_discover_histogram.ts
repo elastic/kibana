@@ -301,7 +301,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.isChartVisible()).to.be(true);
     });
 
-    it.only('should reset all histogram state when resetting the saved search', async () => {
+    it('should reset all histogram state when resetting the saved search', async () => {
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
