@@ -18,9 +18,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/229394
-  // Failing: See https://github.com/elastic/kibana/issues/229394
-  describe.skip('PrivateLocationAPI', function () {
+  describe('PrivateLocationAPI', function () {
     this.tags('skipCloud');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const supertest = getService('supertest');
@@ -44,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('adds a test private location', async () => {
-      await testPrivateLocations.addPrivateLocation();
+      await testPrivateLocations.createPrivateLocation();
     });
 
     it('list all locations', async () => {

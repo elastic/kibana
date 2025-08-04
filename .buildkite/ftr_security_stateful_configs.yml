@@ -29,6 +29,10 @@ disabled:
   # Gen AI Evals run weekly via their own pipeline
   - x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts
 
+  # Detection Rules Management base configs
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/ess/rules_management.basic.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/ess/rules_management.trial.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
@@ -116,3 +120,4 @@ enabled:
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/solutions/security/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/solutions/security/test/api_integration_basic/config.ts
+  - x-pack/solutions/security/test/api_integration/apis/cases/config.ts
