@@ -29,7 +29,7 @@ export const commands = {
   ),
   items: [
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.changePoint', {
+      label: i18n.translate('languageDocumentation.documentationESQL.change_point', {
         defaultMessage: 'CHANGE_POINT',
       }),
       preview: true,
@@ -37,7 +37,7 @@ export const commands = {
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.changePoint.markdown',
+            'languageDocumentation.documentationESQL.change_point.markdown',
             {
               defaultMessage: `### CHANGE POINT
 \`CHANGE POINT\`detects spikes, dips, and change points in a metric.
@@ -94,7 +94,7 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
       license: { licenses: [{ name: 'PLATINUM' }], hasMultipleLicenses: false },
     },
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.completionCommand', {
+      label: i18n.translate('languageDocumentation.documentationESQL.completion', {
         defaultMessage: 'COMPLETION',
       }),
       preview: true,
@@ -102,7 +102,7 @@ ROW key=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.completionCommand.markdown',
+            'languageDocumentation.documentationESQL.completion.markdown',
             {
               defaultMessage: `### COMPLETION
 
@@ -399,7 +399,7 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.lookupJoin', {
+      label: i18n.translate('languageDocumentation.documentationESQL.lookup', {
         defaultMessage: 'LOOKUP JOIN',
       }),
       preview: false,
@@ -407,7 +407,7 @@ FROM employees
         <Markdown
           openLinksInNewTab={true}
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.lookupJoin.markdown',
+            'languageDocumentation.documentationESQL.lookup.markdown',
             {
               defaultMessage: `### LOOKUP JOIN
 You can use \`LOOKUP JOIN\` to add data from an existing index to incoming rows. While this is similar to \`ENRICH\`, it does not require an enrich policy to be executed beforehand. Additionally, if multiple matching documents are found in the lookup index, they will generate multiple output rows.
@@ -449,14 +449,14 @@ In case of name collisions, the fields from the lookup index will override the e
       ),
     },
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.mvExpand', {
+      label: i18n.translate('languageDocumentation.documentationESQL.mv_expand', {
         defaultMessage: 'MV_EXPAND',
       }),
       preview: true,
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.mvExpand.markdown',
+            'languageDocumentation.documentationESQL.mv_expand.markdown',
             {
               defaultMessage: `### MV_EXPAND
 The \`MV_EXPAND\` processing command expands multivalued fields into one row per value, duplicating other fields:
@@ -612,13 +612,13 @@ FROM employees
       ),
     },
     {
-      label: i18n.translate('languageDocumentation.documentationESQL.statsby', {
+      label: i18n.translate('languageDocumentation.documentationESQL.stats', {
         defaultMessage: 'STATS ... BY',
       }),
       description: (
         <Markdown
           markdownContent={i18n.translate(
-            'languageDocumentation.documentationESQL.statsby.markdown',
+            'languageDocumentation.documentationESQL.stats.markdown',
             {
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
