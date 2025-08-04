@@ -66,7 +66,7 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
-  const [countRemovedSettings, addRemovedSettings] = useState<number>(0);
+  const [removedSettingsCount, setRemovedSettingsCount] = useState<number>(0);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
 
@@ -285,11 +285,11 @@ export function SettingsPage({
                           value={settingKey}
                           onChange={(e) => {
                             setNewConfig((prev) => {
-                              delete prev.settings[settingKey];
+                              const { [settingKey]: deleted, ...rest } = prev.settings;
                               return {
                                 ...prev,
                                 settings: {
-                                  ...prev.settings,
+                                  ...rest,
                                   [e.target.value]: settingValue,
                                 },
                               };
@@ -336,8 +336,8 @@ export function SettingsPage({
                               iconType="trash"
                               color={'danger'}
                               onClick={() => {
-                                if (settingValue && settingKey) {
-                                  addRemovedSettings((prev) => prev + 1);
+                                if (newConfig.settings[settingKey]) {
+                                  setRemovedSettingsCount((prev) => prev + 1);
                                 }
                                 setNewConfig((prev) => {
                                   const { [settingKey]: deleted, ...rest } = prev.settings;
@@ -362,18 +362,18 @@ export function SettingsPage({
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {(unsavedChangesCount > 0 || countRemovedSettings > 0) && (
+      {(unsavedChangesCount > 0 || removedSettingsCount > 0) && (
         <BottomBarActions
           isLoading={isSaving}
           onDiscardChanges={() => {
-            addRemovedSettings(0);
+            setRemovedSettingsCount(0);
             resetSettings();
           }}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount + countRemovedSettings}
+          unsavedChangesCount={unsavedChangesCount + removedSettingsCount}
           appTestSubj="apm"
         />
       )}
