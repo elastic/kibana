@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
         `--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`,
+        '--xpack.fleet.registryUrl=http://localhost:8080',
       ],
     },
   };

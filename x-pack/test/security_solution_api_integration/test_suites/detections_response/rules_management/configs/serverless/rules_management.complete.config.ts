@@ -11,7 +11,10 @@ import { LOGGING_CONFIG } from '../constants';
 
 export function createCompleteTierTestConfig(options: CreateTestConfigOptions) {
   return createTestConfig({
-    kbnTestServerArgs: [`--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`],
+    kbnTestServerArgs: [
+      `--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`,
+      '--xpack.fleet.registryUrl=http://localhost:8080',
+    ],
     ...options,
   });
 }
