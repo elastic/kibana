@@ -65,6 +65,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
 };
 
 interface SiemMigrationAuditEvent {
@@ -176,7 +177,7 @@ export class SiemMigrationAuditLogger {
     count?: number;
   }): Promise<void> {
     const { migrationId, error, count } = params;
-    const message = `User added ${
+    const message = `User adding ${
       count ?? ''
     } rules to the SIEM migration with [id=${migrationId}]`;
     return this.log({
@@ -192,7 +193,7 @@ export class SiemMigrationAuditLogger {
     count?: number;
   }): Promise<void> {
     const { migrationId, error, count } = params;
-    const message = `User added ${
+    const message = `User adding ${
       count ?? ''
     } dashboards to the SIEM migration with [id=${migrationId}]`;
     return this.log({
@@ -204,7 +205,7 @@ export class SiemMigrationAuditLogger {
 
   public async logUploadResources(params: { migrationId: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
-    const message = `User uploaded resources to the SIEM migration with [id=${migrationId}]`;
+    const message = `User uploading resources to the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
       message,
@@ -241,7 +242,7 @@ export class SiemMigrationAuditLogger {
   }): Promise<void> {
     const { ids, migrationId, error } = params;
     const events = ids.map<SiemMigrationAuditEvent>((id) => {
-      const message = `User updated a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+      const message = `User updating a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
       return { action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE, message, error };
     });
     return this.log(events);
