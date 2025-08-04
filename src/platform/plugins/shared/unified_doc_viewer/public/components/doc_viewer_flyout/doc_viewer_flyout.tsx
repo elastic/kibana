@@ -16,14 +16,12 @@ import {
   EuiFlexItem,
   EuiFlyoutResizable,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
   EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
-  EuiButtonEmpty,
   useEuiTheme,
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
@@ -213,7 +211,7 @@ export function UnifiedDocViewerFlyout({
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
         docViewsRegistry={docViewsRegistry}
-        decreaseAvailableHeightBy={80} // flyout footer height
+        decreaseAvailableHeightBy={euiTheme.base}
         initialTabId={initialTabId}
       />
     ),
@@ -229,6 +227,7 @@ export function UnifiedDocViewerFlyout({
       isEsqlQuery,
       hits,
       docViewsRegistry,
+      euiTheme.base,
       initialTabId,
     ]
   );
@@ -325,18 +324,6 @@ export function UnifiedDocViewerFlyout({
           )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-            data-test-subj="docViewerFlyoutCloseButton"
-          >
-            {i18n.translate('unifiedDocViewer.flyout.closeButtonLabel', {
-              defaultMessage: 'Close',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
       </EuiFlyoutResizable>
     </EuiPortal>
   );
