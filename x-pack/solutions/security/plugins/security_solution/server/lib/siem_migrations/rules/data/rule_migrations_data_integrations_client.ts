@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { PackageList } from '@kbn/fleet-plugin/common';
-import type { RuleMigrationIntegration, RuleMigrationsClientDependencies } from '../types';
+import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import type { SiemMigrationsIndexNameProvider } from '../../common/types';
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 40 as const;
@@ -21,16 +18,6 @@ const RETURNED_INTEGRATIONS = 5 as const;
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
-  constructor(
-    protected getIndexName: SiemMigrationsIndexNameProvider,
-    protected currentUser: AuthenticatedUser,
-    protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger,
-    protected dependencies: RuleMigrationsClientDependencies
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger);
-  }
-
   /** Returns the Security integration packages that have "logs" type `data_streams` configured, including pre-release packages */
   public async getSecurityLogsPackages(): Promise<PackageList | undefined> {
     const packages = await this.dependencies.packageService?.asInternalUser.getPackages({

@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { RuleVersions } from '../../../detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import type { SiemMigrationsIndexNameProvider } from '../../common/types';
 import type { RuleMigrationPrebuiltRule, RuleMigrationsClientDependencies } from '../types';
 
 export type { RuleVersions };
@@ -27,17 +24,7 @@ const RETURNED_RULES = 5 as const;
  */
 const BULK_MAX_SIZE = 500 as const;
 
-export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient {
-  constructor(
-    protected getIndexName: SiemMigrationsIndexNameProvider,
-    protected currentUser: AuthenticatedUser,
-    protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger,
-    protected dependencies: RuleMigrationsClientDependencies
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger);
-  }
-
+export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient<RuleMigrationsClientDependencies> {
   async getRuleVersionsMap(): Promise<PrebuildRuleVersionsMap> {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(this.dependencies.savedObjectsClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(this.dependencies.rulesClient);

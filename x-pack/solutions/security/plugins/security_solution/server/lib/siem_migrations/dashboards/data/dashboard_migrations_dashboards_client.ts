@@ -12,8 +12,6 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { MigrationTaskStatusEnum } from '../../../../../common/siem_migrations/model/common.gen';
 import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_migrations/model/vendor/dashboards/splunk.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
@@ -22,23 +20,12 @@ import {
   type DashboardMigrationDashboard,
   type DashboardMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { SiemMigrationsIndexNameProvider } from '../../common/types';
-import type { DashboardMigrationsClientDependencies } from '../types';
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed. */
 const BULK_MAX_SIZE = 500 as const;
 
 export class DashboardMigrationsDataDashboardsClient extends SiemMigrationsDataBaseClient {
-  constructor(
-    protected getIndexName: SiemMigrationsIndexNameProvider,
-    protected currentUser: AuthenticatedUser,
-    protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger,
-    protected dependencies: DashboardMigrationsClientDependencies
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger);
-  }
   /** Indexes an array of dashboards to be processed as a part of single migration */
   async create(
     migrationId: string,
