@@ -74,6 +74,7 @@ export const SideNavLogo = ({
           css={css`
             font-weight: ${euiTheme.font.weight.medium};
             font-size: 11px;
+            color: ${euiTheme.colors.textParagraph};
           `}
           size="xs"
         >
