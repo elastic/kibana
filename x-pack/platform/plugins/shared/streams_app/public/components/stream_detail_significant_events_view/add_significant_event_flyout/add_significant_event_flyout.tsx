@@ -51,7 +51,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       setCanSave(false);
       setQueries([defaultQuery()]);
     }
-  }, [selectedFlow, setQueries, queries.length, isEditMode]);
+  }, [selectedFlow]);
 
   return (
     <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose()} size="m">
