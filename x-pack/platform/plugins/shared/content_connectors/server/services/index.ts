@@ -6,7 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Agent, NewAgentPolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  Agent,
+  AgentPolicy,
+  NewAgentPolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import {
   AgentPolicyServiceInterface,
   AgentService,
@@ -159,7 +164,7 @@ export class AgentlessConnectorsInfraService {
     return policiesMetadata;
   };
 
-  public deployConnector = async (connector: ConnectorMetadata) => {
+  public deployConnector = async (connector: ConnectorMetadata): Promise<AgentPolicy> => {
     this.logger.info(
       `Connector ${connector.id} has no integration policy associated with it, creating`
     );
