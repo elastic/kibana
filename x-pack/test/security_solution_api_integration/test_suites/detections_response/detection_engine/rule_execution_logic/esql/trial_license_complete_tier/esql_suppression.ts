@@ -1977,6 +1977,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should apply exceptions', async () => {
         const id = uuidv4();
         console.log(">>> generated id ", id)
+        console.log(">>> ", uuidv4(), uuidv4(), uuidv4())
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
         const doc1 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.2' };
         const doc2 = { agent: { name: 'test-1' } };
