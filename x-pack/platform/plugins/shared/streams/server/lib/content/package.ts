@@ -133,8 +133,11 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
             return (
               !baseFields[key] &&
               key !== 'message' &&
+              (value.type as string) !== 'alias' &&
+              // object and nested are failing to be created with:
+              // Invalid [path] value [attributes.crowdstrike.event.ScanResults] for field alias [crowdstrike.event.ScanResults]: an alias must refer to an existing field in the mappings
               (value.type as string) !== 'object' &&
-              (value.type as string) !== 'alias'
+              (value.type as string) !== 'nested'
             );
           })
           .reduce((acc, [key, value]) => {
