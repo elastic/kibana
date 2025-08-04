@@ -137,7 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
         getTestSyntheticsPolicy({
           name: browserMonitorJson.name,
           id: newBrowserMonitorId,
-          // params,
           isBrowser: true,
           location: { id: locWithSpace.agentPolicyId },
         })
