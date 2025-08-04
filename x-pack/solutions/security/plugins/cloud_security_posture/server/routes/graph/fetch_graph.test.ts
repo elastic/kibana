@@ -138,19 +138,21 @@ describe('fetchGraph', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
-  it('should include entity enrichment when isAssetInventoryEnabled and isEnrichPolicyExists are both true', async () => {
+  it('should include entity enrichment when isEnrichPolicyExists is true', async () => {
     // Mock the enrich.getPolicy method to return a policy that exists
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
-      policies: [
-        {
-          config: {
-            match: {
-              name: getEnrichPolicyId(),
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+      .fn()
+      .mockResolvedValueOnce({
+        policies: [
+          {
+            config: {
+              match: {
+                name: getEnrichPolicyId(),
+              },
             },
           },
-        },
-      ],
-    });
+        ],
+      });
 
     const validIndexPatterns = ['valid_index'];
     const params = {
@@ -163,7 +165,6 @@ describe('fetchGraph', () => {
       indexPatterns: validIndexPatterns,
       spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
-      isAssetInventoryEnabled: true,
     };
 
     const result = await fetchGraph(params);
@@ -192,10 +193,12 @@ describe('fetchGraph', () => {
     expect(result).toEqual([{ id: 'dummy' }]);
   });
 
-  it('should not include entity enrichment when isAssetInventoryEnabled is true but isEnrichPolicyExists is false', async () => {
-    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest.fn().mockResolvedValue({
-      policies: [],
-    });
+  it('should not include entity enrichment when isEnrichPolicyExists is false', async () => {
+    (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
+      .fn()
+      .mockResolvedValueOnce({
+        policies: [],
+      });
 
     const validIndexPatterns = ['valid_index'];
     const params = {
@@ -208,42 +211,6 @@ describe('fetchGraph', () => {
       indexPatterns: validIndexPatterns,
       spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
-      isAssetInventoryEnabled: true,
-    };
-
-    const result = await fetchGraph(params);
-
-    expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
-    const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
-    const query = esqlCallArgs[0].query;
-
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON actor.entity.id`);
-    expect(query).not.toContain(
-      `WITH actorEntityName = entity.name, actorEntityType = entity.type, actorSourceIndex = entity.source`
-    );
-    expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()} ON target.entity.id`);
-    expect(query).not.toContain(
-      `WITH targetEntityName = entity.name, targetEntityType = entity.type, targetSourceIndex = entity.source`
-    );
-
-    expect(query).not.toContain(`actorsDocData = VALUES(actorDocData)`);
-    expect(query).not.toContain(`targetsDocData = VALUES(targetDocData)`);
-    expect(result).toEqual([{ id: 'dummy' }]);
-  });
-
-  it('should not include entity enrichment when isAssetInventoryEnabled is false', async () => {
-    const validIndexPatterns = ['valid_index'];
-    const params = {
-      esClient,
-      logger,
-      start: 0,
-      end: 1000,
-      originEventIds: [] as OriginEventId[],
-      showUnknownTarget: false,
-      indexPatterns: validIndexPatterns,
-      spaceId: 'default',
-      esQuery: undefined as EsQuery | undefined,
-      isAssetInventoryEnabled: false,
     };
 
     const result = await fetchGraph(params);
@@ -269,7 +236,7 @@ describe('fetchGraph', () => {
   it('should not include entity enrichment when the enrich policy check fails', async () => {
     (esClient.asInternalUser.enrich as jest.Mocked<any>).getPolicy = jest
       .fn()
-      .mockRejectedValue(new Error('Failed to get enrich policy'));
+      .mockRejectedValueOnce(new Error('Failed to get enrich policy'));
 
     const validIndexPatterns = ['valid_index'];
     const params = {
@@ -282,7 +249,6 @@ describe('fetchGraph', () => {
       indexPatterns: validIndexPatterns,
       spaceId: 'default',
       esQuery: undefined as EsQuery | undefined,
-      isAssetInventoryEnabled: true,
     };
 
     const result = await fetchGraph(params);
@@ -292,7 +258,6 @@ describe('fetchGraph', () => {
     expect(esClient.asCurrentUser.helpers.esql).toBeCalledTimes(1);
     const esqlCallArgs = esClient.asCurrentUser.helpers.esql.mock.calls[0];
     const query = esqlCallArgs[0].query;
-
     expect(query).not.toContain(`ENRICH ${getEnrichPolicyId()}`);
     expect(result).toEqual([{ id: 'dummy' }]);
   });

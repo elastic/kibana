@@ -11,7 +11,6 @@ import type {
   UiSettingsRequestHandlerContext,
 } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
@@ -50,10 +49,6 @@ export const getGraph = async ({
     )}] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
   );
 
-  const isAssetInventoryEnabled = await uiSettings.client.get(
-    SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
-  );
-
   const results = await fetchGraph({
     esClient,
     showUnknownTarget,
@@ -64,7 +59,6 @@ export const getGraph = async ({
     indexPatterns,
     spaceId,
     esQuery,
-    isAssetInventoryEnabled,
   });
 
   // Convert results into set of nodes and edges

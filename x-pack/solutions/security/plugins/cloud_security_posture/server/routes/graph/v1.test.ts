@@ -9,7 +9,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getGraph, type GetGraphParams } from './v1';
 import { fetchGraph } from './fetch_graph';
 import { parseRecords } from './parse_records';
-import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
 jest.mock('./fetch_graph');
 jest.mock('./parse_records');
@@ -31,7 +30,7 @@ describe('getGraph', () => {
     };
   });
 
-  it('should call fetchGraph and parseRecords with correct parameters with asset inventory disabled', async () => {
+  it('should call fetchGraph and parseRecords with correct parameters', async () => {
     const fakeFetchResult = { records: ['record1', 'record2'] };
     (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
 
@@ -60,10 +59,6 @@ describe('getGraph', () => {
 
     const result = await getGraph(params);
 
-    expect(mockUiSettings.client.get).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
-    );
-
     expect(fetchGraph).toHaveBeenCalledWith({
       esClient,
       showUnknownTarget: true,
@@ -77,47 +72,9 @@ describe('getGraph', () => {
       indexPatterns: ['pattern1', 'pattern2'],
       spaceId: 'testSpace',
       esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
-      isAssetInventoryEnabled: false,
     });
     expect(parseRecords).toHaveBeenCalledWith(mockLogger, fakeFetchResult.records, 10);
     expect(result).toEqual(parsedResult);
-  });
-
-  it('should pass isAssetInventoryEnabled as true when asset inventory is enabled', async () => {
-    const fakeFetchResult = { records: ['record1', 'record2'] };
-    (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
-
-    const parsedResult = { nodes: ['node1'], edges: ['edge1'], messages: ['msg1'] };
-    (parseRecords as jest.Mock).mockReturnValue(parsedResult);
-
-    // Asset inventory is enabled
-    mockUiSettings.client.get.mockResolvedValue(true);
-
-    const params = {
-      services: { esClient, logger: mockLogger, uiSettings: mockUiSettings },
-      query: {
-        originEventIds: [{ id: 'event1', isAlert: false }],
-        spaceId: 'testSpace',
-        indexPatterns: ['pattern1', 'pattern2'],
-        start: 0,
-        end: 100,
-        esQuery: { bool: { must: [{ match_phrase: { field: 'value' } }] } },
-      },
-      showUnknownTarget: true,
-      nodesLimit: 10,
-    } satisfies GetGraphParams;
-
-    await getGraph(params);
-
-    expect(mockUiSettings.client.get).toHaveBeenCalledWith(
-      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
-    );
-
-    expect(fetchGraph).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isAssetInventoryEnabled: true,
-      })
-    );
   });
 
   it('should use default indexPatterns if not provided', async () => {

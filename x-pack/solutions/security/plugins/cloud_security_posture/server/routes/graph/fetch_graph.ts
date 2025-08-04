@@ -19,7 +19,6 @@ interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
-  isAssetInventoryEnabled?: boolean;
   isEnrichPolicyExists: boolean;
   enrichPolicyName: string;
   alertsMappingsIncluded: boolean;
@@ -35,7 +34,6 @@ export const fetchGraph = async ({
   indexPatterns,
   spaceId,
   esQuery,
-  isAssetInventoryEnabled,
 }: {
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -46,7 +44,6 @@ export const fetchGraph = async ({
   indexPatterns: string[];
   spaceId: string;
   esQuery?: EsQuery;
-  isAssetInventoryEnabled?: boolean;
 }): Promise<EsqlToRecords<GraphEdge>> => {
   const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
@@ -70,7 +67,6 @@ export const fetchGraph = async ({
     indexPatterns,
     originEventIds,
     originAlertIds,
-    isAssetInventoryEnabled,
     isEnrichPolicyExists,
     enrichPolicyName: getEnrichPolicyId(spaceId),
     alertsMappingsIncluded,
@@ -165,7 +161,6 @@ const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
-  isAssetInventoryEnabled,
   isEnrichPolicyExists,
   enrichPolicyName,
   alertsMappingsIncluded,
@@ -186,7 +181,7 @@ const buildEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',');
 
-  if (isAssetInventoryEnabled && isEnrichPolicyExists) {
+  if (isEnrichPolicyExists) {
     return `FROM ${formattedIndexPatterns} METADATA _id, _index
 
 | ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type

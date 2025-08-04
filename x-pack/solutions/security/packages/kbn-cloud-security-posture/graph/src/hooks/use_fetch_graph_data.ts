@@ -107,7 +107,7 @@ export const useFetchGraphData = ({
           body: JSON.stringify(req),
         });
       } catch (err) {
-        // Create a new error with the extracted message but preserve the original error properties
+        // extract error message in case its not under err.message
         throw new Error(err.body?.message ?? err.message);
       }
     },
