@@ -18,9 +18,9 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
-import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
+import { WorkflowExecution } from '../../workflow_execution_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -33,12 +33,12 @@ interface WorkflowExecutionTableItem {
   duration?: number;
 }
 
-export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
+export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDto }) {
   const {
     data: workflowExecutions,
     isLoading: isLoadingWorkflowExecutions,
     error,
-  } = useWorkflowExecutions(workflowId);
+  } = useWorkflowExecutions(workflow.id);
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
@@ -136,6 +136,7 @@ export function WorkflowExecutionList({ workflowId }: { workflowId: string }) {
         {selectedExecutionId ? (
           <WorkflowExecution
             workflowExecutionId={selectedExecutionId}
+            workflowYaml={workflow.yaml}
             fields={['stepId', 'status', 'executionTimeMs']}
           />
         ) : (

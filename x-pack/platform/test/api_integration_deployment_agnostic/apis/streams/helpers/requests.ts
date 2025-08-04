@@ -107,6 +107,23 @@ export async function getStream(
     .then((response) => response.body);
 }
 
+export async function deleteStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('DELETE /api/streams/{name} 2023-10-31', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
 export async function getIlmStats(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
@@ -159,7 +176,6 @@ export async function exportContent(
   name: string,
   body: ContentPackManifest & {
     include: ContentPackIncludedObjects;
-    replaced_patterns: string[];
   },
   expectStatusCode: number = 200
 ) {

@@ -8,13 +8,15 @@
 import { Conversation, ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
 import { QueryClient, QueryKey, useQuery, useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { queryKeys } from '../query_keys';
 import { appPaths } from '../utils/app_paths';
+import { createNewConversation, newConversationId } from '../utils/new_conversation';
+import { useConversationId } from './use_conversation_id';
+import { useIsSendingMessage } from './use_is_sending_message';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
-import { useConversationId } from './use_conversation_id';
-import { createNewConversation, newConversationId } from '../utils/new_conversation';
 
 const createActions = ({
   queryClient,
@@ -38,18 +40,15 @@ const createActions = ({
       })
     );
   };
+  const removeNewConversationQuery = () => {
+    queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(newConversationId) });
+  };
   const [_, conversationId] = queryKey;
   const isNewConversation = conversationId === newConversationId;
   return {
     invalidateConversation: () => {
-      if (isNewConversation) {
-        // Purge the query cache since we never fetch for conversation id "new"
-        queryClient.removeQueries({ queryKey });
-        // Invalidate all conversations to refresh conversation history
-        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      } else {
-        queryClient.invalidateQueries({ queryKey });
-      }
+      removeNewConversationQuery();
+      queryClient.invalidateQueries({ queryKey });
     },
     addConversation: () => {
       setConversation(() => createNewConversation());
@@ -84,11 +83,11 @@ const createActions = ({
         round.steps.push(step);
       });
     },
-    setToolCallResult: ({ result, toolCallId }: { result: string; toolCallId: string }) => {
+    setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
       setCurrentRound((round) => {
         const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
         if (step) {
-          step.result = result;
+          step.results = results;
         }
       });
     },
@@ -110,28 +109,36 @@ const createActions = ({
       title: string;
     }) => {
       const current = queryClient.getQueryData<Conversation>(queryKey);
-      if (current) {
-        queryClient.setQueryData<Conversation>(
-          queryKeys.conversations.byId(id),
-          produce(current, (draft) => {
-            draft.id = id;
-            draft.title = title;
-          })
-        );
+      if (!current) {
+        throw new Error('Conversation not created');
       }
+      queryClient.setQueryData<Conversation>(
+        queryKeys.conversations.byId(id),
+        produce(current, (draft) => {
+          draft.id = id;
+          draft.title = title;
+        })
+      );
+      removeNewConversationQuery();
+      // Invalidate all conversations to refresh conversation history
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
       navigateToConversation({ nextConversationId: id });
     },
   };
 };
 
 export const useConversation = () => {
+  const shouldAllowConversationRedirectRef = useRef(true);
   const conversationId = useConversationId();
   const { conversationsService } = useOnechatServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+  const isSendingMessage = useIsSendingMessage();
   const { data: conversation, isLoading } = useQuery({
     queryKey,
-    enabled: Boolean(conversationId),
+    // Disable query if we are on a new conversation or if there is a message currently being sent
+    // Otherwise a refetch will overwrite our optimistic updates
+    enabled: Boolean(conversationId) && !isSendingMessage,
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -141,16 +148,28 @@ export const useConversation = () => {
   });
   const { navigateToOnechatUrl } = useNavigation();
 
+  useEffect(() => {
+    return () => {
+      // On unmount disable conversation redirect
+      shouldAllowConversationRedirectRef.current = false;
+    };
+  }, []);
+
   const actions = useMemo(
     () =>
       createActions({
         queryClient,
         queryKey,
         navigateToConversation: ({ nextConversationId }: { nextConversationId: string }) => {
-          navigateToOnechatUrl(appPaths.chat.conversation({ conversationId: nextConversationId }));
+          // Navigate to the new conversation if user is still on the "new" conversation page
+          if (!conversationId && shouldAllowConversationRedirectRef.current) {
+            navigateToOnechatUrl(
+              appPaths.chat.conversation({ conversationId: nextConversationId })
+            );
+          }
         },
       }),
-    [queryClient, queryKey, navigateToOnechatUrl]
+    [queryClient, queryKey, conversationId, navigateToOnechatUrl]
   );
 
   useEffect(() => {

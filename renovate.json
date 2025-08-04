@@ -197,7 +197,8 @@
         "cache-manager",
         "cache-manager-fs-hash",
         "keyv",
-        "@types/cache-manager-fs-hash"
+        "@types/cache-manager-fs-hash",
+        "@arizeai/phoenix-client"
       ],
       "reviewers": [
         "team:appex-ai-infra"
@@ -510,11 +511,9 @@
         "prop-types",
         "react",
         "react-dom",
-        "react-is",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is",
         "csstype"
       ],
       "reviewers": [
@@ -1464,7 +1463,8 @@
       "matchDepNames": [
         "@apidevtools/swagger-parser",
         "@redocly/cli",
-        "openapi-types"
+        "openapi-types",
+        "@seriousme/openapi-schema-validator"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1916,6 +1916,25 @@
       "matchDepNames": [
         "normalize-path",
         "@types/normalize-path"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "resolve.exports",
+      "matchDepNames": [
+        "resolve.exports"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -3248,7 +3267,9 @@
         "camelcase-keys",
         "copy-to-clipboard",
         "css-box-model",
+        "dom-to-image-more",
         "i18n-iso-countries",
+        "pdf-lib",
         "node-diff3",
         "re-resizable",
         "react-diff-view",
@@ -4051,6 +4072,7 @@
         "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
+        "@langchain/langgraph-checkpoint",
         "@langchain/openai",
         "@google/generative-ai",
         "@smithy/eventstream-codec",
@@ -4351,11 +4373,13 @@
         "@elastic/opentelemetry-node",
         "@opentelemetry/api",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-metrics-otlp-http",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/exporter-trace-otlp-http",
         "@opentelemetry/exporter-trace-otlp-proto",
         "@opentelemetry/instrumentation",
+        "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/semantic-conventions"

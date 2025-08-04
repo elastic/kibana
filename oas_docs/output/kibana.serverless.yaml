@@ -9146,7 +9146,7 @@ paths:
               type: object
               properties:
                 objects:
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -11155,6 +11155,32 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/delete:
+    delete:
+      operationId: DeleteMonitoringEngine
+      parameters:
+        - description: Whether to delete all the privileged user data
+          in: query
+          name: data
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                required:
+                  - deleted
+          description: Successful response
+      summary: Delete the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
       operationId: DisableMonitoringEngine
@@ -11199,11 +11225,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -19642,6 +19664,15 @@ paths:
                               - monitoring
                               - download
                               - features
+                          connectors:
+                            additionalProperties: {}
+                            type: object
+                          exporters:
+                            additionalProperties: {}
+                            type: object
+                          extensions:
+                            additionalProperties: {}
+                            type: object
                           fleet:
                             anyOf:
                               - additionalProperties: false
@@ -19834,6 +19865,12 @@ paths:
                                 - type
                                 - proxy_headers
                             type: object
+                          processors:
+                            additionalProperties: {}
+                            type: object
+                          receivers:
+                            additionalProperties: {}
+                            type: object
                           revision:
                             type: number
                           secret_references:
@@ -19846,6 +19883,33 @@ paths:
                               required:
                                 - id
                             type: array
+                          service:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              extensions:
+                                items:
+                                  type: string
+                                type: array
+                              pipelines:
+                                additionalProperties:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    exporters:
+                                      items:
+                                        type: string
+                                      type: array
+                                    processors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    receivers:
+                                      items:
+                                        type: string
+                                      type: array
+                                  x-oas-optional: true
+                                type: object
                           signed:
                             additionalProperties: false
                             type: object
@@ -20552,6 +20616,20 @@ paths:
                             - updating
                             - starting
                           type: string
+                        last_known_status:
+                          enum:
+                            - offline
+                            - error
+                            - online
+                            - inactive
+                            - enrolling
+                            - unenrolling
+                            - unenrolled
+                            - updating
+                            - degraded
+                            - uninstalled
+                            - orphaned
+                          type: string
                         local_metadata:
                           additionalProperties: {}
                           type: object
@@ -21011,6 +21089,20 @@ paths:
                           - updating
                           - starting
                         type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
+                        type: string
                       local_metadata:
                         additionalProperties: {}
                         type: object
@@ -21351,6 +21443,20 @@ paths:
                           - degraded
                           - updating
                           - starting
+                        type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       local_metadata:
                         additionalProperties: {}
@@ -48314,12 +48420,12 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
-                                            unwired:
+                                            classic:
                                               additionalProperties: false
                                               type: object
                                               properties: {}
                                           required:
-                                            - unwired
+                                            - classic
                                       required:
                                         - ingest
                           required:
@@ -52140,12 +52246,12 @@ paths:
                             - processing
                         - type: object
                           properties:
-                            unwired:
+                            classic:
                               additionalProperties: false
                               type: object
                               properties: {}
                           required:
-                            - unwired
+                            - classic
               required:
                 - ingest
       responses: {}
@@ -52188,12 +52294,12 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            dashboards:
+                            streams:
                               items:
                                 type: string
                               type: array
                           required:
-                            - dashboards
+                            - streams
                       required:
                         - objects
                     - additionalProperties: false
@@ -52207,17 +52313,12 @@ paths:
                         - all
                 name:
                   type: string
-                replaced_patterns:
-                  items:
-                    type: string
-                  type: array
                 version:
                   type: string
               required:
                 - name
                 - description
                 - version
-                - replaced_patterns
                 - include
       responses: {}
       summary: Export stream content
@@ -57425,6 +57526,35 @@ components:
                     - level
                     - summary
                     - meta
+                http:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    detail:
+                      description: Human readable detail of the service status.
+                      type: string
+                    documentationUrl:
+                      description: A URL to further documentation regarding this service.
+                      type: string
+                    level:
+                      description: Service status levels as human and machine readable values.
+                      enum:
+                        - available
+                        - degraded
+                        - unavailable
+                        - critical
+                      type: string
+                    meta:
+                      additionalProperties: {}
+                      description: An unstructured set of extra metadata about this service.
+                      type: object
+                    summary:
+                      description: A human readable summary of the service status.
+                      type: string
+                  required:
+                    - level
+                    - summary
+                    - meta
                 savedObjects:
                   additionalProperties: false
                   type: object
@@ -59404,14 +59534,14 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: A list of user profile `uid`s to assign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: A list of user profile `uid`s to unassign. Users need to activate their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -59755,7 +59885,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59779,7 +59911,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59816,7 +59950,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59914,7 +60050,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59943,7 +60081,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -59969,7 +60109,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60010,7 +60152,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -60035,7 +60179,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -63921,7 +64067,7 @@ components:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
             format: nonempty
             minLength: 1
@@ -67535,12 +67681,10 @@ components:
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object
