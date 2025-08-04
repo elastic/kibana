@@ -73,6 +73,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     bulkUnsnoozeRules,
   } = props;
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -138,7 +140,9 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
   if (bulkEditAction === 'unsnooze' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
         title={confirmationTitle}
+        titleProps={{ id: confirmModalTitleId }}
         onCancel={onClose}
         onConfirm={onUnsnoozeRule}
         confirmButtonText={i18n.translate(
