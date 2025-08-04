@@ -12,8 +12,8 @@ import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-// we can use the import because the package isn't included in the shared bundle,
-// but we still check in tests to make sure selector is correct
+// We can't use the import directly because the package isn't included in the shared bundle.
+// However, we still check this in tests to ensure our hardcoded selector is correct.
 // import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
