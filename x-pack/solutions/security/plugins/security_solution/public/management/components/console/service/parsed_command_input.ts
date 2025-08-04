@@ -6,7 +6,7 @@
  */
 
 import type { ParsedCommandInput, ParsedCommandInterface } from './types';
-import type { CommandDefinition } from '..';
+import type { CommandDefinition, CommandArgDefinition } from '../types';
 
 const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
@@ -116,10 +116,12 @@ export const getCommandNameFromTextInput = (input: string): string => {
 export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
   let requiredArgs = '';
   let optionalArgs = '';
-  const exclusiveOrArgs = [];
+  const exclusiveOrArgs: string[] = [];
 
   if (command.args) {
-    for (const [argName, argDefinition] of Object.entries(command.args)) {
+    for (const [argName, argDefinition] of Object.entries(command.args) as Array<
+      [string, CommandArgDefinition]
+    >) {
       if (argDefinition.required) {
         if (requiredArgs.length) {
           requiredArgs += ' ';

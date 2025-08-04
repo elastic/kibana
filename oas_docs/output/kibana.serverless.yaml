@@ -19668,6 +19668,15 @@ paths:
                               - monitoring
                               - download
                               - features
+                          connectors:
+                            additionalProperties: {}
+                            type: object
+                          exporters:
+                            additionalProperties: {}
+                            type: object
+                          extensions:
+                            additionalProperties: {}
+                            type: object
                           fleet:
                             anyOf:
                               - additionalProperties: false
@@ -19860,6 +19869,12 @@ paths:
                                 - type
                                 - proxy_headers
                             type: object
+                          processors:
+                            additionalProperties: {}
+                            type: object
+                          receivers:
+                            additionalProperties: {}
+                            type: object
                           revision:
                             type: number
                           secret_references:
@@ -19872,6 +19887,33 @@ paths:
                               required:
                                 - id
                             type: array
+                          service:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              extensions:
+                                items:
+                                  type: string
+                                type: array
+                              pipelines:
+                                additionalProperties:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    exporters:
+                                      items:
+                                        type: string
+                                      type: array
+                                    processors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    receivers:
+                                      items:
+                                        type: string
+                                      type: array
+                                  x-oas-optional: true
+                                type: object
                           signed:
                             additionalProperties: false
                             type: object
@@ -20578,6 +20620,20 @@ paths:
                             - updating
                             - starting
                           type: string
+                        last_known_status:
+                          enum:
+                            - offline
+                            - error
+                            - online
+                            - inactive
+                            - enrolling
+                            - unenrolling
+                            - unenrolled
+                            - updating
+                            - degraded
+                            - uninstalled
+                            - orphaned
+                          type: string
                         local_metadata:
                           additionalProperties: {}
                           type: object
@@ -21037,6 +21093,20 @@ paths:
                           - updating
                           - starting
                         type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
+                        type: string
                       local_metadata:
                         additionalProperties: {}
                         type: object
@@ -21377,6 +21447,20 @@ paths:
                           - degraded
                           - updating
                           - starting
+                        type: string
+                      last_known_status:
+                        enum:
+                          - offline
+                          - error
+                          - online
+                          - inactive
+                          - enrolling
+                          - unenrolling
+                          - unenrolled
+                          - updating
+                          - degraded
+                          - uninstalled
+                          - orphaned
                         type: string
                       local_metadata:
                         additionalProperties: {}

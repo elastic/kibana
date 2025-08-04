@@ -19,7 +19,7 @@ import {
 } from './definitions';
 
 export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
-  const tools: Array<BuiltinToolDefinition<any, any>> = [
+  const tools: Array<BuiltinToolDefinition<any>> = [
     getDocumentByIdTool(),
     executeEsqlTool(),
     naturalLanguageSearchTool(),
