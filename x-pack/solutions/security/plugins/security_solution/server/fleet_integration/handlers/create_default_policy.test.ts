@@ -37,7 +37,7 @@ describe('Create Default Policy tests ', () => {
   let productFeaturesService: ProductFeaturesService;
   const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
   const experimentalFeatures = {
-    trustedDevicesEnabled: true,
+    trustedDevices: true,
   } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
@@ -336,10 +336,10 @@ describe('Create Default Policy tests ', () => {
       removeDeviceControlSpy.mockRestore();
     });
 
-    it('should remove device control when trustedDevicesEnabled experimental feature is disabled', async () => {
+    it('should remove device control when trustedDevices experimental feature is disabled', async () => {
       const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       const experimentalFeaturesWithTrustedDevicesDisabled = {
-        trustedDevicesEnabled: false,
+        trustedDevices: false,
       } as ExperimentalFeatures;
 
       const createDefaultPolicyCallbackWithDisabledFeature = async (
@@ -367,13 +367,13 @@ describe('Create Default Policy tests ', () => {
       removeDeviceControlSpy.mockRestore();
     });
 
-    it('should remove device control when both endpointTrustedDevices product feature and trustedDevicesEnabled experimental feature are disabled', async () => {
+    it('should remove device control when both endpointTrustedDevices product feature and experimental feature are disabled', async () => {
       const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       productFeaturesService = createProductFeaturesServiceMock(
         ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
       );
       const experimentalFeaturesWithTrustedDevicesDisabled = {
-        trustedDevicesEnabled: false,
+        trustedDevices: false,
       } as ExperimentalFeatures;
 
       const createDefaultPolicyCallbackWithBothDisabled = async (
@@ -401,7 +401,7 @@ describe('Create Default Policy tests ', () => {
       removeDeviceControlSpy.mockRestore();
     });
 
-    it('should NOT remove device control when both endpointTrustedDevices product feature and trustedDevicesEnabled experimental feature are enabled', async () => {
+    it('should NOT remove device control when both endpointTrustedDevices product feature and trustedDevices experimental feature are enabled', async () => {
       const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
       // Both features are enabled by default in the test setup
 

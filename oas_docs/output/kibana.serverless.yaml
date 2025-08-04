@@ -11225,11 +11225,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -19668,6 +19664,15 @@ paths:
                               - monitoring
                               - download
                               - features
+                          connectors:
+                            additionalProperties: {}
+                            type: object
+                          exporters:
+                            additionalProperties: {}
+                            type: object
+                          extensions:
+                            additionalProperties: {}
+                            type: object
                           fleet:
                             anyOf:
                               - additionalProperties: false
@@ -19860,6 +19865,12 @@ paths:
                                 - type
                                 - proxy_headers
                             type: object
+                          processors:
+                            additionalProperties: {}
+                            type: object
+                          receivers:
+                            additionalProperties: {}
+                            type: object
                           revision:
                             type: number
                           secret_references:
@@ -19872,6 +19883,33 @@ paths:
                               required:
                                 - id
                             type: array
+                          service:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              extensions:
+                                items:
+                                  type: string
+                                type: array
+                              pipelines:
+                                additionalProperties:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    exporters:
+                                      items:
+                                        type: string
+                                      type: array
+                                    processors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    receivers:
+                                      items:
+                                        type: string
+                                      type: array
+                                  x-oas-optional: true
+                                type: object
                           signed:
                             additionalProperties: false
                             type: object
@@ -67643,12 +67681,10 @@ components:
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object

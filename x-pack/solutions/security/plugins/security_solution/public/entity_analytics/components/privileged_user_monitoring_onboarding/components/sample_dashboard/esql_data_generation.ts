@@ -41,7 +41,7 @@ export const generateESQLSource = () => {
   return right(`ROW data=[${rows}]
             | MV_EXPAND data
             | EVAL row = SPLIT(data, ",")
-            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = MV_SLICE(row, 4)
+            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = TO_DATETIME(MV_SLICE(row, 4))
             | DROP row`);
 };
 
