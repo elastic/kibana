@@ -27,8 +27,8 @@ export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
   title?: string; // custom control label
-  output: ControlOutputOption;
-  valuesSource: ControlValuesSource;
+  output?: ControlOutputOption;
+  valuesSource?: ControlValuesSource;
   esqlVariableString?: string;
   esqlQuery?: string;
   staticValues?: Array<{ value: string; text: string }>;

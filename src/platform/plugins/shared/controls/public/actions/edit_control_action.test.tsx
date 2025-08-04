@@ -19,7 +19,6 @@ import { getMockedControlGroupApi, getMockedFinalizeApi } from '../controls/mock
 import { getTimesliderControlFactory } from '../controls/timeslider_control/get_timeslider_control_factory';
 import { dataService } from '../services/kibana_services';
 import { EditControlAction } from './edit_control_action';
-import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
   const now = new Date();
@@ -47,8 +46,6 @@ beforeAll(async () => {
 
   const optionsListControl = await controlFactory.buildControl({
     initialState: {
-      output: ControlOutputOption.DSL,
-      valuesSource: ControlValuesSource.DSL,
       dataViewId: 'test-data-view',
       title: 'test',
       fieldName: 'test-field',

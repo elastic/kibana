@@ -40,10 +40,7 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
-export type OptionsListState = Pick<
-  DefaultDataControlState,
-  'fieldName' | 'valuesSource' | 'output'
-> &
+export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
   SelectionsState &
   EditorState &
   TemporaryState & { sort: OptionsListSortingType | undefined };

@@ -12,12 +12,9 @@ import { first, skip } from 'rxjs';
 import { dataViewsService } from '../../services/kibana_services';
 import { ControlGroupApi } from '../../control_group/types';
 import { initializeDataControlManager } from './data_control_manager';
-import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 describe('initializeDataControlManager', () => {
   const dataControlState = {
-    output: ControlOutputOption.DSL,
-    valuesSource: ControlValuesSource.DSL,
     dataViewId: 'myDataViewId',
     fieldName: 'myFieldName',
   };

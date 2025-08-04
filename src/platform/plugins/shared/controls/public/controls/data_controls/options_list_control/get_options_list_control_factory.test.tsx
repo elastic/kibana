@@ -14,7 +14,6 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
-import { ControlOutputOption, ControlValuesSource } from '@kbn/controls-constants';
 
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
@@ -66,8 +65,6 @@ describe('Options List Control Api', () => {
     test('should not set filters$ when selectedOptions is not provided', async () => {
       const { api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
@@ -81,8 +78,6 @@ describe('Options List Control Api', () => {
     test('should set filters$ when selectedOptions is provided', async () => {
       const { api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['cool', 'test'],
@@ -123,8 +118,6 @@ describe('Options List Control Api', () => {
     test('should set filters$ when exists is selected', async () => {
       const { api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
@@ -151,8 +144,6 @@ describe('Options List Control Api', () => {
     test('should set filters$ when exclude is selected', async () => {
       const { api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
@@ -193,8 +184,6 @@ describe('Options List Control Api', () => {
     test('clicking another option unselects "Exists"', async () => {
       const { Component } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           existsSelected: true,
@@ -224,8 +213,6 @@ describe('Options List Control Api', () => {
     test('clicking "Exists" unselects all other selections', async () => {
       const { Component } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
@@ -260,8 +247,6 @@ describe('Options List Control Api', () => {
     test('deselects when showOnlySelected is true', async () => {
       const { Component, api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           selectedOptions: ['woof', 'bark'],
@@ -308,8 +293,6 @@ describe('Options List Control Api', () => {
     test('replace selection when singleSelect is true', async () => {
       const { Component, api } = await factory.buildControl({
         initialState: {
-          output: ControlOutputOption.DSL,
-          valuesSource: ControlValuesSource.DSL,
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           singleSelect: true,

@@ -39,7 +39,11 @@ import { defaultControlComparators, defaultControlDefaultValues } from '../defau
 import type { ControlApiInitialization } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
-import type { DataControlApi, DataControlFieldFormatter } from './types';
+import type {
+  DataControlApi,
+  DataControlFieldFormatter,
+  PublishesControlInputOutput,
+} from './types';
 
 export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
@@ -89,6 +93,11 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     },
     defaultDataControlComparators
   );
+  // output and valuesSource are set to DSL by default and therefore never publish undefined; retype the API
+  // so TypeScript can reflect this
+  const dataControlManagerApi =
+    dataControlManager.api as StateManager<DefaultDataControlState>['api'] &
+      PublishesControlInputOutput;
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   function setBlockingError(error: Error | undefined) {
@@ -110,7 +119,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable | undefined>(undefined);
 
-  const dataViewIdSubscription = dataControlManager.api.dataViewId$
+  const dataViewIdSubscription = dataControlManagerApi.dataViewId$
     .pipe(
       tap(() => {
         filtersReady$.next(false);
@@ -137,9 +146,9 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
   const fieldNameSubscription = combineLatest([
     dataViews$,
-    dataControlManager.api.fieldName$,
-    dataControlManager.api.output$,
-    dataControlManager.api.valuesSource$,
+    dataControlManagerApi.fieldName$,
+    dataControlManagerApi.output$,
+    dataControlManagerApi.valuesSource$,
   ])
     .pipe(
       tap(() => {
@@ -154,7 +163,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       }
 
       const dataView = nextDataViews
-        ? nextDataViews.find(({ id }) => dataControlManager.api.dataViewId$.value === id)
+        ? nextDataViews.find(({ id }) => dataControlManagerApi.dataViewId$.value === id)
         : undefined;
       if (!dataView) {
         return;
@@ -185,8 +194,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     });
 
   const esqlVariableStringSubscription = combineLatest([
-    dataControlManager.api.esqlVariableString$,
-    dataControlManager.api.output$,
+    dataControlManagerApi.esqlVariableString$,
+    dataControlManagerApi.output$,
   ])
     .pipe(
       tap(() => {
@@ -200,8 +209,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     });
 
   const staticValuesSubscription = combineLatest([
-    dataControlManager.api.valuesSource$,
-    dataControlManager.api.staticValues$,
+    dataControlManagerApi.valuesSource$,
+    dataControlManagerApi.staticValues$,
   ])
     .pipe(
       tap(() => {
@@ -255,7 +264,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
   return {
     api: {
-      ...dataControlManager.api,
+      ...dataControlManagerApi,
       dataLoading$,
       blockingError$,
       setBlockingError,
@@ -293,7 +302,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
           {
             name: getReferenceName(controlId, referenceNameSuffix),
             type: DATA_VIEW_SAVED_OBJECT_TYPE,
-            id: dataControlManager.api.dataViewId$.getValue(),
+            id: dataControlManagerApi.dataViewId$.getValue(),
           },
         ];
       },
