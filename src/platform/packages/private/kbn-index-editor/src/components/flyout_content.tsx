@@ -24,7 +24,6 @@ import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
-import { RowColumnCreator } from './row_column_creator';
 
 export interface FlyoutContentProps {
   deps: FlyoutDeps;
@@ -102,20 +101,10 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             `}
           >
             <FileDropzone noResults={noResults}>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                css={{ overflow: 'hidden', height: '100%' }}
-              >
+              <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <QueryBar />
                 </EuiFlexItem>
-
-                {dataViewColumns ? (
-                  <EuiFlexItem grow={false}>
-                    <RowColumnCreator />
-                  </EuiFlexItem>
-                ) : null}
 
                 <EuiFlexItem grow={true} css={{ minHeight: 0 }}>
                   {dataView && dataViewColumns ? (
