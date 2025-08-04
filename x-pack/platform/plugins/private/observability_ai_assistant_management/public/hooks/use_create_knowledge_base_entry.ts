@@ -46,6 +46,7 @@ export function useCreateKnowledgeBaseEntry() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { entry }) => {
         toasts.addSuccess(
           i18n.translate(
