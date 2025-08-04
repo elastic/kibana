@@ -8,7 +8,7 @@
  */
 
 import { Condition } from '@kbn/streams-schema';
-import { IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import { type Ingest, IngestStream } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
 import { ScoutSpaceParallelFixture } from '../../scout_space';
@@ -19,7 +19,9 @@ export interface StreamsApiService {
   forkStream: (streamName: string, destination: string, condition: Condition) => Promise<void>;
   getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   deleteStream: (streamName: string) => Promise<void>;
+  updateStream: (streamName: string, updateBody: { ingest: Ingest }) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
+  clearStreamProcessors: (streamName: string) => Promise<void>;
 }
 
 export const getStreamsApiService = ({
@@ -81,6 +83,15 @@ export const getStreamsApiService = ({
         });
       });
     },
+    updateStream: async (streamName: string, updateBody: { ingest: Ingest }) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `${basePath}/api/streams/${streamName}/_ingest`,
+          body: updateBody,
+        });
+      });
+    },
     clearStreamChildren: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
@@ -91,6 +102,17 @@ export const getStreamsApiService = ({
             )
           );
         }
+      });
+    },
+    clearStreamProcessors: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing: [],
+          },
+        });
       });
     },
   };

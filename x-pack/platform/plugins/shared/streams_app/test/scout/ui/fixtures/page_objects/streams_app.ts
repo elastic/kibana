@@ -85,11 +85,6 @@ export class StreamsApp {
     await expect(this.getDeleteModal()).toBeHidden();
   }
 
-  async closeToast() {
-    await this.page.getByTestId('toastCloseButton').click();
-    await expect(this.page.getByRole('log')).toBeHidden();
-  }
-
   // Condition editor utility methods
   async fillConditionEditor({
     field,
@@ -193,7 +188,48 @@ export class StreamsApp {
       .click();
   }
 
-  // Utility for data preview
+  /**
+   * Utility for data processing
+   */
+  async clickAddProcessor() {
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
+  }
+
+  async clickCreateProcessor() {
+    await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
+  }
+
+  async clickCancelProcessorChanges() {
+    await this.page.getByTestId('streamsAppProcessorConfigurationCancelButton').click();
+  }
+
+  async confirmDiscardInModal() {
+    await this.page.getByRole('alertdialog').getByRole('button', { name: 'Discard' }).click();
+    await expect(this.page.getByRole('alertdialog')).toBeHidden();
+  }
+
+  async fillFieldInput(value: string) {
+    await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
+  }
+
+  async fillGrokPatternInput(value: string) {
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternExpression').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async saveProcessorsListChanges() {
+    await this.page.getByRole('button', { name: 'Save changes' }).click();
+    await expect(this.page.getByText("Stream's processors updated")).toBeVisible();
+    await this.page.getByTestId('toastCloseButton').click();
+  }
+
+  /**
+   * Utility for data preview
+   */
   async getPreviewTableRows() {
     // Wait for the preview table to be rendered
     await expect(this.page.getByTestId('euiDataGridBody')).toBeVisible();
@@ -213,5 +249,13 @@ export class StreamsApp {
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
     await expect(cellContent).toContainText(value);
+  }
+
+  /**
+   * Share utility methods
+   */
+  async closeToast() {
+    await this.page.getByTestId('toastCloseButton').click();
+    await expect(this.page.getByRole('log')).toBeHidden();
   }
 }
