@@ -92,11 +92,7 @@ export const useESQLVariables = ({
       return;
     }
     const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
-      if (
-        input &&
-        input.initialChildControlState &&
-        Object.keys(input.initialChildControlState).length > 0
-      ) {
+      if (input && input.initialChildControlState) {
         const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
 
