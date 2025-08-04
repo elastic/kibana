@@ -26,6 +26,7 @@ export class SampleDataManager {
   private readonly log: Logger;
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
+  private isInstalling: boolean = false;
 
   constructor({
     artifactsFolder,
@@ -64,10 +65,12 @@ export class SampleDataManager {
     const indexName = getSampleDataIndexName(sampleType);
 
     try {
-      if (await this.indexManager.isIndexExists({ indexName, esClient })) {
+      if ((await this.indexManager.isIndexExists({ indexName, esClient })) || this.isInstalling) {
         this.log.warn(`Sample data already installed for [${sampleType}]`);
         return indexName;
       }
+
+      this.isInstalling = true;
 
       const {
         archive: artifactsArchive,
@@ -100,6 +103,7 @@ export class SampleDataManager {
       }
 
       await this.artifactManager.cleanup();
+      this.isInstalling = false;
     }
   }
 
