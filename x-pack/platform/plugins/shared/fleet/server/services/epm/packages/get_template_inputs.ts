@@ -27,6 +27,8 @@ import type {
   RegistryStream,
   PackagePolicyConfigRecordEntry,
   RegistryInput,
+  FullAgentPolicyInputStream,
+  OTelCollectorConfig,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 
@@ -34,6 +36,8 @@ import { getFullInputStreams } from '../../agent_policies/package_policies_to_ag
 
 import { getPackageInfo } from '.';
 import { getAgentTemplateAssetsMap } from './get';
+import { generateOtelcolConfig } from '../../agent_policies/full_agent_policy';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 
 type Format = 'yml' | 'json';
 
@@ -117,6 +121,8 @@ export async function getTemplateInputs(
   prerelease?: boolean,
   ignoreUnverified?: boolean
 ) {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName,
@@ -193,17 +199,25 @@ export async function getTemplateInputs(
     inputIdsDestinationMap
   ).filter(isInputIncluded);
 
+
+  let otelcolConfig;
+  if (experimentalFeature.enableOtelIntegrations) {
+    otelcolConfig = generateOtelcolConfig(inputs);
+  }
+  // filter out the otelcol inputs, they will be added at the root of the config
+  const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
+
   if (format === 'json') {
-    return { inputs };
+    return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}), };
   } else if (format === 'yml') {
     const yaml = dump(
-      { inputs },
-      {
-        skipInvalid: true,
-        sortKeys: _sortYamlKeys,
-      }
-    );
-    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
+      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}), },
+        {
+          skipInvalid: true,
+          sortKeys: _sortYamlKeys,
+        }
+      );
+      return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };

@@ -26,6 +26,7 @@ import type {
   FleetProxy,
   FleetServerHost,
   AgentPolicy,
+  TemplateAgentPolicyInput,
 } from '../../types';
 import type {
   DownloadSource,
@@ -875,7 +876,7 @@ export function getBinarySourceSettings(
 }
 
 // Generate OTel Collector policy
-function generateOtelcolConfig(inputs: FullAgentPolicyInput[]) {
+export function generateOtelcolConfig(inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[]) {
   const otelConfig = inputs.flatMap((input) => {
     if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).flatMap((inputStream) => {
