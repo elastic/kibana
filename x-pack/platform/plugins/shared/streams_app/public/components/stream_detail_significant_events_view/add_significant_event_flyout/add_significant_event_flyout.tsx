@@ -20,13 +20,13 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';
 import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
-import type { Flow } from './types';
+import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 
 interface Props {
   onClose: () => void;
   definition: Streams.all.Definition;
-  onSave: (queries: StreamQueryKql[]) => Promise<void>;
+  onSave: (data: SaveData) => Promise<void>;
   query?: StreamQueryKql;
 }
 
@@ -36,12 +36,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
     isEditMode ? 'manual' : undefined
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQueryKql[]>([
-    {
-      ...defaultQuery(),
-      ...query,
-    },
-  ]);
+  const [queries, setQueries] = useState<StreamQueryKql[]>([{ ...defaultQuery(), ...query }]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,7 +54,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
   }, [selectedFlow, setQueries, queries.length, isEditMode]);
 
   return (
-    <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose?.()} size="m">
+    <EuiFlyout aria-labelledby="addSignificantEventFlyout" onClose={() => onClose()} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2>
@@ -114,7 +109,7 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-          <EuiButton color="text" onClick={() => onClose()}>
+          <EuiButton color="text" onClick={() => onClose()} disabled={isSubmitting}>
             {i18n.translate(
               'xpack.streams.streamDetailView.addSignificantEventFlyout.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
@@ -128,9 +123,16 @@ export function AddSignificantEventFlyout({ query, onClose, definition, onSave }
             onClick={() => {
               setIsSubmitting(true);
 
-              onSave(queries).finally(() => {
-                setIsSubmitting(false);
-              });
+              switch (selectedFlow) {
+                case 'manual':
+                  onSave({ type: 'single', query: queries[0], isUpdating: isEditMode }).finally(
+                    () => setIsSubmitting(false)
+                  );
+                  break;
+                case 'ai':
+                  onSave({ type: 'multiple', queries }).finally(() => setIsSubmitting(false));
+                  break;
+              }
             }}
           >
             {selectedFlow === 'manual'

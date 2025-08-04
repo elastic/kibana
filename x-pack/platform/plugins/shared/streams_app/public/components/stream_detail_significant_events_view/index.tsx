@@ -16,6 +16,7 @@ import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_significant_event_flyout';
+import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
@@ -46,7 +47,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     end,
   });
 
-  const { removeQuery, bulk } = useSignificantEventsApi({ name: definition.stream.name });
+  const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
+    name: definition.stream.name,
+  });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
 
@@ -82,26 +85,55 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     <AddSignificantEventFlyout
       definition={definition.stream}
       query={queryToEdit}
-      onSave={async (next) => {
-        await bulk?.(next.map((s) => ({ index: s }))).then(
-          () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate('xpack.streams.significantEvents.savedSuccessfullyToastTitle', {
-                defaultMessage: `Saved significant events queries successfully`,
-              }),
-            });
-            setIsEditFlyoutOpen(false);
-            significantEventsFetchState.refresh();
-          },
-          (error) => {
-            notifications.showErrorDialog({
-              title: i18n.translate('xpack.streams.significantEvents.savedErrorToastTitle', {
-                defaultMessage: `Could not save significant events queries`,
-              }),
-              error,
-            });
-          }
-        );
+      onSave={async (data: SaveData) => {
+        switch (data.type) {
+          case 'single':
+            await upsertQuery(data.query).then(
+              () => {
+                notifications.toasts.addSuccess({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedSingle.successfullyToastTitle',
+                    { defaultMessage: `Saved significant event query successfully` }
+                  ),
+                });
+                setIsEditFlyoutOpen(false);
+                significantEventsFetchState.refresh();
+              },
+              (error) => {
+                notifications.showErrorDialog({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedSingle.errorToastTitle',
+                    { defaultMessage: `Could not save significant event query` }
+                  ),
+                  error,
+                });
+              }
+            );
+            break;
+          case 'multiple':
+            await bulk(data.queries.map((query) => ({ index: query }))).then(
+              () => {
+                notifications.toasts.addSuccess({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedMultiple.successfullyToastTitle',
+                    { defaultMessage: `Saved significant events queries successfully` }
+                  ),
+                });
+                setIsEditFlyoutOpen(false);
+                significantEventsFetchState.refresh();
+              },
+              (error) => {
+                notifications.showErrorDialog({
+                  title: i18n.translate(
+                    'xpack.streams.significantEvents.savedMultiple.errorToastTitle',
+                    { defaultMessage: 'Could not save significant events queries' }
+                  ),
+                  error,
+                });
+              }
+            );
+            break;
+        }
       }}
       onClose={() => {
         setIsEditFlyoutOpen(false);

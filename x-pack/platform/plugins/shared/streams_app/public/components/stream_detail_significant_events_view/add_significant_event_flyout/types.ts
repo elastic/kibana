@@ -5,4 +5,10 @@
  * 2.0.
  */
 
+import type { StreamQueryKql } from '@kbn/streams-schema';
+
 export type Flow = 'manual' | 'ai';
+
+export type SaveData =
+  | { type: 'single'; query: StreamQueryKql; isUpdating?: boolean }
+  | { type: 'multiple'; queries: StreamQueryKql[] };

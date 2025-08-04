@@ -21,7 +21,7 @@ type SignificantEventsApiBulkOperation =
   | SignificantEventsApiBulkOperationDelete;
 
 interface SignificantEventsApi {
-  addQuery: (query: StreamQueryKql) => Promise<void>;
+  upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   generate: (connectorId: string) => SignificantEventsGenerateResponse;
@@ -39,7 +39,7 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
   const { signal } = useAbortController();
 
   return {
-    addQuery: async ({ kql, title, id }) => {
+    upsertQuery: async ({ kql, title, id }) => {
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
