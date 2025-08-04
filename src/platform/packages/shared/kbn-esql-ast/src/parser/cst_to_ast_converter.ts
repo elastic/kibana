@@ -1139,7 +1139,8 @@ export class CstToAstConverter {
   private fromCompletionCommand(ctx: cst.CompletionCommandContext): ast.ESQLAstCompletionCommand {
     const command = this.createCommand<'completion', ast.ESQLAstCompletionCommand>(
       'completion',
-      ctx
+      ctx,
+      { incomplete: true }
     );
 
     if (ctx._targetField && ctx.ASSIGN()) {
@@ -1176,18 +1177,32 @@ export class CstToAstConverter {
       command.args.push(unknownItem);
     }
 
-    const namedParametersOption = this.fromCommandNamedParameters(ctx.commandNamedParameters());
-    const namedParameters = namedParametersOption.args[0] as ast.ESQLMap;
-    const inferenceId = namedParameters.entries.find(
-      (param) => param.key.valueUnquoted === 'inference_id'
-    )?.value as ast.ESQLLiteral;
+    let inferenceId = Builder.expression.literal.string(
+      '',
+      { name: 'inferenceId' },
+      { incomplete: true }
+    );
 
-    if (inferenceId) {
-      command.inferenceId = inferenceId;
+    const commandNamedParametersContext = ctx.commandNamedParameters();
+    if (commandNamedParametersContext) {
+      const namedParametersOption = this.fromCommandNamedParameters(commandNamedParametersContext);
+
+      const namedParameters = namedParametersOption.args[0] as ast.ESQLMap | undefined;
+
+      const inferenceIdParam = namedParameters?.entries.find(
+        (param) => param.key.valueUnquoted === 'inference_id'
+      )?.value as ast.ESQLStringLiteral;
+
+      if (inferenceIdParam) {
+        inferenceId = inferenceIdParam;
+        inferenceId.incomplete = false;
+      }
+
+      command.args.push(namedParametersOption);
     }
 
-    command.args.push(namedParametersOption);
-
+    command.inferenceId = inferenceId;
+    command.incomplete = inferenceId.incomplete;
     return command;
   }
 
@@ -1600,16 +1615,25 @@ export class CstToAstConverter {
     const withOption = this.toOption('with', ctx);
 
     const withCtx = ctx.WITH();
+
+    if (!withCtx) {
+      withOption.incomplete = true;
+      return withOption;
+    }
+
     const mapExpressionCtx = ctx.mapExpression();
 
-    if (!withCtx || !mapExpressionCtx) {
-      return withOption;
+    if (!mapExpressionCtx) {
+      withOption.location.min = withCtx.symbol.start;
+      withOption.location.max = withCtx.symbol.stop;
+      withOption.incomplete = true;
     }
 
     const map = this.fromMapExpression(mapExpressionCtx);
     withOption.args.push(map);
     withOption.location.min = withCtx.symbol.start;
     withOption.location.max = map.location.max;
+    withOption.incomplete = map.incomplete;
 
     return withOption;
   }
