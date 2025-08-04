@@ -9,7 +9,10 @@ import { omit } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { Threshold } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
-import { AlertSuppression, type ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import {
+  AlertSuppression,
+  type ThreatMapping,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { expectRulesInTable } from '../../../../tasks/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
