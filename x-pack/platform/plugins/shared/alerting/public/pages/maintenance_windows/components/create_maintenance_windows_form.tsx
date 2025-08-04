@@ -223,8 +223,11 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const onScopeQueryToggle = useCallback(
     (isEnabled: boolean) => {
       setIsScopedQueryEnabled(isEnabled);
+      if (scopedQueryErrors.length) {
+        setScopedQueryErrors([]);
+      }
     },
-    [setIsScopedQueryEnabled]
+    [setIsScopedQueryEnabled, scopedQueryErrors, setScopedQueryErrors]
   );
 
   const onQueryChange = useCallback(
