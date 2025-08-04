@@ -55,7 +55,6 @@ export const initPrivilegeMonitoringEngineRoute = (
         try {
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           const body = await privMonDataClient.init();
-          await privMonDataClient.scheduleNow();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
