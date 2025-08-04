@@ -384,6 +384,8 @@ src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/kbn-validate-oas @elastic/kibana-core
+src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core
+src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
@@ -812,6 +814,7 @@ x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/performance @elastic/appex-qa
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
+x-pack/platform/packages/private/kbn-evals-suite-streams @elastic/streams-program-team
 x-pack/platform/packages/private/kbn-infra-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
