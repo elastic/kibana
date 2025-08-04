@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { maintenanceWindowResponseSchema } from './schemas/latest';
+export type { maintenanceWindowResponseSchema } from './schemas/latest';
 export { maintenanceWindowStatus } from './constants/latest';
 export type { MaintenanceWindowStatus } from './constants/latest';
 export type { MaintenanceWindowResponse } from './types/latest';
