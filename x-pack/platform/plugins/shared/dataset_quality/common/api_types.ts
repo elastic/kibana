@@ -12,15 +12,29 @@ const userPrivilegesRt = rt.type({
   canReadFailureStore: rt.boolean,
 });
 
-const datasetUserPrivilegesRt = rt.intersection([
-  userPrivilegesRt,
-  rt.type({
-    canRead: rt.boolean,
-    canViewIntegrations: rt.boolean,
-  }),
-]);
+const datasetPrivilegeRt = rt.record(
+  rt.string,
+  rt.intersection([
+    userPrivilegesRt,
+    rt.type({
+      canRead: rt.boolean,
+    }),
+  ])
+);
+
+const datasetUserPrivilegesRt = rt.type({
+  datasetsPrivilages: datasetPrivilegeRt,
+  canViewIntegrations: rt.boolean,
+});
 
 export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
+export type DatasetTypesPrivileges = rt.TypeOf<typeof datasetPrivilegeRt>;
+
+export const getDataStreamsTypesPrivilegesResponseRt = rt.exact(
+  rt.type({
+    datasetTypesPrivileges: datasetPrivilegeRt,
+  })
+);
 
 export const dataStreamStatRt = rt.intersection([
   rt.type({
