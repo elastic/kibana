@@ -10,11 +10,8 @@
 import * as esKuery from '@kbn/es-query';
 import type { SavedObjectTypeIdTuple } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import {
-  ALL_NAMESPACES_STRING,
-  DEFAULT_NAMESPACE_STRING,
-} from '@kbn/core-saved-objects-utils-server';
 import { getReferencesFilter } from './references_filter';
+import { uniqNamespaces, getClauseForType } from '../utils';
 
 type KueryNode = any;
 
@@ -58,72 +55,6 @@ function getSimpleQueryStringTypeFields(
   return { fields };
 }
 
-/**
- *  Gets the clause that will filter for the type in the namespace.
- *  Some types are namespace agnostic, so they must be treated differently.
- */
-function getClauseForType(
-  registry: ISavedObjectTypeRegistry,
-  namespaces: string[] = [DEFAULT_NAMESPACE_STRING],
-  type: string
-) {
-  if (namespaces.length === 0) {
-    throw new Error('cannot specify empty namespaces array');
-  }
-  const searchAcrossAllNamespaces = namespaces.includes(ALL_NAMESPACES_STRING);
-
-  if (registry.isMultiNamespace(type)) {
-    const typeFilterClause = { term: { type } };
-
-    const namespacesFilterClause = {
-      terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] },
-    };
-
-    const must = searchAcrossAllNamespaces
-      ? [typeFilterClause]
-      : [typeFilterClause, namespacesFilterClause];
-
-    return {
-      bool: {
-        must,
-        must_not: [{ exists: { field: 'namespace' } }],
-      },
-    };
-  } else if (registry.isSingleNamespace(type)) {
-    const should: Array<Record<string, any>> = [];
-    const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
-    if (eligibleNamespaces.length > 0 && !searchAcrossAllNamespaces) {
-      should.push({ terms: { namespace: eligibleNamespaces } });
-    }
-    if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
-      should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
-    }
-
-    const shouldClauseProps =
-      should.length > 0
-        ? {
-            should,
-            minimum_should_match: 1,
-          }
-        : {};
-
-    return {
-      bool: {
-        must: [{ term: { type } }],
-        ...shouldClauseProps,
-        must_not: [{ exists: { field: 'namespaces' } }],
-      },
-    };
-  }
-  // isNamespaceAgnostic
-  return {
-    bool: {
-      must: [{ term: { type } }],
-      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
-    },
-  };
-}
-
 export type SearchOperator = 'AND' | 'OR';
 
 interface QueryParams {
@@ -141,10 +72,6 @@ interface QueryParams {
   hasNoReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
-
-// A de-duplicated set of namespaces makes for a more efficient query.
-const uniqNamespaces = (namespacesToNormalize?: string[]) =>
-  namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
 
 const toArray = (val: unknown) => {
   if (typeof val === 'undefined') {

@@ -14,3 +14,5 @@ export {
   validateConvertFilterToKueryNode,
   validateFilterKueryNode,
 } from './filter_utils';
+
+export { uniqNamespaces, getClauseForType } from './namespace_utils';
