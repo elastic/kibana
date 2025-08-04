@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
 import {
@@ -31,21 +29,6 @@ const displayName = i18n.translate('dashboardMarkdown.convertLegacyDisplayName',
   defaultMessage: 'Convert to new markdown',
 });
 
-const ActionMenuItem: React.FC = () => {
-  return (
-    <EuiToolTip
-      content={i18n.translate('dashboardMarkdown.convertLegacyDisplayName', {
-        defaultMessage:
-          'Legacy markdown can’t be edited. Convert to the new markdown for easier editing and better styling.',
-      })}
-    >
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>{displayName}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
-};
-
 type ConvertLegacyMarkdownApi = HasUniqueId &
   CanAccessViewMode &
   HasVisualizeConfig &
@@ -63,7 +46,6 @@ export const getConvertLegacyMarkdownAction = () => ({
   id: CONVERT_LEGACY_MARKDOWN_ACTION_ID,
   getIconType: () => 'merge',
   showNotification: true,
-  MenuItem: ActionMenuItem,
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit') {
       return false;
@@ -85,5 +67,5 @@ export const getConvertLegacyMarkdownAction = () => ({
       },
     });
   },
-  getDisplayName: () => 'Convert to new markdown',
+  getDisplayName: () => displayName,
 });
