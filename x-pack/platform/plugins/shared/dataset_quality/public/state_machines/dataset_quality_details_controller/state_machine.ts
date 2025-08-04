@@ -772,7 +772,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         canReadFailureStore: (context) => {
           return (
             'dataStreamSettings' in context &&
-            Boolean(context.dataStreamSettings.datasetUserPrivileges?.canReadFailureStore)
+            Boolean(
+              context.dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[
+                context.dataStream
+              ].canReadFailureStore
+            )
           );
         },
       },
