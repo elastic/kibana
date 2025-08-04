@@ -97,9 +97,9 @@ export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
 }
 
 export enum TraceDataState {
-  Full,
-  Partial,
-  Empty,
+  Full = 'full',
+  Partial = 'partial',
+  Empty = 'empty',
 }
 
 export function getRootItemOrFallback(
@@ -117,19 +117,20 @@ export function getRootItemOrFallback(
   const parentIds = new Set(traceItems.map(({ id }) => id));
   const orphans = traceItems.filter((item) => item.parentId && !parentIds.has(item.parentId));
 
-  if (rootItem && orphans.length === 0) {
+  if (rootItem) {
     return {
-      traceState: TraceDataState.Full,
+      traceState: orphans.length === 0 ? TraceDataState.Full : TraceDataState.Partial,
       rootItem,
+      orphans,
     };
   }
 
-  const [fallbackItem, ...rest] = orphans;
+  const [fallbackRootItem, ...remainingOrphans] = orphans;
 
   return {
     traceState: TraceDataState.Partial,
-    rootItem: fallbackItem,
-    orphans: rest,
+    rootItem: fallbackRootItem,
+    orphans: remainingOrphans,
   };
 }
 

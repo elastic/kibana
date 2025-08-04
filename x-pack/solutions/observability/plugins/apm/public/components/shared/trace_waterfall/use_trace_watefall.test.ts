@@ -448,7 +448,7 @@ describe('getRootItemOrFallback', () => {
 
     expect(result.rootItem).toEqual(root);
     expect(result.traceState).toBe(TraceDataState.Full);
-    expect(result.orphans).toBeUndefined();
+    expect(result.orphans).toEqual([]);
   });
 
   it('should return an EMPTY state for an empty trace', () => {
@@ -459,12 +459,22 @@ describe('getRootItemOrFallback', () => {
     expect(result.orphans).toBeUndefined();
   });
 
-  it('should return a PARTIAL state for an incomplete trace with no root or with orphan items', () => {
-    const traceData = [child2, grandchild];
+  it('should return a PARTIAL state for an incomplete trace with no root span', () => {
+    const traceData = [child1, grandchild];
 
     const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
 
-    expect(result.rootItem).toEqual(child2);
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([]);
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with orphan child spans', () => {
+    const traceData = [root, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
     expect(result.traceState).toBe(TraceDataState.Partial);
     expect(result.orphans).toEqual([grandchild]);
   });
