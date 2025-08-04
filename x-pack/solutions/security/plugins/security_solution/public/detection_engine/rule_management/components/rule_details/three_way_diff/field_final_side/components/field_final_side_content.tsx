@@ -25,7 +25,11 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
+            <EuiButtonEmpty
+              iconType="pencil"
+              onClick={setEditMode}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-edit"
+            >
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
@@ -41,7 +45,11 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={setReadOnlyMode}
+              data-test-subj="prebuilt-rule-upgrade-flyout-field-cancel"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>
