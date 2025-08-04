@@ -96,7 +96,9 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     }
   });
 
-  test('should allow updating the condition manually by syntax editor', async ({ pageObjects }) => {
+  test.only('should allow updating the condition manually by syntax editor', async ({
+    pageObjects,
+  }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('logs.preview-test');
 
@@ -130,9 +132,18 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.fillConditionEditorWithSyntax(
       JSON.stringify(
         {
-          field: 'severity_text',
-          operator: 'eq',
-          value: 'warn',
+          and: [
+            {
+              field: 'severity_text',
+              operator: 'eq',
+              value: 'warn',
+            },
+            {
+              field: 'body.text',
+              operator: 'contains',
+              value: 'log',
+            },
+          ],
         },
         null,
         2
@@ -147,6 +158,11 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
+      });
+      await pageObjects.streams.expectCellValue({
+        columnName: 'body.text',
+        rowIndex,
+        value: 'Test log message',
       });
     }
   });
