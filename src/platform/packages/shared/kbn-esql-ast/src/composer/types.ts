@@ -16,20 +16,23 @@ export type ComposerQueryTagHole = synth.SynthTemplateHole | ParameterHole | Par
 
 export type ParameterShorthandHole = Record<string, unknown>;
 
-// const asdf: ParameterShorthandHole = { a: 13 };
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never;
+export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
+export type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
 
-// export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-//   k: infer I
-// ) => void
-//   ? I
-//   : never;
-// export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
-// export type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
-
-export type ComposerQueryTag = (
+export type ComposerTag<Return> = <T extends ComposerQueryTagHole[]>(
   template: TemplateStringsArray,
-  ...holes: ComposerQueryTagHole[]
-) => ComposerQuery;
+  /**
+   * The SingleKey below ensures that the parameter shorthand holes
+   * are processed correctly, allowing only one key per object.
+   */
+  ...holes: { [K in keyof T]: T[K] extends ParameterShorthandHole ? SingleKey<T[K]> : T[K] }
+) => Return;
+export type ComposerQueryTag = ComposerTag<ComposerQuery>;
 export type ComposerQueryGenerator = (query: string) => ComposerQuery;
 
 type SynthMethods = typeof import('../synth');

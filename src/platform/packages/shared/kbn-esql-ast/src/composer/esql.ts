@@ -18,7 +18,7 @@ import type {
   ComposerQueryTagMethods,
 } from './types';
 
-const esqlTag = ((templateOrQuery, ...holes: ComposerQueryTagHole[]) => {
+const esqlTag = ((templateOrQuery: any, ...holes: ComposerQueryTagHole[]) => {
   const { params } = processTemplateHoles(holes);
   const ast =
     typeof templateOrQuery === 'string'

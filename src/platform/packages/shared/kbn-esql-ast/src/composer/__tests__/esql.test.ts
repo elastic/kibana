@@ -206,9 +206,12 @@ ComposerQuery
   test('throws on invalid shorthand syntax', () => {
     const limit = 123;
 
-    expect(
-      () => esql`FROM index | LIMIT ${{ limit, noMoreFields: true }}`
-    ).toThrowErrorMatchingInlineSnapshot(
+    expect(() => {
+      esql`FROM index | LIMIT ${
+        // @ts-expect-error - Parameter shorthand must be an object with a single key
+        { limit, noMoreFields: true }
+      }`;
+    }).toThrowErrorMatchingInlineSnapshot(
       `"Unexpected synth hole: {\\"limit\\":123,\\"noMoreFields\\":true}"`
     );
   });
