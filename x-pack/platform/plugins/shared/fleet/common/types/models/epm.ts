@@ -62,6 +62,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -81,6 +82,7 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -283,6 +285,7 @@ export enum RegistryInputKeys {
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
+  deployment_modes = 'deployment_modes',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -296,6 +299,7 @@ export interface RegistryInput {
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+  [RegistryInputKeys.deployment_modes]?: string[];
 }
 
 export enum RegistryStreamKeys {
@@ -685,7 +689,7 @@ export interface Installation {
   latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
-  previous_version?: string;
+  previous_version?: string | null;
 }
 
 export interface PackageUsageStats {

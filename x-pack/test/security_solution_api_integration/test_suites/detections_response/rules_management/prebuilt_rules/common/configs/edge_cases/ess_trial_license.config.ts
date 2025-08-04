@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../configs/ess/rules_management.trial.config')
   );
 
   const testConfig = {
@@ -18,6 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName:
         'Rules Management - Prebuilt Rules (Common) Integration Tests - ESS Trial License',
+    },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 60000 * 10, // 10 minutes
     },
   };
 

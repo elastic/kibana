@@ -187,6 +187,26 @@ const getAssetCriticalityColumn = () => ({
   ),
 });
 
+const getLabelColumn = () => ({
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.label"
+      defaultMessage="Label"
+    />
+  ),
+  render: (record: TableItemType) => {
+    const labels = record.eaLabels;
+
+    return labels ? (
+      <EuiText size="s" data-test-subj="privileged-user-monitoring-label">
+        {(isArray(labels) ? labels : [labels]).join(', ')}
+      </EuiText>
+    ) : (
+      getEmptyTagValue()
+    );
+  },
+});
+
 function dataSourcesIsArray(dataSources: string | string[]): dataSources is string[] {
   return Array.isArray(dataSources);
 }
@@ -324,6 +344,7 @@ export const buildPrivilegedUsersTableColumns = (
   getPrivilegedUserColumn(),
   getRiskScoreColumn(euiTheme),
   getAssetCriticalityColumn(),
+  getLabelColumn(),
   getDataSourceColumn(),
   getAlertDistributionColumn(),
 ];

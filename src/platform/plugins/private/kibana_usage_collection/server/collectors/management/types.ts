@@ -49,6 +49,7 @@ export interface UsageStats {
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
+  'ai:anonymizationSettings': string;
   'onechat:mcp:enabled': boolean;
   'onechat:ui:enabled': boolean;
   'onechat:api:enabled': boolean;
@@ -72,6 +73,7 @@ export interface UsageStats {
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;
+  'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;

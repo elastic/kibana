@@ -86,4 +86,36 @@ describe('custom_scripts_handler', () => {
 
     expect(mockGetResponseActionsClient).toHaveBeenCalledWith('crowdstrike', expect.anything());
   });
+
+  describe('and agentType is sentinel_one', () => {
+    beforeEach(() => {
+      // @ts-expect-error write to readonly property
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        true;
+      httpRequestMock.query.agentType = 'sentinel_one';
+      httpRequestMock.query.osType = 'linux';
+    });
+
+    it('should return error if feature flag is disabled', async () => {
+      // @ts-expect-error write to readonly property
+      testSetup.endpointAppContextMock.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        false;
+      await callHandler();
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: expect.objectContaining({
+          message: "Agent type [sentinel_one] does not support 'runscript' response action",
+        }),
+      });
+    });
+
+    it('should pass query params to SentinelOne `getCustomScripts()` method', async () => {
+      await callHandler();
+
+      expect(mockGetResponseActionsClient().getCustomScripts).toHaveBeenCalledWith({
+        osType: 'linux',
+      });
+    });
+  });
 });

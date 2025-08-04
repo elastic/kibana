@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
+import { ESQLLicenseType } from '@kbn/esql-types';
 import {
   ESQLAstItem,
   ESQLCommand,
@@ -17,10 +18,6 @@ import {
   ESQLParamLiteral,
 } from '../../../types';
 import { isAssignment, isInlineCast } from '../../../ast/is';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../../constants';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
 import {
   FunctionParameter,
@@ -29,7 +26,10 @@ import {
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import {
+  ICommandCallbacks,
+  getLocationFromCommandOrOptionName,
+} from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -197,6 +197,42 @@ export function checkFunctionArgMatchesDefinition(
 }
 
 /**
+ * Filters function signatures to only include those whose parameter types
+ * precisely match the provided argument types.
+ */
+function getTypeMatchingSignatures(
+  fn: ESQLFunction,
+  signatures: FunctionDefinition['signatures'],
+  context: ICommandContext,
+  parentCommand: string
+): FunctionDefinition['signatures'] {
+  return signatures.filter((signature) =>
+    signature.params.every((param, index) => {
+      const arg = fn.args[index];
+      if (!arg) {
+        return param.optional;
+      }
+
+      if (Array.isArray(arg)) {
+        if (arg.length === 0) {
+          return param.optional;
+        }
+
+        // all elements within an array will have the same type and we can pick up the first one
+        // and pass to checkFunctionArgMatchesDefinition to check if an AST function argument is of the correct type
+        const firstArg = arg[0];
+        if (Array.isArray(firstArg)) {
+          return false; // Nested arrays. Do we have this case?
+        }
+
+        return checkFunctionArgMatchesDefinition(firstArg, param, context, parentCommand);
+      }
+      return checkFunctionArgMatchesDefinition(arg, param, context, parentCommand);
+    })
+  );
+}
+
+/**
  * Checks if this argument is one of the possible options
  * if they are defined on the arg definition.
  *
@@ -279,8 +315,6 @@ function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType
   return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
-const NO_MESSAGE: ESQLMessage[] = [];
-
 /**
  * Performs validation on a function
  */
@@ -289,19 +323,19 @@ export function validateFunction({
   parentCommand,
   parentOption,
   context,
+  callbacks,
   forceConstantOnly = false,
   isNested,
   parentAst,
-  currentCommandIndex,
 }: {
   fn: ESQLFunction;
   parentCommand: string;
   parentOption?: string;
   context: ICommandContext;
+  callbacks: ICommandCallbacks;
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
 }): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
@@ -315,20 +349,6 @@ export function validateFunction({
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
-  if (typeof textSearchFunctionsValidators[fn.name] === 'function') {
-    const validator = textSearchFunctionsValidators[fn.name];
-    messages.push(
-      ...validator({
-        fn,
-        parentCommand,
-        parentOption,
-        context,
-        isNested,
-        parentAst,
-        currentCommandIndex,
-      })
-    );
-  }
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
       messages.push(errors.unknownFunction(fn));
@@ -357,7 +377,34 @@ export function validateFunction({
       return messages;
     }
   }
+
   const matchingSignatures = getSignaturesWithMatchingArity(fnDefinition, fn);
+
+  // Check license requirements for the function
+  const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
+
+  if (isFnSupported.supported && hasMinimumLicenseRequired) {
+    const licenseMessages = validateFunctionLicense(fn, hasMinimumLicenseRequired);
+    if (licenseMessages.length) {
+      messages.push(...licenseMessages);
+    }
+
+    // Check signature-specific license requirements
+    if (licenseMessages.length === 0 && matchingSignatures.length > 0) {
+      const signatureLicenseMessages = validateSignatureLicense(
+        fn,
+        matchingSignatures,
+        hasMinimumLicenseRequired,
+        context,
+        parentCommand
+      );
+
+      if (signatureLicenseMessages.length) {
+        messages.push(...signatureLicenseMessages);
+      }
+    }
+  }
+
   if (!matchingSignatures.length) {
     const { max, min } = getMaxMinNumberOfParams(fnDefinition);
     if (max === min) {
@@ -423,6 +470,7 @@ export function validateFunction({
           parentCommand,
           parentOption,
           context,
+          callbacks,
           /*
            * The constantOnly constraint needs to be enforced for arguments that
            * are functions as well, regardless of whether the definition for the
@@ -467,13 +515,7 @@ export function validateFunction({
       }
     }
   }
-  // check if the definition has some specific validation to apply:
-  if (fnDefinition.validate) {
-    const payloads = fnDefinition.validate(fn);
-    if (payloads.length) {
-      messages.push(...payloads);
-    }
-  }
+
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
   let relevantFuncSignatures = matchingSignatures;
@@ -766,19 +808,7 @@ function validateFunctionColumnArg(
   }
 
   if (actualArg.name === '*') {
-    // if function does not support wildcards return a specific error
-    if (!('supportsWildcard' in parameterDefinition) || !parameterDefinition.supportsWildcard) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'noWildcardSupportAsArg',
-          values: {
-            name: astFunction.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    }
-
+    // special case for COUNT(*)
     return messages;
   }
 
@@ -818,88 +848,6 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 
 // #region Specific functions
 
-function validateIfHasUnsupportedCommandPrior(
-  fn: ESQLFunction,
-  parentAst: ESQLCommand[] = [],
-  unsupportedCommands: Set<string>,
-  currentCommandIndex?: number
-) {
-  if (currentCommandIndex === undefined) {
-    return NO_MESSAGE;
-  }
-  const unsupportedCommandsPrior = parentAst.filter(
-    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.has(cmd.name)
-  );
-
-  if (unsupportedCommandsPrior.length > 0) {
-    return [
-      getMessageFromId({
-        messageId: 'fnUnsupportedAfterCommand',
-        values: {
-          function: fn.name.toUpperCase(),
-          command: unsupportedCommandsPrior[0].name.toUpperCase(),
-        },
-        locations: fn.location,
-      }),
-    ];
-  }
-  return NO_MESSAGE;
-}
-
-const validateMatchFunction: FunctionValidator = ({
-  fn,
-  parentCommand,
-  parentAst,
-  currentCommandIndex,
-}) => {
-  if (fn.name === 'match') {
-    if (parentCommand !== 'where') {
-      return [
-        getMessageFromId({
-          messageId: 'onlyWhereCommandSupported',
-          values: { fn: fn.name },
-          locations: fn.location,
-        }),
-      ];
-    }
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-type FunctionValidator = (args: {
-  fn: ESQLFunction;
-  parentCommand: string;
-  parentOption?: string;
-  context: ICommandContext;
-  forceConstantOnly?: boolean;
-  isNested?: boolean;
-  parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
-}) => ESQLMessage[];
-
-const validateQSTRFunction: FunctionValidator = ({ fn, parentAst, currentCommandIndex }) => {
-  if (fn.name === 'qstr') {
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
-  match: validateMatchFunction,
-  qstr: validateQSTRFunction,
-};
-
 export function isSupportedFunction(
   name: string,
   parentCommand?: string,
@@ -919,6 +867,110 @@ export function isSupportedFunction(
     supported: isSupported,
     reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
   };
+}
+
+function validateFunctionLicense(
+  fn: ESQLFunction,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+): ESQLMessage[] {
+  const fnDefinition = getFunctionDefinition(fn.name);
+
+  if (!fnDefinition) {
+    return [];
+  }
+
+  const { license } = fnDefinition;
+
+  if (!!hasMinimumLicenseRequired && license) {
+    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+      return [
+        getMessageFromId({
+          messageId: 'licenseRequired',
+          values: {
+            name: fn.name.toUpperCase(),
+            requiredLicense: license?.toUpperCase() || 'UNKNOWN',
+          },
+          locations: fn.location,
+        }),
+      ];
+    }
+  }
+
+  return [];
+}
+
+/**
+ *
+ *
+ * Validates license requirements for function signatures based on argument types:
+ * 1. Filters signatures to only those that match the actual argument types being used
+ * 2. Checks if any matching signature is available without a license requirement
+ * 3. If all matching signatures require licenses, validates user's license level
+ * 4. Returns specific error messages indicating which signature requires the license
+ *
+ * @example
+ * // For ST_EXTENT_AGG(TO_CARTESIANPOINT(field)) with BASIC license:
+ * // Returns [] because cartesian_point signature doesn't require license
+ *
+ * // For ST_EXTENT_AGG(TO_CARTESIANSHAPE(field)) with BASIC license:
+ * // Returns ["...some error message"]
+ */
+function validateSignatureLicense(
+  fn: ESQLFunction,
+  matchingSignatures: FunctionDefinition['signatures'],
+  hasMinimumLicenseRequired: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  context: ICommandContext,
+  parentCommand: string
+): ESQLMessage[] {
+  if (matchingSignatures.length === 0) {
+    return [];
+  }
+
+  const relevantSignatures = getTypeMatchingSignatures(
+    fn,
+    matchingSignatures,
+    context,
+    parentCommand
+  );
+
+  // If the user can use at least one signature without a license, the function is allowed
+  const hasUnlicensedSignature =
+    relevantSignatures.length === 0 || relevantSignatures.some((sig) => !sig.license);
+  if (hasUnlicensedSignature) {
+    return [];
+  }
+
+  // If the user has the required license for at least one signature, allow the function
+  const hasValidLicense = relevantSignatures.some(
+    (signature) =>
+      signature.license &&
+      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+  );
+
+  if (hasValidLicense) {
+    return [];
+  }
+
+  // Generate a specific error message indicating which signature requires the license
+  // We're asserting non-null here because based on the preceding logic, all 'relevantSignatures' must have a license at this point.
+  const firstLicensedSignature = relevantSignatures.find((sig) => sig.license)!;
+  const requiredLicense = firstLicensedSignature.license!.toUpperCase();
+
+  const signatureDescription = firstLicensedSignature.params
+    .map((param) => `'${param.name}' of type '${param.type}'`)
+    .join(', ');
+
+  return [
+    getMessageFromId({
+      messageId: 'licenseRequiredForSignature',
+      values: {
+        name: fn.name.toUpperCase(),
+        signatureDescription,
+        requiredLicense,
+      },
+      locations: fn.location,
+    }),
+  ];
 }
 
 // #endregion
