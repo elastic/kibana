@@ -8,7 +8,7 @@
 import { asTree, mergeTrees } from './tree';
 import { testContentPackEntry } from './test.utils';
 
-describe('content pack stream helpers', () => {
+describe('content pack tree helpers', () => {
   describe('asTree', () => {
     it('builds a complete tree when includeAll is provided', () => {
       const root = testContentPackEntry({
