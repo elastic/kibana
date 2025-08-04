@@ -67,11 +67,16 @@ export const indexTemplates: {
     template: {
       settings: {
         default_pipeline: 'logs@default-pipeline',
+        data_stream_options: {
+          failure_store: {
+            enabled: false,
+          },
+        },
       },
     },
     priority: 500,
     index_patterns: ['logs-*'],
-    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings', 'synth.no-fs@custom'],
+    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
     allow_auto_create: true,
     data_stream: {
       hidden: false,
