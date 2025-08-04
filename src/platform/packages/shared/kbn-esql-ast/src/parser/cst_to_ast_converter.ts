@@ -1176,44 +1176,17 @@ export class CstToAstConverter {
       command.args.push(unknownItem);
     }
 
-    const withCtx = ctx.WITH();
+    const namedParametersOption = this.fromCommandNamedParameters(ctx.commandNamedParameters());
+    const namedParameters = namedParametersOption.args[0] as ast.ESQLMap;
+    const inferenceId = namedParameters.entries.find(
+      (param) => param.key.valueUnquoted === 'inference_id'
+    )?.value as ast.ESQLLiteral;
 
-    let inferenceId: ast.ESQLSingleAstItem;
-    let withIncomplete = true;
-
-    const withText = withCtx?.getText();
-    const inferenceIdText = ctx._inferenceId?.getText();
-    if (withText?.includes('missing') && /(?:w|wi|wit|with)$/i.test(inferenceIdText)) {
-      // This case is when the WITH keyword is partially typed, and no inferenceId has been provided e.g. 'COMPLETION "prompt" WI'
-      // (the parser incorrectly recognizes the partial WITH keyword as the inferenceId)
-      inferenceId = Builder.identifier('', { incomplete: true });
-    } else {
-      if (!inferenceIdText) {
-        inferenceId = Builder.identifier('', { incomplete: true });
-      } else {
-        withIncomplete = false;
-        inferenceId = this.fromIdentifierOrParam(ctx._inferenceId)!;
-      }
+    if (inferenceId) {
+      command.inferenceId = inferenceId;
     }
 
-    command.inferenceId = inferenceId;
-
-    const optionWith = Builder.option(
-      {
-        name: 'with',
-        args: [inferenceId],
-      },
-      {
-        incomplete: withIncomplete,
-        ...(withCtx && ctx._inferenceId
-          ? {
-              location: getPosition(withCtx.symbol, ctx._inferenceId.stop),
-            }
-          : undefined),
-      }
-    );
-
-    command.args.push(optionWith);
+    command.args.push(namedParametersOption);
 
     return command;
   }
@@ -1619,6 +1592,26 @@ export class CstToAstConverter {
       return this.collectInlineCast(ctx);
     }
     return this.fromParserRuleToUnknown(ctx);
+  }
+
+  private fromCommandNamedParameters(
+    ctx: cst.CommandNamedParametersContext
+  ): ast.ESQLCommandOption {
+    const withOption = this.toOption('with', ctx);
+
+    const withCtx = ctx.WITH();
+    const mapExpressionCtx = ctx.mapExpression();
+
+    if (!withCtx || !mapExpressionCtx) {
+      return withOption;
+    }
+
+    const map = this.fromMapExpression(mapExpressionCtx);
+    withOption.args.push(map);
+    withOption.location.min = withCtx.symbol.start;
+    withOption.location.max = map.location.max;
+
+    return withOption;
   }
 
   private collectInlineCast(ctx: cst.InlineCastContext): ast.ESQLInlineCast {
