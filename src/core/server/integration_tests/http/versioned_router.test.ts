@@ -34,7 +34,7 @@ describe('Routing versioned requests', () => {
   let router: IRouter;
   let supertest: Supertest.Agent;
   const endMock = jest.fn();
-  jest.spyOn(apm, 'startSpan').mockReturnValue({ end: endMock } as Span);
+  jest.spyOn(apm, 'startSpan').mockReturnValue({ end: endMock } as any as Span);
 
   const assertSpanCloseCalled = (numberofOfCalls: number = 2) => {
     expect(apm.startSpan).toHaveBeenCalledTimes(numberofOfCalls);
