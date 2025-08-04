@@ -22,7 +22,8 @@ export function EntityDetailsTimeRangeMetadataProvider({
   entityId: string;
   entityType: InventoryItemType;
 }) {
-  const { dateRange } = useDatePickerContext();
+  const { getParsedDateRange } = useDatePickerContext();
+  const parsedDateRange = getParsedDateRange();
 
   if (entityType !== 'host') return <>{children}</>;
   const { id } = findInventoryFields(entityType);
@@ -30,8 +31,8 @@ export function EntityDetailsTimeRangeMetadataProvider({
   return (
     <TimeRangeMetadataProvider
       dataSource={entityType}
-      start={dateRange.from}
-      end={dateRange.to}
+      start={parsedDateRange.from}
+      end={parsedDateRange.to}
       kuery={`${id}:"${entityId}"`}
     >
       {children}
