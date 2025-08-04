@@ -21,9 +21,13 @@ import {
   Streams,
 } from '@kbn/streams-schema';
 import { EcsFlat } from '@elastic/ecs';
-import { baseFields } from '../streams/component_templates/logs_layer';
 import { FieldDefinitionType } from '@kbn/streams-schema/src/fields';
+import { baseFields } from '../streams/component_templates/logs_layer';
 
+/**
+ * returns a content pack that includes the `logs` data streams of the provided package
+ * and a __ROOT__ stream that defines routing rules based on `data_stream.dataset`
+ */
 export async function packageAsContentPack({ name }: { name: string }): Promise<ContentPack> {
   const pkgKey = await fetchFindLatestPackageOrThrow(name);
   const pkg = await getPackage(pkgKey.name, pkgKey.version);
@@ -45,8 +49,10 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
           loadDatastreamsFieldsFromYaml(pkg, pkg.assetsMap, ds.path)
         );
 
-        let fieldsFromProcessors: FieldDefinition = {};
-        const pipelines = pkg.paths
+        // while the main pipeline can delegate parsing to another pipeline via
+        // a processor, we only support the main pipeline processors here but it
+        // should be doable via conditional processors
+        const [mainPipeline] = pkg.paths
           .filter((path) => isDataStreamPipeline(path, ds.path) && path.endsWith('default.yml'))
           .map((path) => {
             const buf = pkg.assetsMap.get(path);
@@ -56,71 +62,16 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
 
             const pipeline = YAML.parse(buf.toString('utf8')) as { processors: any[] };
             const processors = pipeline.processors.filter(
-              // don't handle pipeline processor but there should be no issue
-              // with conditional processors
               (processor) => !('pipeline' in processor)
             );
-            processors.forEach((processor) => {
-              // there's likely more processors to specially handle here
-              if ('grok' in processor) {
-                const grokConfig = processor.grok as GrokProcessorConfig;
-                grokConfig.patterns.forEach((pattern) => {
-                  fieldsFromProcessors = {
-                    ...fieldsFromProcessors,
-                    ...fieldsFromGrokPattern(pattern),
-                  };
-                });
-                Object.values(grokConfig.pattern_definitions ?? {})?.forEach((definition) => {
-                  fieldsFromProcessors = {
-                    ...fieldsFromProcessors,
-                    ...fieldsFromGrokPattern(definition),
-                  };
-                });
-              }
-
-              if ('dissect' in processor) {
-                const dissectConfig = processor.dissect as DissectProcessorConfig;
-                fieldsFromProcessors = {
-                  ...fieldsFromProcessors,
-                  ...fieldsFromDissectPattern(dissectConfig.pattern),
-                };
-              }
-
-              if ('uri_parts' in processor) {
-                fieldsFromProcessors = {
-                  ...fieldsFromProcessors,
-                  ...{
-                    'url.original': { type: 'keyword' },
-                    'url.domain': { type: 'keyword' },
-                    'url.port': { type: 'long' },
-                  },
-                };
-              }
-
-              if ('user_agent' in processor) {
-                fieldsFromProcessors = {
-                  ...fieldsFromProcessors,
-                  ...{
-                    'user_agent.device.name': { type: 'keyword' },
-                    'user_agent.name': { type: 'keyword' },
-                    'user_agent.original': { type: 'keyword' },
-                    'user_agent.os.family': { type: 'keyword' },
-                    'user_agent.os.full': { type: 'keyword' },
-                    'user_agent.os.kernel': { type: 'keyword' },
-                    'user_agent.os.name': { type: 'keyword' },
-                    'user_agent.os.platform': { type: 'keyword' },
-                    'user_agent.os.type': { type: 'keyword' },
-                    'user_agent.os.version': { type: 'keyword' },
-                    'user_agent.version': { type: 'keyword' },
-                  },
-                };
-              }
-            });
             return { ...pipeline, processors };
           });
 
+        const processorsFields = fieldsFromProcessors(mainPipeline.processors);
+        // - map only the ecs fields extracted from the processors
+        // - map all the fields explicitly mapped
         const mappedFields = Object.entries({
-          ...Object.entries(fieldsFromProcessors).reduce((acc, [key, value]) => {
+          ...Object.entries(processorsFields).reduce((acc, [key, value]) => {
             if ((EcsFlat as Record<string, any>)[key]) {
               acc[key] = value;
             }
@@ -153,49 +104,10 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
               description: '',
               ingest: {
                 lifecycle: { inherit: {} },
-                processing: [
-                  {
-                    manual_ingest_pipeline: {
-                      if: { always: {} },
-                      // integration pipeline expects data to be in message field
-                      processors: [{ set: { field: 'message', copy_from: 'body.text' } }],
-                    },
-                  },
-                  {
-                    manual_ingest_pipeline: {
-                      if: { always: {} },
-                      // integration processors as-is (minus pipeline processor)
-                      processors: pipelines[0].processors,
-                    },
-                  },
-                  {
-                    manual_ingest_pipeline: {
-                      if: { always: {} },
-                      // streams require scoped ecs. need more logic here since
-                      // some fields belong to resource.attributes.* and other attributes.*
-                      processors: Object.keys(mappedFields).map((field) => ({
-                        rename: {
-                          field: field,
-                          target_field: `attributes.${field}`,
-                          ignore_missing: true,
-                        },
-                      })),
-                    },
-                  },
-                  {
-                    manual_ingest_pipeline: {
-                      if: { always: {} },
-                      processors: [
-                        {
-                          remove: {
-                            field: 'message',
-                            ignore_missing: true,
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
+                processing: streamProcessors({
+                  mappedFields,
+                  integrationProcessors: mainPipeline.processors,
+                }),
                 wired: {
                   fields: Object.entries(mappedFields).reduce((acc, [key, value]) => {
                     acc[`attributes.${key}`] = value;
@@ -250,7 +162,121 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
   };
 }
 
-const mappingsAsFields = (properties: Record<string, any>, prefix = '') => {
+function streamProcessors({
+  mappedFields,
+  integrationProcessors,
+}: {
+  mappedFields: FieldDefinition;
+  integrationProcessors: any[];
+}) {
+  return [
+    {
+      manual_ingest_pipeline: {
+        if: { always: {} },
+        // integration pipeline expects data to be in message field
+        processors: [{ set: { field: 'message', copy_from: 'body.text' } }],
+      },
+    },
+    {
+      manual_ingest_pipeline: {
+        if: { always: {} },
+        // integration processors as-is (minus pipeline processor)
+        processors: integrationProcessors,
+      },
+    },
+    {
+      manual_ingest_pipeline: {
+        if: { always: {} },
+        // streams require scoped ecs. need more logic here since
+        // some fields belong to resource.attributes.* and other attributes.*
+        processors: Object.keys(mappedFields).map((field) => ({
+          rename: {
+            field: field,
+            target_field: `attributes.${field}`,
+            ignore_missing: true,
+          },
+        })),
+      },
+    },
+    {
+      manual_ingest_pipeline: {
+        if: { always: {} },
+        processors: [
+          {
+            remove: {
+              field: 'message',
+              ignore_missing: true,
+            },
+          },
+        ],
+      },
+    },
+  ];
+}
+
+// there's more processors to handle here
+function fieldsFromProcessors(processors: any[]): FieldDefinition {
+  return processors.reduce((fields, processor) => {
+    if ('grok' in processor) {
+      const grokConfig = processor.grok as GrokProcessorConfig;
+      grokConfig.patterns.forEach((pattern) => {
+        fields = {
+          ...fields,
+          ...fieldsFromGrokPattern(pattern),
+        };
+      });
+      Object.values(grokConfig.pattern_definitions ?? {})?.forEach((definition) => {
+        fields = {
+          ...fields,
+          ...fieldsFromGrokPattern(definition),
+        };
+      });
+    }
+
+    if ('dissect' in processor) {
+      const dissectConfig = processor.dissect as DissectProcessorConfig;
+      fields = {
+        ...fields,
+        ...fieldsFromDissectPattern(dissectConfig.pattern),
+      };
+    }
+
+    if ('uri_parts' in processor) {
+      fields = {
+        ...fields,
+        ...{
+          'url.original': { type: 'keyword' },
+          'url.domain': { type: 'keyword' },
+          'url.port': { type: 'long' },
+        },
+      };
+    }
+
+    if ('user_agent' in processor) {
+      fields = {
+        ...fields,
+        ...{
+          'user_agent.device.name': { type: 'keyword' },
+          'user_agent.name': { type: 'keyword' },
+          'user_agent.original': { type: 'keyword' },
+          'user_agent.os.family': { type: 'keyword' },
+          'user_agent.os.full': { type: 'keyword' },
+          'user_agent.os.kernel': { type: 'keyword' },
+          'user_agent.os.name': { type: 'keyword' },
+          'user_agent.os.platform': { type: 'keyword' },
+          'user_agent.os.type': { type: 'keyword' },
+          'user_agent.os.version': { type: 'keyword' },
+          'user_agent.version': { type: 'keyword' },
+        },
+      };
+    }
+
+    return fields;
+  }, {} as FieldDefinition);
+}
+
+// flatten integration mappings
+function mappingsAsFields(properties: Record<string, any>, prefix = '') {
   return Object.entries(properties).reduce((acc, [key, value]) => {
     if (typeof value.properties === 'object') {
       acc = {
@@ -262,7 +288,7 @@ const mappingsAsFields = (properties: Record<string, any>, prefix = '') => {
     }
     return acc;
   }, {} as FieldDefinition);
-};
+}
 
 // should use @kbn/grok-ui
 function fieldsFromGrokPattern(pattern: string): FieldDefinition {

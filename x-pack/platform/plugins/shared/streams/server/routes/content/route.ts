@@ -22,7 +22,10 @@ import {
 } from '../../lib/content/stream';
 import { baseFields } from '../../lib/streams/component_templates/logs_layer';
 import { asTree } from '../../lib/content/stream/tree';
-import { fetchFindLatestPackageOrUndefined, fetchList } from '@kbn/fleet-plugin/server/services/epm/registry';
+import {
+  fetchFindLatestPackageOrUndefined,
+  fetchList,
+} from '@kbn/fleet-plugin/server/services/epm/registry';
 import { packageAsContentPack } from '../../lib/content/package';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
@@ -224,7 +227,7 @@ const suggestContentRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/content/suggest',
   options: {
     access: 'internal',
-    summary: 'Suggest a content pack',
+    summary: 'Suggests integrations based on the available logs',
   },
   params: z.object({
     path: z.object({
@@ -256,7 +259,8 @@ const suggestContentRoute = createServerRoute({
         return pkg?.name;
       })
     );
-    return (await fetchList({})).map(item => item.name);
+    // uncomment to show all packages
+    // return (await fetchList({})).map((item) => item.name);
     return compact(packages);
   },
 });
