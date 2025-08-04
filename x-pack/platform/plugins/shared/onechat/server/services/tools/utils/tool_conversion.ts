@@ -21,10 +21,10 @@ export const toExecutableTool = <
   runner,
   request,
 }: {
-  tool: InternalToolDefinition<TConfig, RunInput, RunOutput>;
+  tool: InternalToolDefinition<TConfig, RunInput>;
   runner: Runner;
   request: KibanaRequest;
-}): ExecutableTool<TConfig, RunInput, RunOutput> => {
+}): ExecutableTool<TConfig, RunInput> => {
   const { handler, ...toolParts } = tool;
 
   return {
