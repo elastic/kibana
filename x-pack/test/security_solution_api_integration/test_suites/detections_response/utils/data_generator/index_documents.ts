@@ -35,5 +35,6 @@ export const indexDocuments: IndexDocuments = async ({ es, documents, index, log
       throw Error(responseIndex.error.message);
     }
   });
+  console.log(">>> response.items", JSON.stringify(response.items, null, 2))
   return response;
 };
