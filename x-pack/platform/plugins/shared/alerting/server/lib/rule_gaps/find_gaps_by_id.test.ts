@@ -31,12 +31,9 @@ const createMockGapEvent = () => ({
         },
       },
     },
-    saved_objects: [
-      {
-        type: 'alert',
-        id: 'rule-id',
-      },
-    ],
+  },
+  rule: {
+    id: 'rule-id',
   },
 });
 
