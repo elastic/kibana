@@ -69,15 +69,17 @@ export default function Filters() {
           integrations={integrations}
           onIntegrationsChange={onIntegrationsChange}
         />
-        <Selector
-          dataTestSubj="datasetQualityFilterType"
-          label={typesLabel}
-          searchPlaceholder={typesSearchPlaceholder}
-          noneMatchingMessage={typesNoneMatching}
-          noneAvailableMessage={typesNoneAvailable}
-          options={types}
-          onOptionsChange={onTypesChange}
-        />
+        {types.length > 1 && (
+          <Selector
+            dataTestSubj="datasetQualityFilterTypeSelectable"
+            label={typesLabel}
+            searchPlaceholder={typesSearchPlaceholder}
+            noneMatchingMessage={typesNoneMatching}
+            noneAvailableMessage={typesNoneAvailable}
+            options={types}
+            onOptionsChange={onTypesChange}
+          />
+        )}
         <NamespacesSelector
           isLoading={isLoading}
           namespaces={namespaces}
