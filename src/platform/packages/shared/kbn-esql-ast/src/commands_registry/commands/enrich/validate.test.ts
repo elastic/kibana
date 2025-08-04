@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { mockContext } from '../../../definitions/utils/test_mocks';
+import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 
-import { expectErrors } from '../../../definitions/utils/test_functions';
+import { expectErrors } from '../../../__tests__/validation';
 import { camelCase } from 'lodash';
 
 const enrichExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
@@ -67,9 +67,6 @@ describe('ENRICH Validation', () => {
     enrichExpectErrors('from a_index | enrich `this``is fine`', ['Unknown policy [`this``is]']);
     enrichExpectErrors('from a_index | enrich this is fine', ['Unknown policy [this]']);
     enrichExpectErrors(`from a_index |enrich missing-policy `, ['Unknown policy [missing-policy]']);
-    enrichExpectErrors('from a_index | enrich my-pol*', [
-      'Using wildcards (*) in ENRICH is not allowed [my-pol*]',
-    ]);
   });
 
   test('validates the columns', () => {

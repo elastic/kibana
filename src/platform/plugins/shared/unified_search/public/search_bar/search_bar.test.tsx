@@ -90,7 +90,6 @@ function wrapSearchBarInContext(testProps: any) {
     },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
-    savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
     theme: startMock.theme,
@@ -408,6 +407,52 @@ describe('SearchBar', () => {
           esql: 'test_new_props',
         },
       });
+    });
+  });
+
+  describe('draft', () => {
+    it('should prefill with the draft query if provided', () => {
+      const draft = {
+        query: { language: 'kuery', query: 'test_draft' },
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(draft);
+      expect(component.find('textarea').prop('value')).toEqual(draft.query.query);
+    });
+
+    it('should check for query type mismatch', () => {
+      const draft = {
+        query: esqlQuery,
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
+      expect(component.find('textarea').prop('value')).toEqual(kqlQuery.query);
     });
   });
 });

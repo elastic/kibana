@@ -7,12 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import { LogLevel, ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  constructor(workerContext: string) {
-    super({ level: 'verbose', writeTo: process.stdout }, { context: workerContext });
-    this.serviceLoaded('logger');
+  /**
+   * Creates a ScoutLogger instance.
+   *
+   * Log level resolution priority:
+   *   1. The logLevel argument (if provided)
+   *   2. The SCOUT_LOG_LEVEL environment variable (if set)
+   *   3. The LOG_LEVEL environment variable (if set)
+   *   4. The default log level ('info')
+   *
+   * The log level string is normalized (case-insensitive), and 'quiet' is treated as 'error'.
+   * Only valid log levels from LOG_LEVEL_FLAGS are accepted.
+   *
+   * @param workerContext - Unique context string for the logger
+   * @param logLevel - Optional log level string (highest priority)
+   */
+  constructor(workerContext: string, logLevel?: LogLevel) {
+    // Helper to normalize and resolve log level string
+    const resolveLogLevelFromEnv = (value: string | undefined): LogLevel | undefined => {
+      if (typeof value === 'string' && value) {
+        let normalized = value.toLowerCase();
+        if (normalized === 'quiet') {
+          normalized = 'error';
+        }
+        const found = LOG_LEVEL_FLAGS.find(({ name }) => name === normalized);
+        if (found) return found.name as LogLevel;
+      }
+      return undefined;
+    };
+
+    const level =
+      logLevel ||
+      resolveLogLevelFromEnv(process.env.SCOUT_LOG_LEVEL) ||
+      resolveLogLevelFromEnv(process.env.LOG_LEVEL) ||
+      DEFAULT_LOG_LEVEL;
+    super({ level, writeTo: process.stdout }, { context: workerContext });
   }
 
   /**
@@ -29,19 +61,4 @@ export class ScoutLogger extends ToolingLog {
   public serviceMessage(name: string, message: string) {
     this.debug(`[${name}] ${message}`);
   }
-}
-
-const loggerInstances = new Map<string, ScoutLogger>();
-
-/**
- * Singleton logger instance for specific worker to share across the Scout components
- * @param workerContext logger context, e.g. `scout-worker-1`; default is `scout`
- * @returns {ScoutLogger} logger instance
- */
-export function getLogger(workerContext: string = 'scout'): ScoutLogger {
-  if (!loggerInstances.has(workerContext)) {
-    loggerInstances.set(workerContext, new ScoutLogger(workerContext));
-  }
-
-  return loggerInstances.get(workerContext)!;
 }

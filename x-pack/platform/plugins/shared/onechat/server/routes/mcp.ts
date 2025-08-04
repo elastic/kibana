@@ -8,6 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
+import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -19,7 +20,7 @@ const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic MCP Server
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/mcp';
+const MCP_SERVER_PATH = '/api/chat/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -64,17 +65,19 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
             const { tools: toolService } = getInternalServices();
 
-            const registry = toolService.registry.asScopedPublicRegistry({ request });
+            const registry = await toolService.getRegistry({ request });
             const tools = await registry.list({});
+
+            const idMapping = createToolIdMappings(tools);
 
             // Expose tools scoped to the request
             for (const tool of tools) {
               server.tool(
-                tool.id,
+                idMapping.get(tool.id) ?? tool.id,
                 tool.description,
                 tool.schema.shape,
                 async (args: { [x: string]: any }) => {
-                  const toolResult = await tool.execute({ toolParams: args });
+                  const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
                   return {
                     content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
                   };

@@ -15,9 +15,11 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (/[0-9]\s+$/.test(query)) {
+  const innerText = query.substring(0, cursorPosition);
+  if (/[0-9]\s+$/.test(innerText)) {
     return [pipeCompleteItem];
   }
 

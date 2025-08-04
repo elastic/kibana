@@ -47,7 +47,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   type InTableSearchRestorableState,
   useDataGridInTableSearch,
@@ -397,10 +396,6 @@ interface InternalUnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
-   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
-  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -505,7 +500,6 @@ const InternalUnifiedDataTable = ({
   externalAdditionalControls,
   rowsPerPageOptions,
   externalCustomRenderers,
-  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -879,7 +873,8 @@ const InternalUnifiedDataTable = ({
     storage,
     consumer,
     key: 'dataGridHeaderRowHeight',
-    configRowHeight: configHeaderRowHeight ?? 1,
+    defaultRowHeight: 1,
+    configRowHeight: configHeaderRowHeight,
     rowHeightState: headerRowHeightState,
     onUpdateRowHeight: onUpdateHeaderRowHeight,
   });
@@ -889,7 +884,8 @@ const InternalUnifiedDataTable = ({
       storage,
       consumer,
       key: 'dataGridRowHeight',
-      configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+      defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
+      configRowHeight,
       rowHeightState,
       onUpdateRowHeight,
     });
@@ -1279,7 +1275,6 @@ const InternalUnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
-              additionalFieldGroups={additionalFieldGroups}
               selectedDocIds={docIdsInSelectionOrder}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}

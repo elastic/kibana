@@ -20,6 +20,7 @@ const getConnectorByIdMock = getConnectorById as unknown as jest.MockedFn<typeof
 
 jest.mock('@kbn/inference-langchain');
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { createRegexWorkerServiceMock } from '../test_utils';
 const InferenceChatModelMock = InferenceChatModel as unknown as jest.Mock<
   typeof InferenceChatModel
 >;
@@ -28,6 +29,7 @@ describe('createChatModel', () => {
   let logger: MockedLogger;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
   const mockEsClient = {
     ml: {
       inferTrainedModel: jest.fn(),
@@ -38,6 +40,7 @@ describe('createChatModel', () => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     request = httpServerMock.createKibanaRequest();
+    regexWorker = createRegexWorkerServiceMock();
 
     createClientMock.mockReturnValue({
       chatComplete: jest.fn(),
@@ -60,6 +63,7 @@ describe('createChatModel', () => {
         temperature: 0.3,
       },
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -68,8 +72,9 @@ describe('createChatModel', () => {
       actions,
       request,
       logger,
-      anonymizationRulesPromise: Promise.resolve([]),
       esClient: mockEsClient,
+      anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
     });
   });
 
@@ -86,6 +91,7 @@ describe('createChatModel', () => {
         temperature: 0.3,
       },
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -114,6 +120,7 @@ describe('createChatModel', () => {
         temperature: 0.3,
       },
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
 

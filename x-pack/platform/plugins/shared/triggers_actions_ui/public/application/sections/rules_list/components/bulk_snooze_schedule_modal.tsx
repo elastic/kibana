@@ -18,6 +18,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiButtonEmpty,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
   withBulkRuleOperations,
@@ -124,9 +125,14 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
     return deleteConfirmPlural(numberOfSelectedRules);
   }, [rules, filter, numberOfSelectedRules]);
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+  const modalHeaderTitleId = useGeneratedHtmlId();
+
   if (bulkEditAction === 'unschedule' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={confirmationTitle}
         onCancel={onClose}
         onConfirm={onRemoveSnoozeSchedule}
@@ -151,9 +157,9 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
 
   if (bulkEditAction === 'schedule' && (rules.length || filter)) {
     return (
-      <EuiModal onClose={onClose}>
+      <EuiModal aria-labelledby={modalHeaderTitleId} onClose={onClose}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalHeaderTitleId}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeScheduleModal.modalTitle"
               defaultMessage="Add snooze schedule"

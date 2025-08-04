@@ -5,57 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
-import { css } from '@emotion/css';
-import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useChat } from '../../hooks/use_chat';
+import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ConversationRound } from '@kbn/onechat-common';
 import { useConversation } from '../../hooks/use_conversation';
+import { useSendMessageMutation } from '../../hooks/use_send_message_mutation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
-import { ConversationInputForm } from './conversation_input_form';
+import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 
-const fullHeightClassName = css`
+const fullHeightStyles = css`
   height: 100%;
 `;
-
-const conversationPanelClass = css`
-  min-height: 100%;
-  max-width: 850px;
-  margin-left: auto;
-  margin-right: auto;
+const conversationContainerStyles = css`
+  ${fullHeightStyles}
+  width: 100%;
 `;
 
-const scrollContainerClassName = (scrollBarStyles: string) => css`
-  overflow-y: auto;
-  ${scrollBarStyles}
-`;
+export const Conversation: React.FC<{}> = () => {
+  const { conversation, conversationId, hasActiveConversation } = useConversation();
+  const [message, setMessage] = useState<string>('');
+  const { sendMessage, isResponseLoading, error, pendingMessage, retry } = useSendMessageMutation();
 
-interface ConversationProps {
-  conversationId: string | undefined;
-}
-
-export const Conversation: React.FC<ConversationProps> = ({ conversationId }) => {
-  const [selectedAgentId, setSelectedAgentId] = useState<string>(oneChatDefaultAgentId);
-
-  const { conversation } = useConversation({ conversationId });
-
-  const { agentId: conversationAgentId } = conversation ?? {};
-
-  // We allow to change agent only at the start of the conversation
-  const agentId = conversationId ? conversationAgentId ?? oneChatDefaultAgentId : selectedAgentId;
-
-  const { sendMessage } = useChat({
-    conversationId,
-    agentId,
-  });
-
-  const theme = useEuiTheme();
-  const scrollBarStyles = euiScrollBarStyles(theme);
-
+  const scrollContainerStyles = css`
+    overflow-y: auto;
+    ${fullHeightStyles}
+    ${useEuiScrollBar()}
+  `;
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-
   const { setStickToBottom } = useStickToBottom({
     defaultState: true,
     scrollContainer: scrollContainerRef.current,
@@ -65,41 +44,67 @@ export const Conversation: React.FC<ConversationProps> = ({ conversationId }) =>
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      setStickToBottom(true);
-      sendMessage(message);
-    },
-    [sendMessage, setStickToBottom]
-  );
+  const errorRound: ConversationRound | null = useMemo(() => {
+    if (error && pendingMessage) {
+      return {
+        input: { message: pendingMessage },
+        response: { message: '' },
+        steps: [],
+      };
+    }
+    return null;
+  }, [error, pendingMessage]);
 
-  if (!conversationId && (!conversation || conversation.rounds.length === 0)) {
-    return (
-      <NewConversationPrompt
-        onSubmit={onSubmit}
-        selectAgentId={setSelectedAgentId}
-        agentId={selectedAgentId}
-      />
-    );
-  }
+  const displayRounds = useMemo(() => {
+    const baseRounds = conversation?.rounds ?? [];
+    return errorRound ? [...baseRounds, errorRound] : baseRounds;
+  }, [conversation?.rounds, errorRound]);
 
   return (
-    <>
-      <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
-        <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
-            <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
-          </EuiPanel>
-        </div>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ConversationInputForm
-          disabled={!agentId}
-          loading={false}
-          onSubmit={onSubmit}
-          selectedAgentId={agentId}
-        />
-      </EuiFlexItem>
-    </>
+    <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
+      {(EuiResizablePanel, EuiResizableButton) => {
+        return (
+          <>
+            {hasActiveConversation ? (
+              <EuiResizablePanel initialSize={80}>
+                <div css={scrollContainerStyles}>
+                  <div ref={scrollContainerRef}>
+                    <ConversationRounds
+                      rounds={displayRounds}
+                      isResponseLoading={isResponseLoading}
+                      error={error}
+                      onRetry={() => {
+                        retry();
+                      }}
+                    />
+                  </div>
+                </div>
+              </EuiResizablePanel>
+            ) : (
+              <EuiResizablePanel initialSize={80}>
+                <div css={fullHeightStyles}>
+                  <NewConversationPrompt />
+                </div>
+              </EuiResizablePanel>
+            )}
+            <EuiResizableButton />
+            <EuiResizablePanel initialSize={20} minSize="20%">
+              <ConversationInputForm
+                message={message}
+                setMessage={setMessage}
+                onSubmit={() => {
+                  if (isResponseLoading || !message.trim()) {
+                    return;
+                  }
+                  sendMessage({ message });
+                  setMessage('');
+                  setStickToBottom(true);
+                }}
+              />
+            </EuiResizablePanel>
+          </>
+        );
+      }}
+    </EuiResizableContainer>
   );
 };

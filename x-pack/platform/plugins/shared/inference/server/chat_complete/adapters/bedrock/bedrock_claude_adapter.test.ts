@@ -25,7 +25,10 @@ describe('bedrockClaudeAdapter', () => {
       return {
         actionId: '',
         status: 'ok',
-        data: new PassThrough(),
+        data: {
+          stream: new PassThrough(),
+          tokenStream: new PassThrough(),
+        },
       };
     });
   });

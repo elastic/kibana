@@ -43,7 +43,8 @@
       "licensing",
       "navigation",
       "fieldsMetadata",
-      "esql"
+      "esql",
+      "savedObjectsTagging",
     ],
     "optionalPlugins": [
       "aiops",
@@ -55,7 +56,6 @@
       "cloud",
       "spaces",
       "serverless",
-      "guidedOnboarding",
       "observabilityAIAssistant",
       "investigate",
       "streams"

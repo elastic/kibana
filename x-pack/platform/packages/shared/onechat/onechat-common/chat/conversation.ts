@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { PlainIdToolIdentifier } from '../tools/tools';
-import { oneChatDefaultAgentId } from '../agents';
 import type { UserIdAndName } from '../base/users';
+import { ToolResult } from '../tools/tool_result';
 
 /**
  * Represents a user input that initiated a conversation round.
@@ -43,7 +42,7 @@ export type ConversationRoundStepMixin<TType extends ConversationRoundStepType, 
 /**
  * Represents a tool call with the corresponding result.
  */
-export interface ToolCallWithResult {
+export interface ToolCallWithResult<T = ToolResult[]> {
   /**
    * Id of the tool call, as returned by the LLM
    */
@@ -51,24 +50,20 @@ export interface ToolCallWithResult {
   /**
    * Identifier of the tool.
    */
-  tool_id: PlainIdToolIdentifier;
-  /**
-   * Type of the tool.
-   */
-  tool_type: string;
+  tool_id: string;
   /**
    * Arguments the tool was called with.
    */
   params: Record<string, any>;
   /**
-   * Result of the tool, serialized as string.
+   * Result of the tool
    */
-  result: string;
+  results: T;
 }
 
-export type ToolCallStep = ConversationRoundStepMixin<
+export type ToolCallStep<T = ToolResult[]> = ConversationRoundStepMixin<
   ConversationRoundStepType.toolCall,
-  ToolCallWithResult
+  ToolCallWithResult<T>
 >;
 
 export const createToolCallStep = (toolCallWithResult: ToolCallWithResult): ToolCallStep => {
@@ -101,40 +96,31 @@ export const isReasoningStep = (step: ConversationRoundStep): step is ReasoningS
 /**
  * Defines all possible types for round steps.
  */
-export type ConversationRoundStep = ToolCallStep | ReasoningStep;
+export type ConversationRoundStep<T = ToolResult[]> = ToolCallStep<T> | ReasoningStep;
 
 /**
  * Represents a round in a conversation, containing all the information
  * related to this particular round.
  */
-export interface ConversationRound {
+export interface ConversationRound<T = ToolResult[]> {
   /** The user input that initiated the round */
   input: RoundInput;
   /** List of intermediate steps before the end result, such as tool calls */
-  steps: ConversationRoundStep[];
+  steps: Array<ConversationRoundStep<T>>;
   /** The final response from the assistant */
   response: AssistantResponse;
+  /** when tracing is enabled, contains the traceId associated with this round */
+  trace_id?: string;
 }
 
 export interface Conversation {
   id: string;
-  agentId: string;
+  agent_id: string;
   user: UserIdAndName;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   rounds: ConversationRound[];
 }
 
-export const createEmptyConversation = (): Conversation => {
-  const now = new Date().toISOString();
-  return {
-    id: 'new',
-    agentId: oneChatDefaultAgentId,
-    user: { id: '', username: '' },
-    title: '',
-    createdAt: now,
-    updatedAt: now,
-    rounds: [],
-  };
-};
+export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;

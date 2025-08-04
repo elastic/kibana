@@ -15,11 +15,10 @@ export { createScopedRunnerDepsMock, type CreateScopedRunnerDepsMock } from './r
 export {
   createToolsServiceStartMock,
   createToolProviderMock,
-  createScopedPublicToolRegistryMock,
   createMockedTool,
   createMockedExecutableTool,
-  type ScopedPublicToolRegistryFactoryFnMock,
-  type ScopedPublicToolRegistryMock,
+  createToolRegistryMock,
+  type ToolRegistryMock,
   type ToolProviderMock,
   type ToolsServiceStartMock,
   type MockedTool,
@@ -33,3 +32,10 @@ export {
   type AgentClientMock,
   type MockedAgent,
 } from './agents';
+export {
+  createConversationClientMock,
+  createConversationServiceMock,
+  createEmptyConversation,
+  type ConversationServiceMock,
+  type ConversationClientMock,
+} from './conversations';

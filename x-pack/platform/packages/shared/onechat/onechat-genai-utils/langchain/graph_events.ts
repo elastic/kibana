@@ -14,6 +14,7 @@ import {
   ToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
+import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -42,7 +43,6 @@ export const hasTag = (event: LangchainStreamEvent, tag: string): boolean => {
 export const createToolCallEvent = (data: {
   toolCallId: string;
   toolId: string;
-  toolType: string;
   params: Record<string, unknown>;
 }): ToolCallEvent => {
   return {
@@ -50,7 +50,6 @@ export const createToolCallEvent = (data: {
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
-      tool_type: data.toolType,
       params: data.params,
     },
   };
@@ -59,16 +58,14 @@ export const createToolCallEvent = (data: {
 export const createToolResultEvent = (data: {
   toolCallId: string;
   toolId: string;
-  toolType: string;
-  result: string;
+  results: ToolResult[];
 }): ToolResultEvent => {
   return {
     type: ChatEventType.toolResult,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
-      tool_type: data.toolType,
-      result: data.result,
+      results: data.results,
     },
   };
 };

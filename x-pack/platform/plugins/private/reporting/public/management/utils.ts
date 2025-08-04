@@ -126,8 +126,10 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
   return {
     title,
     recurringSchedule,
+    // TODO dtstart should be required
+    startDate: rRule.dtstart!,
     reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
-    timezone: schedule.rrule.tzid,
+    timezone: rRule.tzid,
     recurring: true,
     sendByEmail: Boolean(notification?.email),
     emailRecipients: [...(notification?.email?.to || [])],

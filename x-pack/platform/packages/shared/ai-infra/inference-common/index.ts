@@ -26,6 +26,7 @@ export {
   type ToolCallsOf,
   type ToolCallbacksOf,
   type ToolCall,
+  type ToolCallback,
   type ToolDefinition,
   type ToolOptions,
   type FunctionCallingMode,
@@ -70,6 +71,7 @@ export {
   type DeanonymizationOutput,
   type DeanonymizedMessage,
   type AnonymizationSettings,
+  type AnonymizationRegexWorkerTaskPayload,
 } from './src/chat_complete';
 
 export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
@@ -130,7 +132,11 @@ export {
   getConnectorPlatform,
   getConnectorProvider,
   connectorToInference,
+  getModelDefinition,
+  getContextWindowSize,
+  contextWindowFromModelName,
   type InferenceConnector,
+  type InferenceConnectorCapabilities,
 } from './src/connectors';
 export {
   defaultInferenceEndpoints,
@@ -157,4 +163,4 @@ export {
 
 export { type BoundOptions, type UnboundOptions, bindApi } from './src/bind';
 
-export { aiAssistantAnonymizationSettings } from './src/ui_settings/settings_keys';
+export { aiAnonymizationSettings } from './src/ui_settings/settings_keys';
