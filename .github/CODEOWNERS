@@ -2146,6 +2146,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional_solution_sidenav/tests/security_sidenav.ts @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
 /x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+/x-pack/test/common/utils/security_solution/spaces.ts @elastic/security-detection-rule-management
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
