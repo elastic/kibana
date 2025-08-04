@@ -177,7 +177,7 @@ const previewContentRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  async handler({ logger, request, params, getScopedClients }): Promise<ContentPack> {
+  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
     const { streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
@@ -205,10 +205,7 @@ const exportPackageRoute = createServerRoute({
   async handler({ request, response, params, getScopedClients }) {
     const { streamsClient } = await getScopedClients({ request });
 
-    const root = await streamsClient.getStream(params.path.name);
-    if (!Streams.WiredStream.Definition.is(root)) {
-      throw new StatusError('Can only import content into wired streams', 400);
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const contentPack = await packageAsContentPack({ name: params.path.package });
     const archive = await generateArchive(contentPack, contentPack.entries);
