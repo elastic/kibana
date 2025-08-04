@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { RuleUpgradeEventTypes } from '../../../common/lib/telemetry/events/rule_upgrade/types';
 import type { ReviewPrebuiltRuleUpgradeFilter } from '../../../../common/api/detection_engine/prebuilt_rules/common/review_prebuilt_rules_upgrade_filter';
 import { FieldUpgradeStateEnum, type RuleUpgradeState } from '../model/prebuilt_rule_upgrade';
 import { PerFieldRuleDiffTab } from '../components/rule_details/per_field_rule_diff_tab';
@@ -43,6 +44,7 @@ import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
 import type { RulesConflictStats } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal/conflicts_description';
+import { useKibana } from '../../../common/lib/kibana';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
@@ -67,6 +69,7 @@ export function usePrebuiltRulesUpgrade({
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
+  const { telemetry } = useKibana().services;
 
   const {
     data: upgradeReviewResponse,
@@ -358,8 +361,9 @@ export function usePrebuiltRulesUpgrade({
     },
     [rulesUpgradeState, isRulesCustomizationEnabled, setRuleFieldResolvedValue]
   );
-  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+  const { rulePreviewFlyout, openRulePreview: openRulePreviewDefault } = useRulePreviewFlyout({
     rules: ruleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
+    rulesUpgradeState,
     subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,
@@ -368,6 +372,18 @@ export function usePrebuiltRulesUpgrade({
       dataTestSubj: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
     },
   });
+
+  const openRulePreview = useCallback(
+    (ruleId: string) => {
+      openRulePreviewDefault(ruleId);
+      const ruleUpgradeState = rulesUpgradeState[ruleId];
+      const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen, {
+        hasMissingBaseVersion,
+      });
+    },
+    [openRulePreviewDefault, rulesUpgradeState, telemetry]
+  );
 
   return {
     ruleUpgradeStates,
