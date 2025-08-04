@@ -19,7 +19,7 @@ import type {
 const VALUE = 42;
 const STATIC_COLOR = ' #FFB300';
 const COLUMN_NAME = 'Column name';
-const SECONDARY_PREFIX = 'Secondary prefix';
+const SECONDARY_LABEL = 'Secondary label';
 const PALETTE: [string, string, string] = ['#f00', '#0f0', '#00f'];
 
 const BASELINE_VALUE = 40;
@@ -35,7 +35,7 @@ describe('getSecondaryMetricInfo', () => {
   const row = { secondary: VALUE };
   const config = {
     metric: {
-      secondaryPrefix: SECONDARY_PREFIX,
+      secondaryLabel: SECONDARY_LABEL,
       secondaryTrend: {},
       secondaryColor: 'red',
     },
@@ -54,17 +54,17 @@ describe('getSecondaryMetricInfo', () => {
 
   it('returns label when there is a prefix', () => {
     const result = getSecondaryMetricInfo(defaultSecondaryMetricInfoArgs);
-    expect(result.label).toBe(SECONDARY_PREFIX);
+    expect(result.label).toBe(SECONDARY_LABEL);
   });
 
   it('returns label when we do not show the prefix', () => {
-    const _config = { ...config, metric: { ...config.metric, secondaryPrefix: '' } };
+    const _config = { ...config, metric: { ...config.metric, secondaryLabel: '' } };
     const result = getSecondaryMetricInfo({ ...defaultSecondaryMetricInfoArgs, config: _config });
     expect(result.label).toBe('');
   });
 
   it('returns label when there is auto prefix', () => {
-    const _config = { ...config, metric: { ...config.metric, secondaryPrefix: undefined } };
+    const _config = { ...config, metric: { ...config.metric, secondaryLabel: undefined } };
     const result = getSecondaryMetricInfo({ ...defaultSecondaryMetricInfoArgs, config: _config });
     expect(result.label).toBe(COLUMN_NAME);
   });
@@ -76,7 +76,7 @@ describe('getSecondaryMetricInfo', () => {
     });
     const expected: SecondaryMetricInfo = {
       value: `${VALUE}`,
-      label: SECONDARY_PREFIX,
+      label: SECONDARY_LABEL,
       badgeColor: STATIC_COLOR,
     };
 
@@ -119,7 +119,7 @@ describe('getSecondaryMetricInfo', () => {
     });
 
     expect(result.value).toBe(`${VALUE} ↑`);
-    expect(result.label).toBe(SECONDARY_PREFIX);
+    expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe('#00f');
   });
 
@@ -185,7 +185,7 @@ describe('getSecondaryMetricInfo', () => {
     });
 
     expect(result.value).toBe(`-2 ${DECREASE_ICON}`);
-    expect(result.label).toBe(SECONDARY_PREFIX);
+    expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe(PALETTE[0]);
   });
 
@@ -260,7 +260,7 @@ describe('getSecondaryMetricInfo', () => {
 
   it('returns formatted value and label when no static color or trendConfig', () => {
     const result = getSecondaryMetricInfo(defaultSecondaryMetricInfoArgs);
-    const expected = { value: `${VALUE}`, label: SECONDARY_PREFIX };
+    const expected = { value: `${VALUE}`, label: SECONDARY_LABEL };
 
     expect(result).toEqual(expected);
   });

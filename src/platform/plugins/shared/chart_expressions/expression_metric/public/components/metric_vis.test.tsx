@@ -8,25 +8,24 @@
  */
 
 import React from 'react';
+import { act, render, renderHook, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
+
+import { faker } from '@faker-js/faker';
+
+import { useEuiTheme } from '@elastic/eui';
 import { MetricWTrend } from '@elastic/charts';
+
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
+import { PaletteOutput } from '@kbn/coloring';
+
+import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
-import { faker } from '@faker-js/faker';
-import {
-  setupResizeObserverMock,
-  cleanResizeObserverMock,
-  renderChart,
-  waitForRenderComplete,
-} from '@kbn/chart-test-jest-helpers';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { setupChartMocks, cleanChartMocks } from './chart_testing_utilities';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
@@ -89,6 +88,7 @@ const defaultMetricParams: MetricVisParam = {
     baseline: undefined,
     palette: undefined,
   },
+  secondaryValuePosition: 'after',
 };
 
 const table: Datatable = {
@@ -300,28 +300,27 @@ describe('MetricVisComponent', function () {
       const { rerender } = await renderMetricChart({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: undefined },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
-      // for the secondary metric
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
 
-      const secondaryElement = screen.getByTestId('metric-secondary-element');
-      expect(secondaryElement.textContent).toBe(
-        `${secondaryLabel}number-${table.rows[0][minPriceColumnId]}`
-      );
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      expect(screen.getByText(secondaryLabel)).toBeInTheDocument();
+
+      const secondaryValue = `number-${table.rows[0][minPriceColumnId]}`;
+      expect(screen.getByText(secondaryValue)).toBeInTheDocument();
 
       await rerender({
         config: {
           ...config,
-          metric: { ...config.metric, subtitle: 'subtitle', secondaryPrefix: 'secondary prefix' },
+          metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: 'secondary label' },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
 
-      expect(screen.getByText(/secondary prefix/)).toBeInTheDocument();
       expect(screen.queryByText(secondaryLabel)).not.toBeInTheDocument();
+      expect(screen.getByText(/secondary label/)).toBeInTheDocument();
     });
 
     it('should display progress bar if min and max provided', async () => {
@@ -548,20 +547,20 @@ describe('MetricVisComponent', function () {
     });
 
     it('should display secondary prefix or secondary metric', async () => {
-      const { rerender } = await renderMetricChart({
+      const { rerender } = await renderChart({
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryPrefix: 'howdy' },
+          metric: { ...config.metric, secondaryLabel: 'howdy' },
         },
       });
 
-      let secondaryElements = screen.getAllByTestId('metric-secondary-element');
+      let charts = screen.getAllByRole('listitem');
+
       for (const row of table.rows) {
         const regExp = new RegExp(`howdynumber-${row[minPriceColumnId]}`, 'i');
-        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
-          true
-        );
+        // Check that at least one listitem contains the expected text
+        expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
 
       // Now remove the prefix and check the secondary label is there
@@ -569,18 +568,16 @@ describe('MetricVisComponent', function () {
         config: {
           ...config,
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
-          metric: { ...config.metric, secondaryPrefix: undefined },
+          metric: { ...config.metric, secondaryLabel: undefined },
         },
       });
 
-      secondaryElements = screen.getAllByTestId('metric-secondary-element');
+      charts = screen.getAllByRole('listitem');
 
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       for (const row of table.rows) {
         const regExp = new RegExp(`${secondaryLabel}*number-${row[minPriceColumnId]}`, 'i');
-        expect(secondaryElements.some((element) => regExp.test(element.textContent ?? ''))).toBe(
-          true
-        );
+        expect(charts.some((chart) => regExp.test(chart.textContent ?? ''))).toBe(true);
       }
     });
 
@@ -1014,8 +1011,9 @@ describe('MetricVisComponent', function () {
             },
           },
         });
+        const { result } = renderHook(() => useEuiTheme());
         expect(screen.getByRole('figure')).toHaveStyle({
-          backgroundColor: euiThemeVars.euiColorEmptyShade,
+          backgroundColor: result.current.euiTheme.colors.emptyShade,
         });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });

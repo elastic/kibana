@@ -31,7 +31,7 @@ import { metricStateDefaults } from './constants';
 import {
   getColorMode,
   getDefaultConfigForMode,
-  getPrefixSelected,
+  getSecondaryLabelSelected,
   getTrendPalette,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
@@ -163,8 +163,8 @@ export const toExpression = (
   const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
 
   // replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
-  const secondaryPrefixConfig = getPrefixSelected(state, {
-    defaultPrefix: '',
+  const secondaryLabelConfig = getSecondaryLabelSelected(state, {
+    defaultSecondaryLabel: '',
     colorMode: secondaryDynamicColorMode,
     isPrimaryMetricNumeric: isMetricNumeric,
   });
@@ -177,8 +177,8 @@ export const toExpression = (
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryPrefix:
-      secondaryPrefixConfig.mode === 'custom' ? secondaryPrefixConfig.label : state.secondaryPrefix,
+    secondaryLabel:
+      secondaryLabelConfig.mode === 'custom' ? secondaryLabelConfig.label : state.secondaryLabel,
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
@@ -219,6 +219,8 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
+    secondaryValuePosition:
+      state.secondaryValuePosition ?? metricStateDefaults.secondaryValuePosition,
   });
 
   return {

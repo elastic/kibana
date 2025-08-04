@@ -9,7 +9,7 @@
 
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { LayoutDirection, MetricStyle } from '@elastic/charts';
+import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import { PaletteOutput } from '@kbn/coloring';
 import { TrendlineResult } from './expression_functions';
 
@@ -24,7 +24,7 @@ export interface DimensionsVisParam {
 
 export interface MetricVisParam {
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrend: {
     visuals?: string;
@@ -45,6 +45,7 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
+  secondaryValuePosition?: SecondaryMetricProps['valuePosition'];
 }
 
 export interface VisParams {
