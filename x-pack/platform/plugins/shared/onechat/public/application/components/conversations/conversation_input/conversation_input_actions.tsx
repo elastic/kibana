@@ -8,12 +8,12 @@
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
 import { useConversationActions } from '../../../hooks/use_conversation_actions';
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
 import { useMessages } from '../../../context/messages_context';
-import { css } from '@emotion/react';
 
 interface ConversationInputActionsProps {
   handleSubmit: () => void;
