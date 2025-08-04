@@ -12,6 +12,7 @@ import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { ESQLAstQueryExpression } from '../types';
 import { processTemplateHoles } from './util';
+import { Builder } from '../builder';
 import type { ComposerQueryTagHole, EsqlRequest } from './types';
 
 export class ComposerQuery {
@@ -35,8 +36,49 @@ export class ComposerQuery {
     return this;
   };
 
+  /**
+   * Appends a new `LIMIT` command to the query. Equivalent to calling
+   * `.pipe` with a `LIMIT` command.
+   *
+   * @param limit The limit to apply to the query.
+   * @returns The updated ComposerQuery instance.
+   */
   public limit(limit: number): ComposerQuery {
     return this.pipe`LIMIT ${limit}`;
+  }
+
+  /**
+   * Specifies the columns to keep in the result set. Appends a `KEEP` command.
+   * Equivalent to calling `.pipe` with a `KEEP` command.
+   *
+   * ```typescript
+   * query.pipe`KEEP {['order', 'id']}`; // KEEP order.id
+   * ```
+   *
+   * Columns can be a list of column names. To specify nested columns, use the
+   * shorthand syntax `['user', 'name']` for `user.name`.
+   *
+   * For example:
+   *
+   * ```typescript
+   * query.keep('my-column', ['order', 'id']); // KEEP `my-column`, order.id
+   * ```
+   *
+   * Column name parts are automatically escaped if they contain special
+   * characters.
+   *
+   * @param columns The columns to keep in the result set.
+   * @returns The updated ComposerQuery instance.
+   */
+  public keep(
+    column: string | synth.SynthColumnShorthand,
+    ...columns: Array<string | synth.SynthColumnShorthand>
+  ): ComposerQuery {
+    const nodes = [column, ...columns].map((name) => {
+      return Builder.expression.column(name);
+    });
+
+    return this.pipe`KEEP ${nodes}`;
   }
 
   /**

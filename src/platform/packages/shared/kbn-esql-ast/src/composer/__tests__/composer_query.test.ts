@@ -105,6 +105,45 @@ describe('high-level helpers', () => {
       );
     });
   });
+
+  describe('.keep()', () => {
+    test('appends command to the end', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
+
+      query.keep('foo', 'bar', 'my-column');
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index | KEEP foo, bar, `my-column`');
+    });
+
+    test('can specify nested columns', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      query.keep(['user', 'name'], ['user', 'age']);
+
+      expect(query.print('basic')).toBe('FROM kibana_ecommerce_index | KEEP user.name, user.age');
+    });
+
+    test('escapes special characters', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      query.keep(['usér', 'name'], ['user', '❤️']);
+
+      expect(query.print('basic')).toBe(
+        'FROM kibana_ecommerce_index | KEEP `usér`.name, user.`❤️`'
+      );
+    });
+
+    test('throws on empty list', () => {
+      const query = esql`FROM kibana_ecommerce_index`;
+
+      expect(() => {
+        // @ts-expect-error - TypeScript types do not allow empty .keep() call
+        query.keep();
+      }).toThrow();
+    });
+  });
 });
 
 describe('.toRequest()', () => {
