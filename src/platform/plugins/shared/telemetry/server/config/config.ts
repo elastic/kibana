@@ -10,7 +10,7 @@
 import { schema, TypeOf, Type, offeringBasedSchema } from '@kbn/config-schema';
 import { getConfigPath } from '@kbn/utils';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { telemetryTracingSchemaProps } from '@kbn/telemetry-config';
+import { telemetryConfigSchemaProps } from '@kbn/telemetry-config';
 import { labelsSchema } from './telemetry_labels';
 
 const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
@@ -53,7 +53,7 @@ const configSchema = schema
     ),
   })
   // Extend the plugin's configuration with the OpenTelemetry configuration
-  .extends(telemetryTracingSchemaProps);
+  .extends(telemetryConfigSchemaProps);
 
 export type TelemetryConfigType = TypeOf<typeof configSchema>;
 
