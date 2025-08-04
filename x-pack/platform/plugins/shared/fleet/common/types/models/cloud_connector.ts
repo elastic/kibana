@@ -33,11 +33,11 @@ export interface CloudConnectorVars {
 export interface CloudConnectorSO {
   id: string;
   name: string;
-  attributes: {
-    cloudProvider: CloudProvider;
-    vars: CloudConnectorVars;
-    packagePolicyCount: number;
-  };
+  cloudProvider: CloudProvider;
+  vars: CloudConnectorVars;
+  packagePolicyCount: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CloudConnectorListOptions {

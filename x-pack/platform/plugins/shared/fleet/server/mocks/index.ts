@@ -32,7 +32,7 @@ import { createArtifactsClientMock } from '../services/artifacts/mocks';
 import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
-import type { AgentPolicyServiceInterface } from '../services';
+import type { AgentPolicyServiceInterface, CloudConnectorServiceInterface } from '../services';
 import type { FleetAppContext, FleetStartContract } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
@@ -282,6 +282,16 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
+  };
+};
+
+/**
+ * Create mock CloudConnectorService
+ */
+export const createMockCloudConnectorService = (): jest.Mocked<CloudConnectorServiceInterface> => {
+  return {
+    create: jest.fn().mockReturnValue(Promise.resolve()),
+    getList: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 

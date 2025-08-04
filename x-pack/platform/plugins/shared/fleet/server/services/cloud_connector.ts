@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
@@ -81,11 +80,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return {
         id: savedObject.id,
         name: savedObject.attributes.name,
-        attributes: {
-          cloudProvider: savedObject.attributes.cloudProvider,
-          vars: savedObject.attributes.vars,
-          packagePolicyCount: savedObject.attributes.packagePolicyCount,
-        },
+        cloudProvider: savedObject.attributes.cloudProvider,
+        vars: savedObject.attributes.vars,
+        packagePolicyCount: savedObject.attributes.packagePolicyCount,
+        created_at: savedObject.attributes.created_at,
+        updated_at: savedObject.attributes.updated_at,
       };
     } catch (error) {
       const templateName = packagePolicy?.inputs?.[0]?.policy_template || 'unknown';
@@ -118,11 +117,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       return cloudConnectors.saved_objects.map((so) => ({
         id: so.id,
         name: so.attributes.name,
-        attributes: {
-          cloudProvider: so.attributes.cloudProvider,
-          vars: so.attributes.vars,
-          packagePolicyCount: so.attributes.packagePolicyCount,
-        },
+        cloudProvider: so.attributes.cloudProvider,
+        vars: so.attributes.vars,
+        packagePolicyCount: so.attributes.packagePolicyCount,
+        created_at: so.attributes.created_at,
+        updated_at: so.attributes.updated_at,
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list');
@@ -149,6 +148,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       );
       throw new Error('AWS package policy must contain role_arn variable');
     }
+
     // Check for AWS variables
     if (roleArn) {
       let externalId: any;
@@ -192,33 +192,9 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudProvider: cloudConnector.cloudProvider as CloudProvider,
         vars: {
           role_arn: roleArn,
-          'aws.role_arn': roleArn,
-          'aws.credentials.external_id': {
-            type: vars.external_id?.type || 'secret',
-            value: externalId,
-            frozen: vars.external_id?.frozen || false,
-          },
-          external_id: {
-            type: vars.external_id?.type || 'secret',
-            value: externalId,
-            frozen: vars.external_id?.frozen || false,
-          },
+          external_id: externalId,
         },
         name: cloudConnector.name,
-      };
-    }
-
-    // Check for Azure variables
-    if (vars.client_id?.value && vars.tenant_id?.value) {
-      const uuid = uuidv4();
-
-      return {
-        cloudProvider: cloudConnector.cloudProvider as CloudProvider,
-        vars: {
-          client_id: vars.client_id,
-          tenant_id: vars.tenant_id,
-        },
-        name: `azure-connector-${packagePolicy?.name || 'unknown'}-${uuid}`,
       };
     }
 
@@ -230,7 +206,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }, Template: ${templateName}, Available vars: ${Object.keys(vars).join(', ')}`
     );
     throw new Error(
-      'Package policy must contain valid cloud provider variables (AWS: role_arn + external_id, Azure: client_id + tenant_id)'
+      `Package policy must contain valid cloud provider variables (${
+        cloudConnector.cloudProvider === 'aws'
+          ? `role_arn  + external_id `
+          : `client_id + tenant_id`
+      }`
     );
   }
 }
