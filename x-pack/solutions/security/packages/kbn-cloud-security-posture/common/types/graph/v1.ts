@@ -52,3 +52,5 @@ export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 export type NodeDataModel = EntityNodeDataModel | GroupNodeDataModel | LabelNodeDataModel;
 
 export type NodeDocumentDataModel = TypeOf<typeof nodeDocumentDataSchema>;
+
+export type EntityDocumentDataModel = TypeOf<typeof entitySchema>;

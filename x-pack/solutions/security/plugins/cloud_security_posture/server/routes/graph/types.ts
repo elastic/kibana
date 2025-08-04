@@ -17,9 +17,6 @@ export interface OriginEventId {
 export interface GraphEdge {
   badge: number;
   docs: string[] | string;
-  ips?: string[] | string;
-  hosts?: string[] | string;
-  users?: string[] | string;
   actorIds: string[] | string;
   action: string;
   targetIds: Array<string | null> | string;

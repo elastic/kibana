@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import { EntityNodeDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+
 type EntityTypeIconMapping = Record<string, string>;
+type EntityTypeShapeMapping = Record<string, EntityNodeDataModel['shape']>;
+
+export interface EntityTypeMappings {
+  icons: EntityTypeIconMapping;
+  shapes: EntityTypeShapeMapping;
+}
 
 /**
- * Helper function to generate the mapping of entity types to icons
- * This builds a record where each key is a lowercase entity type string
- * and the value is the icon name to use for that entity type
+ * Helper function to generate the mapping of entity types to icons and shapes
+ * This builds records where each key is a lowercase entity type string
+ * and the values are the icon name and shape to use for that entity type
  */
-const buildEntityTypeMapping = (): EntityTypeIconMapping => {
+const buildEntityTypeMappings = (): EntityTypeMappings => {
   const rawMappings = [
     {
       icon: 'user',
+      shape: 'ellipse',
       values: [
         'User',
         'Service Account',
@@ -29,10 +38,12 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'storage',
+      shape: 'hexagon',
       values: ['Host', 'Virtual Desktop', 'Virtual Workstation', 'Virtual Machine Image'],
     },
     {
       icon: 'container',
+      shape: 'rectangle',
       values: [
         'Container',
         'Container Group',
@@ -48,6 +59,7 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'kubernetesNode',
+      shape: 'rectangle',
       values: [
         'Orchestrator',
         'Orchestrator Job',
@@ -66,10 +78,12 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'tableDensityExpanded',
+      shape: 'rectangle',
       values: ['Application (Desktop or Web App)'],
     },
     {
       icon: 'database',
+      shape: 'rectangle',
       values: [
         'Database',
         'File System Service',
@@ -91,6 +105,7 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'globe',
+      shape: 'rectangle',
       values: [
         'IP',
         'API Gateway',
@@ -114,6 +129,7 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'cloudStormy',
+      shape: 'rectangle',
       values: [
         'Development Service',
         'Management Service',
@@ -135,6 +151,7 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'securityApp',
+      shape: 'rectangle',
       values: [
         'Governance Policy',
         'Governance Policy Group',
@@ -150,6 +167,7 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'code',
+      shape: 'rectangle',
       values: [
         'Version Control Integration',
         'Repository',
@@ -161,22 +179,37 @@ const buildEntityTypeMapping = (): EntityTypeIconMapping => {
     },
     {
       icon: 'comment',
+      shape: 'rectangle',
       values: ['Call Center Service', 'Messaging Service', 'Monitor Service', 'Log Configuration'],
     },
     {
       icon: 'key',
+      shape: 'rectangle',
       values: ['Secrets', 'Keys', 'API Keys', 'Encryption Keys', 'Access Keys'],
     },
   ];
 
-  const mappings: EntityTypeIconMapping = {};
-  for (const mapping of rawMappings) {
-    for (const value of mapping.values) {
-      mappings[value.toLowerCase()] = mapping.icon;
-    }
-  }
+  const icons = rawMappings.reduce<EntityTypeIconMapping>((acc, mapping) => {
+    mapping.values.forEach((value) => {
+      acc[value.toLowerCase()] = mapping.icon;
+    });
+    return acc;
+  }, {});
+
+  const shapes = rawMappings.reduce<EntityTypeShapeMapping>((acc, mapping) => {
+    mapping.values.forEach((value) => {
+      acc[value.toLowerCase()] = mapping.shape as EntityNodeDataModel['shape'];
+    });
+    return acc;
+  }, {});
+
+  const mappings = { icons, shapes };
 
   return mappings;
 };
 
-export const entityTypeMappings = buildEntityTypeMapping();
+/**
+ * Master mapping of entity types to icons and shapes
+ * All keys are normalized to lowercase for case-insensitive lookups
+ */
+export const entityTypeMappings = buildEntityTypeMappings();

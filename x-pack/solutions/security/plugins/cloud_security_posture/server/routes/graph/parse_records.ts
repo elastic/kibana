@@ -21,7 +21,7 @@ import type {
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
 import type { GraphEdge } from './types';
-import { transformEntityTypeToIcon } from './utils';
+import { transformEntityTypeToIconAndShape } from './utils';
 
 interface LabelEdges {
   source: string;
@@ -98,9 +98,6 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
 
     const {
       docs,
-      ips,
-      hosts,
-      users,
       actorIds,
       action,
       targetIds,
@@ -109,6 +106,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       targetsDocData,
       isAlert,
     } = record;
+
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
 
@@ -145,13 +143,7 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
           id,
           label: unknownTargets.includes(id) ? 'Unknown' : undefined,
           color: 'primary',
-          ...determineEntityNodeVisualProps(
-            id,
-            castArray(ips ?? []),
-            castArray(hosts ?? []),
-            castArray(users ?? []),
-            [...actorsDocDataArray, ...targetsDocDataArray]
-          ),
+          ...determineEntityNodeVisualProps(id, [...actorsDocDataArray, ...targetsDocDataArray]),
         };
       }
     });
@@ -187,9 +179,6 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
 
 const determineEntityNodeVisualProps = (
   actorId: string,
-  ips: string[],
-  hosts: string[],
-  users: string[],
   entitiesData: NodeDocumentDataModel[] = []
 ): NodeVisualProps => {
   // try to find an exact match by entity id
@@ -198,7 +187,9 @@ const determineEntityNodeVisualProps = (
   // Extract entity data from the matching entity's documentsData if available
   const entityDetailsData = matchingEntity?.entity ?? {};
 
-  const mappedProps: Partial<NodeVisualProps> = {};
+  let mappedProps: Partial<NodeVisualProps> = {
+    shape: 'rectangle',
+  };
 
   if (entityDetailsData.name) {
     mappedProps.label = entityDetailsData.name;
@@ -207,34 +198,16 @@ const determineEntityNodeVisualProps = (
   if (entityDetailsData.type) {
     mappedProps.tag = entityDetailsData.type;
 
-    const iconValue: string | undefined = transformEntityTypeToIcon(entityDetailsData.type);
-    if (iconValue) {
-      mappedProps.icon = iconValue;
-    }
+    const { icon, shape } = transformEntityTypeToIconAndShape(entityDetailsData);
+
+    mappedProps = {
+      ...mappedProps,
+      ...(icon && { icon }),
+      ...(shape && { shape }),
+    };
   }
 
-  let nodeProps: NodeVisualProps = {
-    shape: 'hexagon',
-    ...mappedProps,
-  };
-
-  // If actor is a user return ellipse
-  if (users.includes(actorId)) {
-    nodeProps = { ...nodeProps, shape: 'ellipse', icon: 'user' };
-  }
-
-  // If actor is a host return hexagon
-  if (hosts.includes(actorId)) {
-    nodeProps = { ...nodeProps, shape: 'hexagon', icon: 'storage' };
-  }
-
-  // If actor is an IP return diamond
-  if (ips.includes(actorId)) {
-    nodeProps = { ...nodeProps, shape: 'diamond', icon: 'globe' };
-  }
-
-  // Ensure shape property is present
-  return nodeProps;
+  return mappedProps as NodeVisualProps;
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
