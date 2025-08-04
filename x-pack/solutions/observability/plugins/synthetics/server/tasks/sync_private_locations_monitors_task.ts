@@ -7,6 +7,8 @@
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import {
+  type SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
@@ -15,7 +17,12 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
-import { syntheticsParamType } from '../../common/types/saved_objects';
+import { SPACES_EXTENSION_ID } from '@kbn/core/server';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorSavedObjectType,
+  syntheticsParamType,
+} from '../../common/types/saved_objects';
 import { normalizeSecrets } from '../synthetics_service/utils';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import {
@@ -57,7 +64,7 @@ export class SyncPrivateLocationMonitorsTask {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '3m',
+        timeout: '5m',
         maxAttempts: 3,
         createTaskRunner: ({ taskInstance }) => {
           return {
@@ -80,6 +87,9 @@ export class SyncPrivateLocationMonitorsTask {
       encryptedSavedObjects,
       logger,
     } = this.serverSetup;
+
+    await this.migrateMonitorsToMultiSpace();
+
     const lastStartedAt =
       taskInstance.state.lastStartedAt || moment().subtract(10, 'minute').toISOString();
     const startedAt = taskInstance.startedAt || new Date();
@@ -135,7 +145,7 @@ export class SyncPrivateLocationMonitorsTask {
     };
   }
 
-  start = async () => {
+  async start() {
     const {
       logger,
       pluginsStart: { taskManager },
@@ -151,7 +161,7 @@ export class SyncPrivateLocationMonitorsTask {
       params: {},
     });
     logger.debug(`Sync private location monitors task scheduled successfully`);
-  };
+  }
 
   hasAnyDataChanged = async ({
     taskInstance,
@@ -379,6 +389,88 @@ export class SyncPrivateLocationMonitorsTask {
       updatedMWs,
       totalMWs: noOfMWs,
     };
+  }
+
+  async migrateMonitorsToMultiSpace() {
+    const {
+      coreStart: { savedObjects },
+      logger,
+      encryptedSavedObjects,
+    } = this.serverSetup;
+    try {
+      const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+      const soClient = savedObjects.getUnsafeInternalClient({
+        excludedExtensions: [SPACES_EXTENSION_ID],
+      });
+      const finder =
+        await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
+          {
+            type: legacySyntheticsMonitorTypeSingle,
+            perPage: 200,
+            namespaces: [ALL_SPACES_ID],
+          }
+        );
+
+      for await (const result of finder.find()) {
+        const toCreate: Array<
+          SavedObjectsBulkCreateObject<SyntheticsMonitorWithSecretsAttributes>
+        > = result.saved_objects.map((m) => ({
+          type: syntheticsMonitorSavedObjectType,
+          id: m.id,
+          attributes: m.attributes,
+          initialNamespaces: m.namespaces,
+        }));
+        // first recreate the monitors in the new type and then delete the old ones
+        const recreatedMonitors = await soClient.bulkCreate(toCreate, {
+          overwrite: true,
+        });
+        const successfulRecreates = recreatedMonitors.saved_objects.filter((m) => !m.error);
+
+        // monitors can only be delete per space, so we need to delete per space
+        const deletePerSpace: Record<string, SavedObjectsBulkDeleteObject[]> = {};
+
+        successfulRecreates.forEach((m) => {
+          m.namespaces?.forEach((spaceId) => {
+            if (!deletePerSpace[spaceId]) {
+              deletePerSpace[spaceId] = [];
+            }
+            deletePerSpace[spaceId].push({
+              id: m.id,
+              type: legacySyntheticsMonitorTypeSingle,
+            });
+          });
+        });
+
+        // delete the old monitors in the legacy type
+        Object.entries(deletePerSpace).forEach(([deletePerSpaceId, monitorsToDelete]) => {
+          soClient
+            .bulkDelete(monitorsToDelete, {
+              namespace: deletePerSpaceId,
+            })
+            .then((deletedMonitors) => {
+              deletedMonitors.statuses.forEach((status) => {
+                if (!status.success) {
+                  logger.error(
+                    `Failed to delete legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}: ${status.error?.message}`,
+                    { error: status.error }
+                  );
+                } else {
+                  logger.debug(
+                    `Successfully deleted legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}`
+                  );
+                }
+              });
+            });
+        });
+
+        logger.info(
+          `Migrated ${successfulRecreates.length} monitors from ${legacySyntheticsMonitorTypeSingle} type to ${syntheticsMonitorSavedObjectType} type`
+        );
+      }
+      finder.close().catch(() => {});
+    } catch (error) {
+      logger.error(`Error migrating monitors to multi-space: ${error.message}`, { error });
+    }
   }
 }
 

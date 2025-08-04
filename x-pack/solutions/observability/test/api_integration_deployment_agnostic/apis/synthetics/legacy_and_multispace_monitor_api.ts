@@ -24,6 +24,7 @@ const runTests = (
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestEditorWithApiKey: SupertestWithRoleScopeType;
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const privateLocationService = new PrivateLocationTestService(getService);
 
   const saveMonitor = async (monitor: any, type: string, spaceId?: string) => {
@@ -468,6 +469,59 @@ const runTests = (
       expect(resp.body.message).to.eql(
         'Invalid space ID provided in monitor configuration. It should always include the current space ID.'
       );
+    });
+  });
+
+  describe('MultiSpaceMigration', () => {
+    it('should migrate legacy monitor to multi-space type in default space', async () => {
+      const mon = await saveMonitor(
+        { ...httpMonitor, name: `legacy-migrate-${uuid}` },
+        legacySyntheticsMonitorTypeSingle
+      );
+      expect(mon.name).eql(`legacy-migrate-${uuid}`);
+
+      retry.try(async () => {
+        // Verify migration
+        const response = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+        });
+        const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(found).not.to.be(undefined);
+        expect(found?.attributes.name).to.eql(`migrated-multi-${uuid}`);
+      });
+    });
+
+    it('should migrate legacy monitor to multi-space type in a specific space', async () => {
+      const SPACE_ID = `migrate-space-${uuid}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: `Migrate Space ${uuid}` });
+      spacesToDeleteIds.push(SPACE_ID);
+      // create a private location in the new space if using private locations
+      const otherSpacePrivateLocation = await privateLocationService.addTestPrivateLocation(
+        SPACE_ID
+      );
+
+      const mon = await saveMonitor(
+        {
+          ...httpMonitor,
+          name: `legacy-migrate-space-${uuid}`,
+          locations: [],
+          private_locations: [otherSpacePrivateLocation],
+        },
+        legacySyntheticsMonitorTypeSingle,
+        SPACE_ID
+      );
+      expect(mon.name).eql(`legacy-migrate-space-${uuid}`);
+
+      retry.try(async () => {
+        // Verify migration
+        const response = await kibanaServer.savedObjects.find({
+          type: syntheticsMonitorSavedObjectType,
+          space: SPACE_ID,
+        });
+        const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(found).not.to.be(undefined);
+        expect(found?.attributes.name).to.eql(`migrated-multi-${uuid}`);
+      });
     });
   });
 };

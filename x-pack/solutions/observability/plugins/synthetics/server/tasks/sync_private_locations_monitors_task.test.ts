@@ -431,6 +431,139 @@ describe('SyncPrivateLocationMonitorsTask', () => {
   });
 });
 
+describe('migrateMonitorsToMultiSpace', () => {
+  let task: SyncPrivateLocationMonitorsTask;
+  let mockFinder: any;
+  let mockSoClient: any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSoClient = {
+      createInternalRepository: jest.fn(),
+      bulkCreate: jest.fn(),
+      bulkDelete: jest.fn(),
+      createPointInTimeFinder: jest.fn(),
+    };
+    mockFinder = {
+      find: jest.fn(),
+      close: jest.fn().mockResolvedValue(undefined),
+    };
+    const mockServerSetupWithSO = {
+      ...mockServerSetup,
+      coreStart: {
+        ...mockServerSetup.coreStart,
+        savedObjects: {
+          createInternalRepository: jest.fn(() => mockSoClient),
+        },
+      },
+    };
+    task = new SyncPrivateLocationMonitorsTask(
+      mockServerSetupWithSO as any,
+      mockTaskManager as unknown as TaskManagerSetupContract,
+      mockSyntheticsMonitorClient as unknown as SyntheticsMonitorClient
+    );
+    mockSoClient.createPointInTimeFinder = jest.fn(() => mockFinder);
+  });
+
+  it('should migrate monitors and delete legacy ones', async () => {
+    const legacyMonitors = [
+      {
+        id: 'monitor-1',
+        attributes: { foo: 'bar' },
+        namespaces: ['default'],
+      },
+      {
+        id: 'monitor-2',
+        attributes: { foo: 'baz' },
+        namespaces: ['space1'],
+      },
+    ];
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: legacyMonitors };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        { id: 'monitor-1', namespaces: ['default'] },
+        { id: 'monitor-2', namespaces: ['space1'] },
+      ],
+    });
+    mockSoClient.bulkDelete.mockResolvedValue({});
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkCreate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        type: 'synthetics-monitor',
+        id: 'monitor-1',
+        attributes: expect.objectContaining({ foo: 'bar', spaces: ['default'] }),
+        initialNamespaces: ['default'],
+      }),
+      expect.objectContaining({
+        type: 'synthetics-monitor',
+        id: 'monitor-2',
+        attributes: expect.objectContaining({ foo: 'baz', spaces: ['space1'] }),
+        initialNamespaces: ['space1'],
+      }),
+    ]);
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith([
+      { id: 'monitor-1', type: 'synthetics-monitor-single', namespace: 'default' },
+      { id: 'monitor-2', type: 'synthetics-monitor-single', namespace: 'space1' },
+    ]);
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+
+  it('should only delete successfully recreated monitors', async () => {
+    const legacyMonitors = [
+      { id: 'monitor-1', attributes: {}, namespaces: ['default'] },
+      { id: 'monitor-2', attributes: {}, namespaces: ['space1'] },
+    ];
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: legacyMonitors };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({
+      saved_objects: [
+        { id: 'monitor-1', namespaces: ['default'] },
+        { id: 'monitor-2', namespaces: ['space1'], error: { message: 'fail' } },
+      ],
+    });
+    mockSoClient.bulkDelete.mockResolvedValue({});
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith([
+      { id: 'monitor-1', type: 'synthetics-monitor-single', namespace: 'default' },
+    ]);
+    expect(mockSoClient.bulkDelete).not.toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ id: 'monitor-2' })])
+    );
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+
+  it('should handle no legacy monitors gracefully', async () => {
+    mockFinder.find.mockImplementation(async function* () {
+      yield { saved_objects: [] };
+    });
+    mockSoClient.bulkCreate.mockResolvedValue({ saved_objects: [] });
+    mockSoClient.bulkDelete.mockResolvedValue({});
+
+    await task.migrateMonitorsToMultiSpace();
+
+    expect(mockSoClient.bulkCreate).toHaveBeenCalledWith([]);
+    expect(mockSoClient.bulkDelete).toHaveBeenCalledWith([]);
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+
+  it('should close finder even if an error occurs', async () => {
+    mockFinder.find.mockImplementation(() => {
+      throw new Error('Finder error');
+    });
+    mockFinder.close.mockResolvedValue(undefined);
+
+    await expect(task.migrateMonitorsToMultiSpace()).resolves.toBeUndefined();
+    expect(mockFinder.close).toHaveBeenCalled();
+  });
+});
+
 describe('runSynPrivateLocationMonitorsTaskSoon', () => {
   beforeEach(() => {
     jest.clearAllMocks();
