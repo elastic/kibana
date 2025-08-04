@@ -41,7 +41,7 @@ const footerStyles = {
         inset: 0,
       },
     }),
-  flexGroup: css({
+  buttonsContainer: css({
     position: 'relative',
   }),
   previewFooter: ({ euiTheme }: UseEuiTheme) =>
@@ -93,7 +93,7 @@ export const MarkdownFooter = ({
         responsive={false}
         gutterSize="xs"
         justifyContent="flexEnd"
-        css={styles.flexGroup}
+        css={styles.buttonsContainer}
       >
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

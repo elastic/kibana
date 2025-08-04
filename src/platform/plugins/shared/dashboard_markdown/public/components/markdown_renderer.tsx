@@ -17,6 +17,7 @@ const markdownRendererStyles = {
     css({
       padding: euiTheme.size.base,
       width: '100%',
+      overflowWrap: 'break-word',
       img: {
         maxInlineSize: '100%',
       },

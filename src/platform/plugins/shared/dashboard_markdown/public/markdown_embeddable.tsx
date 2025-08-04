@@ -29,9 +29,9 @@ import { BehaviorSubject, map, merge } from 'rxjs';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
-import { MarkdownRenderer } from './components/markdown_renderer';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
+import { MarkdownRenderer } from './components/markdown_renderer';
 
 const defaultMarkdownState: WithAllKeys<MarkdownEditorState> = {
   content: '',

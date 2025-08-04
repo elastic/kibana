@@ -59,55 +59,6 @@ const strings = {
     defaultMessage: 'Dashboard markdown editor',
   }),
 };
-
-export function useCaretPosition(
-  ref: React.RefObject<{ textarea?: HTMLTextAreaElement | null }>,
-  shouldFocus: boolean
-) {
-  const caretPosRef = useRef<number | null>(null);
-
-  // Keep caretPosRef updated
-  useLayoutEffect(() => {
-    const textarea = ref.current?.textarea;
-    if (!textarea) return;
-
-    const updateCaret = () => {
-      caretPosRef.current = textarea.selectionStart;
-    };
-
-    textarea.addEventListener('input', updateCaret);
-    textarea.addEventListener('click', updateCaret);
-    textarea.addEventListener('keyup', updateCaret);
-
-    return () => {
-      textarea.removeEventListener('input', updateCaret);
-      textarea.removeEventListener('click', updateCaret);
-      textarea.removeEventListener('keyup', updateCaret);
-    };
-  }, [ref.current?.textarea, ref]);
-
-  // Restore caret when needed (preview -> editor)
-  useLayoutEffect(() => {
-    if (!shouldFocus) return;
-
-    const textarea = ref.current?.textarea;
-    if (!textarea) return;
-
-    textarea.focus();
-
-    if (caretPosRef.current === null) {
-      // focus at end of first line
-      const newlineIndex = textarea.value.indexOf('\n');
-      const firstLineEnd = newlineIndex === -1 ? textarea.value.length : newlineIndex;
-      textarea.setSelectionRange(firstLineEnd, firstLineEnd);
-    } else {
-      textarea.setSelectionRange(caretPosRef.current, caretPosRef.current);
-    }
-  }, [shouldFocus, ref.current?.textarea, ref]);
-
-  return caretPosRef;
-}
-
 export interface MarkdownEditorProps {
   processingPluginList: EuiMarkdownFormatProps['processingPluginList'];
   content: string;
@@ -168,3 +119,51 @@ export const MarkdownEditor = ({
     </>
   );
 };
+
+function useCaretPosition(
+  ref: React.RefObject<{ textarea?: HTMLTextAreaElement | null }>,
+  shouldFocus: boolean
+) {
+  const caretPosRef = useRef<number | null>(null);
+
+  // Keep caretPosRef updated
+  useLayoutEffect(() => {
+    const textarea = ref.current?.textarea;
+    if (!textarea) return;
+
+    const updateCaret = () => {
+      caretPosRef.current = textarea.selectionStart;
+    };
+
+    textarea.addEventListener('input', updateCaret);
+    textarea.addEventListener('click', updateCaret);
+    textarea.addEventListener('keyup', updateCaret);
+
+    return () => {
+      textarea.removeEventListener('input', updateCaret);
+      textarea.removeEventListener('click', updateCaret);
+      textarea.removeEventListener('keyup', updateCaret);
+    };
+  }, [ref.current?.textarea, ref]);
+
+  // Restore caret when needed (preview -> editor)
+  useLayoutEffect(() => {
+    if (!shouldFocus) return;
+
+    const textarea = ref.current?.textarea;
+    if (!textarea) return;
+
+    textarea.focus();
+
+    if (caretPosRef.current === null) {
+      // focus at end of first line
+      const newlineIndex = textarea.value.indexOf('\n');
+      const firstLineEnd = newlineIndex === -1 ? textarea.value.length : newlineIndex;
+      textarea.setSelectionRange(firstLineEnd, firstLineEnd);
+    } else {
+      textarea.setSelectionRange(caretPosRef.current, caretPosRef.current);
+    }
+  }, [shouldFocus, ref.current?.textarea, ref]);
+
+  return caretPosRef;
+}
