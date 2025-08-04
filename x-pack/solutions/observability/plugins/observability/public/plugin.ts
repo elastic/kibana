@@ -122,6 +122,9 @@ export interface ConfigSchema {
     ruleFormV2?: {
       enabled: boolean;
     };
+    rulesFeature?: {
+      enabled: boolean;
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

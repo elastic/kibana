@@ -99,7 +99,9 @@ export class ObservabilityPlugin
 
     const alertDetailsContextualInsightsService = new AlertDetailsContextualInsightsService();
 
-    plugins.features.registerKibanaFeature(getManageRulesFeature());
+    if (config.unsafe.rulesFeature.enabled) {
+      plugins.features.registerKibanaFeature(getManageRulesFeature());
+    }
 
     if (plugins.cases?.config.enabled) {
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
@@ -176,6 +178,9 @@ export class ObservabilityPlugin
     return {
       getAlertDetailsConfig() {
         return config.unsafe.alertDetails;
+      },
+      getRulesFeatureConfig() {
+        return config.unsafe.rulesFeature;
       },
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
