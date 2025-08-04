@@ -84,6 +84,7 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  ResponseActionsCancelParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -97,6 +98,7 @@ import type {
   SuspendProcessRequestBody,
   UnisolationRouteRequestBody,
   UploadActionApiRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
@@ -1036,6 +1038,14 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
     throw new ResponseActionsNotSupportedError('runscript');
+  }
+
+  public async cancel(
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+    // TODO TC: check if we need outputcontent type
+  ): Promise<ActionDetails<unknown, ResponseActionsCancelParameters>> {
+    throw new ResponseActionsNotSupportedError('cancel');
   }
 
   public async getCustomScripts(

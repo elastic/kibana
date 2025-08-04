@@ -253,6 +253,10 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
+export interface ResponseActionsCancelParameters {
+  id: string;
+}
+
 export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =

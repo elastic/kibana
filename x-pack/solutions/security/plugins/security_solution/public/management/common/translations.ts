@@ -217,6 +217,11 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Run a script on the host',
     }),
   },
+  cancel: {
+    about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.cancel.about', {
+      defaultMessage: 'Cancel an ongoing action on the host',
+    }),
+  },
 };
 
 export const CROWDSTRIKE_CONSOLE_COMMANDS = {

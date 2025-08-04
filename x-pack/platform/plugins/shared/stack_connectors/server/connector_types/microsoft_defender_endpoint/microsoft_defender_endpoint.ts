@@ -25,6 +25,7 @@ import {
   MicrosoftDefenderEndpointEmptyParamsSchema,
   GetActionResultsParamsSchema,
   DownloadActionResultsResponseSchema,
+  CancelParamsSchema,
 } from '../../../common/microsoft_defender_endpoint/schema';
 import type {
   MicrosoftDefenderEndpointAgentDetailsParams,
@@ -44,6 +45,7 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
   MicrosoftDefenderEndpointRunScriptParams,
   MicrosoftDefenderEndpointGetActionResultsResponse,
+  MicrosoftDefenderEndpointCancelParams,
 } from '../../../common/microsoft_defender_endpoint/types';
 
 export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
@@ -122,6 +124,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.RUN_SCRIPT,
       method: 'runScript',
       schema: RunScriptParamsSchema,
+    });
+    this.registerSubAction({
+      name: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION,
+      method: 'cancelAction',
+      schema: CancelParamsSchema, // TODO
     });
 
     this.registerSubAction({
@@ -413,6 +420,24 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
               ],
             },
           ],
+        },
+      },
+      connectorUsageCollector
+    );
+  }
+
+  public async cancelAction(
+    payload: MicrosoftDefenderEndpointCancelParams,
+    connectorUsageCollector: ConnectorUsageCollector
+  ): Promise<MicrosoftDefenderEndpointMachineAction> {
+    // API Reference:https://learn.microsoft.com/en-us/defender-endpoint/api/cancel-machine-action
+
+    return this.fetchFromMicrosoft<MicrosoftDefenderEndpointMachineAction>(
+      {
+        url: `${this.urls.machineActions}/${payload.actionId}/cancel`,
+        method: 'POST',
+        data: {
+          Comment: payload.comment || 'Test comment',
         },
       },
       connectorUsageCollector

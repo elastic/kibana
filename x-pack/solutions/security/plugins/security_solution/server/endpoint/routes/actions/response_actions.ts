@@ -29,9 +29,12 @@ import {
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
   type RunScriptActionRequestBody,
+  CancelActionRequestSchema,
+  type CancelActionRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {
+  CANCEL_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -50,6 +53,7 @@ import type {
   EndpointActionDataParameterTypes,
   ActionDetails,
   ResponseActionRunScriptParameters,
+  ResponseActionsCancelParameters,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
@@ -335,6 +339,31 @@ export function registerResponseActionRoutes(
         )
       )
     );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: CANCEL_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
+      options: { authRequired: true },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: CancelActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsCancelParameters>(endpointContext, 'cancel')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -446,6 +475,8 @@ async function handleActionCreation(
       return responseActionsClient.scan(body as ScanActionRequestBody);
     case 'runscript':
       return responseActionsClient.runscript(body as RunScriptActionRequestBody);
+    case 'cancel':
+      return responseActionsClient.cancel(body as CancelActionRequestBody);
     default:
       throw new CustomHttpRequestError(
         `No handler found for response action command: [${command}]`,

@@ -30,6 +30,7 @@ import type {
   RunScriptActionRequestBody,
   UnisolationRouteRequestBody,
   MSDefenderRunScriptActionRequestParams,
+  CancelActionRequestBody,
 } from '../../../../../../../../common/api/endpoint';
 import type {
   ActionDetails,
@@ -554,6 +555,59 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     >;
   }
 
+  async cancel(
+    actionRequest: CancelActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      undefined,
+      {},
+      MicrosoftDefenderEndpointActionRequestCommonMeta
+    > = {
+      ...actionRequest,
+      ...this.getMethodOptions(options),
+      command: 'cancel',
+    };
+
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
+
+      console.log({ actionRequest, options });
+      if (!error) {
+        try {
+          const msActionResponse = await this.sendAction<
+            MicrosoftDefenderEndpointMachineAction,
+            MicrosoftDefenderEndpointIsolateHostParams
+          >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION, {
+            actionId: actionRequest.parameters.id,
+            comment: this.buildExternalComment(reqIndexOptions),
+          });
+
+          console.log({ msActionResponse });
+          if (msActionResponse?.data?.id) {
+            reqIndexOptions.meta = { machineActionId: msActionResponse.data.id };
+          } else {
+            throw new ResponseActionsClientError(
+              `Cancel request was sent to Microsoft Defender, but Machine Action Id was not provided!`
+            );
+          }
+        } catch (err) {
+          error = err;
+        }
+      }
+
+      reqIndexOptions.error = error?.message;
+
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
+    }
+
+    const { actionDetails } = await this.handleResponseActionCreation(reqIndexOptions);
+
+    return actionDetails;
+  }
+
   async processPendingActions({
     abortSignal,
     addToQueue,
@@ -589,6 +643,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         switch (actionType as ResponseActionsApiCommandNames) {
           case 'isolate':
           case 'unisolate':
+          case 'cancel':
             addResponsesToQueueIfAny(
               await this.checkPendingActions(
                 typePendingActions as Array<
@@ -747,9 +802,12 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
       case 'Cancelled':
         isPending = false;
-        isError = true;
+
+        // TODO: Cancel action is a normal action - I think we should show it as succeeded if everything is fine, and not error.
+        isError = false;
         message = `Response action was canceled by [${
-          machineAction.cancellationRequestor
+          // TODO does requestor make more sense?
+          machineAction.requestor
         }] (Microsoft Defender for Endpoint machine action ID: ${machineAction.id})${
           machineAction.cancellationComment ? `: ${machineAction.cancellationComment}` : ''
         }`;
