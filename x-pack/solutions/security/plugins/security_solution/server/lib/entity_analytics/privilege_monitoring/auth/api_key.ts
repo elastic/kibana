@@ -49,7 +49,7 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
   } else {
     const apiKey = await generateAPIKey(request, deps);
 
-    const soClient = core.savedObjects.getScopedClient(request, {
+    const soClient = core.savedObjects.getUnsafeInternalClient({
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
     });
 
@@ -57,6 +57,7 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
       id: getPrivmonEncryptedSavedObjectId(namespace),
       overwrite: true,
       managed: true,
+      namespace,
     });
   }
 };
@@ -74,7 +75,10 @@ const getApiKey = async (deps: ApiKeyManagerDependencies) => {
     return (
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<PrivilegeMonitoringAPIKey>(
         PrivilegeMonitoringApiKeyType.name,
-        getPrivmonEncryptedSavedObjectId(deps.namespace)
+        getPrivmonEncryptedSavedObjectId(deps.namespace),
+        {
+          namespace: deps.namespace,
+        }
       )
     ).attributes;
   } catch (err) {
