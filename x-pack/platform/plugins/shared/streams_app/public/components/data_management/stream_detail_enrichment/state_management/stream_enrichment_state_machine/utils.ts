@@ -147,7 +147,7 @@ export const spawnProcessor = <
 >(
   processor: ProcessorDefinition,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
-  options?: { isNew?: boolean; whereParentId?: string; id?: string }
+  options?: { isNew?: boolean; whereParentId?: string; id?: string; shouldSkipDraft?: boolean }
 ) => {
   const { spawn, self } = assignArgs;
   const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
@@ -164,6 +164,7 @@ export const spawnProcessor = <
       parentRef: self,
       processor: processorWithUIAttributes,
       isNew: options?.isNew ?? false,
+      shouldSkipDraft: options?.shouldSkipDraft ?? false,
     },
   });
 };

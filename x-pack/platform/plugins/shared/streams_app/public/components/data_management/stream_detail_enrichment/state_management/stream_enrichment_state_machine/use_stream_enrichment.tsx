@@ -85,6 +85,9 @@ export const useStreamEnrichmentEvents = () => {
       addDataSource: (dataSource: EnrichmentDataSource) => {
         service.send({ type: 'dataSources.add', dataSource });
       },
+      updateAllProcessors: (processors: ProcessorDefinition[]) => {
+        service.send({ type: 'processors.updateAll', processors });
+      },
       setExplicitlyEnabledPreviewColumns: (columns: string[]) => {
         service.send({
           type: 'previewColumns.updateExplicitlyEnabledColumns',

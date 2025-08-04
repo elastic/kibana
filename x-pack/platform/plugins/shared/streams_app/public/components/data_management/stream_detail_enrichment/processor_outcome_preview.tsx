@@ -245,6 +245,8 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   );
 
   const grokMode =
+    // disable for now
+    false &&
     draftProcessor?.processor &&
     isGrokProcessor(draftProcessor.processor) &&
     !isEmpty(draftProcessor.processor.grok.field) &&

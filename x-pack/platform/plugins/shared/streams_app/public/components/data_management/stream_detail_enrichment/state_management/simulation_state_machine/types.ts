@@ -45,6 +45,7 @@ export type SimulationEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'processors.updateAll'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }

@@ -5,29 +5,36 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import { dump, load } from 'js-yaml';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { z } from '@kbn/zod';
 import {
   DragDropContextProps,
   EuiAccordion,
   EuiButton,
   EuiCode,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
+  EuiSwitch,
   EuiText,
   EuiTimeline,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, processorDefinitionSchema } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
+import { css as cssCss } from '@emotion/css';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditor, monaco } from '@kbn/code-editor';
+import Zod from '@kbn/zod';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
@@ -41,6 +48,9 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { NoProcessorsEmptyPrompt } from './empty_prompts';
+import { processorsWithUIAttributesToApiDefinition } from './utils';
+import { getTabContentAvailableHeight } from './get_height';
+import { ProcessorStatusIndicator } from './processor_status_indicator';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -163,6 +173,8 @@ const ProcessorsEditor = React.memo(() => {
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
+  const [yamlMode, setYamlMode] = useState(false);
+
   const errors = useMemo(() => {
     if (!simulation) {
       return { ignoredFields: [], mappingFailures: [] };
@@ -253,7 +265,18 @@ const ProcessorsEditor = React.memo(() => {
           </EuiButton>
         </EuiFlexGroup>
       </EuiPanel>
-      {hasProcessors ? (
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.yamlModeSwitchLabel',
+          { defaultMessage: 'YAML mode' }
+        )}
+        checked={yamlMode}
+        onChange={(e) => setYamlMode(e.target.checked)}
+        data-test-subj="yamlModeSwitch"
+      />
+      {yamlMode ? (
+        <YamlProcessingEditor />
+      ) : hasProcessors ? (
         <EuiPanel
           hasShadow={false}
           borderRadius="none"
@@ -272,11 +295,21 @@ const ProcessorsEditor = React.memo(() => {
                   <DraggableProcessorListItem
                     isDragDisabled={!canReorderProcessors}
                     key={processorRef.id}
+                    subId={'main-list'}
                     idx={idx}
                     processorRef={processorRef}
                     processorMetrics={simulation?.processors_metrics[processorRef.id]}
                   />
                 ))}
+              <EuiDroppable
+                droppableId={'main-list-merge'}
+                css={css`
+                  width: 100%;
+                  min-height: 100px;
+                `}
+              >
+                <span />
+              </EuiDroppable>
             </EuiTimeline>
           </SortableList>
         </EuiPanel>
@@ -381,3 +414,210 @@ const clampTwoLines = css`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
+
+function YamlProcessingEditor() {
+  const processorsRefs = useStreamEnrichmentSelector((state) => state.context.processorsRefs);
+  const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+  const [initialProcessors] = useState(() =>
+    processorsRefs.map((processorRef) => processorRef.getSnapshot().context.processor)
+  );
+  const [yamlContent, setYamlContent] = useState(() => {
+    const apiDefinition = processorsWithUIAttributesToApiDefinition(initialProcessors);
+    return dump(apiDefinition);
+  });
+  const simState = useSimulatorSelector((s) => s);
+  const streamState = useStreamEnrichmentSelector((s) => s);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  // Compute markers for top-level processors
+  const markers = useMemo(() => {
+    const topLevelRefs = processorsRefs.filter(
+      (processorRef) => !processorRef.getSnapshot().context.processor.whereParentId
+    );
+    const apiDefinition = processorsWithUIAttributesToApiDefinition(
+      processorsRefs.map((processorRef) => processorRef.getSnapshot().context.processor)
+    );
+    let currentLine = 0;
+    return topLevelRefs.map((ref, idx) => {
+      const dumped = dump([apiDefinition[idx]]);
+      const lineCount = dumped.split('\n').length - 1;
+      const marker = { processorRef: ref, line: currentLine };
+      currentLine += lineCount;
+      return marker;
+    });
+  }, [processorsRefs, simulation?.documents]);
+  const [editorHeight, setEditorHeight] = useState<number>(0);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const { updateAllProcessors } = useStreamEnrichmentEvents();
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+    const height = getTabContentAvailableHeight(wrapperRef.current, 0);
+    setEditorHeight(height);
+  }, []);
+
+  // Helper to get status for a processorRef (logic copied from ProcessorStatusIndicator)
+  function getProcessorStatus(processorRef: any) {
+    const snapshot = processorRef.getSnapshot();
+    const isNew = snapshot.context.isNew;
+
+    // Get simulation and stream state
+
+    const processorsInSim = simState.context.processors;
+    const isParticipatingInSimulation = processorsInSim.find((p) => p.id === processorRef.id);
+    const isSimulationRunning = simState.matches('runningSimulation');
+    const isPending = simulation && !simulation.processors_metrics[processorRef.id];
+    const isFailing = Boolean(
+      simulation?.processors_metrics[processorRef.id]?.errors.some(
+        (e: any) => e.type === 'generic_simulation_failure'
+      )
+    );
+    const isAnyProcessorBeforePersisted = (() => {
+      return processorsRefs
+        .map((ref) => ref.getSnapshot())
+        .some((s, id, processorSnapshots) => {
+          // Skip if this processor is already persisted
+          if (!s.context.isNew) return false;
+
+          // Check if there are persisted processors after this position
+          const hasPersistedAfter = processorSnapshots
+            .slice(id + 1)
+            .some(({ context }) => !context.isNew);
+
+          return hasPersistedAfter;
+        });
+    })();
+
+    if (isAnyProcessorBeforePersisted) {
+      return {
+        icon: '⛔',
+        color: '#ccc',
+        tooltip:
+          'Simulation is disabled when new processors are placed between previously made processors. To enable simulation, move all new processors to the end.',
+      };
+    } else if (!isParticipatingInSimulation) {
+      return {
+        icon: '⏭️',
+        color: '#ccc',
+        tooltip: isNew
+          ? 'Processor skipped because it follows a processor being edited.'
+          : 'Processor skipped because it was created in a previous simulation session.',
+      };
+    } else {
+      if (isSimulationRunning) {
+        return {
+          icon: '⏳',
+          color: '#0077cc',
+          tooltip: 'Simulating processor',
+        };
+      } else if (!simulation || isPending) {
+        return {
+          icon: '🕒',
+          color: '#ccc',
+          tooltip: 'Pending to run for simulation.',
+        };
+      } else if (isFailing) {
+        return {
+          icon: '❌',
+          color: '#d36086',
+          tooltip: 'Processor configuration failed simulation.',
+        };
+      } else {
+        return {
+          icon: '✅',
+          color: '#17c964',
+          tooltip: 'Processor configuration simulated successfully.',
+        };
+      }
+    }
+  }
+
+  // Render status indicators for each marker as Monaco glyphs
+  const renderLineMarkers = (editor: monaco.editor.IStandaloneCodeEditor | undefined) => {
+    if (!editor || !markers.length) return;
+    // Remove old decorations
+    if ((editor as any).__statusDecorations) {
+      editor.deltaDecorations((editor as any).__statusDecorations, []);
+    }
+    // Add new decorations
+    const decorations = markers.map(({ processorRef, line }, idx) => {
+      const status = getProcessorStatus(processorRef);
+      return {
+        range: new monaco.Range(line + 1, 1, line + 1, 1),
+        options: {
+          isWholeLine: false,
+          glyphMarginClassName: cssCss`
+            background: none !important;
+            color: ${status.color};
+            font-size: 18px;
+            line-height: 1;
+            text-align: center;
+            ::before {
+            content: '${status.icon}';
+            display: block;
+        }
+          `,
+          glyphMarginHoverMessage: { value: status.tooltip },
+        },
+      };
+    });
+    (editor as any).__statusDecorations = editor.deltaDecorations([], decorations);
+  };
+
+  useEffect(() => {
+    if (editorRef.current) {
+      renderLineMarkers(editorRef.current);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markers, editorRef.current]);
+
+  return (
+    <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
+      <EuiButton
+        onClick={() => {
+          const parsedYaml = load(yamlContent);
+
+          try {
+            const output = z.array(processorDefinitionSchema).parse(parsedYaml);
+
+            updateAllProcessors(output);
+          } catch (error) {
+            alert('Invalid YAML content: ' + error.message);
+          }
+          // Figure out how we map the YAML content back to processorsRefs.
+          // Then apply by sending processor change, processor create and processor delete events.
+        }}
+      >
+        Apply
+      </EuiButton>
+      <div
+        ref={wrapperRef}
+        className={cssCss`
+          width: 100%;
+          height: ${editorHeight}px;
+          // https://github.com/microsoft/monaco-editor/issues/3873
+          .codicon-light-bulb {
+            display: none !important;
+          }
+        `}
+      >
+        <CodeEditor
+          languageId="yaml"
+          value={yamlContent}
+          editorDidMount={(editor) => {
+            editorRef.current = editor;
+            renderLineMarkers(editor);
+          }}
+          onChange={(e) => setYamlContent(e)}
+          aria-label={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.yamlEditorAriaLabel',
+            { defaultMessage: 'YAML editor' }
+          )}
+          fullWidth
+          height={`${editorHeight}px`}
+          options={{
+            glyphMargin: true,
+          }}
+        />
+      </div>
+    </EuiPanel>
+  );
+}

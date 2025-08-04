@@ -19,6 +19,8 @@ import {
   EuiFlexItem,
   EuiButtonEmptyProps,
   useEuiTheme,
+  EuiDragDropContext,
+  EuiDroppable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DraftGrokExpression, GrokCollection } from '@kbn/grok-ui';
@@ -98,16 +100,18 @@ export const GrokPatternsEditor = () => {
       >
         <EuiPanel color="subdued" paddingSize="none">
           <SortableList onDragItem={handlePatternDrag}>
-            {fields.map((field, idx) => (
-              <DraggablePatternInput
-                key={field.id}
-                draftGrokExpression={field}
-                idx={idx}
-                onRemove={getRemovePatternHandler(idx)}
-                grokCollection={grokCollection}
-                onChange={(expression) => handlePatternChange(expression, idx)}
-              />
-            ))}
+            <EuiDroppable droppableId="grokky">
+              {fields.map((field, idx) => (
+                <DraggablePatternInput
+                  key={field.id}
+                  draftGrokExpression={field}
+                  idx={idx}
+                  onRemove={getRemovePatternHandler(idx)}
+                  grokCollection={grokCollection}
+                  onChange={(expression) => handlePatternChange(expression, idx)}
+                />
+              ))}
+            </EuiDroppable>
           </SortableList>
         </EuiPanel>
       </EuiFormRow>

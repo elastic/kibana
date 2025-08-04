@@ -21,6 +21,7 @@ export interface ProcessorInput {
   parentRef: ProcessorParentActor;
   processor: ProcessorDefinitionWithUIAttributes;
   isNew?: boolean;
+  shouldSkipDraft?: boolean;
 }
 
 export type ProcessorParentActor = ActorRef<Snapshot<unknown>, ProcessorToParentEvent>;
@@ -37,6 +38,7 @@ export interface ProcessorContext {
   processor: ProcessorDefinitionWithUIAttributes;
   // Additional resources to interact with the processor, these aren't persisted but facilitate certain UI functionality.
   resources?: ProcessorResources;
+  shouldSkipDraft?: boolean;
   isNew: boolean;
   isUpdated?: boolean;
 }
@@ -47,6 +49,11 @@ export type ProcessorEvent =
       type: 'processor.change';
       processor: ProcessorDefinition;
       resources?: ProcessorResources;
+    }
+  | {
+      type: 'processor.reset';
+      processor: ProcessorDefinition;
+      whereParentId?: string;
     }
   | { type: 'processor.delete' }
   | { type: 'processor.changeParent'; parentId?: string }

@@ -31,18 +31,24 @@ export const selectDraftProcessor = (context: StreamEnrichmentContextType) => {
 export const selectWhetherAnyProcessorBeforePersisted = createSelector(
   [(context: StreamEnrichmentContextType) => context.processorsRefs],
   (processorsRefs) => {
-    return processorsRefs
-      .map((ref) => ref.getSnapshot())
-      .some((snapshot, id, processorSnapshots) => {
-        // Skip if this processor is already persisted
-        if (!snapshot.context.isNew) return false;
+    // if an existing processor is edited, we cant simulate anymore
+    return (
+      processorsRefs
+        .map((ref) => ref.getSnapshot())
+        .some((snapshot) => !snapshot.context.isNew && snapshot.context.isUpdated) ||
+      processorsRefs
+        .map((ref) => ref.getSnapshot())
+        .some((snapshot, id, processorSnapshots) => {
+          // Skip if this processor is already persisted
+          if (!snapshot.context.isNew) return false;
 
-        // Check if there are persisted processors after this position
-        const hasPersistedAfter = processorSnapshots
-          .slice(id + 1)
-          .some(({ context }) => !context.isNew);
+          // Check if there are persisted processors after this position
+          const hasPersistedAfter = processorSnapshots
+            .slice(id + 1)
+            .some(({ context }) => !context.isNew);
 
-        return hasPersistedAfter;
-      });
+          return hasPersistedAfter;
+        })
+    );
   }
 );

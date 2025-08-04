@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import { EuiDraggable, EuiTimelineItem } from '@elastic/eui';
+import { EuiDraggable, EuiDroppable, EuiTimelineItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ProcessorConfiguration, ProcessorConfigurationProps } from './processors';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 
 export const DraggableProcessorListItem = ({
-  idx,
-  isDragDisabled,
   ...props
 }: Omit<ProcessorConfigurationProps, 'dragHandleProps'> & {
   idx: number;
-  isDragDisabled: boolean;
+  subId: string;
 }) => {
   return (
     <EuiTimelineItem
@@ -32,23 +30,7 @@ export const DraggableProcessorListItem = ({
         }
       `}
     >
-      <EuiDraggable
-        index={idx}
-        spacing="none"
-        draggableId={props.processorRef.id}
-        hasInteractiveChildren
-        disableInteractiveElementBlocking // Allows button to be drag handle
-        customDragHandle
-        isDragDisabled={isDragDisabled}
-      >
-        {(provided) => (
-          <ProcessorConfiguration
-            {...props}
-            idx={idx}
-            dragHandleProps={isDragDisabled ? null : provided.dragHandleProps}
-          />
-        )}
-      </EuiDraggable>
+      <ProcessorConfiguration {...props} />
     </EuiTimelineItem>
   );
 };

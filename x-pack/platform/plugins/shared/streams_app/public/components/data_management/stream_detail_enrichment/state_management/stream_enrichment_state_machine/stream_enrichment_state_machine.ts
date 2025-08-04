@@ -30,7 +30,7 @@ import {
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
-import { getDefaultGrokProcessor, isGrokProcessor } from '../../utils';
+import { getDefaultGrokProcessor, isGrokProcessor, processorConverter } from '../../utils';
 import {
   createUpsertStreamActor,
   createUpsertStreamFailureNofitier,
@@ -65,6 +65,52 @@ import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
 export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
 
+const createId = htmlIdGenerator();
+// Helper to recursively flatten processors, unpacking "where" steps and setting whereParentId
+function flattenProcessors(
+  processors: ProcessorDefinition[],
+  parentWhereId?: string
+): Array<{ processor: ProcessorDefinition; id: string; whereParentId?: string }> {
+  const result: Array<{
+    processor: ProcessorDefinition;
+    id: string;
+    whereParentId?: string;
+  }> = [];
+  for (const proc of processors) {
+    if ('where' in proc && Array.isArray(proc.where.steps)) {
+      // Generate id for this where processor
+      const whereId = createId();
+      // Clone the where processor and empty its steps
+      const steps = proc.where.steps;
+      const whereProc: ProcessorDefinition = {
+        ...proc,
+        where: {
+          ...proc.where,
+          steps: [],
+        },
+      };
+      result.push({ processor: whereProc, id: whereId });
+      // Recursively flatten steps, setting whereParentId to this where's id
+      if (Array.isArray(steps)) {
+        result.push(...flattenProcessors(steps, whereId));
+      }
+    } else {
+      // Generate id for this processor
+      const procId = createId();
+      if (parentWhereId) {
+        result.push({
+          processor: { ...proc },
+          id: procId,
+          whereParentId: parentWhereId,
+        });
+      } else {
+        result.push({ processor: proc, id: procId });
+      }
+    }
+  }
+  return result;
+}
+
 export const streamEnrichmentMachine = setup({
   types: {
     input: {} as StreamEnrichmentInput,
@@ -96,53 +142,6 @@ export const streamEnrichmentMachine = setup({
       // Clean-up pre-existing processors
       context.processorsRefs.forEach(stopChild);
 
-      const createId = htmlIdGenerator();
-
-      // Helper to recursively flatten processors, unpacking "where" steps and setting whereParentId
-      function flattenProcessors(
-        processors: ProcessorDefinition[],
-        parentWhereId?: string
-      ): Array<{ processor: ProcessorDefinition; id: string; whereParentId?: string }> {
-        const result: Array<{
-          processor: ProcessorDefinition;
-          id: string;
-          whereParentId?: string;
-        }> = [];
-        for (const proc of processors) {
-          if ('where' in proc && Array.isArray(proc.where.steps)) {
-            // Generate id for this where processor
-            const whereId = createId();
-            // Clone the where processor and empty its steps
-            const steps = proc.where.steps;
-            const whereProc: ProcessorDefinition = {
-              ...proc,
-              where: {
-                ...proc.where,
-                steps: [],
-              },
-            };
-            result.push({ processor: whereProc, id: whereId });
-            // Recursively flatten steps, setting whereParentId to this where's id
-            if (Array.isArray(steps)) {
-              result.push(...flattenProcessors(steps, whereId));
-            }
-          } else {
-            // Generate id for this processor
-            const procId = createId();
-            if (parentWhereId) {
-              result.push({
-                processor: { ...proc },
-                id: procId,
-                whereParentId: parentWhereId,
-              });
-            } else {
-              result.push({ processor: proc, id: procId });
-            }
-          }
-        }
-        return result;
-      }
-
       // Flatten all processors from the stream definition
       const flattenedProcessors = flattenProcessors(context.definition.stream.ingest.processing);
 
@@ -164,6 +163,137 @@ export const streamEnrichmentMachine = setup({
         processorsRefs,
       };
     }),
+    updateAllProcessors: assign(
+      ({ context, spawn, self }, { processors }: { processors: ProcessorDefinition[] }) => {
+        const existingRefs = context.processorsRefs;
+
+        // Flatten processors and assign ids by index, preserving parent-child relationships
+        function flattenAndAssignIds(
+          ps: ProcessorDefinition[],
+          whereParentId?: string,
+          refIndexTracker: { idx: number } = { idx: 0 }
+        ): Array<{ processor: ProcessorDefinition; id: string; whereParentId?: string }> {
+          const result: Array<{
+            processor: ProcessorDefinition;
+            id: string;
+            whereParentId?: string;
+          }> = [];
+          for (const proc of ps) {
+            let assignedId: string;
+            if ('where' in proc && Array.isArray(proc.where.steps)) {
+              // Assign id by index if available, else generate new
+              if (existingRefs[refIndexTracker.idx]) {
+                assignedId = existingRefs[refIndexTracker.idx].id;
+              } else {
+                assignedId = createId();
+              }
+              refIndexTracker.idx++;
+              // "where" processor: flatten its steps
+              const steps = proc.where.steps;
+              const whereProc: ProcessorDefinition = {
+                ...proc,
+                where: {
+                  ...proc.where,
+                  steps: [],
+                },
+              };
+              result.push({ processor: whereProc, id: assignedId, whereParentId });
+              // Recursively flatten steps, setting whereParentId to this where's id
+              if (Array.isArray(steps)) {
+                result.push(...flattenAndAssignIds(steps, assignedId, refIndexTracker));
+              }
+            } else {
+              // Assign id by index if available, else generate new
+              if (existingRefs[refIndexTracker.idx]) {
+                assignedId = existingRefs[refIndexTracker.idx].id;
+              } else {
+                assignedId = createId();
+              }
+              refIndexTracker.idx++;
+              result.push({ processor: proc, id: assignedId, whereParentId });
+            }
+          }
+          return result;
+        }
+
+        // Flatten incoming processors and assign ids by index
+        const flatIncoming = flattenAndAssignIds(processors);
+
+        // Build newRefs: reuse, update, or spawn as needed
+        const newRefs: typeof context.processorsRefs = [];
+        let index = 0;
+        const originalDefinitions = flattenProcessors(context.definition.stream.ingest.processing);
+        for (const incoming of flatIncoming) {
+          const existingRef = existingRefs.find((ref) => ref.id === incoming.id);
+          if (existingRef) {
+            // If processor definition or parent changed, send update event
+            const snap = existingRef.getSnapshot();
+            const prevDef = snap.context.processor;
+            const prevParent = prevDef.whereParentId;
+            const nextParent = incoming.whereParentId;
+            // Compare processor definition shallowly (could be improved)
+            const changed =
+              JSON.stringify({ ...processorConverter.toAPIDefinition(prevDef) }) !==
+                JSON.stringify({ ...incoming.processor }) || prevParent !== nextParent;
+            if (changed) {
+              // check whether this processor was basically reset to the previous state. In this case, we don't want to send a change event
+              const originalDefinition = originalDefinitions[index];
+              if (
+                originalDefinition &&
+                JSON.stringify(originalDefinition.processor) === JSON.stringify(incoming.processor)
+              ) {
+                const whereParentIndex = originalDefinitions.findIndex(
+                  (def) => def.id === originalDefinition.whereParentId
+                );
+                existingRef.send({
+                  type: 'processor.reset',
+                  processor: { ...incoming.processor },
+                  whereParentId: whereParentIndex !== -1 ? newRefs[whereParentIndex].id : undefined,
+                });
+              } else {
+                existingRef.send({
+                  type: 'processor.change',
+                  processor: { ...incoming.processor },
+                });
+              }
+              if (prevParent !== nextParent) {
+                existingRef.send({
+                  type: 'processor.changeParent',
+                  parentId: nextParent,
+                });
+              }
+            }
+            newRefs.push(existingRef);
+          } else {
+            // Spawn new processor actor
+            const ref = spawnProcessor(
+              { ...incoming.processor },
+              { spawn, self },
+              {
+                id: incoming.id,
+                whereParentId: incoming.whereParentId,
+                isNew: true,
+                shouldSkipDraft: true,
+              }
+            );
+            newRefs.push(ref);
+          }
+          index++;
+        }
+
+        // Stop actors that are no longer present
+        const incomingIds = new Set(flatIncoming.map((p) => p.id));
+        for (const ref of existingRefs) {
+          if (!incomingIds.has(ref.id)) {
+            ref.send({ type: 'processor.delete' });
+          }
+        }
+
+        return {
+          processorsRefs: newRefs,
+        };
+      }
+    ),
     addProcessor: assign((assignArgs, { processor }: { processor?: ProcessorDefinition }) => {
       if (!processor) {
         processor = getDefaultGrokProcessor({
@@ -219,25 +349,6 @@ export const streamEnrichmentMachine = setup({
           return groups;
         };
 
-        // Helper: get global index from sublist index
-        const getGlobalIndex = (
-          groups: Record<string, typeof context.processorsRefs>,
-          parent: string,
-          idx: number
-        ) => {
-          let globalIdx = 0;
-          for (const proc of context.processorsRefs) {
-            const pid = proc.getSnapshot().context.processor.whereParentId ?? 'main-list';
-            if (pid === parent) {
-              if (idx === 0) return globalIdx;
-              idx--;
-            }
-            globalIdx++;
-          }
-          // fallback
-          return context.processorsRefs.length;
-        };
-
         // Helper: flatten groups to a single array in correct nested order
         const flattenGroups = (
           groups: Record<string, typeof context.processorsRefs>,
@@ -256,7 +367,7 @@ export const streamEnrichmentMachine = setup({
           return result;
         };
 
-        const { from, to, fromParent = 'main-list', toParent = 'main-list' } = params;
+        let { from, to, fromParent = 'main-list', toParent = 'main-list' } = params;
         const processorsRefs = context.processorsRefs;
         let actualToParent = toParent;
         let mergeToEnd = false;
@@ -265,6 +376,21 @@ export const streamEnrichmentMachine = setup({
         if (toParent.endsWith('-merge')) {
           actualToParent = toParent.slice(0, -6); // remove '-merge'
           mergeToEnd = true;
+        }
+
+        // if the from or to parent matches <id>-<integer>, then that integer is the actual from index, and the <id> is the actual fromParent. Same for toParent
+
+        const fromMatcher = /^(.*?)-(\d+)$/.exec(fromParent);
+        const toMatcher = /^(.*?)-(\d+)$/.exec(actualToParent);
+
+        if (fromMatcher) {
+          fromParent = fromMatcher[1];
+          // from = from + parseInt(fromMatcher[2], 10);
+        }
+
+        if (toMatcher) {
+          actualToParent = toMatcher[1];
+          // to = to + parseInt(toMatcher[2], 10);
         }
 
         const groups = groupByParent(processorsRefs);
@@ -602,6 +728,13 @@ export const streamEnrichmentMachine = setup({
                       guard: 'canReorderProcessors',
                       actions: [
                         { type: 'reorderProcessors', params: ({ event }) => event },
+                        { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
+                    'processors.updateAll': {
+                      guard: 'hasSimulatePrivileges',
+                      actions: [
+                        { type: 'updateAllProcessors', params: ({ event }) => event },
                         { type: 'sendProcessorsEventToSimulator', params: ({ event }) => event },
                       ],
                     },

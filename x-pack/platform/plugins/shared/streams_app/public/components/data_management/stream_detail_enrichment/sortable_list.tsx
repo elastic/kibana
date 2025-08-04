@@ -23,20 +23,16 @@ export const SortableList = ({ onDragItem, children, subId }: SortableListProps)
   if (!subId) {
     return (
       <EuiDragDropContext onDragEnd={onDragItem}>
-        <EuiDroppable
-          isCombineEnabled
-          type={subId || 'main-list'}
-          droppableId={subId || 'main-list'}
-        >
-          {children}
-        </EuiDroppable>
+        <>{children}</>
       </EuiDragDropContext>
     );
   }
   // no context for subId, just return children
   return (
-    <EuiDroppable isCombineEnabled type={subId || 'main-list'} droppableId={subId}>
+    <>
+      {/* <EuiDroppable isCombineEnabled type={subId || 'main-list'} droppableId={subId}> */}
       {children}
-    </EuiDroppable>
+      {/* </EuiDroppable> */}
+    </>
   );
 };

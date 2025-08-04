@@ -42,6 +42,20 @@ export const processorMachine = setup({
     resetToPrevious: assign(({ context }) => ({
       processor: context.previousProcessor,
     })),
+    reset: assign(
+      ({ context }, params: { processor: ProcessorDefinition; whereParentId?: string }) => {
+        const type = getProcessorType(params.processor);
+        return {
+          processor: {
+            id: context.processor.id,
+            whereParentId: params.whereParentId,
+            type,
+            ...params.processor,
+          },
+          isUpdated: false,
+        };
+      }
+    ),
     markAsUpdated: assign(({ context }) => ({
       previousProcessor: context.processor,
       isUpdated: true,
@@ -63,7 +77,7 @@ export const processorMachine = setup({
     ),
   },
   guards: {
-    isDraft: ({ context }) => context.isNew,
+    isDraft: ({ context }) => context.isNew && !context.shouldSkipDraft,
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5QAcBOB7AxnW7UDoBXAO1TnQBsA3SAYgG0AGAXURXVgEsAXT9YtiAAeiAEwBmcfgBsATkkAOAIxKALEoDss2YwUAaEAE8xm-LInjVjaeIUalAVmmqAvi4NosOPEVLlqdPRKrEggyBw8fAKhIgiiEviqCjaqsgqymtq6BsYI4oxSCrpJ0oyO4g6y0m4eGNiwuAQQqACGAGbctJ71jfiwLTRMIexcvPyCsdJTZpKV4hoOOYgAtEoV+A41YXXeTa0dXTsNPpgtxNgUQ4Lho1ETiNIOqolVjPILSwhK5jJVGhrKWz2JyiLbdXb4ZrtTrg44ETAACzOMCuoRukXGMTElQ2og0lnmiyMiGSMniCjsAOcqjx1Xc2y8cPwmH4bU4UEIZAg+E4EAoYEOjN6kB4qJGGOioFiDlE0kSoiqdiJuXxCnw+NkDgUkh1szBR16LOIbI5XPwIt4xCggp6Pn6gxY1wiY0lwkQ81EZjU1lEysQmqUZg1Wt1evpsMNrPZnMg5ogkStNohp3OYEujrRzruWLyDgc+HSPr9CABsnwEk12tDFX1QpOUdNsYtnETEZ8EDTYG4YDFYSzmKliCcjAL9impVkGhpAM+IKDGlEjH+-1UTlc4YN9eN0bNzdbm-hSKtPYz4pd9wQk8+Chp5cr1bD9OI6A78DRB6dtwHbq+n2W8XEWtbQIEgyFwAIIE-CULwcDR8HEeRtEcaRFzeApi1ERwZHxSxrCBZD11qOs9mhKDzxzVR-gLUQaSUOxUm0bRVE+TD82kHCrBsOwCKA5MGxjSDMy-V1YlST5HkDCsQ2rTYN2I5l+LNXl+TI7NBxLAozHMOiPmJS9pnMDRdAfWSiOAhTt0bbk9ygVTv1iJQ5HLYtJxHIzFyrUNTIZcyO35btBLPNSfymKQ3nyJcATzGVpE+HVyzWKsF3EFC8TcNwgA */
@@ -73,6 +87,8 @@ export const processorMachine = setup({
     previousProcessor: input.processor,
     processor: input.processor,
     isNew: input.isNew ?? false,
+    shouldSkipDraft: input.shouldSkipDraft ?? false,
+    isUpdated: input.shouldSkipDraft ?? false,
   }),
   initial: 'unresolved',
   states: {
@@ -109,6 +125,16 @@ export const processorMachine = setup({
             },
             'processor.changeParent': {
               actions: [{ type: 'changeParent', params: ({ event }) => event }],
+            },
+            // receive upstream changes
+            'processor.change': {
+              actions: [
+                { type: 'markAsUpdated' },
+                { type: 'changeProcessor', params: ({ event }) => event },
+              ],
+            },
+            'processor.reset': {
+              actions: [{ type: 'reset', params: ({ event }) => event }],
             },
           },
         },

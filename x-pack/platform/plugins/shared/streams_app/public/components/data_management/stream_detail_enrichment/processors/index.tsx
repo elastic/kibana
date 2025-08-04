@@ -22,6 +22,8 @@ import {
   EuiBadge,
   EuiFlexItem,
   DragDropContextProps,
+  EuiDroppable,
+  EuiDraggable,
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
@@ -64,27 +66,32 @@ import { SortableList } from '../sortable_list';
 import { DraggableProcessorListItem } from '../processors_list';
 
 export interface ProcessorConfigurationProps {
-  dragHandleProps: DraggableProvidedDragHandleProps | null;
+  // dragHandleProps: DraggableProvidedDragHandleProps | null;
   processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
   idx: number;
+  isDragDisabled?: boolean;
+  subId: string;
 }
 
 export function ProcessorConfiguration({
-  dragHandleProps,
+  // dragHandleProps,
   processorRef,
   processorMetrics,
   idx,
+  subId,
+  isDragDisabled = false,
 }: ProcessorConfigurationProps) {
   const isOpen = useSelector(processorRef, isProcessorUnderEdit);
 
   if (!isOpen) {
     return (
       <ProcessorConfigurationListItem
-        dragHandleProps={dragHandleProps}
         processorMetrics={processorMetrics}
         processorRef={processorRef}
         idx={idx}
+        subId={subId}
+        isDragDisabled={isDragDisabled}
       />
     );
   }
@@ -94,14 +101,17 @@ export function ProcessorConfiguration({
       processorMetrics={processorMetrics}
       processorRef={processorRef}
       idx={idx}
+      subId={subId}
+      isDragDisabled={isDragDisabled}
     />
   );
 }
 
 const ProcessorConfigurationListItem = ({
-  dragHandleProps,
   processorMetrics,
   processorRef,
+  subId,
+  isDragDisabled,
   idx,
 }: ProcessorConfigurationProps) => {
   const canEdit = useStreamEnrichmentSelector((snapshot) =>
@@ -116,7 +126,7 @@ const ProcessorConfigurationListItem = ({
     processorRef,
     (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
   );
-  const canDragAndDrop = isConfigured && dragHandleProps;
+  const canDragAndDrop = isConfigured && !isDragDisabled;
 
   const processorDescription = getProcessorDescription(processor);
 
@@ -136,91 +146,111 @@ const ProcessorConfigurationListItem = ({
   return (
     <ProcessorPanel>
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          {processorRef.getSnapshot().context.processor.whereParentId ? (
-            <EuiButtonIcon
-              iconType="arrowLeft"
-              aria-label="Pop out"
-              onClick={() => {
-                // find the new parent processor
-                const parent = processorsRefs.find(
-                  (ref) => ref.id === processorRef.getSnapshot().context.processor.whereParentId
-                );
-                // find the index of the parent in its parent
-                const parentIdx = processorsRefs
-                  .filter(
-                    (ref) => ref.id === processorRef.getSnapshot().context.processor.whereParentId
-                  )
-                  .findIndex((ref) => ref.id === parent?.id);
-                reorderProcessors(
-                  idx,
-                  parentIdx + 1,
-                  processorRef.getSnapshot().context.processor.whereParentId,
-                  parent?.getSnapshot().context.processor.whereParentId || 'main-list'
-                );
-              }}
-            />
-          ) : null}
-          {comesAfterWhereProcessor && (
-            <EuiButtonIcon
-              iconType="arrowUp"
-              aria-label="Merge into parent"
-              onClick={() => {
-                const childrenInTargetWhere = processorsRefs.filter(
-                  (ref) =>
-                    ref.getSnapshot().context.processor.whereParentId === previousProcessor?.id
-                );
-                reorderProcessors(
-                  idx,
-                  childrenInTargetWhere.length + 1,
-                  processorRef.getSnapshot().context.processor.whereParentId,
-                  previousProcessor?.id || 'main-list'
-                );
-              }}
-            />
-          )}
-          {canDragAndDrop && (
-            <EuiPanel
-              grow={false}
-              hasShadow={false}
-              color="transparent"
-              paddingSize="none"
-              {...dragHandleProps}
-            >
-              <EuiIcon type="grab" size="m" />
-            </EuiPanel>
-          )}
-          <strong>{processor.type.toUpperCase()}</strong>
-          <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
-            {processorDescription}
-          </EuiText>
-          <EuiFlexItem grow={1} />
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
-              {isUnsaved && (
-                <EuiBadge>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
-                    { defaultMessage: 'Unsaved' }
-                  )}
-                </EuiBadge>
-              )}
-              <EuiButtonIcon
-                data-test-subj="streamsAppProcessorConfigurationButton"
-                onClick={handleOpen}
-                iconType="pencil"
-                disabled={!canEdit}
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
-                  { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
+        <EuiDroppable droppableId={`${subId || 'main-list'}-${idx}`}>
+          <EuiDraggable
+            index={idx}
+            spacing="none"
+            draggableId={processorRef.id}
+            hasInteractiveChildren
+            disableInteractiveElementBlocking // Allows button to be drag handle
+            customDragHandle
+            isDragDisabled={isDragDisabled}
+          >
+            {(provided) => (
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+                {processorRef.getSnapshot().context.processor.whereParentId ? (
+                  <EuiButtonIcon
+                    iconType="arrowLeft"
+                    aria-label="Pop out"
+                    onClick={() => {
+                      // find the new parent processor
+                      const parent = processorsRefs.find(
+                        (ref) =>
+                          ref.id === processorRef.getSnapshot().context.processor.whereParentId
+                      );
+                      // find the index of the parent in its parent
+                      const parentIdx = processorsRefs
+                        .filter(
+                          (ref) =>
+                            ref.id === processorRef.getSnapshot().context.processor.whereParentId
+                        )
+                        .findIndex((ref) => ref.id === parent?.id);
+                      reorderProcessors(
+                        idx,
+                        parentIdx + 1,
+                        processorRef.getSnapshot().context.processor.whereParentId,
+                        parent?.getSnapshot().context.processor.whereParentId || 'main-list'
+                      );
+                    }}
+                  />
+                ) : null}
+                {comesAfterWhereProcessor && (
+                  <EuiButtonIcon
+                    iconType="arrowUp"
+                    aria-label="Merge into parent"
+                    onClick={() => {
+                      const childrenInTargetWhere = processorsRefs.filter(
+                        (ref) =>
+                          ref.getSnapshot().context.processor.whereParentId ===
+                          previousProcessor?.id
+                      );
+                      reorderProcessors(
+                        idx,
+                        childrenInTargetWhere.length + 1,
+                        processorRef.getSnapshot().context.processor.whereParentId,
+                        previousProcessor?.id || 'main-list'
+                      );
+                    }}
+                  />
                 )}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                {canDragAndDrop && (
+                  <EuiPanel
+                    grow={false}
+                    hasShadow={false}
+                    color="transparent"
+                    paddingSize="none"
+                    {...provided.dragHandleProps}
+                  >
+                    <EuiIcon type="grab" size="m" />
+                  </EuiPanel>
+                )}
+                <strong>{processor.type.toUpperCase()}</strong>
+                <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
+                  {processorDescription}
+                </EuiText>
+                <EuiFlexItem grow={1} />
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="xs">
+                    {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
+                    {isUnsaved && (
+                      <EuiBadge>
+                        {i18n.translate(
+                          'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
+                          { defaultMessage: 'Unsaved' }
+                        )}
+                      </EuiBadge>
+                    )}
+                    <EuiButtonIcon
+                      data-test-subj="streamsAppProcessorConfigurationButton"
+                      onClick={handleOpen}
+                      iconType="pencil"
+                      disabled={!canEdit}
+                      color="text"
+                      size="xs"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
+                        {
+                          defaultMessage: 'Edit {type} processor',
+                          values: { type: processor.type },
+                        }
+                      )}
+                    />
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </EuiDraggable>
+        </EuiDroppable>
         {processor.type === 'where' && <SubList parentId={processorRef.id} />}
       </EuiFlexGroup>
     </ProcessorPanel>
@@ -255,11 +285,25 @@ const SubList = ({ parentId }: { parentId: string; grandparentId?: string }) => 
             isDragDisabled={!canReorderProcessors}
             key={processorRef.id}
             idx={idx}
+            subId={parentId}
             processorRef={processorRef}
             processorMetrics={simulation?.processors_metrics[processorRef.id]}
           />
         ))}
       </SortableList>
+      {relevantProcessorsRefs.length === 0 && (
+        <EuiDroppable
+          droppableId={parentId}
+          css={css`
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `}
+        >
+          Drop here for child
+        </EuiDroppable>
+      )}
     </EuiFlexGroup>
   );
 };
