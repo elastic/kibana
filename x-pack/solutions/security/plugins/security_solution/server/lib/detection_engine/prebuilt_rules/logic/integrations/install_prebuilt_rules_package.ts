@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { EnsurePackageResult } from '@kbn/fleet-plugin/server/services/epm/packages/install';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import { findLatestPackageVersion } from './find_latest_package_version';
@@ -20,7 +21,7 @@ import { ensureInstalledPackage } from './ensure_installed_package';
 export async function installPrebuiltRulesPackage(
   context: SecuritySolutionApiRequestHandlerContext,
   logger: Logger
-) {
+): Promise<EnsurePackageResult> {
   const config = context.getConfig();
   let pkgVersion = config.prebuiltRulesPackageVersion;
 

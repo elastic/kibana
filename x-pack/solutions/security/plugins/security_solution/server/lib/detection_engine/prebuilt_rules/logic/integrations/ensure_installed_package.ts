@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { EnsurePackageResult } from '@kbn/fleet-plugin/server/services/epm/packages/install';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 
 export async function ensureInstalledPackage(
@@ -13,7 +14,7 @@ export async function ensureInstalledPackage(
   pkgName: string,
   pkgVersion: string,
   logger: Logger
-) {
+): Promise<EnsurePackageResult> {
   try {
     logger.debug(
       `ensureInstalledPackage: Ensuring Fleet package is installed: "${pkgName}" v${pkgVersion}`
