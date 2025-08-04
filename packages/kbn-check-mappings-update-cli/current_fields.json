@@ -248,6 +248,14 @@
     "type"
   ],
   "cloud": [],
+  "cloud-connector": [
+    "cloudProvider",
+    "created_at",
+    "name",
+    "packagePolicyCount",
+    "updated_at",
+    "vars"
+  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
@@ -529,6 +537,14 @@
     "unenroll_timeout",
     "updated_at",
     "updated_by"
+  ],
+  "fleet-cloud-connector": [
+    "cloudProvider",
+    "created_at",
+    "name",
+    "packagePolicyCount",
+    "updated_at",
+    "vars"
   ],
   "fleet-fleet-server-host": [
     "host_urls",

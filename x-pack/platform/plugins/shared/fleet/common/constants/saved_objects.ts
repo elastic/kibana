@@ -9,4 +9,4 @@ export const INGEST_SAVED_OBJECT_INDEX = '.kibana_ingest';
 
 export const FLEET_SETUP_LOCK_TYPE = 'fleet-setup-lock';
 
-export const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'cloud-connector';
+export const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'fleet-cloud-connector';
