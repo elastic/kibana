@@ -16,8 +16,7 @@ import { PrivateLocationTestService } from './services/private_location_test_ser
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/229295
-  describe.skip('AddProjectMonitors', function () {
+  describe('AddProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -68,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
-      await testPrivateLocations.addPrivateLocation();
+      await testPrivateLocations.createPrivateLocation();
 
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)

@@ -275,7 +275,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
 
         return response.ok({
           body: {
-            result: toolResult.result,
+            results: toolResult.results,
           },
         });
       })

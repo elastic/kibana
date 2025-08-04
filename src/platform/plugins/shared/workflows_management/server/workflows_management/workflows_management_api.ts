@@ -17,11 +17,12 @@ import {
   WorkflowExecutionEngineModel,
   UpdatedWorkflowResponseDto,
   transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
 import { WorkflowsService } from './workflows_management_service';
 import { SchedulerService } from '../scheduler/scheduler_service';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -112,8 +113,7 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     return await this.schedulerService.runWorkflow(
       {
@@ -145,18 +145,31 @@ export class WorkflowsManagementApi {
 
     // Transform the logs to match our API format
     return {
-      logs: result.logs.map((log: any) => ({
-        id: log.id,
-        timestamp: log.source['@timestamp'],
-        level: log.source.level,
-        message: log.source.message,
-        stepId: log.source.workflow?.step_id,
-        stepName: log.source.workflow?.step_name,
-        connectorType: log.source.workflow?.step_type,
-        duration: log.source.duration,
-        additionalData: log.source.additionalData,
-      })),
-      total: typeof result.total === 'number' ? result.total : result.total?.value || 0,
+      logs: result.logs
+        .filter((log: any) => log) // Filter out undefined/null logs
+        .map((log: any) => ({
+          id:
+            log.id ||
+            `${log['@timestamp']}-${log.workflow?.execution_id}-${
+              log.workflow?.step_id || 'workflow'
+            }`,
+          timestamp: log['@timestamp'],
+          level: log.level,
+          message: log.message,
+          stepId: log.workflow?.step_id,
+          stepName: log.workflow?.step_name,
+          connectorType: log.workflow?.step_type,
+          duration: log.event?.duration,
+          additionalData: {
+            workflowId: log.workflow?.id,
+            workflowName: log.workflow?.name,
+            executionId: log.workflow?.execution_id,
+            event: log.event,
+            tags: log.tags,
+            error: log.error,
+          },
+        })),
+      total: result.total,
       limit: params.limit || 100,
       offset: params.offset || 0,
     };
