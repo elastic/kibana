@@ -89,9 +89,7 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
 
     return (
       <span
-        tabIndex={0}
         aria-label={INFINITE_RETENTION_LABEL}
-        role="status"
         style={{ display: 'inline-flex', alignItems: 'center' }}
       >
         <EuiIcon type="infinity" size="m" aria-hidden="true" />
