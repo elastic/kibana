@@ -8,14 +8,14 @@
 import { badRequest } from '@hapi/boom';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  GeneratedSignificantEventQuery,
+  SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import { Observable, from as fromRxjs, map } from 'rxjs';
+import { from as fromRxjs, map } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
@@ -27,7 +27,6 @@ import { SecurityError } from '../../../lib/streams/errors/security_error';
 import type { StreamsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
-import type { ServerSentEventBase } from '../../../../../../../../../src/platform/packages/shared/kbn-sse-utils';
 
 async function assertLicenseAndPricingTier(
   server: StreamsServer,
@@ -219,9 +218,7 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<
-    Observable<ServerSentEventBase<'generated_queries', { query: GeneratedSignificantEventQuery }>>
-  > => {
+  }): Promise<SignificantEventsGenerateResponse> => {
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({ request });
     await assertLicenseAndPricingTier(server, licensing);

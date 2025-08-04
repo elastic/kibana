@@ -20,11 +20,6 @@ import KQL_GUIDE from './prompts/kql_guide.text';
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
 
-export interface GeneratedSignificantEventQuery {
-  title: string;
-  kql: string;
-}
-
 interface Params {
   name: string;
   connectorId: string;
