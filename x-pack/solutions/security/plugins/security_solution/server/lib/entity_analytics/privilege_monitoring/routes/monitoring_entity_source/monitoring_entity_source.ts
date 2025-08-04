@@ -65,7 +65,7 @@ export const monitoringEntitySourceRoute = (
 
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           await privMonDataClient.scheduleNow();
-          
+
           const body = await client.init(request.body);
 
           return response.ok({ body });
