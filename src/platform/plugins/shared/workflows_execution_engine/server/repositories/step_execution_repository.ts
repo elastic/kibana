@@ -30,6 +30,10 @@ export class StepExecutionRepository {
    * @returns A promise that resolves when the document has been successfully indexed.
    */
   public async createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
+    if (!stepExecution.id) {
+      throw new Error('Step execution ID is required for creation');
+    }
+
     await this.esClient.index({
       index: this.indexName,
       id: stepExecution.id,

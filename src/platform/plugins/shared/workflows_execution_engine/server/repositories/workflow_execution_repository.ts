@@ -24,6 +24,10 @@ export class WorkflowExecutionRepository {
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
+    if (!workflowExecution.id) {
+      throw new Error('Workflow execution ID is required for creation');
+    }
+
     await this.esClient.index({
       index: this.indexName,
       id: workflowExecution.id,
