@@ -50,6 +50,18 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
 
+      // Disable failure store for logs-*
+      await synthtrace.createComponentTemplate({
+        name: 'synth.no-fs@custom',
+        dataStreamOptions: {
+          failure_store: {
+            enabled: false,
+          },
+        },
+      });
+      await synthtrace.createIndexTemplate(IndexTemplateName.NoFailureStore);
+
+      // Enable failure store only for logs-synth.2-*
       await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
       await synthtrace.createComponentTemplate({
         name: 'synth.2@custom',
@@ -97,6 +109,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     after(async () => {
       await synthtrace.clean();
       await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
+      await synthtrace.deleteIndexTemplate(IndexTemplateName.NoFailureStore);
+      await synthtrace.deleteComponentTemplate('synth.no-fs@custom');
       await synthtrace.deleteIndexTemplate(IndexTemplateName.Synht2);
       await synthtrace.deleteComponentTemplate('synth.2@custom');
       await synthtrace.deleteCustomPipeline('synth.2@pipeline');
