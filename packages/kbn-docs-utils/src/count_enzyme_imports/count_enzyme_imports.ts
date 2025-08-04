@@ -25,6 +25,5 @@ export async function countEnzymeImports(paths: string[]): Promise<EnzymeImportC
       count(content, /import\s+[^;]*?from\s+['"]enzyme['"]/g) +
       count(content, /require\(['"]enzyme['"]\)/g);
   });
-
   return { enzymeImportCount };
 }
