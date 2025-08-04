@@ -52294,23 +52294,47 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            streams:
-                              items:
-                                type: string
-                              type: array
+                            all:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
                           required:
-                            - streams
+                            - all
                       required:
                         - objects
                     - additionalProperties: false
                       type: object
                       properties:
-                        all:
+                        objects:
                           additionalProperties: false
                           type: object
-                          properties: {}
+                          properties:
+                            queries:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                required:
+                                  - id
+                              type: array
+                            routing:
+                              items:
+                                allOf:
+                                  - {}
+                                  - type: object
+                                    properties:
+                                      destination:
+                                        type: string
+                                    required:
+                                      - destination
+                              type: array
+                          required:
+                            - queries
+                            - routing
                       required:
-                        - all
+                        - objects
                 name:
                   type: string
                 version:
