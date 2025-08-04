@@ -6,13 +6,13 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { RuleMigrationsDataMigrationClient } from './rule_migrations_data_migration_client';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
 import type SearchApi from '@elastic/elasticsearch/lib/api/api/search';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -25,7 +25,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
     userName: 'testUser',
     profile_uid: 'testProfileUid',
   } as unknown as AuthenticatedUser;
-  const dependencies = {} as unknown as SiemRuleMigrationsClientDependencies;
+  const dependencies = {} as unknown as SiemMigrationsClientDependencies;
 
   beforeEach(() => {
     ruleMigrationsDataMigrationClient = new RuleMigrationsDataMigrationClient(
