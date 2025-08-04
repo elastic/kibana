@@ -53,7 +53,12 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
     toasts,
   } = useAssistantContext();
 
-  const { data: allPrompts, refetch: refetchPrompts, isFetched: promptsLoaded, isLoading: promptsLoading } = useFetchPrompts();
+  const {
+    data: allPrompts,
+    refetch: refetchPrompts,
+    isFetched: promptsLoaded,
+    isLoading: promptsLoading,
+  } = useFetchPrompts();
 
   const {
     data: conversations,

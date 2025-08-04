@@ -76,7 +76,9 @@ export const useSystemPromptUpdater = ({
   toasts,
 }: Params): SystemPromptUpdater => {
   // server equivalent
-  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>(DEFAULT_SYSTEM_PROMPT_SETTINGS);
+  const [systemPromptSettings, setSystemPromptSettings] = useState<SystemPromptSettings[]>(
+    DEFAULT_SYSTEM_PROMPT_SETTINGS
+  );
   // local updates
   const [systemPromptSettingsUpdates, setSystemPromptSettingsUpdates] = useState<
     SystemPromptSettings[]
@@ -110,7 +112,6 @@ export const useSystemPromptUpdater = ({
     filter,
   });
   useEffect(() => {
-
     const updateSystemPromptSettings = (prev: SystemPromptSettings[]) => {
       const updatedSettings = systemPrompts.map((p) => {
         const conversations = Object.values(data).filter(
@@ -126,11 +127,9 @@ export const useSystemPromptUpdater = ({
       return prev;
     };
 
-    setSystemPromptSettings(prev => updateSystemPromptSettings(prev));
-    setSystemPromptSettingsUpdates(prev => updateSystemPromptSettings(prev));
+    setSystemPromptSettings((prev) => updateSystemPromptSettings(prev));
+    setSystemPromptSettingsUpdates((prev) => updateSystemPromptSettings(prev));
   }, [data, systemPrompts]);
-
-
 
   const onSystemPromptSelect = useCallback(
     (systemPrompt?: SystemPromptSettings | string) => {
