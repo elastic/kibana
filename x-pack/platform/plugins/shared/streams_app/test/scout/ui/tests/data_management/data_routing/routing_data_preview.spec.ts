@@ -96,9 +96,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     }
   });
 
-  test.only('should allow updating the condition manually by syntax editor', async ({
-    pageObjects,
-  }) => {
+  test('should allow updating the condition manually by syntax editor', async ({ pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('logs.preview-test');
 
