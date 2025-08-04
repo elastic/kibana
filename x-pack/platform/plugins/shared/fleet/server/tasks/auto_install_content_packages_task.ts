@@ -166,7 +166,6 @@ export class AutoInstallContentPackagesTask {
         );
         this.discoveryMap = await this.getContentPackagesDiscoveryMap(soClient);
       }
-      // console.log(JSON.stringify(this.discoveryMap, null, 2));
 
       const installedPackages = await getInstalledPackages({
         savedObjectsClient: soClient,
@@ -297,11 +296,11 @@ export class AutoInstallContentPackagesTask {
             .map((dataset) => `"${dataset}"`)
             .join(',')})`
         : '';
-    const response = await esClient.esql.query({
-      query: `FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - ${this.intervalToEsql(
-        this.taskInterval
-      )} | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
-    });
+    const query = `FROM logs-*,metrics-*,traces-* 
+      | KEEP @timestamp, data_stream.dataset 
+      | WHERE @timestamp > NOW() - ${this.intervalToEsql(this.taskInterval)} 
+      | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
+    const response = await esClient.esql.query({ query });
     this.logger.debug(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
 
     const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
@@ -313,7 +312,7 @@ export class AutoInstallContentPackagesTask {
 
   private intervalToEsql(interval: string): string {
     const value = parseInt(interval, 10);
-    const unit = interval.includes('h') ? 'hours' : 'minutes';
+    const unit = interval.includes('h') ? 'hours' : interval.includes('m') ? 'minutes' : 'seconds';
     return `${value} ${unit}`;
   }
 
@@ -324,8 +323,6 @@ export class AutoInstallContentPackagesTask {
     const prerelease = await getPrereleaseFromSettings(soClient);
     const discoveryMap: DiscoveryMap = {};
     const registryItems = await Registry.fetchList({ prerelease, type });
-
-    // console.log(registryItems.map((item) => item.name));
 
     registryItems.forEach((item) => {
       if (item.discovery?.datasets) {
