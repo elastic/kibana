@@ -9,7 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
-import { useLoadSnapshots } from '../../public/application/services/http';
+import { useLoadRepositories, useLoadSnapshots } from '../../public/application/services/http';
 import { DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../public/application/lib';
 
 import * as fixtures from '../../test/fixtures';
@@ -26,6 +26,7 @@ import { pageHelpers, getRandomString } from './helpers';
  */
 jest.mock('../../public/application/services/http', () => ({
   useLoadSnapshots: jest.fn(),
+  useLoadRepositories: jest.fn(),
   setUiMetricServiceSnapshot: () => {},
   setUiMetricService: () => {},
 }));
@@ -67,12 +68,23 @@ describe('<SnapshotList />', () => {
       isLoading: false,
       data: {
         snapshots,
-        repositories: [REPOSITORY_NAME],
         policies: [],
         errors: {},
         total: snapshots.length,
       },
       resendRequest: () => {},
+    });
+    (useLoadRepositories as jest.Mock).mockReturnValue({
+      error: null,
+      isInitialRequest: false,
+      isLoading: false,
+      data: {
+        repositories: [
+          {
+            name: REPOSITORY_NAME,
+          },
+        ],
+      },
     });
   });
 

@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('visualize');
       await visualize.openSavedVisualization('A Pie');
       await common.navigateToApp('home');
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       await visChart.waitForVisualization();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Pie');
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       await visualize.openSavedVisualization('A Pie in another space');
 
       await spaceSelector.openSpacesNav();
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spaceSelector.expectHomePage('default');
 
       // default space
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       await visChart.waitForVisualization();
       const activeTitleDefaultSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleDefaultSpace).to.be('A Pie');
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spaceSelector.expectHomePage('another-space');
 
       // other space
-      await appsMenu.clickLink('Visualize Library');
+      await appsMenu.clickLink('Visualize library');
       await visChart.waitForVisualization();
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Pie in another space');

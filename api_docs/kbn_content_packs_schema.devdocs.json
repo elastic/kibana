@@ -74,7 +74,7 @@
         "label": "getEntryTypeByFile",
         "description": [],
         "signature": [
-          "(rootDir: string, filepath: string) => \"dashboard\" | \"index-pattern\" | \"lens\" | \"stream\""
+          "(rootDir: string, filepath: string) => \"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
         "deprecated": false,
@@ -1657,7 +1657,7 @@
         "label": "SupportedEntryType",
         "description": [],
         "signature": [
-          "\"dashboard\" | \"index-pattern\" | \"lens\" | \"stream\""
+          "\"dashboard\" | \"lens\" | \"index-pattern\" | \"stream\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
         "deprecated": false,

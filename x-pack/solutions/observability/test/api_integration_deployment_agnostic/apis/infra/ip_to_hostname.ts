@@ -21,10 +21,14 @@ export default function ipToHostNameTest({ getService }: DeploymentAgnosticFtrPr
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await supertestWithAdminScope.destroy();
     });
 

@@ -55,6 +55,7 @@ import {
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
   TOOLTIP,
+  ACKNOWLDEGED_ALERTS_FILTER_BTN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -290,6 +291,12 @@ export const selectAlertsHistogram = () => {
 
 export const selectAlertsTreemap = () => {
   cy.get(SELECT_TREEMAP).click();
+};
+
+export const goToAcknowledgedAlertsOnRuleDetailsPage = () => {
+  cy.get(ACKNOWLDEGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const goToAcknowledgedAlerts = () => {

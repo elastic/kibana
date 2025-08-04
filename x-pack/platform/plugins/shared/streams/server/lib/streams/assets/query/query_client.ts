@@ -122,6 +122,19 @@ export class QueryClient {
     await this.bulk(stream, [{ delete: { id: queryId } }]);
   }
 
+  public async deleteAll(stream: string) {
+    if (!this.isSignificantEventsEnabled) {
+      this.dependencies.logger.debug(
+        `Skipping deleteAll for stream "${stream}" because significant events feature is disabled.`
+      );
+      return;
+    }
+
+    const currentQueryLinks = await this.dependencies.assetClient.getAssetLinks(stream, ['query']);
+    const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
+    await this.bulk(stream, queriesToDelete);
+  }
+
   public async bulk(
     stream: string,
     operations: Array<{ index?: StreamQuery; delete?: { id: string } }>

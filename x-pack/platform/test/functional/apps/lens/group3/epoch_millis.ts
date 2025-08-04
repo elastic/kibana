@@ -15,14 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('epoch millis', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/lens/epoch_millis');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/lens/epoch_millis');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/epoch_millis.json'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/lens/epoch_millis');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/lens/epoch_millis');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/epoch_millis.json'
       );

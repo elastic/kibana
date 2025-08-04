@@ -24,6 +24,7 @@ import { SvlApiKeysProvider } from './svl_api_keys';
 import { SvlSearchCreateIndexPageProvider } from './svl_search_create_index_page';
 import { SvlSearchInferenceManagementPageProvider } from './svl_search_inference_management_page';
 import { SvlDataUsagePageProvider } from './svl_data_usage';
+import { SvlCustomRolesPageProvider } from './svl_custom_roles_page';
 import { CspDashboardPageProvider } from './csp_dashboard_page';
 import { AddCisIntegrationFormPageProvider } from './add_cis_integration_form_page';
 import { CspSecurityCommonProvider } from './security_common';
@@ -48,6 +49,7 @@ export const pageObjects = {
   svlSearchCreateIndexPage: SvlSearchCreateIndexPageProvider,
   svlSearchInferenceManagementPage: SvlSearchInferenceManagementPageProvider,
   svlDataUsagePage: SvlDataUsagePageProvider,
+  svlCustomRolesPage: SvlCustomRolesPageProvider,
   // Cloud Security Posture specific page objects
   cloudPostureDashboard: CspDashboardPageProvider,
   cisAddIntegration: AddCisIntegrationFormPageProvider,

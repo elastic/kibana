@@ -77,12 +77,17 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         {
           deepLinkId: 'searchPlayground',
           breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'svlPlaygroundPage',
+          pageTestSubject: 'playgroundsListPage',
         },
         {
           deepLinkId: 'serverlessConnectors',
           breadcrumbs: ['Build', 'Connectors'],
           pageTestSubject: 'svlSearchConnectorsPage',
+        },
+        {
+          deepLinkId: 'serverlessWebCrawlers',
+          breadcrumbs: ['Build', 'Web crawlers'],
+          pageTestSubject: 'serverlessSearchConnectorsTitle',
         },
         {
           deepLinkId: 'searchSynonyms',
@@ -154,7 +159,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
 
       await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
-      expect(await browser.getCurrentUrl()).contain('/app/search_playground/chat');
+      expect(await browser.getCurrentUrl()).contain('/app/search_playground');
     });
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
@@ -214,6 +219,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Connectors' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Web crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Query Rules' });
@@ -227,6 +233,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.openSection(
         'search_project_nav_footer.project_settings_project_nav'
       );
+      await solutionNavigation.sidenav.expectSectionOpen(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'home',
@@ -236,6 +245,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'elasticsearchIndexManagement',
         'searchPlayground',
         'serverlessConnectors',
+        'serverlessWebCrawlers',
         'relevance',
         'searchSynonyms',
         'searchQueryRules',

@@ -24,11 +24,13 @@ export default function ({ getService }: FtrProviderContext) {
         { space: spaceId }
       );
       await reportingAPI.initEcommerce();
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/archived_reports');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/reporting/archived_reports'
+      );
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
       await spacesService.delete(spaceId);
