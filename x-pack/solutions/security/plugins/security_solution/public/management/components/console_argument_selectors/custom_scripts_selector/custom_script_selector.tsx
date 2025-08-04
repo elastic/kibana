@@ -123,13 +123,31 @@ export const CustomScriptSelector = memo<
   }, [data, value]);
 
   useEffect(() => {
-    // TODO:PT implement useEffect()
-    //
-    //  working here: need to properly initialize the compnent when pre-selected values are used
-    //
-    //
-    //
-  }, []);
+    // For SentinelOne: If a `value` is set, but we have no `selectedOption`, then component
+    // might be getting initialized from either console input history or from a user's past action.
+    // Ensure that we set `selectedOption` once we get the list of scripts
+    if (agentType === 'sentinel_one' && value && !state?.selectedOption && data.length > 0) {
+      const preSelectedScript = data.find((script) => script.name === value);
+
+      // If script not found, then reset value/valueText
+      if (!preSelectedScript) {
+        onChange({
+          value: '',
+          valueText: '',
+          store: state,
+        });
+      } else {
+        onChange({
+          value,
+          valueText,
+          store: {
+            ...state,
+            selectedOption: preSelectedScript,
+          },
+        });
+      }
+    }
+  }, [agentType, data, onChange, state, value, valueText]);
 
   // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
   // This is a workaround to ensure the popover is not shown until the input is focused
