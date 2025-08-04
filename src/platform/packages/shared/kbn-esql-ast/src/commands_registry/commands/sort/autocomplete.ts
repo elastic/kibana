@@ -65,7 +65,7 @@ export async function autocomplete(
         expressionRoot: undefined,
         location: Location.SORT,
         context,
-        advanceCursorAfterInitialField: false,
+        advanceCursorAfterInitialColumn: false,
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
       });
     }
