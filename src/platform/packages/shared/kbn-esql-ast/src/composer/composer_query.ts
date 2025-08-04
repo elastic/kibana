@@ -13,7 +13,12 @@ import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
 import { processTemplateHoles } from './util';
 import { Builder } from '../builder';
 import type { ESQLAstQueryExpression } from '../types';
-import type { ComposerQueryTagHole, ComposerSortShorthand, EsqlRequest } from './types';
+import type {
+  ComposerQueryTagHole,
+  ComposerSortShorthand,
+  EsqlRequest,
+  ComposerQueryTag,
+} from './types';
 
 export class ComposerQuery {
   constructor(
@@ -128,6 +133,35 @@ export class ComposerQuery {
 
     return this.pipe`SORT ${nodes}`;
   };
+
+  public readonly where: ComposerQueryTag = (templateOrQuery: unknown, ...holes: unknown[]) => {
+    const tag = ((_templateOrQuery, ..._holes: ComposerQueryTagHole[]) => {
+      if (Array.isArray(_holes)) processTemplateHoles(_holes, this.params);
+
+      const expression = synth.exp(
+        _templateOrQuery as TemplateStringsArray,
+        ...(_holes as synth.SynthTemplateHole[])
+      );
+
+      return this.pipe`WHERE ${expression}`;
+    }) as ComposerQueryTag;
+
+    if (Array.isArray(templateOrQuery)) {
+      return tag(templateOrQuery as any, ...(holes as ComposerQueryTagHole[]));
+    }
+
+    return tag as any;
+  };
+
+  public inlineParams(): this {
+    // TODO: Replace all param AST nodes. Throws if there is not enough values?
+    throw new Error('not implemented');
+  }
+
+  public command() {
+    // TODO: Select a command from the query.
+    throw new Error('not implemented');
+  }
 
   /**
    * Prints the query to a string in a specified format.

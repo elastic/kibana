@@ -30,7 +30,9 @@ describe('.pipe``', () => {
 
     expect(query.print('basic')).toBe('FROM kibana_ecommerce_index');
 
-    query.pipe`WHERE foo > 42`.pipe`EVAL a = 123`;
+    query.pipe`
+      WHERE foo > 42`.pipe`
+      EVAL a = 123`;
 
     expect(query.print('basic')).toBe(
       'FROM kibana_ecommerce_index | WHERE foo > 42 | EVAL a = 123'
@@ -194,6 +196,30 @@ describe('high-level helpers', () => {
         // @ts-expect-error - TypeScript types do not allow empty .sort() call
         query.sort();
       }).toThrow();
+    });
+  });
+
+  describe('.where``', () => {
+    test('appends command to the end', () => {
+      const query = esql`FROM a`;
+
+      expect(query.print('basic')).toBe('FROM a');
+
+      query.where`abc > 123 AND xyz < 456`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE abc > 123 AND xyz < 456');
+    });
+
+    test('can specify a parameter', () => {
+      const query = esql`FROM a`;
+
+      expect(query.print('basic')).toBe('FROM a');
+
+      const param = 123;
+
+      query.where`abc > fn(${{ param }})`;
+
+      expect(query.print('basic')).toBe('FROM a | WHERE abc > FN(?param)');
     });
   });
 });
