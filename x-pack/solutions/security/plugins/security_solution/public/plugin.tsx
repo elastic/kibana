@@ -227,6 +227,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
+
         const assistantManagementApp = management?.sections.section.kibana.getApp(
           'securityAiAssistantManagement'
         );
@@ -310,6 +311,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
         configurations: new subPluginClasses.Configurations(),
+        reports: new subPluginClasses.Reports(),
       };
     }
     return this._subPlugins;
@@ -344,6 +346,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
       configurations: subPlugins.configurations.start(),
+      reports: subPlugins.reports.start(),
     };
   }
 
