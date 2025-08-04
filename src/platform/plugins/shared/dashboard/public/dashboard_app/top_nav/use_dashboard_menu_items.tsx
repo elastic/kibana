@@ -221,7 +221,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.add,
         id: 'add',
         iconType: 'plusInCircle',
-        testId: 'dashboardAddButton',
+        testId: 'dashboardAddTopNavButton',
         disableButton: disableTopNav,
         run: (anchorElement: HTMLElement) =>
           ShowAddMenu({ dashboardApi, anchorElement, coreServices }),

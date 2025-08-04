@@ -75,7 +75,7 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
 
     async assertLogsAiopsSectionExists(expectExist = true) {
       await retry.tryForTime(60 * 1000, async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('logs-aiops', expectExist);
       });
     },
@@ -103,7 +103,7 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
         aiopsChangePointChart: 'Change point detection',
       };
       await retry.tryForTime(60 * 1000, async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await testSubjects.existOrFail('dashboardPanelSelectionFlyout', { timeout: 2000 });
 
         await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('logs-aiops');

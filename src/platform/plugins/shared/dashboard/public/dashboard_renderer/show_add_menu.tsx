@@ -26,8 +26,10 @@ import {
   getControlButtonTitle,
   getAddESQLControlButtonTitle,
   getAddTimeSliderControlButtonTitle,
+  getCreateVisualizationButtonTitle,
 } from '../dashboard_app/_dashboard_app_strings';
 import { uiActionsService } from '../services/kibana_services';
+import { i18n } from '@kbn/i18n';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -62,16 +64,22 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
       id: 0,
       items: [
         {
-          name: 'Create a new visualization',
+          id: 'dashboardCreateNewVisButton',
+          name: getCreateVisualizationButtonTitle(),
           icon: 'lensApp',
+          'data-test-subj': 'dashboardCreateNewVisButton',
           onClick: async () => {
             await executeAddLensPanelAction(dashboardApi);
             closePopover();
           },
         },
         {
-          name: 'Add a panel',
+          id: 'dashboardOpenAddPanelFlyoutButton',
+          name: i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
+            defaultMessage: 'Add panel',
+          }),
           icon: 'plusInCircle',
+          'data-test-subj': 'dashboardOpenAddPanelFlyoutButton',
           onClick: () => {
             const overlayRef = coreServices.overlays.openFlyout(
               toMountPoint(
@@ -110,7 +118,9 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           },
         },
         {
-          name: 'Add a collapsible section',
+          name: i18n.translate('dashboard.solutionToolbar.addSectionButtonLabel', {
+            defaultMessage: 'Add collapsible section',
+          }),
           icon: 'section',
           onClick: () => {
             dashboardApi.addNewSection();
@@ -118,12 +128,17 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           },
         },
         {
-          name: 'Add a control',
+          name: i18n.translate('dashboard.solutionToolbar.addControlButtonLabel', {
+            defaultMessage: 'Add control',
+          }),
           icon: 'controlsHorizontal',
           panel: 1,
         },
         {
-          name: 'Add from library',
+          id: 'addFromLibraryButton',
+          name: i18n.translate('sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
+            defaultMessage: 'Add from library',
+          }),
           icon: 'folderOpen',
           onClick: () => {
             addFromLibrary(dashboardApi);
