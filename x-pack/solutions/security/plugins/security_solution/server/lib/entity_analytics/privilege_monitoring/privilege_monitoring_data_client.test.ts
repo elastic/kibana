@@ -22,10 +22,12 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
 } from './elasticsearch/pipelines/event_ingested';
 
+const mockScheduleNow = jest.fn().mockResolvedValue(undefined);
 jest.mock('./tasks/privilege_monitoring_task', () => {
   return {
     startPrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
     removePrivilegeMonitoringTask: jest.fn().mockResolvedValue(undefined),
+    scheduleNow: () => mockScheduleNow(),
   };
 });
 
@@ -344,6 +346,44 @@ describe('Privilege Monitoring Data Client', () => {
       });
       const result = await dataClient.disable();
       expect(result.status).toBe('disabled');
+    });
+  });
+
+  describe('scheduleNow', () => {
+    it('should schedule the privilege monitoring task to run immediately', async () => {
+      Object.defineProperty(dataClient, 'engineClient', {
+        value: {
+          find: jest.fn().mockResolvedValue({
+            total: 1,
+            saved_objects: [{ attributes: { status: 'started' } }],
+          }),
+        },
+      });
+
+      await dataClient.scheduleNow();
+
+      expect(mockScheduleNow).toHaveBeenCalled();
+      expect(auditMock.log).toHaveBeenCalled();
+    });
+    it('should not schedule if status is not started', async () => {
+      Object.defineProperty(dataClient, 'engineClient', {
+        value: {
+          find: jest.fn().mockResolvedValue({
+            total: 1,
+            saved_objects: [{ attributes: { status: 'stopped' } }],
+          }),
+        },
+      });
+      await expect(dataClient.scheduleNow()).rejects.toThrow(
+        'The Privileged Monitoring Engine must be enabled to schedule a run. Current status:'
+      );
+    });
+
+    it('should not schedule if taskManager is not available', async () => {
+      const { taskManager, ...optsWithoutTaskManager } = defaultOpts;
+      dataClient = new PrivilegeMonitoringDataClient(optsWithoutTaskManager);
+
+      await expect(dataClient.scheduleNow()).rejects.toThrow('Task Manager is not available');
     });
   });
 });

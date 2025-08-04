@@ -21,6 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WorkflowYaml } from '@kbn/workflows';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
@@ -29,10 +32,19 @@ import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../features/workflow_visual_editor/ui').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
+
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
-  const { data: workflow, isLoading: isLoadingWorkflow, error } = useWorkflowDetail(id);
-
+  const {
+    data: workflow,
+    isLoading: isLoadingWorkflow,
+    error: workflowError,
+  } = useWorkflowDetail(id);
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
@@ -52,6 +64,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
+
+  const workflowYamlObject = useMemo(
+    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
+    [workflowYaml]
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -125,12 +142,21 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <WorkflowEditor
-            workflowId={workflow?.id ?? ''}
-            value={workflowYaml}
-            onChange={handleChange}
-            hasChanges={hasChanges}
-          />
+          {workflow && (
+            <WorkflowEditor
+              workflowId={workflow?.id ?? ''}
+              value={workflowYaml}
+              onChange={handleChange}
+              hasChanges={hasChanges}
+            />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {workflowYamlObject?.data && (
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <WorkflowVisualEditor workflow={workflowYamlObject.data as WorkflowYaml} />
+            </React.Suspense>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -146,7 +172,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return <EuiLoadingSpinner />;
   }
 
-  if (error) {
+  if (workflowError) {
     return <EuiText>Error loading workflow</EuiText>;
   }
 

@@ -563,6 +563,10 @@ const expectAssetsInstalled = ({
     expect(sortedRes).eql({
       installed_kibana: [
         {
+          id: 'sample_alert_rule',
+          type: 'alert',
+        },
+        {
           id: 'sample_csp_rule_template',
           type: 'csp-rule-template',
         },
@@ -755,6 +759,11 @@ const expectAssetsInstalled = ({
         {
           id: 'bd5ff3c5-655e-5385-9918-b60ff3040aad',
           path: 'all_assets-0.1.0/img/logo_overrides_64_color.svg',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: 'af688395-0e06-5c7f-9584-05ffba778108',
+          path: 'all_assets-0.1.0/kibana/alert/sample_alert_rule.json',
           type: 'epm-packages-assets',
         },
         {
