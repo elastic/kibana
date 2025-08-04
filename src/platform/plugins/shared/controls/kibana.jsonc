@@ -17,10 +17,10 @@
       "unifiedSearch",
       "uiActions",
       "contentManagement",
-      "expressions"
+      "expressions",
+      "kibanaReact"
     ],
     "optionalPlugins": ["fieldsMetadata", "usageCollection"],
-    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }
