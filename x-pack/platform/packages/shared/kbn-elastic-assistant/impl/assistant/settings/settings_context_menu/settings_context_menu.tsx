@@ -144,6 +144,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
+      [selectedConversation]
+    );
+
     const items = useMemo(
       () => [
         <EuiContextMenuItem
@@ -307,20 +312,23 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
-          >
-            {i18n.RESET_CONVERSATION}
-          </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiTheme.colors.textDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -337,6 +345,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         showDestroyModal,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
