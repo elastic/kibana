@@ -69,6 +69,7 @@ import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
+import type { Reports } from './reports';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
@@ -233,6 +234,7 @@ export interface SubPlugins {
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
+  reports: Reports;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
@@ -254,6 +256,7 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
+  reports: ReturnType<Reports['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
