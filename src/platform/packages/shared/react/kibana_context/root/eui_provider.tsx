@@ -11,6 +11,7 @@ import * as Rx from 'rxjs';
 import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
@@ -73,6 +74,12 @@ utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
 
+const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
+  EuiFlyout: {
+    includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+  },
+};
+
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
@@ -130,6 +137,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         utilityClasses: globalStyles,
         highContrastMode,
         theme: _theme,
+        componentDefaults,
       }}
     >
       {children}
