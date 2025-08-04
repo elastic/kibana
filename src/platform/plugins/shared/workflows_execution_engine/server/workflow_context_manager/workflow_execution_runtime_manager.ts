@@ -12,6 +12,7 @@ import { graphlib } from '@dagrejs/dagre';
 import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import { IWorkflowContextLogger } from './types';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecution: EsWorkflowExecution;
@@ -44,6 +45,7 @@ export class WorkflowExecutionRuntimeManager {
   private stepStates: Map<string, Record<string, any> | undefined> = new Map();
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
+  private contextManager?: IWorkflowContextLogger;
 
   public workflowExecution: EsWorkflowExecution;
   private workflowExecutionRepository: WorkflowExecutionRepository;
@@ -57,6 +59,13 @@ export class WorkflowExecutionRuntimeManager {
     this.stepExecutionRepository = workflowExecutionRuntimeManagerInit.stepExecutionRepository;
     this.workflowExecutionGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
+  }
+
+  /**
+   * Set the logger instance - called after construction to avoid circular dependencies
+   */
+  public setLogger(logger: IWorkflowContextLogger): void {
+    this.contextManager = logger;
   }
 
   public getWorkflowExecutionStatus(): ExecutionStatus {
@@ -118,6 +127,11 @@ export class WorkflowExecutionRuntimeManager {
     const nodeId = stepId;
     const workflowStepExecutionId = `${workflowRunId}-${nodeId}`;
     const stepStartedAt = new Date();
+
+    // Get step details from the graph
+    const stepNode = this.workflowExecutionGraph.node(stepId) as any;
+    const stepName = stepNode?.name || stepId;
+
     const stepExecution = {
       id: workflowStepExecutionId,
       workflowId, // Replace with actual workflow ID
@@ -127,6 +141,9 @@ export class WorkflowExecutionRuntimeManager {
       status: ExecutionStatus.RUNNING,
       startedAt: stepStartedAt.toISOString(),
     } as Partial<EsWorkflowStepExecution>;
+
+    // Log step start using context manager
+    this.contextManager?.logStepStart(stepId, stepName);
 
     await this.stepExecutionRepository.createStepExecution(stepExecution);
     this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
@@ -155,6 +172,13 @@ export class WorkflowExecutionRuntimeManager {
       error: stepResult.error,
       output: stepResult.output,
     } as Partial<EsWorkflowStepExecution>;
+
+    // Log step completion using context manager
+    const success = !stepResult.error;
+    const stepNode = this.workflowExecutionGraph.node(stepId) as any;
+    const stepName = stepNode?.name || stepId;
+    this.contextManager?.logStepComplete(stepId, stepName, success);
+
     await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
     this.stepExecutions.set(stepId, {
       ...startedStepExecution,
