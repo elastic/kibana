@@ -60,23 +60,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(getElements(response).length).toBe(0);
       });
 
-      it('returns an empty list (api v2)', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map`,
-          params: {
-            query: {
-              start: new Date(start).toISOString(),
-              end: new Date(end).toISOString(),
-              environment: 'ENVIRONMENT_ALL',
-              useV2: true,
-            },
-          },
-        });
-
-        expect(response.status).toBe(200);
-        expect(getSpans(response).length).toBe(0);
-      });
-
       describe('/internal/apm/service-map/service/{serviceName} without data', () => {
         let response: ServiceNodeResponse;
         before(async () => {
@@ -173,7 +156,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await synthtraceEsClient.clean();
         });
 
-        it('returns service map elements', async () => {
+        it('returns service map spans', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/service-map',
             params: {
@@ -181,23 +164,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 start: new Date(start).toISOString(),
                 end: new Date(end).toISOString(),
                 environment: 'ENVIRONMENT_ALL',
-              },
-            },
-          });
-
-          expect(response.status).toBe(200);
-          expect(getElements(response).length).toBeGreaterThan(0);
-        });
-
-        it('returns service map spans (api v2)', async () => {
-          const response = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/service-map',
-            params: {
-              query: {
-                start: new Date(start).toISOString(),
-                end: new Date(end).toISOString(),
-                environment: 'ENVIRONMENT_ALL',
-                useV2: true,
               },
             },
           });
@@ -229,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      describe('span links (api v2)', () => {
+      describe('span links', () => {
         before(async () => {
           synthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
@@ -322,7 +288,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 start: new Date(start).toISOString(),
                 end: new Date(end).toISOString(),
                 environment: 'ENVIRONMENT_ALL',
-                useV2: true,
               },
             },
           });

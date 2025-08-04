@@ -121,7 +121,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(() => apmSynthtraceEsClient.clean());
 
-      // FLAKY: https://github.com/elastic/kibana/issues/176976
       describe('compare latency value between service inventory and service maps', () => {
         before(async () => {
           [latencyTransactionValues, latencyMetricValues] = await Promise.all([

@@ -84,31 +84,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(status).to.be(200);
 
-      const { nodes, edges } = partitionElements(getElements({ body }));
-
-      expect(getIds(nodes)).to.eql([
-        '>elasticsearch',
-        '>redis',
-        'synthbeans-go',
-        'synthbeans-java',
-        'synthbeans-node',
-      ]);
-      expect(getIds(edges)).to.eql([
-        'synthbeans-go~>elasticsearch',
-        'synthbeans-go~>redis',
-        'synthbeans-go~synthbeans-java',
-        'synthbeans-go~synthbeans-node',
-        'synthbeans-java~synthbeans-go',
-        'synthbeans-node~>redis',
-        'synthbeans-node~synthbeans-java',
-      ]);
-    });
-
-    it('returns full service map when no kuery is defined (api v2)', async () => {
-      const { status, body } = await callApi({ query: { useV2: true } });
-
-      expect(status).to.be(200);
-
       const spans = getSpans({ body });
 
       const exitSpansConnections = extractExitSpansConnections(spans);
