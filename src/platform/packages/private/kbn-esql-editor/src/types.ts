@@ -135,6 +135,9 @@ export interface ESQLEditorDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
+  config: {
+    isDevMode: boolean;
+  };
 }
 
 export enum HistoryTabId {

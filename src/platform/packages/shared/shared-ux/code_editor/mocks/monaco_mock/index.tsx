@@ -19,6 +19,7 @@ function createEditorInstance() {
   const didHideListeners: Array<(e?: unknown) => void> = [];
   let placeholderDiv: undefined | HTMLDivElement;
   let areSuggestionsVisible = false;
+  let isInspectTokensWidgetVisible = false;
 
   /**
    * Mocks for monaco editor API
@@ -71,6 +72,7 @@ function createEditorInstance() {
     // Helpers for our tests
     __helpers__: {
       areSuggestionsVisible: () => areSuggestionsVisible,
+      isInspectTokensWidgetVisible: () => isInspectTokensWidgetVisible,
       getPlaceholderRef: (div: HTMLDivElement) => {
         placeholderDiv = div;
       },
@@ -82,6 +84,10 @@ function createEditorInstance() {
         if (e.keyCode === monaco.KeyCode.Escape && areSuggestionsVisible) {
           editorInstanceMethods.__helpers__.hideSuggestions();
         }
+        // Close the inspect tokens when hitting the ESC key
+        if (e.keyCode === monaco.KeyCode.Escape && isInspectTokensWidgetVisible) {
+          editorInstanceMethods.__helpers__.hideInspectTokensWidget();
+        }
       }) as KeyboardEventHandler,
       showSuggestions: () => {
         areSuggestionsVisible = true;
@@ -89,6 +95,14 @@ function createEditorInstance() {
       },
       hideSuggestions: () => {
         areSuggestionsVisible = false;
+        didHideListeners.forEach((listener) => listener());
+      },
+      showInspectTokensWidget: () => {
+        isInspectTokensWidgetVisible = true;
+        didShowListeners.forEach((listener) => listener());
+      },
+      hideInspectTokensWidget: () => {
+        isInspectTokensWidgetVisible = false;
         didHideListeners.forEach((listener) => listener());
       },
     },

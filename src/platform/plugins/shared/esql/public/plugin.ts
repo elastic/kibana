@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -62,6 +62,8 @@ export interface EsqlPluginStart {
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
   private indexManagement?: IndexManagementPluginSetup;
 
+  constructor(private ctx: PluginInitializerContext) {}
+
   public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
     this.indexManagement = indexManagement;
 
@@ -84,6 +86,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
+    const isDevMode = this.ctx.env.mode.dev;
 
     // Register triggers
     uiActions.addTriggerActionAsync(
@@ -182,6 +185,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
+      isDevMode,
       this.indexManagement,
       fieldsMetadata,
       usageCollection
