@@ -24,6 +24,9 @@ export const FIELD_DEFINITION_TYPES = [
   'float',
   'short',
   'geo_point',
+  'wildcard',
+  'nested',
+  'version',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];

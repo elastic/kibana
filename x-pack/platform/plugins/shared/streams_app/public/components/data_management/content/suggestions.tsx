@@ -85,32 +85,36 @@ export function Suggestions({
         <EuiLoadingSpinner />
       ) : (
         suggestionsResponse?.suggestions.map((suggestion) => (
-          <EuiFlexGroup key={suggestion} gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <b>{suggestion}</b>
-            </EuiFlexItem>
+          <>
+            <EuiFlexGroup key={suggestion} gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <b>{suggestion}</b>
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="text"
-                size="s"
-                isLoading={isExporting}
-                isDisabled={isExporting}
-                onClick={async () => {
-                  setIsExporting(true);
-                  try {
-                    const file = await exportPackage(suggestion);
-                    onPackageExport(file);
-                  } catch (error) {
-                  } finally {
-                    setIsExporting(false);
-                  }
-                }}
-              >
-                Preview
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="text"
+                  size="s"
+                  isLoading={isExporting}
+                  isDisabled={isExporting}
+                  onClick={async () => {
+                    setIsExporting(true);
+                    try {
+                      const file = await exportPackage(suggestion);
+                      onPackageExport(file);
+                    } catch (error) {
+                    } finally {
+                      setIsExporting(false);
+                    }
+                  }}
+                >
+                  Preview
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="s" />
+          </>
         ))
       )}
     </>

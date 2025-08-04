@@ -94,6 +94,24 @@ export const FIELD_TYPE_MAP = {
     }),
     readonly: false,
   },
+  wildcard: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableWildcardType', {
+      defaultMessage: 'Wildcard',
+    }),
+    readonly: false,
+  },
+  nested: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableNestedType', {
+      defaultMessage: 'Nested',
+    }),
+    readonly: false,
+  },
+  version: {
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableVersionType', {
+      defaultMessage: 'Version',
+    }),
+    readonly: false,
+  },
 } as const;
 
 export type FieldTypeOption = keyof typeof FIELD_TYPE_MAP;
