@@ -57,7 +57,7 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {canCancel || true ? (
+          {canCancel ? (
             <EuiButtonIcon
               aria-label={labels.cancel}
               data-test-subj="onechatAppConversationInputFormCancelButton"
