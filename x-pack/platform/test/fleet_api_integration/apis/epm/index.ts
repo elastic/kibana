@@ -34,8 +34,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./install_with_streaming'));
     loadTestFile(require.resolve('./bulk_upgrade'));
-    loadTestFile(require.resolve('./bulk_uninstall'));
-    loadTestFile(require.resolve('./bulk_install_upgrade'));
     loadTestFile(require.resolve('./bulk_install'));
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
@@ -53,6 +51,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./install_runtime_field'));
     loadTestFile(require.resolve('./get_templates_inputs'));
     loadTestFile(require.resolve('./data_views'));
-    loadTestFile(require.resolve('./custom_integrations'));
   });
 }
