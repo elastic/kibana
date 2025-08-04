@@ -187,6 +187,9 @@ The following variables are specific to the {es} query rule:
 `context.date`::
 (string) The date, in ISO format, that the rule met the condition. For example: `2024-04-30T00:55:42.765Z`.
 
+`context.grouping`:: 
+The object containing groups that are reporting data.
+
 `context.hits`::
 (array of objects) The most recent documents that matched the query.
 Using the https://mustache.github.io/[Mustache] template array syntax, you can iterate 

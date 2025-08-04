@@ -23,6 +23,7 @@ import { UserProfilePageProvider } from './user_profile_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { GraphPageObject } from './graph_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
+import { BannersPageObject } from './banners_page';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -45,4 +46,5 @@ export const pageObjects = {
   upgradeAssistant: UpgradeAssistantFlyoutObject,
   userProfiles: UserProfilePageProvider,
   maintenanceWindows: MaintenanceWindowsPageProvider,
+  banners: BannersPageObject,
 };

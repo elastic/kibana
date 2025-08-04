@@ -99,6 +99,11 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
 
     await this.retry.waitFor(
