@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EnterIfNodeImpl } from './enter_if_node_impl';
-export { EnterConditionBranchNodeImpl } from './enter_condition_branch_node_impl';
-export { ExitConditionBranchNodeImpl } from './exit_condition_branch_node_impl';
-export { ExitIfNodeImpl } from './exit_if_node_impl';
+import { StepImplementation } from '../step_base';
+import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+
+export class EnterConditionBranchNodeImpl implements StepImplementation {
+  constructor(private workflowState: WorkflowExecutionRuntimeManager) {}
+
+  public async run(): Promise<void> {
+    this.workflowState.goToNextStep();
+  }
+}

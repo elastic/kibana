@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterIfNode } from '@kbn/workflows';
+import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -16,20 +16,29 @@ export class EnterIfNodeImpl implements StepImplementation {
 
   public async run(): Promise<void> {
     await this.workflowState.startStep(this.step.id);
-    const evaluatedConditionResult = this.step.configuration.condition; // must be real condition from step definition
+    const successors: any[] = this.workflowState.getNodeSuccessors(this.step.id);
 
-    let runningBranch: string[];
-    let notRunningBranch: string[];
+    const thenNode = successors?.find((node) =>
+      Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode;
+    // multiple else-if could be implemented similarly to thenNode
+    const elseNode = successors?.find(
+      (node) => !Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode;
+
+    const evaluatedConditionResult =
+      typeof thenNode.condition === 'boolean'
+        ? thenNode.condition
+        : thenNode.condition?.toLowerCase() === 'true'; // must be real condition from step definition)
 
     if (evaluatedConditionResult) {
-      runningBranch = this.step.trueNodeIds;
-      notRunningBranch = this.step.falseNodeIds;
+      this.workflowState.goToStep(thenNode.id);
+    } else if (elseNode) {
+      this.workflowState.goToStep(elseNode.id);
     } else {
-      runningBranch = this.step.falseNodeIds;
-      notRunningBranch = this.step.trueNodeIds;
+      // in the case when the condition evaluates to false and no else branch is defined
+      // we go straight to the exit node skipping "then" branch
+      this.workflowState.goToStep(this.step.exitNodeId);
     }
-
-    await this.workflowState.skipSteps(notRunningBranch);
-    this.workflowState.goToStep(runningBranch[0]);
   }
 }

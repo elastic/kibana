@@ -72,6 +72,16 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecution.status;
   }
 
+  public getNodeSuccessors(nodeId: string): any[] {
+    const successors = this.workflowExecutionGraph.successors(nodeId);
+
+    if (!successors) {
+      return [];
+    }
+
+    return successors.map((successorId) => this.workflowExecutionGraph.node(successorId)) as any[];
+  }
+
   public getCurrentStep(): any {
     // must be a proper type
     if (this.currentStepIndex < 0 || this.currentStepIndex >= this.topologicalOrder.length) {
