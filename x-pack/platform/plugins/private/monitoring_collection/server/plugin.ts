@@ -164,16 +164,22 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       meterReaders.push(this.prometheusExporter);
     }
 
-    const meterProvider = new metrics.MeterProvider({
-      resource: resources.resourceFromAttributes({
-        [ATTR_SERVICE_NAME]: serviceName,
-        [ATTR_SERVICE_INSTANCE_ID]: serviceInstanceId,
-        [ATTR_SERVICE_VERSION]: serviceVersion,
-      }),
-      readers: meterReaders,
-    });
+    // TODO: Figure out how to make this compatible with the meter provider registered in @kbn/telemetry
+    // * A potential idea is to use a LateBindingMeterProvider similar to the LateBindingSpanProcessor.
+    // * Another one is to register these readers on the global meter provider by intercepting this config in @kbn/telemetry
+    // Related issue: https://github.com/open-telemetry/opentelemetry-js/issues/4112
+    if (meterReaders.length > 0) {
+      const meterProvider = new metrics.MeterProvider({
+        resource: resources.resourceFromAttributes({
+          [ATTR_SERVICE_NAME]: serviceName,
+          [ATTR_SERVICE_INSTANCE_ID]: serviceInstanceId,
+          [ATTR_SERVICE_VERSION]: serviceVersion,
+        }),
+        readers: meterReaders,
+      });
 
-    api.metrics.setGlobalMeterProvider(meterProvider);
+      api.metrics.setGlobalMeterProvider(meterProvider);
+    }
   }
 
   start() {}

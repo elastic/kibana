@@ -17,6 +17,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
+import pRetry from 'p-retry';
 import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import {
   legacySyntheticsMonitorTypeSingle,
@@ -102,7 +103,7 @@ export class SyncPrivateLocationMonitorsTask {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
-      const allPrivateLocations = await getPrivateLocations(soClient);
+      const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
       const { totalMWs, totalParams, hasDataChanged } = await this.hasAnyDataChanged({
         soClient,
         taskInstance,
@@ -476,19 +477,28 @@ export class SyncPrivateLocationMonitorsTask {
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
   server,
+  retries = 5,
 }: {
   server: SyntheticsServerSetup;
+  retries?: number;
 }) => {
-  const {
-    logger,
-    pluginsStart: { taskManager },
-  } = server;
   try {
-    logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
-    await taskManager.runSoon(TASK_ID);
-    logger.debug(`Synthetics sync private location task scheduled successfully`);
+    await pRetry(
+      async () => {
+        const {
+          logger,
+          pluginsStart: { taskManager },
+        } = server;
+        logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
+        await taskManager.runSoon(TASK_ID);
+        logger.debug(`Synthetics sync private location task scheduled successfully`);
+      },
+      {
+        retries,
+      }
+    );
   } catch (error) {
-    logger.error(
+    server.logger.error(
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
       { error }
     );
