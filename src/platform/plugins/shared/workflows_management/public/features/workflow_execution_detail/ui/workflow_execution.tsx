@@ -25,10 +25,10 @@ import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkf
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
 
-interface WorkflowExecutionProps {
+export interface WorkflowExecutionProps {
   workflowExecutionId: string;
   workflowYaml: string;
   fields?: Array<keyof EsWorkflowStepExecution>;
