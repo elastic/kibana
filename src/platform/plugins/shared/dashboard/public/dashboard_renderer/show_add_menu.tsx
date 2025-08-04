@@ -109,7 +109,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
                   overlayRef.close();
                   // Focus the anchor element after closing the flyout
                   setTimeout(() => anchorElement.focus(), 0);
-                }
+                },
               }
             );
 
