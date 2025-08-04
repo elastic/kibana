@@ -158,7 +158,11 @@ export const useESQLVariables = ({
     const savedControlGroupState = JSON.parse(
       savedSearchState?.controlGroupJson || '{}'
     ) as ControlPanelsState<ESQLControlState>;
-    return currentTab.controlGroupState ?? savedControlGroupState;
+    const currentControlGroupState =
+      currentTab.controlGroupState && Object.keys(currentTab.controlGroupState).length > 0
+        ? currentTab.controlGroupState
+        : savedControlGroupState;
+    return currentControlGroupState;
   }, [currentTab, savedSearchState]);
 
   return {
