@@ -18,6 +18,7 @@ import type {
   ESQLSource,
 } from '../../types';
 import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
+import { getMaxMinNumberOfParams } from './expressions';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -92,6 +93,31 @@ Expected one of:
             fn: out.fn,
             numArgs: out.numArgs,
             passedArgs: out.passedArgs,
+          },
+        }),
+      };
+    case 'wrongNumberArgsVariadic':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
+          defaultMessage:
+            '[{fn}] expected {expectedMin}-{expectedMax} arguments, but got {actual}.',
+          values: {
+            fn: out.fn.toUpperCase(),
+            expectedMin: out.expectedMin,
+            expectedMax: out.expectedMax,
+            actual: out.actual,
+          },
+        }),
+      };
+    case 'wrongNumberArgsExact':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsExact', {
+          defaultMessage:
+            '[{fn}] expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
+          values: {
+            fn: out.fn.toUpperCase(),
+            expected: out.expected,
+            actual: out.actual,
           },
         }),
       };
@@ -515,4 +541,23 @@ export const errors = {
       name: fn.name,
       locationName,
     }),
+
+  wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
+    const { min, max } = getMaxMinNumberOfParams(definition);
+    const arity = fn.args.length;
+    if (min === max) {
+      return errors.byId('wrongNumberArgsExact', fn.location, {
+        fn: fn.name,
+        expected: min,
+        actual: fn.args.length,
+      });
+    } else {
+      return errors.byId('wrongNumberArgsVariadic', fn.location, {
+        fn: fn.name,
+        expectedMin: min,
+        expectedMax: max,
+        actual: arity,
+      });
+    }
+  },
 };

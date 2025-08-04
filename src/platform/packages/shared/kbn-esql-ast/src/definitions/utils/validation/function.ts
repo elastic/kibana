@@ -49,6 +49,7 @@ import {
 import { getColumnExists, getQuotedColumnName } from '../columns';
 import {
   getExpressionType,
+  getMaxMinNumberOfParams,
   getParamAtPosition,
   getSignaturesWithMatchingArity,
 } from '../expressions';
@@ -113,6 +114,12 @@ export function validateFunctionNew({
   const { displayName, location } = getFunctionLocation(fn, parentCommand);
   if (!definition.locationsAvailable.includes(location)) {
     return [errors.functionNotAllowedHere(fn, displayName)];
+  }
+
+  const { min, max } = getMaxMinNumberOfParams(definition);
+  const arity = fn.args.length;
+  if (arity < min || arity > max) {
+    return [errors.wrongNumberArgs(fn, definition)];
   }
 
   const argTypes = fn.args.map((node) =>
@@ -364,25 +371,6 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
-}
-
-/**
- * Returns the maximum and minimum number of parameters allowed by a function
- *
- * Used for too-many, too-few arguments validation
- */
-export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
-  if (definition.signatures.length === 0) {
-    return { min: 0, max: 0 };
-  }
-
-  let min = Infinity;
-  let max = 0;
-  definition.signatures.forEach(({ params, minParams }) => {
-    min = Math.min(min, params.filter(({ optional }) => !optional).length);
-    max = Math.max(max, minParams ? Infinity : params.length);
-  });
-  return { min, max };
 }
 
 /**

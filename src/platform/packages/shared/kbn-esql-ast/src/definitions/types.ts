@@ -261,6 +261,23 @@ export interface ValidationErrors {
       extraArgs: number;
     };
   };
+  wrongNumberArgsExact: {
+    message: string;
+    type: {
+      fn: string;
+      expected: number;
+      actual: number;
+    };
+  };
+  wrongNumberArgsVariadic: {
+    message: string;
+    type: {
+      fn: string;
+      expectedMin: number;
+      expectedMax: number;
+      actual: number;
+    };
+  };
   noMatchingCallSignature: {
     message: string;
     type: {
