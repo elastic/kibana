@@ -93,7 +93,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'observability:enableLegacyUptimeApp': true,
       },
     },
-    testFiles: [resolve(__dirname, './apps/observability/pages/rules_page.ts')],
+    testFiles: [resolve(__dirname, './apps/observability')],
     junit: {
       ...xpackFunctionalConfig.get('junit'),
       reportName: 'Chrome X-Pack Observability UI Functional Tests',
