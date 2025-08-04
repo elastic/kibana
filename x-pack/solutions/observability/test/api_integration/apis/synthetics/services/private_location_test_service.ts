@@ -14,7 +14,7 @@ import {
 } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.1.1';
+export const INSTALLED_VERSION = '1.4.2';
 
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
