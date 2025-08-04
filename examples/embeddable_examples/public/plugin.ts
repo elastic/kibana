@@ -16,7 +16,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
