@@ -213,7 +213,7 @@ describe("my internal APIs test suite", async function() {
 With custom native roles now enabled for Security, Search, and Observability projects on MKI, FTR supports
 defining and authenticating with custom roles in both UI functional and API integration tests.
 
-To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
+To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](./functional/test_suites/observability/config.feature_flags.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
 
 When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
