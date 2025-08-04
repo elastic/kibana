@@ -111,6 +111,7 @@ const STANDARD_LIST_TYPES = [
   'uptime-dynamic-settings',
   'synthetics-privates-locations',
   'synthetics-private-location',
+  'synthetics-param',
 
   'osquery-saved-query',
   'osquery-pack',
