@@ -6,57 +6,171 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { uniqBy } from 'lodash';
 import { ESQLLicenseType } from '@kbn/esql-types';
+import { uniqBy } from 'lodash';
+import { errors, getColumnForASTNode, getFunctionDefinition, getMessageFromId } from '..';
+import { within } from '../../../..';
+import {
+  isAssignment,
+  isColumn,
+  isFunctionExpression,
+  isIdentifier,
+  isInlineCast,
+  isList,
+  isLiteral,
+  isOptionNode,
+  isParamLiteral,
+  isParametrized,
+  isTimeInterval,
+} from '../../../ast/is';
+import {
+  ICommandCallbacks,
+  ICommandContext,
+  getLocationFromCommandOrOptionName,
+} from '../../../commands_registry/types';
 import {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
-  ESQLMessage,
-  ESQLSingleAstItem,
   ESQLLiteral,
+  ESQLMessage,
   ESQLParamLiteral,
+  ESQLSingleAstItem,
 } from '../../../types';
-import { isAssignment, isInlineCast, isOptionNode } from '../../../ast/is';
-import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
+import { Walker } from '../../../walker';
 import {
-  FunctionParameter,
-  FunctionDefinitionTypes,
   FunctionDefinition,
+  FunctionDefinitionTypes,
+  FunctionParameter,
   FunctionParameterType,
   ReasonTypes,
   SupportedDataType,
 } from '../../types';
+import { getColumnExists, getQuotedColumnName } from '../columns';
 import {
-  ICommandCallbacks,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
-import { buildFunctionLookup, printFunctionSignature } from '../functions';
-import {
-  getSignaturesWithMatchingArity,
   getExpressionType,
   getParamAtPosition,
+  getSignaturesWithMatchingArity,
 } from '../expressions';
-import { isArrayType } from '../operators';
+import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   compareTypesWithLiterals,
   doesLiteralMatchParameterType,
   inKnownTimeInterval,
 } from '../literals';
-import { getQuotedColumnName, getColumnExists } from '../columns';
-import {
-  isLiteral,
-  isTimeInterval,
-  isFunctionExpression,
-  isColumn,
-  isList,
-  isIdentifier,
-  isParamLiteral,
-  isParametrized,
-} from '../../../ast/is';
-import { ICommandContext } from '../../../commands_registry/types';
-import { Walker } from '@kbn/esql-ast/src/walker';
-import { within } from '@kbn/esql-ast';
+import { isArrayType } from '../operators';
+
+export const USE_NEW_VALIDATION = true;
+const validateFunction = USE_NEW_VALIDATION ? validateFunctionNew : validateFunctionOld;
+export { validateFunction };
+
+// #region New stuff
+
+export function validateFunctionNew({
+  fn,
+  parentCommand,
+  context,
+  callbacks,
+}: {
+  fn: ESQLFunction;
+  parentCommand: ESQLCommand;
+  context: ICommandContext;
+  callbacks: ICommandCallbacks;
+}): ESQLMessage[] {
+  const nestedErrors: ESQLMessage[] = [];
+  for (const arg of fn.args) {
+    if (isFunctionExpression(arg)) {
+      nestedErrors.push(
+        ...validateFunction({
+          fn: arg,
+          parentCommand,
+          context,
+          callbacks,
+        })
+      );
+    }
+
+    // if a one or more child functions produced errors, stop validation and report
+    if (nestedErrors.length) {
+      return nestedErrors;
+    }
+  }
+
+  const definition = getFunctionDefinition(fn.name);
+
+  if (!definition) {
+    return [errors.unknownFunction(fn)];
+  }
+
+  if (
+    definition.license &&
+    callbacks.hasMinimumLicenseRequired &&
+    !callbacks.hasMinimumLicenseRequired(definition.license.toLowerCase() as ESQLLicenseType)
+  ) {
+    return [errors.licenseRequired(fn, definition.license)]; // TODO - maybe don't end validation here
+  }
+
+  const { displayName, location } = getFunctionLocation(fn, parentCommand);
+  if (!definition.locationsAvailable.includes(location)) {
+    return [errors.functionNotAllowedHere(fn, displayName)];
+  }
+
+  const argTypes = fn.args.map((node) =>
+    getExpressionType(node, context.fields, context.userDefinedColumns)
+  );
+
+  // Begin validation
+  const A = getSignaturesWithMatchingArity(definition, fn);
+
+  if (!A.length) {
+    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
+  }
+
+  const S = getSignatureWithMatchingTypes(definition, argTypes);
+
+  if (!S) {
+    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
+  }
+
+  return [];
+}
+
+/**
+ * Returns a signature matching the given types if it exists
+ * @param definition
+ * @param types
+ *
+ * @TODO handle variadic, implicit casting, etc.
+ */
+function getSignatureWithMatchingTypes(
+  definition: FunctionDefinition,
+  types: Array<SupportedDataType | 'unknown'>
+): FunctionDefinition['signatures'][number] | undefined {
+  return definition.signatures.find((sig) => {
+    if (types.length < sig.params.length) {
+      return false;
+    }
+
+    return sig.params.every((param, index) => {
+      return types[index] === param.type;
+    });
+  });
+}
+
+/**
+ * Identifies the location ID of the function's position
+ */
+function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
+  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
+
+  const displayName = (option ?? parentCommand).name;
+
+  const location = getLocationFromCommandOrOptionName(displayName);
+
+  return { location, displayName };
+}
+
+// #region Old stuff
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -316,110 +430,6 @@ const isFunctionOperatorParam = (fn: ESQLFunction): boolean =>
  */
 function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType {
   return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
-}
-
-export function validateFunction({
-  fn,
-  parentCommand,
-  context,
-  callbacks,
-}: {
-  fn: ESQLFunction;
-  parentCommand: ESQLCommand;
-  context: ICommandContext;
-  callbacks: ICommandCallbacks;
-}): ESQLMessage[] {
-  const nestedErrors: ESQLMessage[] = [];
-  for (const arg of fn.args) {
-    if (isFunctionExpression(arg)) {
-      nestedErrors.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand,
-          context,
-          callbacks,
-        })
-      );
-    }
-
-    // if a one or more child functions produced errors, stop validation and report
-    if (nestedErrors.length) {
-      return nestedErrors;
-    }
-  }
-
-  const definition = getFunctionDefinition(fn.name);
-
-  if (!definition) {
-    return [errors.unknownFunction(fn)];
-  }
-
-  if (
-    definition.license &&
-    callbacks.hasMinimumLicenseRequired &&
-    !callbacks.hasMinimumLicenseRequired(definition.license.toLowerCase() as ESQLLicenseType)
-  ) {
-    return [errors.licenseRequired(fn, definition.license)]; // TODO - maybe don't end validation here
-  }
-
-  const { displayName, location } = getFunctionLocation(fn, parentCommand);
-  if (!definition.locationsAvailable.includes(location)) {
-    return [errors.functionNotAllowedHere(fn, displayName)];
-  }
-
-  const argTypes = fn.args.map((node) =>
-    getExpressionType(node, context.fields, context.userDefinedColumns)
-  );
-
-  // Begin validation
-  const A = getSignaturesWithMatchingArity(definition, fn);
-
-  if (!A.length) {
-    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
-  }
-
-  const S = getSignatureWithMatchingTypes(definition, argTypes);
-
-  if (!S) {
-    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
-  }
-
-  return [];
-}
-
-/**
- * Identifies the location ID of the function's position
- */
-export function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
-  const option = Walker.find(parentCommand, (node) => isOptionNode(node) && within(fn, node));
-
-  const displayName = (option ?? parentCommand).name;
-
-  const location = getLocationFromCommandOrOptionName(displayName);
-
-  return { location, displayName };
-}
-
-/**
- * Returns a signature matching the given types if it exists
- * @param definition
- * @param types
- *
- * @TODO handle variadic, implicit casting, etc.
- */
-function getSignatureWithMatchingTypes(
-  definition: FunctionDefinition,
-  types: Array<SupportedDataType | 'unknown'>
-): FunctionDefinition['signatures'][number] | undefined {
-  return definition.signatures.find((sig) => {
-    if (types.length < sig.params.length) {
-      return false;
-    }
-
-    return sig.params.every((param, index) => {
-      return types[index] === param.type;
-    });
-  });
 }
 
 /**
@@ -722,8 +732,6 @@ export function validateFunctionOld({
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
-// #region Arg validation
-
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   argument: ESQLAstItem,
@@ -952,10 +960,6 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
   return arg;
 }
 
-// #endregion
-
-// #region Specific functions
-
 export function isSupportedFunction(
   name: string,
   parentCommand?: string,
@@ -1080,5 +1084,3 @@ function validateSignatureLicense(
     }),
   ];
 }
-
-// #endregion

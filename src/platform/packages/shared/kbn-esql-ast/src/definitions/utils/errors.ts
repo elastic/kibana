@@ -489,11 +489,13 @@ export const errors = {
     definition: FunctionDefinition,
     argTypes: string[]
   ): ESQLMessage => {
-    const validSignatures = definition.signatures.map((sig) => {
-      const definitionArgTypes = sig.params.map((param) => param.type).join(', ');
-      return `${definitionArgTypes}`;
-      // return `${definitionArgTypes} => ${sig.returnType}`;
-    });
+    const validSignatures = [...definition.signatures]
+      .sort((a, b) => a.params.length - b.params.length)
+      .map((sig) => {
+        const definitionArgTypes = sig.params.map((param) => param.type).join(', ');
+        return `${definitionArgTypes}`;
+        // return `${definitionArgTypes} => ${sig.returnType}`;
+      });
 
     return errors.byId('noMatchingCallSignature', fn.location, {
       functionName: fn.name,
