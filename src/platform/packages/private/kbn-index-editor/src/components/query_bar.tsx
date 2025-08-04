@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiSearchBar,
   EuiText,
 } from '@elastic/eui';
@@ -28,7 +28,14 @@ export const QueryBar = () => {
   } = useKibana<KibanaContextExtra>();
 
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
-  const dataView = useObservable(indexUpdateService.dataView$);
+  const isIndexCreated = useObservable(
+    indexUpdateService.indexCreated$,
+    indexUpdateService.isIndexCreated()
+  );
+
+  const esqlQuery = useObservable(indexUpdateService.esqlQuery$);
+
+  const [queryError, setQueryError] = useState<string>('');
 
   const activeColumns = useMemo(() => {
     return dataViewColumns?.map((c) => c.name);
@@ -38,62 +45,57 @@ export const QueryBar = () => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  const discoverLink = dataView
+  const discoverLink = esqlQuery
     ? discoverLocator?.getRedirectUrl({
         timeRange: data.query.timefilter.timefilter.getTime(),
         query: {
-          esql: `FROM ${dataView.getIndexPattern()} | LIMIT ${10}`,
+          esql: esqlQuery,
         },
-        columns: activeColumns,
+        ...(activeColumns ? { columns: activeColumns } : {}),
       })
     : null;
 
-  if (!discoverLink) return null;
+  if (!isIndexCreated) return null;
 
   return (
-    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+    <EuiFlexGroup alignItems={'flexStart'} gutterSize={'s'}>
       <EuiFlexItem grow>
-        {dataView ? (
-          <EuiSearchBar
-            defaultQuery={''}
-            onChange={({ queryText, query, error }) => {
-              indexUpdateService.setQuery(queryText);
-            }}
-          />
+        {isIndexCreated ? (
+          <EuiFormRow isInvalid={!!queryError} error={queryError} fullWidth>
+            <EuiSearchBar
+              defaultQuery={''}
+              onChange={({ queryText, error }) => {
+                if (error) {
+                  setQueryError(error.message);
+                } else {
+                  setQueryError('');
+                  indexUpdateService.setQstr(queryText);
+                }
+              }}
+            />
+          </EuiFormRow>
         ) : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          display="base"
-          size={'m'}
-          color={'text'}
-          onClick={() => {
-            indexUpdateService.refresh();
-          }}
-          iconType="refresh"
-          aria-label={i18n.translate('indexEditor.filePicker.refreshAriaLabel', {
-            defaultMessage: 'Refresh button',
-          })}
-        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilePicker />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size={'m'}
-          color={'text'}
-          href={discoverLink}
-          target="_blank"
-          iconType={'discoverApp'}
-        >
-          <EuiText size="xs">
-            {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
-              defaultMessage: 'Query this index',
-            })}
-          </EuiText>
-        </EuiButton>
-      </EuiFlexItem>
+      {discoverLink ? (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size={'m'}
+            color={'text'}
+            href={discoverLink}
+            target="_blank"
+            iconType={'discoverApp'}
+          >
+            <EuiText size="xs">
+              {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
+                defaultMessage: 'Query this index',
+              })}
+            </EuiText>
+          </EuiButton>
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };

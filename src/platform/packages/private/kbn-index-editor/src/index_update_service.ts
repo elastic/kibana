@@ -90,10 +90,10 @@ export class IndexUpdateService {
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
-  private readonly _query$ = new BehaviorSubject<string>('');
-  public readonly query$: Observable<string> = this._query$.asObservable();
-  public setQuery(queryString: string) {
-    this._query$.next(queryString);
+  private readonly _qstr$ = new BehaviorSubject<string>('');
+  public readonly qstr$: Observable<string> = this._qstr$.asObservable();
+  public setQstr(queryString: string) {
+    this._qstr$.next(queryString);
   }
 
   // Indicated if the index exists (has been created) in Elasticsearch.
@@ -132,6 +132,42 @@ export class IndexUpdateService {
   private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
   private readonly _subscription = new Subscription();
+
+  public readonly esqlQuery$: Observable<string> = combineLatest([
+    this._indexCrated$,
+    this._indexName$,
+    this._qstr$,
+  ]).pipe(
+    skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
+    map(([indexCreated, indexName, qstr]) => {
+      // FROM
+      const fromCmd = Builder.command({
+        name: 'from',
+        args: [Builder.expression.source.node(indexName!)],
+      });
+
+      // WHERE qstr("message: …")
+      const whereCmd = Builder.command({
+        name: 'where',
+        args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr)])],
+      });
+
+      // LIMIT 10
+      const limitCmd = Builder.command({
+        name: 'limit',
+        args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
+      });
+      // Combine the commands into a query node
+      const queryExpression = Builder.expression.query([
+        fromCmd,
+        ...(qstr ? [whereCmd] : []),
+        limitCmd,
+      ]);
+      const queryText: string = BasicPrettyPrinter.print(queryExpression);
+
+      return queryText;
+    })
+  );
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
@@ -366,8 +402,6 @@ export class IndexUpdateService {
     // Fetch ES docs
     this._subscription.add(
       combineLatest([
-        // Only when the dataview is set for the first time
-        this.dataView$.pipe(take(1)),
         // Time range updates
         this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(
           startWith(null),
@@ -376,7 +410,7 @@ export class IndexUpdateService {
           })
         ),
         // Query updates
-        this._query$,
+        this.esqlQuery$,
         this._refreshSubject$,
       ])
         .pipe(
@@ -384,39 +418,12 @@ export class IndexUpdateService {
           tap(() => {
             this._isFetching$.next(true);
           }),
-          switchMap(([dataView, timeRange, query]) => {
-            // FROM
-            const fromCmd = Builder.command({
-              name: 'from',
-              args: [Builder.expression.source.node(dataView.getIndexPattern())],
-            });
-
-            // WHERE qstr("message: …")
-            const whereCmd = Builder.command({
-              name: 'where',
-              args: [
-                Builder.expression.func.call('qstr', [Builder.expression.literal.string(query)]),
-              ],
-            });
-
-            // LIMIT 10
-            const limitCmd = Builder.command({
-              name: 'limit',
-              args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
-            });
-            // Combine the commands into a query node
-            const queryExpression = Builder.expression.query([
-              fromCmd,
-              ...(query ? [whereCmd] : []),
-              limitCmd,
-            ]);
-            const queryText: string = BasicPrettyPrinter.print(queryExpression);
-
+          switchMap(([timeRange, esqlQuery]) => {
             return this.data.search
               .search<{ params: ESQLSearchParams }, { rawResponse: ESQLSearchResponse }>(
                 {
                   params: {
-                    query: queryText,
+                    query: esqlQuery,
                   },
                 },
                 {
@@ -436,11 +443,10 @@ export class IndexUpdateService {
                   });
                 })
               );
-          }),
-          withLatestFrom(this.dataView$)
+          })
         )
         .subscribe({
-          next: ([response, dataView]) => {
+          next: (response) => {
             const { documents_found: total, values, columns } = response.rawResponse;
 
             const columnNames = columns.map(({ name }) => name);
