@@ -54,10 +54,9 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
           })}
           target="_blank"
           aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmLinkAriaLabel', {
-            defaultMessage: 'Edit ILM policy {name} (opens in new tab)',
+            defaultMessage: 'ILM policy: {name}, click to edit the policy in a new tab',
             values: { name: lifecycle.ilm.policy },
           })}
-          aria-describedby="ilm-policy-description"
         >
           {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
             defaultMessage: 'ILM policy: {name}',

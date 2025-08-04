@@ -158,7 +158,7 @@ export function DocumentsColumn({
         values: { docCount, indexPattern },
       })
     : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
-        defaultMessage: 'No document data available for {indexPattern}',
+        defaultMessage: 'No documents found in {indexPattern}',
         values: { indexPattern },
       });
 
