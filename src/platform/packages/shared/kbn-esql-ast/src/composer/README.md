@@ -16,10 +16,11 @@ import { esql } from '@kbn/esql-ast';
 
 const param = 123; // Dynamic parameter, e.g. received from the UI.
 
-const query = esql`FROM index
-  | WHERE @timestamp >= ${{ param }}
-  | SORT @timestamp DESC
-  | KEEP service.name, log.level`;
+const query = esql`
+  FROM index
+    | WHERE @timestamp >= ${{ param }}
+    | SORT @timestamp DESC
+    | KEEP service.name, log.level`;
 ```
 
 You can then "pipe" more commands to the query using the `.pipe` tag:
