@@ -235,8 +235,7 @@ function generateCommandDoc({
   const previewProp = preview !== undefined ? `\n preview: ${preview},` : '';
   const licenseProp = license ? `\n license: ${JSON.stringify(license)},` : '';
   // replace(/`/g, '\\`') escape backticks for nested template literals in the generated file
-  // replace(/%\{/g, '%\\{') escape i18n placeholder patterns like %{variable}
-  const description = descriptionDefaultMessage.replace(/`/g, '\\`').replace(/%\{/g, '%\\{');
+  const description = descriptionDefaultMessage.replace(/`/g, '\\`');
 
   return `{
       label: i18n.translate('${labelKey}', {

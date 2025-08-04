@@ -155,7 +155,7 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 
 \`\`\` esql
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
-| DISSECT a "%{Y}-%{M}-%{D}T%{h}:%{m}:%{s}Z - %{msg} - %{ip}"
+| DISSECT a "%'\\{Y\\}-%\\{M\\}-%\\{D\\}T%\\{h\\}:%\\{m\\}:%\\{s\\}Z - %\\{msg\\} - %\\{ip\\}'"
 \`\`\`            `,
     descriptionOptions: {
       ignoreTag: true,
@@ -270,7 +270,7 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 
 \`\`\` esql
 ROW a = "12 15.5 15.6 true"
-| GROK a "%{NUMBER:b:int} %{NUMBER:c:float} %{NUMBER:d:double} %{WORD:e:boolean}"
+| GROK a "%'\\{NUMBER:b:int\\} %\\{NUMBER:c:float\\} %\\{NUMBER:d:double\\} %\\{WORD:e:boolean\\}'"
 \`\`\`
             `,
     descriptionOptions: {
@@ -342,13 +342,13 @@ An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index
 
 \`\`\` esql
 PUT languages
-{
+'{
   "settings": {
     "index":{
       "mode":"lookup"
     }
   }
-}
+}'
 \`\`\`
 
 The join key field must have a compatible type and match the name of the field in the lookup index to find matching documents. You can use \`RENAME\` or \`EVAL\` to rename columns as needed.
