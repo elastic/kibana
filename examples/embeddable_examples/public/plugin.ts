@@ -22,8 +22,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
-import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
-import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
+import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
@@ -93,7 +92,12 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerAddSearchPanelAction(deps.uiActions);
 
-    registerCreateDataTableAction(deps.uiActions);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
+      const { createDataTableAction } = await import(
+        './react_embeddables/data_table/create_data_table_action'
+      );
+      return createDataTableAction;
+    });
 
     registerCreateSavedBookAction(deps.uiActions, core);
   }
