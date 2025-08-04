@@ -18,9 +18,9 @@ import { getFilterSimulationDocumentsFn } from './utils';
  */
 export const selectPreviewRecords = createSelector(
   [
-    (context: SimulationContext) => context.samples,
-    (context: SimulationContext) => context.previewDocsFilter,
-    (context: SimulationContext) => context.simulation?.documents,
+    (context: Pick<SimulationContext, 'samples'>) => context.samples,
+    (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
+    (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {
