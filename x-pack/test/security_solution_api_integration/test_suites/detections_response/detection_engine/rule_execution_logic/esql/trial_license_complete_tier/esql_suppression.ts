@@ -1978,10 +1978,11 @@ export default ({ getService }: FtrProviderContext) => {
         const id = uuidv4();
         console.log(">>> generated id ", id)
         console.log(">>> ", uuidv4(), uuidv4(), uuidv4())
+        const runAt = new Date().toISOString()
         const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
-        const doc1 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.2' };
-        const doc2 = { agent: { name: 'test-1' } };
-        const doc3 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.1' };
+        const doc1 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.2', 'run.at': runAt };
+        const doc2 = { agent: { name: 'test-1' }, 'run.at': runAt };
+        const doc3 = { agent: { name: 'test-1' }, 'client.ip': '127.0.0.1', 'run.at': runAt };
 
         const {records: recordsBeforeDocsIndexing} = await es.helpers.esql({query: `from ecs_compliant ${internalIdPipe(id)} | where agent.name=="test-1"`}).toRecords()
 
