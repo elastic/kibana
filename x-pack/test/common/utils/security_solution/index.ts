@@ -6,3 +6,4 @@
  */
 
 export * from './detections_response';
+export * from './spaces';
