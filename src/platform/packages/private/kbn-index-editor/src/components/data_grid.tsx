@@ -24,6 +24,8 @@ import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
 import { KibanaContextExtra } from '../types';
 import {
@@ -189,57 +191,63 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [renderedColumns, props.dataView, indexUpdateService]);
 
   return (
-    <>
-      <UnifiedDataTable
-        ref={dataTableRef}
-        customGridColumnsConfiguration={customGridColumnsConfiguration}
-        columns={renderedColumns}
-        rows={rows}
-        columnsMeta={columnsMeta}
-        services={services}
-        enableInTableSearch
-        externalCustomRenderers={externalCustomRenderers}
-        renderCellPopover={renderCellPopover}
-        isPlainRecord
-        isSortEnabled
-        showMultiFields={false}
-        showColumnTokens
-        showTimeCol
-        enableComparisonMode
-        isPaginationEnabled
-        showKeyboardShortcuts
-        totalHits={props.totalHits}
-        rowsPerPageState={rowsPerPage}
-        rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-        sampleSizeState={10_000}
-        canDragAndDropColumns
-        loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-        dataView={props.dataView}
-        onSetColumns={onSetColumns}
-        onUpdateRowsPerPage={setRowsPerPage}
-        onSort={(newSort) => setSortOrder(newSort as SortOrder[])}
-        sort={sortOrder}
-        ariaLabelledBy="lookupIndexDataGrid"
-        maxDocFieldsDisplayed={100}
-        showFullScreenButton={false}
-        configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
-        rowHeightState={rowHeight}
-        onUpdateRowHeight={setRowHeight}
-        controlColumnIds={props.controlColumnIds}
-        css={css`
-          .euiDataGridRowCell__content > div,
-          .unifiedDataTable__cellValue {
-            height: 100%;
-            width: 100%;
-            display: block;
-          }
-          .euiDataGridHeaderCell {
-            align-items: center;
-            display: flex;
-          }
-        `}
-      />
-    </>
+    <EuiFlexGroup direction="column" gutterSize="s" css={{ overflow: 'hidden', height: '100%' }}>
+      <EuiFlexItem grow={false}>
+        <RowColumnCreator dataTableRef={dataTableRef} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <UnifiedDataTable
+          ref={dataTableRef}
+          customGridColumnsConfiguration={customGridColumnsConfiguration}
+          columns={renderedColumns}
+          rows={rows}
+          columnsMeta={columnsMeta}
+          services={services}
+          enableInTableSearch
+          externalCustomRenderers={externalCustomRenderers}
+          renderCellPopover={renderCellPopover}
+          isPlainRecord
+          isSortEnabled
+          showMultiFields={false}
+          showColumnTokens
+          showTimeCol
+          enableComparisonMode
+          isPaginationEnabled
+          showKeyboardShortcuts
+          totalHits={props.totalHits}
+          rowsPerPageState={rowsPerPage}
+          rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+          sampleSizeState={10_000}
+          canDragAndDropColumns
+          loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
+          dataView={props.dataView}
+          onSetColumns={onSetColumns}
+          onUpdateRowsPerPage={setRowsPerPage}
+          onSort={(newSort) => setSortOrder(newSort as SortOrder[])}
+          sort={sortOrder}
+          ariaLabelledBy="lookupIndexDataGrid"
+          maxDocFieldsDisplayed={100}
+          showFullScreenButton={false}
+          configRowHeight={DEFAULT_INITIAL_ROW_HEIGHT}
+          rowHeightState={rowHeight}
+          onUpdateRowHeight={setRowHeight}
+          controlColumnIds={props.controlColumnIds}
+          css={css`
+            .euiDataGridRowCell__content > div,
+            .unifiedDataTable__cellValue {
+              height: 100%;
+              width: 100%;
+              display: block;
+            }
+            .euiDataGridHeaderCell {
+              align-items: center;
+              display: flex;
+            }
+          `}
+        />
+        <EuiSpacer size="l" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
