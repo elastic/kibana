@@ -40,7 +40,11 @@ import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualizatio
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorMode, getDefaultConfigForMode, getPrefixSelected } from './helpers';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getSecondaryLabelSelected as getSecondaryLabelSelected,
+} from './helpers';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
@@ -50,6 +54,10 @@ export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> 
 };
 
 type SubProps = Props & { idPrefix: string };
+
+function invertPosition(position: 'before' | 'after'): 'before' | 'after' {
+  return position === 'before' ? 'after' : 'before';
+}
 
 export function DimensionEditor(props: Props) {
   const { state, accessor } = props;
@@ -420,7 +428,7 @@ function SecondaryMetricEditor({
   datasource,
 }: SubProps) {
   const columnName = getColumnByAccessor(accessor, frame.activeData?.[layerId]?.columns)?.name;
-  const defaultPrefix = columnName || '';
+  const defaultSecondaryLabel = columnName || '';
   const { isNumeric: isNumericType } = getAccessorType(datasource, accessor);
   const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const colorMode = getColorMode(state.secondaryTrend, isNumericType);
@@ -447,8 +455,8 @@ function SecondaryMetricEditor({
     [state]
   );
 
-  const prefixConfig = getPrefixSelected(state, {
-    defaultPrefix,
+  const secondaryLabelConfig = getSecondaryLabelSelected(state, {
+    defaultSecondaryLabel,
     colorMode,
     isPrimaryMetricNumeric,
   });
@@ -458,7 +466,7 @@ function SecondaryMetricEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.labelText.label', {
+        label={i18n.translate('xpack.lens.metric.secondaryLabel', {
           defaultMessage: 'Label',
         })}
       >
@@ -466,55 +474,55 @@ function SecondaryMetricEditor({
           <EuiButtonGroup
             isFullWidth
             buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.prefix.label', {
-              defaultMessage: 'Prefix',
+            legend={i18n.translate('xpack.lens.metric.secondaryLabel', {
+              defaultMessage: 'Label',
             })}
-            data-test-subj="lnsMetric_prefix_buttons"
+            data-test-subj="lnsMetric_seondaryLabel_buttons"
             options={[
               {
                 id: `${idPrefix}auto`,
-                label: i18n.translate('xpack.lens.metric.prefix.auto', {
+                label: i18n.translate('xpack.lens.metric.seondaryLabel.auto', {
                   defaultMessage: 'Auto',
                 }),
-                'data-test-subj': 'lnsMetric_prefix_auto',
+                'data-test-subj': 'lnsMetric_seondaryLabel_auto',
                 value: undefined,
               },
               {
                 id: `${idPrefix}custom`,
-                label: i18n.translate('xpack.lens.metric.prefix.custom', {
+                label: i18n.translate('xpack.lens.metric.seondaryLabel.custom', {
                   defaultMessage: 'Custom',
                 }),
-                'data-test-subj': 'lnsMetric_prefix_custom',
-                value: defaultPrefix,
+                'data-test-subj': 'lnsMetric_seondaryLabel_custom',
+                value: defaultSecondaryLabel,
               },
               {
                 id: `${idPrefix}none`,
-                label: i18n.translate('xpack.lens.metric.prefix.none', {
+                label: i18n.translate('xpack.lens.metric.seondaryLabel.none', {
                   defaultMessage: 'None',
                 }),
-                'data-test-subj': 'lnsMetric_prefix_none',
+                'data-test-subj': 'lnsMetric_seondaryLabel_none',
                 value: '',
               },
             ]}
-            idSelected={`${idPrefix}${prefixConfig.mode}`}
-            onChange={(_id, secondaryPrefix) => {
+            idSelected={`${idPrefix}${secondaryLabelConfig.mode}`}
+            onChange={(_id, secondaryLabel) => {
               setState({
                 ...state,
-                secondaryPrefix,
+                secondaryLabel,
               });
             }}
           />
-          {prefixConfig.mode === 'custom' && (
+          {secondaryLabelConfig.mode === 'custom' && (
             <>
               <EuiSpacer size="s" />
               <DebouncedInput
                 data-test-subj="lnsMetric_prefix_custom_input"
                 compressed
-                value={prefixConfig.label}
-                onChange={(newPrefix) => {
+                value={secondaryLabelConfig.label}
+                onChange={(newSecondaryLabel) => {
                   setState({
                     ...state,
-                    secondaryPrefix: newPrefix,
+                    secondaryLabel: newSecondaryLabel,
                   });
                 }}
               />
@@ -523,8 +531,50 @@ function SecondaryMetricEditor({
         </>
       </EuiFormRow>
 
-      {/* Here: When the label is visible, choose whether before or after the value */}
-      {prefixConfig.mode !== 'none' && 'Change label postion'}
+      {/* When the label is visible, choose whether before or after the value */}
+      {secondaryLabelConfig.mode !== 'none' && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.metric.secondaryMetric.labelPosition', {
+            defaultMessage: 'Label position',
+          })}
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.secondaryMetric.labelPosition', {
+              defaultMessage: 'Label position',
+            })}
+            options={[
+              {
+                id: `${idPrefix}before`,
+                label: i18n.translate('xpack.lens.metric.secondaryMetric.labelPosition.before', {
+                  defaultMessage: 'Before',
+                }),
+                value: 'before',
+              },
+              {
+                id: `${idPrefix}after`,
+                label: i18n.translate('xpack.lens.metric.secondaryMetric.labelPosition.after', {
+                  defaultMessage: 'After',
+                }),
+                value: 'after',
+              },
+            ]}
+            idSelected={`${idPrefix}${
+              state.secondaryValuePosition && invertPosition(state.secondaryValuePosition)
+            }`}
+            onChange={(_id, labelPosition) => {
+              // Note: Invert the position because the button updates the label's position relative to the value
+              setState({
+                ...state,
+                secondaryValuePosition: invertPosition(labelPosition),
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
 
       <EuiFormRow
         display="columnCompressed"

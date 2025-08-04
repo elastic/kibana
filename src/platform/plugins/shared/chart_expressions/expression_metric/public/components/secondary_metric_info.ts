@@ -222,7 +222,7 @@ export function getSecondaryMetricInfo({
   const { metricFormatter, metricColumn } =
     getMetricColumnAndFormatter(columns, config, getMetricFormatter, formatOverrides) || {};
 
-  const label = config.metric.secondaryPrefix ?? metricColumn?.name; // prefix
+  const label = config.metric.secondaryLabel ?? metricColumn?.name;
 
   const rawValue = metricColumn ? row[metricColumn.id] : undefined;
   const formattedValue = metricFormatter?.(rawValue);

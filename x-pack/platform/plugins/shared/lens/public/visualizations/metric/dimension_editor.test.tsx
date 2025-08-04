@@ -55,7 +55,7 @@ describe('dimension editor', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: faker.lorem.word(5),
-    secondaryPrefix: faker.lorem.word(3),
+    secondaryLabel: faker.lorem.word(3),
     secondaryTrend: { type: 'none' },
     progressDirection: 'vertical',
     maxCols: 5,
@@ -76,6 +76,7 @@ describe('dimension editor', () => {
     trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
+    secondaryValuePosition: 'after',
   };
 
   let props: Props;
@@ -363,11 +364,11 @@ describe('dimension editor', () => {
     });
 
     describe('metric prefix', () => {
-      const NONE_PREFIX = '';
-      const AUTO_PREFIX = undefined;
+      const NONE_SECONDARY_LABEL = '';
+      const AUTO_SECONDARY_LABEL = undefined;
       const localState = {
         ...fullState,
-        secondaryPrefix: AUTO_PREFIX,
+        secondaryLabel: AUTO_SECONDARY_LABEL,
         secondaryMetricAccessor: accessor,
       };
       it('correctly renders chosen auto prefix', () => {
@@ -384,7 +385,9 @@ describe('dimension editor', () => {
 
       it('correctly renders chosen none prefix', () => {
         const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
-          renderSecondaryMetricEditor({ state: { ...localState, secondaryPrefix: NONE_PREFIX } });
+          renderSecondaryMetricEditor({
+            state: { ...localState, secondaryLabel: NONE_SECONDARY_LABEL },
+          });
 
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'true');
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
@@ -393,33 +396,33 @@ describe('dimension editor', () => {
       });
 
       it('correctly renders custom prefix', () => {
-        const customPrefixState = { ...localState, secondaryPrefix: faker.lorem.word(3) };
+        const customPrefixState = { ...localState, secondaryLabel: faker.lorem.word(3) };
         const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
           renderSecondaryMetricEditor({ state: customPrefixState });
 
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'true');
-        expect(getCustomPrefixTextbox()).toHaveValue(customPrefixState.secondaryPrefix);
+        expect(getCustomPrefixTextbox()).toHaveValue(customPrefixState.secondaryLabel);
       });
 
-      it('clicking on the buttons calls setState with a correct secondaryPrefix', async () => {
-        const customPrefix = faker.lorem.word(3);
+      it('clicking on the buttons calls setState with a correct secondaryLabel', async () => {
+        const customSecondaryLabel = faker.lorem.word(3);
         const setState = jest.fn();
 
         const { getSettingAuto, getSettingNone } = renderSecondaryMetricEditor({
           setState,
-          state: { ...localState, secondaryPrefix: customPrefix },
+          state: { ...localState, secondaryLabel: customSecondaryLabel },
         });
 
         await userEvent.click(getSettingNone());
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryPrefix: NONE_PREFIX })
+          expect.objectContaining({ secondaryLabel: NONE_SECONDARY_LABEL })
         );
 
         await userEvent.click(getSettingAuto());
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ secondaryPrefix: AUTO_PREFIX })
+          expect.objectContaining({ secondaryLabel: AUTO_SECONDARY_LABEL })
         );
       });
 
@@ -429,7 +432,7 @@ describe('dimension editor', () => {
 
         const { typePrefix } = renderSecondaryMetricEditor({
           setState,
-          state: { ...localState, secondaryPrefix: customPrefix },
+          state: { ...localState, secondaryLabel: customPrefix },
         });
 
         const newCustomPrefix = faker.lorem.word(3);
@@ -437,7 +440,7 @@ describe('dimension editor', () => {
 
         await waitFor(() =>
           expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryPrefix: newCustomPrefix })
+            expect.objectContaining({ secondaryLabel: newCustomPrefix })
           )
         );
       });
@@ -603,7 +606,7 @@ describe('dimension editor', () => {
         const { getCustomPrefixTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
           state: {
             ...localState,
-            secondaryPrefix: undefined,
+            secondaryLabel: undefined,
             secondaryTrend: {
               type: 'dynamic',
               visuals: 'both',
@@ -642,7 +645,7 @@ describe('dimension editor', () => {
           } = renderSecondaryMetricEditor({
             state: {
               ...localState,
-              secondaryPrefix: value,
+              secondaryLabel: value,
               secondaryTrend: {
                 type: 'dynamic',
                 visuals: 'both',

@@ -83,7 +83,7 @@ describe('metric visualization', () => {
     collapseFn: 'sum',
     subtitle: 'subtitle',
     icon: 'empty',
-    secondaryPrefix: 'extra-text',
+    secondaryLabel: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
     color: 'static-color',
@@ -466,7 +466,7 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
-                "secondaryPrefix": Array [
+                "secondaryLabel": Array [
                   "extra-text",
                 ],
                 "subtitle": Array [
@@ -545,7 +545,7 @@ describe('metric visualization', () => {
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
-                "secondaryPrefix": Array [
+                "secondaryLabel": Array [
                   "extra-text",
                 ],
                 "subtitle": Array [
@@ -855,7 +855,7 @@ describe('metric visualization', () => {
                 "metric-col-id",
               ],
               "palette": Array [],
-              "secondaryPrefix": Array [
+              "secondaryLabel": Array [
                 "extra-text",
               ],
               "subtitle": Array [
@@ -1069,12 +1069,12 @@ describe('metric visualization', () => {
 
     it('forwards secondary prefix correctly when is an empty string', () => {
       const expression = visualization.toExpression(
-        { ...fullState, secondaryPrefix: '', collapseFn: undefined },
+        { ...fullState, secondaryLabel: '', collapseFn: undefined },
         datasourceLayers
       );
       if (expression && typeof expression === 'object') {
-        const secondaryPrefix = expression.chain[0].arguments.secondaryPrefix[0];
-        expect(secondaryPrefix).toBe('');
+        const secondaryLabel = expression.chain[0].arguments.secondaryLabel[0];
+        expect(secondaryLabel).toBe('');
       } else {
         fail('Expression is not an object');
       }
@@ -1082,11 +1082,11 @@ describe('metric visualization', () => {
 
     it('forwards secondary prefix correctly when is undefined', () => {
       const expression = visualization.toExpression(
-        { ...fullState, secondaryPrefix: undefined, collapseFn: undefined },
+        { ...fullState, secondaryLabel: undefined, collapseFn: undefined },
         datasourceLayers
       );
       if (expression && typeof expression === 'object') {
-        expect(expression.chain[0].arguments.secondaryPrefix).toBe(undefined);
+        expect(expression.chain[0].arguments.secondaryLabel).toBe(undefined);
       } else {
         fail('Expression is not an object');
       }
@@ -1453,7 +1453,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
-      expect(removed).not.toHaveProperty('secondaryPrefix');
+      expect(removed).not.toHaveProperty('secondaryLabel');
       expect(removed).not.toHaveProperty('secondaryColorMode');
       expect(removed).not.toHaveProperty('secondaryTrend');
     });

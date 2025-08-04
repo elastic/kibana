@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LayoutDirection, MetricStyle } from '@elastic/charts';
+import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { LayerType } from '../../../common/types';
@@ -36,7 +36,7 @@ export interface MetricVisualizationState {
   // computed by collapsing all rows
   collapseFn?: CollapseFunction;
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
@@ -47,6 +47,7 @@ export interface MetricVisualizationState {
   valueFontMode?: ValueFontMode;
   titleWeight?: MetricStyle['titleWeight'];
   primaryPosition?: MetricStyle['valuePosition'];
+  secondaryValuePosition?: SecondaryMetricProps['valuePosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;

@@ -329,7 +329,7 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
-  delete state.secondaryPrefix;
+  delete state.secondaryLabel;
   delete state.secondaryTrend;
 };
 
@@ -577,7 +577,7 @@ export const getMetricVisualization = ({
       return {
         state: {
           ...state,
-          secondaryPrefix: undefined,
+          secondaryLabel: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
         },
         references: [],

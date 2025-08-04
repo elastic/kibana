@@ -165,7 +165,6 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const hasDynamicColoring = config.metric.palette?.params && value != null;
     const tileColor =
       config.metric.palette?.params && typeof value === 'number'
         ? getColor(
@@ -181,16 +180,12 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    // Build secondary metric information
-
-    const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
-
     const secondaryMetricInfo = getSecondaryMetricInfo({
       columns: data.columns,
       row,
       config,
       getMetricFormatter,
-      trendConfig,
+      trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
       staticColor: config.metric.secondaryColor,
     });
 
@@ -200,6 +195,7 @@ export const MetricVis = ({
       badgeColor: secondaryMetricInfo.badgeColor,
       ariaDescription: secondaryMetricInfo.description,
       icon: secondaryMetricInfo.icon,
+      valuePosition: config.metric.secondaryValuePosition,
     };
 
     if (typeof value !== 'number') {

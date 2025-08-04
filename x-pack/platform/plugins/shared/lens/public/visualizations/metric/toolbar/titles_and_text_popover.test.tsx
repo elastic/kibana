@@ -30,7 +30,7 @@ describe('TitlesAndTextPopover', () => {
     breakdownByAccessor: 'breakdown-col-id',
     collapseFn: 'sum',
     subtitle: 'subtitle',
-    secondaryPrefix: 'extra-text',
+    secondaryLabel: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
     color: 'static-color',
@@ -51,6 +51,7 @@ describe('TitlesAndTextPopover', () => {
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
+    secondaryValuePosition: 'after',
   };
 
   const mockSetState = jest.fn();

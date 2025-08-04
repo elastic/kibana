@@ -62,10 +62,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The subtitle for a single metric. Overridden if breakdownBy is supplied.',
       }),
     },
-    secondaryPrefix: {
+    secondaryLabel: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryPrefix.help', {
-        defaultMessage: 'Optional text to be show before secondaryMetric.',
+      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
+        defaultMessage: 'Optional text to be show next to the secondary metric.',
       }),
     },
     progressDirection: {
@@ -187,6 +187,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
+    secondaryValuePosition: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
+        defaultMessage: 'Specifies the secondary label value position',
+      }),
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
@@ -254,7 +261,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visConfig: {
           metric: {
             subtitle: args.subtitle,
-            secondaryPrefix: args.secondaryPrefix,
+            secondaryLabel: args.secondaryLabel,
             color: args.color,
             icon: args.icon,
             palette: args.palette,
@@ -275,6 +282,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
             },
+            secondaryValuePosition: args.secondaryValuePosition,
           },
           dimensions: {
             metric: args.metric,

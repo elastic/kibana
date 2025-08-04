@@ -8,7 +8,12 @@
  */
 
 import type { PaletteOutput } from '@kbn/coloring';
-import type { LayoutDirection, MetricStyle, MetricWTrend } from '@elastic/charts';
+import type {
+  LayoutDirection,
+  MetricStyle,
+  MetricWTrend,
+  SecondaryMetricProps,
+} from '@elastic/charts';
 import type { $Values } from '@kbn/utility-types';
 import type {
   Datatable,
@@ -42,7 +47,7 @@ export interface MetricArguments {
   breakdownBy?: ExpressionValueVisDimension | string;
   trendline?: TrendlineResult;
   subtitle?: string;
-  secondaryPrefix?: string;
+  secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
@@ -61,6 +66,7 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
+  secondaryValuePosition?: SecondaryMetricProps['valuePosition'];
 }
 
 export type MetricInput = Datatable;
