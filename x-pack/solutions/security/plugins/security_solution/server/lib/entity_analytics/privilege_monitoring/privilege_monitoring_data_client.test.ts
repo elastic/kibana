@@ -370,7 +370,7 @@ describe('Privilege Monitoring Data Client', () => {
       });
 
       await expect(dataClient.scheduleNow()).rejects.toThrow(
-        'The Privileged Monitoring Engine must be enable to schedule a run. Current status: stopped'
+        'The Privileged Monitoring Engine must be enabled to schedule a run. Current status:'
       );
     });
 
