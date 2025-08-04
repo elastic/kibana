@@ -45,7 +45,7 @@ export function PreviewPanel() {
 
   return (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
             <EuiIcon type="inspect" />
@@ -181,7 +181,7 @@ const RuleCreationPanel = () => {
     );
   } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow>
+      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <PreviewMatches
