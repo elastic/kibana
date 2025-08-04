@@ -3113,7 +3113,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => { },
+            setState: () => {},
           })
         ).toMatchInlineSnapshot(`
           Array [
@@ -3202,7 +3202,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => { },
+            setState: () => {},
           });
 
           expect(messages.length).toBe(1);
@@ -3243,7 +3243,7 @@ describe('IndexPattern Data Source', () => {
             frame: createMockFramePublicAPI({
               dataViews: createMockDataViewsState({ indexPatterns }),
             }),
-            setState: () => { },
+            setState: () => {},
           });
 
           expect(messages.length).toBe(1);
@@ -3409,7 +3409,7 @@ describe('IndexPattern Data Source', () => {
       it('should return mismatched time shifts', () => {
         const warnings = FormBasedDatasource.getUserMessages!(state, {
           frame: framePublicAPI,
-          setState: () => { },
+          setState: () => {},
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
@@ -3425,7 +3425,7 @@ describe('IndexPattern Data Source', () => {
 
         const warnings = FormBasedDatasource.getUserMessages!(state, {
           frame: framePublicAPI,
-          setState: () => { },
+          setState: () => {},
         });
 
         expect(extractTranslationIdsFromWarnings(warnings)).toMatchInlineSnapshot(`
@@ -3527,7 +3527,7 @@ describe('IndexPattern Data Source', () => {
                   indexPatterns: expectedIndexPatterns,
                 }),
               }),
-              setState: () => { },
+              setState: () => {},
               visualizationInfo: { layers: [] },
             }
           );
@@ -3553,7 +3553,7 @@ describe('IndexPattern Data Source', () => {
               indexPatterns: expectedIndexPatterns,
             }),
           }),
-          setState: () => { },
+          setState: () => {},
           visualizationInfo: { layers: [] },
         });
         const infoMessages = messages.filter(({ severity }) => severity === 'info');
