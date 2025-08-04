@@ -21,10 +21,10 @@ import type {
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import type { DeviceControlOSes } from '../../../types';
 
-const AUDIT_LABEL = i18n.translate(
+const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
   {
-    defaultMessage: 'Allow Read and Write',
+    defaultMessage: 'Allow all',
   }
 );
 
@@ -38,14 +38,14 @@ const BLOCK_LABEL = i18n.translate(
 const READ_ONLY_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.readOnly',
   {
-    defaultMessage: 'Read Only',
+    defaultMessage: 'Read only',
   }
 );
 
-const EXECUTE_ONLY_LABEL = i18n.translate(
+const BLOCK_EXECUTE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.executeOnly',
   {
-    defaultMessage: 'Execute',
+    defaultMessage: 'Block execute',
   }
 );
 
@@ -66,16 +66,16 @@ export const DeviceControlProtectionLevel = memo<DeviceControlProtectionLevelPro
     > = useMemo(() => {
       return [
         {
-          id: DeviceControlAccessLevelEnum.execute_only,
-          label: EXECUTE_ONLY_LABEL,
-        },
-        {
           id: DeviceControlAccessLevelEnum.audit,
-          label: AUDIT_LABEL,
+          label: ALLOW_ALL_LABEL,
         },
         {
           id: DeviceControlAccessLevelEnum.read_only,
           label: READ_ONLY_LABEL,
+        },
+        {
+          id: DeviceControlAccessLevelEnum.execute_only,
+          label: BLOCK_EXECUTE_LABEL,
         },
         {
           id: DeviceControlAccessLevelEnum.block,
