@@ -8,12 +8,13 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { useCallback, useState } from 'react';
+import { z } from '@kbn/zod';
+import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
 import _ from 'lodash';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { MUSTACHE_REGEX } from './mustache';
+import { MUSTACHE_REGEX_GLOBAL } from './mustache';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
@@ -47,6 +48,7 @@ export function useYamlValidation({
   onValidationErrors,
 }: UseYamlValidationProps): UseYamlValidationResult {
   const [validationErrors, setValidationErrors] = useState<YamlValidationError[] | null>(null);
+  const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   // Function to validate mustache expressions and apply decorations
   const validateVariables = useCallback(
@@ -60,6 +62,8 @@ export function useYamlValidation({
         // TODO: validate diff editor
         return;
       }
+
+      editor = editor as monaco.editor.IStandaloneCodeEditor;
 
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
@@ -77,7 +81,7 @@ export function useYamlValidation({
         // Collect markers to add to the model
         const markers: monaco.editor.IMarkerData[] = [];
 
-        const matches = [...text.matchAll(MUSTACHE_REGEX)];
+        const matches = [...text.matchAll(MUSTACHE_REGEX_GLOBAL)];
         // TODO: check if the variable is inside quouted string or yaml | or > string section
         for (const match of matches) {
           const matchStart = match.index ?? 0;
@@ -119,6 +123,7 @@ export function useYamlValidation({
               ),
               options: {
                 inlineClassName: 'template-variable-error',
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               },
             });
           } else {
@@ -131,14 +136,19 @@ export function useYamlValidation({
               ),
               options: {
                 inlineClassName: 'template-variable-valid',
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               },
             });
           }
         }
 
+        if (decorationsCollection.current) {
+          decorationsCollection.current.clear();
+        }
+        decorationsCollection.current = editor.createDecorationsCollection(decorations);
+
         // Set markers on the model for the problems panel
         monaco.editor.setModelMarkers(model, 'mustache-validation', markers);
-        editor?.deltaDecorations([], decorations);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
