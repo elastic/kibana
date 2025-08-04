@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { ruleMigrationRouteHelpersFactory } from '../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { ruleMigrationRouteHelpersFactory } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

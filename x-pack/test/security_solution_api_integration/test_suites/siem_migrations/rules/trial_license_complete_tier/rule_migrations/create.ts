@@ -6,8 +6,8 @@
  */
 
 import expect from 'expect';
-import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

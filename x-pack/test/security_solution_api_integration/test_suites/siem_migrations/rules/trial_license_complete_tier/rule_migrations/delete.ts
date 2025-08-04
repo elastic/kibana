@@ -12,13 +12,13 @@ import {
   deleteAllRuleMigrations,
   ruleMigrationRouteHelpersFactory,
   splunkRuleWithResources,
-} from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getResoucesPerMigrationFromES,
   getRuleMigrationFromES,
   getRulesPerMigrationFromES,
-} from '../../utils/es_queries';
+} from '../../../utils/es_queries';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

@@ -6,42 +6,34 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../utils';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
   const ruleMigrationRoutes = ruleMigrationRouteHelpersFactory(supertest);
-  describe('@ess @serverless @serverlessQA Update API', () => {
+
+  describe('@ess @serverless @serverlessQA Get API', () => {
     let migrationId: string;
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
-      const name = 'First Migration';
-      const creationResponse = await ruleMigrationRoutes.create({ body: { name } });
+      const creationResponse = await ruleMigrationRoutes.create({});
       migrationId = creationResponse.body.migration_id;
     });
 
-    it('should update migration name without any issues', async () => {
-      const updatedName = 'Updated Migration Name';
-      await ruleMigrationRoutes.update({
-        migrationId,
-        body: { name: updatedName },
-      });
-
-      const { body } = await ruleMigrationRoutes.get({
+    it('should fetch existing migration', async () => {
+      const migrationResponse = await ruleMigrationRoutes.get({
         migrationId,
       });
 
-      expect(body.id).toBe(migrationId);
-      expect(body.name).toBe(updatedName);
+      expect(migrationResponse.body.id).toBe(migrationId);
     });
 
     describe('Error handling', () => {
       it('should return 404 if migration ID does not exist', async () => {
-        const { body } = await ruleMigrationRoutes.update({
+        const { body } = await ruleMigrationRoutes.get({
           migrationId: 'non-existing-migration-id',
-          body: { name: 'New Name' },
           expectStatusCode: 404,
         });
 
