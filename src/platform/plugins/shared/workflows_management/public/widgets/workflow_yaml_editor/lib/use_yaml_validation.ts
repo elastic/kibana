@@ -154,7 +154,7 @@ export function useYamlValidation({
         console.error(error);
       }
     },
-    []
+    [workflowYamlSchema]
   );
 
   const handleMarkersChanged = useCallback(
