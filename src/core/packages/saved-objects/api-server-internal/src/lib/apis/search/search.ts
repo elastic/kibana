@@ -144,6 +144,7 @@ export const performSearch = async <
 
   const hasFieldsOption = Boolean(options.fields?.length);
 
+  // This is a bit silly, maybe we can just return saved objects in `hits.hits`? But that is also a bit weird.
   const migrateStorageDocument = flow(
     serializer.rawToSavedObject,
     migrationHelper.migrateStorageDocument,
