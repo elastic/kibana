@@ -52,7 +52,6 @@ import {
 } from '../../panel_actions';
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -133,7 +132,6 @@ export const PresentationPanelHoverActions = ({
   className,
   viewMode,
   showNotifications = true,
-  showBorder,
 }: PresentationPanelHoverActionsProps) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -144,9 +142,8 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
+  const [title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
     useBatchedOptionalPublishingSubjects(
-      api?.defaultTitle$,
       api?.title$,
       api?.description$,
       api?.hideTitle$,
@@ -441,27 +438,12 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
-  const { containerStyles, hoverActionStyles } = useHoverActionStyles(
-    viewMode === 'edit',
-    showBorder
-  );
 
   return (
-    <div
-      className={classNames('embPanel__hoverActionsAnchor', {
-        'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
-        'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
-      })}
-      data-test-embeddable-id={api?.uuid}
-      data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
-        /\s/g,
-        ''
-      )}`}
-      css={containerStyles}
-    >
+    <>
       {children}
       {api && hasHoverActions && (
-        <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
+        <div className={classNames('embPanel__hoverActions', className)}>
           {dragHandle}
           {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
@@ -525,6 +507,6 @@ export const PresentationPanelHoverActions = ({
           </span>
         </div>
       )}
-    </div>
+    </>
   );
 };
