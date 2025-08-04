@@ -23,7 +23,7 @@ import { WindowValueExpression } from './common/condition_window_value';
 import {
   DEFAULT_CONDITION,
   ForTheLastExpression,
-  SHOW_RECOVERY_MODE_SWITCH,
+  SHOW_RECOVERY_STRATEGY_SWITCH,
 } from './common/for_the_last_expression';
 import { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
@@ -33,13 +33,13 @@ interface Props {
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
   // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
   // After the next serverless release the commit containing these changes can be reverted
-  showRecoveryModeSwitch?: boolean;
+  showRecoveryStrategySwitch?: boolean;
 }
 
 export const StatusRuleExpression: React.FC<Props> = ({
   ruleParams,
   setRuleParams,
-  showRecoveryModeSwitch = SHOW_RECOVERY_MODE_SWITCH,
+  showRecoveryStrategySwitch = SHOW_RECOVERY_STRATEGY_SWITCH,
 }) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
@@ -88,12 +88,12 @@ export const StatusRuleExpression: React.FC<Props> = ({
     [ruleParams?.condition, setRuleParams]
   );
 
-  const onFirstUpRecoveryModeChange = useCallback(
+  const onFirstUpRecoveryStrategyChange = useCallback(
     (isChecked: boolean) => {
       let newCondition = ruleParams?.condition ?? DEFAULT_CONDITION;
       newCondition = {
         ...newCondition,
-        recoveryMode: isChecked ? 'firstUp' : 'conditionNotMet',
+        recoveryStrategy: isChecked ? 'firstUp' : 'conditionNotMet',
       };
 
       setRuleParams('condition', newCondition);
@@ -181,20 +181,20 @@ export const StatusRuleExpression: React.FC<Props> = ({
           onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
         />
       </EuiFlexItem>
-      {showRecoveryModeSwitch && (
+      {showRecoveryStrategySwitch && (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 compressed
-                label={FIRST_UP_RECOVERY_MODE_SWITCH_LABEL}
-                checked={ruleParams.condition?.recoveryMode === 'firstUp'}
-                onChange={(e) => onFirstUpRecoveryModeChange(e.target.checked)}
+                label={FIRST_UP_RECOVERY_STRATEGY_SWITCH_LABEL}
+                checked={ruleParams.condition?.recoveryStrategy === 'firstUp'}
+                onChange={(e) => onFirstUpRecoveryStrategyChange(e.target.checked)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIconTip content={FIRST_UP_RECOVERY_MODE_TOOLTIP} />
+              <EuiIconTip content={FIRST_UP_RECOVERY_STRATEGY_TOOLTIP} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -236,14 +236,14 @@ const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
   }
 );
 
-const FIRST_UP_RECOVERY_MODE_SWITCH_LABEL = i18n.translate(
-  'xpack.synthetics.statusRule.euiSwitch.firstUpRecoveryMode',
+const FIRST_UP_RECOVERY_STRATEGY_SWITCH_LABEL = i18n.translate(
+  'xpack.synthetics.statusRule.euiSwitch.firstUpRecoveryStrategy',
   {
     defaultMessage: 'Recover the alert as soon as the monitor is up',
   }
 );
-const FIRST_UP_RECOVERY_MODE_TOOLTIP = i18n.translate(
-  'xpack.synthetics.statusRule.tooltip.firstUpRecoveryMode',
+const FIRST_UP_RECOVERY_STRATEGY_TOOLTIP = i18n.translate(
+  'xpack.synthetics.statusRule.tooltip.firstUpRecoveryStrategy',
   {
     defaultMessage: 'If not selected, the alert will recover when the condition is no longer met',
   }

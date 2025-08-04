@@ -61,14 +61,14 @@ const OPTIONS: Option[] = [
 ];
 
 // Set this to true to test the feature
-export const SHOW_RECOVERY_MODE_SWITCH = false;
+export const SHOW_RECOVERY_STRATEGY_SWITCH = false;
 
 export const DEFAULT_CONDITION = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
   downThreshold: 3,
   locationsThreshold: 1,
-  ...(SHOW_RECOVERY_MODE_SWITCH ? { recoveryMode: 'firstUp' as const } : {}),
+  ...(SHOW_RECOVERY_STRATEGY_SWITCH ? { recoveryStrategy: 'firstUp' as const } : {}),
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);

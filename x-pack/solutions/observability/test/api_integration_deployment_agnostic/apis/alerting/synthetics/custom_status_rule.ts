@@ -455,11 +455,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // Helper function to reduce code duplication between NumberOfChecks location threshold tests
     async function testNumberOfChecksLocationThresholdUngrouped(options: {
       numberOfChecks: number;
-      recoveryMode?: 'firstUp';
+      recoveryStrategy?: 'firstUp';
       ruleName: string;
       testSuiteName: string;
     }) {
-      const { numberOfChecks, recoveryMode, ruleName, testSuiteName } = options;
+      const { numberOfChecks, recoveryStrategy, ruleName, testSuiteName } = options;
 
       describe(testSuiteName, () => {
         let ruleId = '';
@@ -472,7 +472,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('creates a monitor', async () => {
           monitor = await ruleHelper.addMonitor(
             `Monitor location based at ${moment().format('LT')} ungrouped 2 locations${
-              recoveryMode ? ' - recoveryMode: firstUp' : ''
+              recoveryStrategy ? ' - recoveryStrategy: firstUp' : ''
             }`
           );
           expect(monitor).to.have.property('id');
@@ -487,7 +487,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               groupBy: 'none',
               downThreshold: 1,
-              ...(recoveryMode && { recoveryMode }),
+              ...(recoveryStrategy && { recoveryStrategy }),
             },
             monitorIds: [monitor.id],
           };
@@ -571,7 +571,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const alert: any = response.hits.hits?.[0]._source;
           expect(alert).to.have.property('kibana.alert.status', 'active');
 
-          const devServiceDownTimes = recoveryMode === 'firstUp' ? '2 times' : '1 time';
+          const devServiceDownTimes = recoveryStrategy === 'firstUp' ? '2 times' : '1 time';
 
           expect(alert['kibana.alert.reason']).to.eql(
             `Monitor "${monitor.name}" is down ${devServiceDownTimes} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
@@ -688,7 +688,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           const alert: any = response.hits.hits?.[0]._source;
           expect(alert).to.have.property('kibana.alert.status', 'active');
-          const devServiceDownTimes = recoveryMode === 'firstUp' ? '3 times' : '1 time';
+          const devServiceDownTimes = recoveryStrategy === 'firstUp' ? '3 times' : '1 time';
 
           expect(alert['kibana.alert.reason']).to.eql(
             `Monitor "${monitor.name}" is down ${devServiceDownTimes} from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last ${numberOfChecks} checks from at least 2 locations.`
@@ -782,16 +782,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     void testNumberOfChecksLocationThresholdUngrouped({
       numberOfChecks: 5,
-      recoveryMode: 'firstUp',
-      ruleName: 'When down from 2 locations - recoveryMode: firstUp',
+      recoveryStrategy: 'firstUp',
+      ruleName: 'When down from 2 locations - recoveryStrategy: firstUp',
       testSuiteName:
-        'NumberOfChecks - Location threshold > 1 - ungrouped - 2 down locations - recoveryMode: firstUp',
+        'NumberOfChecks - Location threshold > 1 - ungrouped - 2 down locations - recoveryStrategy: firstUp',
     });
 
     // Helper function to reduce code duplication between similar time window tests
     async function testTimeWindowLocationThresholdGrouped(options: {
       downThreshold: number;
-      recoveryMode?: 'firstUp';
+      recoveryStrategy?: 'firstUp';
       ruleName: string;
       testSuiteName: string;
       expectedRecoveryReason: string;
@@ -799,7 +799,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }) {
       const {
         downThreshold,
-        recoveryMode,
+        recoveryStrategy,
         ruleName,
         testSuiteName,
         expectedRecoveryReason,
@@ -832,7 +832,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               groupBy: 'locationId',
               downThreshold,
-              ...(recoveryMode && { recoveryMode }),
+              ...(recoveryStrategy && { recoveryStrategy }),
             },
             monitorIds: [monitor.id],
           };
@@ -892,7 +892,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('should trigger recovered alert', async function () {
           // Handle different recovery triggers
-          if (recoveryMode === 'firstUp') {
+          if (recoveryStrategy === 'firstUp') {
             upCheckDocs = await ruleHelper.makeSummaries({
               monitor,
               upChecks: 1,
@@ -938,7 +938,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           );
 
           // Handle different recovery reason expectations
-          if (recoveryMode === 'firstUp' && upCheckDocs.length > 0) {
+          if (recoveryStrategy === 'firstUp' && upCheckDocs.length > 0) {
             expect(recoveryResponse.hits.hits[0]._source).property(
               'recoveryReason',
               `the monitor is now up again. It ran successfully at ${moment(
@@ -980,7 +980,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     // Replace the second test suite
     void testTimeWindowLocationThresholdGrouped({
       downThreshold: 1,
-      recoveryMode: 'firstUp',
+      recoveryStrategy: 'firstUp',
       ruleName: 'Status based on checks in a time window - firstUp recovery mode',
       testSuiteName:
         'TimeWindow - Location threshold = 1 - grouped by location - 1 down location - firstUp recovery mode',

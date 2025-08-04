@@ -52,7 +52,8 @@ import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
 
-const DEFAULT_RECOVERY_MODE: NonNullable<StatusRuleCondition['recoveryMode']> = 'conditionNotMet';
+const DEFAULT_RECOVERY_STRATEGY: NonNullable<StatusRuleCondition['recoveryStrategy']> =
+  'conditionNotMet';
 
 export class StatusRuleExecutor {
   previousStartedAt: Date | null;
@@ -366,13 +367,13 @@ export class StatusRuleExecutor {
     const { useTimeWindow, useLatestChecks, downThreshold, locationsThreshold } = getConditionType(
       this.params?.condition
     );
-    const recoveryMode = this.params?.condition?.recoveryMode ?? DEFAULT_RECOVERY_MODE;
+    const recoveryStrategy = this.params?.condition?.recoveryStrategy ?? DEFAULT_RECOVERY_STRATEGY;
     const groupBy = this.params?.condition?.groupBy ?? 'locationId';
 
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
-        // Skip scheduling if recoveryMode is 'firstUp' and latest ping is up
-        if (recoveryMode === 'firstUp' && (statusConfig.ping.summary?.up ?? 0) > 0) {
+        // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
+        if (recoveryStrategy === 'firstUp' && (statusConfig.ping.summary?.up ?? 0) > 0) {
           return;
         }
 
@@ -404,9 +405,9 @@ export class StatusRuleExecutor {
       const downConfigsById = getConfigsByIds(downConfigs);
 
       for (const [configId, locationConfigs] of downConfigsById) {
-        // If recoveryMode is 'firstUp', we only consider configs that are not up
+        // If recoveryStrategy is 'firstUp', we only consider configs that are not up
         const configs =
-          recoveryMode === 'firstUp'
+          recoveryStrategy === 'firstUp'
             ? locationConfigs.filter((c) => (c.ping.summary?.up ?? 0) === 0)
             : locationConfigs;
 
