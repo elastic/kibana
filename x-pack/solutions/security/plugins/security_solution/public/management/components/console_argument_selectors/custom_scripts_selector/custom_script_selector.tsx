@@ -122,6 +122,15 @@ export const CustomScriptSelector = memo<
     });
   }, [data, value]);
 
+  useEffect(() => {
+    // TODO:PT implement useEffect()
+    //
+    //  working here: need to properly initialize the compnent when pre-selected values are used
+    //
+    //
+    //
+  }, []);
+
   // There is a race condition between the parent input and search input which results in search having the last char of the argument eg. 'e' from '--CloudFile'
   // This is a workaround to ensure the popover is not shown until the input is focused
   const [isAwaitingRenderDelay, setIsAwaitingRenderDelay] = useState(true);
