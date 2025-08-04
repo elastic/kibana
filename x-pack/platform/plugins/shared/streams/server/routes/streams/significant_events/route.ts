@@ -15,7 +15,7 @@ import type {
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
-import { from as fromRxjs, map } from 'rxjs';
+import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
@@ -228,26 +228,27 @@ const generateSignificantEventsRoute = createServerRoute({
       throw badRequest('Streams are not enabled');
     }
 
-    const generatedSignificantEventDefinitions = await generateSignificantEventDefinitions(
-      {
-        name: params.path.name,
-        connectorId: params.query.connectorId,
-        currentDate: params.query.currentDate,
-        shortLookback: params.query.shortLookback,
-        longLookback: params.query.longLookback,
-      },
-      {
-        inferenceClient,
-        esClient: createTracedEsClient({
-          client: scopedClusterClient.asCurrentUser,
+    return fromRxjs(
+      generateSignificantEventDefinitions(
+        {
+          name: params.path.name,
+          connectorId: params.query.connectorId,
+          currentDate: params.query.currentDate,
+          shortLookback: params.query.shortLookback,
+          longLookback: params.query.longLookback,
+        },
+        {
+          inferenceClient,
+          esClient: createTracedEsClient({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            plugin: 'streams',
+          }),
           logger,
-          plugin: 'streams',
-        }),
-        logger,
-      }
-    );
-
-    return fromRxjs(generatedSignificantEventDefinitions).pipe(
+        }
+      )
+    ).pipe(
+      mergeMap((queries) => fromRxjs(queries)),
       map((query) => ({
         query,
         type: 'generated_query' as const,
