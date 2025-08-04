@@ -69,7 +69,7 @@ export const installEndpointSecurityPrebuiltRule = async ({
     // Make sure the latest prebuilt rules package is installed (in case the
     // user installs Elastic Defend integration without visiting Security
     // Solution first)
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, context);
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, context, logger);
 
     const latestRuleVersion = await ruleAssetsClient.fetchLatestVersions([
       ELASTIC_SECURITY_RULE_ID,
