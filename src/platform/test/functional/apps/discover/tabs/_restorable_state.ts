@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const monacoEditor = getService('monacoEditor');
   const esql = getService('esql');
+  const browser = getService('browser');
 
   describe('tabs restorable state', function () {
     describe('sidebar', function () {
@@ -122,6 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('data grid', function () {
+      afterEach(async () => {
+        await browser.clearLocalStorage();
+      });
+
       it('should restore the selected docs', async () => {
         const expectState = async (count: number) => {
           expect(await dataGrid.getNumberOfSelectedRowsOnCurrentPage()).to.be(count);
