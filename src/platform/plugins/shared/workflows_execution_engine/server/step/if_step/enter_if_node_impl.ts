@@ -18,6 +18,16 @@ export class EnterIfNodeImpl implements StepImplementation {
     await this.workflowState.startStep(this.step.id);
     const successors: any[] = this.workflowState.getNodeSuccessors(this.step.id);
 
+    if (successors.some((node) => node.type !== 'enter-condition-branch')) {
+      throw new Error(
+        `EnterIfNode with id ${
+          this.step.id
+        } must have only 'enter-condition-branch' successors, but found: ${successors
+          .map((node) => node.type)
+          .join(', ')}.`
+      );
+    }
+
     const thenNode = successors?.find((node) =>
       Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;

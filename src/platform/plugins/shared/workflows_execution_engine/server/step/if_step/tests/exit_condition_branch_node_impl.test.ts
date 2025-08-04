@@ -59,6 +59,13 @@ describe('ExitConditionBranchNodeImpl', () => {
     );
   });
 
+  it('should raise an error if successor is not exit-if', async () => {
+    getNodeSuccessors.mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
+    await expect(impl.run()).rejects.toThrow(
+      `ExitConditionBranchNode with id ${step.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
+    );
+  });
+
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
     expect(workflowState.goToStep).toHaveBeenCalledWith('exitIfNode');

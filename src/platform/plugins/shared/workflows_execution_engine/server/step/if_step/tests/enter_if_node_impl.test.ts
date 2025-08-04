@@ -51,8 +51,16 @@ describe('EnterIfNodeImpl', () => {
 
   it('should evaluate condition and go to thenNode if condition is true', async () => {
     getNodeSuccessors.mockReturnValueOnce([
-      { id: 'thenNode', condition: 'true' },
-      { id: 'elseNode' },
+      {
+        id: 'thenNode',
+        type: 'enter-condition-branch',
+        condition: 'true',
+      } as EnterConditionBranchNode,
+      {
+        id: 'elseNode',
+        type: 'enter-condition-branch',
+        condition: 'false',
+      } as EnterConditionBranchNode,
     ]);
     await impl.run();
     expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
@@ -61,8 +69,15 @@ describe('EnterIfNodeImpl', () => {
 
   it('should evaluate condition and go to elseNode if condition is false', async () => {
     getNodeSuccessors.mockReturnValueOnce([
-      { id: 'thenNode', condition: 'false' },
-      { id: 'elseNode' },
+      {
+        id: 'thenNode',
+        type: 'enter-condition-branch',
+        condition: 'false',
+      } as EnterConditionBranchNode,
+      {
+        id: 'elseNode',
+        type: 'enter-condition-branch',
+      } as EnterConditionBranchNode,
     ]);
     await impl.run();
     expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
@@ -70,9 +85,22 @@ describe('EnterIfNodeImpl', () => {
   });
 
   it('should evaluate condition and go to exit node if no else branch is defined', async () => {
-    getNodeSuccessors.mockReturnValueOnce([{ id: 'thenNode', condition: 'false' }]);
+    getNodeSuccessors.mockReturnValueOnce([
+      {
+        id: 'thenNode',
+        type: 'enter-condition-branch',
+        condition: 'false',
+      } as EnterConditionBranchNode,
+    ]);
     await impl.run();
     expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
     expect(workflowState.goToStep).toHaveBeenCalledWith('exitIfNode');
+  });
+
+  it('should throw an error if successors are not enter-condition-branch', async () => {
+    getNodeSuccessors.mockReturnValueOnce([{ id: 'someOtherNode', type: 'some-other-type' }]);
+    await expect(impl.run()).rejects.toThrow(
+      `EnterIfNode with id ${step.id} must have only 'enter-condition-branch' successors, but found: some-other-type.`
+    );
   });
 });
