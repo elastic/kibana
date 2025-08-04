@@ -15363,6 +15363,18 @@
                               ],
                               "type": "object"
                             },
+                            "connectors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "exporters": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "extensions": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "fleet": {
                               "anyOf": [
                                 {
@@ -15651,6 +15663,14 @@
                               },
                               "type": "object"
                             },
+                            "processors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "receivers": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "revision": {
                               "type": "number"
                             },
@@ -15668,6 +15688,46 @@
                                 "type": "object"
                               },
                               "type": "array"
+                            },
+                            "service": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "extensions": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "pipelines": {
+                                  "additionalProperties": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "exporters": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "processors": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "receivers": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "type": "object",
+                                    "x-oas-optional": true
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
                             },
                             "signed": {
                               "additionalProperties": false,
@@ -58651,6 +58711,22 @@
           {
             "in": "query",
             "name": "currentDate",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shortLookback",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longLookback",
             "required": false,
             "schema": {
               "type": "string"
