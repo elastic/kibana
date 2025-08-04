@@ -214,7 +214,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      * Callback function invoked when the user cancels changes to the controls.
      * This function reverts the UI to its previous state or closes a modal.
      */
-    onCancelControl: () => void;
+    onCancelControl?: () => void;
     /**
      * A React Node that will be rendered as a wrapper for the UI controls
      * associated with the ES|QL variables. This allows for custom layout or
@@ -829,7 +829,7 @@ export const QueryBarTopRow = React.memo(
               props.esqLVariablesConfig
                 ? {
                     onSaveControl: props.esqLVariablesConfig.onSaveControl,
-                    onCancelControl: props.esqLVariablesConfig.onCancelControl,
+                    onCancelControl: props.esqLVariablesConfig.onCancelControl ?? (() => {}),
                     supportsControls: true,
                   }
                 : undefined

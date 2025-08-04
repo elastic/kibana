@@ -84,7 +84,7 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   // ES|QL controls logic
-  const { onSaveControl, onCancelControl, getActivePanels } = useESQLVariables({
+  const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
@@ -305,7 +305,6 @@ export const DiscoverTopNav = ({
             ? {
                 esqlVariables: esqlVariables ?? [],
                 onSaveControl,
-                onCancelControl,
                 controlsWrapper: (
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupAPI}

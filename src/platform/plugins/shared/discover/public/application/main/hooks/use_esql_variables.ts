@@ -77,7 +77,6 @@ export const useESQLVariables = ({
   onTextLangQueryChange: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  onCancelControl: () => void;
   getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
@@ -150,9 +149,6 @@ export const useESQLVariables = ({
     [controlGroupAPI, onTextLangQueryChange]
   );
 
-  // Callback for canceling control changes (currently a no-op, but kept for API consistency)
-  const onCancelControl = useCallback(() => {}, []); // No dependencies as it does nothing for now
-
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
     const savedControlGroupState = JSON.parse(
@@ -167,7 +163,6 @@ export const useESQLVariables = ({
 
   return {
     onSaveControl,
-    onCancelControl,
     getActivePanels,
   };
 };

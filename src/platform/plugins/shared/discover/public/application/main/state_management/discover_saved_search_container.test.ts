@@ -24,6 +24,7 @@ import { VIEW_MODE } from '../../../../common/constants';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 import { omit } from 'lodash';
 import { createTabsStorageManager } from './tabs_storage_manager';
 
@@ -290,6 +291,18 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(isEqualSavedSearch(savedSearch1, savedSearch1)).toBe(true);
       expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
       savedSearch2.searchSource.setField('query', { language: 'lucene', query: 'test' });
+      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
+    });
+
+    it('should return false for different control states', () => {
+      const savedSearch1 = {
+        ...savedSearchMock,
+        controlGroupState: {
+          ...mockControlState,
+          panel1: { ...mockControlState.panel1, selectedOptions: ['baz'] },
+        },
+      };
+      const savedSearch2 = { ...savedSearchMock, controlGroupState: mockControlState };
       expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
     });
   });

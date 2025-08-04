@@ -18,6 +18,7 @@ import {
 import { defaultTabState } from './redux/internal_state';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { mockControlState } from '../../../__mocks__/esql_controls';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -385,6 +386,39 @@ describe('TabsStorageManager', () => {
         {
           ...toStoredTab(mockTab1),
           ...updatedTabState,
+        },
+        toStoredTab(mockTab2),
+      ],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+  });
+
+  it('should update control tab state in local storage', () => {
+    const { tabsStorageManager, services } = create();
+    const storage = services.storage;
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [toStoredTab(mockRecentlyClosedTab)],
+    });
+
+    jest.spyOn(storage, 'set');
+
+    const updatedControlState = mockControlState;
+
+    tabsStorageManager.updateTabControlStateLocally(mockTab1.id, {
+      controlGroupState: updatedControlState,
+    });
+
+    expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [
+        {
+          ...toStoredTab(mockTab1),
+          controlGroupState: updatedControlState,
         },
         toStoredTab(mockTab2),
       ],
