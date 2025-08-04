@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
@@ -13,6 +13,7 @@ import { useConversationActions } from '../../../hooks/use_conversation_actions'
 import { AgentDisplay } from '../agent_display';
 import { AgentSelectDropdown } from '../agent_select_dropdown';
 import { useMessages } from '../../../context/messages_context';
+import { css } from '@emotion/react';
 
 interface ConversationInputActionsProps {
   handleSubmit: () => void;
@@ -36,6 +37,10 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
   const agentId = useAgentId();
   const hasActiveConversation = useHasActiveConversation();
   const { canCancel, cancel } = useMessages();
+  const { euiTheme } = useEuiTheme();
+  const cancelButtonStyles = css`
+    background-color: ${euiTheme.colors.backgroundLightText};
+  `;
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
@@ -52,12 +57,14 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {canCancel ? (
+          {canCancel || true ? (
             <EuiButtonIcon
               aria-label={labels.cancel}
               data-test-subj="onechatAppConversationInputFormCancelButton"
-              iconType="cross"
+              iconType="stopFilled"
               size="m"
+              color="text"
+              css={cancelButtonStyles}
               onClick={cancel}
             />
           ) : (

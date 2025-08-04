@@ -17,12 +17,12 @@ import { createToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import { useMutation } from '@tanstack/react-query';
 import React, { createContext, useContext, useRef, useState } from 'react';
 import { unstable_batchedUpdates } from 'react-dom';
+import { useAgentId } from '../hooks/use_conversation';
 import { useConversationActions } from '../hooks/use_conversation_actions';
+import { useConversationId } from '../hooks/use_conversation_id';
 import { useOnechatServices } from '../hooks/use_onechat_service';
 import { useReportConverseError } from '../hooks/use_report_error';
 import { mutationKeys } from '../mutation_keys';
-import { useAgentId } from '../hooks/use_conversation';
-import { useConversationId } from '../hooks/use_conversation_id';
 interface UseSendMessageMutationProps {
   connectorId?: string;
 }
@@ -182,6 +182,13 @@ export const MessagesProvider = ({ children }: { children: React.ReactNode }) =>
   const { sendMessage, isResponseLoading, error, pendingMessage, retry, canCancel, cancel } =
     useSendMessageMutation();
 
+  const handleCancel = () => {
+    if (pendingMessage) {
+      setInput(pendingMessage);
+    }
+    cancel();
+  };
+
   return (
     <MessagesContext.Provider
       value={{
@@ -193,12 +200,7 @@ export const MessagesProvider = ({ children }: { children: React.ReactNode }) =>
         pendingMessage,
         retry,
         canCancel,
-        cancel: () => {
-          if (pendingMessage) {
-            setInput(pendingMessage);
-          }
-          cancel();
-        },
+        cancel: handleCancel,
       }}
     >
       {children}
