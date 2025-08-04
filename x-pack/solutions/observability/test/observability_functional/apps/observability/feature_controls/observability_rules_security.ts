@@ -33,7 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('observability security feature controls', function () {
     this.tags(['skipFirefox', 'skipFIPS']);
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await observability.alerts.common.createDataView({
         supertest,
         name: DATA_VIEW_1_NAME,
@@ -50,7 +52,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       // Since the above unload removes the default config,
       // the following command will set it back to avoid changing the test environment
     });
@@ -103,7 +107,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('observability alerts read-only privileges', function () {
       this.tags('skipFIPS');
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             observabilityManageRules: ['read'],
@@ -113,7 +119,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
         await observability.users.restoreDefaultTestUserRole();
       });
 
