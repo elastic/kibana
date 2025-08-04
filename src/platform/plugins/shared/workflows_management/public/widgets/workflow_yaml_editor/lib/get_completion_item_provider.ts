@@ -10,22 +10,60 @@
 import { parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
+import _ from 'lodash';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import _ from 'lodash';
-import { MUSTACHE_REGEX } from './mustache';
+import { MUSTACHE_REGEX_WITH_KEY } from './mustache';
 
-function getInsertText(triggerCharacter: string | undefined, key: string) {
-  return key;
-  if (!triggerCharacter) {
-    return key;
+function getDetail(fullKey: string, insertText: string) {
+  if (insertText.endsWith('output')) {
+    return 'Step output';
   }
+  if (insertText.includes('steps')) {
+    return 'State of previous steps';
+  }
+  if (insertText.includes('consts')) {
+    return 'Workflow constants';
+  }
+  return undefined;
+}
 
-  if (['@', '{', ' '].includes(triggerCharacter)) {
-    return `{{ ${key} }}`;
-  }
-  return key;
+function getSuggestion(
+  fullKey: string,
+  key: string,
+  context: monaco.languages.CompletionContext,
+  range: monaco.IRange
+): monaco.languages.CompletionItem {
+  const isAt = ['@'].includes(context.triggerCharacter ?? '');
+  // $0 is the cursor position
+  const insertText = isAt ? `{{ ${key}$0 }}` : key;
+  return {
+    label: key,
+    kind: ['steps', 'consts', 'secrets'].includes(key)
+      ? monaco.languages.CompletionItemKind.Folder
+      : monaco.languages.CompletionItemKind.Field,
+    range,
+    insertText,
+    detail: getDetail(fullKey, insertText),
+    insertTextRules: isAt
+      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      : monaco.languages.CompletionItemInsertTextRule.None,
+    additionalTextEdits: isAt
+      ? [
+          {
+            // remove the @
+            range: {
+              startLineNumber: range.startLineNumber,
+              endLineNumber: range.endLineNumber,
+              startColumn: range.startColumn - 1,
+              endColumn: range.endColumn,
+            },
+            text: '',
+          },
+        ]
+      : [],
+  };
 }
 
 export function getCompletionItemProvider(
@@ -33,7 +71,7 @@ export function getCompletionItemProvider(
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', '{'],
-    provideCompletionItems: (model, position, _context, _token) => {
+    provideCompletionItems: (model, position, completionContext, _token) => {
       const { lineNumber } = position;
       const line = model.getLineContent(lineNumber);
       const wordUntil = model.getWordUntilPosition(position);
@@ -54,7 +92,9 @@ export function getCompletionItemProvider(
       const path = getCurrentPath(yamlDocument, absolutePosition);
       let context = getContextForPath(result.data, workflowGraph, path);
 
-      const match = line.match(/@(\w+)?/) || MUSTACHE_REGEX.exec(line);
+      const match = line.match(/@(?<key>\S+?)\.?(?=\s|$)/) || line.match(MUSTACHE_REGEX_WITH_KEY);
+      const fullKey = match?.[1] ?? '';
+      let scopedContext = context;
 
       // if (!match) {
       //   return {
@@ -62,19 +102,15 @@ export function getCompletionItemProvider(
       //   };
       // }
 
-      if (match?.[1]) {
-        context = _.get(context, match[1]);
+      if (fullKey) {
+        scopedContext = _.get(context, fullKey);
+        if (scopedContext) {
+          context = scopedContext;
+        }
       }
 
       Object.keys(context).forEach((key) => {
-        suggestions.push({
-          label: key,
-          kind: ['steps', 'consts', 'secrets'].includes(key)
-            ? monaco.languages.CompletionItemKind.Folder
-            : monaco.languages.CompletionItemKind.Field,
-          range,
-          insertText: getInsertText(_context.triggerCharacter, key),
-        });
+        suggestions.push(getSuggestion(fullKey, key, completionContext, range));
       });
 
       return {

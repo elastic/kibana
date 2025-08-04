@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MUSTACHE_REGEX = /\{\{\s*(.*?)\s*\}\}/g;
+export const MUSTACHE_REGEX = /\{\{\s*(.*?)\s*\}\}/;
+export const MUSTACHE_REGEX_WITH_KEY = /\{\{\s*(?<key>\S+?)\.?(?=\s|$)\s*\}\}/;
+export const MUSTACHE_REGEX_GLOBAL = /\{\{\s*(.*?)\s*\}\}/g;
