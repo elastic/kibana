@@ -439,10 +439,23 @@ export class RuleTypeRegistry {
     return [...this.ruleTypes.keys()];
   }
 
-  public getAllTypesForCategories(categories: string[]): string[] {
-    return [...this.ruleTypes.values()]
-      .filter((ruleType) => categories.includes(ruleType.category))
-      .map((ruleType) => ruleType.id);
+  public getFilteredTypes({
+    excludeInternallyManaged = false,
+    categories,
+  }: {
+    excludeInternallyManaged?: boolean;
+    categories: string[];
+  }): string[] {
+    return [...this.ruleTypes.keys()].filter((id) => {
+      const ruleType = this.get(id);
+      if (excludeInternallyManaged && ruleType.internallyManaged) {
+        return false;
+      }
+      if (categories && categories.length > 0) {
+        return categories.includes(ruleType.category);
+      }
+      return true;
+    });
   }
 }
 
