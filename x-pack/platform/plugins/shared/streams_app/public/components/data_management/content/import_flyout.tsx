@@ -24,6 +24,7 @@ import {
   EuiFlyoutHeader,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -46,6 +47,8 @@ export function ImportContentPackFlyout({
     core: { http, notifications },
   } = useKibana();
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
@@ -55,10 +58,10 @@ export function ImportContentPackFlyout({
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={modalTitleId}>
             {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
               defaultMessage: 'Import content pack',
             })}
