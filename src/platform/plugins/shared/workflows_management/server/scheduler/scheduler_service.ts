@@ -14,7 +14,10 @@ import { v4 as generateUuid } from 'uuid';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowsService } from '../workflows_management/workflows_management_service';
 import { extractConnectorIds } from './lib/extract_connector_ids';
-import { convertToWorkflowGraph, convertToSerializableGraph } from '../../common';
+import {
+  convertToWorkflowGraph,
+  convertToSerializableGraph,
+} from '../../common/lib/build_execution_graph/build_execution_graph';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
