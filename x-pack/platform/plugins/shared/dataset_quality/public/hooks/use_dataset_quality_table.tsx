@@ -38,14 +38,11 @@ export const useDatasetQualityTable = () => {
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
-  const { canUserReadFailureStore: canReadFailureStore } = useDatasetQualityState();
+  const { canUserReadFailureStore: canReadFailureStore, canUserMonitorAnyDataset } =
+    useDatasetQualityState();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
-  const canUserMonitorDataset = useSelector(
-    service,
-    (state) => state.context.datasetUserPrivileges.canMonitor
-  );
   const canUserMonitorAnyDataStream = useSelector(
     service,
     (state) =>
@@ -62,28 +59,30 @@ export const useDatasetQualityTable = () => {
     qualities,
     query,
   } = useSelector(service, (state) => state.context.filters);
-  const showInactiveDatasets = inactive || !canUserMonitorDataset;
+
+  const showInactiveDatasets = inactive || !canUserMonitorAnyDataset;
 
   const loading = useSelector(
     service,
     (state) =>
-      state.matches('stats.datasets.fetching') ||
-      state.matches('stats.docsStats.fetching') ||
-      state.matches('integrations.fetching') ||
-      state.matches('stats.degradedDocs.fetching') ||
-      state.matches('stats.failedDocs.fetching')
+      state.matches('initializing') ||
+      state.matches('main.stats.datasets.fetching') ||
+      state.matches('main.stats.docsStats.fetching') ||
+      state.matches('main.integrations.fetching') ||
+      state.matches('main.stats.degradedDocs.fetching') ||
+      state.matches('main.stats.failedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('stats.datasets.fetching')
+    state.matches('main.stats.datasets.fetching')
   );
   const loadingDocStats = useSelector(service, (state) =>
-    state.matches('stats.docsStats.fetching')
+    state.matches('main.stats.docsStats.fetching')
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('stats.degradedDocs.fetching')
+    state.matches('main.stats.degradedDocs.fetching')
   );
   const loadingFailedStats = useSelector(service, (state) =>
-    state.matches('stats.failedDocs.fetching')
+    state.matches('main.stats.failedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -107,7 +106,7 @@ export const useDatasetQualityTable = () => {
     () =>
       getDatasetQualityTableColumns({
         fieldFormats,
-        canUserMonitorDataset,
+        canUserMonitorAnyDataset,
         canUserMonitorAnyDataStream,
         loadingDataStreamStats,
         loadingDocStats,
@@ -121,7 +120,7 @@ export const useDatasetQualityTable = () => {
       }),
     [
       fieldFormats,
-      canUserMonitorDataset,
+      canUserMonitorAnyDataset,
       canUserMonitorAnyDataStream,
       loadingDataStreamStats,
       loadingDocStats,
@@ -220,7 +219,7 @@ export const useDatasetQualityTable = () => {
     resultsCount,
     showInactiveDatasets,
     showFullDatasetNames,
-    canUserMonitorDataset,
+    canUserMonitorAnyDataset,
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
