@@ -78,68 +78,123 @@ export function validateFunctionNew({
   context: ICommandContext;
   callbacks: ICommandCallbacks;
 }): ESQLMessage[] {
-  const nestedErrors: ESQLMessage[] = [];
-  for (const arg of fn.args) {
-    if (isFunctionExpression(arg)) {
-      nestedErrors.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand,
-          context,
-          callbacks,
-        })
-      );
-    }
+  return new FunctionValidator(fn, parentCommand, context, callbacks).validate();
+}
 
-    // if a one or more child functions produced errors, stop validation and report
+class FunctionValidator {
+  private definition: FunctionDefinition | undefined;
+  private argTypes: (SupportedDataType | 'unknown')[];
+
+  constructor(
+    private fn: ESQLFunction,
+    private parentCommand: ESQLCommand,
+    private context: ICommandContext,
+    private callbacks: ICommandCallbacks
+  ) {
+    this.definition = getFunctionDefinition(fn.name);
+    this.argTypes = this.fn.args.map((node) =>
+      getExpressionType(node, this.context.fields, this.context.userDefinedColumns)
+    );
+  }
+
+  validate(): ESQLMessage[] {
+    const nestedErrors = this.validateNestedFunctions();
+
     if (nestedErrors.length) {
+      // if one or more child functions produced errors, stop validation and report
       return nestedErrors;
     }
+
+    if (!this.definition) {
+      return [errors.unknownFunction(this.fn)];
+    }
+
+    if (!this.validForLicense) {
+      return [errors.licenseRequired(this.fn, this.definition.license!)]; // TODO - maybe don't end validation here
+    }
+
+    if (!this.availableHere) {
+      const { displayName } = getFunctionLocation(this.fn, this.parentCommand);
+      return [errors.functionNotAllowedHere(this.fn, displayName)];
+    }
+
+    if (!this.hasValidArity) {
+      return [errors.wrongNumberArgs(this.fn, this.definition)];
+    }
+
+    return this.validateArguments();
   }
 
-  const definition = getFunctionDefinition(fn.name);
-
-  if (!definition) {
-    return [errors.unknownFunction(fn)];
+  /**
+   * Checks if the function is valid for the current license
+   */
+  private get validForLicense(): boolean {
+    const hasMinimumLicenseRequired = this.callbacks.hasMinimumLicenseRequired;
+    if (hasMinimumLicenseRequired) {
+      return hasMinimumLicenseRequired(this.definition?.license as ESQLLicenseType);
+    }
+    return true;
   }
 
-  if (
-    definition.license &&
-    callbacks.hasMinimumLicenseRequired &&
-    !callbacks.hasMinimumLicenseRequired(definition.license.toLowerCase() as ESQLLicenseType)
-  ) {
-    return [errors.licenseRequired(fn, definition.license)]; // TODO - maybe don't end validation here
+  /**
+   * Checks if the function is available in the current context
+   */
+  private get availableHere(): boolean {
+    const { location } = getFunctionLocation(this.fn, this.parentCommand);
+    return this.definition?.locationsAvailable.includes(location) ?? false;
   }
 
-  const { displayName, location } = getFunctionLocation(fn, parentCommand);
-  if (!definition.locationsAvailable.includes(location)) {
-    return [errors.functionNotAllowedHere(fn, displayName)];
+  /**
+   * Checks if the function has a valid number of arguments
+   */
+  private get hasValidArity(): boolean {
+    const { min, max } = getMaxMinNumberOfParams(this.definition!);
+    const arity = this.fn.args.length;
+    return arity >= min && arity <= max;
   }
 
-  const { min, max } = getMaxMinNumberOfParams(definition);
-  const arity = fn.args.length;
-  if (arity < min || arity > max) {
-    return [errors.wrongNumberArgs(fn, definition)];
+  /**
+   * Validates the function arguments against the function definition
+   */
+  private validateArguments(): ESQLMessage[] {
+    if (!this.definition) {
+      return [];
+    }
+
+    // Begin validation
+    const A = getSignaturesWithMatchingArity(this.definition, this.fn);
+
+    if (!A.length) {
+      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+    }
+
+    const S = getSignatureWithMatchingTypes(this.definition, this.argTypes);
+
+    if (!S) {
+      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+    }
+
+    return [];
   }
 
-  const argTypes = fn.args.map((node) =>
-    getExpressionType(node, context.fields, context.userDefinedColumns)
-  );
+  /**
+   * Validates the nested functions within the current function
+   */
+  private validateNestedFunctions(): ESQLMessage[] {
+    const nestedErrors: ESQLMessage[] = [];
+    for (const arg of this.fn.args) {
+      if (isFunctionExpression(arg)) {
+        nestedErrors.push(
+          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
+        );
+      }
 
-  // Begin validation
-  const A = getSignaturesWithMatchingArity(definition, fn);
-
-  if (!A.length) {
-    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
+      if (nestedErrors.length) {
+        return nestedErrors;
+      }
+    }
+    return nestedErrors;
   }
-
-  const S = getSignatureWithMatchingTypes(definition, argTypes);
-
-  if (!S) {
-    return [errors.noMatchingCallSignatures(fn, definition, argTypes)];
-  }
-
-  return [];
 }
 
 /**
