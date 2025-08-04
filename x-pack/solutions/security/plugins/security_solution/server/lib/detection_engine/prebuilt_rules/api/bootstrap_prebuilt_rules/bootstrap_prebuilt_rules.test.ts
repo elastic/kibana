@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { bootstrapPrebuiltRulesRoute } from './bootstrap_prebuilt_rules';
 
 import type { Installation, RegistryPackage } from '@kbn/fleet-plugin/common';
@@ -47,7 +46,7 @@ describe('bootstrap_prebuilt_rules_route', () => {
     ({ clients, context } = requestContextMock.createTools());
     clients.productFeaturesService = createProductFeaturesServiceMock([]);
 
-    bootstrapPrebuiltRulesRoute(server.router, loggerMock.create());
+    bootstrapPrebuiltRulesRoute(server.router, clients.logger);
   });
 
   it('returns information about installed packages', async () => {

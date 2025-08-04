@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import {
@@ -67,7 +66,7 @@ describe.skip('Import rules route', () => {
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     mockPrebuiltRuleAssetsClient = createPrebuiltRuleAssetsClientMock();
-    importRulesRoute(server.router, config, loggerMock.create());
+    importRulesRoute(server.router, config, clients.logger);
   });
 
   describe('status codes', () => {

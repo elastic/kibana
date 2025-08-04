@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import {
   getEmptyFindResult,
   addPrepackagedRulesRequest,
@@ -101,7 +100,7 @@ describe('add_prepackaged_rules_route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    installPrebuiltRulesAndTimelinesRoute(server.router, loggerMock.create());
+    installPrebuiltRulesAndTimelinesRoute(server.router, clients.logger);
   });
 
   describe('status codes', () => {
@@ -239,7 +238,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
-        loggerMock.create(),
+        clients.logger,
         mockExceptionsClient
       );
 
@@ -253,7 +252,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
-        loggerMock.create(),
+        clients.logger,
         mockExceptionsClient
       );
 
