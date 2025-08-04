@@ -13,7 +13,6 @@ import { useIntersectingState } from '../../hooks/use_intersecting_state';
 import { MetricsTemplate } from './metrics_template';
 import { HostCharts, KubernetesNodeCharts } from '../../charts';
 import type { HostMetricTypes } from '../../charts/types';
-import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 
 const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
   'cpu',
@@ -26,9 +25,8 @@ const METRIC_TYPES: Array<Exclude<HostMetricTypes, 'kpi'>> = [
 export const HostMetrics = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { dateRange } = useDatePickerContext();
-  const { entity } = useAssetDetailsRenderPropsContext();
+  const { entity, schema } = useAssetDetailsRenderPropsContext();
   const { metrics, logs } = useDataViewsContext();
-  const [state] = useAssetDetailsUrlState();
 
   const intersectingState = useIntersectingState(ref, { dateRange });
 
@@ -41,14 +39,14 @@ export const HostMetrics = () => {
           dataView={metric === 'log' ? logs.dataView : metrics.dataView}
           dateRange={intersectingState.dateRange}
           metric={metric}
-          schema={state?.schema}
+          schema={schema}
         />
       ))}
       <KubernetesNodeCharts
         entityId={entity.id}
         dataView={metrics.dataView}
         dateRange={intersectingState.dateRange}
-        schema={state?.schema}
+        schema={schema}
       />
     </MetricsTemplate>
   );

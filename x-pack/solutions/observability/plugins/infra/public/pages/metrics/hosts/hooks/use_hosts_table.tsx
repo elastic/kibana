@@ -315,7 +315,7 @@ export const useHostsTable = () => {
               sortable: false,
               'data-test-subj': 'hostsView-tableRow-hasSystemMetrics',
               render: (hasSystemMetrics: HostNodeRow['hasSystemMetrics']) => {
-                if (hasSystemMetrics || schema === DataSchemaFormat.SEMCONV) {
+                if (hasSystemMetrics) {
                   return null;
                 }
                 return (
@@ -514,7 +514,6 @@ export const useHostsTable = () => {
       detailsItemId,
       setProperties,
       reportHostEntryClick,
-      schema,
     ]
   );
 

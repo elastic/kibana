@@ -14,7 +14,7 @@ import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,
 } from '@kbn/observability-shared-plugin/common';
-import type { DataSchemaFormat, InventoryItemType } from '../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type { RouteState } from '../../types';
 
@@ -22,7 +22,6 @@ interface QueryParams {
   from?: number;
   to?: number;
   name?: string;
-  schema?: DataSchemaFormat | null;
 }
 
 export const useAssetDetailsRedirect = () => {

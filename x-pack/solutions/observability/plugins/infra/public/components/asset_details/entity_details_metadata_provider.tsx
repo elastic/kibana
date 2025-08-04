@@ -5,7 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+
+import {
+  type InventoryItemType,
+  findInventoryFields,
+} from '@kbn/metrics-data-access-plugin/common';
 import { TimeRangeMetadataProvider } from '../../hooks/use_time_range_metadata';
 import { useDatePickerContext } from './hooks/use_date_picker';
 
@@ -19,13 +23,16 @@ export function EntityDetailsTimeRangeMetadataProvider({
   entityType: InventoryItemType;
 }) {
   const { dateRange } = useDatePickerContext();
+
   if (entityType !== 'host') return <>{children}</>;
+  const { id } = findInventoryFields(entityType);
+
   return (
     <TimeRangeMetadataProvider
-      dataSource="host"
+      dataSource={entityType}
       start={dateRange.from}
       end={dateRange.to}
-      kuery={`host.name:"${entityId}"`}
+      kuery={`${id}:"${entityId}"`}
     >
       {children}
     </TimeRangeMetadataProvider>

@@ -63,7 +63,7 @@ export const getAllHosts = async ({
     aggs: {
       // find hosts with metrics that are monitored by the system integration.
       monitoredHosts: {
-        filter: getFilterForEntityType('host'),
+        filter: getFilterForEntityType('host', schema),
         aggs: {
           names: {
             terms: {
