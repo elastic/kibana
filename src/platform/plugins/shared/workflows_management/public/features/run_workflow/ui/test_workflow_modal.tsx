@@ -21,7 +21,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
+import { WorkflowExecution } from '../../workflow_execution_detail/ui';
 
 export function TestWorkflowModal({
   workflowYaml,
