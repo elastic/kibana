@@ -597,6 +597,54 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '[logs.overlapping.child] already exists'
         );
       });
+
+      it('fails when importing existing query', async () => {
+        const archive = await generateArchive(
+          {
+            name: 'content_pack',
+            description: 'with overlapping query',
+            version: '1.0.0',
+          },
+          [
+            {
+              type: 'stream',
+              name: ROOT_STREAM_ID,
+              request: {
+                stream: {
+                  description: '',
+                  ingest: {
+                    processing: [],
+                    wired: {
+                      fields: {},
+                      routing: [],
+                    },
+                    lifecycle: { inherit: {} },
+                  },
+                },
+                dashboards: [],
+                queries: [
+                  { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+                ],
+              },
+            },
+          ]
+        );
+
+        const response = await importContent(
+          apiClient,
+          'logs.branch_a.child1.nested',
+          {
+            include: { objects: { all: {} } },
+            content: Readable.from(archive),
+            filename: 'overlap-1.0.0.zip',
+          },
+          409
+        );
+
+        expect((response as unknown as { message: string }).message).to.eql(
+          'Query [my-error-query | error query] already exists on [logs.branch_a.child1.nested]'
+        );
+      });
     });
   });
 }
