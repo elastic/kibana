@@ -8,16 +8,17 @@
 import type { LoggerFactory } from '@kbn/core/server';
 import { ReplaySubject, type Subject } from 'rxjs';
 import type { ConfigType } from '../../config';
-import type {
-  RuleMigrationsCreateClientParams,
-  SiemRuleMigrationsService,
+import {
   type SiemRuleMigrationsClient,
+  type RuleMigrationsCreateClientParams,
+  SiemRuleMigrationsService,
 } from './rules/siem_rule_migrations_service';
+
 import type { SiemMigrationsSetupParams } from './types';
-import type {
-  DashboardMigrationsCreateClientParams,
-  SiemDashboardMigrationsService,
+import {
   type SiemDashboardMigrationsClient,
+  type DashboardMigrationsCreateClientParams,
+  SiemDashboardMigrationsService,
 } from './dashboards/siem_dashboard_migration_service';
 
 export class SiemMigrationsService {
