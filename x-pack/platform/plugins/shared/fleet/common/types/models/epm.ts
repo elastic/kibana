@@ -801,7 +801,6 @@ export interface IndexTemplateEntry {
   indexTemplate: IndexTemplate;
 }
 
-
 export interface KnowledgeBaseItem {
   filename: string;
   content: string;

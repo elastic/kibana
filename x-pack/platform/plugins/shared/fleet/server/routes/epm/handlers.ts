@@ -10,7 +10,6 @@ import semverValid from 'semver/functions/valid';
 
 import { type HttpResponseOptions } from '@kbn/core/server';
 
-
 import { omit, pick } from 'lodash';
 
 import { defaultFleetErrorHandler } from '../../errors';

@@ -91,7 +91,6 @@ import {
   updateCustomIntegrationHandler,
   getKnowledgeBaseHandler,
   rollbackPackageHandler,
-
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
