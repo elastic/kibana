@@ -52,8 +52,8 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
     dashboardApi.scrollToTop();
   };
   const closePopover = useCallback(() => {
-    anchorElement.focus();
     cleanup();
+    anchorElement.focus();
   }, [anchorElement]);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
 
