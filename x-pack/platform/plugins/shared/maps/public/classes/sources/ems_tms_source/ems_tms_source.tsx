@@ -162,8 +162,8 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   getTileLayerId() {
-    if (!this._descriptor.isAutoSelect && this._descriptor.id) {
-      return this._descriptor.id;
+    if (!this._descriptor.isAutoSelect) {
+      return this._descriptor.id ?? getEmsTileLayerId().desaturated;
     }
 
     if (getIsDarkMode()) {

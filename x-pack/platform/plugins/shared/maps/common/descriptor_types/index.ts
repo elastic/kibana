@@ -11,4 +11,7 @@ export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
 
-export type { EMSTMSSourceDescriptor } from '../../server';
+export type {
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor
+} from '../../server';

@@ -8,12 +8,34 @@
 import { schema } from '@kbn/config-schema';
 import { SOURCE_TYPES } from '../../../../common';
 
+export const EMSFileSourceSchema = schema.object(
+  {
+    id: schema.string({
+      meta: { description: 'Administrative boundaries layer id from Elastic Maps Service (EMS).' },
+    }),
+    type: schema.literal(SOURCE_TYPES.EMS_FILE),
+    tooltipProperties: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          description: 'Administrative boundary properties displayed in tooltip.',
+        }
+      })
+    )
+  },
+  {
+    meta: {
+      description: 'Administrative boundaries from Elastic Maps Service (EMS).',
+    },
+    unknowns: 'forbid'
+  }
+);
+
 export const EMSTMSSourceSchema = schema.object(
   {
     id: schema.maybe(schema.string({
       meta: { description: 'Tile Map Service (TMS) layer id from Elastic Maps Service (EMS). Required when isAutoSelect is false.' },
     })),
-  type: schema.literal(SOURCE_TYPES.EMS_TMS),
+    type: schema.literal(SOURCE_TYPES.EMS_TMS),
     isAutoSelect: schema.maybe(schema.boolean({
       defaultValue: false,
       meta: {

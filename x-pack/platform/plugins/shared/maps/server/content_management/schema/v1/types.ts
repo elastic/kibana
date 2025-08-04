@@ -16,6 +16,7 @@ import {
   mapsUpdateOptionsSchema,
 } from './cm_services';
 import {
+  EMSFileSourceSchema,
   EMSTMSSourceSchema
 } from './source_schemas';
 
@@ -29,4 +30,5 @@ export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
 export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
 
+export type EMSFileSourceDescriptor = Writable<TypeOf<typeof EMSFileSourceSchema>>;
 export type EMSTMSSourceDescriptor = Writable<TypeOf<typeof EMSTMSSourceSchema>>;
