@@ -8,6 +8,7 @@
  */
 
 export type { SavedObjectsClientContract } from './src/saved_objects_client';
+export type { SearchClient, SearchParams } from './src/search_client';
 export type {
   ISavedObjectsRepository,
   SavedObjectsFindInternalOptions,

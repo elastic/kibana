@@ -48,6 +48,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from './apis';
+import { SearchClient } from './search_client';
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -180,6 +181,9 @@ export interface SavedObjectsClientContract {
   find<T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>>;
+
+  /** TODO(@jloleysens) */
+  getSearchClient(): SearchClient;
 
   /**
    * Returns an array of objects by id
