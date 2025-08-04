@@ -124,5 +124,9 @@
     "@kbn/logging",
     "@kbn/alerts-as-data-utils",
     "@kbn/response-ops-rule-params",
+    "@kbn/slo-plugin",
+    "@kbn/slo-schema",
+    "@kbn/typed-react-router-config",
+    "@kbn/observability-ai-assistant-app-plugin",
   ]
 }
