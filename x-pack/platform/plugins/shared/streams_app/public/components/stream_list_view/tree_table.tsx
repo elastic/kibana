@@ -16,6 +16,7 @@ import {
   Criteria,
   useEuiTheme,
   EuiSearchBarProps,
+  EuiHighlight,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -109,7 +110,7 @@ export function StreamsTreeTable({
                   data-test-subj="streamsAppStreamNodeLink"
                   href={router.link('/{key}', { path: { key: item.stream.name } })}
                 >
-                  {item.stream.name}
+                   <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
