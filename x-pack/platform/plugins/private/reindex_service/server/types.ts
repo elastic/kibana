@@ -10,6 +10,10 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import {
+  ReindexServiceScopedClient,
+  ReindexServiceScopedClientArgs,
+} from './src/lib/reindex_service_wrapper';
 import { CredentialStore } from './src/lib/credential_store';
 
 export interface RouteDependencies {
@@ -22,8 +26,10 @@ export interface RouteDependencies {
     handleEsError: typeof handleEsError;
   };
   version: Version;
+  getReindexService: () => Promise<ReindexServiceServerPluginStart>;
 }
 
 export interface ReindexServiceServerPluginStart {
   cleanupReindexOperations: (indexNames: string[]) => Promise<void>;
+  getScopedClient: (scopedClientArgs: ReindexServiceScopedClientArgs) => ReindexServiceScopedClient;
 }

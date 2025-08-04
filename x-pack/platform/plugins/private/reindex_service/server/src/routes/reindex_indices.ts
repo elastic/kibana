@@ -9,26 +9,22 @@ import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexStatusResponse } from '@kbn/upgrade-assistant-pkg-common';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import { reindexServiceFactory, ReindexWorker, generateNewIndexName } from '../lib';
+import { reindexServiceFactory } from '../lib';
 import { reindexActionsFactory } from '../lib/reindex_actions';
 import { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from '../lib/reindex_handler';
 
-export function registerReindexIndicesRoutes(
-  {
-    credentialStore,
-    router,
-    licensing,
-    log,
-    getSecurityPlugin,
-    lib: { handleEsError },
-    version,
-  }: RouteDependencies,
-  getWorker: () => ReindexWorker
-) {
+export function registerReindexIndicesRoutes({
+  credentialStore,
+  router,
+  licensing,
+  log,
+  getSecurityPlugin,
+  lib: { handleEsError },
+  version,
+  getReindexService,
+}: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
 
   // Start reindex for an index
@@ -54,10 +50,10 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { indexName } = request.params;
       try {
-        const result = await reindexHandler({
+        // todo try to simplify some of the dependency passing
+        const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
-          indexName,
           log,
           licensing,
           request,
@@ -66,8 +62,7 @@ export function registerReindexIndicesRoutes(
           version,
         });
 
-        // Kick the worker on this node to immediately pickup the new reindex operation.
-        getWorker().forceRefresh();
+        const result = await reindexService.reindexOrResume(indexName);
 
         return response.ok({
           body: result,
@@ -104,47 +99,19 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { getClient } = savedObjects;
       const { indexName } = request.params;
-      const asCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser,
-        log,
-        version
-      );
-      const reindexService = reindexServiceFactory(
-        asCurrentUser,
-        reindexActions,
-        log,
-        licensing,
-        version
-      );
 
       try {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
-        const reindexOp = await reindexService.findReindexOperation(indexName);
-        // If the user doesn't have privileges than querying for warnings is going to fail.
-        const warnings = hasRequiredPrivileges
-          ? await reindexService.detectReindexWarnings(indexName)
-          : [];
-
-        const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
-        const { aliases, settings, isInDataStream, isFollowerIndex } =
-          await reindexService.getIndexInfo(indexName);
-
-        const body: ReindexStatusResponse = {
-          reindexOp: reindexOp ? reindexOp.attributes : undefined,
-          warnings,
-          hasRequiredPrivileges,
-          meta: {
-            indexName,
-            reindexName: generateNewIndexName(indexName, version),
-            aliases: Object.keys(aliases),
-            isFrozen: isTruthy(settings?.frozen),
-            isReadonly: isTruthy(settings?.verified_read_only),
-            isInDataStream,
-            isFollowerIndex,
-          },
-        };
+        const reindexService = (await getReindexService()).getScopedClient({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          log,
+          licensing,
+          request,
+          credentialStore,
+          security: getSecurityPlugin(),
+          version,
+        });
+        const body = await reindexService.getStatus(indexName);
 
         return response.ok({
           body,

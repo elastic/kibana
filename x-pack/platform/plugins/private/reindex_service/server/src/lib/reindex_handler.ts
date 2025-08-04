@@ -39,6 +39,7 @@ interface ReindexHandlerArgs {
   version: Version;
 }
 
+// no longer used
 export const reindexHandler = async ({
   credentialStore,
   dataClient,
@@ -52,6 +53,7 @@ export const reindexHandler = async ({
   version,
 }: // accept index settings as params
 ReindexHandlerArgs): Promise<ReindexOperation> => {
+  // todo move this into service
   const callAsCurrentUser = dataClient.asCurrentUser;
   const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log, version);
   const reindexService = reindexServiceFactory(
