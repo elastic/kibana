@@ -14,6 +14,8 @@ import {
   getClockSkew,
   getLegends,
   createColorLookupMap,
+  getRootItemOrFallback,
+  TraceDataState,
 } from './use_trace_waterfall';
 
 jest.mock('@elastic/eui', () => ({
@@ -435,6 +437,36 @@ describe('getTraceMap', () => {
   it('returns an empty object for empty input', () => {
     const result = getTraceParentChildrenMap([]);
     expect(result).toEqual({});
+  });
+});
+
+describe('getRootItemOrFallback', () => {
+  it('should return a FULL state and a rootItem for a complete trace', () => {
+    const traceData = [root, child1, child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(root);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toBeUndefined();
+  });
+
+  it('should return an EMPTY state for an empty trace', () => {
+    const result = getRootItemOrFallback({}, []);
+
+    expect(result.rootItem).toBeUndefined();
+    expect(result.traceState).toBe(TraceDataState.Empty);
+    expect(result.orphans).toBeUndefined();
+  });
+
+  it('should return a PARTIAL state for an incomplete trace with no root or with orphan items', () => {
+    const traceData = [child2, grandchild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+
+    expect(result.rootItem).toEqual(child2);
+    expect(result.traceState).toBe(TraceDataState.Partial);
+    expect(result.orphans).toEqual([grandchild]);
   });
 });
 

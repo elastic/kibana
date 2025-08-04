@@ -102,42 +102,34 @@ export enum TraceDataState {
   Empty,
 }
 
-function matchParentId(this: TraceItem, parent: TraceItem) {
-  return parent.id === this.parentId;
-}
-
-function getFallbackRootItem(item: TraceItem, _index: number, traceItems: TraceItem[]): boolean {
-  // Avoid allocating a whole new function every iteration, making this operation less expensive
-  return !traceItems.find(matchParentId, item);
-}
-
 export function getRootItemOrFallback(
   traceParentChildrenMap: Record<string, TraceItem[]>,
   traceItems: TraceItem[]
 ) {
+  if (traceItems.length === 0) {
+    return {
+      traceState: TraceDataState.Empty,
+    };
+  }
+
   const rootItem = traceParentChildrenMap.root?.[0];
 
-  if (rootItem) {
+  const parentIds = new Set(traceItems.map(({ id }) => id));
+  const orphans = traceItems.filter((item) => item.parentId && !parentIds.has(item.parentId));
+
+  if (rootItem && orphans.length === 0) {
     return {
       traceState: TraceDataState.Full,
       rootItem,
     };
   }
 
-  // O(n) in best case, O(n^2) in worst case. Hot loop here potentially.
-  // Avoid allocating new objects/functions here to ensure as fast iteration speed as
-  // possible for a potentially expensive op.
-  const fallbackItem = traceItems.find(getFallbackRootItem);
-
-  if (fallbackItem) {
-    return {
-      traceState: TraceDataState.Partial,
-      rootItem: fallbackItem,
-    };
-  }
+  const [fallbackItem, ...rest] = orphans;
 
   return {
-    traceState: TraceDataState.Empty,
+    traceState: TraceDataState.Partial,
+    rootItem: fallbackItem,
+    orphans: rest,
   };
 }
 
