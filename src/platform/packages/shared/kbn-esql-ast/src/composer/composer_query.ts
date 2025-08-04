@@ -10,10 +10,10 @@
 import { printTree } from 'tree-dump';
 import * as synth from '../synth';
 import { BasicPrettyPrinter, WrappingPrettyPrinter } from '../pretty_print';
-import { ESQLAstQueryExpression } from '../types';
 import { processTemplateHoles } from './util';
 import { Builder } from '../builder';
-import type { ComposerQueryTagHole, EsqlRequest } from './types';
+import type { ESQLAstQueryExpression } from '../types';
+import type { ComposerQueryTagHole, ComposerSortShorthand, EsqlRequest } from './types';
 
 export class ComposerQuery {
   constructor(
@@ -43,9 +43,9 @@ export class ComposerQuery {
    * @param limit The limit to apply to the query.
    * @returns The updated ComposerQuery instance.
    */
-  public limit(limit: number): ComposerQuery {
+  public limit = (limit: number): ComposerQuery => {
     return this.pipe`LIMIT ${limit}`;
-  }
+  };
 
   /**
    * Specifies the columns to keep in the result set. Appends a `KEEP` command.
@@ -70,16 +70,33 @@ export class ComposerQuery {
    * @param columns The columns to keep in the result set.
    * @returns The updated ComposerQuery instance.
    */
-  public keep(
+  public readonly keep = (
     column: string | synth.SynthColumnShorthand,
     ...columns: Array<string | synth.SynthColumnShorthand>
-  ): ComposerQuery {
+  ): ComposerQuery => {
     const nodes = [column, ...columns].map((name) => {
       return Builder.expression.column(name);
     });
 
     return this.pipe`KEEP ${nodes}`;
-  }
+  };
+
+  public readonly sort = (
+    expression: ComposerSortShorthand,
+    ...expressions: ComposerSortShorthand[]
+  ): ComposerQuery => {
+    const nodes = ([expression, ...expressions] as ComposerSortShorthand[]).map((shorthand) => {
+      const [column, order = '', nulls = ''] = Array.isArray(shorthand)
+        ? shorthand
+        : [shorthand, '', ''];
+      const columnNode = Builder.expression.column(column);
+      const orderNode = Builder.expression.order(columnNode, { order, nulls });
+
+      return orderNode;
+    });
+
+    return this.pipe`SORT ${nodes}`;
+  };
 
   /**
    * Prints the query to a string in a specified format.

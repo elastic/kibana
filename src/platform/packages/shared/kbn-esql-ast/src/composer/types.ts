@@ -8,8 +8,9 @@
  */
 
 import type * as synth from '../synth';
+import type { ESQLOrderExpression } from '../types';
 import type { ComposerQuery } from './composer_query';
-import { ParameterHole } from './parameter_hole';
+import type { ParameterHole } from './parameter_hole';
 
 export type ComposerQueryTagHole = synth.SynthTemplateHole | ParameterHole;
 export type ComposerQueryTag = (
@@ -37,3 +38,11 @@ export type EsqlRequestParams = EsqlRequestParamEntry[];
 export type EsqlRequestParamEntry = EsqlRequestParamPositionalEntry | EsqlRequestParamNamedEntry;
 export type EsqlRequestParamPositionalEntry = string | number | boolean | null;
 export type EsqlRequestParamNamedEntry = Record<string, unknown>;
+
+export type ComposerSortShorthand =
+  | string
+  | [
+      column: string | synth.SynthColumnShorthand,
+      order?: ESQLOrderExpression['order'],
+      nulls?: ESQLOrderExpression['nulls']
+    ];

@@ -144,6 +144,58 @@ describe('high-level helpers', () => {
       }).toThrow();
     });
   });
+
+  describe('.sort()', () => {
+    test('appends command to the end', () => {
+      const query = esql`FROM a`;
+
+      expect(query.print('basic')).toBe('FROM a');
+
+      query.sort(
+        'xyz',
+        ['foo'],
+        ['bar', 'ASC'],
+        ['baz', 'DESC'],
+        ['qux', '', 'NULLS FIRST'],
+        ['quux', 'DESC', 'NULLS LAST']
+      );
+
+      expect(query.print('basic')).toBe(
+        'FROM a | SORT xyz, foo, bar ASC, baz DESC, qux NULLS FIRST, quux DESC NULLS LAST'
+      );
+    });
+
+    test('can specify nested columns', () => {
+      const query = esql`FROM a`;
+
+      query.sort([['nested', 'column'], 'ASC'], [['another', 'column'], '', 'NULLS LAST']);
+
+      expect(query.print('basic')).toBe(
+        'FROM a | SORT nested.column ASC, another.column NULLS LAST'
+      );
+    });
+
+    test('escapes special characters', () => {
+      const query = esql`FROM a`;
+
+      query
+        .sort([['usér', 'name']])
+        .sort([['address', 'emoji-❤️'], 'DESC', 'NULLS LAST'], ['emoji-❤️', 'ASC']);
+
+      expect(query.print('basic')).toBe(
+        'FROM a | SORT `usér`.name | SORT address.`emoji-❤️` DESC NULLS LAST, `emoji-❤️` ASC'
+      );
+    });
+
+    test('throws on empty list', () => {
+      const query = esql`ROW a = 123`;
+
+      expect(() => {
+        // @ts-expect-error - TypeScript types do not allow empty .sort() call
+        query.sort();
+      }).toThrow();
+    });
+  });
 });
 
 describe('.toRequest()', () => {
