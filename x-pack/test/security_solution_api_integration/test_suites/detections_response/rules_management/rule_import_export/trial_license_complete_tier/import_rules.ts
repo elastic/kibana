@@ -92,13 +92,13 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('results in partial success if more than 5 threshold fields', async () => {
+        it('results in partial success if more than 3 threshold fields', async () => {
           const baseRule = getThresholdRuleForAlertTesting(['*']);
           const rule = {
             ...baseRule,
             threshold: {
               ...baseRule.threshold,
-              field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
+              field: ['field-1', 'field-2', 'field-3', 'field-4'],
             },
           };
 
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(importResponse.errors[0]).toEqual({
             error: {
-              message: 'threshold.field: Array must contain at most 5 element(s)',
+              message: 'Number of fields must be 3 or less',
               status_code: 400,
             },
           });
