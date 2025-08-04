@@ -62,7 +62,7 @@ In case a common test needs to be skipped for one of the projects
 there are the following suite tags available to do so:
 `skipSvlChat`, `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
-```
+```ts
 describe('my test suite', function () {
   this.tags(['skipSvlChat', 'skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
   // or for a single tag: this.tags('skipSvlSec');
@@ -130,7 +130,7 @@ Recommendations:
 - no need to log out, you can change role by calling `loginWithRole` again.
 - for the common tests you can use `loginWithPrivilegedRole` to login as Editor/Developer
 
-```
+```ts
 describe("my test suite", async function() {
   before(async () => {
     await PageObjects.svlCommonPage.loginWithRole('viewer');
@@ -163,7 +163,7 @@ Recommendations:
 - pass `useCookieHeader: true` to use Cookie header for request authentication
 - don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
-```
+```ts
 describe("my public APIs test suite", async function() {
     before(async () => {
       supertestViewerWithApiKey =
@@ -184,7 +184,7 @@ describe("my public APIs test suite", async function() {
 });
 ```
 
-```
+```ts
 describe("my internal APIs test suite", async function() {
     before(async () => {
       supertestViewerWithCookieCredentials =
@@ -318,7 +318,7 @@ Similar to how functional tests are run in `x-pack/test`, you can point the
 functional tests server and test runner to config files in this `x-pack/test_serverless`
 directory, e.g. from the `x-pack` directory run:
 
-```
+```bash
 node scripts/functional_tests_server.js --config test_serverless/api_integration/test_suites/search/config.ts
 
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
@@ -328,7 +328,7 @@ node scripts/functional_test_runner.js --config test_serverless/api_integration/
 
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
 
-```
+```bash
 TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
 ```
 
@@ -347,7 +347,7 @@ Steps to follow to run on QA environment:
 
   In response you should get credentials.
 
-  ```
+  ```json
   {
     "password": "testing-internal_pwd",
     "username": "testing-internal"
@@ -359,7 +359,7 @@ Steps to follow to run on QA environment:
 - Now we need to create a user with the roles we want to test. Go to members page - `CLOUD_HOST_NAME/account/members` and click `[Invite member]`.
   - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instance access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
   - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
-    ```
+    ```json
     {
       "viewer": {
         "password": "xxxx",
@@ -369,7 +369,7 @@ Steps to follow to run on QA environment:
     ```
 - Now run the tests from the `x-pack` directory
 
-```
+```bash
 TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
 ```
 
@@ -378,7 +378,7 @@ TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing
 The tests that are listed in the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
 Tag the tests with `skipMKI` to be excluded for MKI run. It works only for the `describe` block:
 
-```
+```ts
 describe("my test suite", async function() {
     this.tags(['skipMKI']);
     ...
@@ -393,12 +393,12 @@ For tests using package registry we have enabled a configuration that uses a doc
 
 To be able to run this version locally you must have a Docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
 
-```
+```bash
 export set FLEET_PACKAGE_REGISTRY_PORT=12345
 ```
 
 To unset the variable, and run the tests against the real endpoint again, execute
 
-```
+```bash
 unset FLEET_PACKAGE_REGISTRY_PORT
 ```
