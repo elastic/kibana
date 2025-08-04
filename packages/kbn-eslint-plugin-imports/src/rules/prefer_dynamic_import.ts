@@ -111,14 +111,29 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
     };
 
     // Determine if a given reference is part of an export/re-export.
-    const isRefInExport = (id: TSESTree.Identifier): boolean => {
+    const isRefDirectlyReexported = (id: TSESTree.Identifier): boolean => {
       for (let p = parentOf(id); p; p = parentOf(p)) {
-        if (
-          p.type === AST_NODE_TYPES.ExportSpecifier ||
-          p.type === AST_NODE_TYPES.ExportNamedDeclaration ||
-          p.type === AST_NODE_TYPES.ExportDefaultDeclaration
-        ) {
-          return true;
+        if (p.type === AST_NODE_TYPES.ExportSpecifier) {
+          // export { local as exported }
+          const es = p as TSESTree.ExportSpecifier;
+          // The identifier node inside the specifier corresponds to es.local (not es.exported)
+          if (es.local.type === AST_NODE_TYPES.Identifier && es.local.name === id.name) return true;
+          return false;
+        }
+        if (p.type === AST_NODE_TYPES.ExportDefaultDeclaration) {
+          const ed = p as TSESTree.ExportDefaultDeclaration;
+          return (
+            ed.declaration.type === AST_NODE_TYPES.Identifier && ed.declaration.name === id.name
+          );
+        }
+        if (p.type === AST_NODE_TYPES.ExportNamedDeclaration) {
+          // Only consider specifier-based re-exports. If there are no specifiers,
+          // this is a declaration export (e.g., export const x = ...), which we DO NOT treat as re-export of `id`.
+          const en = p as TSESTree.ExportNamedDeclaration;
+          if (!en.specifiers || en.specifiers.length === 0) return false;
+          // If we reached ExportNamedDeclaration without hitting an ExportSpecifier ancestor,
+          // the identifier is not the specifier token; treat as not a direct re-export.
+          return false;
         }
         if (p.type === AST_NODE_TYPES.Program) break;
       }
@@ -126,7 +141,9 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
     };
 
     const isBindingReexported = (refs: TSESLint.Scope.Reference[]) =>
-      refs.some((r) => r.identifier && isRefInExport(r.identifier as TSESTree.Identifier));
+      refs.some(
+        (r) => r.identifier && isRefDirectlyReexported(r.identifier as TSESTree.Identifier)
+      );
 
     const buildInlineImportFixes = (
       spec:
