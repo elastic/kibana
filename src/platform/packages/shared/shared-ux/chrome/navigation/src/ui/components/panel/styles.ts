@@ -29,4 +29,8 @@ export const navPanelStyles = ({ euiTheme }: Theme) => css`
   background-color: ${euiTheme.colors.backgroundBaseSubdued};
   height: 100%;
   width: ${PANEL_WIDTH};
+  /* unset default panel floating border */
+  border: none;
+  /* add custom floating border */
+  border-inline-end: 1px solid ${euiTheme.colors.borderBaseFloating};
 `;
