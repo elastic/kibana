@@ -8,10 +8,17 @@
 import { setupTestUsers } from '../test_users';
 
 export default function loadTests({ loadTestFile, getService }) {
-  describe('Agents', () => {
+  describe('Package policies', () => {
     before(async () => {
       await setupTestUsers(getService('security'));
     });
-    loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./get'));
+
+    loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./upgrade'));
+    loadTestFile(require.resolve('./input_package_create_upgrade'));
+    loadTestFile(require.resolve('./input_package_rollback'));
   });
 }

@@ -12,10 +12,26 @@ import { v4 as uuid } from 'uuid';
 import execa from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
+import axios from 'axios';
+import { last } from 'lodash';
+import pRetry from 'p-retry';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getLatestVersion } from '../../../fleet_cypress/artifact_manager';
 import { skipIfNoDockerRegistry } from '../../helpers';
+
+const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
+
+export async function getLatestVersion(): Promise<string> {
+  return pRetry(() => axios('https://artifacts-api.elastic.co/v1/versions'), {
+    maxRetryTime: 60 * 1000, // 1 minute
+  })
+    .then(
+      (response) =>
+        last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||
+        DEFAULT_VERSION
+    )
+    .catch(() => DEFAULT_VERSION);
+}
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
