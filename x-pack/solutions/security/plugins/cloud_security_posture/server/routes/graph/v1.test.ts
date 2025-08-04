@@ -18,16 +18,10 @@ const mockLogger = mockLoggerFactory.get('mock logger');
 
 describe('getGraph', () => {
   let esClient: any;
-  let mockUiSettings: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     esClient = {};
-    mockUiSettings = {
-      client: {
-        get: jest.fn(),
-      },
-    };
   });
 
   it('should call fetchGraph and parseRecords with correct parameters', async () => {
@@ -37,11 +31,8 @@ describe('getGraph', () => {
     const parsedResult = { nodes: ['node1'], edges: ['edge1'], messages: ['msg1'] };
     (parseRecords as jest.Mock).mockReturnValue(parsedResult);
 
-    // Asset inventory is disabled
-    mockUiSettings.client.get.mockResolvedValue(false);
-
     const params = {
-      services: { esClient, logger: mockLogger, uiSettings: mockUiSettings },
+      services: { esClient, logger: mockLogger },
       query: {
         originEventIds: [
           { id: 'event1', isAlert: false },
@@ -84,11 +75,8 @@ describe('getGraph', () => {
     const parsedResult = { nodes: [], edges: [], messages: [] };
     (parseRecords as jest.Mock).mockReturnValue(parsedResult);
 
-    // Asset inventory setting - doesn't matter for this test
-    mockUiSettings.client.get.mockResolvedValue(false);
-
     const params = {
-      services: { esClient, logger: mockLogger, uiSettings: mockUiSettings },
+      services: { esClient, logger: mockLogger },
       query: {
         originEventIds: [{ id: 'event3', isAlert: false }],
         // No indexPatterns provided; spaceId will be used to build default patterns.

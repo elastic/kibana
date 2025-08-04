@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Logger,
-  IScopedClusterClient,
-  UiSettingsRequestHandlerContext,
-} from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
@@ -18,7 +14,6 @@ import { parseRecords } from './parse_records';
 interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
-  uiSettings: UiSettingsRequestHandlerContext;
 }
 
 export interface GetGraphParams {
@@ -36,7 +31,7 @@ export interface GetGraphParams {
 }
 
 export const getGraph = async ({
-  services: { esClient, logger, uiSettings },
+  services: { esClient, logger },
   query: { originEventIds, spaceId = 'default', indexPatterns, start, end, esQuery },
   showUnknownTarget,
   nodesLimit,

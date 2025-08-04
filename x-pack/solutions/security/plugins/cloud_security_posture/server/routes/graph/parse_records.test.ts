@@ -191,13 +191,10 @@ describe('parseRecords', () => {
         actorIds: 'actor1',
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: [],
-        ips: [],
         isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: [null, 'target1'],
-        users: [],
       },
     ];
     const result = parseRecords(mockLogger, records);
@@ -247,27 +244,24 @@ describe('parseRecords', () => {
         docs: ['{"foo":"bar"}'],
         actorsDocData: [null],
         targetsDocData: [null],
-        hosts: ['host1'],
-        ips: ['ip1'],
         isAlert: false,
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['ip1'],
-        users: ['user1'],
       },
     ];
     const result = parseRecords(mockLogger, records);
 
     const userNode = result.nodes.find((n) => n.id === 'user1');
-    expect(userNode).toMatchObject({ shape: 'ellipse', icon: 'user' });
+    expect(userNode).toMatchObject({ shape: 'rectangle' });
     expect(userNode).not.toHaveProperty('tag');
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
     expect(hostNode).not.toHaveProperty('tag');
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
-    expect(ipNode).toMatchObject({ shape: 'diamond', icon: 'globe' });
+    expect(ipNode).toMatchObject({ shape: 'rectangle' });
     expect(ipNode).not.toHaveProperty('tag');
   });
 
@@ -283,12 +277,9 @@ describe('parseRecords', () => {
         ],
         badge: 1,
         docs: ['{"foo":"bar"}'],
-        hosts: ['host1'],
-        ips: ['ip1'],
         isOrigin: true,
         isOriginAlert: false,
         targetIds: ['target1', 'target2'],
-        users: ['user1'],
         isAlert: false,
       },
     ];
@@ -302,12 +293,12 @@ describe('parseRecords', () => {
     });
 
     const hostNode = result.nodes.find((n) => n.id === 'host1');
-    expect(hostNode).toMatchObject({ shape: 'hexagon', icon: 'storage' });
+    expect(hostNode).toMatchObject({ shape: 'rectangle' });
     expect(hostNode).not.toHaveProperty('tag');
 
     const ipNode = result.nodes.find((n) => n.id === 'ip1');
     expect(ipNode).toMatchObject({
-      shape: 'diamond',
+      shape: 'rectangle',
       icon: 'globe',
       tag: 'ip',
     });

@@ -49,7 +49,6 @@ export const defineGraphRoute = (router: CspRouter) =>
         const isGraphEnabled = await (
           await context.core
         ).uiSettings.client.get(SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING);
-        const { uiSettings } = await context.core;
 
         cspContext.logger.debug(`isGraphEnabled: ${isGraphEnabled} for space: ${spaceId}`);
 
@@ -62,7 +61,6 @@ export const defineGraphRoute = (router: CspRouter) =>
             services: {
               logger: cspContext.logger,
               esClient: cspContext.esClient,
-              uiSettings,
             },
             query: {
               originEventIds,
