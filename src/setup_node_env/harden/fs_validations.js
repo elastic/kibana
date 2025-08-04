@@ -9,7 +9,7 @@
 
 /* eslint-disable no-restricted-syntax */
 
-const { join, normalize } = require('path');
+const { join, normalize, resolve, sep } = require('path');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { tmpdir, homedir } = require('os');
 const { realpathSync } = require('fs');
@@ -65,10 +65,6 @@ const devOrCIPaths = [
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
-
-function isDevOrCIEnvironment() {
-  return isDevOrCI;
-}
 
 /**
  * Validates that a path does not contain any path traversal sequences or dangerous characters
@@ -133,16 +129,7 @@ function validateFileExtension(path) {
   }
 }
 
-function validatePathIsSubdirectoryOfSafeDirectory(path, isDevOrCiEnvironmentOverride) {
-  // Skip if Dev or CI environment so Kibana can build correctly
-  // If isDevOrCiEnvironmentOverride is defined, use it, otherwise call isDevOrCIEnvironment()
-  if (
-    isDevOrCiEnvironmentOverride === true ||
-    (isDevOrCiEnvironmentOverride !== false && isDevOrCIEnvironment())
-  ) {
-    return true;
-  }
-
+function validatePathIsSubdirectoryOfSafeDirectory(path) {
   // Check if the path is actually a subdirectory of any safe path
   const isSafePath = safePaths.some((safePath) => {
     // Path exactly matches a safe path
@@ -154,7 +141,7 @@ function validatePathIsSubdirectoryOfSafeDirectory(path, isDevOrCiEnvironmentOve
     if (path.startsWith(safePath)) {
       const nextChar = path.charAt(safePath.length);
       // Check if the next character after the safe path is a path separator (/ or \)
-      return nextChar === '/' || nextChar === '\\';
+      return nextChar === sep;
     }
 
     return false;
@@ -276,17 +263,22 @@ function validateContentLength(content, mimeType) {
 /**
  * Validates and normalizes a user-provided path to ensure it's safe to use
  * @param {string} userPath - The user-provided path to validate and normalize
- * @returns {string} - The normalized path if validation passes
+ * @returns {string} - The resolved path if validation passes
  * @throws {Error} - Throws if the path contains traversal sequences, has invalid file extension,
  *                   or is outside of safe directories in production environments
  */
 function getSafePath(userPath) {
-  validateNoPathTraversal(userPath); // Should I run this on both?
-  const normalizedPath = normalize(userPath);
-  validateFileExtension(normalizedPath); // Maintain logic, dont run in prod
-  validatePathIsSubdirectoryOfSafeDirectory(normalizedPath); // Maintain logic, run only in prod
+  // First check for path traversal sequences in the raw path
+  validateNoPathTraversal(userPath);
 
-  return normalizedPath;
+  // Then resolve the path to an absolute path
+  const resolvedPath = resolve(userPath);
+
+  // Finally validate file extension and that the path is within safe directories
+  validateFileExtension(resolvedPath);
+  validatePathIsSubdirectoryOfSafeDirectory(resolvedPath);
+
+  return resolvedPath;
 }
 
 /**
