@@ -19668,9 +19668,15 @@ paths:
                               - monitoring
                               - download
                               - features
-                          connectors: {}
-                          exporters: {}
-                          extensions: {}
+                          connectors:
+                            additionalProperties: {}
+                            type: object
+                          exporters:
+                            additionalProperties: {}
+                            type: object
+                          extensions:
+                            additionalProperties: {}
+                            type: object
                           fleet:
                             anyOf:
                               - additionalProperties: false
@@ -19863,8 +19869,12 @@ paths:
                                 - type
                                 - proxy_headers
                             type: object
-                          processors: {}
-                          receivers: {}
+                          processors:
+                            additionalProperties: {}
+                            type: object
+                          receivers:
+                            additionalProperties: {}
+                            type: object
                           revision:
                             type: number
                           secret_references:
@@ -19877,7 +19887,33 @@ paths:
                               required:
                                 - id
                             type: array
-                          service: {}
+                          service:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              extensions:
+                                items:
+                                  type: string
+                                type: array
+                              pipelines:
+                                additionalProperties:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    exporters:
+                                      items:
+                                        type: string
+                                      type: array
+                                    processors:
+                                      items:
+                                        type: string
+                                      type: array
+                                    receivers:
+                                      items:
+                                        type: string
+                                      type: array
+                                  x-oas-optional: true
+                                type: object
                           signed:
                             additionalProperties: false
                             type: object
@@ -19893,12 +19929,6 @@ paths:
                           - id
                           - outputs
                           - inputs
-                          - extensions
-                          - receivers
-                          - processors
-                          - service
-                          - connectors
-                          - exporters
                 required:
                   - item
         '400':
