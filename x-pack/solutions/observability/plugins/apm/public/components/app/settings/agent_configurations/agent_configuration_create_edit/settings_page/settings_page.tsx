@@ -62,6 +62,7 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const [removedSettingsCount, setRemovedSettingsCount] = useState<number>(0);
+  const [areChangesInvalid, setInvalidChanges] = useState<boolean>(false);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
 
@@ -210,6 +211,7 @@ export function SettingsPage({
                 setNewConfig={setNewConfig}
                 settingsDefinitionsByAgent={settingsDefinitionsByAgent}
                 setRemovedSettingsCount={setRemovedSettingsCount}
+                setInvalidChanges={setInvalidChanges}
               />
             </>
           )}
@@ -231,6 +233,7 @@ export function SettingsPage({
           })}
           unsavedChangesCount={unsavedChangesCount + removedSettingsCount}
           appTestSubj="apm"
+          areChangesInvalid={areChangesInvalid}
         />
       )}
     </>

@@ -27,11 +27,13 @@ export function AdvancedConfiguration({
   settingsDefinitionsByAgent,
   setNewConfig,
   setRemovedSettingsCount,
+  setInvalidChanges,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitionsByAgent: SettingDefinition[];
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   setRemovedSettingsCount: React.Dispatch<React.SetStateAction<number>>;
+  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const agentSettingKeys = useMemo(
     () => settingsDefinitionsByAgent.map((setting) => setting.key),
@@ -150,6 +152,7 @@ export function AdvancedConfiguration({
                 agentSettingKeys={agentSettingKeys}
                 unknownAgentSettings={unknownAgentSettings}
                 onUpdate={updateKey}
+                setInvalidChanges={setInvalidChanges}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -202,6 +205,7 @@ function AdvancedConfigKeyInput({
   index,
   agentSettingKeys,
   unknownAgentSettings,
+  setInvalidChanges,
   onUpdate,
 }: {
   settingKey: string;
@@ -209,10 +213,12 @@ function AdvancedConfigKeyInput({
   index: number;
   agentSettingKeys: string[];
   unknownAgentSettings: Array<[string, string]>;
+  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
   onUpdate: (oldKey: string, newKey: string, value: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(settingKey);
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     setLocalKey(settingKey);
@@ -220,9 +226,10 @@ function AdvancedConfigKeyInput({
 
   const isInvalidInput = (key: string) => {
     return (
-      key === '' ||
-      agentSettingKeys.includes(key) ||
-      unknownAgentSettings.some(([k], idx) => k === key && idx !== index)
+      touched &&
+      (key === '' ||
+        agentSettingKeys.includes(key) ||
+        unknownAgentSettings.some(([k], idx) => k === key && idx !== index))
     );
   };
 
@@ -246,11 +253,14 @@ function AdvancedConfigKeyInput({
   };
 
   const handleKeyChange = (newKey: string) => {
+    setTouched(true);
     setLocalKey(newKey);
 
-    // Only update the parent state if the key is valid
     if (!isInvalidInput(newKey)) {
+      setInvalidChanges(false);
       onUpdate(settingKey, newKey, settingValue);
+    } else {
+      setInvalidChanges(true);
     }
   };
 
