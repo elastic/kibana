@@ -236,7 +236,16 @@ export class PrivilegeMonitoringDataClient {
   }
 
   async getEngineStatus() {
-    const engineDescriptor = await this.engineClient.get();
+    const findResponse = await this.engineClient.find();
+    const engineDescriptor =
+      findResponse.total > 0 ? findResponse.saved_objects[0].attributes : undefined;
+
+    if (!engineDescriptor) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
 
     return {
       status: engineDescriptor.status,
@@ -860,12 +869,10 @@ export class PrivilegeMonitoringDataClient {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
-
     const engineStatus = await this.getEngineStatus();
-
     if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
       throw new Error(
-        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}.`
       );
     }
 

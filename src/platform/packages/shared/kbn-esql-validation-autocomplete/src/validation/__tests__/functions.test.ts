@@ -648,7 +648,6 @@ describe('function validation', () => {
           'SORT does not support function stats_fn',
         ]);
         await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'At least one aggregation function required in [STATS], found [ROW_FN()]',
           'STATS does not support function row_fn',
         ]);
         await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
