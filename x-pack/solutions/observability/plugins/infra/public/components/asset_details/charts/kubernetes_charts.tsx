@@ -30,11 +30,10 @@ interface Props extends MetricsChartsFields {
 }
 
 export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ entityId, dataView, dateRange, onShowAll, overview, schema }, ref) => {
+  ({ entityId, dataView, dateRange, onShowAll, overview }, ref) => {
     const { charts } = useKubernetesCharts({
       dataViewId: dataView?.id,
       overview,
-      schema,
     });
 
     const hasIntegration = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesNode });

@@ -46,7 +46,6 @@ export const HostMetrics = () => {
         entityId={entity.id}
         dataView={metrics.dataView}
         dateRange={intersectingState.dateRange}
-        schema={schema}
       />
     </MetricsTemplate>
   );

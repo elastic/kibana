@@ -47,7 +47,7 @@ export const HostMetrics = (props: Props) => {
         />
       </EuiFlexGrid>
       <HostCharts {...props} metric="disk" onShowAll={onClick} overview schema={schema} />
-      <KubernetesNodeCharts {...props} onShowAll={onClick} overview schema={schema} />
+      <KubernetesNodeCharts {...props} onShowAll={onClick} overview />
     </EuiFlexGroup>
   );
 };
