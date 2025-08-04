@@ -11,9 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolRegistry } from './tool_registry';
 
 export interface ToolsServiceSetup {
-  register<RunInput extends ZodObject<any>, RunOutput = unknown>(
-    tool: BuiltinToolDefinition<RunInput, RunOutput>
-  ): void;
+  register<RunInput extends ZodObject<any>>(tool: BuiltinToolDefinition<RunInput>): void;
 }
 
 export interface ToolsServiceStart {
