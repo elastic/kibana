@@ -20,7 +20,7 @@ export function UnmanagedElasticsearchAssets({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.UnwiredStream.GetResponse;
+  definition: Streams.ClassicStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {

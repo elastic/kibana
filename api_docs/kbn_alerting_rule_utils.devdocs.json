@@ -69,21 +69,48 @@
       },
       {
         "parentPluginId": "@kbn/alerting-rule-utils",
-        "id": "def-common.getFormattedGroupBy",
+        "id": "def-common.getEcsGroupsFromFlattenGrouping",
         "type": "Function",
         "tags": [],
-        "label": "getFormattedGroupBy",
+        "label": "getEcsGroupsFromFlattenGrouping",
         "description": [],
         "signature": [
-          "(groupBy: string | string[] | undefined, groupSet: Set<string>) => Record<string, ",
+          "(flattenGrouping?: Record<string, unknown>) => Record<string, string | string[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
-            "pluginId": "@kbn/alerting-rule-utils",
-            "scope": "common",
-            "docId": "kibKbnAlertingRuleUtilsPluginApi",
-            "section": "def-common.Group",
-            "text": "Group"
-          },
-          "[]>"
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.getEcsGroupsFromFlattenGrouping.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flattenGrouping",
+            "description": [],
+            "signature": [
+              "Record<string, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.getFlattenGrouping",
+        "type": "Function",
+        "tags": [],
+        "label": "getFlattenGrouping",
+        "description": [
+          "\nFlattens a bucket key returned by Elasticsearch aggregations into an object whose\nkeys correspond to the rule's `groupBy` fields and whose values come from the\naggregation `bucketKey`.\n\nThe contract is:\n - `groupBy`            → the same field(s) that were sent in the alert rule params.\n - `bucketKey`          → an object whose **first property** relates to the first\n                          `groupBy` field, the **second property** to the second\n                          `groupBy`, and so on. The property names coming from\n                          Elasticsearch (e.g. `key0`, `key1`, …) are irrelevant –\n                          only their insertion order matters.\n\nExample 1 – single group-by:\n  groupBy   = 'host.hostname'\n  bucketKey = { key0: 'web-01' }\n  returns   = { 'host.hostname': 'web-01' }\n\nExample 2 – multiple group-bys:\n  groupBy   = ['host.hostname', 'host.architecture']\n  bucketKey = { key0: 'web-01', key1: 'amd64' }\n  returns   = {\n    'host.hostname':      'web-01',\n    'host.architecture':  'amd64',\n  }\n\nNOTE: `bucketKey` **must** contain at least the same number of values as there\nare `groupBy` entries; extra properties will be ignored and missing properties\nwill result in `undefined` values in the flattened object."
+        ],
+        "signature": [
+          "({ groupBy, bucketKey, }: { groupBy: string | string[] | undefined; bucketKey: Record<string, string>; }) => { [k: string]: string; } | undefined"
         ],
         "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
         "deprecated": false,
@@ -91,33 +118,44 @@
         "children": [
           {
             "parentPluginId": "@kbn/alerting-rule-utils",
-            "id": "def-common.getFormattedGroupBy.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "groupBy",
-            "description": [],
-            "signature": [
-              "string | string[] | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/alerting-rule-utils",
-            "id": "def-common.getFormattedGroupBy.$2",
+            "id": "def-common.getFlattenGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "groupSet",
+            "label": "{\n  groupBy,\n  bucketKey,\n}",
             "description": [],
-            "signature": [
-              "Set<string>"
-            ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-rule-utils",
+                "id": "def-common.getFlattenGrouping.$1.groupBy",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "groupBy",
+                "description": [],
+                "signature": [
+                  "string | string[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/alerting-rule-utils",
+                "id": "def-common.getFlattenGrouping.$1.bucketKey",
+                "type": "Object",
+                "tags": [],
+                "label": "bucketKey",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: string; }"
+                ],
+                "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -131,7 +169,7 @@
         "label": "getFormattedGroups",
         "description": [],
         "signature": [
-          "(grouping?: Record<string, string> | undefined) => ",
+          "(grouping?: Record<string, unknown> | undefined) => ",
           {
             "pluginId": "@kbn/alerting-rule-utils",
             "scope": "common",
@@ -153,60 +191,12 @@
             "label": "grouping",
             "description": [],
             "signature": [
-              "Record<string, string> | undefined"
+              "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/alerting-rule-utils",
-        "id": "def-common.getGroupByObject",
-        "type": "Function",
-        "tags": [],
-        "label": "getGroupByObject",
-        "description": [],
-        "signature": [
-          "(groupBy: string | string[] | undefined, groupValueSet: Set<string>) => Record<string, unknown>"
-        ],
-        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/alerting-rule-utils",
-            "id": "def-common.getGroupByObject.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "groupBy",
-            "description": [],
-            "signature": [
-              "string | string[] | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/alerting-rule-utils",
-            "id": "def-common.getGroupByObject.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "groupValueSet",
-            "description": [],
-            "signature": [
-              "Set<string>"
-            ],
-            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/group_by_object_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
