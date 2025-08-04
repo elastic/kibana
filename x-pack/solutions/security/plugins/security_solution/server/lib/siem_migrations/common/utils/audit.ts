@@ -23,6 +23,8 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
   SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
   SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
+  // Dashboards
+  SIEM_MIGRATION_ADDED_DASHBOARDS = 'siem_migration_added_dashboards',
 }
 
 export enum AUDIT_TYPE {
@@ -74,7 +76,8 @@ interface SiemMigrationAuditEvent {
 export class SiemMigrationAuditLogger {
   private auditLogger?: AuditLogger | null = null;
   constructor(
-    private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>
+    private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>,
+    private readonly migrationType: 'rules' | 'dashboards' = 'rules'
   ) {}
 
   private setAuditLogger = async (): Promise<boolean> => {
@@ -86,13 +89,14 @@ export class SiemMigrationAuditLogger {
   };
 
   private logEvent = ({ action, message, error }: SiemMigrationAuditEvent): void => {
-    const type = siemMigrationAuditEventType[action];
+    const auditEventType = siemMigrationAuditEventType[action];
+    const messageWithMigrationType = `[migrationType=${this.migrationType}]${message}`;
     this.auditLogger?.log({
-      message,
+      message: messageWithMigrationType,
       event: {
         action,
         category: [AUDIT_CATEGORY.DATABASE],
-        type: type ? [type] : undefined,
+        type: auditEventType ? [auditEventType] : undefined,
         outcome: error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS,
       },
       error: error && {
@@ -177,6 +181,22 @@ export class SiemMigrationAuditLogger {
     } rules to the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES,
+      message,
+      error,
+    });
+  }
+
+  public async logAddDashboards(params: {
+    migrationId: string;
+    error?: Error;
+    count?: number;
+  }): Promise<void> {
+    const { migrationId, error, count } = params;
+    const message = `User added ${
+      count ?? ''
+    } dashboards to the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS,
       message,
       error,
     });

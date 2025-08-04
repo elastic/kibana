@@ -37,7 +37,10 @@ export const registerSiemDashboardMigrationsCreateRoute = (
       },
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateDashboardMigrationResponse>> => {
-          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+            context.securitySolution,
+            'dashboards'
+          );
           try {
             const ctx = await context.resolve(['securitySolution']);
             const dashboardMigrationsClient =
