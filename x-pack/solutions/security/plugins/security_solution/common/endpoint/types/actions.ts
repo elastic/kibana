@@ -253,7 +253,7 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-export interface ResponseActionsCancelParameters {
+export interface ResponseActionCancelParameters {
   id: string;
 }
 
@@ -266,7 +266,8 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
   | ResponseActionScanParameters
-  | ResponseActionRunScriptParameters;
+  | ResponseActionRunScriptParameters
+  | ResponseActionCancelParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =

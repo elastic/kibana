@@ -84,7 +84,6 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
-  ResponseActionsCancelParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -1044,7 +1043,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
     options?: CommonResponseActionMethodOptions
     // TODO TC: check if we need outputcontent type
-  ): Promise<ActionDetails<unknown, ResponseActionsCancelParameters>> {
+  ): Promise<ActionDetails> {
     throw new ResponseActionsNotSupportedError('cancel');
   }
 

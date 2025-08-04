@@ -13,6 +13,7 @@ import {
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
   type MicrosoftDefenderEndpointIsolateHostParams,
+  MicrosoftDefenderEndpointCancelParams,
   type MicrosoftDefenderEndpointMachine,
   type MicrosoftDefenderEndpointMachineAction,
   type MicrosoftDefenderEndpointGetActionsParams,
@@ -577,7 +578,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         try {
           const msActionResponse = await this.sendAction<
             MicrosoftDefenderEndpointMachineAction,
-            MicrosoftDefenderEndpointIsolateHostParams
+            MicrosoftDefenderEndpointCancelParams
           >(MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.CANCEL_ACTION, {
             actionId: actionRequest.parameters.id,
             comment: this.buildExternalComment(reqIndexOptions),

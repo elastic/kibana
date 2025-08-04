@@ -49,7 +49,7 @@ export const CancelActionResult = memo<
     setStatus,
     actionCreator,
     actionRequestBody,
-    dataTestSubj: 'scan',
+    dataTestSubj: 'cancel',
     pendingMessage: i18n.translate('xpack.securitySolution.cancelAction.pendingMessage', {
       defaultMessage: 'Cancel action in progress.',
     }),

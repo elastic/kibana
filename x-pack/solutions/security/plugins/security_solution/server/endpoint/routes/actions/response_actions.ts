@@ -53,7 +53,7 @@ import type {
   EndpointActionDataParameterTypes,
   ActionDetails,
   ResponseActionRunScriptParameters,
-  ResponseActionsCancelParameters,
+  ResponseActionCancelParameters,
 } from '../../../../common/endpoint/types';
 import type {
   SecuritySolutionPluginRouter,
@@ -361,7 +361,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canWriteExecuteOperations'] },
         logger,
-        responseActionRequestHandler<ResponseActionsCancelParameters>(endpointContext, 'cancel')
+        responseActionRequestHandler<ResponseActionCancelParameters>(endpointContext, 'cancel')
       )
     );
 }

@@ -39,6 +39,7 @@ import type {
   SuspendProcessRequestBody,
   RunScriptActionRequestBody,
   BaseActionRequestBody,
+  CancelActionRequestBody,
 } from '../../../../../../common/api/endpoint';
 
 export type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
@@ -197,6 +198,17 @@ export interface ResponseActionsClient {
     options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
+  >;
+  /**
+   * Run a script
+   * @param actionRequest
+   * @param options
+   */
+  cancel: (
+    actionRequest: OmitUnsupportedAttributes<CancelActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<
+    ActionDetails
   >;
 }
 
