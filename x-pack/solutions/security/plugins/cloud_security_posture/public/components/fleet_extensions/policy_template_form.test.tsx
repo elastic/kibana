@@ -1567,29 +1567,6 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Agentless', () => {
-    it('should NOT show traffic filtering warning for agentless deployment on ESS after fix', async () => {
-      const policy = getMockPolicyAWS();
-      const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
-        'aws.credentials.type': { value: 'direct_access_keys' },
-      });
-
-      jest.spyOn(KibanaHook, 'useKibana').mockReturnValue({
-        services: {
-          cloud: {
-            serverless: {},
-          },
-        },
-      } as any);
-
-      const { queryByText } = render(
-        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
-      );
-
-      // Verify that traffic filtering warning is no longer shown
-      expect(queryByText(/Agentless deployment is not supported if you are using/)).not.toBeInTheDocument();
-      expect(queryByText('Traffic filtering')).not.toBeInTheDocument();
-    });
-
     it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
       const policy = getMockPolicyAWS();
       const newPackagePolicy = getPosturePolicy(policy, CLOUDBEAT_AWS, {
