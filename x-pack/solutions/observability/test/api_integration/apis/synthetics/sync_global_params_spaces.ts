@@ -144,7 +144,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('delete all params and sync again', async () => {
-      // await new Promise((resolve) => setTimeout(resolve, 10000)); // wait for params to be synced
       const getResponse = await supertestAPI
         .get(`/s/${spaceId}` + SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
