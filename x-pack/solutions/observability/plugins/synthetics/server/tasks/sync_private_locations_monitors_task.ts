@@ -385,27 +385,30 @@ export class SyncPrivateLocationMonitorsTask {
 
 export const runSynPrivateLocationMonitorsTaskSoon = async ({
   server,
+  retries = 5,
 }: {
   server: SyntheticsServerSetup;
+  retries?: number;
 }) => {
-  await pRetry(
-    async () => {
-      const {
-        logger,
-        pluginsStart: { taskManager },
-      } = server;
-      logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
-      await taskManager.runSoon(TASK_ID);
-      logger.debug(`Synthetics sync private location task scheduled successfully`);
-    },
-    {
-      retries: 5,
-      onFailedAttempt: (error) => {
-        server.logger.error(
-          `Failed to schedule Synthetics sync private location monitors task: ${error.message}`,
-          { error }
-        );
+  try {
+    await pRetry(
+      async () => {
+        const {
+          logger,
+          pluginsStart: { taskManager },
+        } = server;
+        logger.debug(`Scheduling Synthetics sync private location monitors task soon`);
+        await taskManager.runSoon(TASK_ID);
+        logger.debug(`Synthetics sync private location task scheduled successfully`);
       },
-    }
-  );
+      {
+        retries,
+      }
+    );
+  } catch (error) {
+    server.logger.error(
+      `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
+      { error }
+    );
+  }
 };
