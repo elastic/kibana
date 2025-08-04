@@ -116,8 +116,8 @@ export function scopeIncludedObjects({
     objects: {
       ...include.objects,
       routing: include.objects.routing.map((routing) => ({
-        destination: withRootPrefix(root, routing.destination),
         ...scopeIncludedObjects({ root, include: routing }),
+        destination: withRootPrefix(root, routing.destination),
       })),
     },
   };
