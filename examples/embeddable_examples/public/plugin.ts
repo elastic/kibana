@@ -23,6 +23,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
+import { ADD_SEARCH_ACTION_ID } from './react_embeddables/search/constants';
 import {
   ADD_EUI_MARKDOWN_ACTION_ID,
   EUI_MARKDOWN_ID,
@@ -31,7 +32,6 @@ import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
 import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
-import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
@@ -108,13 +108,21 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createEuiMarkdownAction();
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
+
+    deps.uiActions.registerActionAsync(ADD_SEARCH_ACTION_ID, async () => {
+      const { createSearchPanelAction } = await import(
+        './react_embeddables/search/create_search_panel_action'
+      );
+      return createSearchPanelAction;
+    });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID);
+
     if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
       deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
+      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_SEARCH_ACTION_ID);
     }
-
-    registerAddSearchPanelAction(deps.uiActions);
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(
