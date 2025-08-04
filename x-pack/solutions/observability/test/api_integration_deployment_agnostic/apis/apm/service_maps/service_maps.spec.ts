@@ -12,13 +12,7 @@ import { Readable } from 'node:stream';
 import { compact } from 'lodash';
 import type { SupertestReturnType } from '../../../../apm_api_integration/common/apm_api_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import {
-  extractExitSpansConnections,
-  getElements,
-  getIds,
-  getSpans,
-  partitionElements,
-} from './utils';
+import { extractExitSpansConnections } from './utils';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -57,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.status).toBe(200);
-        expect(getElements(response).length).toBe(0);
+        expect(response.body.spans.length).toBe(0);
       });
 
       describe('/internal/apm/service-map/service/{serviceName} without data', () => {
@@ -168,7 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const spans = getSpans(response);
+          const { spans } = response.body;
           const exitSpansConnections = extractExitSpansConnections(spans);
 
           expect(response.status).toBe(200);
@@ -292,7 +286,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          const spans = getSpans(response);
+          const { spans } = response.body;
           const exitSpansConnections = extractExitSpansConnections(spans);
 
           expect(response.status).toBe(200);
@@ -365,10 +359,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(status).toBe(200);
 
-          const { nodes, edges } = partitionElements(getElements({ body }));
+          const { spans } = body;
+          const exitSpansConnections = extractExitSpansConnections(spans);
 
-          expect(getIds(nodes)).toEqual(['frontend-node', 'frontend-rum']);
-          expect(getIds(edges)).toEqual(['frontend-rum~frontend-node']);
+          expect(exitSpansConnections).toEqual([
+            {
+              destinationService: {
+                serviceName: 'frontend-node',
+              },
+              serviceName: 'frontend-rum',
+              spanDestinationServiceResource: 'frontend-node',
+            },
+          ]);
         });
       });
     });
