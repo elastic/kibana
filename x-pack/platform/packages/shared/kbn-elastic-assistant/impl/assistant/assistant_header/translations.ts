@@ -21,14 +21,14 @@ export const VISIBILITY = i18n.translate('xpack.elasticAssistant.assistant.visib
 export const ONLY_VISIBLE_TO_YOU = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.visibleToYou',
   {
-    defaultMessage: 'Only visible to you',
+    defaultMessage: 'This conversation is only visible to you.',
   }
 );
 
 export const VISIBLE_TO_YOUR_TEAM = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.visibleToYourTeam',
   {
-    defaultMessage: 'Visible to your team',
+    defaultMessage: 'Team members can view this conversation.',
   }
 );
 
@@ -36,8 +36,8 @@ export const SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibilit
   defaultMessage: 'Shared',
 });
 
-export const NOT_SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibility.notShared', {
-  defaultMessage: 'Not shared',
+export const PRIVATE = i18n.translate('xpack.elasticAssistant.assistant.visibility.private', {
+  defaultMessage: 'Private',
 });
 export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.selectVisibilityAriaLabel',

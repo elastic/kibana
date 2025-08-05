@@ -15,6 +15,7 @@ import {
   type EuiSelectableOption,
   EuiBadge,
   useGeneratedHtmlId,
+  EuiIcon,
 } from '@elastic/eui';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
@@ -40,7 +41,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
         },
         'data-test-subj': 'notShared',
         disabled: !isConversationOwner,
-        label: i18n.NOT_SHARED,
+        label: i18n.PRIVATE,
       },
       {
         checked: isShared ? 'on' : undefined,
@@ -85,23 +86,22 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
         onClick={togglePopover}
         onClickAriaLabel={i18n.SELECT_VISIBILITY_ARIA_LABEL}
       >
+        <EuiIcon
+          type={isShared ? 'users' : 'lock'}
+          size="s"
+          css={css`
+            margin-right: 4px;
+          `}
+        />{' '}
         {selectedLabel}
       </EuiBadge>
     ),
-    [togglePopover, selectedLabel]
+    [isShared, togglePopover, selectedLabel]
   );
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<SharedBadgeOptionData>) => (
-      <EuiFlexGroup
-        css={css`
-          height: 53px;
-          width: 132px;
-        `}
-        direction="column"
-        gutterSize="none"
-        justifyContent="center"
-      >
+      <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiText
             css={css`
@@ -115,7 +115,13 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiText data-test-subj="optionDescription" size="s">
+          <EuiText
+            css={css`
+              text-wrap: pretty;
+            `}
+            data-test-subj="optionDescription"
+            size="s"
+          >
             {option.description}
           </EuiText>
         </EuiFlexItem>
