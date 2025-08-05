@@ -149,6 +149,7 @@ export const NodeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: ${NODE_WIDTH}px;
 `;
 
 export const NodeShapeContainer = styled.div`

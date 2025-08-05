@@ -23,13 +23,19 @@ interface NodeDetailsProps {
 
 export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
-  const hasTopPart = !!tag || (count && count > 1);
-  const hasBottomPart =
-    !!label || (ips && ips.length > 0) || (countryCodes && countryCodes.length > 0);
+
+  const shouldRenderTag = !!tag || (count && count > 1);
+  const shouldRenderLabel = !!label;
+  const shouldRenderIps = ips && ips.length > 0;
+  const shouldRenderFlags = countryCodes && countryCodes.length > 0;
+
+  const shouldRenderTop = shouldRenderTag;
+  const shouldRenderBottom = shouldRenderLabel || shouldRenderIps || shouldRenderFlags;
+
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize={hasTopPart && hasBottomPart ? 's' : 'none'}
+      gutterSize={shouldRenderTop && shouldRenderBottom ? 's' : 'none'}
       css={css`
         position: absolute;
         left: 50%;
@@ -38,14 +44,18 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
         white-space: nowrap;
       `}
     >
-      <EuiFlexItem grow={false}>
-        {!!tag || (count && count > 1) ? <Tag count={count} text={tag} /> : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ alignItems: 'center', gap: euiTheme.size.xxs }}>
-        {label && <Label text={label} />}
-        {ips && ips.length > 0 && <Ips ips={ips} />}
-        {countryCodes && countryCodes.length > 0 && <CountryFlags countryCodes={countryCodes} />}
-      </EuiFlexItem>
+      {shouldRenderTop ? (
+        <EuiFlexItem grow={false}>
+          {shouldRenderTag ? <Tag count={count} text={tag} /> : null}
+        </EuiFlexItem>
+      ) : null}
+      {shouldRenderBottom ? (
+        <EuiFlexItem grow={false} css={{ alignItems: 'center', gap: euiTheme.size.xxs }}>
+          {shouldRenderLabel ? <Label text={label} /> : null}
+          {shouldRenderIps ? <Ips ips={ips} /> : null}
+          {shouldRenderFlags ? <CountryFlags countryCodes={countryCodes} /> : null}
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 };
