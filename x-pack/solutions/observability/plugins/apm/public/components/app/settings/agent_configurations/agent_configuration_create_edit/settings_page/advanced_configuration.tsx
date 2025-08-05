@@ -151,8 +151,8 @@ export function AdvancedConfiguration({
                 index={index}
                 agentSettingKeys={agentSettingKeys}
                 unknownAgentSettings={unknownAgentSettings}
-                onUpdate={updateKey}
                 setInvalidChanges={setInvalidChanges}
+                onUpdate={updateKey}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -160,6 +160,7 @@ export function AdvancedConfiguration({
                 settingValue={settingValue}
                 settingKey={settingKey}
                 index={index}
+                setInvalidChanges={setInvalidChanges}
                 onUpdate={updateValue}
                 onDelete={deleteRow}
               />
@@ -268,15 +269,29 @@ function AdvancedConfigValueInput({
   settingValue,
   settingKey,
   index,
+  setInvalidChanges,
   onUpdate,
   onDelete,
 }: {
   settingValue: string;
   settingKey: string;
   index: number;
+  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
   onUpdate: (key: string, value: string) => void;
   onDelete: (key: string) => void;
 }) {
+  const [touched, setTouched] = useState(false);
+
+  const isInvalidInput = (value: string) => {
+    return touched && value === '';
+  };
+
+  const handleValueChange = (value: string) => {
+    setTouched(true);
+    onUpdate(settingKey, value);
+    setInvalidChanges(!isInvalidInput(value) ? false : true);
+  };
+
   return (
     <EuiFormRow
       label={
@@ -286,16 +301,21 @@ function AdvancedConfigValueInput({
             })
           : undefined
       }
+      error={i18n.translate('xpack.apm.agentConfig.settingsPage.valueEmptyError', {
+        defaultMessage: 'Value cannot be empty',
+      })}
+      isInvalid={isInvalidInput(settingValue)}
       fullWidth
     >
       <EuiFieldText
+        isInvalid={isInvalidInput(settingValue)}
         data-test-subj="apmSettingsAdvancedConfigurationValueField"
         aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
           defaultMessage: 'Advanced configuration value',
         })}
         fullWidth
         value={settingValue}
-        onChange={(e) => onUpdate(settingKey, e.target.value)}
+        onChange={(e) => handleValueChange(e.target.value)}
         append={
           <EuiButtonIcon
             data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
