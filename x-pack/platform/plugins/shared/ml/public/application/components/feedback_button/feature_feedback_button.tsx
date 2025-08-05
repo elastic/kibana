@@ -68,7 +68,7 @@ export const FeatureFeedbackButton = ({
   sanitizedPath,
   surveyButtonText = (
     <FormattedMessage
-      id="xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink"
+      id="xpack.ml.featureFeedbackButton.tellUsWhatYouThinkLink"
       defaultMessage="Give feedback"
     />
   ),
@@ -81,7 +81,7 @@ export const FeatureFeedbackButton = ({
   return (
     <EuiButtonEmpty
       aria-label={i18n.translate(
-        'xpack.observabilityShared.featureFeedbackButton.button.ariaLabel',
+        'xpack.ml.featureFeedbackButton.button.ariaLabel',
         { defaultMessage: 'Give feedback' }
       )}
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
