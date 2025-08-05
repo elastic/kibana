@@ -14,5 +14,6 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/std",
     "@kbn/expect",
+    "@kbn/core-chrome-layout-constants",
   ]
 }
