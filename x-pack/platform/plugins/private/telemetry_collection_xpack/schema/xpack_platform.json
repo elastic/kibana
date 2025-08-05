@@ -3639,6 +3639,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             },
@@ -3739,6 +3742,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             },
@@ -3839,6 +3845,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             }
