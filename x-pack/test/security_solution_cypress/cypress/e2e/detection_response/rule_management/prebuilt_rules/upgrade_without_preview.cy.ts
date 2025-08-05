@@ -48,7 +48,9 @@ import {
   visitRulesUpgradeTable,
 } from '../../../../tasks/rules_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/230105
+// Failing: See https://github.com/elastic/kibana/issues/230105
+describe.skip(
   'Detection rules, Prebuilt Rules Upgrade Without Preview',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {

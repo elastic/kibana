@@ -301,6 +301,9 @@ components:
         end:
           description: filter by end date (relative or absolute)
           type: string
+        includeUniqueAlertIds:
+          description: whether to include attack alert IDs in the response
+          type: boolean
         ids:
           description: filter by Attack discovery IDs
           type: array
