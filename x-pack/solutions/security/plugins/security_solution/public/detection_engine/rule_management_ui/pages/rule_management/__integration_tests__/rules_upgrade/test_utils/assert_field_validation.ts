@@ -62,6 +62,11 @@ export function assertFieldValidation({
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName, value: invalidValue });
 
+      // Some fields have async validation and/or debounced validation.
+      // It all makes it possible the validator function is scheduled with a delay
+      // or it may be picked up by the event loop later than expected.
+      // Waiting for the "Save" button to be disabled with a reasonable timeout makes sure the validation
+      // has enough time to run.
       await waitFor(() => expect(getSaveFieldValueButton(fieldUpgradeWrapper)).toBeDisabled(), {
         timeout: 1000,
       });
