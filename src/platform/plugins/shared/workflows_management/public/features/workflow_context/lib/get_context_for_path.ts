@@ -16,7 +16,6 @@ import { CurrentStepContext } from '../model/types';
 function getRootContext(definition: WorkflowYaml): CurrentStepContext {
   return {
     consts: definition.workflow.consts ?? {},
-    secrets: {},
     steps: {},
   };
 }
@@ -75,6 +74,7 @@ export function getContextForPath(
   path: Array<string | number>
 ): CurrentStepContext {
   const rootContext = getRootContext(definition);
+  let context = { ...rootContext };
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
     return rootContext;
@@ -83,8 +83,16 @@ export function getContextForPath(
   if (!nearestStep) {
     throw new Error(`Invalid path: ${path.join('.')}`);
   }
+  if (nearestStep?.foreach) {
+    context = {
+      ...context,
+      foreach: {
+        item: nearestStep.foreach,
+      },
+    };
+  }
   return {
-    ...rootContext,
+    ...context,
     steps: getAvailableOutputs(definition, workflowGraph, nearestStep.name) ?? {},
   };
 }

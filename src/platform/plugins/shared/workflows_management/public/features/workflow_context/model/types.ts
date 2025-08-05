@@ -19,6 +19,5 @@ export interface CurrentStepContext<
     item: T;
   };
   consts: Record<string, string | number | boolean | any[] | Record<string, any> | {}>;
-  secrets: Record<string, string>;
   steps: Record<string, StepContext<S>>;
 }
