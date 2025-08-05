@@ -41,7 +41,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const reportingApi = getService('reportingAPI');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
 
   const postJobJSON = async (
     apiPath: string,
