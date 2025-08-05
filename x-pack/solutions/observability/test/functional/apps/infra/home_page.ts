@@ -186,7 +186,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
       describe('Asset Details flyout for a host', () => {
@@ -480,6 +479,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
+            await pageObjects.infraHome.ensureKubernetesFeedbackLinkIsVisible();
 
             await returnTo(INVENTORY_PATH);
           });

@@ -19,6 +19,7 @@ import { fullHeightContentStyles } from '../../../page_template.styles';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
 import { InventoryViewsProvider } from './hooks/use_inventory_views';
+import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 
 export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
@@ -32,29 +33,31 @@ export const SnapshotPage = () => {
 
   return (
     <InventoryViewsProvider>
-      <WaffleTimeProvider>
-        <WaffleFiltersProvider>
-          <div className={APP_WRAPPER_CLASS}>
-            <InfraPageTemplate
-              onboardingFlow={OnboardingFlow.Infra}
-              pageHeader={{
-                pageTitle: inventoryTitle,
-                rightSideItems: [<SavedViews />],
-              }}
-              pageSectionProps={{
-                contentProps: {
-                  css: css`
-                    ${fullHeightContentStyles};
-                    padding-bottom: 0;
-                  `,
-                },
-              }}
-            >
-              <SnapshotContainer />
-            </InfraPageTemplate>
-          </div>
-        </WaffleFiltersProvider>
-      </WaffleTimeProvider>
+      <WaffleOptionsProvider>
+        <WaffleTimeProvider>
+          <WaffleFiltersProvider>
+            <div className={APP_WRAPPER_CLASS}>
+              <InfraPageTemplate
+                onboardingFlow={OnboardingFlow.Infra}
+                pageHeader={{
+                  pageTitle: inventoryTitle,
+                  rightSideItems: [<SavedViews />],
+                }}
+                pageSectionProps={{
+                  contentProps: {
+                    css: css`
+                      ${fullHeightContentStyles};
+                      padding-bottom: 0;
+                    `,
+                  },
+                }}
+              >
+                <SnapshotContainer />
+              </InfraPageTemplate>
+            </div>
+          </WaffleFiltersProvider>
+        </WaffleTimeProvider>
+      </WaffleOptionsProvider>
     </InventoryViewsProvider>
   );
 };
