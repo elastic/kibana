@@ -62,11 +62,10 @@ describe('convertToWorkflowGraph', () => {
       ],
     } as Partial<WorkflowSchema>;
 
-    it('should have if condition related nodes sorted in topological order', () => {
+    it('should return nodes for if condition in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const nodesCount = executionGraph.nodeCount();
       const topSort = graphlib.alg.topsort(executionGraph);
-      expect(nodesCount).toBe(9);
+      expect(topSort).toHaveLength(9);
       expect(topSort).toEqual([
         'testIfStep',
         'enterThen(testIfStep)',
@@ -80,7 +79,7 @@ describe('convertToWorkflowGraph', () => {
       ]);
     });
 
-    it('should have correct edges', () => {
+    it('should return correct edges for if step graph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const edges = executionGraph.edges();
       expect(edges).toEqual(
@@ -99,7 +98,7 @@ describe('convertToWorkflowGraph', () => {
       expect(edges).toHaveLength(9);
     });
 
-    it('should have enter if node correctly configured', () => {
+    it('should configure enter-if node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const enterIfNode = executionGraph.node('testIfStep');
       expect(enterIfNode).toEqual({
@@ -114,7 +113,7 @@ describe('convertToWorkflowGraph', () => {
       } as EnterIfNode);
     });
 
-    it('should have enter then branch node correctly configured', () => {
+    it('should configure enter-then branch node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const enterThenBranchNode = executionGraph.node('enterThen(testIfStep)');
       expect(enterThenBranchNode).toEqual({
@@ -124,7 +123,7 @@ describe('convertToWorkflowGraph', () => {
       } as EnterConditionBranchNode);
     });
 
-    it('should have exit then branch node correctly configured', () => {
+    it('should configure exit-then branch node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const exitThenBranchNode = executionGraph.node('exitThen(testIfStep)');
       expect(exitThenBranchNode).toEqual({
@@ -134,7 +133,7 @@ describe('convertToWorkflowGraph', () => {
       } as ExitConditionBranchNode);
     });
 
-    it('should have enter else branch nodes correctly configured', () => {
+    it('should configure enter-else branch node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const enterElseBranchNode = executionGraph.node('enterElse(testIfStep)');
       expect(enterElseBranchNode).toEqual({
@@ -144,7 +143,7 @@ describe('convertToWorkflowGraph', () => {
       } as EnterConditionBranchNode);
     });
 
-    it('should have exit else branch node correctly configured', () => {
+    it('should configure exit-else branch node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const exitElseBranchNode = executionGraph.node('exitElse(testIfStep)');
       expect(exitElseBranchNode).toEqual({
@@ -154,7 +153,7 @@ describe('convertToWorkflowGraph', () => {
       } as ExitConditionBranchNode);
     });
 
-    it('should have exit condition node correctly configured', () => {
+    it('should configure exit-if node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const exitConditionNode = executionGraph.node('exitCondition(testIfStep)');
       expect(exitConditionNode).toEqual({
@@ -194,11 +193,10 @@ describe('convertToWorkflowGraph', () => {
       ],
     } as Partial<WorkflowSchema>;
 
-    it('should have correct foreach related nodes sorted in topological order', () => {
+    it('should return nodes for foreach step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const nodesCount = executionGraph.nodeCount();
       const topSort = graphlib.alg.topsort(executionGraph);
-      expect(nodesCount).toBe(4);
+      expect(topSort).toHaveLength(4);
       expect(topSort).toEqual([
         'testForeachStep',
         'firstTestForeachConnectorStep',
@@ -207,7 +205,7 @@ describe('convertToWorkflowGraph', () => {
       ]);
     });
 
-    it('should have correct edges', () => {
+    it('should return correct edges for foreach step graph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const edges = executionGraph.edges();
       expect(edges).toEqual(
@@ -220,7 +218,7 @@ describe('convertToWorkflowGraph', () => {
       expect(edges).toHaveLength(3);
     });
 
-    it('should have enter foreach node correctly configured', () => {
+    it('should configure enter-foreach node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const enterForeachNode = executionGraph.node('testForeachStep');
       expect(enterForeachNode).toEqual({
@@ -235,7 +233,7 @@ describe('convertToWorkflowGraph', () => {
       } as EnterForeachNode);
     });
 
-    it('should have exit foreach node correctly configured', () => {
+    it('should configure exit-foreach node correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const exitForeachNode = executionGraph.node('exitForeach(testForeachStep)');
       expect(exitForeachNode).toEqual({
