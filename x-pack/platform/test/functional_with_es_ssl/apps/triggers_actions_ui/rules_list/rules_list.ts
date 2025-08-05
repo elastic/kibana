@@ -29,7 +29,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const objectRemover = new ObjectRemover(supertest);
   const toasts = getService('toasts');
 
-  async function refreshAlertsList() {
+  const refreshAlertsList = async () => {
     const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
     const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
     if (existsClearFilter) {
@@ -40,7 +40,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     }
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
-  }
+  };
 
   const getAlertSummary = async (ruleId: string) => {
     const { body: summary } = await supertest
@@ -197,7 +197,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('confirmModalConfirmButton');
 
-      await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
