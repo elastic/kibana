@@ -121,7 +121,7 @@ Discover::
 * Improves performance of breakdown field search ({kibana-pull}229335[#229335]).
 * Fixes the field being picked for fetching stats in the sidebar popover ({kibana-pull}228969[#228969]).
 * Fixes an issue where HTML search highlighting markup is incorrectly carried over into filter values when using the **Filter for value** field action in the **Log overview** tab ({kibana-pull}227652[#227652]).
-* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context. ({kibana-pull}229531[#229531]).
+* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context ({kibana-pull}229531[#229531]).
 
 Elastic Observability solution::
 * AI Assistant now works offline, allowing to use the knowledge base UI for cases like air-gapped environments ({kibana-pull}229874[#229874]).
