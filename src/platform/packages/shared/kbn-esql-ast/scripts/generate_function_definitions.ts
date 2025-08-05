@@ -18,7 +18,6 @@ import {
 } from '../src/definitions/types';
 import { Location } from '../src/commands_registry/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/definitions/constants';
-import { mathValidators } from './validators';
 import {
   aliasTable,
   aliases,
@@ -149,7 +148,6 @@ const enrichGrouping = (
 const enrichOperators = (
   operatorsFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
-  // @ts-expect-error Stringified version of the validator function
   return operatorsFunctionDefinitions.map((op) => {
     const isMathOperator = MATH_OPERATORS.includes(op.name);
     const isComparisonOperator = COMPARISON_OPERATORS.includes(op.name);
@@ -231,7 +229,6 @@ const enrichOperators = (
       // so we are overriding to add proper support
       locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
-      validate: mathValidators[op.name],
     };
   });
 };
@@ -315,7 +312,6 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
   signatures: ${JSON.stringify(signatures, null, 2)},
   locationsAvailable: [${locationsAvailable.join(', ')}],
   ${licenseField}
-  validate: ${functionDefinition.validate || 'undefined'},
   examples: ${JSON.stringify(functionDefinition.examples || [])},${
       customParametersSnippet
         ? `\ncustomParametersSnippet: ${JSON.stringify(customParametersSnippet)},`
@@ -346,17 +342,6 @@ const ${getDefinitionName(name)}: FunctionDefinition = {
 import { i18n } from '@kbn/i18n';
 import { Location } from '../../commands_registry/types';
 import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
-${
-  functionsType === FunctionDefinitionTypes.SCALAR
-    ? `import type { ESQLFunction } from '../../types';
-import { isLiteral } from '../../ast/is';;`
-    : ''
-}
-${
-  functionsType === FunctionDefinitionTypes.OPERATOR
-    ? `import { isNumericType } from '../types';`
-    : ''
-}
 
 
 
