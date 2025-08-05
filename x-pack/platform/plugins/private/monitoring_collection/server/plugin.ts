@@ -111,7 +111,5 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
   start() {}
 
-  stop() {
-    PrometheusExporter.destroy();
-  }
+  stop() {}
 }
