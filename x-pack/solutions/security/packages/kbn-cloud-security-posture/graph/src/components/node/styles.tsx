@@ -310,6 +310,7 @@ export const GroupStyleOverride = (size: {
 
 export const RoundedBadge = styled.div<{
   euiTheme: EuiThemeComputed;
+  bgColor?: string;
 }>`
   display: inline-flex;
   align-items: center;
@@ -318,8 +319,9 @@ export const RoundedBadge = styled.div<{
   padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
   gap: ${({ euiTheme }) => euiTheme.size.xxs};
 
-  background-color: ${({ euiTheme }) => euiTheme.colors.backgroundBasePlain};
-  border: ${({ euiTheme }) => euiTheme.border.thin};
+  background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
+  border: ${({ euiTheme }) =>
+    `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
   border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
 
   font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
