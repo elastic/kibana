@@ -26,12 +26,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RowColumnCreator } from './row_column_creator';
-import { getColumnInputRenderer } from './grid_custom_renderers/column_input_control';
+import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
 import { KibanaContextExtra } from '../types';
-import {
-  getCellValueRenderer,
-  getValueInputPopover,
-} from './grid_custom_renderers/value_input_control';
+import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
+import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 
 interface ESQLDataGridProps {
   rows: DataTableRecord[];
