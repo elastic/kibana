@@ -17,7 +17,7 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import {
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
-} from '@opentelemetry/semantic-conventions/build/src/experimental_attributes';
+} from '@opentelemetry/semantic-conventions/incubating';
 
 /**
  *

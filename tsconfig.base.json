@@ -2308,6 +2308,7 @@
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
+      "@opentelemetry/semantic-conventions/incubating": ["typings/@opentelemetry/semantic-conventions/incubating"],
       "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
