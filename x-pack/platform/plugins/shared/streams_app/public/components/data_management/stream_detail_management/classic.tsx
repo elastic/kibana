@@ -120,12 +120,12 @@ export function ClassicStreamDetailManagement({
     ),
     label: (
       <EuiToolTip
-        content={i18n.translate('xpack.streams.managementTab.advanced.tooltip', {
+        content={i18n.translate('xpack.streams.managementTab.dataQuality.tooltip', {
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
         <span>
-          {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+          {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
             defaultMessage: 'Data quality',
           })}
         </span>
