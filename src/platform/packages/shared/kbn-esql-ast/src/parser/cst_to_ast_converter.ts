@@ -789,20 +789,22 @@ export class CstToAstConverter {
       const stringNode = this.toStringLiteral(stringContext);
 
       command.args.push(stringNode);
-      command.args.push(...this.fromCommandOptions(ctx.commandOptions()));
+      command.args.push(...this.fromDissectCommandOptions(ctx.dissectCommandOptions()));
     }
 
     return command;
   }
 
-  private fromCommandOptions(ctx: cst.CommandOptionsContext | undefined): ast.ESQLCommandOption[] {
+  private fromDissectCommandOptions(
+    ctx: cst.DissectCommandOptionsContext | undefined
+  ): ast.ESQLCommandOption[] {
     if (!ctx) {
       return [];
     }
 
     const options: ast.ESQLCommandOption[] = [];
 
-    for (const optionCtx of ctx.commandOption_list()) {
+    for (const optionCtx of ctx.dissectCommandOption_list()) {
       const option = this.toOption(
         this.sanitizeIdentifierString(optionCtx.identifier()).toLowerCase(),
         optionCtx
