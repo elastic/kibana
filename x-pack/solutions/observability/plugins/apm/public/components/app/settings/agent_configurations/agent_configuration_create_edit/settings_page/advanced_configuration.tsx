@@ -146,7 +146,8 @@ export function AdvancedConfiguration({
       </EuiFlexGroup>
       <EuiSpacer />
       {unknownAgentSettings.map(([settingKey, settingValue], index) => (
-        <Fragment key={index}>
+        // Use reverse index as key prop to allow adding new rows at the top
+        <Fragment key={unknownAgentSettings.length - 1 - index}>
           {index > 0 && <EuiSpacer size="s" />}
           <EuiFlexGroup>
             <EuiFlexItem>
