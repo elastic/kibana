@@ -271,6 +271,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             isValid={isValid}
           />
         )}
+
         {selectedProvider === GCP_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <GcpCredentialsFormAgentless
             input={input}
@@ -291,6 +292,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
+
         {selectedProvider === AZURE_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AzureCredentialsFormAgentless
             input={input}
