@@ -182,12 +182,13 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedPrompts,
   ]);
 
-  const isConversationOwner = useMemo(
-    () =>
+  const isConversationOwner = useMemo(() => {
+    return (
+      currentConversation?.id === '' ||
       currentConversation?.createdBy.id === currentUser?.id ||
-      currentConversation?.createdBy.name === currentUser?.name,
-    [currentConversation, currentUser]
-  );
+      currentConversation?.createdBy.name === currentUser?.name
+    );
+  }, [currentConversation, currentUser]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(

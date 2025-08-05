@@ -6,7 +6,7 @@
  */
 
 import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
@@ -14,6 +14,7 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import { UserAvatar } from './user_avatar';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
 
@@ -63,7 +64,7 @@ export const getComments: GetComments =
     refetchCurrentConversation,
     regenerateMessage,
     showAnonymizedValues,
-    currentUserAvatar,
+    isConversationOwner,
     setIsStreaming,
     systemPromptContent,
     contentReferencesVisible,
@@ -104,23 +105,6 @@ export const getComments: GetComments =
         ]
       : [];
 
-    const UserAvatar = () => {
-      if (currentUserAvatar) {
-        return (
-          <EuiAvatar
-            name="user"
-            size="l"
-            color={currentUserAvatar?.color ?? 'subdued'}
-            {...(currentUserAvatar?.imageUrl
-              ? { imageUrl: currentUserAvatar.imageUrl as string }
-              : { initials: currentUserAvatar?.initials })}
-          />
-        );
-      }
-
-      return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
-    };
-
     return [
       ...(systemPromptContent && currentConversation.messages.length
         ? [
@@ -156,7 +140,7 @@ export const getComments: GetComments =
 
         const messageProps = {
           timelineAvatar: isUser ? (
-            <UserAvatar />
+            <UserAvatar user={message.user} />
           ) : (
             <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
@@ -169,7 +153,7 @@ export const getComments: GetComments =
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 
-        const isControlsEnabled = isLastComment && !isUser;
+        const isControlsEnabled = isLastComment && !isUser && isConversationOwner;
 
         const transformMessage = (content: string) =>
           transformMessageWithReplacements({
