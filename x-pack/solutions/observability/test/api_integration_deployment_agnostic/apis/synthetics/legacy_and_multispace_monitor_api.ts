@@ -49,7 +49,7 @@ const runTests = (
     return res.body;
   };
 
-  const editMonitor = async (monitorId: string, monitor: any, type: string, spaceId?: string) => {
+  const editMonitor = async (monitorId: string, monitor: any, spaceId?: string) => {
     let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}?internal=true`;
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
@@ -59,7 +59,7 @@ const runTests = (
     return res.body;
   };
 
-  const deleteMonitor = async (monitorId: string, type: string, spaceId?: string) => {
+  const deleteMonitor = async (monitorId: string, spaceId?: string) => {
     let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`;
     if (spaceId) {
       url = `/s/${spaceId}${url}`;
@@ -521,6 +521,9 @@ const runTests = (
           ['private_locations']
         )
       );
+      // verify that it can be edited
+      const editedMonitor = await editMonitor(mon.id, { name: `legacy-edited-${uuid}` });
+      expect(editedMonitor.name).to.eql(`legacy-edited-${uuid}`);
     });
 
     it('should migrate legacy monitor to multi-space type in a specific space', async () => {
@@ -581,6 +584,9 @@ const runTests = (
           ['private_locations']
         )
       );
+      // verify that it can be edited in the new space
+      const editedMonitor = await editMonitor(mon.id, { name: `legacy-edited-${uuid}` }, SPACE_ID);
+      expect(editedMonitor.name).to.eql(`legacy-edited-${uuid}`);
     });
   });
 };
