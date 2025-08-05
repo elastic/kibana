@@ -23,6 +23,7 @@ import {
   internalStateActions,
   useInternalStateDispatch,
   useInternalStateSelector,
+  selectTabRuntimeState,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -91,6 +92,7 @@ export const DiscoverMainRoute = ({
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
+  const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
   const { core, dataViews, chrome } = services;
   const history = useHistory();
@@ -118,11 +120,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   );
 
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
-  const latestPersistedDiscoverSession = useLatest(persistedDiscoverSession);
-  const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
     async ({
       discoverSessionId,
@@ -137,6 +134,29 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   );
 
+  const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const initializeDiscoverSession = useLatest(
+    ({ nextDiscoverSessionId }: { nextDiscoverSessionId: string | undefined }) => {
+      const persistedDiscoverSessionId = persistedDiscoverSession?.id;
+
+      if (!persistedDiscoverSessionId || persistedDiscoverSessionId !== nextDiscoverSessionId) {
+        initializeTabs({ discoverSessionId: nextDiscoverSessionId });
+      } else if (
+        persistedDiscoverSessionId &&
+        persistedDiscoverSessionId === nextDiscoverSessionId
+      ) {
+        const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+        const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
+
+        currentTabStateContainer?.appState.updateUrlWithCurrentState();
+      }
+    }
+  );
+
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
       initializeMainRoute(rootProfileState);
@@ -144,14 +164,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
-    const persistedDiscoverSessionId = latestPersistedDiscoverSession.current?.id;
-    if (!persistedDiscoverSessionId || persistedDiscoverSessionId !== currentDiscoverSessionId) {
-      initializeTabs({ discoverSessionId: currentDiscoverSessionId });
-    }
-  }, [currentDiscoverSessionId, initializeTabs, latestPersistedDiscoverSession]);
+    initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
+  }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
-    for (const tabId of Object.keys(props.runtimeStateManager.tabs.byId)) {
+    for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }
   });
@@ -173,7 +190,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   });
 
   useEffect(() => {
-    if (props.customizationContext.displayMode === 'standalone') {
+    if (customizationContext.displayMode === 'standalone') {
       const pageTitleSuffix = persistedDiscoverSession?.title
         ? `: ${persistedDiscoverSession.title}`
         : '';
@@ -183,7 +200,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [
     chrome.docTitle,
     persistedDiscoverSession?.title,
-    props.customizationContext.displayMode,
+    customizationContext.displayMode,
     services,
   ]);
 
@@ -219,7 +236,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   return (
     <rootProfileState.AppWrapper>
-      <ChartPortalsRenderer runtimeStateManager={props.runtimeStateManager}>
+      <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         {TABS_ENABLED ? <TabsView {...props} /> : <SingleTabView {...props} />}
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
