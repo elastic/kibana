@@ -70,12 +70,12 @@ function restoreMaskedPatterns(masked: string, literals: string[]): string {
 */
 function findDelimiter(msgs: string[]): string {
   const delimiterOptions = [
-    { id: '|', pattern: /\|/g },
+    { id: '\\|', pattern: /\|/g },
     { id: ',', pattern: /,/g },
     { id: '\\s', pattern: /\s+/g },
     { id: '\\t', pattern: /\t+/g },
     { id: ';', pattern: /;/g },
-    { id: ':', pattern: /:/g },
+    // { id: ':', pattern: /:/g }, Exclude colons since they are used inside capture groups (e.g. %{WORD:0}) so would incorrectly match those and break up the Grok component
   ];
 
   const minOccurrences: Record<string, number> = {};
@@ -138,7 +138,14 @@ function tokenizeLines(
   },
   splitChars?: string[][]
 ) {
-  const delimiterValue = delimiter === '\\s' || delimiter === '\\s+' ? ' ' : delimiter;
+  const delimiterValue =
+    delimiter === '\\s' || delimiter === '\\s+'
+      ? ' '
+      : delimiter === '\\t'
+      ? '\t'
+      : delimiter === '\\|'
+      ? '|'
+      : delimiter;
 
   return maskedMessages.map(({ literals, masked }, index) => {
     const original = messages[index];
@@ -306,15 +313,29 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
     const tokenLists = templates.map((template) => template.columns[idx].tokens);
 
     // Calculate whitespace stats
+    let minLeading: number | undefined;
+    let minTrailing: number | undefined;
     let maxLeading = 0;
     let maxTrailing = 0;
     templates.forEach((template) => {
       const column = template.columns[idx];
-      maxLeading = Math.max(maxLeading, column.value.match(LEADING_WHITESPACE)?.[0].length ?? 0);
-      maxTrailing = Math.max(maxTrailing, column.value.match(TRAILING_WHITESPACE)?.[0].length ?? 0);
+      const leadingWhitespace = column.value.match(LEADING_WHITESPACE)?.[0].length ?? 0;
+      const trailingWhitespace = column.value.match(TRAILING_WHITESPACE)?.[0].length ?? 0;
+      minLeading =
+        minLeading !== undefined ? Math.min(minLeading, leadingWhitespace) : leadingWhitespace;
+      minTrailing =
+        minTrailing !== undefined ? Math.min(minTrailing, trailingWhitespace) : trailingWhitespace;
+      maxLeading = Math.max(maxLeading, leadingWhitespace);
+      maxTrailing = Math.max(maxTrailing, trailingWhitespace);
     });
-    // Use the normalize_tokens module to handle the token normalization
-    return normalizeTokensForColumn(tokenLists, maxLeading, maxTrailing);
+    // Only include the minimum amount of variable whitespace that is consistent across all messages
+    return normalizeTokensForColumn(
+      tokenLists,
+      minLeading ?? 0,
+      maxLeading,
+      minTrailing ?? 0,
+      maxTrailing
+    );
   });
 
   // append %{GREEDYDATA} if some columns in some messages have not been processed
@@ -327,10 +348,7 @@ export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
           values: [],
         },
       ],
-      whitespace: {
-        leading: 0,
-        trailing: 0,
-      },
+      whitespace: { minLeading: 0, maxLeading: 0, minTrailing: 0, maxTrailing: 0 },
     });
   }
 

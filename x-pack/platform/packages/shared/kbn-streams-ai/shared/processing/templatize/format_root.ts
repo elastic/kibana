@@ -70,7 +70,7 @@ function getDisplayValue(values: string[], enumThreshold: number): string | null
 }
 
 export function formatRoot(roots: NormalizedColumn[], delimiter: string): TemplateRoot {
-  const { columns, usefulColumns } = getUsefulTokens(roots, delimiter);
+  const { columns, usefulColumns, usefulTokens } = getUsefulTokens(roots, delimiter);
 
   function getDisplayedTokens(
     tokens: Array<{ id: string | undefined; pattern: string; values: string[] }>
@@ -100,11 +100,11 @@ export function formatRoot(roots: NormalizedColumn[], delimiter: string): Templa
     return usefulColumns.reduce((acc, { tokens, whitespace }) => {
       return (
         (acc ? acc + (delimiter === '\\s' ? ' ' : delimiter) : '') +
-        ' '.repeat(whitespace.leading) +
+        ' '.repeat(whitespace.maxLeading) +
         getDisplayedTokens(tokens)
           .map((token) => displayToken(token))
           .join('') +
-        ' '.repeat(whitespace.trailing)
+        ' '.repeat(whitespace.maxTrailing)
       );
     }, '');
   }
@@ -134,13 +134,7 @@ export function formatRoot(roots: NormalizedColumn[], delimiter: string): Templa
           return `<${pattern}>`;
         })
       ),
-      grok: sanitizeWhitespace(
-        formatColumns((token) => {
-          return !TOKEN_SPLIT_CHARS.includes(token.pattern)
-            ? `%{${token.pattern}:${token.id}}`
-            : sanitize(token.pattern);
-        })
-      ),
+      grok: getGrokPattern(usefulTokens),
     },
   };
 }
@@ -195,13 +189,13 @@ export function getUsefulTokens(roots: NormalizedColumn[], delimiter: string) {
     Math.max(
       // Find last column that is surrounded by variable whitespace (this indicates intentional separation so should not be collapsed into GREEDYDATA)
       columns.findLastIndex((col) => {
-        return col.whitespace.leading > 0 || col.whitespace.trailing > 0;
+        const leadingWhitespaceRange = col.whitespace.maxLeading - col.whitespace.minLeading;
+        const trailingWhitespaceRange = col.whitespace.maxTrailing - col.whitespace.minTrailing;
+        return leadingWhitespaceRange > 0 || trailingWhitespaceRange > 0;
       }),
       // Find last column that is not just freeform text (the rest can be collapsed into GREEDYDATA)
       columns.findLastIndex((col) => {
-        return col.tokens.some(
-          (token) => token.pattern && COLLAPSIBLE_PATTERNS.indexOf(token.pattern) === -1
-        );
+        return col.tokens.some((token) => token.pattern && !isCollapsibleToken(token.pattern));
       }) + 1
     )
   );
@@ -212,24 +206,40 @@ export function getUsefulTokens(roots: NormalizedColumn[], delimiter: string) {
         { pattern: 'GREEDYDATA', values: [], id: columns[usefulColumns.length].tokens[0].id },
       ],
       whitespace: {
-        leading: columns[usefulColumns.length].whitespace.leading,
-        trailing: columns[columns.length - 1].whitespace.trailing,
+        minLeading: columns[usefulColumns.length].whitespace.minLeading,
+        maxLeading: columns[usefulColumns.length].whitespace.maxLeading,
+        minTrailing: columns[columns.length - 1].whitespace.minTrailing,
+        maxTrailing: columns[columns.length - 1].whitespace.maxTrailing,
       },
     });
   }
-
   const usefulTokens = usefulColumns.reduce<TokenTuple[]>((acc, col, i) => {
+    let { minLeading, maxLeading } = col.whitespace;
     if (i > 0) {
-      acc.push([delimiter === '\\s' ? ' ' : delimiter, undefined]);
+      if (delimiter !== '\\s') {
+        acc.push([delimiter, undefined]);
+      } else {
+        // Increment leading whitespace by one to account for the delimiter. This simplifies the GROK pattern by combining the delimiter and leading whitespace into a single token.
+        minLeading += 1;
+        maxLeading += 1;
+      }
     }
-    if (col.whitespace.leading) {
-      acc.push([' '.repeat(col.whitespace.leading), undefined]);
+    if (minLeading === 1 && maxLeading === 1) {
+      acc.push(['\\s', undefined]);
+    } else if (minLeading >= 1) {
+      acc.push(['\\s+', undefined]);
+    } else if (maxLeading >= 1) {
+      acc.push(['\\s*', undefined]);
     }
     col.tokens.forEach((token) => {
       acc.push([token.pattern, token.id]);
     });
-    if (col.whitespace.trailing) {
-      acc.push([' '.repeat(col.whitespace.trailing), undefined]);
+    if (col.whitespace.minTrailing === 1 && col.whitespace.maxTrailing === 1) {
+      acc.push(['\\s', undefined]);
+    } else if (col.whitespace.minTrailing >= 1) {
+      acc.push(['\\s+', undefined]);
+    } else if (col.whitespace.maxTrailing >= 1) {
+      acc.push(['\\s*', undefined]);
     }
     return acc;
   }, []);
@@ -379,7 +389,7 @@ export function getGrokProcessor(
     originalPattern: string,
     exampleValues: string[]
   ) => {
-    // If the suggested pattern is a collapsible token, return the original pattern. These have been vetted by the heuristics to not be unecessarily greedy, something the LLM is not able to do, so should not be changed
+    // If the suggested pattern is a collapsible token, return the original pattern. These have been vetted by the heuristics to not be unecessarily greedy, something the LLM does not do well, so should not be changed
     if (isCollapsibleToken(suggestedPattern)) {
       return originalPattern;
     }
@@ -405,6 +415,7 @@ export function getGrokProcessor(
           // Token is part of a field with multiple columns, create a custom pattern definition and add the token to it
           const index = match.columns.indexOf(id);
           const patternDefinition = `CUSTOM_${match.name
+            .replace(/^(resource\.)?(attributes\.)?(custom_)?/g, '')
             .toUpperCase()
             .replace(/\W+/g, '_')
             .replace(/^_|_$/g, '')}`;
@@ -442,10 +453,8 @@ export function getGrokProcessor(
 
   return {
     description: reviewResult.log_source,
-    patterns: [sanitizeWhitespace(rootPattern)],
-    pattern_definitions: Object.fromEntries(
-      Object.entries(patternDefinitions).map(([key, value]) => [key, sanitizeWhitespace(value)])
-    ),
+    patterns: [rootPattern],
+    pattern_definitions: patternDefinitions,
   };
 }
 
@@ -484,4 +493,10 @@ interface NormalizedReviewResult {
     columns: string[];
     grok_components: string[];
   }>;
+}
+
+export function getGrokPattern(usefulTokens: TokenTuple[]) {
+  return usefulTokens.reduce((acc, [token, id]) => {
+    return acc + (id ? `%{${token}:${id}}` : sanitize(token));
+  }, '');
 }

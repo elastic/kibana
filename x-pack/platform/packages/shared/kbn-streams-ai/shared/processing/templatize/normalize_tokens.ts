@@ -48,8 +48,10 @@ export interface NormalizedToken {
 export interface NormalizedColumn {
   tokens: NormalizedToken[];
   whitespace: {
-    leading: number;
-    trailing: number;
+    minLeading: number;
+    maxLeading: number;
+    minTrailing: number;
+    maxTrailing: number;
   };
 }
 
@@ -124,13 +126,15 @@ const buildTokenBy = (
  */
 export function normalizeTokensForColumn(
   tokenLists: Token[][],
-  leadingWhitespace: number,
-  trailingWhitespace: number
+  minLeading: number,
+  maxLeading: number,
+  minTrailing: number,
+  maxTrailing: number
 ): NormalizedColumn {
   if (tokenLists.length === 0) {
     return {
       tokens: [],
-      whitespace: { leading: leadingWhitespace, trailing: trailingWhitespace },
+      whitespace: { minLeading, maxLeading, minTrailing, maxTrailing },
     };
   }
 
@@ -269,9 +273,6 @@ export function normalizeTokensForColumn(
 
   return {
     tokens: reevaluated,
-    whitespace: {
-      leading: leadingWhitespace,
-      trailing: trailingWhitespace,
-    },
+    whitespace: { minLeading, maxLeading, minTrailing, maxTrailing },
   };
 }

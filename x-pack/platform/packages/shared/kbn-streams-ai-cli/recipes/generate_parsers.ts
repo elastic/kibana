@@ -21,37 +21,44 @@ runRecipe(
     name: 'generate_parsers',
     flags: {
       string: ['stream'],
-      boolean: ['apply'],
+      boolean: ['apply', 'clear'],
       help: `
         --stream      The name of the stream to generate parsers for
         --apply       Whether to apply the generated parsers
+        --clear       Whether to clear the existing streams before running the recipe
       `,
       default: {
-        stream: 'logs',
+        stream:
+          'logs.android,logs.apache,logs.bgl,logs.hadoop,logs.hdfs,logs.healthapp,logs.hpc,logs.linux,logs.mac,logs.openssh,logs.openstack,logs.proxifier,logs.spark,logs.thunderbird,logs.windows,logs.zookeeper',
       },
     },
   },
   async ({ inferenceClient, kibanaClient, esClient, logger, log, signal, flags }) => {
-    await clearStreams({
-      esClient,
-      kibanaClient,
-      signal,
-    });
-
-    await enableStreams({
-      kibanaClient,
-      signal,
-    });
-
     const streams = getStreamNames(flags);
-    console.log('Streams to process:', streams);
 
-    await prepartitionStreams({
-      esClient,
-      kibanaClient,
-      signal,
-      filter: streams.map((stream) => stream.split('.')[1]).filter((stream) => stream),
-    });
+    if (flags.clear) {
+      log.info('Clearing existing streams...');
+      await clearStreams({
+        esClient,
+        kibanaClient,
+        signal,
+      });
+
+      log.info('Enabling streams...');
+      await enableStreams({
+        kibanaClient,
+        signal,
+      });
+
+      log.info('Partitioning streams: ', streams);
+
+      await prepartitionStreams({
+        esClient,
+        kibanaClient,
+        signal,
+        filter: streams.map((stream) => stream.split('.')[1]).filter((stream) => stream),
+      });
+    }
 
     const now = moment();
 

@@ -17,7 +17,7 @@
  * Run evaluation script using:
  *
  * ```bash
- * yarn run ts-node --transpile-only x-pack/platform/plugins/shared/streams/scripts/evaluate_grok_patterns.ts
+ * node --require ./src/setup_node_env/ ./x-pack/platform/plugins/shared/streams/scripts/evaluate_heuristic_grok_patterns.ts
  * ```
  */
 
@@ -30,6 +30,14 @@ import chalk from 'chalk';
 import yargs from 'yargs/yargs';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
+import {
+  getUsefulTokens,
+  getReviewFields,
+  getGrokProcessor,
+  formatRoot,
+  ReviewFields,
+} from '@kbn/streams-ai/shared/processing/templatize/format_root';
+import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
 import { getLogGroups } from '../server/routes/internal/streams/processing/get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
@@ -72,11 +80,11 @@ async function getStreams(): Promise<string[]> {
   const data = await fetch(`${KIBANA_URL}/api/streams`, {
     method: 'GET',
     headers: getKibanaAuthHeaders(),
-  }).then((res) => {
+  }).then(async (res) => {
     if (res.ok) {
       return res.json();
     }
-    throw new Error(`HTTP Response Code: ${res.status}`);
+    throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
   return data.streams.map((s: any) => s.name).filter((name: string) => name.startsWith('logs.'));
 }
@@ -85,29 +93,37 @@ async function getConnectors(): Promise<string[]> {
   const data = await fetch(`${KIBANA_URL}/api/actions/connectors`, {
     method: 'GET',
     headers: getKibanaAuthHeaders(),
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    }
-    throw new Error(`HTTP Response Code: ${res.status}`);
-  });
-  return data.map((c: any) => c.id);
-}
-
-async function getSuggestions(stream: string, connectorId: string, samples: any[]) {
-  const data = await fetch(`${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions`, {
-    method: 'POST',
-    headers: getKibanaAuthHeaders(),
-    body: JSON.stringify({
-      connectorId,
-      field: MESSAGE_FIELD,
-      samples,
-    }),
   }).then(async (res) => {
     if (res.ok) {
       return res.json();
     }
-    throw new Error(`HTTP Response Code: ${res.status}`);
+    throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
+  });
+  return data.map((c: any) => c.id);
+}
+
+async function getSuggestions(
+  stream: string,
+  connectorId: string,
+  messages: string[],
+  reviewFields: ReviewFields
+) {
+  const data = await fetch(
+    `${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions/grok`,
+    {
+      method: 'POST',
+      headers: getKibanaAuthHeaders(),
+      body: JSON.stringify({
+        connector_id: connectorId,
+        sample_messages: messages.slice(0, 10),
+        review_fields: reviewFields,
+      }),
+    }
+  ).then(async (res) => {
+    if (res.ok) {
+      return res.json();
+    }
+    throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
   return data;
 }
@@ -122,7 +138,7 @@ async function simulateGrokProcessor(stream: string, documents: any[], grokProce
         {
           id: 'eval-grok',
           grok: {
-            field: grokProcessor.field,
+            field: MESSAGE_FIELD,
             patterns: grokProcessor.patterns,
             pattern_definitions: grokProcessor.pattern_definitions,
             ignore_failure: true,
@@ -132,11 +148,11 @@ async function simulateGrokProcessor(stream: string, documents: any[], grokProce
         },
       ],
     }),
-  }).then((res) => {
+  }).then(async (res) => {
     if (res.ok) {
       return res.json();
     }
-    throw new Error(`HTTP Response Code: ${res.status}`);
+    throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
   return data;
 }
@@ -182,12 +198,26 @@ export async function evaluateGrokSuggestions() {
     streams.map(async (stream) => {
       const sampleDocs = await fetchDocs(stream, 100);
 
-      const suggestion = await getSuggestions(stream, connector, sampleDocs);
-      const grokProcessor = suggestion[0]?.grokProcessor;
+      const messages = sampleDocs.reduce<string[]>((acc, sample) => {
+        const value = get(sample, MESSAGE_FIELD);
+        if (typeof value === 'string') {
+          acc.push(value);
+        }
+        return acc;
+      }, []);
+
+      const { roots, delimiter } = syncExtractTemplate(messages);
+      const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
+      const grok = formatRoot(roots, delimiter);
+      const reviewFields = getReviewFields(usefulColumns, 10);
+      console.log(`- ${stream}: ${chalk.dim(grok.formatted.grok)}`);
+
+      const suggestion = await getSuggestions(stream, connector, messages, reviewFields);
+      const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, suggestion);
       if (!grokProcessor) {
         throw new Error('No grokProcessor returned');
       }
-      console.log(`- ${stream}: ${chalk.dim(grokProcessor.patterns.join(', '))}`);
+      console.log(`- ${stream}: ${chalk.green(grokProcessor.patterns.join(', '))}`);
 
       return { stream, ...grokProcessor };
     })
@@ -233,7 +263,7 @@ export async function evaluateGrokSuggestions() {
     chalk.bold(`Average Parsing Score (all docs): ${chalk.green(averageParsingScoreAllDocs)}`)
   );
 
-  return output.reduce((acc, suggestion) => {
+  return output.reduce<Record<string, any>>((acc, suggestion) => {
     acc[suggestion.stream] = {
       patterns: suggestion.patterns,
       pattern_definitions: suggestion.pattern_definitions,

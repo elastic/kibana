@@ -10,7 +10,8 @@ import { get } from 'lodash';
 import {
   getUsefulTokens,
   getReviewFields,
-  formatRoot,
+  getGrokPattern,
+  getGrokProcessor,
 } from '../../../shared/processing/templatize/format_root';
 import { OnboardingTaskContext, OnboardingTaskState } from '../types';
 import { ReviewFieldsPrompt } from './prompts';
@@ -48,21 +49,32 @@ export async function generateParsers({
   });
 
   const { usefulColumns, usefulTokens } = getUsefulTokens(roots, delimiter);
-  const templateExtraction = formatRoot(roots, delimiter);
+  const reviewFields = getReviewFields(usefulColumns, 5);
+  const grokPattern = getGrokPattern(usefulTokens);
 
-  const { grok, display } = templateExtraction.formatted;
+  context.logger.info(`${state.stream.definition.name}: ${grokPattern}`);
 
-  context.logger.info(JSON.stringify({ grok, delimiter }));
-
-  const formatDescription = await context.inferenceClient.prompt({
+  const reviewResponse = await context.inferenceClient.prompt({
     prompt: ReviewFieldsPrompt,
     input: {
       sample_messages: messages.slice(0, 5),
-      review_fields: JSON.stringify(getReviewFields(usefulColumns, 5)),
+      review_fields: JSON.stringify(reviewFields),
     },
   });
 
-  context.logger.info(formatDescription.content);
+  context.logger.info(reviewResponse.content);
+
+  const reviewResult = reviewResponse.toolCalls[0].function.arguments;
+  const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, {
+    log_source: reviewResult.log_source,
+    fields: reviewResult.fields.map((field) => {
+      return {
+        name: field.ecs_field,
+        columns: field.columns,
+        grok_components: field.grok_components,
+      };
+    }),
+  });
 
   const initial = await context.services.processing
     .simulate(state.stream.definition.name, {
@@ -71,7 +83,8 @@ export async function generateParsers({
         id: 'initial',
         grok: {
           field: fieldName,
-          patterns: [grok],
+          patterns: grokProcessor.patterns,
+          pattern_definitions: grokProcessor.pattern_definitions,
         },
       },
     })
