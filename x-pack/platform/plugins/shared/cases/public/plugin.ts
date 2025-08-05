@@ -28,6 +28,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { AttachmentSuggestionRegistry } from './client/attachment_framework/suggestion_registry';
 import { registerCaseFileKinds } from './files';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerActions } from './components/visualizations/actions';
@@ -57,11 +58,13 @@ export class CasesUiPlugin
   private readonly storage = new Storage(localStorage);
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  private attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+    this.attachmentSuggestionRegistry = new AttachmentSuggestionRegistry();
   }
 
   public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
@@ -127,6 +130,9 @@ export class CasesUiPlugin
         },
         registerPersistableState: (persistableStateAttachmentType) => {
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
+        },
+        registerSuggestion: (suggestionType) => {
+          this.attachmentSuggestionRegistry.register(suggestionType);
         },
       },
     };

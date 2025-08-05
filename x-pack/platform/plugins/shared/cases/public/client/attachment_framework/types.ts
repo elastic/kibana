@@ -10,6 +10,8 @@ import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
+  SuggestionOwner,
+  SuggestionResponse,
 } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
@@ -73,6 +75,19 @@ export interface AttachmentType<Props> {
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 
+interface BaseSuggestionType {
+  id: string;
+  owner: SuggestionOwner;
+}
+
+export type SuggestionType<TPayload = {}> = BaseSuggestionType & {
+  children: React.LazyExoticComponent<React.FC<CaseSuggestionChildrenProps<TPayload>>>;
+};
+
+export interface CaseSuggestionChildrenProps<TPayload = {}> {
+  caseSuggestion: SuggestionResponse<TPayload>;
+}
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
@@ -80,4 +95,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
+  registerSuggestion: (suggestionType: SuggestionType) => void;
 }

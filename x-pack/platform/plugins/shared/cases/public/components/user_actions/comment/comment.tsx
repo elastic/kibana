@@ -10,7 +10,7 @@ import type { EuiCommentProps } from '@elastic/eui';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
-import { type AttachmentTypeRegistry } from '../../../../common/registry';
+import { type Registry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import type { AttachmentUI } from '../../../containers/types';
@@ -76,7 +76,7 @@ const getDeleteLabelTitle = ({
 interface GetDeleteLabelFromRegistryArgs<R> {
   caseData: UserActionBuilderArgs['caseData'];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  registry: AttachmentTypeRegistry<AttachmentFrameworkAttachmentType<any>>;
+  registry: Registry<AttachmentFrameworkAttachmentType<any>>;
   getId: () => string;
   getAttachmentProps: () => object;
 }

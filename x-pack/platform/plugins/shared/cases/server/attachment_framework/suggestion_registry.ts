@@ -6,10 +6,14 @@
  */
 
 import { Registry } from '../../common/registry';
-import type { ExternalReferenceAttachmentType } from './types';
+import type { SuggestionType } from './types';
 
-export class ExternalReferenceAttachmentTypeRegistry extends Registry<ExternalReferenceAttachmentType> {
+export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
   constructor() {
-    super('ExternalReferenceAttachmentTypeRegistry');
+    super('AttachmentSuggestionRegistry');
+  }
+
+  public register(suggestionType: SuggestionType): void {
+    super.register(suggestionType);
   }
 }
