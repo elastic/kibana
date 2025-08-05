@@ -128,8 +128,6 @@ export function createTestConfig(
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     return {
-<<<<<<< HEAD:x-pack/test/apm_api_integration/common/config.ts
-=======
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
         registry: {
@@ -142,7 +140,6 @@ export function createTestConfig(
           waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
->>>>>>> 15456349ea8 ([APM] Configure fleet docker container for APM tests (#230398)):x-pack/solutions/observability/test/apm_api_integration/common/config.ts
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
