@@ -30,7 +30,7 @@ export const PolicyContainer = memo(() => {
   const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
     'protectionUpdatesEnabled'
   );
-  const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevicesEnabled');
+  const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
   const isEnterprise = useLicense().isEnterprise();
   const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
 

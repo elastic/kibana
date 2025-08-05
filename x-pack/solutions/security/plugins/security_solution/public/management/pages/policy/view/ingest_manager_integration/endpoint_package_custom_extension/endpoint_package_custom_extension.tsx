@@ -146,9 +146,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
     const userCanAccessContent = useCanAccessSomeArtifacts();
     const isEnterprise = useLicense().isEnterprise();
     const trustedDevicesVisible =
-      useIsExperimentalFeatureEnabled('trustedDevicesEnabled') &&
-      canReadTrustedDevices &&
-      isEnterprise;
+      useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {

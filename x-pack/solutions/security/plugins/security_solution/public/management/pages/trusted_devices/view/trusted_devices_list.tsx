@@ -134,7 +134,7 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
 
 export const TrustedDevicesList = memo<TrustedDevicesListProps>((props) => {
   const http = useHttp();
-  const isTrustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevicesEnabled');
+  const isTrustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
 
   const trustedDevicesListApiClient = TrustedDevicesApiClient.getInstance(http);
 
