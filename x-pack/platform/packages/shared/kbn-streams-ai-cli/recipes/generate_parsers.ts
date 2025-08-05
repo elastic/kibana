@@ -83,7 +83,7 @@ runRecipe(
           });
         })
       );
-    }
+    };
 
     if (flags.clear) {
       log.info('Clearing existing streams...');

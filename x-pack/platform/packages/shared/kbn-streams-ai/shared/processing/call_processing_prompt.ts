@@ -89,8 +89,8 @@ export async function callProcessingPrompt({
             const overallValidity = validities.every((validity) => validity === 'success')
               ? 'success'
               : validities.some((validity) => validity === 'failure')
-                ? 'failure'
-                : 'partial';
+              ? 'failure'
+              : 'partial';
 
             return {
               validity: overallValidity,
@@ -133,11 +133,12 @@ export async function callProcessingPrompt({
                           >> \`${source?.[messageField]}\`
                           > Matching tokens
                           >> \`${JSON.stringify(formatted.matched)}\`
-                          ${result.result.successful?.length
-                            ? `> This message _was_ successfully parsed:
+                          ${
+                            result.result.successful?.length
+                              ? `> This message _was_ successfully parsed:
                           >> \`${result.result.successful[0]?.[messageField]}\`
                           `
-                            : ''
+                              : ''
                           }
                       `),
                         abortSignal: signal,
@@ -174,9 +175,9 @@ export async function callProcessingPrompt({
   const processors = (assistantResponse?.toolCalls.flatMap((toolCall) =>
     toolCall.function.name === 'suggest_pipeline'
       ? toolCall.function.arguments.processors.map((processor) => ({
-        id: processor.id,
-        ...processor.config,
-      }))
+          id: processor.id,
+          ...processor.config,
+        }))
       : []
   ) ?? []) as ProcessorDefinitionWithId[];
 
