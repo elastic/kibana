@@ -18,7 +18,7 @@ const triggerNodeTypes = [
   'triggers.elastic.detectionRule',
   'triggers.elastic.scheduled',
 ];
-const actionNodeTypes = ['console', 'slack.sendMessage', 'delay'];
+const actionNodeTypes = ['console', 'slack', 'delay', 'inference.unified_inference'];
 
 function getNodeIcon(nodeType: string, color: string) {
   switch (nodeType) {
@@ -28,8 +28,10 @@ function getNodeIcon(nodeType: string, color: string) {
       return <EuiIcon type="logstashInput" color={color} />;
     case 'console':
       return <EuiIcon type="console" color={color} />;
-    case 'slack.sendMessage':
+    case 'slack':
       return <EuiIcon type="logoSlack" color={color} />;
+    case 'inference.unified_inference':
+      return <EuiIcon type="sparkles" color={color} />;
     case 'triggers.elastic.manual':
       return <EuiIcon type="accessibility" color={color} />;
     case 'triggers.elastic.detectionRule':

@@ -8,24 +8,12 @@
  */
 
 import nunjucks from 'nunjucks';
-import Mustache from 'mustache';
 
 export class WorkflowTemplatingEngine {
-  private syntax: 'mustache' | 'nunjucks';
-
-  constructor(syntax: 'mustache' | 'nunjucks' = 'nunjucks') {
-    this.syntax = syntax;
-  }
+  constructor() {}
 
   public render(template: string, context: Record<string, any>): string {
-    switch (this.syntax) {
-      case 'nunjucks':
-        return this.renderNunjucks(template, context);
-      case 'mustache':
-        return this.renderMustache(template, context);
-      default:
-        throw new Error(`Unsupported syntax: ${this.syntax}`);
-    }
+    return this.renderNunjucks(template, context);
   }
 
   private renderNunjucks(template: string, context: Record<string, any>): string {
@@ -43,10 +31,5 @@ export class WorkflowTemplatingEngine {
     });
 
     return env.renderString(template, context);
-  }
-
-  private renderMustache(template: string, context: Record<string, any>): string {
-    // Assuming Mustache is available globally or imported
-    return Mustache.render(template, context);
   }
 }
