@@ -443,26 +443,25 @@ export class SyncPrivateLocationMonitorsTask {
         });
 
         // delete the old monitors in the legacy type
-        Object.entries(deletePerSpace).forEach(([deletePerSpaceId, monitorsToDelete]) => {
-          soClient
-            .bulkDelete(monitorsToDelete, {
-              namespace: deletePerSpaceId,
-            })
-            .then((deletedMonitors) => {
-              deletedMonitors.statuses.forEach((status) => {
-                if (!status.success) {
-                  logger.error(
-                    `Failed to delete legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}: ${status.error?.message}`,
-                    { error: status.error }
-                  );
-                } else {
-                  logger.debug(
-                    `Successfully deleted legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}`
-                  );
-                }
-              });
-            });
-        });
+        const toDelete = Object.entries(deletePerSpace);
+
+        for (const [deletePerSpaceId, monitorsToDelete] of toDelete) {
+          const deletedMonitors = await soClient.bulkDelete(monitorsToDelete, {
+            namespace: deletePerSpaceId,
+          });
+          deletedMonitors.statuses.forEach((status) => {
+            if (!status.success) {
+              logger.error(
+                `Failed to delete legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}: ${status.error?.message}`,
+                { error: status.error }
+              );
+            } else {
+              logger.debug(
+                `Successfully deleted legacy monitor ${status.id} of type ${legacySyntheticsMonitorTypeSingle}`
+              );
+            }
+          });
+        }
 
         logger.info(
           `Migrated ${successfulRecreates.length} monitors from ${legacySyntheticsMonitorTypeSingle} type to ${syntheticsMonitorSavedObjectType} type`
