@@ -13,6 +13,15 @@ import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_funct
 import { setup } from './helpers';
 import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 
+const getExpectedError = (fnName: string, givenTypes: string[]) => {
+  const definition = buildFunctionLookup().get(fnName)!;
+  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
+    ', '
+  )}].\n\nExpected one of:\n  ${definition.signatures
+    .map((sig) => `- [${sig.params.map((p) => p.type).join(', ')}]`)
+    .join('\n  ')}`;
+};
+
 describe('function validation', () => {
   afterEach(() => {
     setTestFunctions([]);
@@ -99,15 +108,6 @@ describe('function validation', () => {
 
         it('rejects arguments of an incorrect type', async () => {
           const { expectErrors } = await setup();
-
-          const getExpectedError = (fnName: string, givenTypes: string[]) => {
-            const definition = buildFunctionLookup().get(fnName)!;
-            return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
-              ', '
-            )}].\n\nExpected one of:\n  ${definition.signatures
-              .map((sig) => `- [${sig.params.map((p) => p.type).join(', ')}]`)
-              .join('\n  ')}`;
-          };
 
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
@@ -200,8 +200,8 @@ describe('function validation', () => {
           const { expectErrors } = await setup();
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
-          await expectErrors('ROW "a" IN (1, "b", "c")', [
-            'Argument of [in] must be [keyword[]], found value [(1, "b", "c")] type [(integer, keyword, keyword)]',
+          await expectErrors('ROW "a" IN (1, 2)', [
+            getExpectedError('in', ['keyword', 'integer']), // @TODO look at reporting array type
           ]);
         });
       });

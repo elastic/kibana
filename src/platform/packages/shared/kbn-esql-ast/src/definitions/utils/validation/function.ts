@@ -216,12 +216,13 @@ function getSignatureWithMatchingTypes(
 
     return types.every((type, index) => {
       const paramType = getParamAtPosition(sig, index)!.type;
+      const singularType = unwrapArrayOneLevel(paramType);
       return (
-        paramType === 'any' ||
+        singularType === 'any' ||
         type === 'param' ||
         type === 'null' ||
         // safe to assume the param is there, because we checked the length above
-        type === paramType
+        type === singularType
       );
     });
   });
