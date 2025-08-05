@@ -63,6 +63,22 @@ export const MetricsAndGroupByToolbarItems = ({
     timeRangeMetadata,
   ]);
 
+  const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata]
+  );
+
+  useEffect(() => {
+    const current = preferredSchema;
+    if (current === null) {
+      const next = schemas.includes(DataSchemaFormat.SEMCONV)
+        ? DataSchemaFormat.SEMCONV
+        : schemas[0];
+      changePreferredSchema(next);
+    }
+  }, [changePreferredSchema, preferredSchema, schemas]);
+
   const { value: aggregations } = useAsync(
     () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? 'ecs' }),
     [inventoryModel.metrics, preferredSchema]
