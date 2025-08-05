@@ -20,6 +20,8 @@ export enum SNAPSHOT_STATE {
   INCOMPATIBLE = 'INCOMPATIBLE',
 }
 
+export const SNAPSHOT_REPOSITORY_EXCEPTION_ERROR = 'repository_exception';
+
 const INDEX_SETTING_SUGGESTIONS: string[] = [
   'index.number_of_shards',
   'index.shard.check_on_startup',
