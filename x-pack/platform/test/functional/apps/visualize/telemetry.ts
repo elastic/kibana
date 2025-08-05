@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
       await kibanaServer.importExport.load(
-        `x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations`
+        `x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/with_by_value_visualizations`
       );
       await kibanaServer.uiSettings.update({
         'histogram:maxBars': 100,
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/with_by_value_visualizations'
       );
       await kibanaServer.uiSettings.update({
         'histogram:maxBars': 1000,
