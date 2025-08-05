@@ -26,23 +26,25 @@ export function AdvancedConfiguration({
   newConfig,
   settingsDefinitionsByAgent,
   setNewConfig,
-  setRemovedSettingsCount,
+  setRemovedConfigCount,
   setValidationErrors,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitionsByAgent: SettingDefinition[];
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
-  setRemovedSettingsCount: React.Dispatch<React.SetStateAction<number>>;
+  setRemovedConfigCount: React.Dispatch<React.SetStateAction<number>>;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }) {
-  const agentSettingKeys = useMemo(
+  const predefinedAgentConfigKeys = useMemo(
     () => settingsDefinitionsByAgent.map((setting) => setting.key),
     [settingsDefinitionsByAgent]
   );
 
-  const unknownAgentSettings = useMemo(() => {
-    return Object.entries(newConfig.settings).filter(([key]) => !agentSettingKeys.includes(key));
-  }, [agentSettingKeys, newConfig.settings]);
+  const unknownAgentConfigs = useMemo(() => {
+    return Object.entries(newConfig.settings).filter(
+      ([key]) => !predefinedAgentConfigKeys.includes(key)
+    );
+  }, [predefinedAgentConfigKeys, newConfig.settings]);
 
   const updateValue = (key: string, value: string) => {
     setNewConfig((prev) => {
@@ -58,22 +60,22 @@ export function AdvancedConfiguration({
 
   const updateKey = (oldKey: string, newKey: string, value: string) => {
     setNewConfig((prev) => {
-      // Maintain the order by recreating the settings object while preserving key positions
-      const newSettings: Record<string, string> = {};
+      // Maintain the order by recreating the config object while preserving key positions
+      const newConfigs: Record<string, string> = {};
 
       Object.entries(prev.settings).forEach(([key, val]) => {
         if (key === oldKey) {
           // Replace the old key with the new key at the same position
-          newSettings[newKey] = value;
+          newConfigs[newKey] = value;
         } else {
           // Keep other keys in their original positions
-          newSettings[key] = val;
+          newConfigs[key] = val;
         }
       });
 
       return {
         ...prev,
-        settings: newSettings,
+        settings: newConfigs,
       };
     });
   };
@@ -92,7 +94,7 @@ export function AdvancedConfiguration({
 
   const deleteRow = (key: string, index: number) => {
     if (newConfig.settings[key] !== undefined) {
-      setRemovedSettingsCount((prev) => prev + 1);
+      setRemovedConfigCount((prev) => prev + 1);
     }
     setValidationErrors((prev) => ({
       ...prev,
@@ -145,26 +147,26 @@ export function AdvancedConfiguration({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {unknownAgentSettings.map(([settingKey, settingValue], index) => (
+      {unknownAgentConfigs.map(([configKey, configValue], index) => (
         // Use reverse index as key prop to allow adding new rows at the top
-        <Fragment key={unknownAgentSettings.length - 1 - index}>
+        <Fragment key={unknownAgentConfigs.length - 1 - index}>
           {index > 0 && <EuiSpacer size="s" />}
           <EuiFlexGroup>
             <EuiFlexItem>
               <AdvancedConfigKeyInput
-                settingKey={settingKey}
-                settingValue={settingValue}
+                configKey={configKey}
+                configValue={configValue}
                 index={index}
-                agentSettingKeys={agentSettingKeys}
-                unknownAgentSettings={unknownAgentSettings}
+                predefinedAgentConfigKeys={predefinedAgentConfigKeys}
+                unknownAgentConfigs={unknownAgentConfigs}
                 setValidationErrors={setValidationErrors}
                 onUpdate={updateKey}
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <AdvancedConfigValueInput
-                settingValue={settingValue}
-                settingKey={settingKey}
+                configValue={configValue}
+                configKey={configKey}
                 index={index}
                 setValidationErrors={setValidationErrors}
                 onUpdate={updateValue}
@@ -180,49 +182,51 @@ export function AdvancedConfiguration({
 }
 
 function AdvancedConfigKeyInput({
-  settingKey,
-  settingValue,
+  configKey,
+  configValue,
   index,
-  agentSettingKeys,
-  unknownAgentSettings,
+  predefinedAgentConfigKeys,
+  unknownAgentConfigs,
   setValidationErrors,
   onUpdate,
 }: {
-  settingKey: string;
-  settingValue: string;
+  configKey: string;
+  configValue: string;
   index: number;
-  agentSettingKeys: string[];
-  unknownAgentSettings: Array<[string, string]>;
+  predefinedAgentConfigKeys: string[];
+  unknownAgentConfigs: Array<[string, string]>;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onUpdate: (oldKey: string, newKey: string, value: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
-  const [localKey, setLocalKey] = useState(settingKey);
+  const [localKey, setLocalKey] = useState(configKey);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
-    setLocalKey(settingKey);
-  }, [settingKey]);
+    setLocalKey(configKey);
+  }, [configKey]);
 
   const checkIfAdvancedConfigKeyExists = useCallback(
     (key: string) => {
-      return unknownAgentSettings.some(
+      return unknownAgentConfigs.some(
         ([unknownConfigKey], unknownConfigIndex) =>
           unknownConfigKey === key && unknownConfigIndex !== index
       );
     },
-    [unknownAgentSettings, index]
+    [unknownAgentConfigs, index]
   );
 
-  const checkIfPredefinedKeyExists = useCallback(
+  const checkIfPredefinedConfigKeyExists = useCallback(
     (key: string) => {
-      return agentSettingKeys.includes(key);
+      return predefinedAgentConfigKeys.includes(key);
     },
-    [agentSettingKeys]
+    [predefinedAgentConfigKeys]
   );
 
   const isInvalidInput = (key: string) => {
-    return key === '' || checkIfPredefinedKeyExists(key) || checkIfAdvancedConfigKeyExists(key);
+    return (
+      key === '' || checkIfPredefinedConfigKeyExists(key) || checkIfAdvancedConfigKeyExists(key)
+    );
   };
 
   const getKeyValidationError = (key: string) => {
@@ -231,7 +235,7 @@ function AdvancedConfigKeyInput({
         defaultMessage: 'Key cannot be empty',
       });
     }
-    if (checkIfPredefinedKeyExists(key)) {
+    if (checkIfPredefinedConfigKeyExists(key)) {
       return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
         defaultMessage: 'This key is already predefined in the standard configuration above',
       });
@@ -253,8 +257,8 @@ function AdvancedConfigKeyInput({
     }));
     // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
     // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
-    if (!checkIfAdvancedConfigKeyExists(newKey) && !checkIfPredefinedKeyExists(newKey)) {
-      onUpdate(settingKey, newKey, settingValue);
+    if (!checkIfPredefinedConfigKeyExists(newKey) && !checkIfAdvancedConfigKeyExists(newKey)) {
+      onUpdate(configKey, newKey, configValue);
     }
   };
 
@@ -286,15 +290,15 @@ function AdvancedConfigKeyInput({
 }
 
 function AdvancedConfigValueInput({
-  settingValue,
-  settingKey,
+  configValue,
+  configKey,
   index,
   setValidationErrors,
   onUpdate,
   onDelete,
 }: {
-  settingValue: string;
-  settingKey: string;
+  configValue: string;
+  configKey: string;
   index: number;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onUpdate: (key: string, value: string) => void;
@@ -308,7 +312,7 @@ function AdvancedConfigValueInput({
 
   const handleValueChange = (newValue: string) => {
     setTouched(true);
-    onUpdate(settingKey, newValue);
+    onUpdate(configKey, newValue);
     setValidationErrors((prev) => ({
       ...prev,
       [`value${index}`]: isInvalidInput(newValue),
@@ -327,17 +331,17 @@ function AdvancedConfigValueInput({
       error={i18n.translate('xpack.apm.agentConfig.settingsPage.valueEmptyError', {
         defaultMessage: 'Value cannot be empty',
       })}
-      isInvalid={touched && isInvalidInput(settingValue)}
+      isInvalid={touched && isInvalidInput(configValue)}
       fullWidth
     >
       <EuiFieldText
-        isInvalid={touched && isInvalidInput(settingValue)}
+        isInvalid={touched && isInvalidInput(configValue)}
         data-test-subj="apmSettingsAdvancedConfigurationValueField"
         aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
           defaultMessage: 'Advanced configuration value',
         })}
         fullWidth
-        value={settingValue}
+        value={configValue}
         onChange={(e) => handleValueChange(e.target.value)}
         append={
           <EuiButtonIcon
@@ -347,7 +351,7 @@ function AdvancedConfigValueInput({
             })}
             iconType="trash"
             color={'danger'}
-            onClick={() => onDelete(settingKey, index)}
+            onClick={() => onDelete(configKey, index)}
           />
         }
       />

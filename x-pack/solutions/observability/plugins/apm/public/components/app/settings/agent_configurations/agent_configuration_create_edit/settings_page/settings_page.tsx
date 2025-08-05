@@ -61,12 +61,12 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
-  const [removedSettingsCount, setRemovedSettingsCount] = useState<number>(0);
+  const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const areAdvancedConfigsInvalid: boolean = useMemo(() => {
+  const invalidAdvancedConfig: boolean = useMemo(() => {
     return Object.values(validationErrors).some((error) => error);
   }, [validationErrors]);
 
@@ -215,7 +215,7 @@ export function SettingsPage({
                 setNewConfig={setNewConfig}
                 setValidationErrors={setValidationErrors}
                 settingsDefinitionsByAgent={settingsDefinitionsByAgent}
-                setRemovedSettingsCount={setRemovedSettingsCount}
+                setRemovedConfigCount={setRemovedConfigCount}
               />
             </>
           )}
@@ -224,20 +224,20 @@ export function SettingsPage({
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {(unsavedChangesCount > 0 || removedSettingsCount > 0) && (
+      {(unsavedChangesCount > 0 || removedConfigCount > 0) && (
         <BottomBarActions
           isLoading={isSaving}
           onDiscardChanges={() => {
-            setRemovedSettingsCount(0);
+            setRemovedConfigCount(0);
             resetSettings();
           }}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount + removedSettingsCount}
+          unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
-          areChangesInvalid={areAdvancedConfigsInvalid}
+          areChangesInvalid={invalidAdvancedConfig}
         />
       )}
     </>
