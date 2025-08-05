@@ -1,12 +1,7 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
-    "paths": {
-      "@a2a-js/sdk/server": [
-        "node_modules/@a2a-js/sdk/dist/server"
-      ]
-    }
+    "outDir": "target/types"
   },
   "include": [
     "../../../../../typings/**/*",
