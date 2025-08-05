@@ -39,9 +39,7 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
         return JSON.parse(fileContent);
       })
-      .filter((command) => {
-        Object.entries(command).filter(([key]) => key !== 'comment');
-      });
+      .map(({ comment, ...rest }) => rest);
   } catch (error) {
     const errorMessage =
       error.code === 'ENOENT'

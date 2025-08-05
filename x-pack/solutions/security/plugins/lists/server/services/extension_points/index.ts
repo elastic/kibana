@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export { ExtensionPointStorage } from './extension_point_storage';
 export type { ExtensionPointStorageInterface, ExtensionPointStorageClientInterface } from './types';
