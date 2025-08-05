@@ -202,6 +202,8 @@
       "@kbn/code-editor/*": ["src/platform/packages/shared/shared-ux/code_editor/impl/*"],
       "@kbn/code-editor-mock": ["src/platform/packages/shared/shared-ux/code_editor/mocks"],
       "@kbn/code-editor-mock/*": ["src/platform/packages/shared/shared-ux/code_editor/mocks/*"],
+      "@kbn/code-examples": ["x-pack/solutions/search/packages/kbn-code-examples"],
+      "@kbn/code-examples/*": ["x-pack/solutions/search/packages/kbn-code-examples/*"],
       "@kbn/code-owners": ["src/platform/packages/private/kbn-code-owners"],
       "@kbn/code-owners/*": ["src/platform/packages/private/kbn-code-owners/*"],
       "@kbn/coloring": ["src/platform/packages/shared/kbn-coloring"],

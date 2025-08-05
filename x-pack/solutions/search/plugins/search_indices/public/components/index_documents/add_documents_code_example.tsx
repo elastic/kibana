@@ -11,6 +11,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
+import { quickstartExamples } from '@kbn/code-examples';
+
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { WorkflowId } from '@kbn/search-shared-ui';
 import { useKibana } from '../../hooks/use_kibana';
@@ -132,12 +134,14 @@ export const AddDocumentsCodeExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
+                content={'SUPS'}
                 request={
-                  !indexHasMappings
-                    ? `${ingestExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                    : ingestExamples.sense.ingestCommand(codeParams)
+                  quickstartExamples.basics({ indexName: codeParams.indexName })
+                  // !indexHasMappings
+                  //   ? `${ingestExamples.sense.updateMappingsCommand(
+                  //       codeParams
+                  //     )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                  //   : ingestExamples.sense.ingestCommand(codeParams)
                 }
                 application={application}
                 sharePlugin={share}

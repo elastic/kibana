@@ -4330,6 +4330,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/code-examples@link:x-pack/solutions/search/packages/kbn-code-examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/code-owners@link:src/platform/packages/private/kbn-code-owners":
   version "0.0.0"
   uid ""

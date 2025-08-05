@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './src/types';
-export * from './src/basics_quickstart';
+export * from './src/api-quickstarts';
