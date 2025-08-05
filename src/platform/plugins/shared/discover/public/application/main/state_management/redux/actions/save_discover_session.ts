@@ -17,7 +17,7 @@ import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
-import { selectAllTabs, selectRecentlyClosedTabs } from '../selectors';
+import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
 import { internalStateSlice } from '../internal_state';
@@ -55,7 +55,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     { dispatch, getState, extra: { services, runtimeStateManager } }
   ) => {
     const state = getState();
-    const allTabs = selectAllTabs(state);
+    const currentTabs = selectAllTabs(state);
     const adHocDataViews = new Map<
       string,
       {
@@ -66,7 +66,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
     >();
 
     const updatedTabs: DiscoverSessionTab[] = await Promise.all(
-      allTabs.map(async (tab) => {
+      currentTabs.map(async (tab) => {
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
         const tabStateContainer = tabRuntimeState.stateContainer$.getValue();
         const overriddenVisContextAfterInvalidation = tab.overriddenVisContextAfterInvalidation;
@@ -225,9 +225,17 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         })
       );
 
+      const allTabs = discoverSession.tabs.map((tab) => {
+        const existingTab = selectTab(state, tab.id);
+        return fromSavedObjectTabToTabState({
+          tab,
+          fallbackGlobalState: existingTab.globalState,
+        });
+      });
+
       dispatch(
         setTabs({
-          allTabs: discoverSession.tabs.map(fromSavedObjectTabToTabState),
+          allTabs,
           selectedTabId: state.tabs.unsafeCurrentId,
           recentlyClosedTabs: selectRecentlyClosedTabs(state),
         })
