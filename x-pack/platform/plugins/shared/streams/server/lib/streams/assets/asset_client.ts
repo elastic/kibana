@@ -250,10 +250,10 @@ export class AssetClient {
   }
 
   async getAssetLinks<TAssetType extends AssetType>(
-    name: string,
+    names: string[],
     assetTypes?: TAssetType[]
-  ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
-    const filters = [...termQuery(STREAM_NAME, name)];
+  ): Promise<Record<string, Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>>> {
+    const filters = [...termsQuery(STREAM_NAME, names)];
     if (assetTypes?.length) {
       filters.push(...termsQuery(ASSET_TYPE, assetTypes));
     }
@@ -268,9 +268,18 @@ export class AssetClient {
       },
     });
 
-    return assetsResponse.hits.hits.map(
-      (hit) => fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>
-    );
+    const assetsPerName = names.reduce((acc, name) => {
+      acc[name] = [];
+      return acc;
+    }, {} as Record<string, Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>>);
+
+    assetsResponse.hits.hits.forEach((hit) => {
+      const name = hit._source[STREAM_NAME];
+      const asset = fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>;
+      assetsPerName[name].push(asset);
+    });
+
+    return assetsPerName;
   }
 
   async bulkGetByIds<TAssetType extends AssetType>(
@@ -324,9 +333,9 @@ export class AssetClient {
   }
 
   async getAssets(name: string): Promise<Asset[]> {
-    const assetLinks = await this.getAssetLinks(name);
+    const { [name]: assetLinks } = await this.getAssetLinks([name]);
 
-    if (!assetLinks.length) {
+    if (assetLinks.length === 0) {
       return [];
     }
 
