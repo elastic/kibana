@@ -90,7 +90,6 @@
     "@kbn/elastic-assistant-common",
     "@kbn/ebt-tools",
     "@kbn/presentation-util",
-    "@kbn/alerts-as-data-utils"
   ],
   "exclude": ["target/**/*"]
 }
