@@ -156,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Searchable',
             'Aggregatable',
             'Excluded',
+            'Actions',
           ];
 
           expect(headers.length).to.be(expectedHeaders.length);
