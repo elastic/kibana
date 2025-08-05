@@ -12,7 +12,7 @@ import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../urls/navi
 describe(
   'Privileged User Monitoring Page',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
   },
   () => {
     before(() => {
