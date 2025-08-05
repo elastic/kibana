@@ -15,6 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
 import { AccessDenied } from '../common/components/access_denied';
+import { WorkflowsOverviewPage } from './pages/overview';
 
 interface WorkflowsAppDeps {
   history: ScopedHistory;
@@ -55,6 +56,15 @@ export function WorkflowsRoutes({ history }: WorkflowsAppDeps) {
     <Router history={history}>
       <I18nProvider>
         <Routes>
+          <Route
+            path="/overview"
+            exact
+            render={() => (
+              <WorkflowsPermissionsWrapper permissions={['read', 'readWorkflow']}>
+                <WorkflowsOverviewPage />
+              </WorkflowsPermissionsWrapper>
+            )}
+          />
           <Route
             path="/:id"
             render={(props) => (
