@@ -11,18 +11,18 @@ import { EnterConditionBranchNodeImpl } from '../enter_condition_branch_node_imp
 import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('EnterConditionBranchNodeImpl', () => {
-  let workflowState: WorkflowExecutionRuntimeManager;
+  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: EnterConditionBranchNodeImpl;
 
   beforeEach(() => {
-    workflowState = {
+    wfExecutionRuntimeManagerMock = {
       goToNextStep: jest.fn(),
     } as any;
-    impl = new EnterConditionBranchNodeImpl(workflowState);
+    impl = new EnterConditionBranchNodeImpl(wfExecutionRuntimeManagerMock);
   });
 
   it('should go to next step', async () => {
     await impl.run();
-    expect(workflowState.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
   });
 });

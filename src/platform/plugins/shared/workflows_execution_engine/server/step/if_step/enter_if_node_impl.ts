@@ -12,11 +12,14 @@ import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class EnterIfNodeImpl implements StepImplementation {
-  constructor(private step: EnterIfNode, private workflowState: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private step: EnterIfNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    await this.workflowState.startStep(this.step.id);
-    const successors: any[] = this.workflowState.getNodeSuccessors(this.step.id);
+    await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
     if (successors.some((node) => node.type !== 'enter-condition-branch')) {
       throw new Error(
@@ -42,13 +45,13 @@ export class EnterIfNodeImpl implements StepImplementation {
         : thenNode.condition?.toLowerCase() === 'true'; // must be real condition from step definition)
 
     if (evaluatedConditionResult) {
-      this.workflowState.goToStep(thenNode.id);
+      this.wfExecutionRuntimeManager.goToStep(thenNode.id);
     } else if (elseNode) {
-      this.workflowState.goToStep(elseNode.id);
+      this.wfExecutionRuntimeManager.goToStep(elseNode.id);
     } else {
       // in the case when the condition evaluates to false and no else branch is defined
       // we go straight to the exit node skipping "then" branch
-      this.workflowState.goToStep(this.step.exitNodeId);
+      this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
     }
   }
 }

@@ -11,9 +11,9 @@ import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class EnterConditionBranchNodeImpl implements StepImplementation {
-  constructor(private workflowState: WorkflowExecutionRuntimeManager) {}
+  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
 
   public async run(): Promise<void> {
-    this.workflowState.goToNextStep();
+    this.wfExecutionRuntimeManager.goToNextStep();
   }
 }

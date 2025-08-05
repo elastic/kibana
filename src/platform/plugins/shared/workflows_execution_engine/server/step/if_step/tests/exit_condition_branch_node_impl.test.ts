@@ -13,7 +13,7 @@ import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl'
 
 describe('ExitConditionBranchNodeImpl', () => {
   let step: ExitConditionBranchNode;
-  let workflowState: WorkflowExecutionRuntimeManager;
+  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: ExitConditionBranchNodeImpl;
   let goToStep: jest.Mock<any, any, any>;
   let getNodeSuccessors: jest.Mock<any, any, any>;
@@ -26,11 +26,11 @@ describe('ExitConditionBranchNodeImpl', () => {
       type: 'exit-condition-branch',
       startNodeId: 'startBranchNode',
     };
-    workflowState = {
+    wfExecutionRuntimeManagerMock = {
       goToStep,
       getNodeSuccessors,
     } as any;
-    impl = new ExitConditionBranchNodeImpl(step, workflowState);
+    impl = new ExitConditionBranchNodeImpl(step, wfExecutionRuntimeManagerMock);
 
     getNodeSuccessors.mockReturnValue([
       {
@@ -68,6 +68,6 @@ describe('ExitConditionBranchNodeImpl', () => {
 
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
-    expect(workflowState.goToStep).toHaveBeenCalledWith('exitIfNode');
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
   });
 });

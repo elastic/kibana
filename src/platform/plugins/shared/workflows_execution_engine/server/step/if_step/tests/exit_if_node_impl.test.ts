@@ -13,7 +13,7 @@ import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manag
 
 describe('ExitIfNodeImpl', () => {
   let step: ExitIfNode;
-  let workflowState: WorkflowExecutionRuntimeManager;
+  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: ExitIfNodeImpl;
 
   beforeEach(() => {
@@ -22,21 +22,21 @@ describe('ExitIfNodeImpl', () => {
       type: 'exit-if',
       startNodeId: 'enterIfNode',
     };
-    workflowState = {
+    wfExecutionRuntimeManagerMock = {
       goToNextStep: jest.fn(),
       finishStep: jest.fn(),
     } as any;
-    impl = new ExitIfNodeImpl(step, workflowState);
+    impl = new ExitIfNodeImpl(step, wfExecutionRuntimeManagerMock);
   });
 
   it('should finish enterIfNode', async () => {
     await impl.run();
-    expect(workflowState.finishStep).toHaveBeenCalledTimes(1);
-    expect(workflowState.finishStep).toHaveBeenCalledWith('enterIfNode');
+    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.finishStep).toHaveBeenCalledWith('enterIfNode');
   });
 
   it('should go to the next step', async () => {
     await impl.run();
-    expect(workflowState.goToNextStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.goToNextStep).toHaveBeenCalledTimes(1);
   });
 });

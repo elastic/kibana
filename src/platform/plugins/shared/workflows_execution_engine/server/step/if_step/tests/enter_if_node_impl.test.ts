@@ -13,7 +13,7 @@ import { EnterConditionBranchNode, EnterIfNode } from '@kbn/workflows';
 
 describe('EnterIfNodeImpl', () => {
   let step: EnterIfNode;
-  let workflowState: WorkflowExecutionRuntimeManager;
+  let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
   let impl: EnterIfNodeImpl;
   let startStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
@@ -24,12 +24,12 @@ describe('EnterIfNodeImpl', () => {
     goToStep = jest.fn();
     getNodeSuccessors = jest.fn();
     step = { id: 'testStep', type: 'enter-if', exitNodeId: 'exitIfNode', configuration: {} as any };
-    workflowState = {
+    wfExecutionRuntimeManagerMock = {
       startStep,
       goToStep,
       getNodeSuccessors,
     } as any;
-    impl = new EnterIfNodeImpl(step, workflowState);
+    impl = new EnterIfNodeImpl(step, wfExecutionRuntimeManagerMock);
 
     getNodeSuccessors.mockReturnValue([
       {
@@ -46,7 +46,7 @@ describe('EnterIfNodeImpl', () => {
 
   it('should start the step and go to the next step', async () => {
     await impl.run();
-    expect(workflowState.startStep).toHaveBeenCalledWith(step.id);
+    expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith(step.id);
   });
 
   it('should evaluate condition and go to thenNode if condition is true', async () => {
@@ -63,8 +63,8 @@ describe('EnterIfNodeImpl', () => {
       } as EnterConditionBranchNode,
     ]);
     await impl.run();
-    expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
-    expect(workflowState.goToStep).toHaveBeenCalledWith('thenNode');
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('thenNode');
   });
 
   it('should evaluate condition and go to elseNode if condition is false', async () => {
@@ -80,8 +80,8 @@ describe('EnterIfNodeImpl', () => {
       } as EnterConditionBranchNode,
     ]);
     await impl.run();
-    expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
-    expect(workflowState.goToStep).toHaveBeenCalledWith('elseNode');
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('elseNode');
   });
 
   it('should evaluate condition and go to exit node if no else branch is defined', async () => {
@@ -93,8 +93,8 @@ describe('EnterIfNodeImpl', () => {
       } as EnterConditionBranchNode,
     ]);
     await impl.run();
-    expect(workflowState.goToStep).toHaveBeenCalledTimes(1);
-    expect(workflowState.goToStep).toHaveBeenCalledWith('exitIfNode');
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledTimes(1);
+    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
   });
 
   it('should throw an error if successors are not enter-condition-branch', async () => {

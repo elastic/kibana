@@ -14,11 +14,11 @@ import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/
 export class ExitConditionBranchNodeImpl implements StepImplementation {
   constructor(
     private step: ExitConditionBranchNode,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const successors = this.workflowState.getNodeSuccessors(this.step.id);
+    const successors = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
     if (successors.length !== 1) {
       throw new Error(
@@ -34,6 +34,6 @@ export class ExitConditionBranchNodeImpl implements StepImplementation {
 
     // After the branch finishes, we go to the end of If condition
     const exitIfNode = successors[0];
-    this.workflowState.goToStep(exitIfNode.id);
+    this.wfExecutionRuntimeManager.goToStep(exitIfNode.id);
   }
 }
