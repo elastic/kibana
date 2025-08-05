@@ -662,6 +662,7 @@ export class IndexUpdateService {
     this._totalHits$.complete();
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
+    this.data.dataViews.clearInstanceCache();
   }
 
   public async createIndex() {
