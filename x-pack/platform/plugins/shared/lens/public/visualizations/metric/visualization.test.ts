@@ -97,6 +97,7 @@ describe('metric visualization', () => {
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
+    secondaryValuePosition: 'after',
   };
 
   const fullStateWTrend: Required<
@@ -463,14 +464,29 @@ describe('metric visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "secondaryMetric": Array [
-                  "secondary-metric-col-id",
+                "primaryAlign": Array [
+                  "right",
+                ],
+                "primaryPosition": Array [
+                  "bottom",
+                ],
+                "secondaryAlign": Array [
+                  "right",
                 ],
                 "secondaryLabel": Array [
                   "extra-text",
                 ],
+                "secondaryMetric": Array [
+                  "secondary-metric-col-id",
+                ],
+                "secondaryValuePosition": Array [
+                  "after",
+                ],
                 "subtitle": Array [
                   "subtitle",
+                ],
+                "titleWeight": Array [
+                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -478,12 +494,6 @@ describe('metric visualization', () => {
                 "trendline": Array [],
                 "valueFontSize": Array [
                   "default",
-                ],
-                "valueTextAlign": Array [
-                  "right",
-                ],
-                "extraTextAlign": Array [
-                  "right",
                 ],
               },
               "function": "metricVis",
@@ -542,14 +552,29 @@ describe('metric visualization', () => {
                     "type": "expression",
                   },
                 ],
-                "secondaryMetric": Array [
-                  "secondary-metric-col-id",
+                "primaryAlign": Array [
+                  "right",
+                ],
+                "primaryPosition": Array [
+                  "bottom",
+                ],
+                "secondaryAlign": Array [
+                  "right",
                 ],
                 "secondaryLabel": Array [
                   "extra-text",
                 ],
+                "secondaryMetric": Array [
+                  "secondary-metric-col-id",
+                ],
+                "secondaryValuePosition": Array [
+                  "after",
+                ],
                 "subtitle": Array [
                   "subtitle",
+                ],
+                "titleWeight": Array [
+                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -557,12 +582,6 @@ describe('metric visualization', () => {
                 "trendline": Array [],
                 "valueFontSize": Array [
                   "default",
-                ],
-                "valueTextAlign": Array [
-                  "right",
-                ],
-                "extraTextAlign": Array [
-                  "right",
                 ],
               },
               "function": "metricVis",
@@ -855,11 +874,26 @@ describe('metric visualization', () => {
                 "metric-col-id",
               ],
               "palette": Array [],
+              "primaryAlign": Array [
+                "right",
+              ],
+              "primaryPosition": Array [
+                "bottom",
+              ],
+              "secondaryAlign": Array [
+                "right",
+              ],
               "secondaryLabel": Array [
                 "extra-text",
               ],
+              "secondaryValuePosition": Array [
+                "after",
+              ],
               "subtitle": Array [
                 "subtitle",
+              ],
+              "titleWeight": Array [
+                "bold",
               ],
               "titlesTextAlign": Array [
                 "left",
@@ -867,12 +901,6 @@ describe('metric visualization', () => {
               "trendline": Array [],
               "valueFontSize": Array [
                 "default",
-              ],
-              "valueTextAlign": Array [
-                "right",
-              ],
-              "extraTextAlign": Array [
-                "right",
               ],
             },
             "function": "metricVis",
@@ -1100,10 +1128,13 @@ describe('metric visualization', () => {
         "iconAlign": "left",
         "layerId": "first",
         "layerType": "data",
+        "primaryAlign": "right",
+        "primaryPosition": "bottom",
+        "secondaryAlign": "right",
+        "secondaryValuePosition": "after",
+        "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
-        "valueTextAlign": "right",
-        "extraTextAlign": "right",
       }
     `);
   });
