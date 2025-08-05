@@ -376,11 +376,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -1818,12 +1814,10 @@ components:
         - status
     PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     PrivmonUserCsvUploadErrorItem:
       type: object
