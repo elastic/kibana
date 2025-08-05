@@ -30,12 +30,14 @@ import {
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
+import { Minimap } from '../minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
+import { GRAPH_WRAPPER_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -55,6 +57,10 @@ export interface GraphProps extends CommonProps {
    * Determines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not.
    */
   isLocked?: boolean;
+  /**
+   * Determines whether the control to toggle the graph minimap is visible or not
+   */
+  showMinimapControl?: boolean;
   /**
    * Additional children to be rendered inside the graph component.
    */
@@ -94,12 +100,21 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
+  ({
+    nodes,
+    edges,
+    interactive,
+    isLocked = false,
+    showMinimapControl,
+    children,
+    ...rest
+  }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
+    const [isMinimapVisible, setIsMinimapVisible] = useState(false);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
@@ -139,10 +154,15 @@ export const Graph = memo<GraphProps>(
       [interactive]
     );
 
+    const handleToggleMinimap = useCallback(() => {
+      setIsMinimapVisible((prev) => !prev);
+    }, []);
+
     return (
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
+          data-test-subj={GRAPH_WRAPPER_ID}
           fitView={true}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
@@ -168,11 +188,19 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
+              <Controls
+                fitViewOptions={fitViewOptions}
+                showCenter={false}
+                showMinimap={showMinimapControl}
+                onToggleMinimap={handleToggleMinimap}
+              />
             </Panel>
           )}
           {children}
           <Background id={backgroundId} />
+          {interactive && isMinimapVisible ? (
+            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+          ) : null}
         </ReactFlow>
         <GlobalGraphStyles />
       </div>

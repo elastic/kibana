@@ -23,8 +23,10 @@ import {
   GRAPH_CONTROLS_CENTER_ID,
   GRAPH_CONTROLS_ZOOM_IN_ID,
   GRAPH_CONTROLS_ZOOM_OUT_ID,
+  GRAPH_CONTROLS_TOGGLE_MINIMAP_ID,
 } from '../test_ids';
 import fitToViewIcon from '../../assets/icons/fit_to_view.svg';
+import minimapIcon from '../../assets/icons/map.svg';
 
 const selector = (s: ReactFlowState) => ({
   minZoomReached: s.transform[2] <= s.minZoom,
@@ -35,6 +37,7 @@ export interface ControlsProps extends CommonProps {
   showZoom?: boolean;
   showFitView?: boolean;
   showCenter?: boolean;
+  showMinimap?: boolean;
   fitViewOptions?: FitViewOptions;
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
@@ -44,6 +47,8 @@ export interface ControlsProps extends CommonProps {
   onFitView?: () => void;
   /** Callback when center button is clicked */
   onCenter?: () => void;
+  /** Callback when minimap toggle button is clicked */
+  onToggleMinimap?: () => void;
 }
 
 const ZoomInLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.zoomIn', {
@@ -58,18 +63,27 @@ const FitViewLabel = i18n.translate('securitySolutionPackages.csp.graph.controls
 const CenterLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.center', {
   defaultMessage: 'Center',
 });
+const ToggleMinimapLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.controls.toggleMinimap',
+  {
+    defaultMessage: 'Toggle minimap',
+  }
+);
 
 const fitToViewIconFn = () => <EuiIcon type={fitToViewIcon} size="m" color="text" />;
+const minimapIconFn = () => <EuiIcon type={minimapIcon} size="m" color="text" />;
 
 export const Controls = ({
   showZoom = true,
   showFitView = true,
   showCenter = true,
+  showMinimap = true,
   fitViewOptions,
   onZoomIn,
   onZoomOut,
   onCenter,
   onFitView,
+  onToggleMinimap,
   ...props
 }: ControlsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -101,7 +115,7 @@ export const Controls = ({
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
-  if (!showZoom && !showCenter && !showFitView) {
+  if (!showZoom && !showCenter && !showFitView && !showMinimap) {
     return <></>;
   }
 
@@ -160,6 +174,22 @@ export const Controls = ({
             data-test-subj={GRAPH_CONTROLS_FIT_VIEW_ID}
             css={btnCss}
             onClick={onFitViewHandler}
+          />
+        </EuiFlexItem>
+      )}
+      {showMinimap && (
+        <EuiFlexItem grow={false}>
+          {showZoom || showCenter || showFitView ? (
+            <EuiHorizontalRule size="full" margin="none" />
+          ) : null}
+          <EuiButtonIcon
+            iconType={minimapIconFn}
+            aria-label={ToggleMinimapLabel}
+            size="m"
+            color="text"
+            data-test-subj={GRAPH_CONTROLS_TOGGLE_MINIMAP_ID}
+            css={btnCss}
+            onClick={() => onToggleMinimap?.()}
           />
         </EuiFlexItem>
       )}
