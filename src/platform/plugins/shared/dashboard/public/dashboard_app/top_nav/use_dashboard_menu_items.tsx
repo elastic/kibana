@@ -127,7 +127,6 @@ export const useDashboardMenuItems = ({
       fullScreen: {
         ...topNavStrings.fullScreen,
         id: 'full-screen',
-        iconType: 'fullScreen',
         testId: 'dashboardFullScreenMode',
         run: () => dashboardApi.setFullScreenMode(true),
         disableButton: disableTopNav,
@@ -241,8 +240,6 @@ export const useDashboardMenuItems = ({
       ...topNavStrings.resetChanges,
       id: 'reset',
       testId: 'dashboardDiscardChangesMenuItem',
-      iconType: 'editorUndo',
-      iconOnly: true,
       disableButton:
         isResetting ||
         !hasUnsavedChanges ||
