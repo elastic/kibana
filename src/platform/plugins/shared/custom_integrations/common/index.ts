@@ -17,7 +17,7 @@ export const PLUGIN_NAME = 'customIntegrations';
 export const INTEGRATION_CATEGORY_DISPLAY: {
   [key: string]: { title: string; parent_id?: string };
 } = {
-  advanced_analytics_ueba: { title: 'Advanced Analytics (UEBA', parent_id: 'security' },
+  advanced_analytics_ueba: { title: 'Advanced Analytics (UEBA)', parent_id: 'security' },
   analytics_engine: { title: 'Analytics Engine', parent_id: 'observability' },
   application_observability: { title: 'Application', parent_id: 'observability' },
   auditd: { title: 'AuditD', parent_id: 'security' },

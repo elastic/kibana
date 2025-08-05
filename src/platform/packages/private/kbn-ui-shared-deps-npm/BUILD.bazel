@@ -34,7 +34,6 @@ RUNTIME_DEPS = [
   # use the DLL version of a package until it has resolved to the same
   # relative path as the module which is already included in the DLL manifest
   "@npm//core-js",
-  "@npm//whatwg-fetch",
   "@npm//symbol-observable",
   "@npm//@babel/runtime",
   "@npm//@elastic/apm-rum-core",
