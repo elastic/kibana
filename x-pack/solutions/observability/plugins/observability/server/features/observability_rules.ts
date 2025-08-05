@@ -9,63 +9,33 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureConfig, KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
-  SYNTHETICS_RULE_TYPE_IDS,
-  UPTIME_RULE_TYPE_IDS,
-  ApmRuleType,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  SLO_BURN_RATE_RULE_TYPE_ID,
   AlertConsumers,
   LOG_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import {
-  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-  INFRA_UI_SO_TYPE,
-  SO_SLO_TYPE,
-  syntheticsMonitorSOTypes,
-} from '@kbn/observability-shared-plugin/common/saved_object_types';
-import { sloFeatureId, APM_SERVER_FEATURE_ID, SYNTHETICS_FEATURE_ID } from '../../common';
+import { INFRA_UI_SO_TYPE } from '@kbn/observability-shared-plugin/common/saved_object_types';
 
-const syntheticsRuleTypes = [...SYNTHETICS_RULE_TYPE_IDS, ...UPTIME_RULE_TYPE_IDS];
-const apmRuleTypes = Object.values(ApmRuleType);
 const infraRuleTypes = [
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
 ];
-const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 const baseConsumers = [ALERTING_FEATURE_ID, AlertConsumers.OBSERVABILITY];
 
 // Consolidated privileges for all rule/alert types
 const observabilityRulePrivileges = [
-  ...syntheticsRuleTypes.map((ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [SYNTHETICS_FEATURE_ID, ...baseConsumers],
-  })),
-  ...apmRuleTypes.map((ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [APM_SERVER_FEATURE_ID, ...baseConsumers],
-  })),
   ...infraRuleTypes.map((ruleTypeId) => ({
     ruleTypeId,
     consumers: [AlertConsumers.LOGS, ...baseConsumers],
   })),
-  ...sloRuleTypes.map((ruleTypeId) => ({
-    ruleTypeId,
-    consumers: [sloFeatureId, ...baseConsumers],
-  })),
 ];
 
-const savedObjectTypes = [
-  SO_SLO_TYPE,
-  APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,
-  INFRA_UI_SO_TYPE,
-  ...syntheticsMonitorSOTypes,
-];
+const savedObjectTypes = [INFRA_UI_SO_TYPE];
 
 export const getManageRulesFeature = (): KibanaFeatureConfig => ({
   id: 'observabilityManageRules',
