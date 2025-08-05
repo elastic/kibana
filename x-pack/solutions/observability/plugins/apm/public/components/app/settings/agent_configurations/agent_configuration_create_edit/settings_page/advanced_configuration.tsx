@@ -208,8 +208,15 @@ function AdvancedConfigKeyInput({
     [unknownAgentSettings, index]
   );
 
+  const checkIfPredefinedKeyExists = useCallback(
+    (key: string) => {
+      return agentSettingKeys.includes(key);
+    },
+    [agentSettingKeys]
+  );
+
   const isInvalidInput = (key: string) => {
-    return key === '' || agentSettingKeys.includes(key) || checkIfAdvancedConfigKeyExists(key);
+    return key === '' || checkIfPredefinedKeyExists(key) || checkIfAdvancedConfigKeyExists(key);
   };
 
   const getKeyValidationError = (key: string) => {
@@ -218,7 +225,7 @@ function AdvancedConfigKeyInput({
         defaultMessage: 'Key cannot be empty',
       });
     }
-    if (agentSettingKeys.includes(key)) {
+    if (checkIfPredefinedKeyExists(key)) {
       return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
         defaultMessage: 'This key is already predefined in the standard configuration above',
       });
@@ -240,7 +247,7 @@ function AdvancedConfigKeyInput({
     }));
     // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
     // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
-    if (!checkIfAdvancedConfigKeyExists(newKey)) {
+    if (!checkIfAdvancedConfigKeyExists(newKey) && !checkIfPredefinedKeyExists(newKey)) {
       onUpdate(settingKey, newKey, settingValue);
     }
   };
