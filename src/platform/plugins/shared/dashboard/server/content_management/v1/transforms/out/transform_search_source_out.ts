@@ -10,7 +10,7 @@
 import type { SavedObjectReference } from '@kbn/core/server';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import { DashboardAttributes, DashboardQuery } from '../../types';
 import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../../common';
 import { logger } from '../../../../kibana_services';
 
@@ -22,26 +22,26 @@ export function transformSearchSourceOut(
   if (!searchSourceJSON) {
     return {};
   }
+  let parsedSearchSource;
   try {
-    let parsedSearchSource;
-    try {
-      parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
-    } catch (parseError) {
-      logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
-      return { searchSource: {} };
-    }
+    parsedSearchSource = parseSearchSourceJSON(searchSourceJSON);
+  } catch (parseError) {
+    logger.warn(`Unable to parse searchSourceJSON. Error: ${parseError.message}`);
+    return { searchSource: {} };
+  }
 
-    let searchSource;
-    try {
-      searchSource = injectReferences(parsedSearchSource, references);
-    } catch (injectError) {
-      logger.warn(
-        `Unable to transform filter and query state on read. Error: ${injectError.message}`
-      );
-      // fallback to parsed if injection fails
-      searchSource = parsedSearchSource;
-    }
+  let searchSource;
+  try {
+    searchSource = injectReferences(parsedSearchSource, references);
+  } catch (injectError) {
+    logger.warn(
+      `Unable to transform filter and query state on read. Error: ${injectError.message}`
+    );
+    // fallback to parsed if injection fails
+    searchSource = parsedSearchSource;
+  }
 
+  try {
     const filters = cleanFiltersForSerialize(searchSource.filter);
     const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
     return { searchSource: { filters, query } };
@@ -49,6 +49,11 @@ export function transformSearchSourceOut(
     logger.warn(
       `Unexpected error transforming filter and query state on read. Error: ${error.message}`
     );
-    return { searchSource: {} };
+    return {
+      searchSource: {
+        filters: searchSource.filter,
+        query: searchSource.query as DashboardQuery,
+      },
+    };
   }
 }
