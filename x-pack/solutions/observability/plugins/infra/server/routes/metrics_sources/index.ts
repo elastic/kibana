@@ -293,6 +293,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           return response.ok({
             body: getTimeRangeMetadataResponseRT.encode({
               schemas: [DataSchemaFormat.SEMCONV],
+              preferredSchema: DataSchemaFormat.SEMCONV,
             }),
           });
         }
