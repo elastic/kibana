@@ -1672,7 +1672,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     getCompressedModelDefinition(modelType: ModelType) {
       return fs.readFileSync(
         require.resolve(
-          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
+          `../../../api_integration/services/ml/resources/trained_model_definitions/minimum_valid_config_${modelType}.json.gz.b64`
         ),
         'utf-8'
       );
@@ -1681,7 +1681,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     getTrainedModelConfig(modelName: SupportedTrainedModelNamesType) {
       const configFileContent = fs.readFileSync(
         require.resolve(
-          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/config.json`
+          `../../../api_integration/services/ml/resources/trained_model_definitions/${modelName}/config.json`
         ),
         'utf-8'
       );
@@ -1691,7 +1691,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     getTrainedModelVocabulary(modelName: SupportedTrainedModelNamesType) {
       const vocabularyFileContent = fs.readFileSync(
         require.resolve(
-          `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/vocabulary.json`
+          `../../../api_integration/services/ml/resources/trained_model_definitions/${modelName}/vocabulary.json`
         ),
         'utf-8'
       );
@@ -1700,7 +1700,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     getTrainedModelDefinitionPath(modelName: SupportedTrainedModelNamesType) {
       return require.resolve(
-        `@kbn/test-suites-xpack-platform/api_integration/services/ml/resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
+        `../../../api_integration/services/ml/resources/trained_model_definitions/${modelName}/traced_pytorch_model.pt`
       );
     },
 

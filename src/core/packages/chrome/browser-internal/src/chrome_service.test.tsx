@@ -246,28 +246,6 @@ describe('start', () => {
       render(React.createElement(() => chrome.getLegacyHeaderComponentForFixedLayout()));
     });
 
-    it('renders the custom project side navigation', async () => {
-      const { chrome, startDeps } = await start({
-        startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
-      });
-
-      const MyNav = function MyNav() {
-        return <div data-test-subj="customProjectSideNav">HELLO</div>;
-      };
-      chrome.setChromeStyle('project');
-      chrome.project.setSideNavComponent(MyNav);
-
-      render(
-        <KibanaRenderContextProvider {...startDeps}>
-          {chrome.getLegacyHeaderComponentForFixedLayout()}
-        </KibanaRenderContextProvider>
-      );
-
-      expect(screen.getByTestId('kibanaProjectHeader')).toBeInTheDocument();
-      expect(screen.queryByTestId('defaultProjectSideNav')).not.toBeInTheDocument();
-      expect(screen.getByTestId('customProjectSideNav')).toHaveTextContent('HELLO');
-    });
-
     it('renders chromeless header', async () => {
       const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 

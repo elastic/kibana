@@ -26,7 +26,7 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ]
   }
 }

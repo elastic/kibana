@@ -10,9 +10,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
   AggregationConfigMap,
+  ChartsConfigMap,
   FormulasConfigMap,
   InventoryMetricsConfig,
-  LensMetricChartConfig,
 } from './shared/metrics/types';
 
 export { DataSchemaFormat } from './shared/metrics/types';
@@ -258,7 +258,7 @@ export interface InventoryModel<
   TEntityType extends InventoryItemType,
   TAggregations extends AggregationConfigMap,
   TFormulas extends FormulasConfigMap | undefined = undefined,
-  TCharts extends LensMetricChartConfig | undefined = undefined
+  TCharts extends ChartsConfigMap | undefined = undefined
 > {
   id: TEntityType;
   displayName: string;
