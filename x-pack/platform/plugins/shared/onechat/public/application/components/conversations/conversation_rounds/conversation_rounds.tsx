@@ -42,7 +42,7 @@ export const ConversationRounds: React.FC<{}> = () => {
                 isError ? (
                   <RoundError
                     error={error}
-                    onRetry={() => {
+                    onRetry={retry}
                       retry();
                     }}
                   />
