@@ -33,7 +33,6 @@ module.exports = (_, argv) => {
       'kbn-ui-shared-deps-npm': [
         // polyfill code
         'core-js/stable',
-        'whatwg-fetch',
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
