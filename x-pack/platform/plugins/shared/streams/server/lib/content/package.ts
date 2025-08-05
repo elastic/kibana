@@ -67,7 +67,7 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
             return { ...pipeline, processors };
           });
 
-        const processorsFields = fieldsFromProcessors(mainPipeline.processors);
+        const processorsFields = fieldsFromProcessors(mainPipeline?.processors ?? []);
         // - map only the ecs fields extracted from the processors
         // - map all the fields explicitly mapped
         const mappedFields = Object.entries({
@@ -106,7 +106,7 @@ export async function packageAsContentPack({ name }: { name: string }): Promise<
                 lifecycle: { inherit: {} },
                 processing: streamProcessors({
                   mappedFields,
-                  integrationProcessors: mainPipeline.processors,
+                  integrationProcessors: mainPipeline?.processors ?? [],
                 }),
                 wired: {
                   fields: Object.entries(mappedFields).reduce((acc, [key, value]) => {
