@@ -10,7 +10,7 @@ components:
       type: string
       description: Query used to determine which fields in the Elasticsearch index are used for generating alerts.
  
-    ThreatMapEntry:
+    ThreatMappingEntry:
       type: object
       properties:
         field:
@@ -45,7 +45,7 @@ components:
           entries:
             type: array
             items:
-              $ref: '#/components/schemas/ThreatMapEntry'
+              $ref: '#/components/schemas/ThreatMappingEntry'
         required:
           - entries
 

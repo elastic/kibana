@@ -24,8 +24,8 @@ import { NonEmptyString } from '../../../../model/primitives.gen';
 export type ThreatQuery = z.infer<typeof ThreatQuery>;
 export const ThreatQuery = z.string();
 
-export type ThreatMapEntry = z.infer<typeof ThreatMapEntry>;
-export const ThreatMapEntry = z.object({
+export type ThreatMappingEntry = z.infer<typeof ThreatMappingEntry>;
+export const ThreatMappingEntry = z.object({
   field: NonEmptyString,
   type: z.literal('mapping'),
   value: NonEmptyString,
@@ -46,7 +46,7 @@ export type ThreatMapping = z.infer<typeof ThreatMapping>;
 export const ThreatMapping = z
   .array(
     z.object({
-      entries: z.array(ThreatMapEntry),
+      entries: z.array(ThreatMappingEntry),
     })
   )
   .min(1);

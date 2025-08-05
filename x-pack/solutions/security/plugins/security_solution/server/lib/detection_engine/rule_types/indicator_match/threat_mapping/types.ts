@@ -25,7 +25,7 @@ import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
 import type {
-  ThreatMapEntry,
+  ThreatMappingEntry,
   ThreatMapping,
   ThreatIndex,
   ThreatMatchRuleOptionalFields,
@@ -34,7 +34,7 @@ import type {
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
-export type ThreatMappingEntries = ThreatMapEntry[];
+export type ThreatMappingEntries = ThreatMappingEntry[];
 
 export interface CreateThreatSignalsOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
