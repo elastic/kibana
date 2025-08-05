@@ -27,7 +27,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource, DEFAULT_METRIC, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -121,7 +121,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
-        metrics={this._descriptor.metrics}
+        metrics={this._descriptor.metrics ?? [DEFAULT_METRIC]}
         groupByTimeseries={this._descriptor.groupByTimeseries ?? false}
         lineSimplificationSize={
           this._descriptor.lineSimplificationSize ?? DEFAULT_LINE_SIMPLIFICATION_SIZE

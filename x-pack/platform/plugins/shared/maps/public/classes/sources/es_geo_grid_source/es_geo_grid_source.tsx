@@ -40,7 +40,7 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
+import { AbstractESAggSource, DEFAULT_METRIC, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -167,7 +167,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
         geoFieldName={this.getGeoFieldName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
-        metrics={this._descriptor.metrics}
+        metrics={this._descriptor.metrics ?? [DEFAULT_METRIC]}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
       />

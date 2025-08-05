@@ -234,7 +234,9 @@ export const AggSchema = schema.oneOf([countAggSchema, fieldedAggSchema, percent
 
 // base schema for Elasticsearch DSL aggregation sources
 export const ESAggSourceSchema = ESSourceSchema.extends({
-  metrics: schema.arrayOf(AggSchema),
+  metrics: schema.maybe(schema.arrayOf(AggSchema, {
+    defaultValue: [{ type: AGG_TYPE.COUNT }]
+  })),
 });
 
 export const ESGeoGridSourceSchema = ESAggSourceSchema.extends(

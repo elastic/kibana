@@ -83,7 +83,7 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
 export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
-  metrics: AggDescriptor[];
+  metrics?: AggDescriptor[];
 };
 
 export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
