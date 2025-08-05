@@ -672,7 +672,7 @@ const adjustCommandsForSentinelOne = ({
             );
           }
 
-          if (scriptInfo?.meta.inputRequired && !inputParams) {
+          if (scriptInfo?.meta?.inputRequired && !inputParams) {
             return i18n.translate(
               'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.scriptInputParamsMissing',
               {

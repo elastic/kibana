@@ -12,6 +12,7 @@ export type {
   Command,
   ConsoleProps,
   CommandExecutionComponentProps,
+  SupportedArguments,
 } from './types';
 export type { ArgSelectorState } from './components/console_state/types';
 export type {

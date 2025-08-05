@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { ArgSelectorState } from '../../console';
+import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
 import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
@@ -33,9 +33,9 @@ export interface MicrosoftDefenderEndpointRunScriptActionParameters {
   Args?: string[];
 }
 
-export interface SentinelOneRunScriptActionParameters {
-  script: string[];
-  inputParams?: string[];
+export interface SentinelOneRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
 }
 
 export const RunScriptActionResult = memo<
