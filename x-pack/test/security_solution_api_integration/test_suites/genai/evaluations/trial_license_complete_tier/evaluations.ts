@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
       });
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/attack_discovery_alerts'
       );
       // if run is to test prompt changes, uninstall prompt integration to default to local prompts
       if (isEvalLocalPrompts) {
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await deleteTinyElser({ ml, es, log });
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/attack_discovery_alerts'
       );
     });
 

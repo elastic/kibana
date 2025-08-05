@@ -60,6 +60,11 @@ export interface ScoutFileInfo {
  */
 export interface ScoutTestRunInfo {
   id: string;
+  target: {
+    type: string;
+    mode: string;
+  };
+  fully_parallel?: boolean;
   config?: {
     file?: ScoutFileInfo;
     category?: ScoutTestRunConfigCategory;

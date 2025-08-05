@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { GeoIpProcessorConfig, GeoIpProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
@@ -109,7 +110,7 @@ export const geoIpProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'GeoIP',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.geoIpHelpText"
@@ -120,7 +121,7 @@ export const geoIpProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsGeoIpLink"
               external
               target="_blank"
-              href={esDocUrl + 'geoip-processor.html'}
+              href={docLinks.links.ingest.geoIp}
             >
               {i18n.translate('xpack.streams.availableProcessors.geoIpLinkLabel', {
                 defaultMessage: 'IPv4 or IPv6 address.',

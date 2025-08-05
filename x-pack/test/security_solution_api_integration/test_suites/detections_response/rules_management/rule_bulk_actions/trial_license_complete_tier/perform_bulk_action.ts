@@ -95,11 +95,11 @@ export default ({ getService }: FtrProviderContext): void => {
   describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {

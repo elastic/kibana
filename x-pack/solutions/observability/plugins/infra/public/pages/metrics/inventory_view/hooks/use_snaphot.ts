@@ -15,8 +15,7 @@ import type {
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
-  extends Omit<SnapshotRequest, 'filterQuery' | 'timerange' | 'includeTimeseries'> {
-  filterQuery?: string | null | symbol;
+  extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries'> {
   currentTime: number;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
@@ -26,7 +25,15 @@ export function useSnapshot(
   props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
+  const payload = useMemo(
+    () =>
+      JSON.stringify(
+        buildPayload({
+          ...props,
+        })
+      ),
+    [props]
+  );
 
   const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
@@ -57,7 +64,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     accountId = '',
     currentTime,
     dropPartialBuckets = true,
-    filterQuery = '',
+    kuery,
     groupBy = null,
     includeTimeseries = true,
     metrics,
@@ -66,12 +73,13 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     region = '',
     sourceId,
     timerange,
+    schema,
   } = args;
 
   return {
     accountId,
     dropPartialBuckets,
-    filterQuery: filterQuery as string,
+    kuery,
     groupBy,
     includeTimeseries,
     metrics,
@@ -79,6 +87,7 @@ const buildPayload = (args: UseSnapshotRequest): SnapshotRequest => {
     sourceId,
     overrideCompositeSize,
     region,
+    schema,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,

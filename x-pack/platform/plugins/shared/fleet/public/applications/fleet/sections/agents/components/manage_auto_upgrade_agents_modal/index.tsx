@@ -18,6 +18,7 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiSuperSelect,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,6 +44,7 @@ export interface ManageAutoUpgradeAgentsModalProps {
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   ManageAutoUpgradeAgentsModalProps
 > = ({ onClose, agentPolicy, agentCount }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { notifications } = useStartServices();
   const [targetVersions, setTargetVersions] = useState(agentPolicy.required_versions || []);
@@ -105,6 +107,8 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
           defaultMessage="Manage auto-upgrade agents"
         />
       }
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => onClose(false)}
       onConfirm={onSubmit}
       confirmButtonDisabled={isLoading || errors.length > 0 || !targetVersionsChanged}

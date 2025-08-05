@@ -267,6 +267,11 @@ import type {
   SearchPrivilegesIndicesRequestQueryInput,
   SearchPrivilegesIndicesResponse,
 } from './entity_analytics/monitoring/search_indices.gen';
+import type {
+  DeleteMonitoringEngineRequestQueryInput,
+  DeleteMonitoringEngineResponse,
+} from './entity_analytics/privilege_monitoring/engine/delete.gen';
+import type { DisableMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/disable.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
 import type {
@@ -386,6 +391,16 @@ import type {
   ResolveTimelineRequestQueryInput,
   ResolveTimelineResponse,
 } from './timeline/resolve_timeline/resolve_timeline_route.gen';
+import type {
+  CreateDashboardMigrationRequestBodyInput,
+  CreateDashboardMigrationResponse,
+  CreateDashboardMigrationDashboardsRequestParamsInput,
+  CreateDashboardMigrationDashboardsRequestBodyInput,
+  GetDashboardMigrationRequestParamsInput,
+  GetDashboardMigrationResponse,
+  GetDashboardMigrationStatsRequestParamsInput,
+  GetDashboardMigrationStatsResponse,
+} from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   CreateRuleMigrationRequestBodyInput,
   CreateRuleMigrationResponse,
@@ -640,13 +655,48 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Creates a new dashboard migration and returns the corresponding migration_id
+   */
+  async createDashboardMigration(props: CreateDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigration`);
+    return this.kbnClient
+      .request<CreateDashboardMigrationResponse>({
+        path: '/internal/siem_migrations/dashboards',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Adds dashboards to an alreayd existing dashboard migration
+   */
+  async createDashboardMigrationDashboards(props: CreateDashboardMigrationDashboardsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateDashboardMigrationDashboards`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/dashboards',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async createEntitySource(props: CreateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
     return this.kbnClient
       .request<CreateEntitySourceResponse>({
         path: '/api/entity_analytics/monitoring/entity_source',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.body,
@@ -862,9 +912,23 @@ For detailed information on Kibana actions and alerting, and additional API call
       .request({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
+    return this.kbnClient
+      .request<DeleteMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/delete',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -965,6 +1029,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async disableMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
+    return this.kbnClient
+      .request<DisableMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/disable',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1386,6 +1462,39 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves the dashboard migration document stored in the system given the dashboard migration id
+   */
+  async getDashboardMigration(props: GetDashboardMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigration`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResponse>({
+        path: replaceParams('/internal/siem_migrations/dashboards/{migration_id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves the dashboard migrations stats for given migrations stored in the system
+   */
+  async getDashboardMigrationStats(props: GetDashboardMigrationStatsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationStats`);
+    return this.kbnClient
+      .request<GetDashboardMigrationStatsResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/stats',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
    */
   async getDraftTimelines(props: GetDraftTimelinesProps) {
@@ -1447,7 +1556,7 @@ finalize it.
       .request<GetEntitySourceResponse>({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
       })
@@ -2012,7 +2121,7 @@ providing you with the most current and effective threat detection capabilities.
       .request<ListEntitySourcesResponse>({
         path: '/api/entity_analytics/monitoring/entity_source/list',
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
 
@@ -2581,7 +2690,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .request<UpdateEntitySourceResponse>({
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'PUT',
         body: props.body,
@@ -2724,6 +2833,13 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreateDashboardMigrationProps {
+  body: CreateDashboardMigrationRequestBodyInput;
+}
+export interface CreateDashboardMigrationDashboardsProps {
+  params: CreateDashboardMigrationDashboardsRequestParamsInput;
+  body: CreateDashboardMigrationDashboardsRequestBodyInput;
+}
 export interface CreateEntitySourceProps {
   body: CreateEntitySourceRequestBodyInput;
 }
@@ -2759,6 +2875,9 @@ export interface DeleteEntityEngineProps {
 }
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
+}
+export interface DeleteMonitoringEngineProps {
+  query: DeleteMonitoringEngineRequestQueryInput;
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
@@ -2839,6 +2958,12 @@ export interface FindRulesProps {
 }
 export interface GetAssetCriticalityRecordProps {
   query: GetAssetCriticalityRecordRequestQueryInput;
+}
+export interface GetDashboardMigrationProps {
+  params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationStatsProps {
+  params: GetDashboardMigrationStatsRequestParamsInput;
 }
 export interface GetDraftTimelinesProps {
   query: GetDraftTimelinesRequestQueryInput;

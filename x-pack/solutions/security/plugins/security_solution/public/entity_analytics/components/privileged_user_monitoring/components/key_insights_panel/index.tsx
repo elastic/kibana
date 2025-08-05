@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiPanel, EuiFlexGrid } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
-import { ActivePrivilegedUsersTile } from './active_privileged_users_tile';
+import { PrivilegedUsersTile } from './privileged_users_tile';
 import { AlertsTriggeredTile } from './alerts_triggered_tile';
 import { AnomaliesDetectedTile } from './anomalies_detected_tile';
 import { GrantedRightsTile } from './granted_rights_tile';
@@ -23,7 +23,7 @@ export const KeyInsightsPanel: React.FC<{ spaceId: string; sourcerDataView: Data
   return (
     <EuiFlexGrid columns={3} data-test-subj="key-insights-panel">
       <EuiPanel hasBorder>
-        <ActivePrivilegedUsersTile spaceId={spaceId} sourcerDataView={sourcerDataView} />
+        <PrivilegedUsersTile spaceId={spaceId} />
       </EuiPanel>
       <EuiPanel hasBorder>
         <AlertsTriggeredTile spaceId={spaceId} />

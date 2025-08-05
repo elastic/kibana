@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -26,6 +25,9 @@ import {
   EuiTabs,
   EuiNotificationBadge,
   EuiText,
+  EuiIconTip,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -38,10 +40,11 @@ import {
   MAX_HISTORY_QUERIES_NUMBER,
   dateFormat,
 } from '../history_local_storage';
-import type { ESQLEditorDeps } from '../types';
+import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
 import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
+import { useRestorableState } from '../restorable_state';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -52,34 +55,31 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
+          <EuiLink
+            onClick={toggleHistory}
+            external={false}
+            data-test-subj="ESQLEditor-hide-queries-link"
           >
-            <EuiIcon
+            <EuiIconTip
               type="clockCounter"
               color="primary"
               size="m"
-              onClick={toggleHistory}
-              css={css`
-                margin-right: ${euiTheme.size.s};
-                cursor: pointer;
-              `}
+              content={
+                isHistoryOpen
+                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                      defaultMessage: 'Hide recent queries',
+                    })
+                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                      defaultMessage: 'Show recent queries',
+                    })
+              }
+              position="top"
             />
-          </EuiToolTip>
+          </EuiLink>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -513,7 +513,7 @@ export function HistoryAndStarredQueriesTabs({
     }
     return filterMissing([
       {
-        id: 'history-queries-tab',
+        id: HistoryTabId.recentQueries,
         name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
           defaultMessage: 'Recent',
         }),
@@ -534,7 +534,7 @@ export function HistoryAndStarredQueriesTabs({
         ),
       },
       starredQueriesService !== null && {
-        id: 'starred-queries-tab',
+        id: HistoryTabId.standardQueries,
         dataTestSubj: 'starred-queries-tab',
         name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
           defaultMessage: 'Starred',
@@ -570,20 +570,20 @@ export function HistoryAndStarredQueriesTabs({
     starredQueriesService,
   ]);
 
-  const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
+  const [selectedTabId, setSelectedTabId] = useRestorableState(
+    'historySelectedTabId',
+    HistoryTabId.recentQueries
+  );
+
   const selectedTabContent = useMemo(() => {
     return tabs.find((obj) => obj.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
-
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedTabId(id);
-  };
 
   const renderTabs = useCallback(() => {
     return tabs.map((tab, index) => (
       <EuiTab
         key={index}
-        onClick={() => onSelectedTabChanged(tab.id)}
+        onClick={() => setSelectedTabId(tab.id)}
         isSelected={tab.id === selectedTabId}
         append={tab.append}
         data-test-subj={tab.dataTestSubj}
@@ -591,11 +591,12 @@ export function HistoryAndStarredQueriesTabs({
         {tab.name}
       </EuiTab>
     ));
-  }, [selectedTabId, tabs]);
+  }, [selectedTabId, tabs, setSelectedTabId]);
 
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="ESQLEditor-history-container"
         responsive={false}
         alignItems="center"
         justifyContent="spaceBetween"

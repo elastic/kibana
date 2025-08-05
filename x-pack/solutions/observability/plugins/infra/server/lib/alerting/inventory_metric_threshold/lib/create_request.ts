@@ -17,7 +17,7 @@ import type { InventoryMetricConditions } from '../../../../../common/alerting/m
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
-export const createRequest = (
+export const createRequest = async (
   index: string,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
@@ -54,7 +54,12 @@ export const createRequest = (
   if (afterKey) {
     composite.after = afterKey;
   }
-  const metricAggregations = createMetricAggregations(timerange, nodeType, metric, customMetric);
+  const metricAggregations = await createMetricAggregations(
+    timerange,
+    nodeType,
+    metric,
+    customMetric
+  );
   const bucketSelector = createBucketSelector(metric, condition, customMetric);
 
   const containerContextAgg =

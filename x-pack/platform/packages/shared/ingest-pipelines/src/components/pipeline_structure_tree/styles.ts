@@ -40,6 +40,7 @@ export const getStyles = (euiTheme: EuiThemeComputed, isExtension: boolean) => c
   .cssTreeNode-morePipelines {
     margin-left: ${euiTheme.size.base};
     background-color: ${euiTheme.colors.backgroundLightPrimary};
+    color: ${euiTheme.colors.textPrimary} !important;
     border: none;
   }
 `;

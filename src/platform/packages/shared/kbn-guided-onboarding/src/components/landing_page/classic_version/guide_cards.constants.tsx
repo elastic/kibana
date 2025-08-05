@@ -31,22 +31,6 @@ export interface GuideCardConstants {
 
 export const guideCards: GuideCardConstants[] = [
   {
-    solution: 'search',
-    icon: 'database',
-    title: (
-      <FormattedMessage
-        id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases {lineBreak} and business systems"
-        values={{
-          lineBreak: <br />,
-        }}
-      />
-    ),
-    guideId: 'databaseSearch',
-    telemetryId: 'onboarding--search--database',
-    order: 1,
-  },
-  {
     solution: 'security',
     icon: 'securitySignal',
     title: (

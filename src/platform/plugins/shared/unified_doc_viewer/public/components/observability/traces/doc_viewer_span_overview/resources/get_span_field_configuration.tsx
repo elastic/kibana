@@ -18,7 +18,7 @@ import {
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { HighlightField } from '../../components/highlight_field.tsx';
+import { HighlightField } from '../../components/highlight_field';
 import {
   FieldConfiguration,
   getCommonFieldConfiguration,

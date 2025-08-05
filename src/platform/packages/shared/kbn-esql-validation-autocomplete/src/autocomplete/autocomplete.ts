@@ -30,7 +30,7 @@ import {
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLLicenseType, ESQLVariableType } from '@kbn/esql-types';
 import { isSourceCommand } from '../shared/helpers';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { getAstContext } from '../shared/context';
@@ -69,11 +69,34 @@ export async function suggest(
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
 
+  const activeProduct = resourceRetriever?.getActiveProduct?.();
+  const licenseInstance = await resourceRetriever?.getLicense?.();
+  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
+
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // resolve particular commands suggestions after
     // filter source commands if already defined
-    const commands = esqlCommandRegistry.getAllCommandNames();
+    const commands = esqlCommandRegistry
+      .getAllCommands()
+      .filter((command) => {
+        const license = command.metadata?.license;
+        const observabilityTier = command.metadata?.observabilityTier;
+
+        // Check license requirements
+        const hasLicenseAccess =
+          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType);
+
+        // Check observability tier requirements
+        const hasObservabilityAccess =
+          !observabilityTier ||
+          (activeProduct?.type === 'observability' &&
+            activeProduct?.tier === observabilityTier.toLocaleLowerCase());
+
+        return hasLicenseAccess && hasObservabilityAccess;
+      })
+      .map((command) => command.name);
+
     const suggestions = getCommandAutocompleteDefinitions(commands);
     if (!ast.length) {
       // Display the recommended queries if there are no commands (empty state)
@@ -139,7 +162,8 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       resourceRetriever,
-      offset
+      offset,
+      hasMinimumLicenseRequired
     );
     return commandsSpecificSuggestions;
   }
@@ -206,7 +230,8 @@ async function getSuggestionsWithinCommandExpression(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   callbacks?: ESQLCallbacks,
-  offset?: number
+  offset?: number,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
@@ -214,10 +239,6 @@ async function getSuggestionsWithinCommandExpression(
   if (!commandDefinition) {
     return [];
   }
-
-  // resolve the license promise
-  const license = await callbacks?.getLicense?.();
-  const hasMinimumLicenseRequired = license?.hasAtLeast;
 
   // collect all fields + userDefinedColumns to suggest
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();

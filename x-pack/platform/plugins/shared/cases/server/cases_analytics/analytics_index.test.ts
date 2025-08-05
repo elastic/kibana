@@ -297,7 +297,7 @@ describe('AnalyticsIndex', () => {
       });
     });
 
-    it('does not retry if the eexecution throws a non-retryable error', async () => {
+    it('does not retry if the execution throws a non-retryable error', async () => {
       esClient.indices.exists.mockRejectedValue(new Error('My terrible error'));
 
       await expect(index.upsertIndex()).resolves.not.toThrow();
@@ -327,6 +327,29 @@ describe('AnalyticsIndex', () => {
         { tags: ['cai-index-creation', `${indexName}`] }
       );
       expect(logger.error).not.toBeCalled();
+    });
+
+    it('logs multi_project_pending_exception errors as info', async () => {
+      esClient.indices.exists.mockResolvedValueOnce(false);
+      esClient.indices.create.mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          body: {
+            error: {
+              type: 'multi_project_pending_exception',
+            },
+          },
+          statusCode: 404,
+        } as unknown as DiagnosticResult)
+      );
+
+      await index.upsertIndex();
+
+      expect(logger.debug).toBeCalledWith(
+        `[${indexName}] Multi-project setup. Skipping creation.`,
+        { tags: ['cai-index-creation', `${indexName}`] }
+      );
+      expect(logger.error).not.toBeCalled();
+      expect(nextBackOff).toBeCalledTimes(0);
     });
   });
 });

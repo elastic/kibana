@@ -478,6 +478,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,
         privilegedUserMonitoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/privileged-user-monitoring`,
+        mlAnomalyDetection: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection`,
       },
       detectionEngineOverview: `${ELASTIC_DOCS}solutions/security/detect-and-alert`,
       aiAssistant: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
