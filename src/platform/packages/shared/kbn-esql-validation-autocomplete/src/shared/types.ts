@@ -18,6 +18,7 @@ import type {
   RecommendedField,
   InferenceEndpointsAutocompleteResult,
   ESQLLicenseResult,
+  PricingProduct,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
@@ -60,6 +61,7 @@ export interface ESQLCallbacks {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<ESQLLicenseResult | undefined>;
+  getActiveProduct?: () => PricingProduct | undefined;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
