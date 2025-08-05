@@ -199,4 +199,8 @@ export class WorkflowsManagementApi {
       offset: params.offset || 0,
     };
   }
+
+  public async getWorkflowStats() {
+    return await this.workflowsService.getWorkflowStats();
+  }
 }

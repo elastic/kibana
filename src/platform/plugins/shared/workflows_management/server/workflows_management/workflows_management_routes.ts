@@ -22,6 +22,38 @@ export function defineRoutes(
 ) {
   router.get(
     {
+      path: '/api/workflows/stats',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const stats = await api.getWorkflowStats();
+
+        return response.ok({ body: stats });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
       path: '/api/workflows/{id}',
       options: {
         tags: ['access:workflowsManagement'],

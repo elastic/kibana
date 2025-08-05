@@ -203,3 +203,20 @@ export interface WorkflowListItemAction {
   description: string;
   onClick: (item: WorkflowListItemDto) => void;
 }
+
+export interface WorkflowExecutionsHistoryStats {
+  date: string;
+  timestamp: string;
+  completed: number;
+  failed: number;
+  cancelled: number;
+}
+
+export interface WorkflowStatsDto {
+  workflows: {
+    active: number;
+    draft: number;
+    inactive: number;
+  };
+  executions: WorkflowExecutionsHistoryStats[];
+}

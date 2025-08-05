@@ -24,7 +24,13 @@ import type {
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
+  WorkflowStatus,
 } from '@kbn/workflows';
+import { WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import {
+  AggregationsAggregationContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
@@ -567,5 +573,127 @@ export class WorkflowsService {
     };
 
     return this.searchWorkflowLogs(query);
+  }
+
+  public async getWorkflowStats(): Promise<WorkflowStatsDto | null> {
+    const savedObjectsClient = await this.getSavedObjectsClient();
+    try {
+      const [workflowStatusStats, workflowExecutionStatusStats] = await Promise.all([
+        this.getWorkflowStatusStats(savedObjectsClient),
+        this.getWorkflowExecutionStatusStats(),
+      ]);
+
+      return {
+        workflows: {
+          [WorkflowStatus.ACTIVE]: workflowStatusStats.active,
+          [WorkflowStatus.DRAFT]: workflowStatusStats.draft,
+          [WorkflowStatus.INACTIVE]: workflowStatusStats.inactive,
+        },
+        executions: workflowExecutionStatusStats,
+      };
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private async getWorkflowStatusStats(savedObjectsClient: SavedObjectsClientContract) {
+    const aggs: Record<string, AggregationsAggregationContainer> = {
+      by_status: {
+        terms: {
+          field: 'workflow.attributes.status',
+        },
+      },
+    };
+
+    const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
+      type: WORKFLOW_SAVED_OBJECT_TYPE,
+      perPage: 0, // we only want aggregations, no hits
+
+      // workflow SO does not have createdAt in mappings =(
+      // filter: `workflow.attributes.createdAt >= "now-30d/d" and workflow.attributes.createdAt <= "now/d"`,
+      aggs,
+    });
+
+    const { by_status: byStatus } = response.aggregations as any;
+
+    return byStatus.buckets.reduce(
+      (
+        acc: Record<string, number>,
+        { key, doc_count: count }: { key: string; doc_count: number }
+      ) => {
+        acc[key] = count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+  }
+
+  private async getWorkflowExecutionStatusStats() {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+
+    const query: SearchRequest = {
+      index: this.workflowsExecutionIndex,
+      size: 0, // no hits, just aggregations
+      query: {
+        range: {
+          startedAt: {
+            gte: 'now-30d/d',
+            lt: 'now+1d/d',
+          },
+        },
+      },
+      aggs: {
+        by_day: {
+          date_histogram: {
+            field: 'startedAt',
+            calendar_interval: 'day',
+          },
+          aggs: {
+            by_status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const response = await this.esClient.search(query);
+    const { by_day: byDay } = response.aggregations as any;
+
+    return byDay.buckets.map((day: any) => {
+      // Default values
+      let completed = 0;
+      let failed = 0;
+      let cancelled = 0;
+
+      for (const statusBucket of day.by_status.buckets) {
+        switch (statusBucket.key) {
+          case 'completed':
+            completed = statusBucket.doc_count;
+            break;
+          case 'failed':
+            failed = statusBucket.doc_count;
+            break;
+          case 'cancelled':
+            cancelled = statusBucket.doc_count;
+            break;
+        }
+      }
+
+      return {
+        date: day.key_as_string,
+        timestamp: day.key,
+        completed,
+        failed,
+        cancelled,
+      };
+    });
   }
 }
