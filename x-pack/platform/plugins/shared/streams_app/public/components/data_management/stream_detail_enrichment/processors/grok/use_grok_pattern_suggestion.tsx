@@ -13,8 +13,8 @@ import {
   getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
-} from '@kbn/streams-ai/shared/processing/templatize/format_root'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from '@kbn/streams-ai/shared/processing/templatize/format_root';
+import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
 import { get } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';

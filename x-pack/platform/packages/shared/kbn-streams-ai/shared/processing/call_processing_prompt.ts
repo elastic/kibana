@@ -6,7 +6,7 @@
  */
 
 import { mergeSampleDocumentsWithFieldCaps, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { executePromptAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { ProcessorDefinitionWithId, getProcessorType } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { omit } from 'lodash';
@@ -50,7 +50,7 @@ export async function callProcessingPrompt({
 }) {
   const truncatedAnalysis = sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true });
 
-  const assistantResponse = await executePromptAsReasoningAgent({
+  const assistantResponse = await executeAsReasoningAgent({
     inferenceClient,
     prompt,
     abortSignal: signal,
@@ -89,8 +89,8 @@ export async function callProcessingPrompt({
             const overallValidity = validities.every((validity) => validity === 'success')
               ? 'success'
               : validities.some((validity) => validity === 'failure')
-              ? 'failure'
-              : 'partial';
+                ? 'failure'
+                : 'partial';
 
             return {
               validity: overallValidity,
@@ -133,12 +133,11 @@ export async function callProcessingPrompt({
                           >> \`${source?.[messageField]}\`
                           > Matching tokens
                           >> \`${JSON.stringify(formatted.matched)}\`
-                          ${
-                            result.result.successful?.length
-                              ? `> This message _was_ successfully parsed:
+                          ${result.result.successful?.length
+                            ? `> This message _was_ successfully parsed:
                           >> \`${result.result.successful[0]?.[messageField]}\`
                           `
-                              : ''
+                            : ''
                           }
                       `),
                         abortSignal: signal,
@@ -175,9 +174,9 @@ export async function callProcessingPrompt({
   const processors = (assistantResponse?.toolCalls.flatMap((toolCall) =>
     toolCall.function.name === 'suggest_pipeline'
       ? toolCall.function.arguments.processors.map((processor) => ({
-          id: processor.id,
-          ...processor.config,
-        }))
+        id: processor.id,
+        ...processor.config,
+      }))
       : []
   ) ?? []) as ProcessorDefinitionWithId[];
 

@@ -25,7 +25,8 @@ runRecipe(
       help: `
         --stream      The name of the stream to generate parsers for
         --apply       Whether to apply the generated parsers
-        --clear       Whether to clear the existing streams before running the recipe
+        --clear       Whether to clear any existing streams before running the recipe
+        --bootstrap   Whether to create child streams and ingest sample data before running the recipe
       `,
       default: {
         stream:
@@ -35,6 +36,54 @@ runRecipe(
   },
   async ({ inferenceClient, kibanaClient, esClient, logger, log, signal, flags }) => {
     const streams = getStreamNames(flags);
+    const now = moment();
+    const end = now.valueOf();
+    const start = now.clone().subtract(15, 'minutes').valueOf();
+
+    const executeGenerateParsers = async () => {
+      await Promise.allSettled(
+        streams.map(async (name) => {
+          return withInferenceSpan(`generate_parsers ${name}`, async (span) => {
+            log.info(`Initializing task context and state for ${name}`);
+
+            const {
+              context,
+              state: initialState,
+              apply,
+            } = await initializeCliOnboarding({
+              start,
+              end,
+              name,
+              esClient,
+              inferenceClient,
+              logger,
+              signal,
+              kibanaClient,
+            });
+
+            span?.setAttribute('input.value', JSON.stringify(initialState.stream));
+
+            if (initialState.dataset.samples.length === 0) {
+              log.info(`No samples found for stream ${name}. Skipping parser generation.`);
+              return;
+            }
+
+            log.info(`Generating parsers for ${name}`);
+            const nextState = await generateParsers({ context, state: initialState });
+            // log.info(inspect(nextState.stream, { depth: null }));
+
+            if (flags.apply) {
+              await apply(nextState);
+            }
+
+            span?.setAttribute('output.value', JSON.stringify(nextState.stream));
+          }).catch((error) => {
+            log.error(inspect(error, { depth: 10 }));
+            throw error;
+          });
+        })
+      );
+    }
 
     if (flags.clear) {
       log.info('Clearing existing streams...');
@@ -43,7 +92,9 @@ runRecipe(
         kibanaClient,
         signal,
       });
+    }
 
+    if (flags.bootstrap) {
       log.info('Enabling streams...');
       await enableStreams({
         kibanaClient,
@@ -58,65 +109,18 @@ runRecipe(
         signal,
         filter: streams.map((stream) => stream.split('.')[1]).filter((stream) => stream),
       });
+
+      await withLoghubSynthtrace(
+        {
+          start,
+          end,
+          esClient,
+          logger,
+        },
+        executeGenerateParsers
+      );
+    } else {
+      await executeGenerateParsers();
     }
-
-    const now = moment();
-
-    const end = now.valueOf();
-
-    const start = now.clone().subtract(15, 'minutes').valueOf();
-
-    await withLoghubSynthtrace(
-      {
-        start,
-        end,
-        esClient,
-        logger,
-      },
-      async () => {
-        await Promise.allSettled(
-          streams.map(async (name) => {
-            return withInferenceSpan(`generate_parsers ${name}`, async (span) => {
-              log.info(`Initializing task context and state for ${name}`);
-
-              const {
-                context,
-                state: initialState,
-                apply,
-              } = await initializeCliOnboarding({
-                start,
-                end,
-                name,
-                esClient,
-                inferenceClient,
-                logger,
-                signal,
-                kibanaClient,
-              });
-
-              span?.setAttribute('input.value', JSON.stringify(initialState.stream));
-
-              if (initialState.dataset.samples.length === 0) {
-                log.info(`No samples found for stream ${name}. Skipping parser generation.`);
-                return;
-              }
-
-              log.info(`Generating parsers for ${name}`);
-              const nextState = await generateParsers({ context, state: initialState });
-              // log.info(inspect(nextState.stream, { depth: null }));
-
-              if (flags.apply) {
-                await apply(nextState);
-              }
-
-              span?.setAttribute('output.value', JSON.stringify(nextState.stream));
-            }).catch((error) => {
-              log.error(inspect(error, { depth: 10 }));
-              throw error;
-            });
-          })
-        );
-      }
-    );
   }
 );

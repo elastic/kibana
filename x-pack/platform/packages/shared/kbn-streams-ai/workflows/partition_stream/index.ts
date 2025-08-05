@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Condition, Streams } from '@kbn/streams-schema';
 import { BoundInferenceClient } from '@kbn/inference-common';
-import { executePromptAsReasoningAgent } from '@kbn/inference-prompt-utils';
+import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { isEqual } from 'lodash';
 import { SuggestStreamPartitionsPrompt } from './prompt';
 import { clusterLogs } from '../../tools/cluster_logs/cluster_logs';
@@ -41,7 +41,7 @@ export async function partitionStream({
     size: 1000,
   });
 
-  const conclusion = await executePromptAsReasoningAgent({
+  const conclusion = await executeAsReasoningAgent({
     inferenceClient,
     prompt: SuggestStreamPartitionsPrompt,
     input: {
