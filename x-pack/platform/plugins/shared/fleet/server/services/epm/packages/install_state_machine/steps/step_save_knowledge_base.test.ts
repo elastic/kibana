@@ -29,11 +29,14 @@ describe('saveKnowledgeBaseContent', () => {
       },
     ];
 
-    esClient.index.mockResolvedValueOnce({
-      _index: '.integration_knowledge',
-      _id: 'test-package',
-      _version: 1,
-      result: 'created',
+    // Mock the methods that are actually called by saveKnowledgeBaseContentToIndex
+    (esClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValueOnce(true);
+    (esClient.indices.exists as jest.Mock).mockResolvedValueOnce(true);
+    esClient.deleteByQuery.mockResolvedValueOnce({} as any);
+    esClient.bulk.mockResolvedValueOnce({
+      took: 1,
+      errors: false,
+      items: [],
     } as any);
 
     await saveKnowledgeBaseContentToIndex({
@@ -43,15 +46,38 @@ describe('saveKnowledgeBaseContent', () => {
       knowledgeBaseContent,
     });
 
-    expect(esClient.index).toHaveBeenCalledWith({
+    // Verify that deleteByQuery was called to clean up existing documents
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
       index: '.integration_knowledge',
-      id: 'test-package',
-      body: {
-        package_name: 'test-package',
-        version: '1.0.0',
-        installed_at: expect.any(String),
-        knowledge_base_content: knowledgeBaseContent,
+      query: {
+        bool: {
+          must: [
+            { term: { 'package_name.keyword': 'test-package' } },
+            { term: { version: '1.0.0' } },
+          ],
+        },
       },
+      refresh: true,
+    });
+
+    // Verify that bulk was called with the correct operations
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      operations: [
+        { index: { _index: '.integration_knowledge', _id: 'test-package-test-guide.md' } },
+        {
+          package_name: 'test-package',
+          filename: 'test-guide.md',
+          content: '# Test Guide\n\nThis is a test knowledge base document.',
+          version: '1.0.0',
+        },
+        { index: { _index: '.integration_knowledge', _id: 'test-package-troubleshooting.md' } },
+        {
+          package_name: 'test-package',
+          filename: 'troubleshooting.md',
+          content: '# Troubleshooting\n\nCommon issues and solutions.',
+          version: '1.0.0',
+        },
+      ],
       refresh: 'wait_for',
     });
   });
@@ -64,7 +90,8 @@ describe('saveKnowledgeBaseContent', () => {
       knowledgeBaseContent: [],
     });
 
-    expect(esClient.index).not.toHaveBeenCalled();
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it('should not save anything if knowledge base content is null', async () => {
@@ -75,6 +102,7 @@ describe('saveKnowledgeBaseContent', () => {
       knowledgeBaseContent: null as any,
     });
 
-    expect(esClient.index).not.toHaveBeenCalled();
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
 });
