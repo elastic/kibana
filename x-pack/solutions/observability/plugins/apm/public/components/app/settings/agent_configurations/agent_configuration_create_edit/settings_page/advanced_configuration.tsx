@@ -91,7 +91,7 @@ export function AdvancedConfiguration({
   };
 
   const deleteRow = (key: string, index: number) => {
-    if (newConfig.settings[key]) {
+    if (newConfig.settings[key] !== undefined) {
       setRemovedSettingsCount((prev) => prev + 1);
     }
     setValidationErrors((prev) => ({
