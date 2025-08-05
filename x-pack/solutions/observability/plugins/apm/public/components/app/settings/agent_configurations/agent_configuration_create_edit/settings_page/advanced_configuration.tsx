@@ -235,8 +235,8 @@ function AdvancedConfigKeyInput({
     setTouched(true);
     setLocalKey(newKey);
     setInvalidChanges(isInvalidInput(newKey));
-    // Skip updating if key already exists to prevent overwriting existing values,
-    // which would lead to data loss and poor user experience
+    // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
+    // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
     if (!checkIfAdvancedConfigKeyExists(newKey)) {
       onUpdate(settingKey, newKey, settingValue);
     }
