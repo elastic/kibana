@@ -43,6 +43,9 @@ export default {
     showCenter: {
       control: { type: 'boolean' },
     },
+    showMinimap: {
+      control: { type: 'boolean' },
+    },
   },
   decorators: [GlobalStylesStorybookDecorator],
 } satisfies Meta<typeof ControlsComponent>;
@@ -52,5 +55,6 @@ export const Controls: StoryObj<ControlsProps> = {
     showZoom: true,
     showFitView: true,
     showCenter: true,
+    showMinimap: true,
   },
 };

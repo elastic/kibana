@@ -8,17 +8,26 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common/utils/helpers';
-import type { NodeViewModel, NodeDocumentDataViewModel } from './types';
+import type {
+  NodeViewModel,
+  NodeDocumentDataViewModel,
+  EntityNodeViewModel,
+  LabelNodeViewModel,
+  GroupNodeViewModel,
+} from './types';
 
-export const isStackNode = (node: NodeViewModel) => node.shape === 'group';
-export const isLabelNode = (node: NodeViewModel) => node.shape === 'label';
-
-export const isEntityNode = (node: NodeViewModel) =>
+export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
   node.shape === 'ellipse' ||
   node.shape === 'pentagon' ||
   node.shape === 'rectangle' ||
   node.shape === 'diamond' ||
   node.shape === 'hexagon';
+
+export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
+  node.shape === 'label';
+
+export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
+  node.shape === 'group';
 
 export const isStackedLabel = (node: NodeViewModel): boolean =>
   !(node.shape === 'label' && Boolean(node.parentId));
