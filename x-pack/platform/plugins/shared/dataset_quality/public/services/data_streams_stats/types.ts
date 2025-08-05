@@ -13,6 +13,8 @@ import {
   GetDataStreamsFailedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsTotalDocsQuery,
+  GetDataStreamsTypesPrivilegesQuery,
+  GetDataStreamsTypesPrivilegesResponse,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
@@ -28,6 +30,9 @@ export interface DataStreamsStatsServiceStartDeps {
 }
 
 export interface IDataStreamsStatsClient {
+  getDataStreamsTypesPrivileges(
+    params: GetDataStreamsTypesPrivilegesQuery
+  ): Promise<GetDataStreamsTypesPrivilegesResponse>;
   getDataStreamsStats(params?: GetDataStreamsStatsQuery): Promise<DataStreamStatServiceResponse>;
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery
