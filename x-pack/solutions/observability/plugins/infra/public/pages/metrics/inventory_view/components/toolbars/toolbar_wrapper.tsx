@@ -38,6 +38,7 @@ export const ToolbarWrapper = (props: Props) => {
     changeCustomMetrics,
     changePreferredSchema,
   } = useWaffleOptionsContext();
+
   return (
     <EuiFlexGroup responsive={false} wrap gutterSize="m">
       <EuiFlexItem grow={false}>

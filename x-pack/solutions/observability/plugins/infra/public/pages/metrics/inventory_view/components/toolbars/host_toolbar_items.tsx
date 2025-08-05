@@ -8,7 +8,7 @@ import React from 'react';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 
-export const hostGroupByFields = [
+export const ecsHostGroupByFields = [
   'cloud.availability_zone',
   'cloud.machine.type',
   'cloud.project.id',
@@ -16,6 +16,15 @@ export const hostGroupByFields = [
   'service.type',
 ];
 
+const semconvHostGroupByFields = ['cloud.availability_zone', 'host.type', 'cloud.provider'];
+
 export const HostToolbarItems = (props: ToolbarProps) => {
-  return <MetricsAndGroupByToolbarItems {...props} groupByFields={hostGroupByFields} />;
+  return (
+    <MetricsAndGroupByToolbarItems
+      {...props}
+      groupByFields={
+        props.preferredSchema === 'ecs' ? ecsHostGroupByFields : semconvHostGroupByFields
+      }
+    />
+  );
 };

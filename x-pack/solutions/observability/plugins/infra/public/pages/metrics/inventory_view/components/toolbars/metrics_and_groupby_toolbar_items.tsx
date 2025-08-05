@@ -8,7 +8,7 @@
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
@@ -40,16 +40,13 @@ export const MetricsAndGroupByToolbarItems = ({
   useEffect(() => {
     const current = preferredSchema;
     if (current === null) {
-      const next = schemas.includes(DataSchemaFormat.SEMCONV)
-        ? DataSchemaFormat.SEMCONV
-        : schemas[0];
+      const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
       changePreferredSchema(next);
     }
   }, [changePreferredSchema, preferredSchema, schemas]);
 
   const { value: aggregations } = useAsync(
-    () =>
-      inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? DataSchemaFormat.ECS }),
+    () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? 'ecs' }),
     [inventoryModel.metrics, preferredSchema]
   );
 
@@ -97,7 +94,7 @@ export const MetricsAndGroupByToolbarItems = ({
       {schemas.length > 0 && (
         <EuiFlexItem>
           <SchemaSelector
-            value={preferredSchema ?? DataSchemaFormat.ECS}
+            value={preferredSchema ?? 'ecs'}
             schemas={schemas}
             isLoading={loading ?? false}
             onChange={changePreferredSchema}

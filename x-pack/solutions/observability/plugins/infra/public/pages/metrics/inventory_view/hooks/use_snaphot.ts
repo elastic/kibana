@@ -22,17 +22,12 @@ export interface UseSnapshotRequest
 }
 
 export function useSnapshot(
-  props: UseSnapshotRequest,
+  { schema = 'ecs', ...props }: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
   const payload = useMemo(
-    () =>
-      JSON.stringify(
-        buildPayload({
-          ...props,
-        })
-      ),
-    [props]
+    () => JSON.stringify(buildPayload({ ...props, schema })),
+    [props, schema]
   );
 
   const { data, status, error, refetch } = useFetcher(

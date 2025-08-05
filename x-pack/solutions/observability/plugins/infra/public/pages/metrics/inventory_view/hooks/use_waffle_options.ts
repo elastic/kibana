@@ -10,7 +10,8 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
-import { DataSchemaFormat, type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import type {
   InventoryView,
@@ -69,7 +70,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
-    preferredSchema = DataSchemaFormat.ECS,
+    preferredSchema = 'ecs',
   } = savedView.attributes;
 
   return {
@@ -183,6 +184,7 @@ export const useWaffleOptions = () => {
         ...previous,
         preferredSchema,
         metric: DEFAULT_WAFFLE_OPTIONS_STATE.metric,
+        groupBy: DEFAULT_WAFFLE_OPTIONS_STATE.groupBy,
       }));
     },
     [setUrlState]
@@ -207,6 +209,8 @@ export const useWaffleOptions = () => {
 
   return {
     ...urlState,
+    preferredSchema:
+      urlState.preferredSchema === null ? ('ecs' as DataSchemaFormat) : urlState.preferredSchema,
     changeMetric,
     changeGroupBy,
     changeNodeType,

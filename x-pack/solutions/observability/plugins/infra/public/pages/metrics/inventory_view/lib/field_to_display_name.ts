@@ -30,6 +30,7 @@ export const fieldToName = (field: string) => {
     'host.name': i18n.translate('xpack.infra.groupByDisplayNames.hostName', {
       defaultMessage: 'Host',
     }),
+    'host.type': machineTypeName,
     'cloud.availability_zone': availabilityZoneName,
     'cloud.machine.type': machineTypeName,
     'cloud.project.id': i18n.translate('xpack.infra.groupByDisplayNames.projectID', {

@@ -7,7 +7,6 @@
 
 import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
@@ -91,7 +90,7 @@ export function useTimeline({
       accountId,
       region,
       includeTimeseries: true,
-      schema: preferredSchema ?? DataSchemaFormat.ECS,
+      schema: preferredSchema,
     },
     { sendRequestImmediately: false }
   );
