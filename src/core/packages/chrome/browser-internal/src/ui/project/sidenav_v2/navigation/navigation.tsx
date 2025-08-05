@@ -20,7 +20,7 @@ import type { IBasePath as BasePath } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { RedirectNavigationAppLinks } from './redirect_app_links';
-import { toNavigationItems } from './to_navigation_items';
+import { toNavigationItems, NavigationItems } from './to_navigation_items';
 
 export interface ChromeNavigationProps {
   // sidenav state
@@ -45,7 +45,7 @@ export interface ChromeNavigationProps {
 }
 
 export const Navigation = (props: ChromeNavigationProps) => {
-  const state = useNavigationState(props);
+  const state = useNavigationItems(props);
 
   if (!state) {
     return null;
@@ -70,20 +70,20 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationState = (
+const useNavigationItems = (
   props: Pick<ChromeNavigationProps, 'navigationTree$' | 'navLinks$' | 'activeNodes$'>
-) => {
+): NavigationItems | null => {
   const state$ = useMemo(
     () => combineLatest([props.navigationTree$, props.navLinks$, props.activeNodes$]),
     [props.navigationTree$, props.navLinks$, props.activeNodes$]
   );
   const state = useObservable(state$);
 
-  const memoizedState = useMemo(() => {
+  const memoizedItems = useMemo(() => {
     if (!state) return null;
     const [navigationTree, navLinks, activeNodes] = state;
     return toNavigationItems(navigationTree, navLinks, activeNodes);
   }, [state]);
 
-  return memoizedState;
+  return memoizedItems;
 };
