@@ -168,6 +168,8 @@ export const defaultConfig: ScoutServerConfig = {
       // configure security reponse header report-to settings to mimic MKI configuration
       `--csp.report_to=${JSON.stringify(['violations-endpoint'])}`,
       `--permissionsPolicy.report_to=${JSON.stringify(['violations-endpoint'])}`,
+      // Allow dynamic config overrides in tests
+      `--coreApp.allowDynamicConfigOverrides=true`,
     ],
   },
 };

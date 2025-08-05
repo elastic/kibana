@@ -127,6 +127,7 @@ export const RuleDetails = () => {
             error={baseErrors?.tags}
           >
             <EuiComboBox
+              isInvalid={!!baseErrors?.tags?.length}
               fullWidth
               noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}

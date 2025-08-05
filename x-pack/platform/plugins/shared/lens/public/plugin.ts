@@ -134,7 +134,7 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import type { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -363,7 +363,7 @@ export class LensPlugin {
 
       return {
         ...plugins,
-        attributeService: getLensAttributeService(coreStart, plugins),
+        attributeService: getLensAttributeService(plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         coreStart,
@@ -516,7 +516,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
-          attributeService: getLensAttributeService(coreStart, deps),
+          attributeService: getLensAttributeService(deps),
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });

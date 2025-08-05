@@ -62,6 +62,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -81,6 +82,7 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
+  alert = 'alert',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
@@ -687,7 +689,7 @@ export interface Installation {
   latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
-  previous_version?: string;
+  previous_version?: string | null;
 }
 
 export interface PackageUsageStats {
@@ -794,3 +796,27 @@ export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }
+
+// Experimental support for Otel integrations
+export interface OTelCollectorConfig {
+  extensions?: Record<OTelCollectorComponentID, any>;
+  receivers?: Record<OTelCollectorComponentID, any>;
+  processors?: Record<OTelCollectorComponentID, any>;
+  connectors?: Record<OTelCollectorComponentID, any>;
+  exporters?: Record<OTelCollectorComponentID, any>;
+  service?: {
+    extensions?: OTelCollectorComponentID[];
+    pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
+  };
+}
+
+export interface OTelCollectorPipeline {
+  receivers?: OTelCollectorComponentID[];
+  processors?: OTelCollectorComponentID[];
+  exporters?: OTelCollectorComponentID[];
+}
+
+export type OTelCollectorComponentID = string;
+
+export type OTelCollectorPipelineGroup = 'logs' | 'metrics' | 'traces';
+export type OTelCollectorPipelineID = OTelCollectorPipelineGroup | string;

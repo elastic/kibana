@@ -20,7 +20,7 @@ jobs:
       github.event.pull_request.draft == false
     steps:
       - name: Checkout kibana-operations
-        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: 'elastic/kibana-operations'
           ref: main

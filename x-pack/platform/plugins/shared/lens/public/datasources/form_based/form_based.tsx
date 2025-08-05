@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -240,7 +241,7 @@ export function getFormBasedDatasource({
 
     initialize(
       persistedState?: FormBasedPersistedState,
-      references?: SavedObjectReference[],
+      references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
       indexPatterns?: Record<string, IndexPattern>
@@ -868,9 +869,9 @@ export function getFormBasedDatasource({
     },
     isEqual: (
       persistableState1: FormBasedPersistedState,
-      references1: SavedObjectReference[],
+      references1: Reference[],
       persistableState2: FormBasedPersistedState,
-      references2: SavedObjectReference[]
+      references2: Reference[]
     ) =>
       isEqual(
         injectReferences(persistableState1, references1),

@@ -12,6 +12,7 @@ export enum SYNTHETICS_API_URLS {
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
   LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
+  TEST_NOW_MONITOR = '/api/synthetics/monitor/test',
 
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
@@ -19,7 +20,6 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
   SYNTHETICS_ENABLEMENT = '/internal/synthetics/service/enablement',
   RUN_ONCE_MONITOR = '/internal/synthetics/service/monitors/run_once',
-  TRIGGER_MONITOR = '/internal/synthetics/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',
   SYNTHETICS_PROJECT_APIKEY = '/internal/synthetics/service/api_key',
   SYNTHETICS_HAS_INTEGRATION_MONITORS = '/internal/synthetics/fleet/has_integration_monitors',

@@ -49,6 +49,8 @@ export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
 export const TAKE_ACTION_BTN = '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
+export const ACKNOWLDEGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
+
 export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';

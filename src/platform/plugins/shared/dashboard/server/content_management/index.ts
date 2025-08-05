@@ -26,6 +26,8 @@ export type {
   DashboardUpdateOut,
   DashboardUpdateOptions,
   DashboardOptions,
+  DashboardFilter,
+  DashboardQuery,
 } from './latest';
 
 export { DashboardStorage } from './dashboard_storage';

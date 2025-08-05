@@ -55,12 +55,16 @@ describe(
       );
       // ensure no ML jobs are started before the test
       machineLearningJobIds.forEach((j) => forceStopAndCloseJob({ jobId: j }));
+      cy.task('esArchiverLoad', { archiveName: 'auditbeat/hosts', type: 'platform' });
+    });
+
+    after(() => {
+      cy.task('esArchiverUnload', { archiveName: 'auditbeat/hosts', type: 'platform' });
     });
 
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverLoad', { archiveName: '../auditbeat/hosts', type: 'ftr' });
       setupMlModulesWithRetry({ moduleName: 'security_linux_v3' });
       forceStartDatafeeds({ jobIds: [jobId] });
       cy.task('esArchiverLoad', { archiveName: 'anomalies', type: 'ftr' });

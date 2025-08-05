@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler } from 'react';
+import type { MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -249,14 +249,6 @@ export type PanelSelectedNode = Pick<
 >;
 
 /** @public */
-export interface SideNavCompProps {
-  activeNodes: ChromeProjectNavigationNode[][];
-}
-
-/** @public */
-export type SideNavComponent = ComponentType<SideNavCompProps>;
-
-/** @public */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
@@ -440,10 +432,10 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
   /** Optional icon for the solution navigation to render in the select dropdown. */
   icon?: IconType;
-  /** React component to render in the side nav for the navigation */
-  sideNavComponent?: SideNavComponent;
   /** The page to navigate to when clicking on the Kibana (or custom) logo. */
   homePage?: LinkId;
+  /** data-test-subj attribute for the solution navigation. */
+  dataTestSubj?: string;
 }
 
 export type SolutionNavigationDefinitions = {

@@ -32,11 +32,7 @@ interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
 // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml
 const esServerArgsFromController = {
   es: [],
-  oblt: [
-    'xpack.apm_data.enabled=true',
-    // for ML, data frame analytics are not part of this project type
-    'xpack.ml.dfa.enabled=false',
-  ],
+  oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
   chat: [],
 };
@@ -82,7 +78,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../serverless/config.base.ts')
+      require.resolve('../../serverless/shared/config.base.ts')
     );
 
     return {
@@ -119,8 +115,6 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
-          // Enable custom roles
-          '--xpack.security.roleManagementEnabled=true',
           ...(options.serverlessProject === 'oblt'
             ? [
                 // defined in MKI control plane. Necessary for Synthetics app testing

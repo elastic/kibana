@@ -20,6 +20,8 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
@@ -55,6 +57,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -87,6 +90,7 @@ import {
   InputNotFoundError,
   StreamNotFoundError,
   FleetNotFoundError,
+  PackageRollbackError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -138,7 +142,9 @@ import type {
   PackagePolicyClientGetByIdsOptions,
   PackagePolicyClientGetOptions,
   PackagePolicyClientListIdsOptions,
+  PackagePolicyClientRollbackOptions,
   PackagePolicyService,
+  RollbackResult,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
@@ -423,7 +429,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgInfo,
         enrichedPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        { otelcolSuffixId: packagePolicyId }
       );
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -636,7 +643,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 pkgInfo,
                 packagePolicy.vars || {},
                 inputs,
-                assetsMap
+                assetsMap,
+                { otelcolSuffixId: id }
               )
             : inputs;
 
@@ -679,7 +687,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const { saved_objects: createdObjects } = await soClient
       .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
-      .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create pacakge policies'));
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -764,7 +772,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
       });
       inputs = pkgInfo
-        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
+            otelcolSuffixId: id,
+          })
         : inputs;
 
       elasticsearch = pkgInfo?.elasticsearch;
@@ -983,7 +993,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 
@@ -1044,7 +1054,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
       kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND ${kuery}`
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
         : `${savedObjectType}.attributes.latest_revision:true`
     );
 
@@ -1200,11 +1210,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
+
       inputs = _compilePackagePolicyInputs(
         pkgInfo,
         restOfPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        { otelcolSuffixId: id }
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1585,7 +1597,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               pkgInfo,
               restOfPackagePolicy.vars || {},
               inputs,
-              assetsMap
+              assetsMap,
+              { otelcolSuffixId: id }
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1694,7 +1707,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // Update package policies SO.
     const { saved_objects: updatedPolicies } = await soClient
       .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate)
-      .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed]`));
+      .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
 
     // Bump revision of all associated agent policies (old and new)
     const associatedPolicyIds = new Set([
@@ -2487,6 +2500,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         )}]`
     );
 
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     return createSoFindIterable<{}>({
       soClient,
       findRequest: {
@@ -2495,7 +2515,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField: 'created_at',
         sortOrder: 'asc',
         fields: [],
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces,
       },
       resultsMapper: (data) => {
@@ -2528,6 +2548,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const namespaces = isSpacesEnabled ? spaceIds : undefined;
 
+    const filter = _normalizePackagePolicyKuery(
+      savedObjectType,
+      kuery
+        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
+        : `${savedObjectType}.attributes.latest_revision:true`
+    );
+
     return createSoFindIterable<PackagePolicySOAttributes>({
       soClient,
       findRequest: {
@@ -2535,7 +2562,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortField,
         sortOrder,
         perPage,
-        filter: kuery ? _normalizePackagePolicyKuery(savedObjectType, kuery) : undefined,
+        filter,
         namespaces,
       },
       resultsMapper(data) {
@@ -2551,6 +2578,213 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       },
     });
+  }
+
+  public async getPackagePolicySavedObjects(
+    soClient: SavedObjectsClientContract,
+    options: PackagePolicyClientRollbackOptions = {}
+  ): Promise<SavedObjectsFindResponse<PackagePolicySOAttributes, unknown>> {
+    const { perPage = SO_SEARCH_LIMIT, spaceIds } = options;
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled ? spaceIds : undefined;
+
+    const packagePolicies = await soClient
+      .find<PackagePolicySOAttributes>({
+        ...(options || {}),
+        type: savedObjectType,
+        perPage,
+        namespaces,
+      })
+      .catch(catchAndSetErrorStackTrace.withMessage('failed to find package policies'));
+
+    for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'find',
+        id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
+        savedObjectType,
+      });
+    }
+
+    return packagePolicies;
+  }
+
+  public async rollback(
+    soClient: SavedObjectsClientContract,
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ): Promise<RollbackResult> {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    // Need to break down policies by namespace for bulk operations.
+    // Create temporary SOs with id `id:copy` to allow cancellation in case rollback fails.
+    const policiesToCreate: Record<
+      string,
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    > = {};
+    const policiesToUpdate: Record<
+      string,
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    > = {};
+    const previousVersionPolicies: Record<
+      string,
+      Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    > = {};
+
+    packagePolicies.forEach((policy) => {
+      const namespace = policy.namespaces?.[0] || policy.attributes.namespace;
+      if (namespace) {
+        if (!policy.id.endsWith(':prev')) {
+          const previousRevision = packagePolicies.find((p) => p.id === `${policy.id}:prev`);
+          if (previousRevision?.attributes) {
+            if (!policiesToCreate[namespace]) {
+              policiesToCreate[namespace] = [];
+            }
+            policiesToCreate[namespace].push({
+              ...policy,
+              id: `${policy.id}:copy`,
+            });
+            if (!policiesToUpdate[namespace]) {
+              policiesToUpdate[namespace] = [];
+            }
+            policiesToUpdate[namespace].push({
+              ...policy,
+              attributes: {
+                ...previousRevision?.attributes,
+                revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
+                latest_revision: true,
+              },
+            });
+          }
+        } else {
+          if (!previousVersionPolicies[namespace]) {
+            previousVersionPolicies[namespace] = [];
+          }
+          previousVersionPolicies[namespace].push(policy);
+        }
+      }
+    });
+
+    // Create temporary saved objects.
+    for (const [namespace, policies] of Object.entries(policiesToCreate)) {
+      await soClient
+        .bulkCreate<PackagePolicySOAttributes>(policies, { namespace })
+        .catch(catchAndSetErrorStackTrace.withMessage('failed to bulk create package policies'));
+      for (const policy of policies) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'create',
+          id: policy.id,
+          savedObjectType,
+        });
+      }
+    }
+
+    // Update policies with previous revision data.
+    for (const [namespace, policies] of Object.entries(policiesToUpdate)) {
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(policies, { namespace })
+        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
+      for (const policy of policies) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: policy.id,
+          savedObjectType,
+        });
+      }
+    }
+
+    return {
+      updatedPolicies: policiesToUpdate,
+      copiedPolicies: policiesToCreate,
+      previousVersionPolicies,
+    };
+  }
+
+  public async restoreRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ) {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const { copiedPolicies } = rollbackResult;
+
+    for (const [namespace, policies] of Object.entries(copiedPolicies)) {
+      // Update policies with copied data.
+      const policiesToUpdate = policies.map((policy) => ({
+        ...policy,
+        id: policy.id.replace(':copy', ''),
+      }));
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate, { namespace })
+        .catch(catchAndSetErrorStackTrace.withMessage(`Saved objects bulk update failed`));
+      for (const policy of policies) {
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: policy.id.replace(':copy', ''),
+          savedObjectType,
+        });
+      }
+
+      // Delete temporary saved objects.
+      await this.deleteRollbackSavedObjects(soClient, namespace, policies);
+    }
+  }
+
+  public async cleanupRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ) {
+    const { copiedPolicies, previousVersionPolicies } = rollbackResult;
+    // Delete temporary saved objects.
+    for (const [namespace, policies] of Object.entries(copiedPolicies)) {
+      await this.deleteRollbackSavedObjects(soClient, namespace, policies);
+    }
+    // Delete previous revisions saved objects.
+    for (const [namespace, policies] of Object.entries(previousVersionPolicies)) {
+      await this.deleteRollbackSavedObjects(soClient, namespace, policies);
+    }
+  }
+
+  private async deleteRollbackSavedObjects(
+    soClient: SavedObjectsClientContract,
+    namespace: string,
+    policies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+  ) {
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const objects = policies.map((policy) => ({ id: policy.id, type: savedObjectType }));
+
+    const { statuses } = await soClient
+      .bulkDelete(objects, { force: true, namespace })
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          `Bulk delete of package policies [${policies.map((p) => p.id).join(', ')}] failed`
+        )
+      );
+    for (const policy of policies) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'delete',
+        id: policy.id,
+        savedObjectType,
+      });
+    }
+    if (statuses.some((status) => !status.success)) {
+      throw new PackageRollbackError(
+        `Failed to delete some previous package policy revisions: ${statuses
+          .filter((status) => !status.success)
+          .map((status) => status.error?.message || 'Unknown error')
+          .join(', ')}`
+      );
+    }
+  }
+
+  public async bumpAgentPolicyRevisionAfterRollback(
+    soClient: SavedObjectsClientContract,
+    rollbackResult: RollbackResult
+  ) {
+    const { updatedPolicies } = rollbackResult;
+    for (const [namespace, policies] of Object.entries(updatedPolicies)) {
+      const agentPolicyIds = policies.flatMap((policy) => policy.attributes.policy_ids || []);
+      await agentPolicyService.bumpAgentPoliciesByIds(agentPolicyIds, {}, namespace);
+    }
   }
 }
 
@@ -2732,15 +2966,23 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  opts?: { otelcolSuffixId?: string }
 ): PackagePolicyInput[] {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   return inputs.map((input) => {
-    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
-    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
+    if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+      return {
+        ...input,
+        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
+        compiled_input: [],
+      };
+    }
     return {
       ...input,
-      compiled_input: compiledInput,
-      streams: compiledStreams,
+      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
+      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
     };
   });
 }
@@ -2798,10 +3040,11 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  otelcolSuffixId?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
   );
 }
 
@@ -2867,7 +3110,8 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  otelcolSuffixId?: string
 ) {
   let stream = streamIn;
 
@@ -2925,7 +3169,9 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString()
+    pkgStreamTemplate.buffer.toString(),
+    input.type,
+    otelcolSuffixId
   );
 
   stream.compiled_stream = yaml;

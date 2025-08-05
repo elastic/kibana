@@ -16,13 +16,7 @@ import type {
   AlertsTableImperativeApi,
   AlertsTableProps,
 } from '@kbn/response-ops-alerts-table/types';
-import {
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_SEVERITY,
-  AlertConsumers,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_SEVERITY, AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   EuiDataGridProps,
@@ -50,7 +44,7 @@ export const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
   { defaultMessage: 'Timestamp' }
 );
-export const RELATION_INTEGRATION_COLUMN = i18n.translate(
+export const RELATED_INTEGRATION_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.relatedIntegrationName',
   { defaultMessage: 'Integration' }
 );
@@ -69,8 +63,8 @@ export const columns: EuiDataGridProps['columns'] = [
     displayAsText: TIMESTAMP_COLUMN,
   },
   {
-    id: ALERT_RULE_PARAMETERS,
-    displayAsText: RELATION_INTEGRATION_COLUMN,
+    id: 'signal.rule.rule_id',
+    displayAsText: RELATED_INTEGRATION_COLUMN,
   },
   {
     id: ALERT_SEVERITY,

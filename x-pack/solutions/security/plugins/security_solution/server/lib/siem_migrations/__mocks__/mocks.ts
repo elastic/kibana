@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { createDashboardMigrationClient } from '../dashboards/__mocks__/mocks';
 import { createRuleMigrationClient } from '../rules/__mocks__/mocks';
 
 export const mockSetup = jest.fn().mockResolvedValue(undefined);
 export const mockCreateClient = jest.fn().mockReturnValue(createRuleMigrationClient());
+export const mockCreateDashboardsClient = jest
+  .fn()
+  .mockReturnValue(createDashboardMigrationClient());
 export const mockStop = jest.fn();
 
 export const siemMigrationsServiceMock = {
@@ -16,7 +20,9 @@ export const siemMigrationsServiceMock = {
     jest.fn().mockImplementation(() => ({
       setup: mockSetup,
       createRulesClient: mockCreateClient,
+      createDashboardsClient: mockCreateDashboardsClient,
       stop: mockStop,
     })),
   createRulesClient: () => createRuleMigrationClient(),
+  createDashboardsClient: mockCreateDashboardsClient,
 };

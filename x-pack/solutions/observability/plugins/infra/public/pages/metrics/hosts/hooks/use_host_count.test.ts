@@ -11,21 +11,28 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import type * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import { useHostCount } from './use_host_count';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 
 jest.mock('../../../../hooks/use_fetcher');
 jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../containers/plugin_config_context');
 jest.mock('./use_unified_search');
 
 describe('useHostCount', () => {
   const useKibanaContextForPluginMock = useKibanaContextForPlugin as jest.MockedFunction<
     typeof useKibanaContextForPlugin
   >;
+  const usePluginConfigMock = usePluginConfig as jest.MockedFunction<typeof usePluginConfig>;
 
   const telemetryMock = { reportHostsViewTotalHostCountRetrieved: jest.fn() };
 
   useKibanaContextForPluginMock.mockReturnValue({
     services: { telemetry: telemetryMock },
   } as unknown as ReturnType<typeof useKibanaContextForPluginHook.useKibanaContextForPlugin>);
+
+  usePluginConfigMock.mockReturnValue({
+    featureFlags: { hostOtelEnabled: false },
+  } as unknown as ReturnType<typeof usePluginConfig>);
 
   const useUnifiedSearchContextMock =
     useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<

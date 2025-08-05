@@ -12,7 +12,7 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation, console } = getPageObjects([
+  const { common, solutionNavigation } = getPageObjects([
     'common',
     'solutionNavigation',
     'console',
@@ -75,7 +75,6 @@ export default function searchSolutionNavigation({
         deepLinkId: AppDeepLinkId;
         breadcrumbs: string[];
         pageTestSubject: string;
-        extraChecks?: Array<() => Promise<void>>;
       }> = [
         {
           deepLinkId: 'discover',
@@ -95,7 +94,7 @@ export default function searchSolutionNavigation({
         {
           deepLinkId: 'searchPlayground',
           breadcrumbs: ['Build', 'Playground'],
-          pageTestSubject: 'svlPlaygroundPage',
+          pageTestSubject: 'playgroundsListPage',
         },
         {
           deepLinkId: 'enterpriseSearchContent:connectors',
@@ -121,15 +120,6 @@ export default function searchSolutionNavigation({
           deepLinkId: 'dev_tools',
           breadcrumbs: ['Dev Tools'],
           pageTestSubject: 'console',
-          extraChecks: [
-            async () => {
-              if (await console.isTourPopoverOpen()) {
-                // Skip the tour if it's open. This will prevent the tour popover from staying on the page
-                // and blocking breadcrumbs for other tests.
-                await console.clickSkipTour();
-              }
-            },
-          ],
         },
       ];
 
@@ -143,11 +133,6 @@ export default function searchSolutionNavigation({
         });
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
-        if (testCase.extraChecks !== undefined) {
-          for (const check of testCase.extraChecks) {
-            await check();
-          }
         }
       }
 

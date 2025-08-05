@@ -206,6 +206,7 @@ export function ESQLEditor({
         errors={errors}
         suggestsLimitedColumns={suggestsLimitedColumns}
         isVisualizationLoading={isVisualizationLoading}
+        setIsVisualizationLoading={setIsVisualizationLoading}
         esqlVariables={esqlVariables}
         closeFlyout={closeFlyout}
         panelId={panelId}
@@ -250,6 +251,7 @@ type InnerEditorProps = Simplify<
     ) => Promise<void>;
     errors: Error[];
     isVisualizationLoading: boolean | undefined;
+    setIsVisualizationLoading: (status: boolean) => void;
     suggestsLimitedColumns: boolean;
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
@@ -267,6 +269,7 @@ function InnerESQLEditor({
   closeFlyout,
   setQuery,
   isVisualizationLoading,
+  setIsVisualizationLoading,
   prevQuery,
   runQuery,
   esqlVariables,
@@ -300,7 +303,7 @@ function InnerESQLEditor({
         onTextLangQuerySubmit={async (q, a) => {
           // do not run the suggestions if the query is the same as the previous one
           if (q && !isEqual(q, prevQuery.current)) {
-            // setIsVisualizationLoading(true);
+            setIsVisualizationLoading(true);
             await runQuery(q, a);
           }
         }}

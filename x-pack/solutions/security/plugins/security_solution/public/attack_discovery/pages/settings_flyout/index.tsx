@@ -86,7 +86,7 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
 
   const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
     ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-    false
+    true
   );
 
   const [settings, setSettings] = useState<AlertsSelectionSettings>({

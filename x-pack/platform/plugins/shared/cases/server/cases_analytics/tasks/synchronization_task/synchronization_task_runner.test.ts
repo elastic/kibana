@@ -75,6 +75,8 @@ describe('SynchronizationTaskRunner', () => {
     esClient.reindex.mockResolvedValue({
       task: esReindexTaskId,
     });
+
+    esClient.indices.exists.mockResolvedValue(true);
   });
 
   afterAll(() => {
@@ -245,29 +247,6 @@ describe('SynchronizationTaskRunner', () => {
     });
   });
 
-  it('returns the previous state if the previous task is still running', async () => {
-    esClient.tasks.get.mockResolvedValueOnce({
-      completed: false,
-      task: {} as TasksTaskInfo,
-    });
-
-    const getESClient = async () => esClient;
-
-    taskRunner = new SynchronizationTaskRunner({
-      logger,
-      getESClient,
-      taskInstance,
-      analyticsConfig,
-    });
-
-    const result = await taskRunner.run();
-
-    expect(esClient.reindex).not.toBeCalled();
-    expect(result).toEqual({
-      state: taskInstance.state,
-    });
-  });
-
   it('reindexes when the previous sync task failed', async () => {
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
@@ -344,6 +323,54 @@ describe('SynchronizationTaskRunner', () => {
         esReindexTaskId,
       },
     });
+  });
+
+  it('returns the previous state if the previous task is still running', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: false,
+      task: {} as TasksTaskInfo,
+    });
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toEqual({
+      state: taskInstance.state,
+    });
+  });
+
+  it('skips execution if the index does not exist', async () => {
+    esClient.indices.exists.mockResolvedValueOnce(false);
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.cluster.health).not.toBeCalled();
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toBe(undefined);
+
+    expect(logger.error).not.toBeCalled();
+    expect(logger.debug).toBeCalledWith(
+      '[.internal.cases] Destination index does not exist, skipping synchronization task.',
+      { tags: ['cai-synchronization', '.internal.cases'] }
+    );
   });
 
   describe('Error handling', () => {

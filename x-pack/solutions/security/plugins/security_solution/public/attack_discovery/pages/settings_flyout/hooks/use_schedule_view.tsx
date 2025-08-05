@@ -36,7 +36,7 @@ export const useScheduleView = (): UseScheduleView => {
 
   const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
     ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-    false
+    true
   );
 
   // showing / hiding the flyout:

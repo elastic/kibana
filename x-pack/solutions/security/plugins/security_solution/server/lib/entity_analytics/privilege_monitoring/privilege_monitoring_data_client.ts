@@ -18,11 +18,12 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { merge } from 'lodash';
+import { merge, uniq } from 'lodash';
 import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateMonitoringEntitySource } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
@@ -40,7 +41,11 @@ import {
   type EngineComponentResource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { ApiKeyManager } from './auth/api_key';
-import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task';
+import {
+  startPrivilegeMonitoringTask,
+  removePrivilegeMonitoringTask,
+  scheduleNow,
+} from './tasks/privilege_monitoring_task';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import {
   PRIVILEGED_MONITOR_IMPORT_USERS_INDEX_MAPPING,
@@ -61,10 +66,10 @@ import {
 import { batchPartitions } from '../shared/streams/batching';
 import { queryExistingUsers } from './users/query_existing_users';
 import { bulkUpsertBatch } from './users/bulk/upsert_batch';
-import type { SoftDeletionResults } from './users/soft_delete_omitted_users';
+
 import { softDeleteOmittedUsers } from './users/soft_delete_omitted_users';
 import { privilegedUserParserTransform } from './users/privileged_user_parse_transform';
-import type { Accumulator } from './users/bulk/utils';
+
 import { accumulateUpsertResults } from './users/bulk/utils';
 import type { PrivMonBulkUser, PrivMonUserSource } from './types';
 import {
@@ -75,6 +80,7 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
+import type { BulkProcessingResults } from './users/bulk/types';
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
@@ -122,17 +128,9 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring for each namespace
-    const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
-      name: 'default-monitoring-index',
-    });
-    this.log(
-      'debug',
-      `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-    );
+
+    await this.createOrUpdateDefaultDataSource();
+
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await this.createIngestPipelineIfDoesNotExist();
@@ -186,8 +184,48 @@ export class PrivilegeMonitoringDataClient {
     return descriptor;
   }
 
+  async delete(deleteData = false): Promise<{ deleted: boolean }> {
+    this.log('info', 'Deleting privilege monitoring engine');
+
+    await this.engineClient.delete();
+
+    if (deleteData) {
+      await this.esClient.indices.delete(
+        {
+          index: this.getIndex(),
+        },
+        {
+          ignore: [404],
+        }
+      );
+    }
+    if (!this.opts.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+    await removePrivilegeMonitoringTask({
+      logger: this.opts.logger,
+      namespace: this.opts.namespace,
+      taskManager: this.opts.taskManager,
+    });
+
+    await this.monitoringIndexSourceClient
+      .findAll({})
+      .then((sos) => sos.forEach((so) => this.monitoringIndexSourceClient.delete(so.id)));
+
+    return { deleted: true };
+  }
+
   async getEngineStatus() {
-    const engineDescriptor = await this.engineClient.get();
+    const findResponse = await this.engineClient.find();
+    const engineDescriptor =
+      findResponse.total > 0 ? findResponse.saved_objects[0].attributes : undefined;
+
+    if (!engineDescriptor) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
 
     return {
       status: engineDescriptor.status,
@@ -357,35 +395,45 @@ export class PrivilegeMonitoringDataClient {
       skipEmptyLines: true,
     });
 
-    const res = Readable.from(stream.pipe(csvStream))
+    const batches = Readable.from(stream.pipe(csvStream))
       .pipe(privilegedUserParserTransform())
-      .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
-      .map(queryExistingUsers(this.esClient, this.getIndex()))
-      .map(bulkUpsertBatch(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .reduce(accumulateUpsertResults, {
-        users: [],
-        errors: [],
-        failed: 0,
-        successful: 0,
-      } satisfies Accumulator)
+      .pipe(batchPartitions(100));
 
-      .then(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
-      .then((results: SoftDeletionResults) => {
-        return {
-          errors: results.updated.errors.concat(results.deleted.errors),
-          stats: {
-            failed: results.updated.failed + results.deleted.failed,
-            successful: results.updated.successful + results.deleted.successful,
-            total:
-              results.updated.failed +
-              results.updated.successful +
-              results.deleted.failed +
-              results.deleted.successful,
-          },
-        };
-      });
+    let results: BulkProcessingResults = {
+      users: [],
+      errors: [],
+      failed: 0,
+      successful: 0,
+    };
+    for await (const batch of batches) {
+      const usrs = await queryExistingUsers(this.esClient, this.getIndex())(batch);
+      const upserted = await bulkUpsertBatch(this.esClient, this.getIndex(), {
+        flushBytes,
+        retries,
+      })(usrs);
+      results = accumulateUpsertResults(
+        { users: [], errors: [], failed: 0, successful: 0 },
+        upserted
+      );
+    }
 
-    return res;
+    const softDeletedResults = await softDeleteOmittedUsers(this.esClient, this.getIndex(), {
+      flushBytes,
+      retries,
+    })(results);
+
+    return {
+      errors: softDeletedResults.updated.errors.concat(softDeletedResults.deleted.errors),
+      stats: {
+        failed: softDeletedResults.updated.failed + softDeletedResults.deleted.failed,
+        successful: softDeletedResults.updated.successful + softDeletedResults.deleted.successful,
+        total:
+          softDeletedResults.updated.failed +
+          softDeletedResults.updated.successful +
+          softDeletedResults.deleted.failed +
+          softDeletedResults.deleted.successful,
+      },
+    };
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
@@ -480,7 +528,7 @@ export class PrivilegeMonitoringDataClient {
     this.log('debug', `Found ${allStaleUsers.length} stale users across all index sources.`);
     if (allStaleUsers.length > 0) {
       const ops = this.bulkOperationsForSoftDeleteUsers(allStaleUsers, this.getIndex());
-      await this.esClient.bulk({ body: ops });
+      await this.esClient.bulk({ body: ops, refresh: true });
     }
   }
 
@@ -508,7 +556,8 @@ export class PrivilegeMonitoringDataClient {
     indexName: string;
     kuery?: string | unknown;
   }): Promise<string[]> {
-    const batchUsernames: string[] = [];
+    // let batchUniqueUsernames: string[] = [];
+    const allUsernames: string[] = []; // Collect all usernames across batches
     let searchAfter: SortResults | undefined;
     const batchSize = 100;
 
@@ -524,13 +573,18 @@ export class PrivilegeMonitoringDataClient {
       const hits = response.hits.hits;
       if (hits.length === 0) break;
 
-      // Collect usernames from the hits
-      for (const hit of hits) {
-        const username = hit._source?.user?.name;
-        if (username) batchUsernames.push(username);
-      }
+      const batchUsernames = hits
+        .map((hit) => hit._source?.user?.name)
+        .filter((username): username is string => !!username);
+      allUsernames.push(...batchUsernames); // Collect usernames from this batch
+      const batchUniqueUsernames = uniq(batchUsernames); // Ensure uniqueness within the batch
 
-      const existingUserRes = await this.getMonitoredUsers(batchUsernames);
+      this.log(
+        'debug',
+        `Found ${batchUniqueUsernames.length} unique usernames in ${batchUsernames.length} hits.`
+      );
+
+      const existingUserRes = await this.getMonitoredUsers(batchUniqueUsernames);
 
       const existingUserMap = new Map<string, string | undefined>();
       for (const hit of existingUserRes.hits.hits) {
@@ -539,25 +593,25 @@ export class PrivilegeMonitoringDataClient {
         if (username) existingUserMap.set(username, hit._id);
       }
 
-      const usersToWrite: PrivMonBulkUser[] = batchUsernames.map((username) => ({
+      const usersToWrite: PrivMonBulkUser[] = batchUniqueUsernames.map((username) => ({
         username,
         indexName,
         existingUserId: existingUserMap.get(username),
       }));
 
-      if (usersToWrite.length === 0) return batchUsernames;
+      if (usersToWrite.length === 0) return batchUniqueUsernames;
 
       const ops = this.buildBulkOperationsForUsers(usersToWrite, this.getIndex());
       this.log('debug', `Executing bulk operations for ${usersToWrite.length} users`);
       try {
         this.log('debug', `Bulk ops preview:\n${JSON.stringify(ops, null, 2)}`);
-        await this.esClient.bulk({ body: ops });
+        await this.esClient.bulk({ body: ops, refresh: true });
       } catch (error) {
         this.log('error', `Error executing bulk operations: ${error}`);
       }
       searchAfter = hits[hits.length - 1].sort;
     }
-    return batchUsernames;
+    return uniq(allUsernames); // Return all unique usernames collected across batches
   }
 
   private async findStaleUsersForIndex(
@@ -731,6 +785,146 @@ export class PrivilegeMonitoringDataClient {
       sort: [{ 'user.name': 'asc' }],
       search_after: searchAfter,
       query,
+    });
+  }
+
+  private createOrUpdateDefaultDataSource = async () => {
+    const sourceName = `default-monitoring-index-${this.opts.namespace}`;
+
+    const defaultIndexSource: CreateMonitoringEntitySource = {
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
+      name: sourceName,
+    };
+
+    const existingSources = await this.monitoringIndexSourceClient.find({
+      name: sourceName,
+    });
+
+    if (existingSources.saved_objects.length > 0) {
+      this.log('info', 'Default index source already exists, updating it.');
+      const existingSource = existingSources.saved_objects[0];
+      try {
+        await this.monitoringIndexSourceClient.update({
+          id: existingSource.id,
+          ...defaultIndexSource,
+        });
+      } catch (e) {
+        this.log(
+          'error',
+          `Failed to update default index source for privilege monitoring: ${e.message}`
+        );
+        this.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to update default index source for privilege monitoring',
+          e
+        );
+      }
+    } else {
+      this.log('info', 'Creating default index source for privilege monitoring.');
+
+      try {
+        const indexSourceDescriptor = this.monitoringIndexSourceClient.create(defaultIndexSource);
+
+        this.log(
+          'debug',
+          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+        );
+      } catch (e) {
+        this.log(
+          'error',
+          `Failed to create default index source for privilege monitoring: ${e.message}`
+        );
+        this.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to create default index source for privilege monitoring',
+          e
+        );
+      }
+    }
+  };
+
+  public async disable() {
+    this.log('info', 'Disabling Privileged Monitoring Engine');
+    // Check the current status of the engine
+    const currentEngineStatus = await this.getEngineStatus();
+    if (currentEngineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      this.log(
+        'info',
+        'Privilege Monitoring Engine is not in STARTED state, skipping disable operation'
+      );
+      return {
+        status: currentEngineStatus.status,
+        error: null,
+      };
+    }
+    try {
+      // 1. Remove the privileged user monitoring task
+      if (!this.opts.taskManager) {
+        throw new Error('Task Manager is not available');
+      }
+      this.log('debug', 'Disabling Privileged Monitoring Engine: removing task');
+      await removePrivilegeMonitoringTask({
+        logger: this.opts.logger,
+        namespace: this.opts.namespace,
+        taskManager: this.opts.taskManager,
+      });
+
+      // 2. Update status in Saved Objects
+      this.log(
+        'debug',
+        'Disabling Privileged Monitoring Engine: Updating status to DISABLED in Saved Objects'
+      );
+      await this.engineClient.updateStatus(PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Privilege Monitoring Engine disabled'
+      );
+      this.log('info', 'Privileged Monitoring Engine disabled successfully');
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.DISABLED,
+        error: null,
+      };
+    } catch (e) {
+      const msg = `Failed to disable Privileged Monitoring Engine: ${e.message}`;
+      this.log('error', msg);
+
+      this.audit(
+        PrivilegeMonitoringEngineActions.DISABLE,
+        EngineComponentResourceEnum.privmon_engine,
+        'Failed to disable Privileged Monitoring Engine',
+        e
+      );
+      throw new Error(msg);
+    }
+  }
+
+  public async scheduleNow() {
+    if (!this.opts.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+    const engineStatus = await this.getEngineStatus();
+    if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+      throw new Error(
+        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}.`
+      );
+    }
+
+    this.audit(
+      PrivilegeMonitoringEngineActions.SCHEDULE_NOW,
+      EngineComponentResourceEnum.privmon_engine,
+      'Privilege Monitoring Engine scheduled for immediate run'
+    );
+
+    return scheduleNow({
+      taskManager: this.opts.taskManager,
+      namespace: this.opts.namespace,
+      logger: this.opts.logger,
     });
   }
 }
