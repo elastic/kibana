@@ -48,10 +48,9 @@ const readServerlessRoles = (
 ) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
-    const rolesResourcePath =
-      productTier
-        ? resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml')
-        : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+    const rolesResourcePath = productTier
+      ? resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml')
+      : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
 
     return readRolesFromResource(rolesResourcePath);
   } else {

@@ -124,12 +124,12 @@ export const serverless: Command = {
     }
 
     if (options.productTier) {
-      if(options.productTier === 'search_ai_lake' && options.projectType !== 'security') {
+      if (options.productTier === 'search_ai_lake' && options.projectType !== 'security') {
         throw createCliError(
           `--productTier flag 'search_ai_lake' can only be used with projectType 'security'`
         );
       }
-      if(!ServerlessProductTiers.has(options.productTier)){
+      if (!ServerlessProductTiers.has(options.productTier)) {
         throw createCliError(
           `--productTier flag and must be a string: ${supportedProductTiersStr}`
         );
