@@ -7,6 +7,7 @@
 
 import { cloudConnectorService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
+import { appContextService } from '../../services/app_context';
 
 export interface CreateCloudConnectorRequest {
   name: string;
@@ -21,11 +22,17 @@ export const createCloudConnectorHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+  const logger = appContextService
+    .getLogger()
+    .get('[Cloud Connector API] createCloudConnectorHandler');
 
   try {
+    logger.info('Creating cloud connector');
     const cloudConnector = await cloudConnectorService.create(internalSoClient, request.body);
+    logger.info('Successfully created cloud connector');
     return response.ok({ body: cloudConnector });
   } catch (error) {
+    logger.error('Failed to create cloud connector', error.message);
     return response.customError({
       statusCode: 400,
       body: {
@@ -42,15 +49,21 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
   const { page, perPage } = request.query;
+  const logger = appContextService
+    .getLogger()
+    .get('[Cloud Connector API] getCloudConnectorsHandler');
 
   try {
+    logger.info('Getting cloud connectors list');
     const cloudConnectors = await cloudConnectorService.getList(internalSoClient, {
       page: page ? parseInt(page, 10) : undefined,
       perPage: perPage ? parseInt(perPage, 10) : undefined,
     });
 
+    logger.info('Successfully retrieved cloud connectors list');
     return response.ok({ body: cloudConnectors });
   } catch (error) {
+    logger.error('Failed to get cloud connectors list', error.message);
     return response.customError({
       statusCode: 400,
       body: {

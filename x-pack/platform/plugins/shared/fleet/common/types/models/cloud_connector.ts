@@ -23,7 +23,6 @@ export interface CloudConnectorVars {
   external_id?: {
     type?: string;
     value: CloudConnectorSecretVar;
-    frozen?: boolean;
   };
   // Azure variables
   client_id?: PackagePolicyConfigRecordEntry;

@@ -26,7 +26,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
                 FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
               ],
             },
@@ -44,9 +44,34 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: {
           request: {
             body: schema.object({
-              name: schema.string(),
-              cloudProvider: schema.string(),
-              vars: schema.recordOf(schema.string(), schema.any()),
+              name: schema.string({
+                minLength: 1,
+                maxLength: 255,
+              }),
+              cloudProvider: schema.oneOf([
+                schema.literal('AWS'),
+                schema.literal('Azure'),
+                schema.literal('GCP'),
+              ]),
+              vars: schema.recordOf(
+                schema.string({ minLength: 1, maxLength: 100 }),
+                schema.oneOf([
+                  schema.string({ maxLength: 1000 }),
+                  schema.number(),
+                  schema.boolean(),
+                  schema.object({
+                    type: schema.string({ maxLength: 50 }),
+                    value: schema.oneOf([
+                      schema.string({ maxLength: 1000 }),
+                      schema.object({
+                        isSecretRef: schema.boolean(),
+                        id: schema.string({ maxLength: 255 }),
+                      }),
+                    ]),
+                    frozen: schema.maybe(schema.boolean()),
+                  }),
+                ])
+              ),
             }),
           },
           response: {

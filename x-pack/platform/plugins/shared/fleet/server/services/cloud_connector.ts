@@ -35,7 +35,9 @@ export interface CloudConnectorServiceInterface {
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
   protected getLogger(...childContextPaths: string[]): Logger {
-    return appContextService.getLogger().get('CloudConnectorService', ...childContextPaths);
+    return appContextService
+      .getLogger()
+      .get('[Cloud Connector API] CloudConnectorService', ...childContextPaths);
   }
 
   async create(
@@ -47,13 +49,11 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     logger.debug('Creating cloud connector');
 
     try {
-      const templateName = packagePolicy?.inputs?.[0]?.policy_template || 'unknown';
-      logger.info(
-        `Creating cloud connector for integration package: ${packagePolicy?.package?.name} package policy id ${packagePolicy?.id}, template: ${templateName}`
-      );
+      logger.info('Creating cloud connector');
 
       // Extract cloud variables from package policy
       const { cloudProvider, vars, name } = this.extractCloudVars(cloudConnector, packagePolicy);
+
       if (!vars || Object.keys(vars).length === 0) {
         throw new Error('Package policy must contain cloud provider variables');
       }
@@ -73,9 +73,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         cloudConnectorAttributes
       );
 
-      logger.info(
-        `Successfully created cloud connector for integration package: ${packagePolicy?.package?.name} package policy id ${packagePolicy?.id}, template: ${templateName}`
-      );
+      logger.info('Successfully created cloud connector');
 
       return {
         id: savedObject.id,
@@ -87,11 +85,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         updated_at: savedObject.attributes.updated_at,
       };
     } catch (error) {
-      const templateName = packagePolicy?.inputs?.[0]?.policy_template || 'unknown';
-      logger.error(
-        `Failed to create cloud connector for package: ${packagePolicy?.package?.name}, template: ${templateName}`,
-        error.message
-      );
+      logger.error('Failed to create cloud connector', error.message);
       throw error;
     }
   }
@@ -139,13 +133,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   } {
     const logger = this.getLogger('extractCloudVars');
     const vars = cloudConnector?.vars || {};
-    const templateName = packagePolicy?.inputs?.[0]?.policy_template || 'unknown';
     const roleArn = vars.role_arn?.value || vars['aws.role_arn']?.value;
 
     if (!roleArn) {
-      logger.error(
-        `AWS package policy must contain role_arn variable. Package Policy ID: ${packagePolicy?.id}, Name: ${packagePolicy?.name}, Template: ${templateName}`
-      );
+      logger.error('AWS package policy must contain role_arn variable');
       throw new Error('AWS package policy must contain role_arn variable');
     }
 
@@ -153,38 +144,19 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     if (roleArn) {
       let externalId: any;
 
-      if (vars.external_id?.value) {
-        // Check if it's already a secret reference
-        if (typeof vars.external_id.value === 'object' && vars.external_id.value.isSecretRef) {
-          externalId = vars.external_id.value;
-        } else {
-          // Convert to secret reference format
-          externalId = {
-            isSecretRef: true,
-            id: vars.external_id.value,
-          };
-        }
-      } else if (vars.aws) {
-        const awsVars = vars.aws as any;
-        if (awsVars.credentials?.external_id?.value) {
-          if (
-            typeof awsVars.credentials.external_id.value === 'object' &&
-            awsVars.credentials.external_id.value.isSecretRef
-          ) {
-            externalId = awsVars.credentials.external_id.value;
-          } else {
-            externalId = {
-              isSecretRef: true,
-              id: awsVars.credentials.external_id.value,
-            };
-          }
-        }
+      if (typeof vars.external_id?.value === 'object' && vars.external_id?.value?.isSecretRef) {
+        externalId = vars.external_id.value;
+      }
+
+      if (
+        typeof vars.aws?.credentials?.external_id?.value === 'object' &&
+        vars.aws?.credentials.external_id.value.isSecretRef
+      ) {
+        externalId = vars.aws?.credentials.external_id.value;
       }
 
       if (!externalId) {
-        logger.error(
-          `AWS package policy must contain external_id variable. Package Policy ID: ${packagePolicy?.id}, Name: ${packagePolicy?.name}, Template: ${templateName}`
-        );
+        logger.error('AWS package policy must contain external_id variable');
         throw new Error('AWS package policy must contain external_id variable');
       }
 
@@ -198,13 +170,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     }
 
-    logger.error(
-      `Package policy does not contain valid cloud provider variables. Package Policy ID: ${
-        packagePolicy?.id
-      }, Name: ${packagePolicy?.package?.name}, Version: ${
-        packagePolicy?.package?.version
-      }, Template: ${templateName}, Available vars: ${Object.keys(vars).join(', ')}`
-    );
+    logger.error('Package policy does not contain valid cloud provider variables');
     throw new Error(
       `Package policy must contain valid cloud provider variables (${
         cloudConnector.cloudProvider === 'aws'
