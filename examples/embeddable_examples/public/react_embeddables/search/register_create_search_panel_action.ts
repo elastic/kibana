@@ -15,7 +15,6 @@ import { SearchSerializedState } from './types';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 
-
 const createSearchPanelAction = {
   id: ADD_SEARCH_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
@@ -39,4 +38,4 @@ export const registerCreateSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID, async () => {
     return createSearchPanelAction;
   });
-}
+};
