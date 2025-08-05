@@ -287,4 +287,70 @@ describe('convertToWorkflowGraph', () => {
       } as ExitForeachNode);
     });
   });
+
+  describe('complex workflow', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testForeachStep',
+          foreach: '["item1", "item2", "item3"]',
+          type: 'foreach',
+          steps: [
+            {
+              name: 'testIfStep',
+              type: 'if',
+              condition: 'true',
+              steps: [
+                {
+                  name: 'firstThenTestConnectorStep',
+                  type: 'slack',
+                  connectorId: 'slack',
+                  with: {
+                    message: 'Hello from then step 1',
+                  },
+                } as ConnectorStep,
+                {
+                  name: 'secondThenTestConnectorStep',
+                  type: 'openai',
+                  connectorId: 'openai',
+                  with: {
+                    message: 'Hello from then nested step 2',
+                  },
+                } as ConnectorStep,
+              ],
+              else: [
+                {
+                  name: 'elseTestConnectorStep',
+                  type: 'slack',
+                  connectorId: 'slack',
+                  with: {
+                    message: 'Hello from else nested step',
+                  },
+                } as ConnectorStep,
+              ],
+            } as IfStep,
+          ],
+        } as ForEachStep,
+      ],
+    } as Partial<WorkflowSchema>;
+
+    it('should have correctly structured graph for complex nodes', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      const expectedComplexOrder = [
+        'testForeachStep',
+        'testIfStep',
+        'enterThen(testIfStep)',
+        'firstThenTestConnectorStep',
+        'secondThenTestConnectorStep',
+        'exitThen(testIfStep)',
+        'enterElse(testIfStep)',
+        'elseTestConnectorStep',
+        'exitElse(testIfStep)',
+        'exitCondition(testIfStep)',
+        'exitForeach(testForeachStep)',
+      ];
+      expect(topsort).toEqual(expectedComplexOrder);
+    });
+  });
 });
