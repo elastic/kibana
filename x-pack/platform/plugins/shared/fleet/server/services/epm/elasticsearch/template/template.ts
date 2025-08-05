@@ -142,7 +142,7 @@ export function getTemplate({
   return template;
 }
 
-const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
+export const getBaseEsComponents = (type: string, isIndexModeTimeSeries: boolean): string[] => {
   if (type === 'metrics') {
     if (isIndexModeTimeSeries) {
       return [STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS];

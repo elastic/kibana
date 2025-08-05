@@ -42,6 +42,7 @@ import type {
   RegistryElasticsearch,
   AssetsMap,
 } from '../../../../../common/types/models';
+import { getBaseEsComponents } from '../template/template';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
@@ -66,6 +67,7 @@ interface TransformModuleBase {
   transformModuleId?: string;
 }
 interface DestinationIndexTemplateInstallation extends TransformModuleBase {
+  type: 'logs' | 'metrics' | 'traces' | 'synthetics';
   installationName: string;
   _meta: ESAssetMetadata;
   template: IndexTemplate['template'];
@@ -133,9 +135,11 @@ const installLegacyTransformsAssets = async (
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       const content = JSON.parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
+      const destinationIndex = content.dest?.index as string | undefined;
       content._meta = getESAssetMetadata({ packageName: packageInstallContext.packageInfo.name });
 
       return {
+        type: getTransformDestinationDataType(destinationIndex),
         installationName: getLegacyTransformNameForInstallation(
           packageInstallContext.packageInfo,
           path,
@@ -207,12 +211,14 @@ const processTransformAssetsPerModule = async (
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
     const content = load(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
+    const destinationIndex = content.dest?.index as string | undefined;
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
       const templateName = getTransformAssetNameForInstallation(
         installablePackage,
         transformModuleId,
+        destinationIndex,
         'template'
       );
       const indexToModify = destinationIndexTemplates.findIndex(
@@ -221,9 +227,11 @@ const processTransformAssetsPerModule = async (
       const template = {
         transformModuleId,
         _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+        type: getTransformDestinationDataType(destinationIndex),
         installationName: getTransformAssetNameForInstallation(
           installablePackage,
           transformModuleId,
+          destinationIndex,
           'template'
         ),
         template: {},
@@ -275,6 +283,7 @@ const processTransformAssetsPerModule = async (
       const installationName = getTransformAssetNameForInstallation(
         installablePackage,
         transformModuleId,
+        destinationIndex,
         // transform_id is versioned by fleet_transform_version and not by package version
         `default-${transformVersion}`
       );
@@ -358,6 +367,7 @@ const processTransformAssetsPerModule = async (
         const templateName = getTransformAssetNameForInstallation(
           installablePackage,
           transformModuleId,
+          destinationIndex,
           'template'
         );
         const indexToModify = destinationIndexTemplates.findIndex(
@@ -366,9 +376,11 @@ const processTransformAssetsPerModule = async (
         const template = {
           transformModuleId,
           _meta: getESAssetMetadata({ packageName: installablePackage.name }),
+          type: getTransformDestinationDataType(destinationIndex),
           installationName: getTransformAssetNameForInstallation(
             installablePackage,
             transformModuleId,
+            destinationIndex,
             'template'
           ),
           template: content.destination_index_template,
@@ -550,6 +562,7 @@ const installTransformsAssets = async (
             'index_template.mappings': destinationIndexTemplate.template.mappings,
           };
 
+          const esBaseComponents = getBaseEsComponents(destinationIndexTemplate.type, false);
           const componentTemplates = buildComponentTemplates({
             mappings: customMappings,
             templateName: destinationIndexTemplate.installationName,
@@ -583,6 +596,7 @@ const installTransformsAssets = async (
                   ],
                   _meta: destinationIndexTemplate._meta,
                   composed_of: [
+                    ...esBaseComponents,
                     ...Object.keys(componentTemplates),
                     STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
                   ],
@@ -882,12 +896,28 @@ const getLegacyTransformNameForInstallation = (
   return `${installablePackage.name}.${folderName}-${filename}${suffix ? '-' + suffix : ''}`;
 };
 
+// If destinationIndex is defined, use it to derive the data type depending on if it matches one of the known
+// patterns with preset component templates. Defaults to `logs` type if no destinationIndex is provided.
+const getTransformDestinationDataType = (
+  destinationIndex?: string
+): DestinationIndexTemplateInstallation['type'] => {
+  const dataType = destinationIndex
+    ? destinationIndex.match(/^(logs|metrics|traces|synthetics)-.*-.*$/)
+      ? destinationIndex.split('.')[0]
+      : 'logs'
+    : 'logs';
+  return dataType as DestinationIndexTemplateInstallation['type'];
+};
+
 const getTransformAssetNameForInstallation = (
   installablePackage: InstallablePackage,
   transformModuleId: string,
+  destinationIndex?: string,
   suffix?: string
 ) => {
-  return `logs-${installablePackage.name}.${transformModuleId}${suffix ? '-' + suffix : ''}`;
+  return `${getTransformDestinationDataType(destinationIndex)}-${
+    installablePackage.name
+  }.${transformModuleId}${suffix ? '-' + suffix : ''}`;
 };
 
 const getTransformFolderAndFileNames = (installablePackage: InstallablePackage, path: string) => {
