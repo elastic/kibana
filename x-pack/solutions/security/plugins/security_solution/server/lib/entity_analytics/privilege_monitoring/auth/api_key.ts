@@ -49,7 +49,7 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
   } else {
     const apiKey = await generateAPIKey(request, deps);
 
-    const soClient = core.savedObjects.getUnsafeInternalClient({
+    const soClient = core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
     });
 
@@ -57,7 +57,6 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
       id: getPrivmonEncryptedSavedObjectId(namespace),
       overwrite: true,
       managed: true,
-      namespace,
     });
   }
 };
