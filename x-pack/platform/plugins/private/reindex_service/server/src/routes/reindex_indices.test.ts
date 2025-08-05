@@ -66,7 +66,7 @@ describe('reindex API', () => {
       router: mockRouter,
       licensing: licensingMock.createSetup(),
       lib: { handleEsError },
-      getSecurityPlugin: () => securityMock.createStart(),
+      getSecurityPlugin: () => Promise.resolve(securityMock.createStart()),
       version: { getMajorVersion: () => 8, getMinorVersion: () => 7 },
     };
     registerReindexIndicesRoutes(routeDependencies);

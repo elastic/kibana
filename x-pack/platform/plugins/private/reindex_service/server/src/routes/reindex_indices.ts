@@ -58,7 +58,7 @@ export function registerReindexIndicesRoutes({
           licensing,
           request,
           credentialStore,
-          security: getSecurityPlugin(),
+          security: await getSecurityPlugin(),
           version,
         });
 
@@ -108,7 +108,7 @@ export function registerReindexIndicesRoutes({
           licensing,
           request,
           credentialStore,
-          security: getSecurityPlugin(),
+          security: await getSecurityPlugin(),
           version,
         });
         const body = await reindexService.getStatus(indexName);

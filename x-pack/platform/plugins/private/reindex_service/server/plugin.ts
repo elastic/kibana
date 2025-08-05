@@ -44,7 +44,6 @@ export class ReindexServiceServerPlugin
 
   private readonly logger: Logger;
   private readonly credentialStore: CredentialStore;
-  private securityPluginStart?: SecurityPluginStart;
   private version: Version;
 
   constructor({ logger, env }: PluginInitializerContext) {
@@ -71,7 +70,10 @@ export class ReindexServiceServerPlugin
       credentialStore: this.credentialStore,
       log: this.logger,
       licensing,
-      getSecurityPlugin: () => this.securityPluginStart,
+      getSecurityPlugin: async () => {
+        const [, { security }] = await getStartServices();
+        return security;
+      },
       lib: {
         handleEsError,
       },
@@ -96,8 +98,6 @@ export class ReindexServiceServerPlugin
     }: { savedObjects: SavedObjectsServiceStart; elasticsearch: ElasticsearchServiceStart },
     { security }: PluginsStart
   ): ReindexServiceServerPluginStart {
-    this.securityPluginStart = security;
-
     const soClient = new SavedObjectsClient(
       savedObjects.createInternalRepository([reindexOperationSavedObjectType.name])
     );

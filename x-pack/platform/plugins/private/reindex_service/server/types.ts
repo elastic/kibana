@@ -20,7 +20,7 @@ export interface RouteDependencies {
   router: IRouter;
   credentialStore: CredentialStore;
   log: Logger;
-  getSecurityPlugin: () => SecurityPluginStart | undefined;
+  getSecurityPlugin: () => Promise<SecurityPluginStart>;
   licensing: LicensingPluginSetup;
   lib: {
     handleEsError: typeof handleEsError;

@@ -41,6 +41,7 @@ export interface ReindexServiceScopedClientArgs {
 }
 
 export interface ReindexServiceScopedClient {
+  hasRequiredPrivileges: (indexName: string) => Promise<boolean>;
   reindexOrResume: (indexName: string) => Promise<ReindexOperation>;
   reindex: (indexName: string) => Promise<ReindexOperation>;
   getStatus: (indexName: string) => Promise<ReindexStatusResponse>;
@@ -105,21 +106,26 @@ export class ReindexServiceWrapper {
       version
     );
 
+    const throwIfNoPrivileges = async (indexName: string): Promise<void> => {
+      if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+        throw error.accessForbidden(
+          i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
+            defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
+            values: { indexName },
+          })
+        );
+      }
+    };
+
     return {
+      hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),
       reindexOrResume: async (
         indexName: string,
         reindexOptions?: {
           enqueue?: boolean;
         }
       ): Promise<ReindexOperation> => {
-        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
-          throw error.accessForbidden(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-              defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-              values: { indexName },
-            })
-          );
-        }
+        await throwIfNoPrivileges(indexName);
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
@@ -141,21 +147,17 @@ export class ReindexServiceWrapper {
           enqueue?: boolean;
         }
       ): Promise<ReindexOperation> => {
-        // todo share this
-        if (!(await reindexService.hasRequiredPrivileges(indexName))) {
-          throw error.accessForbidden(
-            i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
-              defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
-              values: { indexName },
-            })
-          );
-        }
+        await throwIfNoPrivileges(indexName);
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
         if (existingOp) {
-          // todo clean this up
-          throw new Error('Reindex operation already exists');
+          throw error.reindexAlreadyInProgress(
+            i18n.translate('xpack.upgradeAssistant.reindex.reindexAlreadyInProgressError', {
+              defaultMessage: 'A reindex operation already in-progress for {indexName}',
+              values: { indexName },
+            })
+          );
         }
 
         const reindexOp = await reindexService.createReindexOperation(indexName, reindexOptions);
