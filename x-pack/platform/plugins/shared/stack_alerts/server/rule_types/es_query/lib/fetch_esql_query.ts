@@ -20,6 +20,7 @@ import type { EsqlEsqlShardFailure } from '@elastic/elasticsearch/lib/api/types'
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
+import { getSourceFields } from '../util';
 
 export interface FetchEsqlQueryOpts {
   ruleId: string;
@@ -90,12 +91,14 @@ export async function fetchEsqlQuery({
   }
 
   const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
+  const sourceFields = getSourceFields();
 
   return {
     link,
     parsedResults: parseAggregationResults({
       ...results,
       resultLimit: alertLimit,
+      sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,
     }),
     index: null,

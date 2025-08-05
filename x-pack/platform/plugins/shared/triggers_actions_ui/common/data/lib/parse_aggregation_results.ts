@@ -13,7 +13,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Group } from '@kbn/alerting-rule-utils';
 import { get } from 'lodash';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 
 export const UngroupedGroupId = 'all documents';
 export interface ParsedAggregationGroup {
@@ -36,6 +35,7 @@ export interface ParseAggregationResultsOpts {
   isGroupAgg: boolean;
   esResult: SearchResponse<unknown>;
   resultLimit?: number;
+  sourceFieldsParams?: Array<{ label: string; searchPath: string }>;
   generateSourceFieldsFromHits?: boolean;
   termField?: string | string[];
 }
@@ -44,6 +44,7 @@ export const parseAggregationResults = ({
   isGroupAgg,
   esResult,
   resultLimit,
+  sourceFieldsParams = [],
   generateSourceFieldsFromHits = false,
   termField,
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
@@ -112,14 +113,6 @@ export const parseAggregationResults = ({
 
     const sourceFields: { [key: string]: string[] } = {};
     if (generateSourceFieldsFromHits) {
-      const alertFields = Object.keys(alertFieldMap);
-      const sourceFieldsParams = Object.keys(ecsFieldMap)
-        // exclude the alert fields that we don't want to override
-        .filter((key) => !alertFields.includes(key))
-        .map((key) => ({
-          label: key,
-          searchPath: key,
-        }));
       sourceFieldsParams.forEach((field) => {
         const fieldsSet: string[] = [];
         groupBucket.topHitsAgg.hits.hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
@@ -152,13 +145,3 @@ export const parseAggregationResults = ({
 function totalHitsToNumber(total: SearchHitsMetadata['total']): number {
   return typeof total === 'number' ? total : total?.value ?? 0;
 }
-
-export const getSourceFields = () => {
-  const alertFields = Object.keys(alertFieldMap);
-  return (
-    Object.keys(ecsFieldMap)
-      // exclude the alert fields that we don't want to override
-      .filter((key) => !alertFields.includes(key))
-      .map((key) => ({ label: key, searchPath: key }))
-  );
-};
