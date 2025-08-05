@@ -102,10 +102,43 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.1]]
+== {kib} 8.19.1
+
+The 8.19.1 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.1]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes incorrect panel rendering when the **Defer loading panels below "the fold"** advanced setting is on ({kibana-pull}229662[#229662]).
+* Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in *Lens* ({kibana-pull}228603[#228603]).
+* Fixes ES|QL loading button state for long running queries in *Lens* ({kibana-pull}226565[#226565]).
+* The `system` color mode now correctly applies the dark theme to charts and their legends when the system is in dark mode ({kibana-pull}218417[#218417]).
+* Fixes a console error occurring when adding a Region map visualization to a dashboard ({kibana-pull}228669[#228669]).
+
+Discover::
+* Improves performance of breakdown field search ({kibana-pull}229335[#229335]).
+* Fixes the field being picked for fetching stats in the sidebar popover. ({kibana-pull}228969[#228969]).
+* Fixes an issue where HTML search highlighting markup is incorrectly carried over into filter values when using the **Filter for value** field action in the **Log overview** tab ({kibana-pull}227652[#227652]).
+* Fixes an issue where some Discover **Copy to clipboard** actions only worked when accessing Kibana in a secure browser context. ({kibana-pull}229531[#229531]).
+
+Elastic Observability solution::
+* AI Assistant now works offline, allowing to use the knowledge base UI for cases like air-gapped environments ({kibana-pull}229874[#229874]).
+* Fixes global parameters sync for non-default private locations ({kibana-pull}230157[#230157]).
+* Fixes an issue with column sorting in the **Services** Errors table ({kibana-pull}229199[#229199]).
+* Fixes an error in Uptime occurring when filters are missing in the parameters of a rule created using the API ({kibana-pull}229422[#229422]).
+
+Elastic Security solution::
+For the Elastic Security 8.19.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+Kibana platform::
+* Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
+
+
+
 [[release-notes-8.19.0]]
 == {kib} 8.19.0
-
-coming::[8.19.0]
 
 Review the following information about the {kib} 8.19.0 release.
 
