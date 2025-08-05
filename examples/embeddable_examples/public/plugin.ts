@@ -109,14 +109,12 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
 
-    deps.uiActions.registerActionAsync(ADD_SEARCH_ACTION_ID, async () => {
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID, async () => {
       const { createSearchPanelAction } = await import(
         './react_embeddables/search/create_search_panel_action'
       );
       return createSearchPanelAction;
     });
-    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID);
-
     if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
