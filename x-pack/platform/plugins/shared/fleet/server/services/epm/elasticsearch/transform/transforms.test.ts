@@ -385,6 +385,8 @@ _meta:
         {
           _meta: meta,
           composed_of: [
+            'logs@mappings',
+            'logs@settings',
             'logs-endpoint.metadata_current-template@package',
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',
@@ -674,6 +676,8 @@ _meta:
         {
           _meta: meta,
           composed_of: [
+            'logs@mappings',
+            'logs@settings',
             'logs-endpoint.metadata_current-template@package',
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',
@@ -940,6 +944,8 @@ _meta:
         {
           _meta: meta,
           composed_of: [
+            'logs@mappings',
+            'logs@settings',
             'logs-endpoint.metadata_current-template@package',
             'endpoint@custom',
             'logs-endpoint.metadata_current-template@custom',
