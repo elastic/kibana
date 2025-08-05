@@ -28,20 +28,25 @@ import type {
  */
 export const containsInvalidDoesNotMatchEntries = (items: ThreatMapping): boolean => {
   return items.some((item) => {
-    const hasNegate = item.entries.some((subEntry) => subEntry.negate === true);
-    if (!hasNegate) {
+    const negateMap = new Map<string, Set<string>>();
+
+    item.entries.forEach(({ negate, field, value }) => {
+      if (!negate) {
+        return;
+      }
+
+      if (negateMap.has(field)) {
+        negateMap.get(field)?.add(value);
+      } else {
+        negateMap.set(field, new Set([value]));
+      }
+    });
+
+    if (negateMap.size === 0) {
       return false;
     }
-
-    const negateSet = new Set(
-      item.entries
-        .filter(({ negate, field, value }) => negate && field && value)
-        .map((subEntry) => `${subEntry.field}-${subEntry.value}`)
-    );
-
     return item.entries.some(
-      ({ field, value, negate }) =>
-        field && value && negate !== true && negateSet.has(`${field}-${value}`)
+      ({ field, value, negate }) => negate !== true && negateMap.get(field)?.has(value)
     );
   });
 };

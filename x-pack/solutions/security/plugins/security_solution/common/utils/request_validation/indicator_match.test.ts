@@ -138,6 +138,34 @@ describe('containsInvalidDoesNotMatchEntries', () => {
     expect(containsInvalidDoesNotMatchEntries(items)).toBe(true);
   });
 
+  it('returns true when both entries have same fields and opposite negate with multiple negate entries', () => {
+    const items: ThreatMapping = [
+      {
+        entries: [
+          {
+            field: 'user.name',
+            type: 'mapping' as const,
+            value: 'threat.indicator.user.name',
+            negate: false,
+          },
+          {
+            field: 'user.name',
+            type: 'mapping' as const,
+            value: 'threat.indicator.user.name',
+            negate: true,
+          },
+          {
+            field: 'user.name',
+            type: 'mapping' as const,
+            value: 'threat.indicator.host.name',
+            negate: true,
+          },
+        ],
+      },
+    ];
+    expect(containsInvalidDoesNotMatchEntries(items)).toBe(true);
+  });
+
   it('returns false when both entries have different fields and opposite negate', () => {
     const items: ThreatMapping = [
       {
