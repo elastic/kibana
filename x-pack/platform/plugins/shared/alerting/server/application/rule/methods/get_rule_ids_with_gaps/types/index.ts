@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './get_rules_with_gaps';
+export type * from './get_rules_with_gaps';
