@@ -64157,7 +64157,27 @@ components:
     Security_Detections_API_ThreatIndicatorPath:
       description: Defines the path to the threat indicator in the indicator documents (optional)
       type: string
-    Security_Detections_API_ThreatMapEntry:
+    Security_Detections_API_ThreatMapping:
+      description: |
+        Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
+
+        - field: field from the event indices on which the rule runs
+        - type: must be mapping
+        - value: field from the Elasticsearch threat index
+          
+        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
+      items:
+        type: object
+        properties:
+          entries:
+            items:
+              $ref: '#/components/schemas/Security_Detections_API_ThreatMappingEntry'
+            type: array
+        required:
+          - entries
+      minItems: 1
+      type: array
+    Security_Detections_API_ThreatMappingEntry:
       type: object
       properties:
         field:
@@ -64174,26 +64194,6 @@ components:
         - field
         - type
         - value
-    Security_Detections_API_ThreatMapping:
-      description: |
-        Array of entries objects that define mappings between the source event fields and the values in the Elasticsearch threat index. Each entries object must contain these fields:
-
-        - field: field from the event indices on which the rule runs
-        - type: must be mapping
-        - value: field from the Elasticsearch threat index
-          
-        You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
-      items:
-        type: object
-        properties:
-          entries:
-            items:
-              $ref: '#/components/schemas/Security_Detections_API_ThreatMapEntry'
-            type: array
-        required:
-          - entries
-      minItems: 1
-      type: array
     Security_Detections_API_ThreatMatchRule:
       allOf:
         - type: object
