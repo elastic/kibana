@@ -21,6 +21,49 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % ### Fixes [kibana-X.X.X-fixes]
 % *
 
+## 9.1.1 [kibana-9.1.1-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.1-features-enhancements]
+
+**Dashboards and Visualizations**:
+* Improves usability of dashboards when zooming up to 400% [#228978]({{kib-pull}}228978).
+* Adds list options to ES|QL controls in dashboards [#227334]({{kib-pull}}227334).
+
+**Management**:
+* Console now uses explicit host selection instead of retrying failed hosts, ensuring predictable behavior and preventing silent request failures. This change fixes an issue in Console where request bodies were lost during automatic host retries. [#229574]({{kib-pull}}229574).
+
+
+### Fixes [kibana-9.1.1-fixes]
+
+**Dashboards and Visualizations**:
+* Fixes incorrect panel rendering when the **Defer loading panels below "the fold"** advanced setting is on [#229662]({{kib-pull}}229662).
+* Fixes {{esql}} loading button state for long running queries in *Lens* [#226565]({{kib-pull}}226565).
+* Improves the layout and accessibility of the {{esql}} control editor [#228103]({{kib-pull}}228103).
+
+**Data ingestion and Fleet**:
+* Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types [#230211]({{kib-pull}}230211).
+
+**Discover**:
+* Fixes an issue where HTML search highlighting markup is incorrectly carried over into filter values when using the **Filter for value** field action in the **Log overview** tab. [#227652]({{kib-pull}}227652).
+
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.1.1 release information, refer to [Elastic Observability Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Machine Learning**:
+* Fixes patterns field selector menu width [#228791]({{kib-pull}}228791).
+
+**Kibana platform**:
+* Fixes the breadcrumb to include a link to the home page when browsing pages from the **Elasticsearch** section of the navigation [#230270]({{kib-pull}}230270).
+
+
 ## 9.1.0 [kibana-9.1.0-release-notes]
 
 If you're upgrading to version 9.1.0, you first need to upgrade to version [8.19](https://www.elastic.co/guide/en/kibana/8.19/release-notes-8.19.0.html) or [9.0](#kibana-900-release-notes).
