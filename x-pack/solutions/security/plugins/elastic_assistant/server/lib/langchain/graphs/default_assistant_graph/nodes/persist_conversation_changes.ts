@@ -53,7 +53,7 @@ export async function persistConversationChanges({
     };
   }
 
-  const currentConversation = conversation ? conversation : state.conversation;
+  const currentConversation = state.conversation;
   const updatedConversation = await conversationsDataClient?.appendConversationMessages({
     existingConversation: currentConversation,
     messages: [
