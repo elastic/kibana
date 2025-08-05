@@ -370,6 +370,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     const agentPolicy = await createAgentPolicyWithPackages({
       soClient,
       esClient,
+      agentPolicyService,
       newPolicy,
       hasFleetServer,
       withSysMonitoring,
