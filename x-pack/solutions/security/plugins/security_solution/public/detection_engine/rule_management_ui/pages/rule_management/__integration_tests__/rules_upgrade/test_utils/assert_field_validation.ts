@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { waitFor } from '@testing-library/react';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
@@ -61,9 +62,9 @@ export function assertFieldValidation({
       switchToFieldEdit(fieldUpgradeWrapper);
       await inputFieldValue(fieldUpgradeWrapper, { fieldName, value: invalidValue });
 
-      const saveButton = getSaveFieldValueButton(fieldUpgradeWrapper);
-
-      expect(saveButton).toBeDisabled();
+      await waitFor(() => expect(getSaveFieldValueButton(fieldUpgradeWrapper)).toBeDisabled(), {
+        timeout: 1000,
+      });
     });
   });
 }
