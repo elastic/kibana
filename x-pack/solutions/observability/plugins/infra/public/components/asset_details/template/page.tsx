@@ -21,6 +21,7 @@ import { getIntegrationsAvailable } from '../utils';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
+import { capitalize } from 'lodash';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
@@ -42,6 +43,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     },
     {
       text: entity.name,
+    },
+    {
+      text: capitalize(activeTabId),
     },
   ]);
 
