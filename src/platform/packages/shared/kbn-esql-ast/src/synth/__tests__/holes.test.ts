@@ -54,3 +54,11 @@ describe('column shorthand', () => {
     expect(query1 + '').toBe('ROW a = "b"');
   });
 });
+
+describe('string shorthand', () => {
+  test('can insert a string shorthand', () => {
+    const query1 = query`FROM index | WHERE name == ${'John Doe'}`;
+
+    expect(query1 + '').toBe('FROM index | WHERE name == "John Doe"');
+  });
+});
