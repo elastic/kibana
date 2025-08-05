@@ -95,6 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           },
           tabs: [
             {
+              id: 'my_tab',
+              label: 'My Tab',
               attributes: {
                 columns: ['agent', 'bytes', 'clientip'],
                 sort: [['@timestamp', 'desc']],

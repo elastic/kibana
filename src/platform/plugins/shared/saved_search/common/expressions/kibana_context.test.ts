@@ -58,6 +58,8 @@ describe('kibanaContextFn', () => {
           },
           tabs: [
             {
+              id: 'test',
+              label: 'Test',
               attributes: {
                 kibanaSavedObjectMeta: {
                   searchSourceJSON: JSON.stringify({

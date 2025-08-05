@@ -246,11 +246,6 @@ export function MachineLearningTestResourcesProvider(
         }
       });
 
-      // make searchSourceJSON node a string
-      const searchSourceJsonNode = updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON;
-      const searchSourceJsonString = JSON.stringify(searchSourceJsonNode);
-      updatedBody.attributes.kibanaSavedObjectMeta.searchSourceJSON = searchSourceJsonString;
-
       return updatedBody;
     },
 

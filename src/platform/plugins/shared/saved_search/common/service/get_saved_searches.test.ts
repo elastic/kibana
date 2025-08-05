@@ -63,6 +63,8 @@ describe('getSavedSearch', () => {
           sampleSize: 100,
           tabs: [
             {
+              id: 'my_tab',
+              label: 'My Tab',
               attributes: {
                 kibanaSavedObjectMeta: {
                   searchSourceJSON:
@@ -179,6 +181,8 @@ describe('getSavedSearch', () => {
                 ],
               ],
             },
+            "id": "my_tab",
+            "label": "My Tab",
           },
         ],
         "tags": undefined,
@@ -209,6 +213,8 @@ describe('getSavedSearch', () => {
           isTextBasedQuery: true,
           tabs: [
             {
+              id: 'my_tab',
+              label: 'My Tab',
               attributes: {
                 kibanaSavedObjectMeta: {
                   searchSourceJSON:
@@ -325,6 +331,8 @@ describe('getSavedSearch', () => {
                 ],
               ],
             },
+            "id": "my_tab",
+            "label": "My Tab",
           },
         ],
         "tags": undefined,
@@ -355,6 +363,8 @@ describe('getSavedSearch', () => {
           isTextBasedQuery: true,
           tabs: [
             {
+              id: 'my_tab',
+              label: 'My Tab',
               attributes: {
                 kibanaSavedObjectMeta: {
                   searchSourceJSON:
