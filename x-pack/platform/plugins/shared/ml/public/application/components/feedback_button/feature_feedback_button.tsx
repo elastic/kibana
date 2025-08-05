@@ -80,10 +80,9 @@ export const FeatureFeedbackButton = ({
 
   return (
     <EuiButtonEmpty
-      aria-label={i18n.translate(
-        'xpack.ml.featureFeedbackButton.button.ariaLabel',
-        { defaultMessage: 'Give feedback' }
-      )}
+      aria-label={i18n.translate('xpack.ml.featureFeedbackButton.button.ariaLabel', {
+        defaultMessage: 'Give feedback',
+      })}
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
       size="s"
       iconType={defaultButton ? undefined : 'popout'}
