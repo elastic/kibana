@@ -18,6 +18,7 @@ import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } fr
 
 import { Client } from '@elastic/elasticsearch';
 import { graphlib } from '@dagrejs/dagre';
+import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
   WorkflowsExecutionEnginePluginSetup,
@@ -38,6 +39,7 @@ export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
 {
   private readonly logger: Logger;
+  private readonly config: WorkflowsExecutionEngineConfig;
   private esClient: Client = new Client({
     node: 'http://localhost:9200', // or your ES URL
     auth: {
@@ -48,6 +50,7 @@ export class WorkflowsExecutionEnginePlugin
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
@@ -82,17 +85,19 @@ export class WorkflowsExecutionEnginePlugin
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
+
+      const connectorExecutor = new ConnectorExecutor(
+        context.connectorCredentials,
+        await plugins.actions.getUnsecuredActionsClient()
+      );
+
+      // Create workflow runtime first (simpler, fewer dependencies)
       const workflowRuntime = new WorkflowExecutionRuntimeManager({
         workflowExecution: workflowExecution as EsWorkflowExecution,
         workflowExecutionRepository,
         stepExecutionRepository,
         workflowExecutionGraph,
       });
-
-      const connectorExecutor = new ConnectorExecutor(
-        context.connectorCredentials,
-        await plugins.actions.getUnsecuredActionsClient()
-      );
 
       const contextManager = new WorkflowContextManager({
         workflowRunId,
@@ -104,9 +109,13 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
+        enableConsoleLogging: this.config.logging.console,
         workflowExecutionGraph,
         workflowState: workflowRuntime,
       });
+
+      // Set the logger reference using a clean setter method
+      workflowRuntime.setLogger(contextManager);
 
       // Log workflow execution start
       await contextManager.logWorkflowStart();

@@ -79,6 +79,14 @@ export const policySettingsMiddlewareRunner: MiddlewareRunner = async (
         policyItem.inputs[0].config.policy.value.linux.popup.behavior_protection.message =
           DefaultPolicyRuleNotificationMessage;
       }
+      if (policyItem.inputs[0].config.policy.value.windows.popup.device_control?.message === '') {
+        policyItem.inputs[0].config.policy.value.windows.popup.device_control.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
+      if (policyItem.inputs[0].config.policy.value.mac.popup.device_control?.message === '') {
+        policyItem.inputs[0].config.policy.value.mac.popup.device_control.message =
+          DefaultPolicyRuleNotificationMessage;
+      }
     } catch (error) {
       dispatch({
         type: 'serverFailedToReturnPolicyDetailsData',
