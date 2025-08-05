@@ -13,7 +13,7 @@ import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manag
 
 describe('ExitForeachNodeImpl', () => {
   let step: ExitForeachNode;
-  let workflowStateMock: WorkflowExecutionRuntimeManager;
+  let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let underTest: ExitForeachNodeImpl;
   let startStep: jest.Mock<any, any, any>;
   let getStepState: jest.Mock<any, any, any>;
@@ -36,7 +36,7 @@ describe('ExitForeachNodeImpl', () => {
       type: 'exit-foreach',
       startNodeId: 'foreachStartNode',
     };
-    workflowStateMock = {
+    wfExecutionRuntimeManager = {
       startStep,
       getStepState,
       setStepState,
@@ -45,7 +45,7 @@ describe('ExitForeachNodeImpl', () => {
       finishStep,
       goToStep,
     } as any;
-    underTest = new ExitForeachNodeImpl(step, workflowStateMock);
+    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager);
   });
 
   describe('when no foreach step', () => {
@@ -56,11 +56,11 @@ describe('ExitForeachNodeImpl', () => {
     it('should throw an error', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.setStepResult).toHaveBeenCalledWith(step.startNodeId, {
+      expect(wfExecutionRuntimeManager.setStepResult).toHaveBeenCalledWith(step.startNodeId, {
         output: null,
         error: expect.any(Error),
       });
-      expect(workflowStateMock.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.startNodeId);
     });
   });
 
@@ -77,14 +77,14 @@ describe('ExitForeachNodeImpl', () => {
     it('should go to the start node', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.goToStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.goToStep).toHaveBeenCalledWith(step.startNodeId);
     });
 
     it('should not finish the foreach step and not set step result', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.finishStep).not.toHaveBeenCalled();
-      expect(workflowStateMock.setStepResult).not.toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.finishStep).not.toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.setStepResult).not.toHaveBeenCalled();
     });
   });
 
@@ -101,19 +101,22 @@ describe('ExitForeachNodeImpl', () => {
     it('should clear the foreach state', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.setStepState).toHaveBeenCalledWith(step.startNodeId, undefined);
+      expect(wfExecutionRuntimeManager.setStepState).toHaveBeenCalledWith(
+        step.startNodeId,
+        undefined
+      );
     });
 
     it('should finish the foreach step', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.startNodeId);
     });
 
     it('should go to the next step', async () => {
       await underTest.run();
 
-      expect(workflowStateMock.goToNextStep).toHaveBeenCalled();
+      expect(wfExecutionRuntimeManager.goToNextStep).toHaveBeenCalled();
     });
   });
 });
