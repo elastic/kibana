@@ -94,7 +94,7 @@ export const createEngineStatusService = (
     const engineStatus = await get();
     if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
       throw new Error(
-        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}`
+        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}.`
       );
     }
 
