@@ -8,10 +8,10 @@
 import { load } from 'js-yaml';
 import pMap from 'p-map';
 import minimatch from 'minimatch';
-import {
-  type ElasticsearchClient,
-  type SavedObjectsClientContract,
-  type SavedObjectsFindOptions,
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
@@ -911,6 +911,9 @@ export async function getPackageKnowledgeBase(options: {
       knowledge_base_content: knowledgeBaseItems,
     };
   } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error fetching knowledge base for package ${pkgName}: ${error.message}`);
     return undefined;
   }
 }

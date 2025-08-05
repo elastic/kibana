@@ -98,7 +98,7 @@ export async function saveKnowledgeBaseContentToIndex({
   const operations = [];
 
   for (const item of knowledgeBaseContent) {
-    const docId = `${pkgName}-${pkgVersion}-${item.filename}`;
+    const docId = `${pkgName}-${item.filename}`;
 
     operations.push(
       { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },
@@ -207,7 +207,7 @@ export async function updatePackageKnowledgeBaseVersion({
   const operations = [];
 
   for (const item of knowledgeBaseContent) {
-    const docId = `${pkgName}-${newVersion}-${item.filename}`;
+    const docId = `${pkgName}-${item.filename}`;
 
     operations.push(
       { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },

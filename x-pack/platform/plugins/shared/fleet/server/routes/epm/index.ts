@@ -358,10 +358,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
 
   router.versioned
     .get({
-      path: '/epm/packages/{pkgName}/knowledge_base',
+      path: EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
-        calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
-          .granted,
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN)
+        ).granted,
       summary: `Get all knowledge base content for a package`,
       options: {
         tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
