@@ -67,10 +67,10 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     before(async () => {
       supertest = await utils.createSuperTest();
       search = await utils.createSearch();
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     it('returns Timeline data', async () => {

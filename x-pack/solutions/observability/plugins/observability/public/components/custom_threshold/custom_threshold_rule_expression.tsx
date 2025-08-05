@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -72,6 +73,7 @@ export const defaultExpression: MetricExpression = {
   timeUnit: 'm',
 };
 
+const FILTER_TYPING_DEBOUNCE_MS = 500;
 const EMPTY_FILTERS: Filter[] = [];
 
 // eslint-disable-next-line import/no-default-export
@@ -356,6 +358,11 @@ export default function Expressions(props: Props) {
     [setRuleParams, ruleParams.searchConfiguration]
   );
 
+  const debouncedOnQueryChange = useMemo(
+    () => debounce(onQueryChange, FILTER_TYPING_DEBOUNCE_MS),
+    [onQueryChange]
+  );
+
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
       const hasGroup = !!group && group.length > 0;
@@ -550,7 +557,7 @@ export default function Expressions(props: Props) {
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
-        onQueryChange={onQueryChange}
+        onQueryChange={debouncedOnQueryChange}
         onQuerySubmit={onQuerySubmit}
         onClearSavedQuery={onClearSavedQuery}
         onSavedQueryUpdated={onSavedQueryUpdated}

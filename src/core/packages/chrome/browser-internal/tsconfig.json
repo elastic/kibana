@@ -64,6 +64,9 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-theme-browser-internal",
     "@kbn/shared-ux-chrome-navigation",
+    "@kbn/core-chrome-navigation",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout-constants"
   ],
   "exclude": [
     "target/**/*",

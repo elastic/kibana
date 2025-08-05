@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { Kpi } from './kpi';
 import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 
@@ -20,6 +21,8 @@ export interface HostKpiChartsProps {
   lastReloadRequestTime?: number;
   getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
+
+  schema?: DataSchemaFormat | null;
 }
 
 export const HostKpiCharts = ({
@@ -30,10 +33,12 @@ export const HostKpiCharts = ({
   query,
   lastReloadRequestTime,
   loading = false,
+  schema,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
     dataViewId: dataView?.id,
     getSubtitle,
+    schema,
   });
 
   return (
