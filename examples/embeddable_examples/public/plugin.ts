@@ -121,7 +121,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
       deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
-      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_SEARCH_ACTION_ID);
     }
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
