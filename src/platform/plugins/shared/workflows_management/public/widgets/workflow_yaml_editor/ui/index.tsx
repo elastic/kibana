@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, UseEuiTheme, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
@@ -25,6 +27,22 @@ const jsonSchema = getJsonSchemaFromYamlSchema(WORKFLOW_ZOD_SCHEMA);
 
 const useWorkflowJsonSchema = () => {
   return jsonSchema;
+};
+
+const editorStyles = {
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: '100%',
+      minHeight: 0,
+      '.template-variable-valid': {
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        borderRadius: '2px',
+      },
+      '.template-variable-error': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderRadius: '2px',
+      },
+    }),
 };
 
 export const WorkflowYAMLEditor = ({
@@ -139,16 +157,10 @@ export const WorkflowYAMLEditor = ({
     [readOnly]
   );
 
+  const styles = useMemoCss(editorStyles);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%', minHeight: 0 }}>
-      <style>{`
-        .template-variable-valid {
-          background-color: ${euiTheme.colors.backgroundLightPrimary};
-        }
-        .template-variable-error {
-          background-color: ${euiTheme.colors.backgroundLightWarning};
-        }
-      `}</style>
+    <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
       <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
