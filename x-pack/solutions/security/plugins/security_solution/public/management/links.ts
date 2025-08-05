@@ -153,7 +153,7 @@ export const links: LinkItem = {
       path: TRUSTED_DEVICES_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      experimentalKey: 'trustedDevicesEnabled',
+      experimentalKey: 'trustedDevices',
       capabilities: [`${SECURITY_FEATURE_ID}.readTrustedDevices`],
       licenseType: 'enterprise',
     },

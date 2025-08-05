@@ -101,7 +101,7 @@ export const ManagementContainer = memo(() => {
     'securitySolutionNotesDisabled'
   );
 
-  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevicesEnabled');
+  const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
 
   const {
     loading,
