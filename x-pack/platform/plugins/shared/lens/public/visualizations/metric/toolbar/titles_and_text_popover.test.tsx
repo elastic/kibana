@@ -132,22 +132,49 @@ describe('TitlesAndTextPopover', () => {
     ]);
   });
 
-  it('should set valueTextAlign', async () => {
+  it('should set primaryAlign', async () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
-    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-values-alignment-btn');
+    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-primary-metric-alignment-btn');
 
     valueAlignBtnGroup.select('Center');
     valueAlignBtnGroup.select('Left');
     valueAlignBtnGroup.select('Right');
 
-    expect(mockSetState.mock.calls.map(([s]) => s.valueTextAlign)).toEqual([
+    expect(mockSetState.mock.calls.map(([s]) => s.primaryAlign)).toEqual([
       'center',
       'left',
       'right',
     ]);
+  });
+
+  it('should set secondaryAlign and hide secondaryAlign option when no secondary metric', async () => {
+    const { rerender } = renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const valueAlignBtnGroup = new EuiButtonGroupTestHarness('lens-secondary-metric-alignment-btn');
+
+    valueAlignBtnGroup.select('Center');
+    valueAlignBtnGroup.select('Left');
+    valueAlignBtnGroup.select('Right');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.secondaryAlign)).toEqual([
+      'center',
+      'left',
+      'right',
+    ]);
+
+    rerender(
+      <TitlesAndTextPopover
+        state={{ ...fullState, secondaryMetricAccessor: undefined }}
+        setState={mockSetState}
+      />
+    );
+
+    expect(screen.queryByTestId('lens-secondary-metric-alignment-btn')).not.toBeInTheDocument();
   });
 
   it('should set valueFontMode', async () => {
@@ -180,6 +207,21 @@ describe('TitlesAndTextPopover', () => {
     expect(mockSetState.mock.calls.map(([s]) => s.iconAlign)).toEqual(['right', 'left']);
   });
 
+  it('should set titleWeight', async () => {
+    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const buttonGroup = new EuiButtonGroupTestHarness('lens-title-weight-btn');
+
+    expect(buttonGroup.selected.textContent).toBe('Bold');
+
+    buttonGroup.select('Normal');
+    buttonGroup.select('Bold');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['normal', 'bold']);
+  });
+
   it.each([undefined, 'empty'])('should hide iconAlign option when icon is %j', async (icon) => {
     renderToolbarOptions({ ...fullState, icon });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
@@ -187,4 +229,6 @@ describe('TitlesAndTextPopover', () => {
 
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });
+
+  // TODO: Test automatic settings update when some options are triggered
 });

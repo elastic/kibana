@@ -44,6 +44,7 @@ export function TitleWeightOption({
       <EuiButtonGroup
         isFullWidth
         legend={label}
+        data-test-subj="lens-title-weight-btn"
         buttonSize="compressed"
         idSelected={value}
         options={titleWeightOptions}

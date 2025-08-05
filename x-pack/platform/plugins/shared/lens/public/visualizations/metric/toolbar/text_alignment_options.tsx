@@ -69,6 +69,7 @@ export function TitlesAlignmentOption({
       <EuiButtonGroup
         isFullWidth
         legend={label}
+        data-test-subj="lens-titles-alignment-btn"
         buttonSize="compressed"
         options={alignmentOptions}
         idSelected={value}
@@ -113,6 +114,7 @@ export function PrimaryAlignmentOption({
       <EuiButtonGroup
         isFullWidth
         legend={label}
+        data-test-subj="lens-primary-metric-alignment-btn"
         buttonSize="compressed"
         options={alignmentOptions}
         idSelected={value}
@@ -157,6 +159,7 @@ export function SecondaryAlignmentOption({
       <EuiButtonGroup
         isFullWidth
         legend={label}
+        data-test-subj="lens-secondary-metric-alignment-btn"
         buttonSize="compressed"
         options={alignmentOptions}
         idSelected={value}
