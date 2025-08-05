@@ -32,6 +32,7 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core-application-common",
     "@kbn/security-plugin-types-server",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*"
