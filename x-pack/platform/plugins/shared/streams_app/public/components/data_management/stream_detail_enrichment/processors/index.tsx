@@ -113,6 +113,7 @@ const ProcessorConfigurationListItem = ({
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
         {canDragAndDrop && (
           <EuiPanel
+            data-test-subj="streamsAppProcessorDragHandle"
             grow={false}
             hasShadow={false}
             color="transparent"
@@ -122,7 +123,7 @@ const ProcessorConfigurationListItem = ({
             <EuiIcon type="grab" size="m" />
           </EuiPanel>
         )}
-        <strong>{processor.type.toUpperCase()}</strong>
+        <strong data-test-subj="streamsAppProcessorLegend">{processor.type.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
           {processorDescription}
         </EuiText>

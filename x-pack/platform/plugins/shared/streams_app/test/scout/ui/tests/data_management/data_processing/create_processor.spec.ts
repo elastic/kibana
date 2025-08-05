@@ -23,7 +23,8 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
   });
 
-  test.afterAll(async ({ apiServices }) => {
+  test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    await logsSynthtraceEsClient.clean();
     await apiServices.streams.disable();
   });
 
@@ -37,7 +38,7 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
   });
 
-  test('should not let creating new processors while one is in progress', async ({
+  test('should disable creating new processors while one is in progress', async ({
     page,
     pageObjects,
   }) => {
@@ -54,6 +55,28 @@ test.describe('Stream data processing - creating processors', { tag: ['@ess', '@
     await expect(
       page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton')
     ).toBeEnabled();
+  });
+
+  test('should disable saving the pipeline while one is in progress', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Create a new processor ready to be saved
+    await pageObjects.streams.clickAddProcessor();
+    await pageObjects.streams.fillFieldInput('body.text');
+    await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
+    await pageObjects.streams.clickSaveProcessor();
+
+    // Verify save button is enabled
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+
+    await pageObjects.streams.clickEditProcessor(0);
+
+    // Verify save button is disabled
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    await pageObjects.streams.clickCancelProcessorChanges();
+    // Verify save button is enabled
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
   });
 
   test('should cancel creating a new processor', async ({ page, pageObjects }) => {

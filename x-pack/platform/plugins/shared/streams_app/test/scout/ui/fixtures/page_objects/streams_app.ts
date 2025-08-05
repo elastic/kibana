@@ -140,6 +140,22 @@ export class StreamsApp {
     await this.page.keyboard.press('Space');
   }
 
+  async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
+    // Focus source item and activate DnD
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[processorPos];
+    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
+    await this.page.keyboard.press('Space');
+    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
+    let absoluteSteps = Math.abs(steps);
+    while (absoluteSteps > 0) {
+      this.page.keyboard.press(arrowButton);
+      absoluteSteps--;
+    }
+    // Release DnD
+    await this.page.keyboard.press('Space');
+  }
+
   // Expectation utility methods
   async expectRoutingRuleVisible(streamName: string) {
     await expect(this.page.getByTestId(`routingRule-${streamName}`)).toBeVisible();
@@ -151,7 +167,9 @@ export class StreamsApp {
 
   async expectRoutingOrder(expectedOrder: string[]) {
     // Wait for the routing rules to be rendered before getting their locators
-    await expect(this.page.locator('[data-test-subj^="routingRule-"]')).toHaveCount(3);
+    // eslint-disable-next-line playwright/no-nth-methods
+    await expect(this.page.locator('[data-test-subj^="routingRule-"]').first()).toBeVisible();
+
     const rulesLocators = await this.page.testSubj.locator('^routingRule-').all();
 
     const actualOrder = await Promise.all(
@@ -180,12 +198,9 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Change routing' }).click();
   }
 
-  async cancelRuleOrder() {
+  async cancelChanges() {
     await this.page.getByRole('button', { name: 'Cancel changes' }).click();
-    await this.page
-      .getByRole('alertdialog')
-      .getByRole('button', { name: 'Discard unsaved changes' })
-      .click();
+    await this.getModal().getByRole('button', { name: 'Discard unsaved changes' }).click();
   }
 
   /**
@@ -215,8 +230,8 @@ export class StreamsApp {
   }
 
   async confirmDiscardInModal() {
-    await this.page.getByRole('alertdialog').getByRole('button', { name: 'Discard' }).click();
-    await expect(this.page.getByRole('alertdialog')).toBeHidden();
+    await this.getModal().getByRole('button', { name: 'Discard' }).click();
+    await expect(this.getModal()).toBeHidden();
   }
 
   async fillFieldInput(value: string) {
@@ -253,6 +268,19 @@ export class StreamsApp {
       return [];
     }
     return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
+  }
+
+  async expectProcessorsOrder(expectedOrder: string[]) {
+    // Wait for the routing rules to be rendered before getting their locators
+    const processorLocators = await this.getProcessorsListItems();
+
+    const actualOrder = await Promise.all(
+      processorLocators.map(async (processorLocator) => {
+        return processorLocator.getByTestId('streamsAppProcessorLegend').textContent();
+      })
+    );
+
+    expect(actualOrder).toStrictEqual(expectedOrder);
   }
 
   /**

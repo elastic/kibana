@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe(
-  'Stream data routing - reordering routing rules',
+  'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
