@@ -793,6 +793,7 @@ module.exports = {
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/platform/test/serverless/shared/config*.ts',
         'x-pack/platform/test/serverless/*/test_suites/**/*',
+        'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
         'x-pack/test_serverless/*/test_suites/**/*',
         'x-pack/test/profiling_api_integration/**/*.ts',
