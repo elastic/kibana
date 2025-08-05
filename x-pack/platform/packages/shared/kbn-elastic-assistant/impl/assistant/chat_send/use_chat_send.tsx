@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { Replacements } from '@kbn/elastic-assistant-common';
@@ -19,6 +19,13 @@ import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
+import { addToDashboardTool } from '@kbn/ai-client-tools-plugin/public';
+import { pick } from 'lodash';
+
+// const addToDashboardToolForAssistant = mapToolToSecuritySolutionTool(addToDashboardTool);
+const clientSideTools = [pick(addToDashboardTool, ['id', 'name', 'description', 'parameters', 'screenDescription'])];
+
+// console.log('addToDashboardTool', addToDashboardToolForAssistant);
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
@@ -128,6 +135,7 @@ export const useChatSend = ({
         message: userMessage.content ?? '',
         conversationId: convo.id,
         replacements,
+        clientSideTools,
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
@@ -168,6 +176,7 @@ export const useChatSend = ({
       setLastConversation,
       setSelectedPromptContexts,
       toasts,
+      clientSideTools
     ]
   );
 
@@ -196,6 +205,7 @@ export const useChatSend = ({
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
       replacements: {},
+      clientSideTools
     });
 
     const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
@@ -203,7 +213,7 @@ export const useChatSend = ({
       ...currentConversation,
       messages: [...updatedMessages, responseMessage],
     });
-  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts]);
+  }, [currentConversation, http, removeLastMessage, sendMessage, setCurrentConversation, toasts, clientSideTools]);
 
   const onChatCleared = useCallback(async () => {
     setUserPrompt('');

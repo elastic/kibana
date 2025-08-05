@@ -36,6 +36,8 @@ import {
 } from './helpers';
 import { isOpenSourceModel } from './utils';
 import { ConfigSchema } from '../config_schema';
+import { mapToolToServerSideSecuritySolutionTool } from '@kbn/ai-client-tools-plugin/server';
+
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -88,6 +90,11 @@ export const postActionsConnectorExecuteRoute = (
             INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
             false
           )) ?? false;
+
+        const clientSideTools = request.body.screenContext?.clientSideTools ?? [];
+
+
+        const mappedClientSideTools = clientSideTools.map(mapToolToServerSideSecuritySolutionTool);
 
         try {
           const checkResponse = await performChecks({
@@ -219,6 +226,7 @@ export const postActionsConnectorExecuteRoute = (
               screenContext,
               systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+              clientSideTools: mappedClientSideTools
             }),
             timeout,
           ]);

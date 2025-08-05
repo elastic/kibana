@@ -256,6 +256,8 @@ export interface LangChainExecuteParams {
   screenContext?: ScreenContext;
   systemPrompt?: string;
   timeout?: number;
+  //@todo: fix this type
+  clientSideTools: any[];
 }
 export const langChainExecute = async ({
   messages,
@@ -283,6 +285,7 @@ export const langChainExecute = async ({
   screenContext,
   systemPrompt,
   timeout,
+  clientSideTools
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -297,7 +300,13 @@ export const langChainExecute = async ({
 
   const assistantTools = assistantContext
     .getRegisteredTools(pluginNames)
-    .filter((tool) => !unsupportedTools.has(tool.id));
+    .filter((tool) => !unsupportedTools.has(tool.id))
+    .concat(clientSideTools);
+  console.log('assistantTools', assistantTools.map((tool) => ({
+    id: tool.id,
+    name: tool.name,
+    description: tool.description,
+  })));
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;

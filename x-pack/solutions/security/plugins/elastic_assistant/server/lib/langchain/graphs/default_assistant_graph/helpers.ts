@@ -71,7 +71,8 @@ export const streamGraph = async ({
     end: streamEnd,
     push,
     responseWithHeaders,
-  } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+    //@TODO: update type tool_calls
+  } = streamFactory<{ type: string; payload?: string; toolCalls?: any[] }>(request.headers, logger, false, false);
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
@@ -137,6 +138,9 @@ export const streamGraph = async ({
             const msg = data.chunk as AIMessageChunk;
             if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
               push({ payload: msg.content as string, type: 'content' });
+            }
+            if (!didEnd && msg.tool_calls) {
+              push({ toolCalls: msg.tool_calls, type: 'tool_calls' });
             }
           }
 

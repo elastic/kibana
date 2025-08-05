@@ -12,12 +12,19 @@ import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 
+interface ClientSideTool {
+  name: string;
+  description: string;
+  callback: (blah: any) => void;
+}
+
 interface SendMessageProps {
   apiConfig: ApiConfig;
   http: HttpSetup;
   message?: string;
   conversationId: string;
   replacements: Replacements;
+  clientSideTools?: ClientSideTool[];
 }
 
 interface UseSendMessage {
@@ -27,6 +34,7 @@ interface UseSendMessage {
     apiConfig,
     http,
     message,
+    clientSideTools,
   }: SendMessageProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
@@ -36,7 +44,7 @@ export const useSendMessage = (): UseSendMessage => {
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
   const sendMessage = useCallback(
-    async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
+    async ({ apiConfig, http, message, conversationId, replacements, clientSideTools }: SendMessageProps) => {
       setIsLoading(true);
 
       try {
@@ -53,6 +61,7 @@ export const useSendMessage = (): UseSendMessage => {
           traceOptions,
           screenContext: {
             timeZone: moment.tz.guess(),
+            clientSideTools,
           },
         });
       } finally {

@@ -21,7 +21,8 @@
       "stackConnectors",
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "kibanaUtils",
+      "aiClientTools"
     ]
   }
 }

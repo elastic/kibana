@@ -70,6 +70,8 @@ export const getStreamObservable = ({
               });
             } else {
               const output = decoded;
+              console.log(`--@@output`, output);
+
               const lines = output.split('\n');
               lines[0] = langChainBuffer + lines[0];
               langChainBuffer = lines.pop() || '';

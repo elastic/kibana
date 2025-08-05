@@ -13,7 +13,7 @@ const configSchema = schema.object({
     defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
   }),
   elserInferenceId: schema.string({
-    defaultValue: internalElserInferenceId,
+    defaultValue: '--@@todo',
   }),
 });
 

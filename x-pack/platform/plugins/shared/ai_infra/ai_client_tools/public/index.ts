@@ -16,7 +16,7 @@ import type {
 } from './types';
 
 export type { AIClientToolsBasePluginSetup, AIClientToolsBasePluginStart };
-
+export { addToDashboardTool } from './nl_to_dashboard/tool';
 export const plugin: PluginInitializer<
   AIClientToolsBasePluginSetup,
   AIClientToolsBasePluginStart,

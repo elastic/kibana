@@ -11,7 +11,7 @@
     "browser": true,
     "configPath": ["xpack", "aiClientTools"],
     "requiredPlugins": ["licensing", "inference"],
-    "requiredBundles": [],
+    "requiredBundles": ["data", "lens"],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

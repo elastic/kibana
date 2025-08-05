@@ -12,7 +12,7 @@
     "server/**/*",
     "scripts/**/*",
     ".storybook/**/*"
-  ],
+, "common"  ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
@@ -28,6 +28,11 @@
     "@kbn/inference-common",
     "@kbn/core-security-server",
     "@kbn/ml-is-populated-object",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/lens-utils",
+    "@kbn/dashboard-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/esql-ast",
+    "@kbn/data-plugin"
   ]
 }

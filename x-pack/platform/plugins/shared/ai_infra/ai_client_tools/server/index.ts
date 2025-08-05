@@ -18,12 +18,7 @@ import { AIClientToolsBasePlugin } from './plugin';
 export { config } from './config';
 
 export type { AIClientToolsBaseSetupContract, AIClientToolsBaseStartContract };
-export type {
-  SearchApi as AIClientToolsSearchAPI,
-  DocSearchOptions,
-  DocSearchResult,
-  DocSearchResponse,
-} from './services/search/types';
+export { mapToolToServerSideSecuritySolutionTool } from './adapters';
 
 export const plugin: PluginInitializer<
   AIClientToolsBaseSetupContract,

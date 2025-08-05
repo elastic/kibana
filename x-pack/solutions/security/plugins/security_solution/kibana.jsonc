@@ -86,7 +86,8 @@
       "lists",
       "ml",
       "unifiedSearch",
-      "esql"
+      "esql",
+      "aiClientTools"
     ],
     "extraPublicDirs": [
       "common"
