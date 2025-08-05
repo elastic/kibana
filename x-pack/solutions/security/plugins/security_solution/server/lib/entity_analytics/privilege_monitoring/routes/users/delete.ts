@@ -53,7 +53,7 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
           const crudService = createPrivilegedUsersCrudService(dataClient);
 
           await crudService.delete(request.params.id);
-          return response.ok({ body: { aknowledged: true } });
+          return response.ok({ body: { acknowledged: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error deleting user: ${error.message}`);
