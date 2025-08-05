@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
 import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
-
 import type {
   GenerateConfigurationResponse,
   SearchIndicesResponse,
