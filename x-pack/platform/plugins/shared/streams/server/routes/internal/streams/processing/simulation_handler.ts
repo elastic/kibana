@@ -845,7 +845,7 @@ const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) 
       if (config.type === 'system') {
         return [];
       }
-      return [[name, config]];
+      return [[name, { ...config, ignore_malformed: false }]];
     })
   );
 };
