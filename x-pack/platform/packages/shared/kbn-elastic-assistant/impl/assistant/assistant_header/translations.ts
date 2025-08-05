@@ -123,3 +123,22 @@ export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Select visibility',
   }
 );
+
+export const DUPLICATE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.duplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+export const COPY_URL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.copyUrl',
+  {
+    defaultMessage: 'Copy URL',
+  }
+);
+export const ARCHIVE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.conversation.archive',
+  {
+    defaultMessage: 'Archive',
+  }
+);

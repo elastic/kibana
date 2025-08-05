@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
 import { SharedBadge } from './shared_badge';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
@@ -26,7 +27,7 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
+import { AssistantSettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
 import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
@@ -217,13 +218,16 @@ export const AssistantHeader: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="heyhey2">
                 <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
-                  <SettingsContextMenu
+                  <ConversationSettingsMenu
                     isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled}
                     onChatCleared={onChatCleared}
                     selectedConversation={selectedConversation}
                   />
                 </div>
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="heyhey3">
+                <AssistantSettingsContextMenu isDisabled={isDisabled} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
