@@ -54,15 +54,18 @@ function generateStepSchemaForConnector(connector: ConnectorContract) {
   });
 }
 
-function createRecursiveStepSchema(connectors: ConnectorContract[]): z.ZodType {
+function createRecursiveStepSchema(
+  connectors: ConnectorContract[],
+  loose: boolean = false
+): z.ZodType {
   const connectorSchemas = connectors.map(generateStepSchemaForConnector);
 
   const stepSchema: z.ZodType = z.lazy(() => {
     // Create step schemas with the recursive reference
-    const forEachSchema = getForEachStepSchema(stepSchema);
-    const ifSchema = getIfStepSchema(stepSchema);
-    const parallelSchema = getParallelStepSchema(stepSchema);
-    const mergeSchema = getMergeStepSchema(stepSchema);
+    const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const ifSchema = getIfStepSchema(stepSchema, loose);
+    const parallelSchema = getParallelStepSchema(stepSchema, loose);
+    const mergeSchema = getMergeStepSchema(stepSchema, loose);
 
     // Return discriminated union with all step types
     return z.discriminatedUnion('type', [
@@ -81,7 +84,7 @@ export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContract[],
   loose: boolean = false
 ) {
-  const recursiveStepSchema = createRecursiveStepSchema(connectors);
+  const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
     return z.object({
