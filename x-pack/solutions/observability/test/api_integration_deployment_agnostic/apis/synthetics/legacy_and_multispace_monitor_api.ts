@@ -12,6 +12,7 @@ import {
   syntheticsMonitorSavedObjectType,
   legacySyntheticsMonitorTypeSingle,
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
+import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
@@ -34,6 +35,16 @@ const runTests = (
       monitor.spaces = [spaceId];
     }
     const res = await supertestEditorWithApiKey.post(url).send(monitor);
+    expect(res.status).eql(200, JSON.stringify(res.body));
+    return res.body;
+  };
+
+  const getMonitor = async (monitorId: string, spaceId?: string) => {
+    let url = SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}?internal=true`;
+    if (spaceId) {
+      url = `/s/${spaceId}${url}`;
+    }
+    const res = await supertestEditorWithApiKey.get(url);
     expect(res.status).eql(200, JSON.stringify(res.body));
     return res.body;
   };
@@ -474,21 +485,42 @@ const runTests = (
 
   describe('MultiSpaceMigration', () => {
     it('should migrate legacy monitor to multi-space type in default space', async () => {
-      const mon = await saveMonitor(
-        { ...httpMonitor, name: `legacy-migrate-${uuid}` },
-        legacySyntheticsMonitorTypeSingle
-      );
-      expect(mon.name).eql(`legacy-migrate-${uuid}`);
+      const name = `legacy-migrate-${uuid}`;
+      const mon = await saveMonitor({ ...httpMonitor, name }, legacySyntheticsMonitorTypeSingle);
+      expect(mon.name).eql(name);
 
       retry.try(async () => {
+        // first verify the monitor has been created
         // Verify migration
         const response = await kibanaServer.savedObjects.find({
           type: syntheticsMonitorSavedObjectType,
         });
         const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
         expect(found).not.to.be(undefined);
-        expect(found?.attributes.name).to.eql(`migrated-multi-${uuid}`);
+        expect(found?.attributes.name).to.eql(name);
+        // Ensure the legacy monitor type is no longer present
+        const legacyResponse = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const legacyFound = legacyResponse.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(legacyFound).to.be(undefined);
       });
+      // test decryption to make sure migration worked
+      const decryptedMonitor = await getMonitor(mon.id);
+      expect(decryptedMonitor.name).to.eql(name);
+      expect(omit(decryptedMonitor, ['created_at', 'updated_at', 'private_locations'])).to.eql(
+        omit(
+          {
+            ...httpMonitor,
+            name,
+            spaceId: 'default',
+            id: mon.id,
+            config_id: mon.id,
+            locations: mon.locations,
+          },
+          ['private_locations']
+        )
+      );
     });
 
     it('should migrate legacy monitor to multi-space type in a specific space', async () => {
@@ -500,17 +532,19 @@ const runTests = (
         SPACE_ID
       );
 
+      const name = `legacy-migrate-space-${uuid}`;
+
       const mon = await saveMonitor(
         {
           ...httpMonitor,
-          name: `legacy-migrate-space-${uuid}`,
+          name,
           locations: [],
           private_locations: [otherSpacePrivateLocation],
         },
         legacySyntheticsMonitorTypeSingle,
         SPACE_ID
       );
-      expect(mon.name).eql(`legacy-migrate-space-${uuid}`);
+      expect(mon.name).eql(name);
 
       retry.try(async () => {
         // Verify migration
@@ -520,8 +554,33 @@ const runTests = (
         });
         const found = response.saved_objects.find((obj: any) => obj.id === mon.id);
         expect(found).not.to.be(undefined);
-        expect(found?.attributes.name).to.eql(`migrated-multi-${uuid}`);
+        expect(found?.attributes.name).to.eql(name);
+
+        // Ensure the legacy monitor type is no longer present
+        const legacyResponse = await kibanaServer.savedObjects.find({
+          type: legacySyntheticsMonitorTypeSingle,
+        });
+        const legacyFound = legacyResponse.saved_objects.find((obj: any) => obj.id === mon.id);
+        expect(legacyFound).to.be(undefined);
       });
+
+      // test decryption to make sure migration worked
+      const decryptedMonitor = await getMonitor(mon.id, SPACE_ID);
+      expect(decryptedMonitor.name).to.eql(name);
+      expect(omit(decryptedMonitor, ['created_at', 'updated_at', 'private_locations'])).to.eql(
+        omit(
+          {
+            ...httpMonitor,
+            name,
+            spaceId: SPACE_ID,
+            id: mon.id,
+            config_id: mon.id,
+            locations: mon.locations,
+            spaces: [SPACE_ID],
+          },
+          ['private_locations']
+        )
+      );
     });
   });
 };
