@@ -18,7 +18,5 @@
   "kbn_references": [
     "@kbn/sse-utils",
     "@kbn/zod",
-    "@kbn/core",
-    "@kbn/actions-plugin",
   ]
 }
