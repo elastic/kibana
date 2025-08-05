@@ -179,7 +179,58 @@ export const ESGeoGridSourceSchema = ESAggSourceSchema.extends(
   },
   {
     meta: {
-      description: 'Clusters from documents grouped into grids and hexagons',
+      description:
+        'Vector feature source returning points and polygons from Elasticsearch geotile_grid or geohex_grid aggregations. One feature is returned per bucket.',
+    },
+    unknowns: 'forbid',
+  }
+);
+
+export const ESGeoLineSourceSchema = ESAggSourceSchema.extends(
+  {
+    geoField: schema.string({
+      meta: {
+        description: 'Field containing indexed geo-point values.',
+      },
+    }),
+    groupByTimeseries: schema.maybe(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: `When true, results are grouped by time_series aggregation, creating a line feature for each time_series group.`,
+        },
+      })
+    ),
+    lineSimplificationSize: schema.maybe(
+      schema.number({
+        max: 10000,
+        min: 1,
+        defaultValue: 500,
+        meta: {
+          description: `The maximum number of points for each line. Line is simplifed when threshold is exceeded. Use smaller values for better performance.`,
+        },
+      })
+    ),
+    splitField: schema.maybe(
+      schema.string({
+        meta: {
+          description: `Field used to group results by term aggregation, creating a line feature for each term. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+        },
+      })
+    ),
+    sortField: schema.maybe(
+      schema.string({
+        meta: {
+          description: `Numeric field used as the sort key for ordering the points. Required when groupByTimeseries is false. Ignored when groupByTimeseries is true.`,
+        },
+      })
+    ),
+    type: schema.literal(SOURCE_TYPES.ES_GEO_LINE),
+  },
+  {
+    meta: {
+      description:
+        'Vector feature source returning lines from Elasticsearch geo_line aggregation. One feature is returned per group.',
     },
     unknowns: 'forbid',
   }

@@ -11,6 +11,7 @@ export type {
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
 } from './schema/v1/types';
 
 export { MapsStorage } from './maps_storage';

@@ -20,6 +20,7 @@ import {
   EMSTMSSourceSchema,
   ESAggSourceSchema,
   ESGeoGridSourceSchema,
+  ESGeoLineSourceSchema,
   ESSourceSchema,
 } from './source_schemas';
 
@@ -38,3 +39,4 @@ export type AbstractESSourceDescriptor = Writable<TypeOf<typeof ESSourceSchema>>
 export type EMSFileSourceDescriptor = Writable<TypeOf<typeof EMSFileSourceSchema>>;
 export type EMSTMSSourceDescriptor = Writable<TypeOf<typeof EMSTMSSourceSchema>>;
 export type ESGeoGridSourceDescriptor = Writable<TypeOf<typeof ESGeoGridSourceSchema>>;
+export type ESGeoLineSourceDescriptor = Writable<TypeOf<typeof ESGeoLineSourceSchema>>;

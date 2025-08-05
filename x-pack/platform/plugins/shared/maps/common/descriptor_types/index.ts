@@ -17,4 +17,5 @@ export type {
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
 } from '../../server';

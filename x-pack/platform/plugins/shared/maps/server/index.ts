@@ -15,6 +15,7 @@ export type {
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
 } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {

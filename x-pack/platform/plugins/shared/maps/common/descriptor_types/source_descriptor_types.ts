@@ -87,15 +87,6 @@ type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
-export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
-  type: SOURCE_TYPES.ES_GEO_LINE;
-  geoField: string;
-  groupByTimeseries: boolean;
-  lineSimplificationSize: number;
-  splitField?: string;
-  sortField?: string;
-};
-
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   type: SOURCE_TYPES.ES_SEARCH;
   geoField: string;

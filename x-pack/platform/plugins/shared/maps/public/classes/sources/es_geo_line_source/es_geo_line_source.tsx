@@ -122,8 +122,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        groupByTimeseries={this._descriptor.groupByTimeseries}
-        lineSimplificationSize={this._descriptor.lineSimplificationSize}
+        groupByTimeseries={this._descriptor.groupByTimeseries ?? false}
+        lineSimplificationSize={
+          this._descriptor.lineSimplificationSize ?? DEFAULT_LINE_SIMPLIFICATION_SIZE
+        }
         splitField={this._descriptor.splitField ?? ''}
         sortField={this._descriptor.sortField ?? ''}
       />
