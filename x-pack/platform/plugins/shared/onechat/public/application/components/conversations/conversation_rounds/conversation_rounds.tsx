@@ -40,12 +40,7 @@ export const ConversationRounds: React.FC<{}> = () => {
               outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
               output={
                 isError ? (
-                  <RoundError
-                    error={error}
-                    onRetry={retry}
-                      retry();
-                    }}
-                  />
+                  <RoundError error={error} onRetry={retry} />
                 ) : (
                   <RoundResponse response={response} steps={steps} isLoading={isLoading} />
                 )
