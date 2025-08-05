@@ -760,7 +760,7 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
-  test('404 response is returns user error', async () => {
+  test('404 response returns user error', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
       method: WebhookMethods.POST,
