@@ -17,6 +17,7 @@ import {
   ExitIfNode,
   EnterForeachNode,
   ExitForeachNode,
+  WorkflowSchema,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -112,22 +113,21 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   };
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
-    id: enterForeachNodeId + '_exit',
+    id: `exitForeach(${enterForeachNodeId})`,
     startNodeId: enterForeachNodeId,
   };
 
-  foreachNestedSteps.forEach((step: any, index: number) => {
-    const _previousStep = index > 0 ? foreachNestedSteps[index - 1] : foreachStep;
+  let previousNodeToLink: any = enterForeachNode;
+  foreachNestedSteps.forEach((step: any) => {
     enterForeachNode.itemNodeIds.push(getNodeId(step));
-    const currentNode = visitAbstractStep(graph, _previousStep, step);
+    const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
     graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousStep), getNodeId(currentNode));
+    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
+    previousNodeToLink = currentNode;
   });
 
-  const lastNestedForeachStep = foreachNestedSteps[foreachNestedSteps.length - 1];
-
   graph.setNode(exitForeachNode.id, exitForeachNode);
-  graph.setEdge(getNodeId(lastNestedForeachStep), exitForeachNode.id);
+  graph.setEdge(getNodeId(previousNodeToLink), exitForeachNode.id);
   graph.setNode(enterForeachNodeId, enterForeachNode);
 
   if (previousStep) {
@@ -137,11 +137,11 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
-export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): graphlib.Graph {
+export function convertToWorkflowGraph(workflowSchema: WorkflowSchema): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   let previousStep: BaseStep | null = null;
 
-  workflow.definition.workflow.steps.forEach((currentStep, index) => {
+  workflowSchema.steps.forEach((currentStep, index) => {
     previousStep = visitAbstractStep(graph, previousStep, currentStep);
   });
 
