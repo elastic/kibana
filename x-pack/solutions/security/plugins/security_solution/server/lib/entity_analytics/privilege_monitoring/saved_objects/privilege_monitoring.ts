@@ -16,7 +16,7 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
   namespace: string;
 }
 
-interface PrivilegedMonitoringEngineDescriptor {
+export interface PrivilegedMonitoringEngineDescriptor {
   status: MonitoringEngineDescriptor['status'];
   error?: Record<string, unknown> & {
     message?: string;
