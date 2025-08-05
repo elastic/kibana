@@ -79,5 +79,7 @@ steps:
       env:
         IMAGES_CONFIG: 'kibana/image_cache.yml'
         BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+#        IMAGES_CONFIG: 'kibana/image_cache.tpl.yml'
+#        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
         RETRY: "1"
 EOF

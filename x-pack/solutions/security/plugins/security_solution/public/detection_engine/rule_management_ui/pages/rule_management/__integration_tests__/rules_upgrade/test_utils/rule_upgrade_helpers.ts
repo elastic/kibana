@@ -41,6 +41,10 @@ export async function saveAndAcceptFieldValue(wrapper: HTMLElement): Promise<voi
   await clickFieldSaveButton(wrapper, 'Save and accept');
 }
 
+export function getSaveFieldValueButton(wrapper: HTMLElement): HTMLElement {
+  return within(wrapper).getByRole('button', { name: 'Save' });
+}
+
 async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): Promise<void> {
   const saveButton = within(wrapper).getByRole('button', { name: buttonName });
 

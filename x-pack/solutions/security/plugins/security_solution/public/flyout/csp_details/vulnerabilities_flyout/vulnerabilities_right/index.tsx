@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { FindingsVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import {
   SeverityStatusBadge,
   getNormalizedSeverity,
   type FindingVulnerabilityFullFlyoutContentProps,
+  type FindingsVulnerabilityPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

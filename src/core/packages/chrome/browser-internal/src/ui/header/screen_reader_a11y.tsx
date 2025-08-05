@@ -11,6 +11,7 @@ import React, { FC, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiScreenReaderLive, EuiSkipLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { HeaderProps } from './header';
@@ -57,18 +58,12 @@ export const ScreenReaderRouteAnnouncements: FC<{
   );
 };
 
-const fallbackContentQueries = [
-  'main', // Ideal target for all plugins using KibanaPageTemplate
-  '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
-  '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
-];
-
 export const SkipToMainContent = () => {
   return (
     <EuiSkipLink
       position="fixed"
       destinationId="" // TODO: Potentially allow this to be customizable per-plugin
-      fallbackDestination={fallbackContentQueries}
+      fallbackDestination={MAIN_CONTENT_SELECTORS}
       overrideLinkBehavior
       href="" // Render a button
     >
