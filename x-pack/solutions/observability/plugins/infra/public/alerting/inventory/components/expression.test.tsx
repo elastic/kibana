@@ -124,9 +124,6 @@ describe('Expression', () => {
   });
 
   it('should pass the elasticsearch query to the expression chart', async () => {
-    const FILTER_QUERY =
-      '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}';
-
     const ruleParams = {
       criteria: [
         {
@@ -139,7 +136,8 @@ describe('Expression', () => {
       ],
       nodeType: undefined,
       filterQueryText: 'host.name: "testHostName"',
-      filterQuery: FILTER_QUERY,
+      filterQuery:
+        '{"bool":{"should":[{"match_phrase":{"host.name":"testHostName"}}],"minimum_should_match":1}}',
     };
 
     const wrapper = shallowWithIntl(
@@ -158,7 +156,7 @@ describe('Expression', () => {
 
     const chart = wrapper.find('[data-test-subj="preview-chart"]');
 
-    expect(chart.prop('filterQuery')).toBe(FILTER_QUERY);
+    expect(chart.prop('kuery')).toBe(ruleParams.filterQueryText);
   });
 
   describe('using custom metrics', () => {
