@@ -22,7 +22,7 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -73,8 +73,17 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const policy = _policy as PolicyData;
     const deployedVersion = policy.inputs[0].config.policy.value.global_manifest_version;
 
-    const today = moment.utc();
-    const defaultDate = today.clone().subtract(1, 'days');
+    // Memoize date calculations to avoid midnight race conditions and ensure stability
+    const { today, defaultDate, cutoffDate } = useMemo(() => {
+      const todayMoment = moment.utc();
+      const defaultDateMoment = todayMoment.clone().subtract(1, 'days');
+      const cutoffDateMoment = getControlledArtifactCutoffDate();
+      return {
+        today: todayMoment,
+        defaultDate: defaultDateMoment,
+        cutoffDate: cutoffDateMoment,
+      };
+    }, []);
 
     const [selectedDate, setSelectedDate] = useState<Moment>(defaultDate);
 
@@ -95,7 +104,6 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const internalDateFormat = 'YYYY-MM-DD';
     const displayDateFormat = 'MMMM DD, YYYY';
     const formattedDate = moment.utc(deployedVersion, internalDateFormat).format(displayDateFormat);
-    const cutoffDate = getControlledArtifactCutoffDate(); // Earliest selectable date
 
     const [selectedManifestVersion, setSelectedManifestVersion] = useState(
       deployedVersion === 'latest' ? 'latest' : selectedDate.format(internalDateFormat)
@@ -220,7 +228,10 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
     const updateDatepickerSelectedDate = useCallback(
       (date: Moment | null) => {
-        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
+        if (
+          date?.startOf('day').isSameOrAfter(cutoffDate.clone().startOf('day')) &&
+          date?.isSameOrBefore(defaultDate)
+        ) {
           setSelectedDate(date || defaultDate);
           setSelectedManifestVersion(date?.format(internalDateFormat) || 'latest');
         }

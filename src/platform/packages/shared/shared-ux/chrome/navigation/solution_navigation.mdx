@@ -509,7 +509,7 @@ const solutionNavigation = getPageObject('solutionNavigation');
 
 The page object exposes helpers for using links in the sidenav and breadcrumbs, as well as using page-level components such as global search, recent items, the Elastic logo icon. There are also utilities to check that no page reload happened during the navigation.
 
-Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
+Find the full list of helpers in [the source](https://github.com/elastic/kibana/blob/621401ed6a435d4c9beaa03ac1f61ace9716217a/x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts#L44-L206). The most notable are:
 
 - `solutionNavigation.expectExists()` checks that solution navigation is displayed and not the classic one
 - `solutionNavigation.sideNav.expectLinkExists({ deepLinkId: 'discover'})` checks that the link is visible. Can check by deepLinkId, text or navId

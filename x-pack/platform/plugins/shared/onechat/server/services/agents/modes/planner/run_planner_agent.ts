@@ -100,7 +100,7 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
 
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
-    convertGraphEvents({ graphName: agentGraphName, toolIdMapping }),
+    convertGraphEvents({ graphName: agentGraphName, toolIdMapping, logger }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

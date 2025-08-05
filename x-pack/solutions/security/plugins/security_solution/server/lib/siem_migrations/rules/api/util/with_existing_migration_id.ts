@@ -6,16 +6,8 @@
  */
 
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
-
-export const MIGRATION_ID_NOT_FOUND = (id: string) =>
-  i18n.translate('xpack.securitySolution.api.migrationIdNotFound', {
-    defaultMessage: `No Migration found with id: {id}`,
-    values: {
-      id,
-    },
-  });
+import { MIGRATION_ID_NOT_FOUND } from '../../../common/translations';
 
 /**
  * Checks the existence of a valid migration before proceeding with the request.
@@ -35,7 +27,7 @@ export const withExistingMigration = <
   return async (context, req, res) => {
     const { migration_id: migrationId } = req.params;
     const ctx = await context.resolve(['securitySolution']);
-    const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+    const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
     const storedMigration = await ruleMigrationsClient.data.migrations.get({
       id: migrationId,
     });
