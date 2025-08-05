@@ -19,6 +19,7 @@ import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
 import { toGroupByOpt } from './toolbar_wrapper';
 import type { ToolbarProps } from './types';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 
 interface Props extends ToolbarProps {
   groupByFields: string[];
@@ -30,7 +31,7 @@ export const MetricsAndGroupByToolbarItems = ({
   ...props
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
-
+  const { featureFlags } = usePluginConfig();
   const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
@@ -38,12 +39,20 @@ export const MetricsAndGroupByToolbarItems = ({
   );
 
   useEffect(() => {
+    if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
+
     const current = preferredSchema;
     if (current === null) {
       const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
       changePreferredSchema(next);
     }
-  }, [changePreferredSchema, preferredSchema, schemas]);
+  }, [
+    changePreferredSchema,
+    featureFlags.hostOtelEnabled,
+    preferredSchema,
+    schemas,
+    timeRangeMetadata,
+  ]);
 
   const { value: aggregations } = useAsync(
     () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? 'ecs' }),
@@ -91,7 +100,7 @@ export const MetricsAndGroupByToolbarItems = ({
         </EuiFlexItem>
       )}
 
-      {schemas.length > 0 && (
+      {featureFlags.hostOtelEnabled && (
         <EuiFlexItem>
           <SchemaSelector
             value={preferredSchema ?? 'ecs'}

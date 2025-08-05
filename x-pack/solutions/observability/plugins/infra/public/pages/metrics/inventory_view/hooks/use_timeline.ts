@@ -7,7 +7,6 @@
 
 import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import type { UseSnapshotRequest } from './use_snaphot';
@@ -62,7 +61,6 @@ export function useTimeline({
 }) {
   const { preferredSchema } = useWaffleOptionsContext();
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
-  const config = usePluginConfig();
   const timeLengthResult = useMemo(
     () => getTimeLengthFromInterval(displayInterval),
     [displayInterval]
