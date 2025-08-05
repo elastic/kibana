@@ -65,6 +65,10 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   initAndSync: () => () => void;
   /**
+   * Updates the URL with the current app and global state without pushing to history (e.g. on initialization)
+   */
+  updateUrlWithCurrentState: () => Promise<void>;
+  /**
    * Replaces the current state in URL with the given state
    * @param newState
    * @param merge if true, the given state is merged with the current state
@@ -90,7 +94,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
   /*
    * Get updated AppState when given a saved search
-   *
    */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;
 }
@@ -269,6 +272,42 @@ export const getDiscoverAppStateContainer = ({
     });
   };
 
+  const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
+    const tabState = selectTab(state, tabId);
+    const { timeRange: time, refreshInterval, filters } = tabState.globalState;
+
+    return { time, refreshInterval, filters };
+  };
+
+  const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
+    get: () => getGlobalState(internalState.getState()),
+    set: (state) => {
+      if (!state) {
+        return;
+      }
+
+      const { time: timeRange, refreshInterval, filters } = state;
+
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setGlobalState)({
+          globalState: {
+            timeRange,
+            refreshInterval,
+            filters,
+          },
+        })
+      );
+    },
+    state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
+  };
+
+  const updateUrlWithCurrentState = async () => {
+    await Promise.all([
+      replaceUrlState({}),
+      stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
+    ]);
+  };
+
   const initializeAndSync = () => {
     const currentSavedSearch = savedSearchContainer.getState();
 
@@ -326,35 +365,6 @@ export const getDiscoverAppStateContainer = ({
       startAppStateUrlSync();
 
     // syncs `_g` portion of url with query services
-    const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
-      const tabState = selectTab(state, tabId);
-      const { timeRange: time, refreshInterval, filters } = tabState.globalState;
-
-      return { time, refreshInterval, filters };
-    };
-
-    const globalStateContainer: INullableBaseStateContainer<GlobalQueryStateFromUrl> = {
-      get: () => getGlobalState(internalState.getState()),
-      set: (state) => {
-        if (!state) {
-          return;
-        }
-
-        const { time: timeRange, refreshInterval, filters } = state;
-
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.setGlobalState)({
-            globalState: {
-              timeRange,
-              refreshInterval,
-              filters,
-            },
-          })
-        );
-      },
-      state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
-    };
-
     const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryState(
       data.query,
       globalStateContainer,
@@ -372,11 +382,8 @@ export const getDiscoverAppStateContainer = ({
         stateStorage,
       });
 
-    // current state need to be pushed to url
-    Promise.all([
-      replaceUrlState({}),
-      stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
-    ]).then(() => {
+    // current state needs to be pushed to url
+    updateUrlWithCurrentState().then(() => {
       startSyncingAppStateWithUrl();
       startSyncingGlobalStateWithUrl();
     });
@@ -408,6 +415,7 @@ export const getDiscoverAppStateContainer = ({
     initAndSync: initializeAndSync,
     resetToState,
     resetInitialState,
+    updateUrlWithCurrentState,
     replaceUrlState,
     syncState: startAppStateUrlSync,
     update,
