@@ -176,7 +176,7 @@ describe(
         });
         getIndicatorDeleteButton(1).click();
 
-        cy.contains('Conditions in AND clauses must have at least one MATCHES entry.');
+        cy.contains('Conditions with AND clauses must have at least one MATCHES entry.');
       });
 
       it('shows error when 2 identical entries with different match operator configured', () => {

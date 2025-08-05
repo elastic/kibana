@@ -124,7 +124,7 @@ export function threatMatchMappingValidatorFactory({
         message: i18n.translate(
           'xpack.securitySolution.detectionEngine.ruleManagement.threatMappingField.singleNotMatchClauseError',
           {
-            defaultMessage: 'Conditions in AND clauses must have at least one MATCHES entry.',
+            defaultMessage: 'Conditions with AND clauses must have at least one MATCHES entry.',
           }
         ),
       };
