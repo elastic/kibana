@@ -187,7 +187,9 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     return response.data;
   }
 
-  protected getResponseErrorMessage(error: AxiosError): string {
+  protected getResponseErrorMessage(
+    error: AxiosError<{ error: { code: string; message: string; target: string } }>
+  ): string {
     const appendResponseBody = (message: string): string => {
       const responseBody = JSON.stringify(error.response?.data ?? {});
 
@@ -200,6 +202,11 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
 
     if (!error.response?.status) {
       return appendResponseBody(error.message ?? 'Unknown API Error');
+    }
+    const mdeError = error.response.data?.error;
+    if (mdeError.code === 'ActiveRequestAlreadyExists') {
+      const actionIdMatch = mdeError.message.match(/[0-9a-fA-F-]{36}/);
+      return `${mdeError.message}. Please wait or force clear with 'cancel --id ${actionIdMatch?.[0]}'`;
     }
 
     if (error.response.status === 401) {
