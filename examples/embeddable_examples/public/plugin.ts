@@ -23,7 +23,6 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
-import { ADD_SEARCH_ACTION_ID } from './react_embeddables/search/constants';
 import {
   ADD_EUI_MARKDOWN_ACTION_ID,
   EUI_MARKDOWN_ID,
@@ -35,6 +34,7 @@ import { registerFieldListPanelPlacementSetting } from './react_embeddables/fiel
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
+import { registerCreateSearchPanelAction } from './react_embeddables/search/register_create_search_panel_action';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -101,6 +101,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerCreateFieldListAction(deps.uiActions);
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
+    registerCreateSearchPanelAction(deps.uiActions);
+
     deps.uiActions.registerActionAsync(ADD_EUI_MARKDOWN_ACTION_ID, async () => {
       const { createEuiMarkdownAction } = await import(
         './react_embeddables/eui_markdown/create_eui_markdown_action'
@@ -109,12 +111,6 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
 
-    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID, async () => {
-      const { createSearchPanelAction } = await import(
-        './react_embeddables/search/create_search_panel_action'
-      );
-      return createSearchPanelAction;
-    });
     if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
