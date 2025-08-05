@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KEYWORDS } from '../parser/constants';
 import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -44,13 +45,16 @@ export const LeafPrinter = {
 
   identifier: (node: ESQLIdentifier) => {
     const name = node.name;
+    const isKeyword = KEYWORDS.has(name.toUpperCase());
+    const isQuotationNeeded = !regexUnquotedIdPattern.test(name);
 
-    if (regexUnquotedIdPattern.test(name)) {
-      return name;
-    } else {
+    if (isKeyword || isQuotationNeeded) {
       // Escape backticks "`" with double backticks "``".
       const escaped = name.replace(/`/g, '``');
+
       return '`' + escaped + '`';
+    } else {
+      return name;
     }
   },
 
