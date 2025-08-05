@@ -27,8 +27,6 @@ export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
 };
 
 const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
-  // must be kept in sync with
-  // src/core/packages/apps/server-internal/assets/legacy_theme.js
   /* eslint-disable react/no-danger */
   return (
     <style

@@ -100,7 +100,9 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
             },
           });
 
-          if (hostLastSuccessfulMachineAction?.value?.[0].type === 'Isolate') {
+          // Only check the first action if the array is not empty
+          const [firstAction] = hostLastSuccessfulMachineAction?.value || [];
+          if (firstAction?.type === 'Isolate') {
             response[agentId] = true;
           }
         } catch (err) {

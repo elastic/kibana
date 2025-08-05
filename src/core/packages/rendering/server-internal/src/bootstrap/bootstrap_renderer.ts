@@ -8,8 +8,6 @@
  */
 
 import { createHash } from 'crypto';
-import { PackageInfo } from '@kbn/config';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -17,7 +15,6 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getJsDependencyPaths } from './get_js_dependency_paths';
-import { getThemeTag } from './get_theme_tag';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
@@ -27,7 +24,6 @@ export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererRe
 interface FactoryOptions {
   /** Can be a URL, in the case of a CDN, or a base path if serving from Kibana */
   baseHref: string;
-  packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
   userSettingsService?: InternalUserSettingsServiceSetup;
@@ -45,7 +41,6 @@ interface RendererResult {
 }
 
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
-  packageInfo,
   baseHref,
   uiPlugins,
   auth,
@@ -59,7 +54,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    const themeVersion: ThemeVersion = 'v8';
 
     try {
       const authenticated = isAuthenticated(request);
@@ -77,15 +71,10 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       // just use the default values in case of connectivity issues with ES
     }
 
-    // keeping legacy themeTag support - note that the browser is now overriding it during setup.
-    if (darkMode === 'system') {
-      darkMode = false;
-    }
-
-    const themeTag = getThemeTag({
-      themeVersion,
-      darkMode,
-    });
+    const colorMode = darkMode === false ? 'light' : darkMode === true ? 'dark' : 'system';
+    // Amsterdam theme is called `v8` internally
+    // and should be kept this way for compatibility reasons.
+    const themeTagName = 'v8';
     const bundlesHref = getBundlesHref(baseHref);
 
     const bundlePaths = getPluginsBundlePaths({
@@ -109,7 +98,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     });
 
     const body = renderTemplate({
-      themeTag,
+      colorMode,
+      themeTagName,
       jsDependencyPaths,
       publicPathMap,
     });

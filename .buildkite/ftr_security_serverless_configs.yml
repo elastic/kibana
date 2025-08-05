@@ -16,6 +16,10 @@ disabled:
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
 
+  # Detection Rules Management base configs
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.essentials.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.complete.config.ts
+
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
