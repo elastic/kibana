@@ -270,22 +270,8 @@ describe('COMPLETION command', () => {
       });
     });
 
-    it('throws on missing WITH argument with AS argument', () => {
-      const text = `FROM index | COMPLETION prompt WITH AS targetField`;
-      const { errors } = EsqlQuery.fromSrc(text);
-
-      expect(errors.length).toBe(1);
-    });
-
-    it('throws on missing AS argument', () => {
-      const text = `FROM index | COMPLETION prompt WITH inferenceId AS`;
-      const { errors } = EsqlQuery.fromSrc(text);
-
-      expect(errors.length).toBe(1);
-    });
-
     it('throws on extra unsupported argument', () => {
-      const text = `FROM index | COMPLETION prompt WITH inferenceId AS target WHEN`;
+      const text = `FROM index | COMPLETION prompt WITH inferenceId WHEN`;
       const { errors } = EsqlQuery.fromSrc(text);
 
       expect(errors.length).toBe(1);
