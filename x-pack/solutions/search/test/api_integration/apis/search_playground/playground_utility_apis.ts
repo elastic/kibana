@@ -11,8 +11,9 @@ import { ALL_USERS, USERS } from './common/users';
 import { ALL_ROLES } from './common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from './common/helpers';
 
-const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
-const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
+const archiveDenseVectorIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-national-parks';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

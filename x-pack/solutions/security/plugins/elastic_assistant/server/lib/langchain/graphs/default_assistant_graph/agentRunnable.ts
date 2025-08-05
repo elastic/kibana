@@ -27,7 +27,7 @@ export const agentRunnableFactory = async ({
   llm,
   llmType,
   tools,
-  inferenceChatModelEnabled,
+  inferenceChatModelDisabled,
   isOpenAI,
   isStream,
   prompt,
@@ -37,7 +37,7 @@ export const agentRunnableFactory = async ({
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI
     | InferenceChatModel;
-  inferenceChatModelEnabled: boolean;
+  inferenceChatModelDisabled: boolean;
   isOpenAI: boolean;
   llmType: string | undefined;
   tools: StructuredToolInterface[] | ToolDefinition[];
@@ -51,7 +51,7 @@ export const agentRunnableFactory = async ({
     prompt,
   } as const;
 
-  if (!inferenceChatModelEnabled && (isOpenAI || llmType === 'inference')) {
+  if (inferenceChatModelDisabled && (isOpenAI || llmType === 'inference')) {
     return createOpenAIToolsAgent(params);
   }
 

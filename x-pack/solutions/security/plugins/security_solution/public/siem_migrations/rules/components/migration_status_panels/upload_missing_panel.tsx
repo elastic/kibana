@@ -91,7 +91,7 @@ const RuleMigrationsUploadMissingPanelContent =
             hasShadow={false}
             hasBorder
             paddingSize="s"
-            style={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
+            css={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
           >
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>

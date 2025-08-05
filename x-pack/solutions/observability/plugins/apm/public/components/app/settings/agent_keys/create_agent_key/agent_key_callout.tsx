@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiCallOut, EuiButtonIcon, EuiCopy, EuiFieldText } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut, EuiButtonIcon, EuiCopy, EuiFieldPassword } from '@elastic/eui';
 
 interface Props {
   name: string;
@@ -30,8 +30,9 @@ export function AgentKeyCallOut({ name, token }: Props) {
             defaultMessage: 'Copy this key now. You will not be able to view it again.',
           })}
         </p>
-        <EuiFieldText
+        <EuiFieldPassword
           data-test-subj="apmAgentKeyCallOutFieldText"
+          type="dual"
           readOnly
           value={token}
           aria-label={i18n.translate(

@@ -75,11 +75,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es, log);
     });
 
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
-    });
-
     const IMPORT_PAYLOAD = [
       {
         ...NON_CUSTOMIZED_PREBUILT_RULE,
@@ -168,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Package installation is rate limited. A single package installation is allowed per 10 seconds.
       await retryService.tryWithRetries(
         'installSecurityDetectionEnginePackage',
-        async () => await installMockPrebuiltRulesPackage(es, supertest),
+        async () => await installMockPrebuiltRulesPackage({ getService }),
         {
           retryCount: 5,
           retryDelay: 5000,

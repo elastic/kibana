@@ -281,6 +281,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                   error={errors.ignoreIndexSettings}
                 >
                   <EuiComboBox
+                    isInvalid={Boolean(errors.ignoreIndexSettings)}
                     placeholder={i18n.translate(
                       'xpack.snapshotRestore.restoreForm.stepSettings.ignoreIndexSettingsPlaceholder',
                       {

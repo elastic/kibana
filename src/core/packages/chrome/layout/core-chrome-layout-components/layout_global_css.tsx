@@ -55,7 +55,6 @@ export const LayoutGlobalCSS = () => {
     footerHeight,
     headerHeight,
     navigationWidth,
-    navigationPanelWidth,
     sidebarWidth,
     sidebarPanelWidth,
     applicationTopBarHeight,
@@ -71,35 +70,37 @@ export const LayoutGlobalCSS = () => {
 
   const header = css`
     --kbn-layout--header-top: var(--kbn-layout--banner-height);
-    --kbn-layout--header-left: ${navigationWidth + navigationPanelWidth}px;
+    --kbn-layout--header-left: ${navigationWidth}px;
     --kbn-layout--header-right: ${sidebarWidth + sidebarPanelWidth}px;
     --kbn-layout--header-height: ${headerHeight}px;
     --kbn-layout--header-width: calc(
-      100vw - var(--kbn-layout--header-right) - var(--kbn-layout--header-left)
+      100vw - var(--kbn-layout--header-left) - var(--kbn-layout--header-right)
     );
   `;
 
   const footer = css`
     --kbn-layout--footer-height: ${footerHeight}px;
     --kbn-layout--footer-top: calc(100vh - var(--kbn-layout--footer-height));
-    --kbn-layout--footer-bottom: 0px;
-    --kbn-layout--footer-left: 0px;
+    --kbn-layout--footer-bottom: 0;
+    --kbn-layout--footer-left: 0;
     --kbn-layout--footer-width: 100vw;
   `;
 
   const navigation = css`
-    --kbn-layout--navigation-top: var(--kbn-layout--header-top);
+    --kbn-layout--navigation-top: var(--kbn-layout--banner-height);
     --kbn-layout--navigation-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--navigation-left: 0;
     --kbn-layout--navigation-height: calc(
       100vh - var(--kbn-layout--navigation-top) - var(--kbn-layout--navigation-bottom)
     );
     --kbn-layout--navigation-width: ${navigationWidth}px;
-    --kbn-layout--navigation-panel-width: ${navigationPanelWidth}px;
   `;
 
   const sidebar = css`
-    --kbn-layout--sidebar-top: var(--kbn-layout--header-top);
+    --kbn-layout--sidebar-top: var(--kbn-layout--banner-height);
     --kbn-layout--sidebar-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--sidebar-right: 0;
+    --kbn-layout--sidebar-left: calc(100vw - ${sidebarWidth + sidebarPanelWidth}px);
     --kbn-layout--sidebar-height: calc(
       100vh - var(--kbn-layout--sidebar-top) - var(--kbn-layout--sidebar-bottom)
     );
@@ -108,16 +109,19 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
-    --kbn-layout--application-top: ${headerHeight + bannerHeight}px;
-    --kbn-layout--application-bottom: ${footerHeight}px;
-    --kbn-layout--application-left: ${navigationWidth + navigationPanelWidth}px;
-    --kbn-layout--application-right: ${sidebarWidth + sidebarPanelWidth}px;
+    --kbn-layout--application-top: calc(
+      var(--kbn-layout--banner-height) + var(--kbn-layout--header-height)
+    );
+    --kbn-layout--application-bottom: var(--kbn-layout--footer-height);
+    --kbn-layout--application-left: var(--kbn-layout--navigation-width);
+    --kbn-layout--application-right: calc(
+      var(--kbn-layout--sidebar-width) + var(--kbn-layout--sidebar-panel-width)
+    );
     --kbn-layout--application-height: calc(
       100vh - var(--kbn-layout--application-top) - var(--kbn-layout--application-bottom)
     );
     --kbn-layout--application-width: calc(
-      100vw - var(--kbn-layout--navigation-width) - var(--kbn-layout--navigation-panel-width) -
-        var(--kbn-layout--sidebar-width) - var(--kbn-layout--sidebar-panel-width)
+      100vw - var(--kbn-layout--application-left) - var(--kbn-layout--application-right)
     );
   `;
 
@@ -135,12 +139,12 @@ export const LayoutGlobalCSS = () => {
   const applicationBottomBar = css`
     --kbn-application--bottom-bar-height: ${applicationBottomBarHeight}px;
     --kbn-application--bottom-bar-top: calc(
-      --kbn-layout--application-bottom - var(--kbn-application--bottom-bar-height)
+      var(--kbn-layout--application-bottom) - var(--kbn-application--bottom-bar-height)
     );
     --kbn-application--bottom-bar-left: var(--kbn-layout--application-left);
     --kbn-application--bottom-bar-width: var(--kbn-layout--application-width);
     --kbn-application--bottom-bar-right: var(--kbn-layout--application-right);
-    --kbn-application--bottom-bar-bottom: calc(var(--kbn-layout--application-bottom));
+    --kbn-application--bottom-bar-bottom: var(--kbn-layout--application-bottom);
   `;
 
   // The application content is the main area where the application renders its content.

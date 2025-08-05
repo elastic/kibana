@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
@@ -193,5 +193,20 @@ describe('EditForm', () => {
         },
       })
     );
+  });
+
+  it('calls onFormMutated when settings change', async () => {
+    const onFormMutatedMock = jest.fn();
+
+    render(
+      <TestProviders>
+        <EditForm {...defaultProps} onFormMutated={onFormMutatedMock} />
+      </TestProviders>
+    );
+
+    const input = screen.getByTestId('alertsRange');
+    fireEvent.change(input, { target: { value: 'changed' } });
+
+    expect(onFormMutatedMock).toHaveBeenCalled();
   });
 });

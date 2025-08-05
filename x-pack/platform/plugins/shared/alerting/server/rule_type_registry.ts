@@ -73,6 +73,7 @@ export interface RegistryRuleType
     | 'alerts'
     | 'priority'
     | 'internallyManaged'
+    | 'autoRecoverAlerts'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -424,6 +425,8 @@ export class RuleTypeRegistry {
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
         ...(_ruleType.priority ? { priority: _ruleType.priority } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,
+        autoRecoverAlerts: _ruleType.autoRecoverAlerts,
+        internallyManaged: _ruleType.internallyManaged,
       };
 
       ruleTypesMap.set(ruleType.id, ruleType);

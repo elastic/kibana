@@ -6,8 +6,7 @@
  */
 
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { sortAndTruncateAnalyzedFields } from '@kbn/genai-utils-server/log_analysis/sort_and_truncate_analyzed_fields';
-import { analyzeDocuments } from '@kbn/genai-utils-server/log_analysis/analyze_documents';
+import { sortAndTruncateAnalyzedFields, describeDataset } from '@kbn/ai-tools';
 import { getDataStreamsForEntity } from '@kbn/observability-utils-server/entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '@kbn/observability-utils-server/entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '@kbn/observability-utils-server/entities/signals/get_slos_for_entity';
@@ -253,12 +252,12 @@ async function analyzeDataStreamsForEntity({
   dataStreams: string[];
   esClient: TracedElasticsearchClient;
 }) {
-  const analysis = await analyzeDocuments({
-    esClient,
+  const analysis = await describeDataset({
+    esClient: esClient.client,
     start,
     end,
     index: dataStreams,
-    kuery,
+    kql: kuery,
   });
 
   return {

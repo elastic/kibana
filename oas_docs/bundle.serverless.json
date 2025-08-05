@@ -136,6 +136,44 @@
                     ],
                     "type": "object"
                   },
+                  "http": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "detail": {
+                        "description": "Human readable detail of the service status.",
+                        "type": "string"
+                      },
+                      "documentationUrl": {
+                        "description": "A URL to further documentation regarding this service.",
+                        "type": "string"
+                      },
+                      "level": {
+                        "description": "Service status levels as human and machine readable values.",
+                        "enum": [
+                          "available",
+                          "degraded",
+                          "unavailable",
+                          "critical"
+                        ],
+                        "type": "string"
+                      },
+                      "meta": {
+                        "additionalProperties": {},
+                        "description": "An unstructured set of extra metadata about this service.",
+                        "type": "object"
+                      },
+                      "summary": {
+                        "description": "A human readable summary of the service status.",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "summary",
+                      "meta"
+                    ],
+                    "type": "object"
+                  },
                   "savedObjects": {
                     "additionalProperties": false,
                     "properties": {
@@ -15325,6 +15363,18 @@
                               ],
                               "type": "object"
                             },
+                            "connectors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "exporters": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "extensions": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "fleet": {
                               "anyOf": [
                                 {
@@ -15613,6 +15663,14 @@
                               },
                               "type": "object"
                             },
+                            "processors": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
+                            "receivers": {
+                              "additionalProperties": {},
+                              "type": "object"
+                            },
                             "revision": {
                               "type": "number"
                             },
@@ -15630,6 +15688,46 @@
                                 "type": "object"
                               },
                               "type": "array"
+                            },
+                            "service": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "extensions": {
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "type": "array"
+                                },
+                                "pipelines": {
+                                  "additionalProperties": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "exporters": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "processors": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "receivers": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    },
+                                    "type": "object",
+                                    "x-oas-optional": true
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
                             },
                             "signed": {
                               "additionalProperties": false,
@@ -16417,6 +16515,22 @@
                               "degraded",
                               "updating",
                               "starting"
+                            ],
+                            "type": "string"
+                          },
+                          "last_known_status": {
+                            "enum": [
+                              "offline",
+                              "error",
+                              "online",
+                              "inactive",
+                              "enrolling",
+                              "unenrolling",
+                              "unenrolled",
+                              "updating",
+                              "degraded",
+                              "uninstalled",
+                              "orphaned"
                             ],
                             "type": "string"
                           },
@@ -18515,6 +18629,22 @@
                           ],
                           "type": "string"
                         },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
+                          ],
+                          "type": "string"
+                        },
                         "local_metadata": {
                           "additionalProperties": {},
                           "type": "object"
@@ -18989,6 +19119,22 @@
                             "degraded",
                             "updating",
                             "starting"
+                          ],
+                          "type": "string"
+                        },
+                        "last_known_status": {
+                          "enum": [
+                            "offline",
+                            "error",
+                            "online",
+                            "inactive",
+                            "enrolling",
+                            "unenrolling",
+                            "unenrolled",
+                            "updating",
+                            "degraded",
+                            "uninstalled",
+                            "orphaned"
                           ],
                           "type": "string"
                         },
@@ -42392,6 +42538,122 @@
         ]
       }
     },
+    "/api/fleet/space_settings": {
+      "get": {
+        "operationId": "get-fleet-space-settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      },
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-all.",
+        "operationId": "put-fleet-space-settings",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "allowed_namespace_prefixes": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "item": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allowed_namespace_prefixes": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "managed_by": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "allowed_namespace_prefixes"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create space settings",
+        "tags": [],
+        "x-state": "Generally available"
+      }
+    },
     "/api/fleet/uninstall_tokens": {
       "get": {
         "description": "List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.",
@@ -51573,14 +51835,14 @@
                                           "ingest": {
                                             "additionalProperties": false,
                                             "properties": {
-                                              "unwired": {
+                                              "classic": {
                                                 "additionalProperties": false,
                                                 "properties": {},
                                                 "type": "object"
                                               }
                                             },
                                             "required": [
-                                              "unwired"
+                                              "classic"
                                             ],
                                             "type": "object"
                                           }
@@ -57599,14 +57861,14 @@
                           },
                           {
                             "properties": {
-                              "unwired": {
+                              "classic": {
                                 "additionalProperties": false,
                                 "properties": {},
                                 "type": "object"
                               }
                             },
                             "required": [
-                              "unwired"
+                              "classic"
                             ],
                             "type": "object"
                           }
@@ -57672,7 +57934,7 @@
                           "objects": {
                             "additionalProperties": false,
                             "properties": {
-                              "dashboards": {
+                              "streams": {
                                 "items": {
                                   "type": "string"
                                 },
@@ -57680,7 +57942,7 @@
                               }
                             },
                             "required": [
-                              "dashboards"
+                              "streams"
                             ],
                             "type": "object"
                           }
@@ -57709,12 +57971,6 @@
                   "name": {
                     "type": "string"
                   },
-                  "replaced_patterns": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
                   "version": {
                     "type": "string"
                   }
@@ -57723,7 +57979,6 @@
                   "name",
                   "description",
                   "version",
-                  "replaced_patterns",
                   "include"
                 ],
                 "type": "object"
@@ -58449,6 +58704,30 @@
             "in": "query",
             "name": "connectorId",
             "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "currentDate",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "shortLookback",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longLookback",
+            "required": false,
             "schema": {
               "type": "string"
             }

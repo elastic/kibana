@@ -6,4 +6,4 @@
  */
 
 export * from './links_hooks';
-export * from './types';
+export type * from './types';

@@ -277,6 +277,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             isInvalid={!!error}
           >
             <EuiComboBox
+              isInvalid={!!error}
               placeholder={i18n.translate(
                 'xpack.searchConnectorsattachIndexBox.euiFormRow.indexSelector.placeholder',
                 { defaultMessage: 'Select or create an index' }

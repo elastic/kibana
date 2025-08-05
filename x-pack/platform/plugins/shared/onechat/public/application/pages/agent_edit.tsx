@@ -16,10 +16,6 @@ export const OnechatAgentsEdit = () => {
   const { agentId } = useParams<{ agentId: string }>();
   useBreadcrumb([
     {
-      text: labels.chat.title,
-      path: appPaths.root,
-    },
-    {
       text: labels.agents.title,
       path: appPaths.agents.list,
     },

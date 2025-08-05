@@ -308,6 +308,11 @@ describe('action list services', () => {
               must: [
                 {
                   bool: {
+                    filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                  },
+                },
+                {
+                  bool: {
                     filter: [
                       {
                         range: {
@@ -388,6 +393,11 @@ describe('action list services', () => {
           query: {
             bool: {
               must: [
+                {
+                  bool: {
+                    filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                  },
+                },
                 {
                   bool: {
                     filter: [

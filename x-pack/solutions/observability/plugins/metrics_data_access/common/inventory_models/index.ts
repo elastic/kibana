@@ -27,13 +27,13 @@ const catalog = {
   awsRDS,
   awsSQS,
 } as const;
-
 export const inventoryModels = Object.values(catalog);
+export type InventoryModels = typeof catalog;
 
-export type InventoryModels<T extends InventoryItemType> = (typeof catalog)[T];
-
-export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
-  const model = inventoryModels.find((m) => m.id === type);
+export const findInventoryModel = <TType extends keyof InventoryModels>(
+  type: TType
+): InventoryModels[TType] => {
+  const model = catalog[type];
   if (!model) {
     throw new Error(
       i18n.translate('xpack.metricsData.inventoryModels.findInventoryModel.error', {
@@ -42,7 +42,7 @@ export const findInventoryModel = <T extends InventoryItemType>(type: T): Invent
     );
   }
 
-  return model as InventoryModels<T>;
+  return model;
 };
 
 const LEGACY_TYPES = ['host', 'pod', 'container'];

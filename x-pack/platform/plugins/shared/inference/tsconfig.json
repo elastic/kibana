@@ -18,6 +18,9 @@
     ".storybook/**/*.js"
   ],
   "kbn_references": [
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     "@kbn/i18n",
     "@kbn/esql-ast",
     "@kbn/esql-validation-autocomplete",

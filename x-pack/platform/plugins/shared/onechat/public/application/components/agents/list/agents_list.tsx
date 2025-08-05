@@ -8,23 +8,23 @@
 import React, { useMemo } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AgentProfile } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 
 export const AgentsList: React.FC = () => {
-  const { agentProfiles, isLoading, error } = useOnechatAgents();
+  const { agents, isLoading, error } = useOnechatAgents();
 
   const { createOnechatUrl } = useNavigation();
 
-  const columns: Array<EuiBasicTableColumn<AgentProfile>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(
     () => [
       {
         field: 'name',
         name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
         valign: 'top',
-        render: (name: string, item: AgentProfile) => (
+        render: (name: string, item: AgentDefinition) => (
           <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
             {name}
           </EuiLink>
@@ -39,12 +39,12 @@ export const AgentsList: React.FC = () => {
         render: (description: string) => <EuiText size="s">{description}</EuiText>,
       },
       {
-        field: 'customInstructions',
-        name: i18n.translate('xpack.onechat.agents.customInstructionsLabel', {
-          defaultMessage: 'Custom Instructions',
+        field: 'configuration.instructions',
+        name: i18n.translate('xpack.onechat.agents.instructionsLabel', {
+          defaultMessage: 'Instructions',
         }),
         valign: 'top',
-        render: (customInstructions: string) => <EuiText size="s">{customInstructions}</EuiText>,
+        render: (instructions: string) => <EuiText size="s">{instructions}</EuiText>,
       },
     ],
     [createOnechatUrl]
@@ -65,7 +65,7 @@ export const AgentsList: React.FC = () => {
       <EuiBasicTable
         loading={isLoading}
         columns={columns}
-        items={agentProfiles}
+        items={agents}
         itemId="id"
         error={errorMessage}
       />

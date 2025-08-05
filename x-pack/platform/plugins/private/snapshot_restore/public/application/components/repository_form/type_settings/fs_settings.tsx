@@ -89,6 +89,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.location}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.location)}
             defaultValue={location || ''}
             fullWidth
             onChange={(e) => {

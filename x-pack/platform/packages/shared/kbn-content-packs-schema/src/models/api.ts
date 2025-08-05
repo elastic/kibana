@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 
 export interface ContentPackIncludeObjects {
   objects: {
-    dashboards: string[];
+    streams: string[];
   };
 }
 
@@ -20,11 +20,11 @@ export interface ContentPackIncludeAll {
 export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
 
 const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ dashboards: z.array(z.string()) }),
+  objects: z.object({ streams: z.array(z.string()) }),
 });
-const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
+export const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
 
-export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
+export const isIncludeAll = (value: unknown): value is ContentPackIncludeAll => {
   return contentPackIncludeAllSchema.safeParse(value).success;
 };
 

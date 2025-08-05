@@ -54,11 +54,11 @@ export class RunnerManager {
   // arrow function is required, risks of loosing context when passed down as handler.
   getRunner = (): ScopedRunner => {
     return {
-      runTool: <TParams = Record<string, unknown>, TResult = unknown>(
+      runTool: <TParams = Record<string, unknown>>(
         toolExecutionParams: ScopedRunnerRunToolsParams<TParams>
-      ): Promise<RunToolReturn<TResult>> => {
+      ): Promise<RunToolReturn> => {
         try {
-          return runTool<TParams, TResult>({ toolExecutionParams, parentManager: this });
+          return runTool<TParams>({ toolExecutionParams, parentManager: this });
         } catch (e) {
           if (isOnechatError(e)) {
             throw e;
@@ -67,11 +67,9 @@ export class RunnerManager {
           }
         }
       },
-      runAgent: <TParams = Record<string, unknown>, TResult = unknown>(
-        agentExecutionParams: ScopedRunnerRunAgentParams<TParams>
-      ): Promise<RunAgentReturn<TResult>> => {
+      runAgent: (agentExecutionParams: ScopedRunnerRunAgentParams): Promise<RunAgentReturn> => {
         try {
-          return runAgent<TParams, TResult>({ agentExecutionParams, parentManager: this });
+          return runAgent({ agentExecutionParams, parentManager: this });
         } catch (e) {
           if (isOnechatError(e)) {
             throw e;

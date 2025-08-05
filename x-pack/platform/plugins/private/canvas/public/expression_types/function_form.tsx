@@ -255,7 +255,7 @@ export class FunctionForm extends BaseForm {
             <EuiFormRow>
               <EuiFlexGroup direction="row" gutterSize="s">
                 {removable && (
-                  <EuiToolTip position="top" content={'Remove'}>
+                  <EuiToolTip position="top" content={'Remove'} disableScreenReaderOutput>
                     <EuiButtonIcon
                       color="text"
                       onClick={() => {

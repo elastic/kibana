@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SpanIcon } from '@kbn/apm-ui-shared';
 import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -16,7 +17,6 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BetaBadge } from '../../shared/beta_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
-import { SpanIcon } from '../../shared/span_icon';
 import { ApmMainTemplate } from './apm_main_template';
 
 interface Props {

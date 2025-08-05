@@ -16,4 +16,5 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
+  AnonymizationRegexWorkerTaskPayload,
 } from './types';

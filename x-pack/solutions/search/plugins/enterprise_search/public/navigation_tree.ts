@@ -106,6 +106,18 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    { link: 'onechat:conversations' },
+                    { link: 'onechat:tools' },
+                    { link: 'onechat:agents' },
+                  ],
+                  id: 'chat',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.chat', {
+                    defaultMessage: 'Chat',
+                  }),
+                  renderAs: 'accordion',
+                },
+                {
+                  children: [
                     {
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         return (

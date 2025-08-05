@@ -8,13 +8,37 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { fromKueryExpression, toElasticsearchQuery } from '../../..';
+import {
+  DataViewBase,
+  KueryParseOptions,
+  KueryQueryOptions,
+  fromKueryExpression,
+  toElasticsearchQuery,
+} from '../../..';
+import { KqlContext } from '../../kuery/types';
 
-export function kqlQuery(kql?: string): estypes.QueryDslQueryContainer[] {
+interface ElasticsearchQueryOptions {
+  indexPattern?: DataViewBase;
+  config?: KueryQueryOptions;
+  context?: KqlContext;
+}
+
+export function kqlQuery(
+  kql?: string,
+  parseOptions: Partial<KueryParseOptions> = {},
+  esQueryOptions: Partial<ElasticsearchQueryOptions> = {}
+): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = fromKueryExpression(kql);
-  return [toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql, parseOptions);
+  return [
+    toElasticsearchQuery(
+      ast,
+      esQueryOptions.indexPattern,
+      esQueryOptions.config,
+      esQueryOptions.context
+    ),
+  ];
 }

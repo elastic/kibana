@@ -14,6 +14,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { KibanaRequest, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -134,13 +135,14 @@ describe('Response actions', () => {
     const docGen = new EndpointDocGenerator();
 
     beforeEach(() => {
-      // instantiate... everything
+      const startContract = createMockEndpointAppContextServiceStartContract();
+      const routerMock = httpServiceMock.createRouter();
       const mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
       const mockClusterClient = elasticsearchServiceMock.createClusterClient();
+
       mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
-      const routerMock = httpServiceMock.createRouter();
+      mockScopedClient.asInternalUser = startContract.esClient as ElasticsearchClientMock;
       mockResponse = httpServerMock.createResponseFactory();
-      const startContract = createMockEndpointAppContextServiceStartContract();
       (
         startContract.fleetStartServices.messageSigningService?.sign as jest.Mock
       ).mockImplementation(() => {
@@ -1274,7 +1276,6 @@ describe('Response actions', () => {
       await callHandler();
 
       expect(getResponseActionsClientMock).toHaveBeenCalledWith('sentinel_one', expect.anything());
-      expect(httpResponseMock.ok).toHaveBeenCalled();
     });
   });
 

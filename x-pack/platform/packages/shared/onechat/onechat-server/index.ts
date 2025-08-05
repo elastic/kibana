@@ -6,11 +6,7 @@
  */
 
 export type {
-  RegisteredToolMeta,
-  RegisteredTool,
-  RegisteredToolProvider,
-  EsqlToolDefinition,
-  EsqlTool,
+  BuiltinToolDefinition,
   ToolHandlerFn,
   ToolHandlerReturn,
   ToolHandlerContext,
@@ -46,9 +42,6 @@ export type {
   AgentHandlerContext,
   AgentHandlerReturn,
   AgentHandlerFn,
-  ConversationalAgentParams,
-  ConversationalAgentHandlerFn,
-  ConversationalAgentResponse,
   RunAgentFn,
   RunAgentParams,
   RunAgentReturn,
@@ -56,14 +49,4 @@ export type {
   ScopedRunnerRunAgentParams,
   AgentEventEmitter,
   RunAgentOnEventFn,
-  AgentDefinitionBase,
-  ConversationalAgentDefinition,
-  AgentDefinition,
-  AgentProvider,
-  ExecutableAgent,
-  ExecutableAgentHandlerFn,
-  ExecutableAgentHandlerParams,
-  ExecutableAgentBase,
-  ExecutableConversationalAgent,
-  AgentRegistry,
 } from './agents';

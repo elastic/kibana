@@ -72,10 +72,14 @@ export default ({ getService }: FtrProviderContext): void => {
     beforeEach(async () => {
       createdMigrations = [];
       legacyAlertsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/legacy_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+        )
       );
       outdatedAlertsIndexName = getIndexNameFromLoad(
-        await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+        )
       );
       await createAlertsIndex(supertest, log);
 
@@ -98,8 +102,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send({ migration_ids: [createdMigration.migration_id] })
         .expect(200);
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/outdated_signals_index');
-      await esArchiver.unload('x-pack/test/functional/es_archives/signals/legacy_signals_index');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/outdated_signals_index'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/signals/legacy_signals_index'
+      );
       await deleteMigrations({
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isTracingSuppressed } from '@opentelemetry/core';
+import { core } from '@elastic/opentelemetry-node/sdk';
 import { Span, context, propagation, trace } from '@opentelemetry/api';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 import { InferenceSpanAttributes } from './with_inference_span';
@@ -49,7 +49,7 @@ export function createActiveInferenceSpan<T>(
 
   let parentContext = context.active();
 
-  if (isTracingSuppressed(parentContext)) {
+  if (core.isTracingSuppressed(parentContext)) {
     return cb();
   }
 

@@ -12,17 +12,12 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { NowProviderInternalContract } from '../../now_provider';
-import {
-  calculateBounds,
-  getAbsoluteTimeRange,
-  getTime,
-  getRelativeTime,
-  RefreshInterval,
-} from '../../../common';
+import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 import { TimefilterHook, createUseTimefilterHook } from './use_timefilter';

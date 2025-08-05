@@ -98,7 +98,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: '100%',
-        height: compressed ? 64 : 48,
+        height: !compressed ? 64 : 48,
       }}
     >
       <Tooltip

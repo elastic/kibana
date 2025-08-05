@@ -155,6 +155,7 @@ export const ProcessorTypeField: FunctionComponent<Props> = ({ initialType }) =>
             data-test-subj="processorTypeSelector"
           >
             <EuiComboBox
+              isInvalid={isInvalid}
               fullWidth
               placeholder={i18n.translate(
                 'xpack.ingestPipelines.pipelineEditor.typeField.typeFieldComboboxPlaceholder',

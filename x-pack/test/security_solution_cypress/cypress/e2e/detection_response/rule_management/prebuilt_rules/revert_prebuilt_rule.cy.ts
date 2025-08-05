@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BASE_VERSION_FLYOUT } from '../../../../screens/rule_details_flyout';
+import { RULE_CUSTOMIZATIONS_DIFF_FLYOUT } from '../../../../screens/rule_details_flyout';
 import { RULE_UPGRADE_PER_FIELD_DIFF_LABEL } from '../../../../screens/rule_updates';
 import { POPOVER_ACTIONS_TRIGGER_BUTTON, RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexPatterns, getNewRule } from '../../../../objects/rule';
 import {
-  expectModifiedBadgeToNotBeDisplayed,
+  expectModifiedRuleBadgeToNotBeDisplayed,
   revertRuleFromDetailsPage,
 } from '../../../../tasks/alerts_detection_rules';
 import {
@@ -63,7 +63,7 @@ describe(
         cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
 
         revertRuleFromDetailsPage();
-        expectModifiedBadgeToNotBeDisplayed();
+        expectModifiedRuleBadgeToNotBeDisplayed();
 
         cy.get(RULE_NAME_HEADER).should('contain', 'Non-customized prebuilt rule'); // Correctly displays reverted title
       });
@@ -88,7 +88,7 @@ describe(
         patchRule('rule_1', { description: 'customized description' }); // Customize another field to iterate revision field
         revertRuleFromDetailsPage();
 
-        cy.get(BASE_VERSION_FLYOUT).should('exist'); // Flyout shouldn't be closed
+        cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist'); // Flyout shouldn't be closed
         cy.get(TOASTER_MESSAGE).should(
           'have.text',
           'Something in the rule object has changed before reversion was completed. Please review the updated diff and try again.'

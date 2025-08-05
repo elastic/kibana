@@ -9,15 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommand } from '../../../types';
 import { ICommandCallbacks } from '../../types';
-import {
-  pipeCompleteItem,
-  colonCompleteItem,
-  semiColonCompleteItem,
-} from '../../utils/complete_items';
+import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 const appendSeparatorCompletionItem: ISuggestionItem = {
   command: TRIGGER_SUGGESTION_COMMAND,
@@ -35,12 +32,23 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
+  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
+    innerText,
+    cursorPosition,
+    callbacks,
+    context
+  );
+  if (functionsSpecificSuggestions) {
+    return functionsSpecificSuggestions;
+  }
   // DISSECT field/
-  if (commandArgs.length === 1 && /\s$/.test(query)) {
+  if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
       i18n.translate('kbn-esql-ast.esql.autocomplete.aPatternString', {
@@ -60,7 +68,7 @@ export async function autocomplete(
     ];
   }
   // DISSECT field APPEND_SEPARATOR = /
-  else if (/append_separator\s*=\s*$/i.test(query)) {
+  else if (/append_separator\s*=\s*$/i.test(innerText)) {
     return [colonCompleteItem, semiColonCompleteItem];
   }
   // DISSECT field APPEND_SEPARATOR = ":" /

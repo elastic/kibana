@@ -9,8 +9,9 @@ import expect from 'expect';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
-const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
+const archiveDenseVectorIndex =
+  'x-pack/solutions/search/test/functional_search/fixtures/search-national-parks';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

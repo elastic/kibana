@@ -62,7 +62,7 @@
                   "- The current pricing tiers configuration"
                 ],
                 "signature": [
-                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
                 ],
                 "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
                 "deprecated": false,
@@ -99,7 +99,7 @@
               "\nSets the pricing tiers configuration.\n"
             ],
             "signature": [
-              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
+              "(tiers: Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>) => void"
             ],
             "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
             "deprecated": false,
@@ -115,7 +115,7 @@
                   "- The new pricing tiers configuration"
                 ],
                 "signature": [
-                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; } & { enabled: boolean; }>"
+                  "Readonly<{ products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; } & { enabled: boolean; }>"
                 ],
                 "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
                 "deprecated": false,
@@ -162,6 +162,24 @@
             "returnComment": [
               "True if the feature is available in the current pricing tier, false otherwise"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingTiersClient.getActiveProduct",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -327,6 +345,50 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.GetPricingResponseV1",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetPricingResponseV1",
+        "description": [],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.GetPricingResponseV1.tiers",
+            "type": "Object",
+            "tags": [],
+            "label": "tiers",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; }"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.GetPricingResponseV1.product_features",
+            "type": "Object",
+            "tags": [],
+            "label": "product_features",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "PricingProductFeature",
+              "; }"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
         "id": "def-common.IPricingTiersClient",
         "type": "Interface",
         "tags": [],
@@ -375,6 +437,72 @@
             "returnComment": [
               "True if the feature is available in the current pricing tier, false otherwise"
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.IPricingTiersClient.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/types.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/types.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/common/src/pricing_tiers_client.test.ts"
+              }
+            ],
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -422,11 +550,98 @@
             "label": "products",
             "description": [],
             "signature": [
-              "(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[]"
+              "(Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[]"
             ],
             "path": "src/core/packages/pricing/common/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-pricing-common",
+        "id": "def-common.PricingServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PricingServiceStart",
+        "description": [
+          "\nAPIs to access pricing tier information during the start phase.\n"
+        ],
+        "path": "src/core/packages/pricing/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingServiceStart.isFeatureAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isFeatureAvailable",
+            "description": [
+              "\nCheck if a specific feature is available based on the current pricing tier configuration.\nDelegates to the underlying {@link IPricingTiersClient.isFeatureAvailable} implementation.\n"
+            ],
+            "signature": [
+              "<TFeatureId extends string>(featureId: TFeatureId) => boolean"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [
+              "True if the feature is available in the current pricing tier, false otherwise"
+            ],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-pricing-common",
+                "id": "def-common.PricingServiceStart.isFeatureAvailable.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "featureId",
+                "description": [
+                  "- The identifier of the feature to check"
+                ],
+                "signature": [
+                  "TFeatureId"
+                ],
+                "path": "src/core/packages/pricing/common/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-pricing-common",
+            "id": "def-common.PricingServiceStart.getActiveProduct",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "() => ",
+              "PricingProduct",
+              " | undefined"
+            ],
+            "path": "src/core/packages/pricing/common/src/types.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-internal/src/pricing_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/browser-mocks/src/pricing_service.mock.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts"
+              }
+            ],
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false
@@ -436,15 +651,15 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-pricing-common",
-        "id": "def-common.PricingProduct",
+        "id": "def-common.IPricingProduct",
         "type": "Type",
         "tags": [],
-        "label": "PricingProduct",
+        "label": "IPricingProduct",
         "description": [
           "\nRepresents a product with an associated pricing tier.\nUsed to determine feature availability based on the current pricing configuration.\n"
         ],
         "signature": [
-          "Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>"
+          "Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>"
         ],
         "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
         "deprecated": false,
@@ -461,7 +676,7 @@
           "\nConfiguration for pricing tiers that determines feature availability.\nWhen enabled, features are only available if they're associated with an active product.\nWhen disabled, all features are considered available.\n"
         ],
         "signature": [
-          "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"search_ai_lake\" | \"essentials\"; }>)[] | undefined; readonly enabled: boolean; }"
+          "{ readonly products?: (Readonly<{} & { name: \"observability\"; tier: \"complete\" | \"logs_essentials\"; }> | Readonly<{} & { name: \"ai_soc\"; tier: \"search_ai_lake\"; }> | Readonly<{} & { name: \"security\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"endpoint\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }> | Readonly<{} & { name: \"cloud\"; tier: \"complete\" | \"essentials\" | \"search_ai_lake\"; }>)[] | undefined; readonly enabled: boolean; }"
         ],
         "path": "src/core/packages/pricing/common/src/pricing_tiers_config.ts",
         "deprecated": false,

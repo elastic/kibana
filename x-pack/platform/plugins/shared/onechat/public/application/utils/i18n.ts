@@ -8,7 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const labels = {
-  chat: { title: i18n.translate('xpack.onechat.root.title', { defaultMessage: 'Chat' }) },
+  conversations: {
+    title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Conversations' }),
+  },
+  tools: {
+    title: i18n.translate('xpack.onechat.tools.title', { defaultMessage: 'Tools' }),
+  },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),
     newAgent: i18n.translate('xpack.onechat.agents.new.title', { defaultMessage: 'New Agent' }),

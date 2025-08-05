@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { Section, routeToRules, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
@@ -131,12 +132,14 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
       />
       <EuiSpacer size="l" />
       <HealthContextProvider>
-        <HealthCheck waitForCheck={true}>
-          <Routes>
-            <Route exact path={routeToLogs} component={renderLogsList} />
-            <Route exact path={routeToRules} component={renderRulesList} />
-          </Routes>
-        </HealthCheck>
+        <PerformanceContextProvider>
+          <HealthCheck waitForCheck={true}>
+            <Routes>
+              <Route exact path={routeToLogs} component={renderLogsList} />
+              <Route exact path={routeToRules} component={renderRulesList} />
+            </Routes>
+          </HealthCheck>
+        </PerformanceContextProvider>
       </HealthContextProvider>
     </>
   );

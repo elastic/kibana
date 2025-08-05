@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
 import { testHasEmbeddedConsole } from './embedded_console';
@@ -20,94 +21,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const svlUserManager = getService('svlUserManager');
   let roleAuthc: RoleCredentials;
   const es = getService('es');
+  const browser = getService('browser');
+  const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   const deleteAllTestIndices = async () => {
-    await esDeleteAllIndices(['test-*']);
+    await esDeleteAllIndices(['test-*', 'search-*']);
   };
 
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225446
+  // Skip the tests until timeout flakes can be diagnosed and resolved
   describe.skip('Search Homepage', function () {
-    describe('as admin', function () {
-      before(async () => {
-        await es.indices.create({ index: 'test-my-index-001' });
-        await pageObjects.svlCommonPage.loginAsAdmin();
-      });
-
-      after(async () => {
-        await deleteAllTestIndices();
-      });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
-      });
-
-      it('goes to the home page if there exists at least one index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
-      });
-
-      describe('Elasticsearch endpoint and API Keys', function () {
-        it('renders Elasticsearch endpoint with copy functionality', async () => {
-          await testSubjects.existOrFail('copyEndpointButton');
-          await testSubjects.existOrFail('endpointValueField');
-        });
-
-        it('renders API keys buttons and active badge correctly', async () => {
-          await testSubjects.existOrFail('createApiKeyButton');
-          await testSubjects.existOrFail('manageApiKeysButton');
-          await testSubjects.existOrFail('activeApiKeysBadge');
-        });
-        it('opens API keys management page on clicking Manage API Keys', async () => {
-          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
-          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
-        });
-      });
-    });
-
-    describe('as developer', function () {
-      before(async () => {
-        await es.indices.create({ index: 'test-my-index-001' });
-        await pageObjects.svlCommonPage.loginAsDeveloper();
-      });
-
-      after(async () => {
-        await deleteAllTestIndices();
-      });
-
-      // FLAKY: https://github.com/elastic/kibana/issues/225446
-      it.skip('goes to the start page if there exists no index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
-      });
-
-      it('goes to the home page if there exists at least one index', async () => {
-        await pageObjects.common.navigateToApp('searchHomepage');
-        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
-      });
-
-      describe('Elasticsearch endpoint and API Keys', function () {
-        it('renders Elasticsearch endpoint with copy functionality', async () => {
-          await testSubjects.existOrFail('copyEndpointButton');
-          await testSubjects.existOrFail('endpointValueField');
-        });
-
-        it('renders API keys buttons and active badge correctly', async () => {
-          await testSubjects.existOrFail('createApiKeyButton');
-          await testSubjects.existOrFail('manageApiKeysButton');
-          await testSubjects.existOrFail('activeApiKeysBadge');
-        });
-        it('opens API keys management page on clicking Manage API Keys', async () => {
-          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
-          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
-        });
-      });
-    });
-
     describe('as viewer', function () {
       before(async () => {
         roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -157,6 +82,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('uploadFileButton');
           await pageObjects.svlSearchHomePage.expectToBeOnUploadDataPage();
         });
+
+        it('does not render the "Add sample data" card', async () => {
+          await testSubjects.missingOrFail('sampleDataSection');
+        });
       });
 
       describe('AI search capabilities', function () {
@@ -164,7 +93,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
           await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
           await testSubjects.click('createSemanticOptimizedIndexButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+          expect(await browser.getCurrentUrl()).contain(
+            'app/elasticsearch/indices/create?workflow=semantic'
+          );
         });
 
         it('renders Keyword Search content', async () => {
@@ -173,7 +104,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.click('aiSearchCapabilities-item-keyword');
           await testSubjects.existOrFail('createKeywordIndexButton');
           await testSubjects.click('createKeywordIndexButton');
-          await pageObjects.svlSearchHomePage.expectToBeOnCreateIndexPage();
+          expect(await browser.getCurrentUrl()).contain(
+            'app/elasticsearch/indices/create?workflow=default'
+          );
         });
       });
 
@@ -238,6 +171,147 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('giveFeedbackLink');
           await testSubjects.click('giveFeedbackLink');
           await pageObjects.svlSearchHomePage.expectToBeOnGiveFeedbackPage();
+        });
+      });
+    });
+
+    describe('as admin', function () {
+      before(async () => {
+        await es.indices.create({ index: 'test-my-index-001' });
+        await pageObjects.svlCommonPage.loginAsAdmin();
+      });
+
+      after(async () => {
+        await deleteAllTestIndices();
+      });
+
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
+        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
+      });
+
+      it('goes to the home page if there exists at least one index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
+        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      });
+
+      describe('Elasticsearch endpoint and API Keys', function () {
+        it('renders Elasticsearch endpoint with copy functionality', async () => {
+          await testSubjects.existOrFail('copyEndpointButton');
+          await testSubjects.existOrFail('endpointValueField');
+        });
+
+        it('renders API keys buttons and active badge correctly', async () => {
+          await testSubjects.existOrFail('createApiKeyButton');
+          await testSubjects.existOrFail('manageApiKeysButton');
+          await testSubjects.existOrFail('activeApiKeysBadge');
+        });
+        it('opens API keys management page on clicking Manage API Keys', async () => {
+          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
+          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+        });
+      });
+
+      describe('Sample data section', function () {
+        it('renders the sample data section', async () => {
+          await pageObjects.common.navigateToApp('searchHomepage');
+          await testSubjects.existOrFail('sampleDataSection');
+          await testSubjects.existOrFail('installSampleBtn');
+        });
+
+        describe('when sample-data-elasticsearch index exists', function () {
+          before(async () => {
+            await es.indices.create({ index: 'sample-data-elasticsearch' });
+            await pageObjects.common.navigateToApp('searchHomepage');
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(['sample-data-elasticsearch']);
+          });
+
+          it('renders the "View data" button', async () => {
+            await testSubjects.existOrFail('viewDataBtn');
+          });
+        });
+      });
+    });
+
+    describe('as developer', function () {
+      before(async () => {
+        await es.indices.create({ index: 'test-my-index-001' });
+        await pageObjects.svlCommonPage.loginAsDeveloper();
+      });
+
+      after(async () => {
+        await deleteAllTestIndices();
+      });
+
+      // FLAKY: https://github.com/elastic/kibana/issues/225446
+      it.skip('goes to the start page if there exists no index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
+        await pageObjects.svlSearchHomePage.expectToBeOnStartpage();
+      });
+
+      it('goes to the home page if there exists at least one index', async () => {
+        await pageObjects.common.navigateToApp('searchHomepage');
+        await pageObjects.svlSearchHomePage.expectToBeOnHomepage();
+      });
+
+      describe('AI search capabilities', function () {
+        it('renders Semantic Search content', async () => {
+          await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
+          await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
+          await testSubjects.click('createSemanticOptimizedIndexButton');
+          expect(await browser.getCurrentUrl()).contain(
+            'app/elasticsearch/indices/create?workflow=semantic'
+          );
+          await testSubjects.existOrFail('createIndexBtn');
+          expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+          await testSubjects.click('createIndexBtn');
+          await retry.tryForTime(60 * 1000, async () => {
+            expect(await browser.getCurrentUrl()).contain('data?workflow=semantic');
+          });
+        });
+      });
+
+      describe('Elasticsearch endpoint and API Keys', function () {
+        it('renders Elasticsearch endpoint with copy functionality', async () => {
+          await testSubjects.existOrFail('copyEndpointButton');
+          await testSubjects.existOrFail('endpointValueField');
+        });
+
+        it('renders API keys buttons and active badge correctly', async () => {
+          await testSubjects.existOrFail('createApiKeyButton');
+          await testSubjects.existOrFail('manageApiKeysButton');
+          await testSubjects.existOrFail('activeApiKeysBadge');
+        });
+        it('opens API keys management page on clicking Manage API Keys', async () => {
+          await pageObjects.svlSearchHomePage.clickManageApiKeysLink();
+          await pageObjects.svlSearchHomePage.expectToBeOnManageApiKeysPage();
+        });
+      });
+
+      describe('Sample data section', function () {
+        it('renders the sample data section', async () => {
+          await pageObjects.common.navigateToApp('searchHomepage');
+          await testSubjects.existOrFail('sampleDataSection');
+          await testSubjects.existOrFail('installSampleBtn');
+        });
+
+        describe('when sample-data-elasticsearch index exists', function () {
+          before(async () => {
+            await es.indices.create({ index: 'sample-data-elasticsearch' });
+            await pageObjects.common.navigateToApp('searchHomepage');
+          });
+
+          after(async () => {
+            await esDeleteAllIndices(['sample-data-elasticsearch']);
+          });
+
+          it('renders the "View data" button', async () => {
+            await testSubjects.existOrFail('viewDataBtn');
+          });
         });
       });
     });

@@ -104,7 +104,11 @@ export function TimeSliderPopoverContent({
       }}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={anchorStartToggleButtonLabel} position="left">
+        <EuiToolTip
+          content={anchorStartToggleButtonLabel}
+          position="left"
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             iconType={isAnchored ? 'pinFilled' : 'pin'}
             onClick={() => {

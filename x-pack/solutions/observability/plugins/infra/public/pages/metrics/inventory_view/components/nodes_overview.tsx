@@ -67,7 +67,7 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId, assetType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId, entityType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
 
   const nodeName = useMemo(
@@ -79,7 +79,7 @@ export const NodesOverview = ({
     () =>
       setFlyoutUrlState({
         detailsItemId: null,
-        assetType: null,
+        entityType: null,
       }),
     [setFlyoutUrlState]
   );
@@ -145,11 +145,11 @@ export const NodesOverview = ({
           currentTime={currentTime}
           onFilter={handleDrilldown}
         />
-        {nodeType === assetType && detailsItemId && (
+        {nodeType === entityType && detailsItemId && (
           <AssetDetailsFlyout
-            assetId={detailsItemId}
-            assetName={nodeName}
-            assetType={nodeType}
+            entityId={detailsItemId}
+            entityName={nodeName}
+            entityType={nodeType}
             closeFlyout={closeFlyout}
             currentTime={currentTime}
             isAutoReloading={isAutoReloading}
@@ -174,11 +174,11 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
-      {nodeType === assetType && detailsItemId && (
+      {nodeType === entityType && detailsItemId && (
         <AssetDetailsFlyout
-          assetId={detailsItemId}
-          assetName={nodeName}
-          assetType={nodeType}
+          entityId={detailsItemId}
+          entityName={nodeName}
+          entityType={nodeType}
           closeFlyout={closeFlyout}
           currentTime={currentTime}
           isAutoReloading={isAutoReloading}

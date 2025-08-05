@@ -10,8 +10,13 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { PrivMonHealthResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/health.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -38,17 +43,16 @@ export const healthCheckPrivilegeMonitoringRoute = (
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
+        await assertAdvancedSettingsEnabled(
+          await context.core,
+          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+        );
+
         try {
           const body = await secSol.getPrivilegeMonitoringDataClient().getEngineStatus();
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
-
-          if (error?.statusCode === 404) {
-            return response.ok({
-              body: { status: 'not_found' },
-            });
-          }
 
           logger.error(`Error checking privilege monitoring health: ${error.message}`);
           return siemResponse.error({

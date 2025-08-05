@@ -12,7 +12,9 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/esql-ast",
+    "@kbn/sse-utils"
   ],
   "exclude": [
     "target/**/*"

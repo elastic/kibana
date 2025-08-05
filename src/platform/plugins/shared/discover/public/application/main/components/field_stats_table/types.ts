@@ -18,7 +18,6 @@ import type {
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {
@@ -172,10 +171,6 @@ export interface FieldStatisticsTableProps {
    * Search session id to save to or restore from
    */
   searchSessionId?: string;
-  /**
-   * Additional field groups (e.g. Smart Fields)
-   */
-  additionalFieldGroups?: AdditionalFieldGroups;
   /**
    * If table should query using ES|QL
    */

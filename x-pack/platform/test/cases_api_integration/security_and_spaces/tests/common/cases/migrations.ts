@@ -136,11 +136,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.11.1 saved object to the latest version
     describe('7.11.1 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.11.1');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1'
+        );
       });
 
       it('adds rule info to only alert comments for 7.12', async () => {
@@ -187,11 +189,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       describe('owner field', () => {
@@ -281,11 +285,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.16.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        );
       });
 
       describe('resolve', () => {
@@ -353,12 +359,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     describe('8.0 id migration', () => {
       describe('awesome space', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.16.0_space');
+          await esArchiver.load(
+            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
+          );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/cases/migrations/7.16.0_space'
+            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
           );
         });
 

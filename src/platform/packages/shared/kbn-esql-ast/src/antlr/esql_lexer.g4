@@ -67,7 +67,6 @@ import ChangePoint,
        Lookup,
        MvExpand,
        Project,
-       Rrf,
        Rename,
        Show,
        UnknownCommand;

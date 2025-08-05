@@ -12,11 +12,10 @@ export { createScoutConfig } from './config';
 export { getEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
-export { getLogger } from './logger';
 
 export type { KibanaUrl } from './kibana_url';
 export type { SamlSessionManager } from '@kbn/test';
-export type { ScoutLogger } from './logger';
+export { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/test';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export { createCustomRole, createElasticsearchCustomRole } from './custom_role';

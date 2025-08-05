@@ -21,7 +21,6 @@ const updatedDashboard = {
         type: 'visualization',
         gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
         panelIndex: '1',
-        panelRefName: 'panel_1',
         version: '7.3.0',
       },
     ],

@@ -18,7 +18,8 @@ import type {
 } from '../../../../../../common/api/detection_engine/prebuilt_rules/bootstrap_prebuilt_rules/bootstrap_prebuilt_rules.gen';
 import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
-import { PROMOTION_RULE_TAG } from '../../../../../../common/constants';
+import { PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 interface InstallPromotionRulesParams {
   rulesClient: RulesClient;
@@ -70,7 +71,7 @@ export async function installPromotionRules({
   const latestPromotionRules = latestRuleAssets.filter((rule) => {
     // Rule should be tagged as 'Promotion' and should be related to an enabled integration
     return (
-      (rule.tags ?? []).includes(PROMOTION_RULE_TAG) &&
+      isPromotionRule(rule) &&
       rule.related_integrations?.some((integration) =>
         installedIntegrations.has(integration.package)
       )
@@ -145,4 +146,8 @@ export async function installPromotionRules({
     skipped: alreadyUpToDate.length,
     errors: allErrors.size > 0 ? Array.from(allErrors.values()) : [],
   };
+}
+
+function isPromotionRule(rule: PrebuiltRuleAsset): boolean {
+  return (rule.tags ?? []).some((tag) => PROMOTION_RULE_TAGS.includes(tag));
 }

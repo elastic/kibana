@@ -13,8 +13,7 @@ import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { SynthtraceClients } from './get_clients';
+import { SynthtraceClientTypes } from './clients_manager';
 import { startPerformanceLogger } from './performance_logger';
 import { runWorker } from './workers/run_worker';
 import { logMessage } from './workers/log_message';
@@ -31,14 +30,12 @@ export async function startLiveDataUpload({
 }) {
   const files = runOptions.files;
 
-  const clientsPerIndices = new Map<string, string>();
+  const clientsPerIndices = new Map<string, SynthtraceClientTypes>();
 
   const { logger, clients } = await bootstrap(runOptions);
 
   Object.entries(clients).forEach(([key, client]) => {
-    if (client instanceof SynthtraceEsClient) {
-      clientsPerIndices.set(client.getAllIndices().join(','), key);
-    }
+    clientsPerIndices.set(client.getAllIndices().join(','), key as SynthtraceClientTypes);
   });
 
   const scenarios = await Promise.all(
@@ -87,11 +84,9 @@ export async function startLiveDataUpload({
         if (!indices) return;
 
         const clientName = clientsPerIndices.get(indices);
-        const client = clientName && clients[clientName as keyof SynthtraceClients];
+        const client = clientName ? clients[clientName] : undefined;
 
-        if (client instanceof SynthtraceEsClient) {
-          await client.refresh();
-        }
+        await client?.refresh();
       })
     );
   }

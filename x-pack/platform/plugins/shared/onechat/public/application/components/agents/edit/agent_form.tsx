@@ -20,7 +20,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentProfile } from '@kbn/onechat-common';
+import { AgentDefinition } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -33,7 +34,7 @@ export interface AgentFormProps {
   agentId?: string;
 }
 
-type AgentFormData = Omit<AgentProfile, 'createdAt' | 'updatedAt'>;
+type AgentFormData = Omit<AgentDefinition, 'type'>;
 
 export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
@@ -57,15 +58,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   };
 
   const onSaveError = (err: Error) => {
-    const errorMessage = isCreateMode
+    const errorMessageTitle = isCreateMode
       ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
           defaultMessage: 'Failed to create agent',
         })
       : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
           defaultMessage: 'Failed to update agent',
         });
-    notifications.toasts.addError(err, {
-      title: errorMessage,
+
+    notifications.toasts.addDanger({
+      title: errorMessageTitle,
+      text: formatOnechatErrorMessage(err),
     });
   };
 
@@ -79,10 +82,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
       navigateToOnechatUrl(appPaths.agents.list);
     },
     onError: (err: Error) => {
-      notifications.toasts.addError(err, {
+      notifications.toasts.addDanger({
         title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
           defaultMessage: 'Failed to delete agent',
         }),
+        text: formatOnechatErrorMessage(err),
       });
     },
   });
@@ -173,9 +177,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                 defaultMessage: 'Agent ID is required',
               }),
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled || !isCreateMode}
                 placeholder={
                   isCreateMode
@@ -204,9 +209,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
                 defaultMessage: 'Agent name is required',
               }),
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled}
                 isInvalid={!!formState.errors.name}
               />
@@ -221,9 +227,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           <Controller
             name="description"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiFieldText
-                {...field}
+                {...rest}
+                inputRef={ref}
                 disabled={isFormDisabled}
                 isInvalid={!!formState.errors.description}
               />
@@ -236,14 +243,15 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
           })}
         >
           <Controller
-            name="customInstructions"
+            name="configuration.instructions"
             control={control}
-            render={({ field }) => (
+            render={({ field: { ref, ...rest } }) => (
               <EuiTextArea
-                {...field}
+                {...rest}
+                inputRef={ref}
                 rows={4}
                 disabled={isFormDisabled}
-                isInvalid={!!formState.errors.customInstructions}
+                isInvalid={!!formState.errors.configuration?.instructions}
               />
             )}
           />
@@ -259,7 +267,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
         </EuiTitle>
         <EuiSpacer size="l" />
         <Controller
-          name="toolSelection"
+          name="configuration.tools"
           control={control}
           render={({ field }) => (
             <ToolsSelection

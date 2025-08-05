@@ -9,16 +9,8 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import type { MetricSchema } from '../../../common/constants';
-import {
-  DATASTREAM_DATASET,
-  EVENT_MODULE,
-  METRICSET_MODULE,
-  METRIC_SCHEMA_ECS,
-  METRIC_SCHEMA_SEMCONV,
-  OTEL_RECEIVER_DATASET_VALUE,
-  SYSTEM_INTEGRATION,
-} from '../../../common/constants';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DATASTREAM_DATASET, EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
@@ -37,17 +29,11 @@ import {
 import type { InfraSource } from '../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { integrationNameByEntityType } from '../../lib/sources/constants';
 
 const defaultStatus = {
   metricIndicesExist: false,
   remoteClustersExist: false,
-};
-
-const integrationNameBySource: Record<string, { beats: string; otel: string }> = {
-  host: {
-    beats: SYSTEM_INTEGRATION,
-    otel: OTEL_RECEIVER_DATASET_VALUE,
-  },
 };
 
 export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => {
@@ -223,7 +209,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { dataSource: integration } = request.query;
+        const { entityType: integration } = request.query;
 
         const infraMetricsClient = await getInfraMetricsClient({
           request,
@@ -231,7 +217,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const source = integration ? integrationNameBySource[integration] : undefined;
+        const source = integration ? integrationNameByEntityType[integration] : undefined;
 
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
@@ -289,7 +275,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           libs,
           context,
         });
-        const source = integrationNameBySource[dataSource];
+        const source = integrationNameByEntityType[dataSource];
 
         const [ecsResponse, otelResponse] = (
           await infraMetricsClient.msearch([
@@ -329,14 +315,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
         return response.ok({
           body: getTimeRangeMetadataResponseRT.encode({
-            schemas: ([METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV] as MetricSchema[]).filter(
-              (key) => {
-                return (
-                  (key === METRIC_SCHEMA_ECS && hasEcsData) ||
-                  (key === METRIC_SCHEMA_SEMCONV && hasOtelData)
-                );
-              }
-            ),
+            schemas: (
+              [DataSchemaFormat.ECS, DataSchemaFormat.SEMCONV] as DataSchemaFormat[]
+            ).filter((key) => {
+              return (
+                (key === DataSchemaFormat.ECS && hasEcsData) ||
+                (key === DataSchemaFormat.SEMCONV && hasOtelData)
+              );
+            }),
           }),
         });
       } catch (err) {

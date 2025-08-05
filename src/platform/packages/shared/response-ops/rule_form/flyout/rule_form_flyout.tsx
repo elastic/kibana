@@ -22,14 +22,14 @@ const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy((
   import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
+const inLineContainerCss = css`
+  container-type: inline-size;
+`;
+
 const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
-
-  const inLineContainerCss = css`
-    container-type: inline-size;
-  `;
 
   const onClose = useCallback(() => {
     // If onClickClose has been initialized, call it instead of onCancel. onClickClose should be used to

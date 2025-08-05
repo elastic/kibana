@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/genai-utils-server",
-  "owner": "@elastic/obs-knowledge-team",
-  "group": "platform",
-  "visibility": "shared"
-}

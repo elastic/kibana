@@ -20,7 +20,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -178,12 +178,16 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     useSourcererDataView(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(sourcererScope);
+  const { dataView: experimentalDataView } = useDataView(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const runtimeMappings = useMemo(
+    () =>
+      newDataViewPickerEnabled
+        ? experimentalDataView.getRuntimeMappings()
+        : (oldSourcererDataView.runtimeFieldMap as RunTimeMappings),
+    [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataView]
+  );
 
-  const sourcererDataView = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const license = useLicense();
@@ -213,11 +217,12 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   }, [inputFilters, globalFilters, timeRangeFilter]);
 
   const combinedQuery = useMemo(() => {
-    if (browserFields != null && sourcererDataView) {
+    if (browserFields != null && (oldSourcererDataView || experimentalDataView)) {
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        dataViewSpec: sourcererDataView,
+        dataViewSpec: oldSourcererDataView,
+        dataView: experimentalDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -225,7 +230,14 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       });
     }
     return null;
-  }, [browserFields, globalQuery, sourcererDataView, uiSettings, allFilters]);
+  }, [
+    browserFields,
+    oldSourcererDataView,
+    uiSettings,
+    experimentalDataView,
+    allFilters,
+    globalQuery,
+  ]);
 
   useInvalidFilterQuery({
     id: tableType,
@@ -454,7 +466,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               additionalContext={additionalContext}
               height={alertTableHeight}
               initialPageSize={50}
-              runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
+              runtimeMappings={runtimeMappings}
               toolbarVisibility={toolbarVisibility}
               renderCellValue={CellValue}
               renderActionsCell={ActionsCell}

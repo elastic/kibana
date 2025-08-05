@@ -97,6 +97,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.uri}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.uri)}
             prepend={
               <EuiText size="s" id="hdfsRepositoryUriProtocolDescription">
                 {/* Wrap as string due to prettier not parsing `//` inside JSX correctly (prettier/prettier#2347) */}
@@ -148,6 +149,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.path}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.path)}
             defaultValue={path || ''}
             fullWidth
             onChange={(e) => {
@@ -286,6 +288,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.securityPrincipal}
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.securityPrincipal)}
             defaultValue={securityPrincipal || ''}
             fullWidth
             onChange={(e) => {

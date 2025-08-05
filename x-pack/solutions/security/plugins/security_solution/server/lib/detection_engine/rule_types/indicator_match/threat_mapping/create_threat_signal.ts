@@ -84,8 +84,9 @@ export const createThreatSignal = async ({
       threatFilters,
       threatIndicatorPath,
       pitId: threatPitId,
-      reassignPitId: reassignThreatPitId,
+      reassignThreatPitId,
       threatIndexFields,
+      allowedFieldsForTermsQuery,
     });
 
     let result: SearchAfterAndBulkCreateReturnType;

@@ -18,7 +18,7 @@ import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
 import { OptimizerConfig, Limits } from './optimizer';
 
-const DEFAULT_BUDGET = 15000;
+const DEFAULT_BUDGET_FRACTION = 0.1;
 
 const diff = <T>(a: T[], b: T[]): T[] => a.filter((item) => !b.includes(item));
 
@@ -123,13 +123,16 @@ export function updateBundleLimits({
     : limits.pageLoadAssetSize ?? {};
 
   for (const metric of metrics) {
-    if (metric.group === 'page load bundle size') {
-      const existingLimit = limits.pageLoadAssetSize?.[metric.id];
-      pageLoadAssetSize[metric.id] =
-        existingLimit != null && existingLimit >= metric.value
-          ? existingLimit
-          : metric.value + DEFAULT_BUDGET;
-    }
+    if (metric.group !== 'page load bundle size') continue;
+
+    const existingLimit = limits.pageLoadAssetSize?.[metric.id];
+    const newLimit = Math.floor(metric.value * (1 + DEFAULT_BUDGET_FRACTION)); // 110% of value
+
+    // Update the limit if the value exeeds the limit or if the limit is way too high (more than 110% of value)
+    const shouldKeepExisting =
+      existingLimit != null && existingLimit >= metric.value && existingLimit < newLimit;
+
+    pageLoadAssetSize[metric.id] = shouldKeepExisting ? existingLimit : newLimit;
   }
 
   const newLimits: Limits = {

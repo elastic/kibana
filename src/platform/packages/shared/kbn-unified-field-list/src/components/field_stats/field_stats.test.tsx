@@ -34,6 +34,18 @@ const mockedServices = {
   uiSettings: coreMock.createStart().uiSettings,
 };
 
+// Similar to wrapper.text() but filtered by a selector
+export const getChildrenTextBySelector = (wrapper: ReactWrapper, selector: string) => {
+  let text = '';
+  const children = wrapper.find(selector);
+
+  children.forEach((element) => {
+    text += element.text();
+  });
+
+  return text;
+};
+
 describe('UnifiedFieldList FieldStats', () => {
   let defaultProps: FieldStatsWithKbnQuery;
   let dataView: DataView;
@@ -433,8 +445,12 @@ describe('UnifiedFieldList FieldStats', () => {
       'Calculated from 1624 records.'
     );
 
-    expect(wrapper.text()).toBe(
-      'Top values"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.'
+    expect(wrapper.text()).toContain('Top values');
+
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
+
+    expect(text).toBe(
+      '"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%'
     );
   });
 
@@ -506,8 +522,16 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(wrapper.text()).toBe(
-      'Examples"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%Calculated from 1624 records.'
+    expect(wrapper.text()).toContain('Examples');
+
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
+
+    expect(text).toBe(
+      '"success"41.5%"info"37.1%"security"10.1%"warning"5.0%"error"3.4%"login"2.7%'
+    );
+
+    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
+      'Calculated from 1624 records.'
     );
   });
 
@@ -694,8 +718,14 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(loadFieldStats).toHaveBeenCalledTimes(1);
 
-    expect(wrapper.text()).toBe(
-      'Toggle either theTop valuesDistribution1273.9%1326.1%Calculated from 23 sample records.'
+    expect(wrapper.text()).toContain('Toggle either theTop valuesDistribution');
+
+    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
+
+    expect(text).toBe('1273.9%1326.1%');
+
+    expect(wrapper.find('[data-test-subj="testing-statsFooter"]').first().text()).toBe(
+      'Calculated from 23 sample records.'
     );
   });
 

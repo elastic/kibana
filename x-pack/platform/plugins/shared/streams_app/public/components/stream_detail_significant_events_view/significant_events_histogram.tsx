@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TickFormatter } from '@elastic/charts';
 import { SparkPlot, SparkPlotAnnotation } from '../spark_plot';
-import { FormattedChangePoint } from './change_point';
+import { FormattedChangePoint } from './utils/change_point';
 import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
 
 interface Props {
@@ -47,6 +47,7 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
       type="bar"
       annotations={annotations}
       xFormatter={xFormatter}
+      compressed
     />
   );
 }

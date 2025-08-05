@@ -6,9 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { SupportedDataSources } from '../../../../common/metrics_sources/get_has_data';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -24,15 +22,11 @@ import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { PageTitleWithPopover } from '../header/page_title_with_popover';
 
-const DATA_SOURCE_PER_TYPE: Partial<Record<InventoryItemType, SupportedDataSources>> = {
-  host: 'host',
-};
-
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
   const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs: headerBreadcrumbs } = usePageHeader(tabs, links);
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { entity } = useAssetDetailsRenderPropsContext();
   const trackOnlyOnce = React.useRef(false);
   const { activeTabId } = useTabSwitcherContext();
   const {
@@ -40,14 +34,14 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   } = useKibanaContextForPlugin();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
-  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(asset.type);
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
   useMetricsBreadcrumbs([
     {
       ...breadcrumbOptions.link,
       text: breadcrumbOptions.text,
     },
     {
-      text: asset.name,
+      text: entity.name,
     },
   ]);
 
@@ -59,7 +53,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
-        assetType: asset.type,
+        assetType: entity.type,
         tabId: activeTabId,
       };
 
@@ -73,26 +67,26 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, entity.type, metadata, metadataLoading, telemetry]);
 
   return (
     <InfraPageTemplate
-      onboardingFlow={asset.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
-      dataSourceAvailability={DATA_SOURCE_PER_TYPE[asset.type] || undefined}
+      onboardingFlow={entity.type === 'host' ? OnboardingFlow.Hosts : OnboardingFlow.Infra}
+      dataSourceAvailability={entity.type === 'host' ? 'host' : undefined}
       pageHeader={{
         pageTitle: loading ? (
           <EuiLoadingSpinner size="m" />
-        ) : asset.type === 'host' ? (
-          <PageTitleWithPopover name={asset.name} />
+        ) : entity.type === 'host' ? (
+          <PageTitleWithPopover name={entity.name} />
         ) : (
-          asset.name
+          entity.name
         ),
         tabs: tabEntries,
         rightSideItems,
         breadcrumbs: headerBreadcrumbs,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
-      data-asset-type={asset.type}
+      data-asset-type={entity.type}
     >
       <Content />
     </InfraPageTemplate>

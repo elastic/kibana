@@ -195,7 +195,7 @@ describe('isExistingDateGtEqThanAlert', () => {
           _source: { [ALERT_SUPPRESSION_START]: '2020-10-28T05:42:00.000Z' },
           _id: 'a1',
           _index: 'test-index',
-        } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+        } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
         {
           _id: 'alert-a',
           _source: {
@@ -215,7 +215,7 @@ describe('isExistingDateGtEqThanAlert', () => {
           _source: { [ALERT_SUPPRESSION_START]: '2020-10-28T05:50:00.000Z' },
           _id: 'a1',
           _index: 'test-index',
-        } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+        } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
         {
           _id: 'alert-a',
           _source: {
@@ -235,7 +235,7 @@ describe('isExistingDateGtEqThanAlert', () => {
           _source: { [ALERT_SUPPRESSION_START]: '2020-10-28T05:42:00.000Z' },
           _id: 'a1',
           _index: 'test-index',
-        } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+        } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
         {
           _id: 'alert-a',
           _source: {
@@ -256,7 +256,7 @@ describe('getUpdatedSuppressionBoundaries', () => {
         _source: { [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z' },
         _id: 'a1',
         _index: 'test-index',
-      } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+      } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
       {
         _id: 'alert-a',
         _source: {
@@ -275,7 +275,7 @@ describe('getUpdatedSuppressionBoundaries', () => {
         _source: { [ALERT_SUPPRESSION_END]: '2020-10-28T05:00:00.000Z' },
         _id: 'a1',
         _index: 'test-index',
-      } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+      } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
       {
         _id: 'alert-a',
         _source: {
@@ -297,7 +297,7 @@ describe('getUpdatedSuppressionBoundaries', () => {
         },
         _id: 'a1',
         _index: 'test-index',
-      } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+      } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
       {
         _id: 'alert-a',
         _source: {
@@ -319,7 +319,7 @@ describe('getUpdatedSuppressionBoundaries', () => {
         },
         _id: 'a1',
         _index: 'test-index',
-      } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+      } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
       {
         _id: 'alert-a',
         _source: {
@@ -341,7 +341,7 @@ describe('getUpdatedSuppressionBoundaries', () => {
         },
         _id: 'a1',
         _index: 'test-index',
-      } as estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+      } as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
       {
         _id: 'alert-a',
         _source: {

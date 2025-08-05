@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ??? Should we migrate
-#     x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space
+#     x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0_space
 # ### Yes, it needs migration
 #   ### Saved Object type(s) that we care about:
 #     index-pattern
@@ -39,12 +39,26 @@ list_stragglers() {
   echo
 
   echo "### X-PACK"
+  # Search in x-pack/platform/test/fixtures/es_archives
   while read -r y; do
     local b=$(grep -l '"index": ".kibana' "$y")
     if [ -n "$b" ]; then
       echo "${b%/mappings.json}"
     fi
-  done <<<"$(find x-pack/test/functional/es_archives -name mappings.json)"
+  done <<<"$(find x-pack/platform/test/fixtures/es_archives -name mappings.json)"
+
+  # Also search in x-pack/solutions/{solution}/test/fixtures/es_archives for each solution
+  for solution in search security chat observability; do
+    solution_dir="x-pack/solutions/${solution}/test/fixtures/es_archives"
+    if [ -d "$solution_dir" ]; then
+      while read -r y; do
+        local b=$(grep -l '"index": ".kibana' "$y")
+        if [ -n "$b" ]; then
+          echo "${b%/mappings.json}"
+        fi
+      done <<<"$(find "$solution_dir" -name mappings.json)"
+    fi
+  done
 
 }
 
@@ -350,7 +364,7 @@ migrate() {
 
 load_logstash() {
   set -x
-  node scripts/es_archiver.js load x-pack/test/functional/es_archives/logstash_functional --config "$test_config"
+  node scripts/es_archiver.js load x-pack/platform/test/fixtures/es_archives/logstash_functional --config "$test_config"
   set +x
 }
 
