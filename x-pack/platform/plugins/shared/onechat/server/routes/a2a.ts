@@ -11,12 +11,11 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { ONECHAT_A2A_SERVER_UI_SETTING_ID } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
-import { KibanaA2AAdapter } from '../utils/kibana_a2a_adapter';
+import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
 const A2A_SERVER_PATH = '/api/chat/a2a';
-const A2A_AGENT_CARD_PATH = '/.well-known/agent.json';
 
 export function registerA2ARoutes({
   router,
@@ -26,24 +25,16 @@ export function registerA2ARoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  // Initialize the Kibana A2A adapter that uses the official @a2a-js/sdk
   const getBaseUrl = () => {
-    const protocol = coreSetup.http.getServerInfo().protocol;
-    const hostname = coreSetup.http.getServerInfo().hostname;
-    const port = coreSetup.http.getServerInfo().port;
+    const { protocol, hostname, port } = coreSetup.http.getServerInfo();
     return `${protocol}://${hostname}:${port}`;
   };
 
-  const a2aAdapter = new KibanaA2AAdapter({
-    logger,
-    getInternalServices,
-    getBaseUrl,
-  });
+  const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
 
-  // Serve the agent card at the well-known location
   router.versioned
     .get({
-      path: A2A_AGENT_CARD_PATH,
+      path: `${A2A_SERVER_PATH}/{agentId}.json`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -60,20 +51,25 @@ export function registerA2ARoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            params: schema.object({
+              agentId: schema.string(),
+            }),
+          },
+        },
       },
       wrapHandler(
         async (ctx, request, response) => {
-          return await a2aAdapter.handleAgentCardRequest(request, response);
+          return await a2aAdapter.handleAgentCardRequest(request, response, request.params.agentId);
         },
         { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
       )
     );
 
-  // Handle A2A task submissions
   router.versioned
     .post({
-      path: A2A_SERVER_PATH,
+      path: `${A2A_SERVER_PATH}/{agentId}`,
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
@@ -93,43 +89,17 @@ export function registerA2ARoutes({
         version: '2023-10-31',
         validate: {
           request: {
+            params: schema.object({
+              agentId: schema.string(),
+            }),
             body: schema.object({}, { unknowns: 'allow' }),
           },
         },
       },
       wrapHandler(
         async (ctx, request, response) => {
-          return await a2aAdapter.handleA2ARequest(request, response);
-        },
-        { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
-      )
-    );
-
-  // Handle unsupported methods
-  router.versioned
-    .get({
-      path: A2A_SERVER_PATH,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      access: 'public',
-      summary: 'A2A Server - Unsupported Method',
-      description: 'A2A Server only supports POST requests',
-      options: {
-        tags: ['a2a'],
-        availability: {
-          stability: 'experimental',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-      },
-      wrapHandler(
-        async (ctx, request, response) => {
-          return await a2aAdapter.handleUnsupportedRequest(request, response);
+          const { agentId } = request.params;
+          return await a2aAdapter.handleA2ARequest(request, response, agentId);
         },
         { featureFlag: ONECHAT_A2A_SERVER_UI_SETTING_ID }
       )
