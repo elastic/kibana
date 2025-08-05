@@ -233,3 +233,4 @@ export const WorkflowYamlSchema = z.object({
 });
 
 export type WorkflowYaml = z.infer<typeof WorkflowYamlSchema>;
+export type WorkflowSchema = z.infer<typeof WorkflowSchema>;
