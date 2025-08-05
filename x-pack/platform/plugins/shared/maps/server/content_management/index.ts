@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-export type { 
+export type {
+  AbstractESAggSourceDescriptor,
+  AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor
-} from './schema/v1/types'; 
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+} from './schema/v1/types';
 
 export { MapsStorage } from './maps_storage';

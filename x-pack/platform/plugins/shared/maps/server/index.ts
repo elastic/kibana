@@ -10,8 +10,11 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
 export type {
+  AbstractESAggSourceDescriptor,
+  AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
 } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {

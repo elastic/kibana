@@ -49,6 +49,10 @@ export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
 }
 
+const DEFAULT_APPLY_GLOBAL_QUERY = true;
+const DEFAULT_APPLY_GLOBAL_TIME = true;
+const DEFAULT_APPLY_FORCE_REFRESH = true;
+
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
   indexPattern?: DataView;
 
@@ -65,15 +69,20 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
-      type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
-        typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
+        typeof descriptor.applyGlobalQuery !== 'undefined'
+          ? descriptor.applyGlobalQuery
+          : DEFAULT_APPLY_GLOBAL_QUERY,
       applyGlobalTime:
-        typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
+        typeof descriptor.applyGlobalTime !== 'undefined'
+          ? descriptor.applyGlobalTime
+          : DEFAULT_APPLY_GLOBAL_TIME,
       applyForceRefresh:
-        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
-    };
+        typeof descriptor.applyForceRefresh !== 'undefined'
+          ? descriptor.applyForceRefresh
+          : DEFAULT_APPLY_FORCE_REFRESH,
+    } as AbstractESSourceDescriptor;
   }
 
   constructor(descriptor: AbstractESSourceDescriptor) {
@@ -90,15 +99,15 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getApplyGlobalQuery(): boolean {
-    return this._descriptor.applyGlobalQuery;
+    return this._descriptor.applyGlobalQuery ?? DEFAULT_APPLY_GLOBAL_QUERY;
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.applyGlobalTime;
+    return this._descriptor.applyGlobalTime ?? DEFAULT_APPLY_GLOBAL_TIME;
   }
 
   getApplyForceRefresh(): boolean {
-    return this._descriptor.applyForceRefresh;
+    return this._descriptor.applyForceRefresh ?? DEFAULT_APPLY_FORCE_REFRESH;
   }
 
   isQueryAware(): boolean {
@@ -332,10 +341,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getGeoFieldName(): string {
-    if (!this._descriptor.geoField) {
-      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
-    }
-    return this._descriptor.geoField;
+    throw new Error('Must implement IESSource#getGeoFieldName');
   }
 
   async getIndexPattern(): Promise<DataView> {

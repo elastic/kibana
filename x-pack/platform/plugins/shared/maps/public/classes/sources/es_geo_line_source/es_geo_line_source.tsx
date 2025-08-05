@@ -111,6 +111,10 @@ export class ESGeoLineSource extends AbstractESAggSource {
     });
   }
 
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
+  }
+
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor

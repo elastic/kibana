@@ -12,6 +12,9 @@ export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
 
 export type {
+  AbstractESAggSourceDescriptor,
+  AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
 } from '../../server';

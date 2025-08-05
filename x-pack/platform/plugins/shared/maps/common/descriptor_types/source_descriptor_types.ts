@@ -11,25 +11,11 @@ import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import {
-  AGG_TYPE,
-  GRID_RESOLUTION,
-  MASK_OPERATOR,
-  RENDER_AS,
-  SCALING_TYPES,
-  MVT_FIELD_TYPE,
-  SOURCE_TYPES,
-} from '../constants';
+import { AGG_TYPE, MASK_OPERATOR, SCALING_TYPES, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
-};
-
-export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
-  // id: EMS file id
-  id: string;
-  tooltipProperties: string[];
 };
 
 export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
@@ -56,14 +42,13 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   applyForceRefresh: boolean;
 };
 
-export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
+type AbstractESSourceDescriptor = {
   // id: UUID
   id: string;
   indexPatternId: string;
-  geoField?: string;
-  applyGlobalQuery: boolean;
-  applyGlobalTime: boolean;
-  applyForceRefresh: boolean;
+  applyGlobalQuery?: boolean;
+  applyGlobalTime?: boolean;
+  applyForceRefresh?: boolean;
 };
 
 type AbstractAggDescriptor = {
@@ -98,17 +83,12 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
 
 export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
-export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
+type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
 };
 
-export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
-  geoField: string;
-  requestType: RENDER_AS;
-  resolution: GRID_RESOLUTION;
-};
-
 export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
+  type: SOURCE_TYPES.ES_GEO_LINE;
   geoField: string;
   groupByTimeseries: boolean;
   lineSimplificationSize: number;
@@ -117,6 +97,7 @@ export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
+  type: SOURCE_TYPES.ES_SEARCH;
   geoField: string;
   filterByMapBounds: boolean;
   tooltipProperties: string[];
@@ -129,11 +110,13 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
 };
 
 export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
+  type: SOURCE_TYPES.ES_PEW_PEW;
   sourceGeoField: string;
   destGeoField: string;
 };
 
 export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
+  type: string;
   whereQuery?: Query;
 };
 

@@ -61,6 +61,10 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     this._descriptor = sourceDescriptor;
   }
 
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
+  }
+
   hasCompleteConfig(): boolean {
     return isSpatialSourceComplete(this._descriptor);
   }

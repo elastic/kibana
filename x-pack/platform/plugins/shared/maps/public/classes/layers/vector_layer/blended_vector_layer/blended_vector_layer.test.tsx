@@ -86,18 +86,14 @@ describe('getSource', () => {
         // to ensure type check will fail when new properties are added to AbstractESSourceDescriptor.
         // In the event of type check failure, ensure test is updated with new property and that new property
         // is correctly passed to clustered source descriptor.
-        type: sourceDescriptor.type,
         id: sourceDescriptor.id,
         indexPatternId: sourceDescriptor.indexPatternId,
-        geoField: sourceDescriptor.geoField,
         applyGlobalQuery: sourceDescriptor.applyGlobalQuery,
         applyGlobalTime: sourceDescriptor.applyGlobalTime,
         applyForceRefresh: sourceDescriptor.applyForceRefresh,
       };
       expect(abstractEsSourceDescriptor).toEqual({
-        type: sourceDescriptor.type,
         id: sourceDescriptor.id,
-        geoField: 'myGeoField',
         indexPatternId: 'myIndexPattern',
         applyGlobalQuery: false,
         applyGlobalTime: false,

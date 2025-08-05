@@ -17,7 +17,10 @@ import {
 } from './cm_services';
 import {
   EMSFileSourceSchema,
-  EMSTMSSourceSchema
+  EMSTMSSourceSchema,
+  ESAggSourceSchema,
+  ESGeoGridSourceSchema,
+  ESSourceSchema,
 } from './source_schemas';
 
 export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
@@ -30,5 +33,8 @@ export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
 export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
 
+export type AbstractESAggSourceDescriptor = Writable<TypeOf<typeof ESAggSourceSchema>>;
+export type AbstractESSourceDescriptor = Writable<TypeOf<typeof ESSourceSchema>>;
 export type EMSFileSourceDescriptor = Writable<TypeOf<typeof EMSFileSourceSchema>>;
 export type EMSTMSSourceDescriptor = Writable<TypeOf<typeof EMSTMSSourceSchema>>;
+export type ESGeoGridSourceDescriptor = Writable<TypeOf<typeof ESGeoGridSourceSchema>>;

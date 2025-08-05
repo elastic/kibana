@@ -154,6 +154,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       : [];
   }
 
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
+  }
+
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     if (this._isTopHits()) {
       return (
