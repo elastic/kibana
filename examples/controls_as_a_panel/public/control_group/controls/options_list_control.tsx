@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState } from 'react';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -15,7 +16,6 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
 
 export const OptionsList = ({ controlSize }: { controlSize: 'normal' | 'compressed' }) => {
   const options = [

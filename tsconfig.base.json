@@ -1,4 +1,4 @@
-a{
+{
   "compilerOptions": {
     "baseUrl": ".",
     "rootDir": ".",
@@ -15,7 +15,7 @@ a{
       "@kbn/advanced-settings-plugin": ["src/platform/plugins/private/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["src/platform/plugins/private/advanced_settings/*"],
       "@kbn/ai-assistant": ["x-pack/platform/packages/shared/kbn-ai-assistant"],
-      "@kbn/ai-assistant/*": ["x-pack/platform/packagaes/shared/kbn-ai-assistant/*"],
+      "@kbn/ai-assistant/*": ["x-pack/platform/packages/shared/kbn-ai-assistant/*"],
       "@kbn/ai-assistant-common": ["x-pack/platform/packages/shared/ai-assistant/common"],
       "@kbn/ai-assistant-common/*": ["x-pack/platform/packages/shared/ai-assistant/common/*"],
       "@kbn/ai-assistant-cta": ["x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta"],
@@ -248,10 +248,10 @@ a{
       "@kbn/content-management-utils/*": ["src/platform/packages/shared/kbn-content-management-utils/*"],
       "@kbn/content-packs-schema": ["x-pack/platform/packages/shared/kbn-content-packs-schema"],
       "@kbn/content-packs-schema/*": ["x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
+      "@kbn/controls-as-a-panel-example-plugin": ["examples/controls_as_a_panel"],
+      "@kbn/controls-as-a-panel-example-plugin/*": ["examples/controls_as_a_panel/*"],
       "@kbn/controls-constants": ["src/platform/packages/shared/controls/controls-constants"],
       "@kbn/controls-constants/*": ["src/platform/packages/shared/controls/controls-constants/*"],
-      "@kbn/controls-as-a-panel-example-plugin": ["examples/controls_as_a_panel_example"],
-      "@kbn/controls-as-a-panel-example-plugin/*": ["examples/controls_as_a_panel_example/*"],
       "@kbn/controls-example-plugin": ["examples/controls_example"],
       "@kbn/controls-example-plugin/*": ["examples/controls_example/*"],
       "@kbn/controls-plugin": ["src/platform/plugins/shared/controls"],

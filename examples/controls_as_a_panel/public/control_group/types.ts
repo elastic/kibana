@@ -8,6 +8,7 @@
  */
 
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   PublishesUnsavedChanges,
@@ -26,4 +27,5 @@ export type ControlGroupRuntimeState = SerializedTitles & ControlGroupAttributes
 
 export type ControlGroupApi = DefaultEmbeddableApi<ControlGroupSerializedState> &
   HasEditCapabilities &
+  CanAddNewPanel &
   PublishesUnsavedChanges;

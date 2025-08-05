@@ -9,3 +9,4 @@
 
 export const CONTROL_PANEL_ID = 'controlPanel';
 export const ADD_CONTROL_PANEL_ACTION_ID = 'create_control_panel_action';
+export const ADD_CONTROL_ACTION_ID = 'add_control_action';

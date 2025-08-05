@@ -1,5 +1,6 @@
 {
   "type": "plugin",
+  "visibility": "shared",
   "id": "@kbn/controls-as-a-panel-example-plugin",
   "owner": "@elastic/kibana-presentation",
   "plugin": {

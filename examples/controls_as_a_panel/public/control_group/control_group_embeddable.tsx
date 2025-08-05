@@ -106,6 +106,14 @@ export const getControlPanelEmbeddableFactory: (
         ...controlPanelStateManager.api,
         ...unsavedChangesApi,
         serializeState,
+
+        addNewPanel: async (panel) => {
+          console.log('HEREEE');
+          return new Promise((resolve) => {
+            resolve(undefined);
+          });
+        },
+
         getTypeDisplayName: () => {
           return i18n.translate('controls.typeDisplayName', {
             defaultMessage: 'controls',
@@ -184,6 +192,7 @@ export const getControlPanelEmbeddableFactory: (
                 <EuiPopover
                   css={css({
                     width: '100%',
+                    height: 'fit-content',
                   })}
                   button={
                     <EuiButtonIcon
@@ -195,7 +204,7 @@ export const getControlPanelEmbeddableFactory: (
                         setPopoverOpen(!popoverOpen);
                       }}
                       iconType="controls"
-                      aria-label="Open documentation"
+                      aria-label="View controls"
                       css={css`
                         width: 100%;
                       `}
