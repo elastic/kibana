@@ -23,6 +23,7 @@ import Papa from 'papaparse';
 import { Readable } from 'stream';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import type { CreateMonitoringEntitySource } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { defaultMonitoringUsersIndex } from '../../../../common/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
@@ -130,30 +131,9 @@ export class PrivilegeMonitoringDataClient {
 
     const descriptor = await this.engineClient.init();
     this.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring for each namespace
-    try {
-      const indexSourceDescriptor = await this.monitoringIndexSourceClient.create({
-        type: 'index',
-        managed: true,
-        indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
-        name: `default-monitoring-index-${this.opts.namespace}`,
-      });
-      this.log(
-        'debug',
-        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-      );
-    } catch (e) {
-      this.log(
-        'error',
-        `Failed to create default index source for privilege monitoring: ${e.message}`
-      );
-      this.audit(
-        PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
-        'Failed to create default index source for privilege monitoring',
-        e
-      );
-    }
+
+    await this.createOrUpdateDefaultDataSource();
+
     try {
       this.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await this.createIngestPipelineIfDoesNotExist();
@@ -238,7 +218,16 @@ export class PrivilegeMonitoringDataClient {
   }
 
   async getEngineStatus() {
-    const engineDescriptor = await this.engineClient.get();
+    const findResponse = await this.engineClient.find();
+    const engineDescriptor =
+      findResponse.total > 0 ? findResponse.saved_objects[0].attributes : undefined;
+
+    if (!engineDescriptor) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
 
     return {
       status: engineDescriptor.status,
@@ -801,6 +790,65 @@ export class PrivilegeMonitoringDataClient {
     });
   }
 
+  private createOrUpdateDefaultDataSource = async () => {
+    const sourceName = `default-monitoring-index-${this.opts.namespace}`;
+
+    const defaultIndexSource: CreateMonitoringEntitySource = {
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex(this.opts.namespace),
+      name: sourceName,
+    };
+
+    const existingSources = await this.monitoringIndexSourceClient.find({
+      name: sourceName,
+    });
+
+    if (existingSources.saved_objects.length > 0) {
+      this.log('info', 'Default index source already exists, updating it.');
+      const existingSource = existingSources.saved_objects[0];
+      try {
+        await this.monitoringIndexSourceClient.update({
+          id: existingSource.id,
+          ...defaultIndexSource,
+        });
+      } catch (e) {
+        this.log(
+          'error',
+          `Failed to update default index source for privilege monitoring: ${e.message}`
+        );
+        this.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to update default index source for privilege monitoring',
+          e
+        );
+      }
+    } else {
+      this.log('info', 'Creating default index source for privilege monitoring.');
+
+      try {
+        const indexSourceDescriptor = this.monitoringIndexSourceClient.create(defaultIndexSource);
+
+        this.log(
+          'debug',
+          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+        );
+      } catch (e) {
+        this.log(
+          'error',
+          `Failed to create default index source for privilege monitoring: ${e.message}`
+        );
+        this.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to create default index source for privilege monitoring',
+          e
+        );
+      }
+    }
+  };
+
   public async disable() {
     this.log('info', 'Disabling Privileged Monitoring Engine');
     // Check the current status of the engine
@@ -862,12 +910,10 @@ export class PrivilegeMonitoringDataClient {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');
     }
-
     const engineStatus = await this.getEngineStatus();
-
     if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
       throw new Error(
-        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}.`
       );
     }
 

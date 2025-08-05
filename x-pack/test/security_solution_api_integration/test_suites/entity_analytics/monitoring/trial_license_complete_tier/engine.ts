@@ -51,7 +51,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.status).eql(200);
       });
     });
-
     describe('Privilege Monitoring Init Access', () => {
       before(async () => {
         await privMonRolesUtils.createPrivilegeTestUsers();
@@ -183,5 +182,27 @@ const waitForPrivMonUsersToBeSynced = async (api: any, retry: any) => {
   retry.waitForWithTimeout('Wait for PrivMon users to be synced', 40000, async () => {
     const res = await api.listPrivMonUsers({ query: {} });
     return res.body.length > 0; // // wait until we have at least one user
+    describe('init', () => {
+      it('should be able to be called multiple times', async () => {
+        log.info(`Initializing Privilege Monitoring engine`);
+        const res1 = await api.initMonitoringEngine();
+
+        if (res1.status !== 200) {
+          log.error(`Failed to initialize engine`);
+          log.error(JSON.stringify(res1.body));
+        }
+
+        expect(res1.status).eql(200);
+
+        log.info(`Re-initializing Privilege Monitoring engine`);
+        const res2 = await api.initMonitoringEngine();
+        if (res2.status !== 200) {
+          log.error(`Failed to re-initialize engine`);
+          log.error(JSON.stringify(res2.body));
+        }
+
+        expect(res2.status).eql(200);
+      });
+    });
   });
 };

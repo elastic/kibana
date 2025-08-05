@@ -21,6 +21,7 @@ export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   STARTED: 'started',
   ERROR: 'error',
   DISABLED: 'disabled',
+  NOT_INSTALLED: 'not_installed',
 } as const;
 
 // Base constants

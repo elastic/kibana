@@ -112,7 +112,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 12203
+  onechat: 14281
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -197,4 +197,4 @@ pageLoadAssetSize:
   wciSalesforce: 8506
   workchatApp: 12411
   workchatFramework: 5706
-  workflowsManagement: 475041
+  workflowsManagement: 4657
