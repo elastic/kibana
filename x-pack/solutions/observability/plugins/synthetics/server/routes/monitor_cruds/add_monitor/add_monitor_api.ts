@@ -42,6 +42,10 @@ import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../common/constants/synthetics_alerts';
 
 export type CreateMonitorPayLoad = MonitorFields & {
   url?: string;
@@ -239,8 +243,19 @@ export class AddEditMonitorAPI {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
       console.log('IN CALL');
+      const [statusRule, tlsRule] = await Promise.all([
+        defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
+        defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+      ]);
+      if (statusRule && tlsRule) {
+        console.log('DEFAULT ALERTS ALREADY SETUP, RETURNING EARLY');
+        return {
+          statusRule,
+          tlsRule,
+        };
+      }
       const ret = await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
-      console.log('after', ret);
+      console.log('after DEBUGGING TESTING!!!!!!!!!!!!', ret);
       server.logger.debug(`Successfully created default alert for monitor: ${name}`);
       console.log('IN CATCH');
       return ret;

@@ -32,18 +32,25 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
 
     try {
       console.log('sending the requests to create the rules');
-      const [statusRule, tlsRule] = await Promise.all([
-        defaultAlertService.updateStatusRule(
-          activeSpace?.id ?? 'default',
-          defaultStatusRuleEnabled
-        ),
-        defaultAlertService.updateTlsRule(activeSpace?.id ?? 'default', defaultTLSRuleEnabled),
-      ]);
+      const [statusRule, tlsRule] = await defaultAlertService.updateDefaultRules(
+        activeSpace?.id ?? 'default',
+        defaultStatusRuleEnabled,
+        defaultTLSRuleEnabled
+      );
+      // const [statusRule, tlsRule] = await Promise.all([
+      //   defaultAlertService.updateStatusRule(
+      //     activeSpace?.id ?? 'default',
+      //     defaultStatusRuleEnabled
+      //   ),
+      //   defaultAlertService.updateTlsRule(activeSpace?.id ?? 'default', defaultTLSRuleEnabled),
+      // ]);
+      console.log('HAPPY PATH SUCCESSFUL')
       return {
         statusRule: statusRule || null,
         tlsRule: tlsRule || null,
       };
     } catch (error) {
+      console.error('ERROR CAUGH ', error);
       server.logger.error(`Error updating default alerting rules, Error: ${error.message}`, {
         error,
       });

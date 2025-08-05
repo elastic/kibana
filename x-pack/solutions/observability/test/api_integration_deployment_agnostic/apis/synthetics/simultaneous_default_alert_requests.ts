@@ -39,14 +39,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should handle multiple simultaneous requests for default alerting', async () => {
       // make many simultaneous requests to the default alerting API
-      const REQUEST_COUNT = 3;
+      const REQUEST_COUNT = 20;
       const requests = Array.from({ length: REQUEST_COUNT }, () =>
         supertest
           .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send()
-          .expect(200)
       );
 
       // let all requests finish
@@ -54,12 +53,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(responses).to.have.length(REQUEST_COUNT);
 
+      const successResponses = responses.filter((response: any) => response.status === 200);
+      expect(successResponses.length).to.be.greaterThan(0);
+
       // All the alerting responses should match
       const {
         statusRule: { id: statusId },
         tlsRule: { id: tlsId },
-      } = responses[0].body;
-      responses.forEach((response: any) => {
+      } = successResponses[0].body;
+      successResponses.forEach((response: any) => {
         expect(response.body).to.be.ok();
         const {
           body: {

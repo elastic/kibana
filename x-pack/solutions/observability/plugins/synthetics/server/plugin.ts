@@ -75,6 +75,7 @@ export class Plugin implements PluginType {
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
       alerting: plugins.alerting,
+      coreSetup: core,
     } as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);

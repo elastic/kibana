@@ -9,6 +9,10 @@ import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../common/constants/synthetics_alerts';
 
 export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -20,10 +24,25 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
     savedObjectsClient,
     request,
   }): Promise<DEFAULT_ALERT_RESPONSE> => {
-    console.log('POST ALERTING')
+    console.log('POST ALERTING');
     const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
-    return defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+    console.log('CALLING THE SERVICE TO SETUP DEFAULT ALERTS');
+    console.log('ACTIVE SPACE ID: ', activeSpace?.id ?? 'default');
+    const [statusRule, tlsRule] = await Promise.all([
+      defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
+      defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+    ]);
+    if (statusRule && tlsRule) {
+      console.log('DEFAULT ALERTS ALREADY SETUP, RETURNING EARLY');
+      return {
+        statusRule,
+        tlsRule,
+      };
+    }
+    const result = defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+    console.log('HI I AM FINISHED AND IT IS HAPPY PLEASE SEND A 200');
+    return result;
   },
 });
