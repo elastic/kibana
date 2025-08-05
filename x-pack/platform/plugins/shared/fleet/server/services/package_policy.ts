@@ -57,6 +57,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -428,7 +429,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         pkgInfo,
         enrichedPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        { otelcolSuffixId: packagePolicyId }
       );
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
@@ -641,7 +643,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 pkgInfo,
                 packagePolicy.vars || {},
                 inputs,
-                assetsMap
+                assetsMap,
+                { otelcolSuffixId: id }
               )
             : inputs;
 
@@ -769,7 +772,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         savedObjectsClient: soClient,
       });
       inputs = pkgInfo
-        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap)
+        ? await _compilePackagePolicyInputs(pkgInfo, packagePolicy.vars || {}, inputs, assetsMap, {
+            otelcolSuffixId: id,
+          })
         : inputs;
 
       elasticsearch = pkgInfo?.elasticsearch;
@@ -1205,11 +1210,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packageInfo: pkgInfo,
         savedObjectsClient: soClient,
       });
+
       inputs = _compilePackagePolicyInputs(
         pkgInfo,
         restOfPackagePolicy.vars || {},
         inputs,
-        assetsMap
+        assetsMap,
+        { otelcolSuffixId: id }
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -1590,7 +1597,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               pkgInfo,
               restOfPackagePolicy.vars || {},
               inputs,
-              assetsMap
+              assetsMap,
+              { otelcolSuffixId: id }
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 
@@ -2958,15 +2966,23 @@ export function _compilePackagePolicyInputs(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   inputs: PackagePolicyInput[],
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  opts?: { otelcolSuffixId?: string }
 ): PackagePolicyInput[] {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+
   return inputs.map((input) => {
-    const compiledInput = _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap);
-    const compiledStreams = _compilePackageStreams(pkgInfo, vars, input, assetsMap);
+    if (experimentalFeature.enableOtelIntegrations && input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+      return {
+        ...input,
+        streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap, opts?.otelcolSuffixId),
+        compiled_input: [],
+      };
+    }
     return {
       ...input,
-      compiled_input: compiledInput,
-      streams: compiledStreams,
+      compiled_input: _compilePackagePolicyInput(pkgInfo, vars, input, assetsMap),
+      streams: _compilePackageStreams(pkgInfo, vars, input, assetsMap),
     };
   });
 }
@@ -3024,10 +3040,11 @@ function _compilePackageStreams(
   pkgInfo: PackageInfo,
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  otelcolSuffixId?: string
 ) {
   return input.streams.map((stream) =>
-    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap)
+    _compilePackageStream(pkgInfo, vars, input, stream, assetsMap, otelcolSuffixId)
   );
 }
 
@@ -3093,7 +3110,8 @@ function _compilePackageStream(
   vars: PackagePolicy['vars'],
   input: PackagePolicyInput,
   streamIn: PackagePolicyInputStream,
-  assetsMap: PackagePolicyAssetsMap
+  assetsMap: PackagePolicyAssetsMap,
+  otelcolSuffixId?: string
 ) {
   let stream = streamIn;
 
@@ -3151,7 +3169,9 @@ function _compilePackageStream(
   const yaml = compileTemplate(
     // Populate template variables from package-, input-, and stream-level vars
     Object.assign({}, vars, input.vars, stream.vars),
-    pkgStreamTemplate.buffer.toString()
+    pkgStreamTemplate.buffer.toString(),
+    input.type,
+    otelcolSuffixId
   );
 
   stream.compiled_stream = yaml;

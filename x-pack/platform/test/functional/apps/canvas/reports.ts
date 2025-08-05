@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const security = getService('security');
   const { reporting, canvas } = getPageObjects(['reporting', 'canvas']);
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
+  const archive = 'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/reports';
 
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
