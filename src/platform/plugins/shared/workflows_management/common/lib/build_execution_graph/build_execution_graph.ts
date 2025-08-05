@@ -19,6 +19,7 @@ import {
   WorkflowSchema,
   EnterConditionBranchNode,
   ExitConditionBranchNode,
+  AtomicGraphNode,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -29,12 +30,6 @@ function getNodeId(node: BaseStep): string {
 }
 
 function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
-  const currentStepId = getNodeId(currentStep);
-  // Each step must have a unique id in the graph.
-  // If the step does not have an id, we generate one based on its name.
-  // We need to improve it in the future
-  currentStep.id = currentStepId; // Ensure the step has an id for consistency.
-
   if (currentStep.type === 'if') {
     return visitIfStep(graph, previousStep, currentStep);
   }
@@ -43,13 +38,20 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitForeachStep(graph, previousStep, currentStep);
   }
 
-  graph.setNode(getNodeId(currentStep), currentStep);
+  return visitAtomicStep(graph, previousStep, currentStep);
+}
 
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), currentStepId);
-  }
+export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const atomicNode: AtomicGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'atomic',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(atomicNode.id, atomicNode);
 
-  return currentStep;
+  return atomicNode;
 }
 
 export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
@@ -172,10 +174,17 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
 
 export function convertToWorkflowGraph(workflowSchema: WorkflowSchema): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  let previousStep: BaseStep | null = null;
+  let previousNode: any | null = null;
 
   workflowSchema.steps.forEach((currentStep, index) => {
-    previousStep = visitAbstractStep(graph, previousStep, currentStep);
+    const currentNode = visitAbstractStep(graph, previousNode, currentStep);
+    graph.setNode(currentNode.id, currentNode);
+
+    if (previousNode) {
+      graph.setEdge(currentNode.id, previousNode.id);
+    }
+
+    previousNode = currentNode;
   });
 
   return graph;
