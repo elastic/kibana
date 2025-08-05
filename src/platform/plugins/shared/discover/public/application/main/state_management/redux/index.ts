@@ -89,8 +89,8 @@ export {
 export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
 
 export {
-  fromSavedObjectTabToLocalStorageTab,
+  fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
-  fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
+  fromSavedSearchToSavedObjectTab,
 } from './tab_mapping_utils';

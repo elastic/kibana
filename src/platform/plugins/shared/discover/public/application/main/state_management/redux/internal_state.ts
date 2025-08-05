@@ -36,7 +36,7 @@ import {
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, initializeTabs } from './actions';
+import { loadDataViewList, initializeTabs, saveDiscoverSession } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
@@ -245,6 +245,12 @@ export const internalStateSlice = createSlice({
       state.userId = action.payload.userId;
       state.spaceId = action.payload.spaceId;
       state.persistedDiscoverSession = action.payload.persistedDiscoverSession;
+    });
+
+    builder.addCase(saveDiscoverSession.fulfilled, (state, action) => {
+      if (action.payload.discoverSession) {
+        state.persistedDiscoverSession = action.payload.discoverSession;
+      }
     });
 
     builder.addMatcher(

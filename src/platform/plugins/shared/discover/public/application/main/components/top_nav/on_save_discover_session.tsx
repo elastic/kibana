@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { isObject } from 'lodash';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
@@ -82,7 +83,7 @@ export const onSaveDiscoverSession = async ({
     isTitleDuplicateConfirmed: boolean;
     onTitleDuplicate: () => void;
   }) => {
-    let response: { id: string | undefined } = { id: undefined };
+    let response: { discoverSession: DiscoverSession | undefined } = { discoverSession: undefined };
 
     try {
       response = await state.internalState
@@ -110,7 +111,7 @@ export const onSaveDiscoverSession = async ({
       });
     }
 
-    if (response.id) {
+    if (response.discoverSession) {
       services.toastNotifications.addSuccess({
         title: i18n.translate('discover.notifications.savedSearchTitle', {
           defaultMessage: `Discover session ''{savedSearchTitle}'' was saved`,
@@ -123,12 +124,12 @@ export const onSaveDiscoverSession = async ({
 
       if (onSaveCb) {
         onSaveCb();
-      } else if (response.id !== persistedDiscoverSession?.id) {
-        services.locator.navigate({ savedSearchId: response.id });
+      } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
+        services.locator.navigate({ savedSearchId: response.discoverSession.id });
       }
     }
 
-    return response;
+    return { id: response.discoverSession?.id };
   };
 
   const saveModal = (

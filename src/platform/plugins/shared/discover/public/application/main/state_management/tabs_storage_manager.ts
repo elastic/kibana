@@ -20,7 +20,7 @@ import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
-import { fromSavedObjectTabToLocalStorageTab } from './redux';
+import { fromSavedObjectTabToTabState } from './redux';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -357,9 +357,7 @@ export const createTabsStorageManager = ({
     sessionInfo.spaceId = spaceId;
     sessionInfo.persistedDiscoverSessionId = persistedDiscoverSession?.id;
 
-    const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
-      toTabState(fromSavedObjectTabToLocalStorageTab(tab), defaultTabState)
-    );
+    const persistedTabs = persistedDiscoverSession?.tabs.map(fromSavedObjectTabToTabState);
     const openTabs =
       persistedDiscoverSession?.id === storedTabsState.persistedDiscoverSessionId
         ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
