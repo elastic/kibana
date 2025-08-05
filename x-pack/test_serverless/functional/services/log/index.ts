@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogsSynthtraceProvider(context: FtrProviderContext) {
-  return new LogsSynthtraceEsClient({
+  const clientManager = new SynthtraceClientsManager({
     client: context.getService('es'),
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
   });
+
+  const { logsEsClient } = clientManager.getClients({
+    clients: ['logsEsClient'],
+  });
+
+  return logsEsClient;
 }

@@ -17,7 +17,8 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { getContextMenuPanels, PRIMARY_PANEL_ID } from '../get_context_menu_panels';
 import * as i18n from '../translations';
-import { BatchUpdateListItem, ContextEditorRow } from '../types';
+import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
+import type { HandleRowChecked } from '../selection/types';
 
 export interface Props {
   appliesTo: 'multipleRows' | 'singleRow';
@@ -26,8 +27,10 @@ export interface Props {
   disableAnonymize?: boolean;
   disableDeny?: boolean;
   disableUnanonymize?: boolean;
-  onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  selected: ContextEditorRow[];
+  onListUpdated: OnListUpdated;
+  selectedField?: string; // Selected field for a single row, undefined if applies to multiple rows
+  selectedFields: string[]; // Selected fields for the entire table
+  handleRowChecked: HandleRowChecked;
 }
 
 const BulkActionsComponent: React.FC<Props> = ({
@@ -38,7 +41,9 @@ const BulkActionsComponent: React.FC<Props> = ({
   disableDeny = false,
   disableUnanonymize = false,
   onListUpdated,
-  selected,
+  selectedField,
+  selectedFields,
+  handleRowChecked,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -48,7 +53,9 @@ const BulkActionsComponent: React.FC<Props> = ({
 
   const closePopover = useCallback(() => setPopover(false), []);
 
-  const onButtonClick = useCallback(() => setPopover((isOpen) => !isOpen), []);
+  const onButtonClick = useCallback(() => {
+    setPopover((isOpen) => !isOpen);
+  }, []);
 
   const button = useMemo(
     () => (
@@ -77,7 +84,9 @@ const BulkActionsComponent: React.FC<Props> = ({
         disableUnanonymize,
         closePopover,
         onListUpdated,
-        selected,
+        selectedField,
+        selectedFields,
+        handleRowChecked,
       }),
     [
       closePopover,
@@ -85,8 +94,10 @@ const BulkActionsComponent: React.FC<Props> = ({
       disableAnonymize,
       disableDeny,
       disableUnanonymize,
+      handleRowChecked,
       onListUpdated,
-      selected,
+      selectedField,
+      selectedFields,
     ]
   );
 

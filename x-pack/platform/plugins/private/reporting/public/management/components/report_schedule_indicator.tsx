@@ -34,6 +34,10 @@ export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ sche
 
   const statusText = translations[schedule.rrule.freq];
 
+  if (!statusText) {
+    return null;
+  }
+
   return (
     <EuiBadge
       data-test-subj={`reportScheduleIndicator-${schedule.rrule.freq}`}

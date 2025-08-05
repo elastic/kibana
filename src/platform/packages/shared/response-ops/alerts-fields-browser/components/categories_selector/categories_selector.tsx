@@ -145,6 +145,7 @@ const CategoriesSelectorComponent: React.FC<CategoriesSelectorProps> = ({
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        aria-label={i18n.FILTER_OPTIONS_LABEL}
       >
         <div
           css={styles.selectableContainer}

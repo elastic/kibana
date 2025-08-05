@@ -25,18 +25,17 @@ import {
 } from '../../../common/lib/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
   describe('Kibana index: Alerting & Cases', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/8.8.0');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/cases/migrations/8.8.0');
       await deleteAllCaseItems(es);
     });
 

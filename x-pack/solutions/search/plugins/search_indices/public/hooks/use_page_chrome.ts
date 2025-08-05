@@ -10,7 +10,11 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { useKibana } from './use_kibana';
 import { PARENT_BREADCRUMB } from '../constants';
 
-export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[]) => {
+export const usePageChrome = (
+  docTitle: string,
+  breadcrumbs: ChromeBreadcrumb[],
+  includeParentBreadcrumb: boolean = true
+) => {
   const { chrome, serverless } = useKibana().services;
 
   useEffect(() => {
@@ -19,7 +23,9 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
     if (serverless) {
       serverless.setBreadcrumbs(breadcrumbs);
     } else {
-      const newBreadcrumbs = [PARENT_BREADCRUMB, ...breadcrumbs];
+      const newBreadcrumbs = includeParentBreadcrumb
+        ? [PARENT_BREADCRUMB, ...breadcrumbs]
+        : breadcrumbs;
       chrome.setBreadcrumbs(newBreadcrumbs, { project: { value: newBreadcrumbs, absolute: true } });
     }
     return () => {
@@ -30,5 +36,5 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
         chrome.setBreadcrumbs([]);
       }
     };
-  }, [chrome, docTitle, serverless, breadcrumbs]);
+  }, [chrome, docTitle, serverless, breadcrumbs, includeParentBreadcrumb]);
 };

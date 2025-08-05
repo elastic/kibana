@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
@@ -20,5 +20,10 @@ export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
 export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_builders';
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
-export { findReferenceLink } from './src/utils/find_reference_link.util';
+export {
+  findReferenceLink,
+  isCveReference,
+  getNonCveReferences,
+} from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
+export { getGroupPanelTitle } from './src/utils/get_group_panel_title';

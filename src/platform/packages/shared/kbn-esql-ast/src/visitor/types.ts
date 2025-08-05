@@ -194,7 +194,7 @@ export interface VisitorMethods<
   >;
   visitSampleCommand?: Visitor<contexts.SampleCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
-  visitRrfCommand?: Visitor<contexts.RrfCommandVisitorContext<Visitors, Data>, any, any>;
+  visitFuseCommand?: Visitor<contexts.FuseCommandVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
     contexts.SourceExpressionVisitorContext<Visitors, Data>,

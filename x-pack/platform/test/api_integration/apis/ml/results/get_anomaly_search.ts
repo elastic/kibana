@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('POST results/anomaly_search', () => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       // create spaces
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });

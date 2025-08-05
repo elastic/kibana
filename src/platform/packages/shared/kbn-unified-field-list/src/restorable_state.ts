@@ -12,6 +12,10 @@ import type { FieldTypeKnown } from '@kbn/field-utils';
 
 export interface UnifiedFieldListRestorableState {
   /**
+   * Whether the field list is collapsed or expanded
+   */
+  isCollapsed: boolean;
+  /**
    * Field search
    */
   nameFilter: string;
@@ -24,9 +28,9 @@ export interface UnifiedFieldListRestorableState {
    */
   pageSize: number;
   /**
-   * Scroll position of the field list
+   * Scroll position inside the field list
    */
-  scrollPosition: number;
+  scrollTop: number;
   /**
    * Which sections of the field list are expanded
    */

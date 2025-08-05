@@ -214,6 +214,11 @@ describe('getNetworkEvents', () => {
             "track_total_hits": true,
           },
           Object {
+            "context": Object {
+              "loggingOptions": Object {
+                "loggerName": "uptime",
+              },
+            },
             "meta": true,
           },
         ],

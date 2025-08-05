@@ -78,9 +78,7 @@ export function initializeDashboardServices(
 ): DashboardServicesConfig {
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(
-    initialState.title || internalApi.attributes$.getValue().title
-  );
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(initialState.attributes.title);
   const defaultDescription$ = new BehaviorSubject<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description

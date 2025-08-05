@@ -16,7 +16,6 @@ import {
   getAuthWithSuperUser,
 } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');

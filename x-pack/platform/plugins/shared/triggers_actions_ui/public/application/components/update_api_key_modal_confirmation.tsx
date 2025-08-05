@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useMemo } from 'react';
@@ -77,8 +77,12 @@ export const UpdateApiKeyModalConfirmation = ({
     return computedIdsToUpdate.length;
   }, [idsToUpdateFilter, numberOfSelectedRules, computedIdsToUpdate]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return updateModalFlyoutVisible ? (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="primary"
       data-test-subj="updateApiKeyIdsConfirmation"
       title={i18n.translate('xpack.triggersActionsUI.updateApiKeyConfirmModal.title', {

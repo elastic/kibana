@@ -39,7 +39,7 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     >({
       requestHandlerContext: context,
       request,
-      version: 3,
+      version: 1,
     });
 
     const alertsClient = await ruleRegistry.getRacClientWithRequest(request);

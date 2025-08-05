@@ -7,8 +7,9 @@
 
 import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
-  MonitoringEntitySourceDescriptor,
-  MonitoringEntitySourceResponse,
+  CreateMonitoringEntitySource,
+  ListEntitySourcesRequestQuery,
+  MonitoringEntitySource,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { MonitoringEntitySourceDescriptorClient } from './saved_objects';
 
@@ -28,9 +29,7 @@ export class MonitoringEntitySourceDataClient {
     });
   }
 
-  public async init(
-    input: MonitoringEntitySourceDescriptor
-  ): Promise<MonitoringEntitySourceResponse> {
+  public async init(input: CreateMonitoringEntitySource) {
     const descriptor = await this.monitoringEntitySourceClient.create({
       ...input,
     });
@@ -38,13 +37,13 @@ export class MonitoringEntitySourceDataClient {
     return descriptor;
   }
 
-  public async get(): Promise<MonitoringEntitySourceResponse> {
-    this.log('debug', 'Getting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceClient.get();
+  public async get(id: string): Promise<MonitoringEntitySource> {
+    this.log('debug', `Getting Monitoring Entity Source Sync saved object with id: ${id}`);
+    return this.monitoringEntitySourceClient.get(id);
   }
 
-  public async update(update: Partial<MonitoringEntitySourceResponse>) {
-    this.log('debug', 'Updating Monitoring Entity Source Sync saved object');
+  public async update(update: Partial<MonitoringEntitySource> & { id: string }) {
+    this.log('debug', `Updating Monitoring Entity Source Sync saved object with id: ${update.id}`);
 
     const sanitizedUpdate = {
       ...update,
@@ -57,14 +56,14 @@ export class MonitoringEntitySourceDataClient {
     return this.monitoringEntitySourceClient.update(sanitizedUpdate);
   }
 
-  public async delete() {
-    this.log('debug', 'Deleting Monitoring Entity Source Sync saved object');
-    return this.monitoringEntitySourceClient.delete();
+  public async delete(id: string) {
+    this.log('debug', `Deleting Monitoring Entity Source Sync saved object with id: ${id}`);
+    return this.monitoringEntitySourceClient.delete(id);
   }
 
-  public async list(): Promise<MonitoringEntitySourceResponse[]> {
+  public async list(query: ListEntitySourcesRequestQuery): Promise<MonitoringEntitySource[]> {
     this.log('debug', 'Finding all Monitoring Entity Source Sync saved objects');
-    return this.monitoringEntitySourceClient.findAll();
+    return this.monitoringEntitySourceClient.findAll(query);
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

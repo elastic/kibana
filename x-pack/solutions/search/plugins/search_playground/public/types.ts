@@ -248,7 +248,13 @@ export interface LLMModel {
 
 export type { ActionConnector, UserConfiguredActionConnector };
 export type InferenceActionConnector = ActionConnector & {
-  config: { provider: ServiceProviderKeys; inferenceId: string };
+  config: {
+    providerConfig?: {
+      model_id?: string;
+    };
+    provider: ServiceProviderKeys;
+    inferenceId: string;
+  };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
@@ -269,4 +275,9 @@ export interface SavedPlaygroundRouterParameters {
   playgroundId: string;
   pageMode?: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
 }

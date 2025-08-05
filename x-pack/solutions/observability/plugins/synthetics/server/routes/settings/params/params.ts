@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -96,14 +96,14 @@ const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: s
       }
     );
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
@@ -112,14 +112,14 @@ const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
     perPage: 1000,
   });
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const toClientResponse = (

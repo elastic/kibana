@@ -44,6 +44,7 @@ export interface CreateConnectorFlyoutProps {
   featureId?: string;
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
+  isServerless?: boolean;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
@@ -156,7 +157,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        * At this point the form is valid
        * and there are no pre submit error messages.
        */
-
       const { actionTypeId, name, config, secrets } = data;
       const validConnector = {
         actionTypeId,
@@ -258,6 +258,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 <EuiSpacer size="xs" />
               </>
             )}
+
             {showFormErrors && (
               <>
                 <EuiCallOut
@@ -265,6 +266,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   color="danger"
                   iconType="warning"
                   data-test-subj="connector-form-header-error-label"
+                  role="alert"
+                  aria-label={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionConnectorAdd.connectorFormErrorDialog',
+                    {
+                      defaultMessage: 'Connector form error notification',
+                    }
+                  )}
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.actionConnectorAdd.headerFormLabel',
                     {

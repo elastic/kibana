@@ -81,6 +81,15 @@ describe('getAttackDiscoveryMarkdown', () => {
 
       expect(result).toBe(expected);
     });
+
+    it('handles whitespaces within the value correctly', () => {
+      const markdown = 'This is a {{ field1 value one }} and {{ field2 value two }}.';
+      const expected = 'This is a `value one` and `value two`.';
+
+      const result = getMarkdownFields(markdown);
+
+      expect(result).toBe(expected);
+    });
   });
 
   describe('getAttackChainMarkdown', () => {

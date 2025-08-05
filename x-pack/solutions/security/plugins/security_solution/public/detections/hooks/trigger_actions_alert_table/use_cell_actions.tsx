@@ -30,7 +30,7 @@ export const useCellActionsOptions = (
   >
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalDataView = useDataView(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
 
   const {
     columns = [],
@@ -39,9 +39,9 @@ export const useCellActionsOptions = (
     pageSize = 0,
     dataGridRef,
   } = context ?? {};
-  const getFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
+  const oldGetFieldSpec = useGetFieldSpec(SourcererScopeName.detections);
   const oldDataViewId = useDataViewId(SourcererScopeName.detections);
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.dataView?.id : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id : oldDataViewId;
 
   const cellActionsMetadata = useMemo(
     () => ({ scopeId: tableId, dataViewId }),
@@ -52,15 +52,15 @@ export const useCellActionsOptions = (
       columns.map(
         (column) =>
           (newDataViewPickerEnabled
-            ? experimentalDataView.dataView?.fields?.getByName(column.id)?.toSpec()
-            : getFieldSpec(column.id)) ?? {
+            ? experimentalDataView.fields?.getByName(column.id)?.toSpec()
+            : oldGetFieldSpec(column.id)) ?? {
             name: '',
             type: '', // When type is an empty string all cell actions are incompatible
             aggregatable: false,
             searchable: false,
           }
       ),
-    [columns, experimentalDataView.dataView?.fields, getFieldSpec, newDataViewPickerEnabled]
+    [columns, experimentalDataView.fields, oldGetFieldSpec, newDataViewPickerEnabled]
   );
 
   /**

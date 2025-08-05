@@ -405,6 +405,7 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
+        fleet_server_host_id: 'default-fleet-server',
       });
     });
 
@@ -441,6 +442,46 @@ describe('Agent policy', () => {
         updated_by: 'system',
         schema_version: '1.1.1',
         is_protected: false,
+        fleet_server_host_id: 'fleet-default-fleet-server-host',
+      });
+    });
+
+    it('should create an agentless policy with a fallback fleet_server_host_id if not provided', async () => {
+      jest
+        .spyOn(appContextService, 'getConfig')
+        .mockReturnValue({ agentless: { enabled: true } } as any);
+      jest
+        .spyOn(appContextService, 'getCloud')
+        .mockReturnValue({ isServerlessEnabled: true } as any);
+
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await agentPolicyService.create(soClient, esClient, {
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+      expect(res).toEqual({
+        id: 'mocked',
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+        status: 'active',
+        is_managed: false,
+        revision: 1,
+        updated_at: expect.anything(),
+        updated_by: 'system',
+        schema_version: '1.1.1',
+        is_protected: false,
+        fleet_server_host_id: 'default-fleet-server',
       });
     });
 

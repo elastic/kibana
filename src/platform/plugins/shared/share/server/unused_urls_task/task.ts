@@ -47,8 +47,8 @@ export const deleteUnusedUrls = async ({
       namespace,
     });
 
-    logger.debug(
-      `Succesfully deleted ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`
+    logger.info(
+      `Successfully deleted ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`
     );
   } catch (e) {
     throw new Error(`Failed to delete unused URL(s) in namespace "${namespace}": ${e.message}`);

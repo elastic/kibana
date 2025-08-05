@@ -273,7 +273,15 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   };
 
   return (
-    <EuiFlyout type="push" data-test-subj="rulesSettingsFlyout" onClose={onCloseFlyout} size="s">
+    <EuiFlyout
+      type="push"
+      data-test-subj="rulesSettingsFlyout"
+      onClose={onCloseFlyout}
+      size="s"
+      aria-label={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.ruleSettingsLabel', {
+        defaultMessage: 'Rule settings',
+      })}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
           <h3>

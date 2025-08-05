@@ -6,63 +6,83 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { core, node, resources, tracing } from '@elastic/opentelemetry-node/sdk';
+import { LangfuseSpanProcessor, PhoenixSpanProcessor } from '@kbn/inference-tracing';
+import { ATTR_SERVICE_INSTANCE_ID, ATTR_SERVICE_NAMESPACE } from '@kbn/opentelemetry-attributes';
+import { fromExternalVariant } from '@kbn/std';
+import { TracingConfig } from '@kbn/tracing-config';
 import { context, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import {
-  NodeTracerProvider,
-  ParentBasedSampler,
-  TraceIdRatioBasedSampler,
-} from '@opentelemetry/sdk-trace-node';
-import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
-import { TracingConfig } from '@kbn/telemetry-config';
-import { AgentConfigOptions } from 'elastic-apm-node';
-import {
-  CompositePropagator,
-  W3CBaggagePropagator,
-  W3CTraceContextPropagator,
-} from '@opentelemetry/core';
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
+import type { AgentConfigOptions } from 'elastic-apm-node';
+import { castArray } from 'lodash';
 import { LateBindingSpanProcessor } from '..';
+import { installShutdownHandlers } from './on_exit_cleanup';
 
 export function initTracing({
   tracingConfig,
   apmConfig,
 }: {
   tracingConfig?: TracingConfig;
-  apmConfig: AgentConfigOptions;
+  apmConfig?: AgentConfigOptions;
 }) {
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
 
+  const resource = resources.resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: apmConfig?.serviceName,
+    [ATTR_SERVICE_INSTANCE_ID]: apmConfig?.serviceNodeName,
+    [ATTR_SERVICE_NAMESPACE]: apmConfig?.environment,
+  });
+
   // this is used for late-binding of span processors
-  const processor = LateBindingSpanProcessor.get();
+  const lateBindingProcessor = LateBindingSpanProcessor.get();
 
-  const traceIdSampler = new TraceIdRatioBasedSampler(tracingConfig?.sample_rate ?? 1);
+  const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
 
-  const nodeTracerProvider = new NodeTracerProvider({
+  propagation.setGlobalPropagator(
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
+    })
+  );
+
+  const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig?.sample_rate ?? 1);
+
+  const nodeTracerProvider = new node.NodeTracerProvider({
     // by default, base sampling on parent context,
     // or for root spans, based on the configured sample rate
-    sampler: new ParentBasedSampler({
+    sampler: new tracing.ParentBasedSampler({
       root: traceIdSampler,
     }),
-    spanProcessors: [processor],
-    resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: apmConfig.serviceName,
-      [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
-    }),
+    spanProcessors: allSpanProcessors,
+    resource,
+  });
+
+  castArray(tracingConfig?.exporters ?? []).forEach((exporter) => {
+    const variant = fromExternalVariant(exporter);
+    switch (variant.type) {
+      case 'langfuse':
+        LateBindingSpanProcessor.get().register(new LangfuseSpanProcessor(variant.value));
+        break;
+
+      case 'phoenix':
+        LateBindingSpanProcessor.get().register(new PhoenixSpanProcessor(variant.value));
+        break;
+    }
   });
 
   trace.setGlobalTracerProvider(nodeTracerProvider);
 
   propagation.setGlobalPropagator(
-    new CompositePropagator({
-      propagators: [new W3CTraceContextPropagator(), new W3CBaggagePropagator()],
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
     })
   );
 
-  return async () => {
-    // allow for programmatic shutdown
-    await processor.shutdown();
+  const shutdown = async () => {
+    await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
   };
+
+  installShutdownHandlers(shutdown);
 }

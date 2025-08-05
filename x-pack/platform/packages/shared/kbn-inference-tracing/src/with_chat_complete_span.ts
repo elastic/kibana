@@ -47,7 +47,10 @@ function addEvent(span: Span, event: MessageEvent) {
   });
 }
 
-function setChoice(span: Span, { content, toolCalls }: { content: string; toolCalls: ToolCall[] }) {
+export function setChoice(
+  span: Span,
+  { content, toolCalls }: { content: string; toolCalls: ToolCall[] }
+) {
   addEvent(span, {
     name: GenAISemanticConventions.GenAIChoice,
     body: {

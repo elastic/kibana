@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiConfirmModal, EuiListGroup, EuiListGroupItem, useGeneratedHtmlId } from '@elastic/eui';
 import styled from 'styled-components';
 import { rgba } from 'polished';
 
@@ -54,6 +54,8 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
   showModal,
   titleText,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   if (!showModal) {
     return null;
   }
@@ -61,7 +63,9 @@ export const ReferenceErrorModalComponent: React.FC<ReferenceErrorModalProps> = 
   return (
     <EuiConfirmModal
       maxWidth={460}
+      aria-labelledby={modalTitleId}
       title={titleText}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={cancelText}

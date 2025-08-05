@@ -120,6 +120,7 @@ export const CleanExtraFilesFromModules: Task = {
           '**/*.scss',
           '**/*.sass',
           '**/*.ts',
+          '**/*.text',
           '**/*.tsx',
           '**/tsconfig.json',
           '**/.tsbuildinfo',

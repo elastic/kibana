@@ -13,9 +13,9 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsType } from '@kbn/core/server';
-import { getPrivmonEncryptedSavedObjectId } from './saved_object';
-import { privilegeMonitoringRuntimePrivileges } from './privileges';
+
+import { PrivilegeMonitoringApiKeyType, getPrivmonEncryptedSavedObjectId } from './saved_object';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 export interface ApiKeyManager {
   generate: () => Promise<void>;
@@ -32,9 +32,8 @@ export interface ApiKeyManagerDependencies {
 
 export const getApiKeyManager = (deps: ApiKeyManagerDependencies) => {
   return {
-    generate: generate(deps),
-    getApiKey: getApiKey(deps),
-    getClientFromApiKey: getClientFromApiKey(deps),
+    generate: () => generate(deps),
+    getClient: () => getClient(deps),
     getRequestFromApiKey,
   };
 };
@@ -51,7 +50,7 @@ const generate = async (deps: ApiKeyManagerDependencies) => {
     const apiKey = await generateAPIKey(request, deps);
 
     const soClient = core.savedObjects.getScopedClient(request, {
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
+      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
     });
 
     await soClient.create(PrivilegeMonitoringApiKeyType.name, apiKey, {
@@ -92,31 +91,34 @@ const getRequestFromApiKey = async (apiKey: PrivilegeMonitoringAPIKey) => {
     api_key: apiKey.apiKey,
   });
 };
-const getClientFromApiKey =
-  (deps: ApiKeyManagerDependencies) => async (apiKey: PrivilegeMonitoringAPIKey) => {
-    const fakeRequest = getFakeKibanaRequest({
-      id: apiKey.id,
-      api_key: apiKey.apiKey,
-    });
-    const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
-    const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
-      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name],
-    });
-    return {
-      clusterClient,
-      soClient,
-    };
+const getClient = async (deps: ApiKeyManagerDependencies) => {
+  const apiKey = await getApiKey(deps);
+  if (!apiKey) return undefined;
+  const fakeRequest = getFakeKibanaRequest({
+    id: apiKey.id,
+    api_key: apiKey.apiKey,
+  });
+  const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
+  return {
+    clusterClient,
   };
+};
 
-export const generateAPIKey = async (
+const generateAPIKey = async (
   req: KibanaRequest,
   deps: ApiKeyManagerDependencies
 ): Promise<PrivilegeMonitoringAPIKey | undefined> => {
+  deps.logger.info('Generating Privmon API key');
   const apiKey = await deps.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Privilege Monitoring API key',
-    role_descriptors: {
-      privmon_admin: privilegeMonitoringRuntimePrivileges([]),
-    },
+    /**
+     * Intentionally passing empty array - generates a snapshot (empty object).
+     * Due to not knowing what index pattern changes customer may make to index list.
+     *
+     * - If the customer later adds new indices they *do* have access to, the key will still function.
+     * - If they add indices they *don't* have access to, they will need to reinitialize once their access is elevated.
+     */
+    role_descriptors: {},
     metadata: {
       description: 'API key used to manage the resources in the privilege monitoring engine',
     },
@@ -129,24 +131,6 @@ export const generateAPIKey = async (
       apiKey: apiKey.api_key,
     };
   }
-};
-
-export const SO_PRIVILEGE_MONITORING_API_KEY_TYPE = 'privmon-api-key';
-
-export const PrivilegeMonitoringApiKeyType: SavedObjectsType = {
-  name: SO_PRIVILEGE_MONITORING_API_KEY_TYPE,
-  hidden: true,
-  namespaceType: 'multiple-isolated',
-  mappings: {
-    dynamic: false,
-    properties: {
-      apiKey: { type: 'binary' },
-    },
-  },
-  management: {
-    importableAndExportable: false,
-    displayName: 'Privilege Monitoring API key',
-  },
 };
 
 export interface PrivilegeMonitoringAPIKey {

@@ -64,7 +64,7 @@ const ToolbarComponent: React.FC<Props> = ({
             onClick={handleUnselectAll}
             size="xs"
           >
-            {i18n.UNSELECT_ALL_CONVERSATIONS(totalConversations)}
+            {i18n.UNSELECT_ALL_CONVERSATIONS(totalSelected)}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
@@ -72,7 +72,7 @@ const ToolbarComponent: React.FC<Props> = ({
       {isAnySelected && (
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" data-test-subj="selectedFields" size="xs">
-            {i18n.SELECTED_CONVERSATIONS(isDeleteAll ? totalConversations : totalSelected)}
+            {i18n.SELECTED_CONVERSATIONS(totalSelected)}
           </EuiText>
         </EuiFlexItem>
       )}

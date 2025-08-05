@@ -21,7 +21,7 @@
           "\n\nInitializes OpenTelemetry (currently only tracing)\n"
         ],
         "signature": [
-          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => () => Promise<void>"
+          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void | (() => Promise<void>)"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
         "deprecated": false,

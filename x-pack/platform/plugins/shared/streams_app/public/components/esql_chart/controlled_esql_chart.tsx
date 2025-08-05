@@ -190,6 +190,7 @@ export function ControlledEsqlChart<T extends string>({
             yAccessors={serie.metricNames}
             data={serie.data}
             curve={CurveType.CURVE_MONOTONE_X}
+            enableHistogramMode
           />
         );
       })}

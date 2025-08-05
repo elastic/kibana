@@ -8,7 +8,5 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless observability API - feature flags', function () {
-    loadTestFile(require.resolve('./platform_security'));
-  });
+  describe('Serverless observability API - feature flags', function () {});
 }

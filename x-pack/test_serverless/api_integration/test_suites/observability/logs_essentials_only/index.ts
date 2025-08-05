@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('logs essentials only', function () {
     loadTestFile(require.resolve('./disabled_apis'));
     loadTestFile(require.resolve('./streams'));
+    loadTestFile(require.resolve('./connector_and_rules'));
   });
 }

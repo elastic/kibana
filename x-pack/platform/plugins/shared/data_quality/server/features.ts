@@ -63,7 +63,7 @@ const canManageAlerts: SubFeaturePrivilegeGroupConfig = {
         all: [],
         read: [],
       },
-      ui: ['alerting:save'],
+      ui: [],
     },
   ],
 };
@@ -91,7 +91,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
           read: [degradedDocsAlertingFeatures],
         },
         alert: {
-          all: [degradedDocsAlertingFeatures],
+          read: [degradedDocsAlertingFeatures],
         },
       },
       management: {

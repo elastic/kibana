@@ -66,6 +66,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           kibanaName: this.kibanaName!,
           queueTimeout: this.queueTimeout,
           scheduledReport,
+          spaceId: reportSpaceId,
         })
       );
 

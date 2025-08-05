@@ -20,11 +20,11 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
@@ -41,10 +41,10 @@ const ActionsConnectorsHome = lazy(
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
+  cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
-  dashboard: DashboardStart;
   charts: ChartsPluginStart;
   alerting?: AlertingStart;
   spaces?: SpacesPluginStart;
@@ -59,6 +59,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   theme$: Observable<CoreTheme>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePluginStart;
+  isServerless: boolean;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -91,12 +92,14 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
     actions: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+    isServerless,
   } = useKibana().services;
 
   return (
     <ConnectorProvider
       value={{
         services: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+        isServerless,
       }}
     >
       <Routes>

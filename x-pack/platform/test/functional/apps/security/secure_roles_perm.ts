@@ -32,7 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await security.testUser.setRoles(['cluster_security_manager', 'kibana_admin']);
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'

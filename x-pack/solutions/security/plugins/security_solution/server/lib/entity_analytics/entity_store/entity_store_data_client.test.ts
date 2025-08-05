@@ -38,6 +38,7 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
     version: '0.0.1',
     fields: [],
     identityField: 'host.name',
+    identityFieldMapping: { type: 'keyword' },
     indexMappings: {},
     indexPatterns: [],
     settings: {

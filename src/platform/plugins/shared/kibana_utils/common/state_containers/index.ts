@@ -41,7 +41,7 @@ export type {
 
 export type { CreateStateContainerOptions } from './create_state_container';
 
-export { createStateContainer } from './create_state_container';
+export { createStateContainer, defaultFreeze } from './create_state_container';
 
 export {
   createStateContainerReactHelpers,

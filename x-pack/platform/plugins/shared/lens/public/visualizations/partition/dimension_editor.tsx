@@ -124,10 +124,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
           isDarkMode={props.isDarkMode}
           panelRef={props.panelRef}
           palettes={props.palettes}
-          palette={props.state.palette}
+          palette={localState.palette}
           setPalette={(newPalette) => {
-            setLocalState({ ...props.state, palette: newPalette });
-            setColorMapping();
+            setLocalState({ ...localState, palette: newPalette });
+          }}
+          onModeChange={(isLegacy) => {
+            if (isLegacy) setColorMapping();
           }}
           colorMapping={currentLayer.colorMapping}
           setColorMapping={setColorMapping}
@@ -149,7 +151,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             columnId: props.accessor,
             paletteService: props.paletteService,
             datasource: props.datasource,
-            palette: props.state.palette,
+            palette: localState.palette,
           })}
           disabledMessage={colorPickerDisabledMessage}
           setConfig={setConfig}

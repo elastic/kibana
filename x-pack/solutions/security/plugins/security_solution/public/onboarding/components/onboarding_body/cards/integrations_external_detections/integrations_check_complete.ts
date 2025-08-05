@@ -6,7 +6,7 @@
  */
 
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
-import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../common/constants';
+import { SEARCH_AI_LAKE_PACKAGES } from '@kbn/fleet-plugin/common';
 import type { StartServices } from '../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
@@ -23,7 +23,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
 > = async (services: StartServices) => {
   const { isComplete, activePackages: activeIntegrations } = await getActiveIntegrationList(
     services,
-    AI_FOR_SOC_INTEGRATIONS
+    SEARCH_AI_LAKE_PACKAGES
   );
 
   const activeIntegrationsCount = activeIntegrations.length;

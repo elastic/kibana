@@ -46,6 +46,12 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             loader: require.resolve('@kbn/peggy-loader'),
           },
         },
+        {
+          test: /\.text$/,
+          use: {
+            loader: require.resolve('@kbn/dot-text-loader'),
+          },
+        },
       ],
     },
     plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],

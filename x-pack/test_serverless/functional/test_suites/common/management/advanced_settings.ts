@@ -22,6 +22,7 @@ const editorSettings = new Set<string>([
   settings.SECURITY_SOLUTION_RULES_TABLE_REFRESH_ID,
   settings.SECURITY_SOLUTION_IP_REPUTATION_LINKS_ID,
   settings.OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID,
+  settings.AI_ANONYMIZATION_SETTINGS,
 ]);
 export const isEditorFieldSetting = (settingId: string) => editorSettings.has(settingId);
 

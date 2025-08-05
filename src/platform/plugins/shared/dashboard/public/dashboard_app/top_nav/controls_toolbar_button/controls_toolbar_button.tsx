@@ -38,6 +38,7 @@ export function ControlsToolbarButton({
       size="s"
       iconType="controlsHorizontal"
       data-test-subj="dashboard-controls-menu-button"
+      id="dashboard-controls-menu-button"
       isDisabled={isDisabled}
     >
       {({ closePopover }: { closePopover: () => void }) => (

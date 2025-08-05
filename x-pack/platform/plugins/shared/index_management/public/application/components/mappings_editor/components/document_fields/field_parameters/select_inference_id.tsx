@@ -67,6 +67,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 }) => {
   const {
     core: { application, http },
+    config: { enforceAdaptiveAllocations },
     services: {
       notificationService: { toasts },
     },
@@ -281,6 +282,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 toasts={toasts}
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
+                enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               />
             </Suspense>
           ) : null}

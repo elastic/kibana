@@ -183,6 +183,7 @@ export const createAppContextStartContractMock = (
     updateAgentlessDeploymentsTask: {} as any,
     syncIntegrationsTask: {} as any,
     automaticAgentUpgradeTask: {} as any,
+    autoInstallContentPackagesTask: {} as any,
   };
 };
 
@@ -259,6 +260,11 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
       });
     }),
     removeOutputFromAll: jest.fn(),
+    getPackagePolicySavedObjects: jest.fn(),
+    rollback: jest.fn(),
+    restoreRollback: jest.fn(),
+    cleanupRollbackSavedObjects: jest.fn(),
+    bumpAgentPolicyRevisionAfterRollback: jest.fn(),
   };
 };
 

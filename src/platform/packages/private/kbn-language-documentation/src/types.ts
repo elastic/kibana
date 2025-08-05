@@ -15,3 +15,19 @@ export interface LanguageDocumentationSections {
   }>;
   initialSection: JSX.Element;
 }
+
+export type ESQLSignatureLicenseType = 'PLATINUM' | 'BASIC' | 'GOLD' | 'ENTERPRISE';
+export interface Signature {
+  params: Array<{
+    name: string;
+    type: string;
+    optional?: boolean;
+    supportsWildcard?: boolean;
+  }>;
+  license?: ESQLSignatureLicenseType;
+}
+
+export interface FunctionDefinition {
+  signatures: Signature[];
+  license?: ESQLSignatureLicenseType;
+}

@@ -6,10 +6,12 @@
  */
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import { RELATED_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRelatedColumns } from './get_related_columns';
 import { getBuildRelatedAlertsQuery } from '../../hooks/related_alerts/get_build_related_alerts_query';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
@@ -50,14 +52,18 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-const RELATED_ALERTS_TABLE_ID = 'xpack.observability.alerts.relatedAlerts';
-
 export function RelatedAlertsTable({ alertData }: Props) {
   const { formatted: alert } = alertData;
   const { filterProximal } = useFilterProximalParam();
   const esQuery = getBuildRelatedAlertsQuery({ alert, filterProximal });
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-  const services = useKibana().services;
+  const { services } = useKibana();
+
+  const onLoaded = useCallback(
+    ({ totalAlertsCount }: { totalAlertsCount: number }) =>
+      services.telemetryClient.reportRelatedAlertsLoaded(totalAlertsCount),
+    [services.telemetryClient]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -67,6 +73,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
         id={RELATED_ALERTS_TABLE_ID}
         query={esQuery}
         columns={columns}
+        onLoaded={onLoaded}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         minScore={1.5}
         trackScores={true}
@@ -95,6 +102,15 @@ export function RelatedAlertsTable({ alertData }: Props) {
           defaultHeight: 'auto',
         }}
         height="600px"
+        emptyState={{
+          messageTitle: i18n.translate('xpack.observability.relatedAlertsTable.emptyState.title', {
+            defaultMessage: 'No related alerts found',
+          }),
+          messageBody: i18n.translate('xpack.observability.relatedAlertsTable.emptyState.body', {
+            defaultMessage:
+              'No existing alerts match our related alerts criteria at this time. This may change if more alerts appear, so you may want to check back later.',
+          }),
+        }}
       />
     </EuiFlexGroup>
   );

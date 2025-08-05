@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 
 const root = css`
   position: sticky;
-  overflow: hidden;
   grid-area: sidebar;
   align-self: start;
   display: flex;
@@ -20,6 +19,7 @@ const root = css`
   align-items: center;
   height: 100%;
   width: var(--kbn-layout--sidebar-width);
+  z-index: var(--kbn-layout--aboveFlyoutLevel);
 `;
 
 export const styles = {

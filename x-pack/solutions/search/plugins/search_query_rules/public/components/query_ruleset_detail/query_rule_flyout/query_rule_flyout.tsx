@@ -119,6 +119,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
       onClose={onClose}
       ownFocus={false}
       size="l"
+      data-test-subj="searchQueryRulesQueryRuleFlyout"
       aria-labelledby="flyoutTitle"
       css={css({
         overflowY: 'hidden',
@@ -126,7 +127,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     >
       <QueryRuleFlyoutHeader ruleId={ruleId} createMode={createMode} />
       <EuiFlyoutBody css={QueryRuleFlyoutBody}>
-        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel(euiTheme)}>
+        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel}>
           <EuiFlexItem grow>
             <EuiPanel
               hasBorder={false}
@@ -252,9 +253,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow>
+          <EuiFlexItem grow css={QueryRuleFlyoutPanel}>
             <EuiPanel
-              hasBorder={true}
+              hasBorder={false}
               hasShadow={false}
               paddingSize="l"
               borderRadius="none"

@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import {
   batchTelemetryRecords,
@@ -44,7 +44,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
@@ -102,9 +102,9 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           licenseInfo,
           LIST_DETECTION_RULE_EXCEPTION
         );
-        log.l('Detection rule exception json length', {
+        log.debug('Detection rule exception json length', {
           length: detectionRuleExceptionsJson.length,
-        });
+        } as LogMeta);
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -121,7 +121,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         }
         await taskMetricsService.end(trace);
 
-        log.l('Task executed', { length: detectionRuleExceptionsJson.length });
+        log.debug('Task executed', { length: detectionRuleExceptionsJson.length } as LogMeta);
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {

@@ -18,9 +18,16 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import type { EuiDescriptionListProps, EuiAccordionProps, EuiBasicTableColumn } from '@elastic/eui';
+import type {
+  EuiDescriptionListProps,
+  EuiAccordionProps,
+  EuiBasicTableColumn,
+  EuiThemeComputed,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
@@ -40,6 +47,7 @@ import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
+import { CIS_GCP } from '../../../../common/constants';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -82,9 +90,21 @@ const renderTableField = (value: string) => {
     return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
   }
 
-  return Array.isArray(value) ? (
-    <MultiValueCellPopover<unknown> items={value} field="" object={{}} renderItem={renderValue} />
-  ) : (
+  if (Array.isArray(value)) {
+    return (
+      <MultiValueCellPopover<unknown>
+        items={value}
+        field=""
+        object={{}}
+        renderItem={renderValue}
+        {...(value.length === 1
+          ? { firstItemRenderer: (item) => <TruncatedCopyableText textToCopy={item} /> }
+          : {})}
+      />
+    );
+  }
+
+  return (
     <>
       <TruncatedCopyableText textToCopy={value} />
     </>
@@ -138,40 +158,74 @@ const getResourceList = (data: CspFinding) => [
 const getDetailsList = (
   data: CspFinding,
   ruleFlyoutLink?: string,
-  discoverDataViewLink?: string
+  discoverDataViewLink?: string,
+  euiTheme?: EuiThemeComputed<{}>
 ) => [
   {
     title: (
-      <>
-        <EuiFlexGroup direction="row" gutterSize="m">
-          <EuiFlexItem>
-            {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleDescription', {
-              defaultMessage: 'Rule Description',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
-              <EuiIcon type="expand" />
-              {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
-                defaultMessage: 'Show rule details',
+      <EuiFlexGroup direction="row" gutterSize="m" css={{ marginBottom: euiTheme?.size.xs }}>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h1>
+              {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleDescription', {
+                defaultMessage: 'Rule Description',
               })}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h1>
+              <div
+                css={{
+                  textAlign: 'right',
+                  display: 'flex',
+                  gap: euiTheme?.size.s,
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  marginBottom: euiTheme?.size.xs,
+                }}
+              >
+                <EuiIcon type="expand" color="primary" />
+                <EuiLink href={ruleFlyoutLink} target="_blank" external={false}>
+                  {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
+                    defaultMessage: 'Show rule details',
+                  })}
+                </EuiLink>
+              </div>
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
-    description: data.rule?.description ? <EuiText>{data.rule?.description}</EuiText> : EMPTY_VALUE,
+    description: data.rule?.description ? (
+      <CspFlyoutMarkdown>{data.rule?.description}</CspFlyoutMarkdown>
+    ) : (
+      EMPTY_VALUE
+    ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
-      defaultMessage: 'Alerts',
-    }),
+    title: (
+      <EuiTitle size="xxs" css={{ marginBottom: euiTheme?.size.xs }}>
+        <h1>
+          {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
+            defaultMessage: 'Alerts',
+          })}
+        </h1>
+      </EuiTitle>
+    ),
     description: <FindingsDetectionRuleCounter finding={data} />,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
-      defaultMessage: 'Data View',
-    }),
+    title: (
+      <EuiTitle size="xxs" css={{ marginBottom: euiTheme?.size.xs }}>
+        <h1>
+          {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
+            defaultMessage: 'Data View',
+          })}
+        </h1>
+      </EuiTitle>
+    ),
     description: discoverDataViewLink ? (
       <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
     ) : (
@@ -201,7 +255,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   },
 ];
 
-const getEvidenceList = ({ result }: CspFinding) =>
+const getEvidenceList = (evidence: object) =>
   [
     {
       title: '',
@@ -214,7 +268,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
@@ -229,6 +283,7 @@ export const OverviewTab = ({
 }) => {
   const { discover } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const cdrMisconfigurationsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
+  const { euiTheme } = useEuiTheme();
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding
   const discoverDataViewLink = useMemo(
@@ -254,8 +309,7 @@ export const OverviewTab = ({
     [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result?.evidence);
-
+  const evidence = getEvaluationEvidence(data);
   const accordions: Accordion[] = useMemo(
     () =>
       [
@@ -265,7 +319,7 @@ export const OverviewTab = ({
             defaultMessage: 'About',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink, euiTheme),
         },
         {
           initialIsOpen: true,
@@ -284,17 +338,17 @@ export const OverviewTab = ({
           listItems: getRemediationList(data.rule),
         },
         INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
-          hasEvidence && {
+          !isEmpty(evidence) && {
             initialIsOpen: true,
             title: i18n.translate(
               'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
             ),
             id: 'evidenceAccordion',
-            listItems: getEvidenceList(data),
+            listItems: getEvidenceList(evidence),
           },
       ].filter(truthy),
-    [data, discoverDataViewLink, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataViewLink, euiTheme, ruleFlyoutLink, evidence]
   );
 
   return (
@@ -319,4 +373,12 @@ export const OverviewTab = ({
       ))}
     </>
   );
+};
+
+const getEvaluationEvidence = (data: CspFinding) => {
+  if (data.rule.benchmark?.id === CIS_GCP) {
+    // For CIS GCP, the evidence is the resource.raw field, which may contain a nested 'resource' field
+    return (data.resource?.raw as { resource?: unknown })?.resource || data.resource?.raw;
+  }
+  return data.result?.evidence;
 };

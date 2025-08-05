@@ -20,8 +20,9 @@ import {
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
+import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
-import { transactionFields } from './resources/fields';
+import { transactionFields, allTransactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
@@ -53,6 +54,7 @@ export function TransactionOverview({
   showWaterfall = true,
   showActions = true,
   dataView,
+  columnsMeta,
 }: TransactionOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
@@ -62,7 +64,11 @@ export function TransactionOverview({
     }),
     [dataView, fieldFormats, hit]
   );
-
+  const { dataViewFields } = useDataViewFields({
+    fields: allTransactionFields,
+    dataView,
+    columnsMeta,
+  });
   const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
   const fieldConfigurations = useMemo(
     () => getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
@@ -98,6 +104,7 @@ export function TransactionOverview({
                   <TransactionSummaryField
                     key={fieldId}
                     fieldId={fieldId}
+                    fieldMapping={dataViewFields[fieldId]}
                     fieldConfiguration={fieldConfigurations[fieldId]}
                     showActions={showActions}
                   />
@@ -117,6 +124,7 @@ export function TransactionOverview({
                 {traceId && transactionId && (
                   <Trace
                     fields={fieldConfigurations}
+                    fieldMappings={dataViewFields}
                     traceId={traceId}
                     docId={transactionId}
                     displayType="transaction"

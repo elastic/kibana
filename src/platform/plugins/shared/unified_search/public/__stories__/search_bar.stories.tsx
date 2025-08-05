@@ -85,7 +85,6 @@ const services = {
     get: () => {},
   },
   settings: { client: { get: () => {} } },
-  savedObjects: action('savedObjects'),
   notifications: action('notifications'),
   http: {
     basePath: {

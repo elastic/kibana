@@ -137,6 +137,7 @@ export const termsOperation: OperationDefinition<
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  scale: () => 'ordinal',
   getCurrentFields: (targetColumn) => {
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },
@@ -238,7 +239,6 @@ export const termsOperation: OperationDefinition<
       label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       sourceField: field.name,
       isBucketed: true,
       params: {

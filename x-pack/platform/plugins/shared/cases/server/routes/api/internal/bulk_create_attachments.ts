@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { escapeHatch } from '../utils';
+import { validAttachment } from '../utils';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -22,7 +22,7 @@ export const bulkCreateAttachmentsRoute = createCasesRoute({
     params: schema.object({
       case_id: schema.string(),
     }),
-    body: schema.arrayOf(escapeHatch),
+    body: schema.arrayOf(validAttachment),
   },
   routerOptions: {
     access: 'internal',

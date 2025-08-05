@@ -16,7 +16,6 @@ import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

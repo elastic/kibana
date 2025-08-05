@@ -34,12 +34,12 @@ export const ContextProviders = ({
   children: React.ReactNode;
 }) => {
   const {
-    assetId,
-    assetName,
+    entityId,
+    entityName,
     autoRefresh,
     dateRange,
     overrides,
-    assetType = 'host',
+    entityType = 'host',
     renderMode,
   } = props;
 
@@ -47,11 +47,11 @@ export const ContextProviders = ({
     <RenderWithOptionalSearchSessionProvider renderMode={renderMode}>
       <DatePickerProvider dateRange={dateRange} autoRefresh={autoRefresh}>
         <LoadingStateProvider>
-          <MetadataStateProvider assetId={assetId} assetType={assetType}>
+          <MetadataStateProvider entityId={entityId} entityType={entityType}>
             <AssetDetailsRenderPropsProvider
-              assetId={assetId}
-              assetName={assetName}
-              assetType={assetType}
+              entityId={entityId}
+              entityName={entityName}
+              entityType={entityType}
               overrides={overrides}
               renderMode={renderMode}
             >

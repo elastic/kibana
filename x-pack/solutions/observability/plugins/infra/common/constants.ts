@@ -51,9 +51,13 @@ export const KUBERNETES_POD_UID_FIELD = 'kubernetes.pod.uid';
 export const EVENT_MODULE = 'event.module';
 export const METRICSET_MODULE = 'metricset.module';
 export const METRICSET_NAME = 'metricset.name';
+export const DATASTREAM_DATASET = 'data_stream.dataset';
+
+// OTel hostmetricsreceiver
 
 // integrations
 export const SYSTEM_INTEGRATION = 'system';
+export const HOST_METRICS_RECEIVER_OTEL = 'hostmetricsreceiver.otel';
 
 // logs
 export const MESSAGE_FIELD = 'message';

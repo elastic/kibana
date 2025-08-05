@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExplorerNoResultsFound } from './explorer_no_results_found';
 
-describe('ExplorerNoInfluencersFound', () => {
+describe('ExplorerNoResultsFound', () => {
   test('snapshot', () => {
-    const wrapper = shallow(<ExplorerNoResultsFound />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <IntlProvider>
+        <ExplorerNoResultsFound hasResults={false} selectedJobsRunning={false} />
+      </IntlProvider>
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

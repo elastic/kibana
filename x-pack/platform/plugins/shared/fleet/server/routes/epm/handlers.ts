@@ -7,7 +7,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
-import type { HttpResponseOptions } from '@kbn/core/server';
+
+import { type HttpResponseOptions } from '@kbn/core/server';
+
 import { omit, pick } from 'lodash';
 
 import { defaultFleetErrorHandler } from '../../errors';
@@ -34,6 +36,7 @@ import type {
   GetBulkAssetsResponse,
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
+  RollbackPackageResponse,
   AssetSOObject,
   PackageSpecCategory,
 } from '../../../common/types';
@@ -55,6 +58,7 @@ import type {
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
   CustomIntegrationRequestSchema,
+  RollbackPackageRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -74,6 +78,7 @@ import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
 import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { rollbackInstallation } from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -117,7 +122,11 @@ export const getListHandler: FleetRequestHandler<
     savedObjectsClient,
     ...request.query,
   });
-  const flattenedRes = res.map((pkg) => soToInstallationInfo(pkg)) as PackageList;
+  const flattenedRes = res
+    // exclude the security_ai_prompts package from being shown in Kibana UI
+    // https://github.com/elastic/kibana/pull/227308
+    .filter((pkg) => pkg.id !== 'security_ai_prompts')
+    .map((pkg) => soToInstallationInfo(pkg)) as PackageList;
 
   if (request.query.withPackagePoliciesCount) {
     const countByPackage = await getPackagePoliciesCountByPackageName(
@@ -622,6 +631,7 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'json',
+      undefined,
       prerelease,
       ignoreUnverified
     );
@@ -631,6 +641,7 @@ export const getInputsHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       'yml',
+      undefined,
       prerelease,
       ignoreUnverified
     );
@@ -686,4 +697,29 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
     };
   }
   return pkg;
+};
+
+export const rollbackPackageHandler: FleetRequestHandler<
+  TypeOf<typeof RollbackPackageRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName } = request.params;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const fleetContext = await context.fleet;
+  // Need a less restrictive client than fleetContext.internalSoClient for SO operations in multiple spaces.
+  const internalSoClientWithoutSpaceExtension =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  const spaceId = fleetContext.spaceId;
+  try {
+    const body: RollbackPackageResponse = await rollbackInstallation({
+      esClient,
+      savedObjectsClient: internalSoClientWithoutSpaceExtension,
+      pkgName,
+      spaceId,
+    });
+    return response.ok({ body });
+  } catch (error) {
+    error.message = `Failed to roll back package ${pkgName}: ${error.message}`;
+    throw error;
+  }
 };

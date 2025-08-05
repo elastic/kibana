@@ -19,12 +19,14 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { ConfigType } from '../../../config';
 import { isRetryableEsClientError } from '../../utils';
 
 interface BackfillTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
   getESClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
+  analyticsConfig: ConfigType['analytics'];
 }
 
 export class BackfillTaskRunner implements CancellableTask {
@@ -34,16 +36,28 @@ export class BackfillTaskRunner implements CancellableTask {
   private readonly getESClient: () => Promise<ElasticsearchClient>;
   private readonly logger: Logger;
   private readonly errorSource = TaskErrorSource.FRAMEWORK;
+  private readonly analyticsConfig: ConfigType['analytics'];
 
-  constructor({ taskInstance, getESClient, logger }: BackfillTaskRunnerFactoryConstructorParams) {
+  constructor({
+    taskInstance,
+    getESClient,
+    logger,
+    analyticsConfig,
+  }: BackfillTaskRunnerFactoryConstructorParams) {
     this.sourceIndex = taskInstance.params.sourceIndex;
     this.destIndex = taskInstance.params.destIndex;
     this.sourceQuery = taskInstance.params.sourceQuery;
     this.getESClient = getESClient;
     this.logger = logger;
+    this.analyticsConfig = analyticsConfig;
   }
 
   public async run() {
+    if (!this.analyticsConfig.index.enabled) {
+      this.logDebug('Analytics index is disabled, skipping backfill task.');
+      return;
+    }
+
     const esClient = await this.getESClient();
     try {
       await this.waitForDestIndex(esClient);
@@ -137,8 +151,7 @@ export class BackfillTaskRunner implements CancellableTask {
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
-      timeout: '300ms', // this is probably too much
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
   }
 

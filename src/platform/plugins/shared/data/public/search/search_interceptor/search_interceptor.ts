@@ -64,6 +64,7 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { defaultFreeze } from '@kbn/kibana-utils-plugin/common';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -623,6 +624,8 @@ export class SearchInterceptor {
             ) {
               this.showRestoreWarning(sessionId);
             }
+
+            defaultFreeze(response);
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);

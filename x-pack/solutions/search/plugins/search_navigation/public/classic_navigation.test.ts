@@ -14,9 +14,9 @@ import { ClassicNavItem } from './types';
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [
     {
-      id: 'enterpriseSearch',
-      url: '/app/elasticsearch/overview',
-      title: 'Overview',
+      id: 'searchHomepage',
+      url: '/app/elasticsearch/home',
+      title: 'Home',
     },
     {
       id: 'enterpriseSearchContent:connectors',
@@ -56,7 +56,7 @@ describe('classicNavigationFactory', function () {
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
+          link: 'searchHomepage',
         },
       },
     ];
@@ -64,10 +64,10 @@ describe('classicNavigationFactory', function () {
       icon: 'logoElasticsearch',
       items: [
         {
-          href: '/app/elasticsearch/overview',
+          href: '/app/elasticsearch/home',
           id: 'unit-test',
           isSelected: false,
-          name: 'Overview',
+          name: 'Home',
           onClick: expect.any(Function),
         },
       ],
@@ -77,13 +77,13 @@ describe('classicNavigationFactory', function () {
 
   it('will set isSelected', () => {
     mockHistory.location.pathname = '/overview';
-    mockHistory.createHref.mockReturnValue('/app/elasticsearch/overview');
+    mockHistory.createHref.mockReturnValue('/app/elasticsearch/home');
 
     const items: ClassicNavItem[] = [
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
+          link: 'searchHomepage',
         },
       },
     ];
@@ -91,10 +91,10 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: true,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);
@@ -158,7 +158,7 @@ describe('classicNavigationFactory', function () {
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
+          link: 'searchHomepage',
         },
       },
       {
@@ -172,10 +172,10 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: false,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);

@@ -47,8 +47,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('custom roles', function () {
-        this.tags('skipSvlOblt'); // Observability will not support custom roles
-
         it('displays the roles management card, and will navigate to the Roles UI', async () => {
           await pageObjects.svlManagementPage.assertRoleManagementCardExists();
           await pageObjects.svlManagementPage.clickRoleManagementCard();
@@ -59,9 +57,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('organization members', function () {
-        // Observability will not support custom roles
         // Cannot test cloud link on MKI (will redirect to login)
-        this.tags(['skipSvlOblt', 'skipMKI']);
+        this.tags(['skipMKI']);
 
         it('displays the Organization members management card, and will navigate to the cloud organization URL', async () => {
           await pageObjects.svlManagementPage.assertOrgMembersManagementCardExists();
@@ -107,9 +104,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Organization members', function () {
-        // Observability will not support custom roles
         // Cannot test cloud link on MKI (will redirect to login)
-        this.tags(['skipSvlOblt', 'skipMKI']);
+        this.tags(['skipMKI']);
 
         it('displays the organization members management card, and will navigate to the cloud organization URL', async () => {
           // The org members nav card is always visible because there is no way to check if a user has approprite privileges

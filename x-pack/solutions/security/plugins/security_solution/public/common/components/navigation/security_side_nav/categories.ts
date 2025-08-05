@@ -26,14 +26,11 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
     linkIds: [
+      SecurityPageName.entityAnalyticsLanding,
+      SecurityPageName.exploreLanding,
       SecurityPageName.timelines,
       SecurityPageName.threatIntelligence,
-      SecurityPageName.exploreLanding,
     ],
-  },
-  {
-    type: LinkCategoryType.separator,
-    linkIds: [SecurityPageName.entityAnalyticsLanding],
   },
   {
     type: LinkCategoryType.separator,

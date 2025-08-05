@@ -20,6 +20,7 @@ export { checkLicense } from './license_check';
 import type { CoreSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 /* Services received through useKibana context
@@ -35,6 +36,7 @@ export interface KibanaContext {
   share: SharePluginStart;
   actions: ActionsPublicPluginSetup;
   notifications: NotificationsStart;
+  license$: LicensingPluginStart['license$'];
 }
 
 export const useKibana = () => _useKibana<KibanaContext>();

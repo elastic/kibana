@@ -634,7 +634,7 @@ export class TaskStore {
 
       if (item.update?.error) {
         const err = new BulkUpdateError({
-          message: item.update.error.reason,
+          message: item.update.error.reason ?? undefined, // reason can be null, and we want to keep `message` as string | undefined
           type: item.update.error.type,
           statusCode: item.update.status,
         });

@@ -141,4 +141,21 @@ describe('RulesTable', () => {
       ],
     });
   });
+
+  it('renders checkboxes with proper aria-labels for accessibility', () => {
+    render(
+      <Wrapper>
+        <RulesTable {...mockProps} />
+      </Wrapper>
+    );
+
+    // Check that the "select all" checkbox has an aria-label
+    const selectAllCheckbox = screen.getByLabelText('Select all rules on current page');
+    expect(selectAllCheckbox).toBeInTheDocument();
+
+    // Check that individual rule checkboxes have aria-labels with rule names
+    const mockRuleName = selectRulesMock[0].metadata.name;
+    const ruleCheckbox = screen.getByLabelText(`Select rule: ${mockRuleName}`);
+    expect(ruleCheckbox).toBeInTheDocument();
+  });
 });

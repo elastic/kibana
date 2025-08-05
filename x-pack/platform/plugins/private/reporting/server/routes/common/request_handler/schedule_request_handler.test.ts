@@ -330,6 +330,100 @@ describe('Handle request to schedule', () => {
       );
     });
 
+    test('creates a scheduled_report saved object and rrule dtstart', async () => {
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: {
+          rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2, tzid: 'UTC' },
+        },
+      });
+
+      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      expect(snapObj).toMatchInlineSnapshot(`
+        Object {
+          "created_by": "testymcgee",
+          "jobtype": "printable_pdf_v2",
+          "meta": Object {
+            "isDeprecated": false,
+            "layout": "preserve_layout",
+            "objectType": "cool_object_type",
+          },
+          "migration_version": "unknown",
+          "notification": undefined,
+          "schedule": Object {
+            "rrule": Object {
+              "dtstart": "2025-06-23T14:17:19.765Z",
+              "freq": 1,
+              "interval": 2,
+              "tzid": "UTC",
+            },
+          },
+        }
+      `);
+      expect(payload).toMatchInlineSnapshot(`
+        Object {
+          "browserTimezone": "UTC",
+          "isDeprecated": false,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "locatorParams": Array [],
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "unknown",
+        }
+      `);
+
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_schedule',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['creation'],
+        },
+        kibana: {
+          saved_object: { id: 'mock-report-id', name: 'cool_title', type: 'scheduled_report' },
+        },
+        message: 'User is creating scheduled report [id=mock-report-id] [name=cool_title]',
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'scheduled_report',
+        {
+          jobType: 'printable_pdf_v2',
+          createdAt: expect.any(String),
+          createdBy: 'testymcgee',
+          title: 'cool_title',
+          enabled: true,
+          payload: JSON.stringify(payload),
+          schedule: {
+            rrule: {
+              dtstart: '2025-06-23T14:17:19.765Z',
+              freq: 1,
+              interval: 2,
+              tzid: 'UTC',
+            },
+          },
+          migrationVersion: 'unknown',
+          meta: {
+            objectType: 'cool_object_type',
+            layout: 'preserve_layout',
+            isDeprecated: false,
+          },
+        },
+        { id: 'mock-report-id' }
+      );
+
+      expect(reportingCore.scheduleRecurringTask).toHaveBeenCalledWith(mockRequest, {
+        id: 'foo',
+        jobtype: 'printable_pdf_v2',
+        schedule: {
+          rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2, tzid: 'UTC' },
+        },
+      });
+    });
+
     test('throws errors from so client create', async () => {
       soClient.create = jest.fn().mockImplementationOnce(async () => {
         throw new Error('SO create error');
@@ -398,6 +492,34 @@ describe('Handle request to schedule', () => {
         schedule: { rrule: { freq: 1, interval: 2 } },
       };
       expect(requestHandler.getSchedule()).toEqual({ rrule: { freq: 1, interval: 2 } });
+    });
+
+    test('parse schedule with dtstart from body', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
+      };
+      expect(requestHandler.getSchedule()).toEqual({
+        rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 },
+      });
+    });
+
+    test('handles invalid rrule.dtstart string', () => {
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { dtstart: 'i am not a date', freq: 1, interval: 2 } },
+        };
+        requestHandler.getSchedule();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe('Invalid startedAt date: i am not a date');
     });
 
     test('handles missing schedule', () => {

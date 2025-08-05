@@ -5,77 +5,51 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-} from '@elastic/eui';
+import React, { Suspense, useMemo } from 'react';
+import { EuiBetaBadge, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { RouteComponentProps } from 'react-router-dom';
-import { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  ClientConfigType,
-  ReportingAPIClient,
-  useInternalApiClient,
-  useKibana,
-} from '@kbn/reporting-public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import { useHistory, useParams } from 'react-router-dom';
+import { ILicense } from '@kbn/licensing-plugin/public';
+import { ClientConfigType, useInternalApiClient, useKibana } from '@kbn/reporting-public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
-import { suspendedComponentWithProps } from './suspended_component_with_props';
 import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
 import ReportExportsTable from './report_exports_table';
-import { IlmPolicyLink } from './ilm_policy_link';
-import { ReportDiagnostic } from './report_diagnostic';
-import { useIlmPolicyStatus } from '../../lib/ilm_policy_status_context';
-import { MigrateIlmPolicyCallOut } from './migrate_ilm_policy_callout';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import IlmPolicyWrapper from './ilm_policy_wrapper';
 
 export interface MatchParams {
   section: Section;
 }
 
 export interface ReportingTabsProps {
-  coreStart: CoreStart;
-  license$: LicensingPluginStart['license$'];
-  dataService: DataPublicPluginStart;
-  shareService: SharePluginStart;
   config: ClientConfigType;
-  apiClient: ReportingAPIClient;
 }
 
-export const ReportingTabs: React.FunctionComponent<
-  Partial<RouteComponentProps> & ReportingTabsProps
-> = (props) => {
-  const { coreStart, license$, shareService, config, ...rest } = props;
-  const { notifications } = coreStart;
-  const { section } = rest.match?.params as MatchParams;
-  const history = rest.history as ScopedHistory;
+export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }> = ({
+  config,
+}) => {
+  const { section } = useParams<MatchParams>();
+  const history = useHistory();
+
   const { apiClient } = useInternalApiClient();
   const {
     services: {
       application: { capabilities, navigateToApp, navigateToUrl },
       http,
+      notifications,
+      share: { url: urlService },
+      license$,
     },
   } = useKibana();
-
-  const ilmLocator = shareService.url.locators.get('ILM_LOCATOR_ID');
-  const ilmPolicyContextValue = useIlmPolicyStatus(config.statefulSettings.enabled);
-  const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
-  const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
   const license = useObservable<ILicense | null>(license$ ?? new Observable(), null);
 
-  const hasValidLicense = useCallback(() => {
+  const licensingInfo = useMemo(() => {
     if (!license) {
       return { enableLinks: false, showLinks: false };
     }
@@ -127,73 +101,7 @@ export const ReportingTabs: React.FunctionComponent<
     },
   ];
 
-  const { enableLinks, showLinks } = hasValidLicense();
-
-  const renderExportsList = useCallback(() => {
-    return suspendedComponentWithProps(
-      ReportExportsTable,
-      'xl'
-    )({
-      apiClient,
-      toasts: notifications.toasts,
-      license$,
-      config,
-      capabilities,
-      redirect: navigateToApp,
-      navigateToUrl,
-      urlService: shareService.url,
-      http,
-    });
-  }, [
-    apiClient,
-    notifications.toasts,
-    license$,
-    config,
-    capabilities,
-    navigateToApp,
-    navigateToUrl,
-    shareService.url,
-    http,
-  ]);
-
-  const renderSchedulesList = useCallback(() => {
-    return (
-      <>
-        {enableLinks && showLinks ? (
-          <EuiPageTemplate.Section grow={false} paddingSize="none">
-            {suspendedComponentWithProps(
-              ReportSchedulesTable,
-              'xl'
-            )({
-              apiClient,
-              toasts: notifications.toasts,
-              license$,
-              config,
-              capabilities,
-              redirect: navigateToApp,
-              navigateToUrl,
-              urlService: shareService.url,
-              http,
-            })}
-          </EuiPageTemplate.Section>
-        ) : (
-          <LicensePrompt />
-        )}
-      </>
-    );
-  }, [
-    apiClient,
-    notifications.toasts,
-    license$,
-    config,
-    capabilities,
-    navigateToApp,
-    navigateToUrl,
-    shareService.url,
-    http,
-    enableLinks,
-    showLinks,
-  ]);
+  const { enableLinks, showLinks } = licensingInfo;
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -206,23 +114,7 @@ export const ReportingTabs: React.FunctionComponent<
         bottomBorder
         rightSideItems={
           config.statefulSettings.enabled
-            ? [
-                <MigrateIlmPolicyCallOut toasts={notifications.toasts} />,
-                <EuiFlexItem grow={false}>
-                  <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
-                </EuiFlexItem>,
-                <EuiFlexGroup justifyContent="flexEnd">
-                  {capabilities?.management?.data?.index_lifecycle_management && (
-                    <EuiFlexItem grow={false}>
-                      {ilmPolicyContextValue?.isLoading ? (
-                        <EuiLoadingSpinner />
-                      ) : (
-                        showIlmPolicyLink && <IlmPolicyLink locator={ilmLocator!} />
-                      )}
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>,
-              ]
+            ? [<IlmPolicyWrapper config={config} apiClient={apiClient} />]
             : []
         }
         data-test-subj="reportingPageHeader"
@@ -258,8 +150,38 @@ export const ReportingTabs: React.FunctionComponent<
       />
 
       <Routes>
-        <Route exact path={REPORTING_EXPORTS_PATH} component={renderExportsList} />
-        <Route exact path={REPORTING_SCHEDULES_PATH} component={renderSchedulesList} />
+        <Route
+          exact
+          path={REPORTING_EXPORTS_PATH}
+          render={() => (
+            <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
+              <ReportExportsTable
+                apiClient={apiClient}
+                toasts={notifications.toasts}
+                license$={license$}
+                config={config}
+                capabilities={capabilities}
+                redirect={navigateToApp}
+                navigateToUrl={navigateToUrl}
+                urlService={urlService}
+                http={http}
+              />
+            </Suspense>
+          )}
+        />
+        <Route
+          exact
+          path={REPORTING_SCHEDULES_PATH}
+          render={() => (
+            <Suspense fallback={<EuiLoadingSpinner size={'xl'} />}>
+              {enableLinks && showLinks ? (
+                <ReportSchedulesTable apiClient={apiClient} />
+              ) : (
+                <LicensePrompt />
+              )}
+            </Suspense>
+          )}
+        />
       </Routes>
     </>
   );

@@ -9,7 +9,6 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceSetup, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiErrorBoundary } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
@@ -128,21 +127,19 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <EuiErrorBoundary>
-        <KibanaContextProvider services={services}>
-          <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
-            <ExploratoryViewEmbeddable
-              {...embedProps}
-              dataViewState={dataViews}
-              lens={lens}
-              lensFormulaHelper={lensHelper?.formula}
-              searchSessionId={services.data.search.session.getSessionId()}
-              onLoad={onLensLoaded}
-              analytics={analytics}
-            />
-          </Wrapper>
-        </KibanaContextProvider>
-      </EuiErrorBoundary>
+      <KibanaContextProvider services={services}>
+        <Wrapper customHeight={props.customHeight} data-test-subj={props.dataTestSubj}>
+          <ExploratoryViewEmbeddable
+            {...embedProps}
+            dataViewState={dataViews}
+            lens={lens}
+            lensFormulaHelper={lensHelper?.formula}
+            searchSessionId={services.data.search.session.getSessionId()}
+            onLoad={onLensLoaded}
+            analytics={analytics}
+          />
+        </Wrapper>
+      </KibanaContextProvider>
     );
   };
 }

@@ -6,11 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentIdentifier, ChatAgentEvent } from '@kbn/onechat-common';
+import type { ChatAgentEvent } from '@kbn/onechat-common';
+import type { AgentParams, AgentResponse } from './provider';
 
-export interface RunAgentReturn<TResult = unknown> {
+export interface RunAgentReturn {
   /** return from the agent */
-  result: TResult;
+  result: AgentResponse;
   /** ID of this run */
   runId: string;
 }
@@ -18,19 +19,23 @@ export interface RunAgentReturn<TResult = unknown> {
 /**
  * Params for {@link RunAgentFn}
  */
-export interface RunAgentParams<TParams = Record<string, unknown>> {
+export interface RunAgentParams {
   /**
    * ID of the agent to call.
    */
-  agentId: AgentIdentifier;
+  agentId: string;
   /**
    * Parameters to call the agent with.
    */
-  agentParams: TParams;
+  agentParams: AgentParams;
   /**
    * Optional event handler.
    */
   onEvent?: RunAgentOnEventFn;
+  /**
+   * Optional signal to abort the execution of the agent.
+   */
+  abortSignal?: AbortSignal;
   /**
    * The request that initiated that run.
    */
@@ -47,21 +52,14 @@ export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;
 /**
  * Params for {@link ScopedRunner.runTool}
  */
-export type ScopedRunnerRunAgentParams<TParams = Record<string, unknown>> = Omit<
-  RunAgentParams<TParams>,
-  'request'
->;
+export type ScopedRunnerRunAgentParams = Omit<RunAgentParams, 'request'>;
 
 /**
- * Public onechat API to execute a tools.
+ * Public onechat API to execute an agent.
  */
-export type RunAgentFn = <TParams = Record<string, unknown>, TResult = unknown>(
-  params: RunAgentParams<TParams>
-) => Promise<RunAgentReturn<TResult>>;
+export type RunAgentFn = (params: RunAgentParams) => Promise<RunAgentReturn>;
 
 /**
- * Public onechat API to execute a tools.
+ * Public onechat API to execute an agent.
  */
-export type ScopedRunAgentFn = <TParams = Record<string, unknown>, TResult = unknown>(
-  params: ScopedRunnerRunAgentParams<TParams>
-) => Promise<RunAgentReturn<TResult>>;
+export type ScopedRunAgentFn = (params: ScopedRunnerRunAgentParams) => Promise<RunAgentReturn>;

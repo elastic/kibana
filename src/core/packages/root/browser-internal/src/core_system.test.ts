@@ -494,6 +494,7 @@ describe('#start()', () => {
         application: expect.any(Object),
         chrome: expect.any(Object),
         overlays: expect.any(Object),
+        featureFlags: expect.any(Object),
       },
       expect.any(HTMLElement)
     );

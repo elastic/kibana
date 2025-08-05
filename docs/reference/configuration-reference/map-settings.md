@@ -17,7 +17,7 @@ applies_to:
       includeElasticMapsService: false
       layers:
         - name: "Departments of France"
-          url: "http://my.cors.enabled.server.org/france_departements.geojson"
+          url: "<MY_CORS_ENABLED_SERVER_URL>/france_departements.geojson"
           attribution:   "INRAP"
           fields:
             - name: "department"

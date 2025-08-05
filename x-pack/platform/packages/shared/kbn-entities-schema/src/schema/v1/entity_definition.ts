@@ -40,6 +40,7 @@ export const entityDefinitionSchema = z.object({
         frequency: z.optional(durationSchema),
         timeout: z.optional(durationSchema),
         docsPerSecond: z.optional(z.number()),
+        maxPageSearchSize: z.optional(z.number()),
       })
     ),
   }),

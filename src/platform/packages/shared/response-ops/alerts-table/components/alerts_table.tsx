@@ -187,8 +187,7 @@ const AlertsTableContent = typedForwardRef(
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight = false,
-      emptyStateHeight,
-      emptyStateVariant,
+      emptyState,
       openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
@@ -332,9 +331,9 @@ const AlertsTableContent = typedForwardRef(
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
-        onLoaded(alerts, columns);
+        onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
-    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -608,8 +607,10 @@ const AlertsTableContent = typedForwardRef(
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
-              height={emptyStateHeight}
-              variant={emptyStateVariant}
+              messageTitle={emptyState?.messageTitle}
+              messageBody={emptyState?.messageBody}
+              height={emptyState?.height}
+              variant={emptyState?.variant}
             />
           </InspectButtonContainer>
         )}

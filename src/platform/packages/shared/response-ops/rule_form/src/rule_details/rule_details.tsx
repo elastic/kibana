@@ -114,6 +114,7 @@ export const RuleDetails = () => {
               placeholder={RULE_NAME_INPUT_TITLE}
               onChange={onNameChange}
               data-test-subj="ruleDetailsNameInput"
+              isInvalid={!!baseErrors?.name?.length}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -126,6 +127,7 @@ export const RuleDetails = () => {
             error={baseErrors?.tags}
           >
             <EuiComboBox
+              isInvalid={!!baseErrors?.tags?.length}
               fullWidth
               noSuggestions
               placeholder={RULE_TAG_PLACEHOLDER}

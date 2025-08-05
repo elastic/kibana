@@ -27,7 +27,7 @@ import {
 } from './date_optional_fields';
 import { DateFormatsField } from './date_formats_field';
 
-import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import {
   useStreamEnrichmentSelector,
   useSimulatorSelector,
@@ -46,7 +46,7 @@ export const DateProcessorForm = () => {
 
   const definition = useStreamEnrichmentSelector((snapshot) => snapshot.context.definition);
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+    selectPreviewRecords(snapshot.context)
   );
 
   const applySuggestions = async ({ field }: { field: string }) => {
@@ -75,7 +75,9 @@ export const DateProcessorForm = () => {
       if (!isEmpty(suggestions.formats)) {
         // Merge the suggested formats with the existing ones
         const prevFormats = form.getValues('formats');
-        form.setValue('formats', uniq([...prevFormats, ...suggestions.formats]));
+        form.setValue('formats', uniq([...prevFormats, ...suggestions.formats]), {
+          shouldValidate: true,
+        });
         form.clearErrors();
       }
     } catch (error) {

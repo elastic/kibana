@@ -58,6 +58,7 @@ const previouslyRegisteredTypes = [
   'enterprise_search_telemetry',
   'entity-analytics-monitoring-entity-source',
   'entity-definition',
+  'privmon-api-key',
   'entity-discovery-api-key',
   'epm-packages',
   'epm-packages-assets',

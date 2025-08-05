@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { ServerlessRoleName } from '../../../../../../shared/lib';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 import { getDiscoverESQLState } from './utils';
@@ -24,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('row indicators', () => {
       describe('alerts and events', () => {
         before(async () => {
-          await PageObjects.svlCommonPage.loginWithRole(ServerlessRoleName.PLATFORM_ENGINEER);
+          await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
           await PageObjects.common.navigateToApp('security', {
             path: 'alerts',
           });

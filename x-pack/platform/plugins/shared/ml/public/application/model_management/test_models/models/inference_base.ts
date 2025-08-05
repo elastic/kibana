@@ -393,7 +393,7 @@ export abstract class InferenceBase<TInferResponse> {
     if (doc === undefined) {
       if (error) {
         this.setFinishedWithErrors(error as unknown as MLHttpFetchError);
-        throw Error(error.reason);
+        throw Error(error.reason ?? undefined); // reason can be null and it's not a valid parameter for Error
       }
 
       throw Error(

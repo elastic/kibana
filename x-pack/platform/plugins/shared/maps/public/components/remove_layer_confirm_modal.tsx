@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { ILayer } from '../classes/layers/layer';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 
@@ -18,6 +18,8 @@ export interface Props {
 }
 
 export function RemoveLayerConfirmModal(props: Props) {
+  const modalTitleId = useGeneratedHtmlId();
+
   function getChildrenCount(layerGroup: LayerGroup) {
     let count = 0;
     layerGroup.getChildren().forEach((childLayer) => {
@@ -47,9 +49,11 @@ export function RemoveLayerConfirmModal(props: Props) {
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.maps.deleteLayerConfirmModal.title', {
         defaultMessage: 'Remove layer?',
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={props.onCancel}
       onConfirm={props.onConfirm}
       cancelButtonText={i18n.translate('xpack.maps.deleteLayerConfirmModal.cancelButtonText', {

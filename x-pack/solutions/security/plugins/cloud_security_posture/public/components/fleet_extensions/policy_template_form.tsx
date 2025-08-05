@@ -24,7 +24,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology, NamespaceComboBox } from '@kbn/fleet-plugin/public';
+import {
+  SetupTechnology,
+  NamespaceComboBox,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -56,7 +60,6 @@ import {
   type NewPackagePolicyPostureInput,
   hasErrors,
   POLICY_TEMPLATE_FORM_DTS,
-  POSTURE_NAMESPACE,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
@@ -72,11 +75,9 @@ import {
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -547,28 +548,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-  cloudSecurityNamespaceSupportEnabled,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-  cloudSecurityNamespaceSupportEnabled: boolean;
-}) => {
-  useEffect(() => {
-    // If the namespace support is enabled, we don't need to set the default namespace
-    if (cloudSecurityNamespaceSupportEnabled) return;
-    if (input.type.includes('vuln_mgmt')) return;
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy, cloudSecurityNamespaceSupportEnabled]);
-};
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
   integration,
@@ -714,10 +693,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const { euiTheme } = useEuiTheme();
 
-    const cloudSecurityNamespaceSupportEnabled = useMemo(() => {
-      return ExperimentalFeaturesService.get().cloudSecurityNamespaceSupportEnabled;
-    }, []);
-
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
@@ -855,13 +830,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
-
-    useEnsureDefaultNamespace({
-      newPolicy,
-      input,
-      updatePolicy,
-      cloudSecurityNamespaceSupportEnabled,
-    });
 
     useCloudFormationTemplate({
       packageInfo,
@@ -1014,7 +982,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {/* Namespace selector */}
-        {cloudSecurityNamespaceSupportEnabled && !input.type.includes('vuln_mgmt') && (
+        {!input.type.includes('vuln_mgmt') && (
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
@@ -1053,28 +1021,33 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           </>
         )}
         {shouldRenderAgentlessSelector && (
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
-            disabled={isEditPage}
-            setupTechnology={setupTechnology}
-            isAgentless={!!newPolicy?.supports_agentless}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >
+                    )
                   )
-                )
-              );
-            }}
-          />
+                );
+              }}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+            />
+          </>
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}

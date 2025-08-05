@@ -39,7 +39,7 @@ export interface AnomalyChartsInitializerProps {
   onCreate: (props: {
     jobIds: AnomalyChartsEmbeddableState['jobIds'];
     title: string;
-    maxSeriesToPlot?: number;
+    maxSeriesToPlot: number;
   }) => void;
   onCancel: () => void;
   adJobsApiService: MlApi['jobs'];
@@ -143,6 +143,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               }
             >
               <EuiFieldNumber
+                isInvalid={!isMaxSeriesToPlotValid}
                 data-test-subj="mlAnomalyChartsInitializerMaxSeries"
                 id="selectMaxSeriesToPlot"
                 name="selectMaxSeriesToPlot"

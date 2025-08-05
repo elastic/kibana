@@ -19,9 +19,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  status:
+                  status: 
                     oneOf:
-                    - $ref: './common.schema.yaml#/components/schemas/EngineStatus'
+                    - $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
                     - type: string
                       enum: [not_found]
                   error:

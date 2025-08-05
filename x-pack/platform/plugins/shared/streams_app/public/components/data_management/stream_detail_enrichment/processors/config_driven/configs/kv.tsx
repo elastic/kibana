@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { EuiCode } from '@elastic/eui';
 import { KvProcessorConfig, KvProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
@@ -202,7 +203,7 @@ export const kvProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'Key-value (KV)',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.kvHelpText"
@@ -213,7 +214,7 @@ export const kvProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsKvLink"
               external
               target="_blank"
-              href={esDocUrl + 'kv-processor.html'}
+              href={docLinks.links.ingest.kv}
             >
               {i18n.translate('xpack.streams.availableProcessors.kvLinkLabel', {
                 defaultMessage: 'foo=bar variety.',

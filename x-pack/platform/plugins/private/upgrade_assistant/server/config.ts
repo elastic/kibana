@@ -73,7 +73,7 @@ const configSchema = schema.object({
    * This config allows to hide the UI without disabling the plugin.
    */
   ui: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
   }),
 });
 

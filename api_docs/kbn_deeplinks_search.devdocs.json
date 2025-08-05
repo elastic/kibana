@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\""
+          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"elasticsearchIndices:createIndex\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -174,28 +174,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SEARCH_AI_SEARCH",
+        "id": "def-common.SEARCH_HOMEPAGE",
         "type": "string",
         "tags": [],
-        "label": "SEARCH_AI_SEARCH",
+        "label": "SEARCH_HOMEPAGE",
         "description": [],
         "signature": [
-          "\"enterpriseSearchAISearch\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SEARCH_ELASTICSEARCH",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_ELASTICSEARCH",
-        "description": [],
-        "signature": [
-          "\"enterpriseSearchElasticsearch\""
+          "\"searchHomepage\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,
@@ -241,36 +226,6 @@
         "description": [],
         "signature": [
           "\"elasticsearchStart\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SEARCH_SEMANTIC_SEARCH",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_SEMANTIC_SEARCH",
-        "description": [],
-        "signature": [
-          "\"enterpriseSearchSemanticSearch\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SEARCH_VECTOR_SEARCH",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_VECTOR_SEARCH",
-        "description": [],
-        "signature": [
-          "\"enterpriseSearchVectorSearch\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "deprecated": false,

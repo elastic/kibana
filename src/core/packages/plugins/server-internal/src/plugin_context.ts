@@ -293,6 +293,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     pricing: {
+      isFeatureAvailable: deps.pricing.isFeatureAvailable,
       registerProductFeatures: deps.pricing.registerProductFeatures,
     },
     security: {
@@ -365,6 +366,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
+      getUnsafeInternalClient: deps.savedObjects.getUnsafeInternalClient,
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,

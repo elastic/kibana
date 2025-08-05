@@ -210,7 +210,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
-        scale: 'ratio',
         params: previousFormula
           ? {
               formula: previousFormula,

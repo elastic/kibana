@@ -51,9 +51,9 @@ import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   CIS_GCP_OPTION_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public';
 import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
@@ -75,14 +75,6 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 const onChange = jest.fn();
-
-jest.mock('../../common/experimental_features_service', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({
-      cloudSecurityNamespaceSupportEnabled: true,
-    }),
-  },
-}));
 
 const createReactQueryResponseWithRefetch = (
   data: Parameters<typeof createReactQueryResponse>[0]

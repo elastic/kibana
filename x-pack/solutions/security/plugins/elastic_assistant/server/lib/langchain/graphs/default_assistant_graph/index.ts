@@ -12,6 +12,7 @@ import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-common';
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { isEmpty } from 'lodash';
+import { generateChatTitle } from './nodes/generate_chat_title';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
@@ -41,7 +42,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   dataClients,
   esClient,
   inference,
-  inferenceChatModelEnabled = false,
+  inferenceChatModelDisabled = false,
   langChainMessages,
   llmTasks,
   llmType,
@@ -75,7 +76,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
   const createLlmInstance = async () =>
-    inferenceChatModelEnabled
+    !inferenceChatModelDisabled
       ? inference.getChatModel({
           request,
           connectorId,
@@ -230,7 +231,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llm,
     llmType,
     tools,
-    inferenceChatModelEnabled,
+    inferenceChatModelDisabled,
     isOpenAI,
     isStream,
     prompt: chatPromptTemplate,
@@ -280,12 +281,32 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     provider: provider ?? '',
   };
 
+  // make a fire and forget async call to generateChatTitle
+  void (async () => {
+    const model = await createLlmInstance();
+    await generateChatTitle({
+      actionsClient,
+      contentReferencesStore,
+      conversationsDataClient: dataClients?.conversationsDataClient,
+      logger,
+      savedObjectsClient,
+      state: {
+        ...inputs,
+      },
+      model,
+      telemetryParams,
+      telemetry,
+    }).catch((error) => {
+      logger.error(`Failed to generate chat title: ${error.message}`);
+    });
+  })();
+
   if (isStream) {
     return streamGraph({
       apmTracer,
       assistantGraph,
       inputs,
-      inferenceChatModelEnabled,
+      inferenceChatModelDisabled,
       isEnabledKnowledgeBase: telemetryParams?.isEnabledKnowledgeBase ?? false,
 
       logger,

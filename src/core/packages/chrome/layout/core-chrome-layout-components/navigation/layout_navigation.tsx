@@ -21,5 +21,13 @@ export interface LayoutNavigationProps {
  * @returns The rendered LayoutNavigation component.
  */
 export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
-  return <nav css={styles.root}>{children}</nav>;
+  return (
+    <div
+      css={styles.root}
+      className="kbnChromeLayoutNavigation"
+      data-test-subj="kbnChromeLayoutNavigation"
+    >
+      {children}
+    </div>
+  );
 };

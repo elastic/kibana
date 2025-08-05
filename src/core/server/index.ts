@@ -110,6 +110,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,

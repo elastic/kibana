@@ -18,7 +18,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { createRule } from './helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from './helpers/data_view';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);

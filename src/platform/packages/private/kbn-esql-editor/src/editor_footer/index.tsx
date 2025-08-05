@@ -16,6 +16,7 @@ import {
   EuiCode,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -305,13 +306,20 @@ export const EditorFooter = memo(function EditorFooter({
                     />
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="documentation"
-                      onClick={toggleLanguageComponent}
-                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                        defaultMessage: 'Open documentation',
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate('esqlEditor.query.quickReferenceLabel', {
+                        defaultMessage: 'Quick reference',
                       })}
-                    />
+                    >
+                      <EuiButtonIcon
+                        iconType="documentation"
+                        onClick={toggleLanguageComponent}
+                        aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                          defaultMessage: 'Open documentation',
+                        })}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <KeyboardShortcuts />
                 </EuiFlexGroup>

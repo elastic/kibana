@@ -48,8 +48,6 @@
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/guided-onboarding",
     "@kbn/config-schema",
     "@kbn/analytics",
     "@kbn/field-types",
@@ -79,5 +77,7 @@
     "@kbn/esql-utils",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas",
   ]
 }

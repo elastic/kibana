@@ -13,6 +13,7 @@ import {
   ReportAssistantInvokedParams,
   ReportAssistantMessageSentParams,
   ReportAssistantQuickPromptParams,
+  ReportAssistantStarterPromptParams,
   ReportAssistantSettingToggledParams,
 } from '../../common/lib/telemetry/events/ai_assistant/types';
 
@@ -45,6 +46,8 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
         reportTelemetry({ eventType: AssistantEventTypes.AssistantMessageSent, params }),
       reportAssistantQuickPrompt: (params: ReportAssistantQuickPromptParams) =>
         reportTelemetry({ eventType: AssistantEventTypes.AssistantQuickPrompt, params }),
+      reportAssistantStarterPrompt: (params: ReportAssistantStarterPromptParams) =>
+        reportTelemetry({ eventType: AssistantEventTypes.AssistantStarterPrompt, params }),
       reportAssistantSettingToggled: (params: ReportAssistantSettingToggledParams) =>
         telemetry.reportEvent(AssistantEventTypes.AssistantSettingToggled, params),
     }),

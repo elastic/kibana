@@ -441,6 +441,62 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.Meta",
+        "type": "Interface",
+        "tags": [],
+        "label": "Meta",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeFrom",
+            "type": "string",
+            "tags": [],
+            "label": "rangeFrom",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.rangeTo",
+            "type": "string",
+            "tags": [],
+            "label": "rangeTo",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.Meta.description",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "`[ttfmp_alerts] ${string}` | `[ttfmp_onboarding] ${string}` | `[ttfmp_synthetics] ${string}` | `[ttfmp_hosts] ${string}` | `[ttfmp_services] ${string}` | `[ttfmp_traces] ${string}` | `[ttfmp_dependencies] ${string}` | `[ttfmp_alert_details] ${string}` | `[ttfmp_slos] ${string}` | `[ttfmp_rules_list] ${string}` | `[ttfmp_rule_details] ${string}` | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/context/performance_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.PerformanceMetricEvent",
         "type": "Interface",
         "tags": [],

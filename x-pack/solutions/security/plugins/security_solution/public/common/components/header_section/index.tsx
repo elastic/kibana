@@ -68,6 +68,7 @@ export interface HeaderSectionProps {
   titleSize?: EuiTitleSize;
   tooltip?: string;
   tooltipTitle?: string;
+  toggleAriaLabel?: string;
 }
 
 export const getHeaderAlignment = ({
@@ -113,6 +114,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   toggleStatus = true,
   tooltip,
   tooltipTitle,
+  toggleAriaLabel,
 }) => {
   const styles = useStyles(border, height);
   const toggle = useCallback(() => {
@@ -125,6 +127,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
     'toggle-expand': toggleStatus,
     siemHeaderSection: true,
   });
+
   return (
     <header css={styles.header} data-test-subj="header-section" className={classNames}>
       <EuiFlexGroup
@@ -152,7 +155,9 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
                           data-test-subj="query-toggle-header"
-                          aria-label={i18n.QUERY_BUTTON_TITLE(toggleStatus)}
+                          aria-label={[toggleAriaLabel, i18n.QUERY_BUTTON_TITLE(toggleStatus)]
+                            .filter(Boolean) // remove undefined, empty string, null
+                            .join(' ')}
                           color="text"
                           display="empty"
                           iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}

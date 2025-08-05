@@ -16,7 +16,6 @@ jest.mock('./simulation_handler', () => ({
   simulateProcessing: jest.fn((params) =>
     Promise.resolve({
       documents: [],
-      is_non_additive_simulation: false,
       documents_metrics: {
         parsed_rate: 1,
       },
@@ -725,7 +724,6 @@ describe('handleProcessingSuggestion', () => {
           documents_metrics: {
             parsed_rate: 1,
           },
-          is_non_additive_simulation: false,
           simulationField: 'dummy',
         },
       },

@@ -83,7 +83,7 @@ export function ServiceNameLink({
           {content}
         </EuiLink>
       ) : (
-        serviceName
+        content
       )}
     </>
   );

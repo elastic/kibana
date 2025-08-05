@@ -115,10 +115,10 @@ export function validateHapiRequest(
 ): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
-    kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
+    kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
   } catch (error) {
-    kibanaRequest = CoreKibanaRequest.from(request);
+    kibanaRequest = CoreKibanaRequest.from(request) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
 
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));

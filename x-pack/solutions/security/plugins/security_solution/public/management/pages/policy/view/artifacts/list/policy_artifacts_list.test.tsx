@@ -18,9 +18,14 @@ import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_ut
 import { PolicyArtifactsList } from './policy_artifacts_list';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
+import { ExceptionsListItemGenerator } from '../../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { buildPerPolicyTag } from '../../../../../../../common/endpoint/service/artifacts/utils';
+
+jest.mock('../../../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -53,9 +58,6 @@ describe('Policy details artifacts list', () => {
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
     handleOnDeleteActionCallbackMock = jest.fn();
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: true,
-    });
     render = async (canWriteArtifact = true) => {
       renderResult = mockedContext.render(
         <PolicyArtifactsList
@@ -159,9 +161,9 @@ describe('Policy details artifacts list', () => {
   });
 
   it('does not show remove option in actions menu if license is downgraded to gold or below', async () => {
-    getEndpointPrivilegesInitialStateMock({
-      canCreateArtifactsByPolicy: false,
-    });
+    mockedContext
+      .getUserPrivilegesMockSetter(useUserPrivilegesMock)
+      .set({ canCreateArtifactsByPolicy: false });
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock()
     );
@@ -181,6 +183,33 @@ describe('Policy details artifacts list', () => {
     expect(history.location.search).toMatch('page=1');
     expect(history.location.search).not.toMatch('page_index');
     expect(history.location.search).not.toMatch('page_size');
+  });
+
+  it('should retrieve all policies using getById api', async () => {
+    const generator = new ExceptionsListItemGenerator('seed');
+
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue({
+      data: [
+        generator.generateEventFilter({
+          tags: [buildPerPolicyTag('policy-1'), buildPerPolicyTag('policy-2')],
+        }),
+        generator.generateEventFilter({
+          tags: [buildPerPolicyTag('policy-3'), buildPerPolicyTag('policy-2')],
+        }),
+      ],
+      page: 1,
+      per_page: 1,
+      total: 1,
+    });
+    await render();
+
+    expect(mockedContext.coreStart.http.post).toHaveBeenCalledWith(
+      '/api/fleet/package_policies/_bulk_get',
+      {
+        body: '{"ids":["policy-1","policy-2","policy-3"],"ignoreMissing":true}',
+        version: expect.any(String),
+      }
+    );
   });
 
   describe('without external privileges', () => {

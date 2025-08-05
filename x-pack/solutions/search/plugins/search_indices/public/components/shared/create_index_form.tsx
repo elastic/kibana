@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +16,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,6 +25,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { SampleDataPanel } from './sample_data_panel';
+import { useIngestSampleData } from '../../hooks/use_ingest_data';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface CreateIndexFormProps {
   indexName: string;
@@ -47,6 +52,14 @@ export const CreateIndexForm = ({
   showAPIKeyCreateLabel,
   userPrivileges,
 }: CreateIndexFormProps) => {
+  const { sampleDataIngest } = useKibana().services;
+  const usageTracker = useUsageTracker();
+  const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
+  const onIngestSampleData = useCallback(() => {
+    usageTracker.click(AnalyticsEvents.createIndexIngestSampleDataClick);
+    ingestSampleData();
+  }, [usageTracker, ingestSampleData]);
+
   return (
     <>
       <EuiForm
@@ -103,7 +116,8 @@ export const CreateIndexForm = ({
                 disabled={
                   userPrivileges?.privileges?.canManageIndex === false ||
                   indexNameHasError ||
-                  isLoading
+                  isLoading ||
+                  isIngestingSampleData
                 }
                 isLoading={isLoading}
                 type="submit"
@@ -135,28 +149,43 @@ export const CreateIndexForm = ({
       </EuiForm>
       <EuiHorizontalRule margin="none" />
       <EuiPanel color="transparent" paddingSize="s">
-        <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexGroup gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="documents" />
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchIndices.shared.createIndex.fileUpload.text"
+                      defaultMessage="Already have some data?"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="primary"
+                  iconSide="left"
+                  iconType="documents"
+                  size="s"
+                  data-test-subj="uploadFileLink"
+                  onClick={onFileUpload}
+                >
+                  <FormattedMessage
+                    id="xpack.searchIndices.shared.createIndex.fileUpload.link"
+                    defaultMessage="Upload a file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchIndices.shared.createIndex.fileUpload.text"
-                  defaultMessage="Already have some data? {link}"
-                  values={{
-                    link: (
-                      <EuiLink data-test-subj="uploadFileLink" onClick={onFileUpload}>
-                        {i18n.translate('xpack.searchIndices.shared.createIndex.fileUpload.link', {
-                          defaultMessage: 'Upload a file',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
+          <EuiFlexItem grow={false}>
+            {sampleDataIngest && (
+              <SampleDataPanel
+                isLoading={isIngestingSampleData}
+                onIngestSampleData={onIngestSampleData}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

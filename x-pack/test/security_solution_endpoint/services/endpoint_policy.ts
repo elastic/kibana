@@ -256,10 +256,18 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               .expect(200);
             log.info(`Fleet Endpoint integration policy deleted: ${packagePolicy.id}`);
           } catch (error) {
-            logSupertestApiErrorAndThrow(
-              `Unable to delete Endpoint Integration Policy [${packagePolicy.id}] via Fleet!`,
-              error
-            );
+            // Handle cases where package policy might already be deleted or doesn't exist
+            const statusCode = error?.response?.status;
+            if (statusCode === 404 || statusCode === 500) {
+              log.warning(
+                `Package Policy [${packagePolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
+              );
+            } else {
+              logSupertestApiErrorAndThrow(
+                `Unable to delete Endpoint Integration Policy [${packagePolicy.id}] via Fleet!`,
+                error
+              );
+            }
           }
 
           // Delete Agent Policy
@@ -274,10 +282,18 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
               .expect(200);
             log.info(`Fleet Agent policy deleted: ${agentPolicy.id}`);
           } catch (error) {
-            logSupertestApiErrorAndThrow(
-              `Unable to delete Agent Policy [${agentPolicy.id}] via Fleet!`,
-              error
-            );
+            // Handle cases where agent policy might already be deleted or doesn't exist
+            const statusCode = error?.response?.status;
+            if (statusCode === 404 || statusCode === 500) {
+              log.warning(
+                `Agent Policy [${agentPolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
+              );
+            } else {
+              logSupertestApiErrorAndThrow(
+                `Unable to delete Agent Policy [${agentPolicy.id}] via Fleet!`,
+                error
+              );
+            }
           }
         },
       };

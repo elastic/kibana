@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
