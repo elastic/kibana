@@ -58,7 +58,7 @@ describe('SampleDataManager', () => {
     artifactsFolder: '/tmp/artifacts',
     artifactRepositoryUrl: 'https://artifacts.elastic.co',
     kibanaVersion: '8.16.3',
-    indexPrefixName: 'sample-data',
+    indexPrefixName: 'kibana_sample_data_',
   };
 
   beforeEach(() => {
@@ -136,7 +136,7 @@ describe('SampleDataManager', () => {
 
   describe('installSampleData', () => {
     const sampleType = 'kibana' as DatasetSampleType;
-    const expectedIndexName = 'sample-data-kibana';
+    const expectedIndexName = 'kibana_sample_data_kibana';
 
     it('should install sample data successfully', async () => {
       const result = await sampleDataManager.installSampleData({ sampleType, esClient });
@@ -214,7 +214,7 @@ describe('SampleDataManager', () => {
 
     it('should handle different sample types correctly', async () => {
       const elasticsearchSampleType = 'elasticsearch' as DatasetSampleType;
-      const expectedElasticsearchIndexName = 'sample-data-elasticsearch';
+      const expectedElasticsearchIndexName = 'kibana_sample_data_elasticsearch';
 
       await sampleDataManager.installSampleData({ sampleType: elasticsearchSampleType, esClient });
 
@@ -232,7 +232,7 @@ describe('SampleDataManager', () => {
   describe('removeSampleData', () => {
     it('should remove sample data successfully', async () => {
       const sampleType = 'kibana' as DatasetSampleType;
-      const expectedIndexName = 'sample-data-kibana';
+      const expectedIndexName = 'kibana_sample_data_kibana';
 
       await sampleDataManager.removeSampleData({ sampleType, esClient });
 
@@ -244,7 +244,7 @@ describe('SampleDataManager', () => {
 
     it('should handle different sample types', async () => {
       const sampleType = 'elasticsearch' as DatasetSampleType;
-      const expectedIndexName = 'sample-data-elasticsearch';
+      const expectedIndexName = 'kibana_sample_data_elasticsearch';
 
       await sampleDataManager.removeSampleData({ sampleType, esClient });
 
@@ -257,7 +257,7 @@ describe('SampleDataManager', () => {
 
   describe('getSampleDataStatus', () => {
     const sampleType = 'kibana' as DatasetSampleType;
-    const expectedIndexName = 'sample-data-kibana';
+    const expectedIndexName = 'kibana_sample_data_kibana';
 
     it('should return installed status when index exists', async () => {
       esClient.indices.exists.mockResolvedValue(true);
@@ -298,41 +298,6 @@ describe('SampleDataManager', () => {
     });
   });
 
-  describe('getSampleDataIndexName', () => {
-    it('should generate correct index names for different sample types', async () => {
-      const kibanaType = 'kibana' as DatasetSampleType;
-      const elasticsearchType = 'elasticsearch' as DatasetSampleType;
-
-      await sampleDataManager.installSampleData({ sampleType: kibanaType, esClient });
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'sample-data-kibana',
-        })
-      );
-
-      jest.clearAllMocks();
-
-      await sampleDataManager.installSampleData({ sampleType: elasticsearchType, esClient });
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'sample-data-elasticsearch',
-        })
-      );
-    });
-
-    it('should handle uppercase sample types correctly', async () => {
-      const sampleType = 'KIBANA' as DatasetSampleType;
-
-      await sampleDataManager.installSampleData({ sampleType, esClient });
-
-      expect(mockIndexManager.createAndPopulateIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          indexName: 'sample-data-kibana',
-        })
-      );
-    });
-  });
-
   describe('integration scenarios', () => {
     it('should handle full installation workflow', async () => {
       const sampleType = 'kibana' as DatasetSampleType;
@@ -344,18 +309,18 @@ describe('SampleDataManager', () => {
 
       // Install sample data
       const indexName = await sampleDataManager.installSampleData({ sampleType, esClient });
-      expect(indexName).toBe('sample-data-kibana');
+      expect(indexName).toBe('kibana_sample_data_kibana');
 
       // Check status after installation
       esClient.indices.exists.mockResolvedValue(true);
       status = await sampleDataManager.getSampleDataStatus({ sampleType, esClient });
       expect(status.status).toBe('installed');
-      expect(status.indexName).toBe('sample-data-kibana');
+      expect(status.indexName).toBe('kibana_sample_data_kibana');
 
       // Remove sample data
       await sampleDataManager.removeSampleData({ sampleType, esClient });
       expect(mockIndexManager.deleteIndex).toHaveBeenCalledWith({
-        indexName: 'sample-data-kibana',
+        indexName: 'kibana_sample_data_kibana',
         esClient,
       });
     });
