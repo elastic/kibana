@@ -341,3 +341,13 @@ export const ESPewPewSourceSchema = ESAggSourceSchema.extends(
     unknowns: 'forbid',
   }
 );
+
+export const KibanaTilemapSourceSchema = schema.object({
+  type: schema.literal(SOURCE_TYPES.KIBANA_TILEMAP),
+}, {
+  meta: {
+    description:
+      'Tile map service configured in kibana.yml map.tilemap.url.',
+  },
+  unknowns: 'forbid',
+});

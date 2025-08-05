@@ -18,6 +18,7 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
 } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {

@@ -14,6 +14,7 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
 } from './schema/v1/types';
 
 export { MapsStorage } from './maps_storage';

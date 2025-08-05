@@ -103,10 +103,6 @@ export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
 
-// This is for symmetry with other sources only.
-// It takes no additional configuration since  all params are in the .yml.
-export type KibanaTilemapSourceDescriptor = AbstractSourceDescriptor;
-
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;

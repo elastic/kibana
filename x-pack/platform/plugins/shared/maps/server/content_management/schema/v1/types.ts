@@ -23,6 +23,7 @@ import {
   ESPewPewSourceSchema,
   ESSearchSourceSchema,
   ESSourceSchema,
+  KibanaTilemapSourceSchema,
 } from './source_schemas';
 
 export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
@@ -43,3 +44,4 @@ export type ESGeoGridSourceDescriptor = TypeOf<typeof ESGeoGridSourceSchema>;
 export type ESGeoLineSourceDescriptor = TypeOf<typeof ESGeoLineSourceSchema>;
 export type ESPewPewSourceDescriptor = TypeOf<typeof ESPewPewSourceSchema>;
 export type ESSearchSourceDescriptor = TypeOf<typeof ESSearchSourceSchema>;
+export type KibanaTilemapSourceDescriptor = TypeOf<typeof KibanaTilemapSourceSchema>;

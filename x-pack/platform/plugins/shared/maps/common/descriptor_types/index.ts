@@ -20,4 +20,5 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
 } from '../../server';
