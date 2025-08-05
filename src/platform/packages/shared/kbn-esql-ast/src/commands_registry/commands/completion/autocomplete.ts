@@ -214,7 +214,7 @@ export async function autocomplete(
         suggestions.push(defaultPrompt);
       }
 
-      if (position !== CompletionPosition.AFTER_TARGET_ID && !lastWord) {
+      if (position !== CompletionPosition.AFTER_TARGET_ID) {
         suggestions.push(
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
         );
