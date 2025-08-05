@@ -19,6 +19,7 @@ import { CanvasPageProvider } from '@kbn/test-suites-xpack-platform/functional/p
 import { GisPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/gis_page';
 import { LensPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/lens_page';
 import { UpgradeAssistantFlyoutObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/upgrade_assistant_page';
+import { SnapshotRestorePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/snapshot_restore_page';
 import { UserProfilePageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/user_profile_page';
 import { SearchSessionsPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/search_sessions_management_page';
 import { GraphPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/graph_page';
@@ -46,7 +47,6 @@ import { DatasetQualityPageObject } from './dataset_quality';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
 import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
-import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { StatusPageObject } from './status_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
