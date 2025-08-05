@@ -9,7 +9,12 @@ import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { DefaultPolicyNotificationMessage } from './policy_config';
 import type { PolicyConfig } from '../types';
-import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
+import {
+  PolicyOperatingSystem,
+  ProtectionModes,
+  AntivirusRegistrationModes,
+  DeviceControlAccessLevel,
+} from '../types';
 
 interface PolicyProtectionReference {
   keyPath: string;
@@ -43,6 +48,10 @@ const getPolicyPopupReference = (): Array<{
   {
     keyPath: 'popup.ransomware.message',
     osList: [PolicyOperatingSystem.windows],
+  },
+  {
+    keyPath: 'popup.device_control.message',
+    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
   },
 ];
 
@@ -102,6 +111,27 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
       popup: {
         ...result.windows.popup,
         ...getDisabledWindowsSpecificPopups(result),
+      },
+      device_control: {
+        ...result.windows.device_control,
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
+    },
+    mac: {
+      ...result.mac,
+      device_control: {
+        ...result.mac.device_control,
+        enabled: false,
+        usb_storage: DeviceControlAccessLevel.audit,
+      },
+      popup: {
+        ...result.mac.popup,
+        device_control: {
+          ...result.mac.popup.device_control,
+          enabled: false,
+          message: result.mac.popup.device_control?.message || '',
+        },
       },
     },
   };
@@ -185,6 +215,11 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
     ...policy.windows.popup.ransomware,
     enabled: false,
   },
+  device_control: {
+    ...policy.windows.popup.device_control,
+    enabled: false,
+    message: policy.windows.popup.device_control?.message || '',
+  },
 });
 
 /**
@@ -258,4 +293,35 @@ export const resetCustomNotifications = (
     });
     return acc;
   }, {});
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with device_control fields completely removed
+ * from both Windows and Mac OS configurations and their popup settings.
+ *
+ * @param policy
+ * @returns PolicyConfig without device_control fields
+ */
+export const removeDeviceControl = (policy: PolicyConfig): PolicyConfig => {
+  const { device_control: windowsDeviceControl, ...windowsRest } = policy.windows;
+  const { device_control: macDeviceControl, ...macRest } = policy.mac;
+
+  const { device_control: windowsPopupDeviceControl, ...windowsPopupRest } = policy.windows.popup;
+  const { device_control: macPopupDeviceControl, ...macPopupRest } = policy.mac.popup;
+
+  return {
+    ...policy,
+    windows: {
+      ...windowsRest,
+      popup: {
+        ...windowsPopupRest,
+      },
+    },
+    mac: {
+      ...macRest,
+      popup: {
+        ...macPopupRest,
+      },
+    },
+  };
 };
