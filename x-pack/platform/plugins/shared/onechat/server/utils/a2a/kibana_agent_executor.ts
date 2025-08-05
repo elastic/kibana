@@ -37,7 +37,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
       // Extract text from message parts
       const userText = userMessage.parts
         .filter((part: Part): part is TextPart => part.kind === 'text')
-        .map((part) => part.text)
+        .map((part: TextPart) => part.text)
         .join(' ');
 
       // Execute chat with onechat service
@@ -94,7 +94,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
   }
 
   private sendErrorResponse(
-    eventBus: any,
+    eventBus: ExecutionEventBus,
     taskId: string,
     contextId: string,
     error: unknown
