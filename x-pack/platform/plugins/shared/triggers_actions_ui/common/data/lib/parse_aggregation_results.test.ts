@@ -1081,11 +1081,7 @@ describe('parseAggregationResults', () => {
           aggregations: sampleAggregations,
         },
         resultLimit: 1000,
-        sourceFieldsParams: [
-          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-          { label: 'host.id', searchPath: 'host.id.keyword' },
-          { label: 'host.name', searchPath: 'host.name.keyword' },
-        ],
+        generateSourceFieldsFromHits: true,
       })
     ).toEqual({
       results: [
@@ -1157,11 +1153,7 @@ describe('parseAggregationResults', () => {
         },
         resultLimit: 1000,
         termField: ['host.name'],
-        sourceFieldsParams: [
-          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-          { label: 'host.id', searchPath: 'host.id.keyword' },
-          { label: 'host.name', searchPath: 'host.name.keyword' },
-        ],
+        generateSourceFieldsFromHits: true,
       })
     ).toEqual({
       results: [
@@ -1184,9 +1176,9 @@ describe('parseAggregationResults', () => {
           ],
           count: 4,
           sourceFields: {
-            'host.hostname': ['host-1'],
-            'host.id': ['1'],
-            'host.name': ['host-1'],
+            'host.hostname': ['host-1', 'host-1', 'host-1', 'host-1'],
+            'host.id': ['1', '1', '1', '1'],
+            'host.name': ['host-1', 'host-1', 'host-1', 'host-1'],
           },
         },
       ],
@@ -1214,11 +1206,6 @@ describe('parseAggregationResults', () => {
           },
         },
         resultLimit: 1000,
-        sourceFieldsParams: [
-          { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-          { label: 'host.id', searchPath: 'host.id.keyword' },
-          { label: 'host.name', searchPath: 'host.name.keyword' },
-        ],
         generateSourceFieldsFromHits: true,
       })
     ).toEqual({

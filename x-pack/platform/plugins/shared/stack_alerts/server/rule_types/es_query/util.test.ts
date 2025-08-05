@@ -7,7 +7,7 @@
 
 import type { OnlyEsQueryRuleParams } from './types';
 import type { Comparator } from '../../../common/comparator_types';
-import { getParsedQuery, checkForShardFailures, getSourceFields } from './util';
+import { getParsedQuery, checkForShardFailures } from './util';
 
 describe('es_query utils', () => {
   const defaultProps = {
@@ -251,26 +251,6 @@ describe('es_query utils', () => {
           hits: { total: { value: 0, relation: 'eq' }, max_score: 0, hits: [] },
         })
       ).toBeUndefined();
-    });
-  });
-
-  describe('getSourceFields', () => {
-    it('should generate the correct source fields', async () => {
-      const sourceFields = getSourceFields();
-      const statusCode = sourceFields.find((field) => field.label === 'http.response.status_code');
-      const containerName = sourceFields.find((field) => field.label === 'container.name');
-      expect(statusCode).toMatchInlineSnapshot(`
-        Object {
-          "label": "http.response.status_code",
-          "searchPath": "http.response.status_code",
-        }
-      `);
-      expect(containerName).toMatchInlineSnapshot(`
-        Object {
-          "label": "container.name",
-          "searchPath": "container.name.keyword",
-        }
-      `);
     });
   });
 });

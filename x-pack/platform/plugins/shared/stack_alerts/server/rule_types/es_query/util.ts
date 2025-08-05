@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import type { OnlyEsQueryRuleParams } from './types';
 
 export function isEsQueryRule(searchType: EsQueryRuleParams['searchType']) {
@@ -69,16 +68,3 @@ export function checkForShardFailures(searchResult: SearchResponse<unknown>): st
     }
   }
 }
-
-export const getSourceFields = () => {
-  const alertFields = Object.keys(alertFieldMap);
-  return (
-    Object.keys(ecsFieldMap)
-      // exclude the alert fields that we don't want to override
-      .filter((key) => !alertFields.includes(key))
-      .map((key) => {
-        const field = ecsFieldMap[key];
-        return { label: key, searchPath: field.type === 'keyword' ? `${key}.keyword` : key };
-      })
-  );
-};

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { intersectionBy } from 'lodash';
 import {
   isPerRowAggregation,
   parseAggregationResults,
@@ -13,7 +12,6 @@ import {
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -68,7 +66,6 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const sourceFields = getSourceFields(response);
   const isGroupAgg = isPerRowAggregation(params.groupBy);
   const { results, duplicateAlertIds } = getEsqlQueryHits(
     response,
@@ -99,7 +96,6 @@ export async function fetchEsqlQuery({
     parsedResults: parseAggregationResults({
       ...results,
       resultLimit: alertLimit,
-      sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,
     }),
     index: null,
@@ -133,20 +129,6 @@ export const getEsqlQuery = (
     },
   };
   return query;
-};
-
-export const getSourceFields = (results: EsqlTable) => {
-  const resultFields = results.columns.map((c) => ({
-    label: c.name,
-    searchPath: c.name,
-  }));
-  const alertFields = Object.keys(alertFieldMap);
-  const ecsFields = Object.keys(ecsFieldMap)
-    // exclude the alert fields that we don't want to override
-    .filter((key) => !alertFields.includes(key))
-    .map((key) => ({ label: key, searchPath: key }));
-
-  return intersectionBy(resultFields, ecsFields, 'label');
 };
 
 export function generateLink(
