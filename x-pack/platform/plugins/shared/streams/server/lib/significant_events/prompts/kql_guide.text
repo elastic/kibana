@@ -1,0 +1,51 @@
+## KQL
+
+KQL (Kibana Query Language) is a query language available in Kibana, that will be converted into Elasticsearch Query DSL.
+
+- Supports auto completion of fields and values
+- Supports searching on scripted fields
+- Supports wildcard on field names
+- Simpler syntax for some operators
+
+### Finding values
+Find documents where any field matches any of the words/terms listed. The term must
+appear as it is in the document, e.g. this query won't match documents containing
+the word "darker": `dark light`.
+
+Use and/or and parentheses to define that multiple terms need to appear. This query
+would find all documents that have the term "orange" and either "dark" or "light"
+(or both) in it: `orange and (dark or light)`
+
+To find values only in specific fields you can put the field name before the value
+e.g. this query will only find "orange" in the color field: `color:orange`. 
+
+Putting quotes around values makes sure they are found in that specific order
+(match a phrase) e.g. if you want to make sure to only find documents containing
+"our planet" and not "planet our" you'd need the following query: \`"our planet"\`.
+
+### Wildcards
+
+You can use the wildcard * to match just parts of a term/word, e.g. this query will
+find anything beginning with "dark" like "darker", "darkest", "darkness", etc: `dark*`.
+
+Wildcards can be used anywhere in a term/word. ⚡ Using a wildcard in front of a word
+can be rather slow and resource intensive for your Elasticsearch — use with care:
+`d*k *les`.
+
+You can use the * wildcard also for searching over multiple fields in KQL e.g. this
+query will search "fakestreet" in all fields beginning with "user.address.".
+`user.address.* : fakestreet`
+
+Wildcards cannot be used when searching for phrases i.e. "our plan*" will not
+retrieve results containing "our planet".
+
+### Comparing values
+
+Compare numbers or dates. Those operators also work on text/keyword fields, but
+might behave not very intuitive and thus I'd recommend avoiding usage with
+text/keyword fields: `price >= 42 and price < 100`, or `time >= "2020-04-10"`
+
+### Special queries
+
+Find documents in which a specific field exists (i.e. that does have a non null
+value for that field): `destination : *`

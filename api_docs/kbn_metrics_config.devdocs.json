@@ -1,0 +1,155 @@
+{
+  "id": "@kbn/metrics-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.MetricsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsConfig",
+        "description": [
+          "\nConfiguration for OpenTelemetry metrics"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsConfig.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nWhether OpenTelemetry metrics are enabled"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsConfig.interval",
+            "type": "Object",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nThe interval at which to export metrics"
+            ],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsConfig.exporters",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exporters",
+            "description": [
+              "\nOTLP exporters for metric data"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics-config",
+                "scope": "common",
+                "docId": "kibKbnMetricsConfigPluginApi",
+                "section": "def-common.MetricsExporterConfig",
+                "text": "MetricsExporterConfig"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/metrics-config",
+                "scope": "common",
+                "docId": "kibKbnMetricsConfigPluginApi",
+                "section": "def-common.MetricsExporterConfig",
+                "text": "MetricsExporterConfig"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.MetricsExporterConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "MetricsExporterConfig",
+        "description": [
+          "\nAllowed configurations for OTLP metrics exporters"
+        ],
+        "signature": [
+          "{ grpc: { url: string; headers?: Record<string, string> | undefined; }; } | { http: { url: string; headers?: Record<string, string> | undefined; }; }"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.metricsConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "metricsConfigSchema",
+        "description": [
+          "\nThe metrics config schema that is exposed by the Telemetry plugin."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/metrics-config",
+            "scope": "common",
+            "docId": "kibKbnMetricsConfigPluginApi",
+            "section": "def-common.MetricsConfig",
+            "text": "MetricsConfig"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}
