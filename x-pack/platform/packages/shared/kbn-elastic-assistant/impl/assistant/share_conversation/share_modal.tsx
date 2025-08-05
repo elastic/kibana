@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -20,10 +16,12 @@ import {
   EuiButtonGroup,
   EuiSpacer,
   EuiText,
-  EuiToken,
   EuiCopy,
 } from '@elastic/eui';
+import { COPY_URL } from '../settings/settings_context_menu/translations';
+import * as i18n from './translations';
 import { Conversation } from '../../..';
+import { UserProfilesSearch } from './user_profiles_search';
 
 interface SharedUser {
   name: string;
@@ -35,56 +33,46 @@ interface Props {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
+const shareOptions = [
+  {
+    id: 'everyone',
+    label: i18n.WITH_EVERYONE,
+    iconType: 'globe',
+  },
+  {
+    id: 'selected',
+    label: i18n.WITH_SELECTED,
+    iconType: 'user',
+  },
+];
 const ShareModalComponent: React.FC<Props> = ({
   isModalOpen,
   setIsModalOpen,
   selectedConversation,
 }) => {
   const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>('everyone');
-  const [userInput, setUserInput] = useState('');
-  const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([
-    { name: 'User A', color: 'tint1' },
-    { name: 'User B', color: 'tint3' },
-  ]);
+  const selectedUsers = useMemo(
+    () =>
+      selectedConversation?.users.map(({ name, id }) => ({
+        // id or name will be defined, empty string is fallback for TS
+        uid: id ?? name ?? '',
+        enabled: true,
+        user: { username: name ?? id ?? '' },
+        data: {},
+      })) || [],
+    [selectedConversation]
+  );
 
-  const shareOptions = [
-    {
-      id: 'everyone',
-      label: 'With everyone',
-      iconType: 'globe',
-    },
-    {
-      id: 'selected',
-      label: 'Only with selected users',
-      iconType: 'user',
-    },
-  ];
-
-  const onAddUser = () => {
-    const trimmed = userInput.trim();
-    if (trimmed && !sharedUsers.find((u) => u.name === trimmed)) {
-      const nextColor = `tint${(sharedUsers.length % 9) + 1}`;
-      setSharedUsers([...sharedUsers, { name: trimmed, color: nextColor }]);
-      setUserInput('');
-    }
-  };
-
-  const onRemoveUser = (name: string) => {
-    setSharedUsers(sharedUsers.filter((u) => u.name !== name));
-  };
-
-  const getAccessText = () => {
-    return sharingOption === 'everyone'
-      ? 'All team members in your workspace can view the conversation.'
-      : 'Only selected team members can view this conversation.';
-  };
+  const accessText = useMemo(
+    () => (sharingOption === 'everyone' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
+    [sharingOption]
+  );
 
   return isModalOpen ? (
     <EuiModal onClose={() => setIsModalOpen(false)} maxWidth={600}>
       <EuiModalHeader>
         <EuiModalHeaderTitle className="eui-textTruncate">
-          {'Share '} <strong>{selectedConversation?.title}</strong>
+          {`${i18n.SHARE} `} <strong>{selectedConversation?.title}</strong>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -102,46 +90,14 @@ const ShareModalComponent: React.FC<Props> = ({
 
         {sharingOption === 'selected' && (
           <>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFieldText
-                  placeholder="Add a name or email address"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  fullWidth
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={onAddUser}>Add</EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-
+            <UserProfilesSearch onUserSelect={() => {}} selectedUsers={selectedUsers} />
             <EuiSpacer size="m" />
-
-            {sharedUsers.map((user) => (
-              <EuiFlexGroup key={user.name} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiToken iconType="user" color={user.color} shape="circle" />
-                </EuiFlexItem>
-                <EuiFlexItem>{user.name}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="minusInCircle"
-                    color="danger"
-                    onClick={() => onRemoveUser(user.name)}
-                    aria-label={`Remove ${user.name}`}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ))}
-
-            <EuiSpacer />
           </>
         )}
 
         <EuiText size="s">
-          <strong>Who has access</strong>
-          <p>{getAccessText()}</p>
+          <strong>{i18n.WHO_HAS_ACCESS}</strong>
+          <p>{accessText}</p>
         </EuiText>
 
         <EuiSpacer size="m" />
@@ -149,7 +105,7 @@ const ShareModalComponent: React.FC<Props> = ({
         <EuiCopy textToCopy="https://your.app/share-link">
           {(copy) => (
             <EuiButton iconType="copyClipboard" onClick={copy}>
-              Copy URL
+              {COPY_URL}
             </EuiButton>
           )}
         </EuiCopy>
@@ -157,7 +113,7 @@ const ShareModalComponent: React.FC<Props> = ({
 
       <EuiModalFooter>
         <EuiButton onClick={() => setIsModalOpen(false)} fill>
-          Done
+          {i18n.DONE}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

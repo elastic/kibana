@@ -94,7 +94,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     return {
       core: coreContext,
-
+      // TODO: Use core's UserProfileService, which does not yet support suggest method
+      userProfiles: startPlugins.security.userProfiles,
       actions: startPlugins.actions,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,

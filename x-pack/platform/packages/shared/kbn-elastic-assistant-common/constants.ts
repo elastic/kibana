@@ -73,6 +73,10 @@ export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
 export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
 
+// Users suggest (user profiles)
+export const ELASTIC_USERS_SUGGEST_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/users/_suggest` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;

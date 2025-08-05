@@ -11,7 +11,7 @@ import { userEvent } from '@testing-library/user-event';
 
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { ConversationSettingsMenu } from './conversation_settings_menu';
-import { AI_ASSISTANT_MENU } from './translations';
+import { CONVO_ASSISTANT_MENU } from './translations';
 import {
   alertConvo,
   conversationWithContentReferences,
@@ -30,7 +30,7 @@ describe('ConversationSettingsMenu', () => {
       </TestProviders>
     );
 
-    expect(screen.getByRole('button', { name: AI_ASSISTANT_MENU })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CONVO_ASSISTANT_MENU })).toBeInTheDocument();
   });
 
   it('renders all menu items', async () => {
