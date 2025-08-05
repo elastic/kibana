@@ -8,6 +8,7 @@ import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
+import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
 import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
@@ -150,11 +151,6 @@ export const storedPackagePoliciesToAgentInputs = async (
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  const addFields =
-    globalDataTags && globalDataTags.length > 0
-      ? globalDataTagsToAddFields(globalDataTags)
-      : undefined;
-
   for (const packagePolicy of packagePolicies) {
     if (!isPolicyEnabled(packagePolicy)) {
       continue;
@@ -163,6 +159,12 @@ export const storedPackagePoliciesToAgentInputs = async (
     const packageInfo = packagePolicy.package
       ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
       : undefined;
+
+    const filteredGlobalDataTags = filterGlobalDataTags(globalDataTags, packageInfo);
+    const addFields =
+      filteredGlobalDataTags && filteredGlobalDataTags.length > 0
+        ? globalDataTagsToAddFields(filteredGlobalDataTags)
+        : undefined;
 
     fullInputs.push(
       ...storedPackagePolicyToAgentInputs(
@@ -191,4 +193,25 @@ const globalDataTagsToAddFields = (tags: GlobalDataTag[]): FullAgentPolicyAddFie
       fields,
     },
   };
+};
+
+const filterGlobalDataTags = (
+  globalDataTags: GlobalDataTag[] | undefined,
+  packageInfo: PackageInfo | undefined
+): GlobalDataTag[] | undefined => {
+  if (!globalDataTags) {
+    return globalDataTags;
+  }
+
+  const agentlessGlobalDataTags = getAgentlessGlobalDataTags(packageInfo);
+
+  if (!agentlessGlobalDataTags) {
+    return globalDataTags;
+  }
+
+  return globalDataTags.filter((globalDataTag) => {
+    return !agentlessGlobalDataTags.some(
+      ({ name, value }) => name === globalDataTag.name && value === globalDataTag.value
+    );
+  });
 };
