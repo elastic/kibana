@@ -51,7 +51,7 @@ export const KBN_ARCHIVES = {
   NO_TIME_FIELD:
     'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield',
   DASHBOARD_DRILLDOWNS:
-    'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns',
+    'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns',
   DISCOVER: 'src/platform/test/functional/fixtures/kbn_archiver/discover',
-  ECOMMERCE: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json',
+  ECOMMERCE: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json',
 };
