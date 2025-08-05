@@ -39,10 +39,21 @@ export interface AcquireOptions {
 }
 
 // The index assets should only be set up once
+let runLockManagerSetupSuccessfully = false;
+export const runSetupIndexAssetOnce = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  if (runLockManagerSetupSuccessfully) {
+    return;
+  }
+  await setupLockManagerIndex(esClient, logger);
+  runLockManagerSetupSuccessfully = true;
+};
+
 // For testing purposes, we need to be able to set it up every time
-let runSetupIndexAssetOnce = once(setupLockManagerIndex);
-export function runSetupIndexAssetEveryTime() {
-  runSetupIndexAssetOnce = setupLockManagerIndex;
+export function rerunSetupIndexAsset() {
+  runLockManagerSetupSuccessfully = false;
 }
 
 export class LockManager {
