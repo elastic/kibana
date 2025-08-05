@@ -16,6 +16,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -156,6 +157,10 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     }
   );
 
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
+  const latestPersistedDiscoverSession = useLatest(persistedDiscoverSession);
   const { id: currentDiscoverSessionId } = useParams<{ id?: string }>();
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
     async ({
@@ -178,8 +183,11 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [initializeMainRoute, rootProfileState]);
 
   useEffect(() => {
-    initializeTabs({ discoverSessionId: currentDiscoverSessionId });
-  }, [currentDiscoverSessionId, initializeTabs]);
+    const persistedDiscoverSessionId = latestPersistedDiscoverSession.current?.id;
+    if (!persistedDiscoverSessionId || persistedDiscoverSessionId !== currentDiscoverSessionId) {
+      initializeTabs({ discoverSessionId: currentDiscoverSessionId });
+    }
+  }, [currentDiscoverSessionId, initializeTabs, latestPersistedDiscoverSession]);
 
   useUnmount(() => {
     for (const tabId of Object.keys(props.runtimeStateManager.tabs.byId)) {
@@ -202,10 +210,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     page: 'app',
     id: currentDiscoverSessionId || 'new',
   });
-
-  const persistedDiscoverSession = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession
-  );
 
   useEffect(() => {
     if (props.customizationContext.displayMode === 'standalone') {

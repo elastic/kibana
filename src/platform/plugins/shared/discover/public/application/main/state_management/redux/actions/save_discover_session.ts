@@ -17,16 +17,18 @@ import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
-import { selectAllTabs } from '../selectors';
+import { selectAllTabs, selectRecentlyClosedTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
 import { internalStateSlice } from '../internal_state';
 import {
   fromSavedObjectTabToSavedSearch,
+  fromSavedObjectTabToTabState,
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+import { setTabs } from './tabs';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -222,8 +224,16 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           tabStateContainer.appState.resetInitialState();
         })
       );
+
+      dispatch(
+        setTabs({
+          allTabs: discoverSession.tabs.map(fromSavedObjectTabToTabState),
+          selectedTabId: state.tabs.unsafeCurrentId,
+          recentlyClosedTabs: selectRecentlyClosedTabs(state),
+        })
+      );
     }
 
-    return { id: discoverSession?.id };
+    return { discoverSession };
   }
 );
