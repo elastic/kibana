@@ -24,6 +24,10 @@ describe('"esql" tag query construction', () => {
     });
   });
 
+  test('throws on invalid query', () => {
+    expect(() => esql`FROM index | WHERE foo > | LIMIT 10`).toThrow();
+  });
+
   test('can construct a query with a simple dynamic input', () => {
     const input = 42;
     const query = esql`FROM index | WHERE foo > ${input} | LIMIT 10`;
@@ -75,6 +79,9 @@ describe('processing holes', () => {
       commands: [{ name: 'from' }, { name: 'where' }, { name: 'limit' }],
     });
   });
+
+  test.todo('repeated param with the same name, re-use if the same value');
+  test.todo('repeated param with the same name, increments integer to the end of the name');
 });
 
 describe('params', () => {
@@ -215,4 +222,59 @@ ComposerQuery
       `"Unexpected synth hole: {\\"limit\\":123,\\"noMoreFields\\":true}"`
     );
   });
+});
+
+describe('double params', () => {
+//   POST /_query?format=txt
+// {
+//  "query": """
+//    FROM sample_data
+//    | STATS x = ??param1(??param2) by ??param3
+//    | SORT ??param3
+//    """,
+//  "params": [ {"param1" : "avg"}, {"param2" : "event.duration"}, {"param3" : "client.ip"}]
+// }
+
+// POST /_query?format=txt
+// {
+//  "query": """
+//    FROM persons
+//    | WHERE ??param1.??param2 == ?param3
+//    | KEEP ??param1.??param2, ??param1.??param4, ??param5
+//    | SORT ??param5
+//    """,
+//    "params": [{"param1" : "car"}, {"param2" : "make"}, {"param3" : "Tesla"}, {"param4" : "model"}, {"param5" : "first_name"}]
+// }
+// positional parameters - ?? followed by an integer number indicating the position of the parameter in params
+
+// POST /_query?format=txt
+// {
+//  "query": """
+//    FROM sample_data
+//    | STATS x = ??1(??2) by ??3
+//    | SORT ??3
+//    """,
+//  "params": [ {"param1" : "avg"}, {"param2" : "event.duration"}, {"param3" : "client.ip"}]
+// }
+
+// POST /_query?format=txt
+// {
+//  "query": """
+//    FROM sample_data
+//    | STATS x = ??1(??2) by ??3
+//    | SORT ??3
+//    """,
+//  "params": [ "avg", "event.duration", "client.ip"]
+// }
+// anonymous parameters - just a ??
+
+// POST /_query?format=txt
+// {
+//  "query": """
+//    FROM sample_data
+//    | STATS x = ??(??) by ??
+//    | SORT ??
+//    """,
+//  "params": [ "avg", "event.duration", "client.ip", "client.ip"]
+// }
 });

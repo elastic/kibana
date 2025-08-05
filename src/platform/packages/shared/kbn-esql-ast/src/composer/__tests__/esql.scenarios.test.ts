@@ -53,12 +53,12 @@ describe('various dynamic query construction scenarios', () => {
     expect(query.print()).toBe('FROM index | WHERE TRUE AND foo > 42 AND bar.baz > 24 | LIMIT 10');
   });
 
-  test.only('can inline inline a string value', () => {
+  test('can inline inline a string value', () => {
     const field = ['first', 'name'];
     const name = 'John';
     const query = esql`FROM index | WHERE ${field} == ${name}`;
-    // console.log(query + '');
 
-    // expect(query.print()).toBe('FROM index | WHERE first.name == "John"');
+    expect(query.print()).toBe('FROM index | WHERE `first`.name == "John"');
   });
 });
+``
