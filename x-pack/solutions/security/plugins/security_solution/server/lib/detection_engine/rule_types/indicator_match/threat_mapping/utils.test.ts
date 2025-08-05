@@ -739,7 +739,7 @@ describe('utils', () => {
 
         const encoded = encodeThreatMatchNamedQuery(query);
         const decoded = decodeThreatMatchNamedQuery(encoded);
-
+        // Check that `query` and `encoded` contain the same data but are different objects by reference
         expect(decoded).not.toBe(query);
         expect(decoded).toEqual(query);
       });
