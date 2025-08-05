@@ -9,15 +9,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SerializedPanelState } from '@kbn/presentation-publishing';
-import type {
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlPanelsState,
-} from '../../../common';
+import type { ControlsGroupState } from '@kbn/controls-schemas';
+import type { ControlGroupRuntimeState, ControlPanelsState } from '../../../common';
 import { parseReferenceName } from '../../controls/data_controls/reference_name_utils';
 
 export const deserializeControlGroup = (
-  state: SerializedPanelState<ControlGroupSerializedState>
+  state: SerializedPanelState<ControlsGroupState>
 ): ControlGroupRuntimeState => {
   const initialChildControlState: ControlPanelsState = {};
   (state.rawState.controls ?? []).forEach((controlSeriailizedState) => {

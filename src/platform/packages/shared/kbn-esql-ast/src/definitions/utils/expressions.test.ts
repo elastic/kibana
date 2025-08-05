@@ -15,7 +15,7 @@ import { setTestFunctions } from './test_functions';
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
     const str = 'is NoT nulL';
-    const matcher = buildPartialMatcher(str);
+    const matcher = new RegExp(buildPartialMatcher(str) + '$', 'i');
 
     for (let i = 0; i < str.length; i++) {
       expect(matcher.test(str.slice(0, i + 1))).toEqual(true);

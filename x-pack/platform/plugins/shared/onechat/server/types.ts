@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { RunToolFn, RunAgentFn } from '@kbn/onechat-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
@@ -25,6 +26,7 @@ export interface OnechatSetupDependencies {
 export interface OnechatStartDependencies {
   actions: ActionsPluginStart;
   inference: InferenceServerStart;
+  cloud?: CloudStart;
 }
 
 /**

@@ -15,7 +15,7 @@ import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { hostsTitle } from '../../../translations';
 import { fullHeightContentStyles } from '../../../page_template.styles';
-import { HostContainer } from './components/hosts_container';
+import { HostsContainer } from './components/hosts_container';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
@@ -66,7 +66,7 @@ export const HostsPage = () => {
           },
         }}
       >
-        <HostContainer />
+        <HostsContainer />
       </InfraPageTemplate>
     </div>
   );

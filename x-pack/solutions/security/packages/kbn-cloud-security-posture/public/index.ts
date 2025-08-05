@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './src/types';
+export type * from './src/types';
 export * from './src/constants/navigation';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';

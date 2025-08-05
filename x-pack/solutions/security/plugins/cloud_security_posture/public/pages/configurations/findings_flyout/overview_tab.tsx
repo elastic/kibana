@@ -47,6 +47,7 @@ import { COPY_ARIA_LABEL } from '../../../components/copy_button';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 import { TruncatedCopyableText } from './findings_right/header';
+import { CIS_GCP } from '../../../../common/constants';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -254,7 +255,7 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
   },
 ];
 
-const getEvidenceList = ({ result }: CspFinding) =>
+const getEvidenceList = (evidence: object) =>
   [
     {
       title: '',
@@ -267,7 +268,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
             />
           </EuiText>
           <EuiSpacer size={'s'} />
-          <CodeBlock language="json">{JSON.stringify(result?.evidence, null, 2)}</CodeBlock>
+          <CodeBlock language="json">{JSON.stringify(evidence, null, 2)}</CodeBlock>
         </>
       ),
     },
@@ -308,8 +309,7 @@ export const OverviewTab = ({
     [data.data_stream?.dataset, discover.locator, cdrMisconfigurationsDataView.data?.id]
   );
 
-  const hasEvidence = !isEmpty(data.result?.evidence);
-
+  const evidence = getEvaluationEvidence(data);
   const accordions: Accordion[] = useMemo(
     () =>
       [
@@ -338,17 +338,17 @@ export const OverviewTab = ({
           listItems: getRemediationList(data.rule),
         },
         INTERNAL_FEATURE_FLAGS.showFindingFlyoutEvidence &&
-          hasEvidence && {
+          !isEmpty(evidence) && {
             initialIsOpen: true,
             title: i18n.translate(
               'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
             ),
             id: 'evidenceAccordion',
-            listItems: getEvidenceList(data),
+            listItems: getEvidenceList(evidence),
           },
       ].filter(truthy),
-    [data, discoverDataViewLink, euiTheme, hasEvidence, ruleFlyoutLink]
+    [data, discoverDataViewLink, euiTheme, ruleFlyoutLink, evidence]
   );
 
   return (
@@ -373,4 +373,12 @@ export const OverviewTab = ({
       ))}
     </>
   );
+};
+
+const getEvaluationEvidence = (data: CspFinding) => {
+  if (data.rule.benchmark?.id === CIS_GCP) {
+    // For CIS GCP, the evidence is the resource.raw field, which may contain a nested 'resource' field
+    return (data.resource?.raw as { resource?: unknown })?.resource || data.resource?.raw;
+  }
+  return data.result?.evidence;
 };

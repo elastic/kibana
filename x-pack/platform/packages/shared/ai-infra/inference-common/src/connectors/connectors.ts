@@ -32,6 +32,17 @@ export interface InferenceConnector {
    * the list of properties depends on the connector type (and subtype for inference)
    */
   config: Record<string, any>;
+  /**
+   * Capabilities of this connector.
+   */
+  capabilities: InferenceConnectorCapabilities;
+}
+
+export interface InferenceConnectorCapabilities {
+  /**
+   * The context window size for this connector, if the information is available.
+   */
+  contextWindowSize?: number;
 }
 
 /**

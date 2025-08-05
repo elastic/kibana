@@ -169,7 +169,7 @@ const datasetQualityColumnTooltip = (
 
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
-  canUserMonitorDataset,
+  canUserMonitorAnyDataset,
   canUserMonitorAnyDataStream,
   loadingDataStreamStats,
   loadingDocStats,
@@ -182,7 +182,7 @@ export const getDatasetQualityTableColumns = ({
   canReadFailureStore,
 }: {
   fieldFormats: FieldFormatsStart;
-  canUserMonitorDataset: boolean;
+  canUserMonitorAnyDataset: boolean;
   canUserMonitorAnyDataStream: boolean;
   loadingDataStreamStats: boolean;
   loadingDocStats: boolean;
@@ -247,7 +247,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (
@@ -417,7 +417,7 @@ export const getDatasetQualityTableColumns = ({
           },
         ]
       : []),
-    ...(canUserMonitorDataset && canUserMonitorAnyDataStream
+    ...(canUserMonitorAnyDataset && canUserMonitorAnyDataStream
       ? [
           {
             name: (

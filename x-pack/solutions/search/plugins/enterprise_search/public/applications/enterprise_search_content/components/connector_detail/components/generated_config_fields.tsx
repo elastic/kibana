@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -44,39 +45,45 @@ export interface GeneratedConfigFieldsProps {
 const ConfirmModal: React.FC<{
   onCancel: () => void;
   onConfirm: () => void;
-}> = ({ onCancel, onConfirm }) => (
-  <EuiConfirmModal
-    title={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
-      {
-        defaultMessage: 'Generate an Elasticsearch API key',
-      }
-    )}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
-      {
-        defaultMessage: 'Cancel',
-      }
-    )}
-    confirmButtonText={i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
-      {
-        defaultMessage: 'Generate API key',
-      }
-    )}
-    defaultFocusedButton="confirm"
-  >
-    {i18n.translate(
-      'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
-      {
-        defaultMessage:
-          'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
-      }
-    )}
-  </EuiConfirmModal>
-);
+}> = ({ onCancel, onConfirm }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      title={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.title',
+        {
+          defaultMessage: 'Generate an Elasticsearch API key',
+        }
+      )}
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.cancelButton.label',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.confirmButton.label',
+        {
+          defaultMessage: 'Generate API key',
+        }
+      )}
+      defaultFocusedButton="confirm"
+    >
+      {i18n.translate(
+        'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.confirmModal.description',
+        {
+          defaultMessage:
+            'Generating a new API key will invalidate the previous key. Are you sure you want to generate a new API key? This can not be undone.',
+        }
+      )}
+    </EuiConfirmModal>
+  );
+};
 
 export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   apiKey,
