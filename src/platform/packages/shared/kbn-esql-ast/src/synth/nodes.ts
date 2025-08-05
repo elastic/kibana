@@ -15,6 +15,7 @@ import {
   ESQLSource,
   ESQLStringLiteral,
 } from '../types';
+import { SynthNode } from './synth_node';
 
 /**
  * Creates an ES|QL source node.
@@ -25,7 +26,7 @@ import {
 export const src = (index: string): ESQLSource => {
   const node = Builder.expression.source.index(index);
 
-  return node;
+  return SynthNode.from(node);
 };
 
 /**
@@ -37,7 +38,7 @@ export const src = (index: string): ESQLSource => {
 export const int = (value: number): ESQLIntegerLiteral => {
   const node = Builder.expression.literal.integer(value);
 
-  return node;
+  return SynthNode.from(node);
 };
 
 /**
@@ -49,7 +50,7 @@ export const int = (value: number): ESQLIntegerLiteral => {
 export const float = (value: number): ESQLDecimalLiteral => {
   const node = Builder.expression.literal.decimal(value);
 
-  return node;
+  return SynthNode.from(node);
 };
 
 /**
@@ -61,7 +62,7 @@ export const float = (value: number): ESQLDecimalLiteral => {
 export const str = (value: string): ESQLStringLiteral => {
   const node = Builder.expression.literal.string(value);
 
-  return node;
+  return SynthNode.from(node);
 };
 
 /**
@@ -73,5 +74,5 @@ export const str = (value: string): ESQLStringLiteral => {
 export const par = (name: string): ESQLParamLiteral => {
   const node = Builder.param.build(name);
 
-  return node;
+  return SynthNode.from(node);
 };
