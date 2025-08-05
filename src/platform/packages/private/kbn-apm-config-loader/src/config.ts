@@ -16,10 +16,7 @@ import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import { getFlattenedObject } from '@kbn/std';
 import { type TelemetryConfig, telemetryConfigSchema } from '@kbn/telemetry-config';
-import {
-  type MonitoringCollectionConfig,
-  config as monitoringCollectionConfig,
-} from '@kbn/monitoring-collection-plugin/server';
+import { type MonitoringCollectionConfig, monitoringCollectionSchema } from '@kbn/metrics-config';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -109,7 +106,7 @@ export class ApmConfiguration {
   }
 
   public getMonitoringCollectionConfig(): MonitoringCollectionConfig {
-    return monitoringCollectionConfig.schema.validate(this.rawKibanaConfig.monitoring_collection);
+    return monitoringCollectionSchema.validate(this.rawKibanaConfig.monitoring_collection);
   }
 
   public isUsersRedactionEnabled(): boolean {

@@ -9,7 +9,7 @@
 
 import type { TelemetryConfig } from '@kbn/telemetry-config';
 import type { Instrumentation } from '@opentelemetry/instrumentation';
-import type { MonitoringCollectionConfig } from '@kbn/monitoring-collection-plugin/server';
+import type { MonitoringCollectionConfig } from '@kbn/metrics-config';
 
 jest.mock('@opentelemetry/instrumentation', () => {
   const originalPkg = jest.requireActual('@opentelemetry/instrumentation');

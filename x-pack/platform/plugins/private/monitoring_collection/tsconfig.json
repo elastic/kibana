@@ -14,6 +14,7 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/metrics",
+    "@kbn/metrics-config",
   ],
   "exclude": [
     "target/**/*",

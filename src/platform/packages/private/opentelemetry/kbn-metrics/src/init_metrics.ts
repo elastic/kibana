@@ -12,9 +12,8 @@ import { Metadata } from '@grpc/grpc-js';
 import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
 import { api, metrics, resources } from '@elastic/opentelemetry-node/sdk';
-import type { MetricsConfig } from '@kbn/metrics-config';
+import type { MetricsConfig, MonitoringCollectionConfig } from '@kbn/metrics-config';
 import { fromExternalVariant } from '@kbn/std';
-import type { MonitoringCollectionConfig } from '@kbn/monitoring-collection-plugin/server';
 import { PrometheusExporter } from './prometheus_exporter';
 
 /**
