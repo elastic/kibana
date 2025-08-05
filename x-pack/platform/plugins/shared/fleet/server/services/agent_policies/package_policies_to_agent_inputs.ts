@@ -204,9 +204,13 @@ const filterGlobalDataTags = (
   globalDataTags: GlobalDataTag[] | undefined,
   packageInfo: PackageInfo | undefined
 ): GlobalDataTag[] | undefined => {
+  if (!globalDataTags) {
+    return globalDataTags;
+  }
+
   const agentlessGlobalDataTags = getAgentlessGlobalDataTags(packageInfo);
 
-  if (!globalDataTags || !packageInfo || !agentlessGlobalDataTags) {
+  if (!agentlessGlobalDataTags) {
     return globalDataTags;
   }
 
