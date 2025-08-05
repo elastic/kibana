@@ -192,14 +192,6 @@ export class SavedQueryManagementComponentService extends FtrService {
     await this.closeSavedQueryManagementComponent();
   }
 
-  async savedQueryLoadButtonMissingOrFail() {
-    await this.retry.try(async () => {
-      await this.openSavedQueryManagementComponent();
-      await this.testSubjects.missingOrFail('saved-query-management-load-button');
-    });
-    await this.closeSavedQueryManagementComponent();
-  }
-
   async openSavedQueryManagementComponent() {
     const isOpenAlready = await this.testSubjects.exists('queryBarMenuPanel');
     if (isOpenAlready) return;
@@ -228,16 +220,11 @@ export class SavedQueryManagementComponentService extends FtrService {
     });
   }
 
-  async saveNewQueryMissingOrFail(expectedButtonState: 'disabled' | 'hidden' = 'disabled') {
+  async saveNewQueryMissingOrFail() {
     await this.openSavedQueryManagementComponent();
-
-    if (expectedButtonState === 'disabled') {
-      const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
-      const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
-      expect(isDisabled).to.equal('true');
-    } else {
-      await this.testSubjects.missingOrFail('saved-query-management-save-button');
-    }
+    const saveFilterSetBtn = await this.testSubjects.find('saved-query-management-save-button');
+    const isDisabled = await saveFilterSetBtn.getAttribute('disabled');
+    expect(isDisabled).to.equal('true');
   }
 
   async updateCurrentlyLoadedQueryMissingOrFail() {
