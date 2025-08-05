@@ -13,6 +13,7 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/utility-types",
     "@kbn/i18n",
+    "@kbn/metrics",
   ],
   "exclude": [
     "target/**/*",
