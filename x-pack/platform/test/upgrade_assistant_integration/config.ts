@@ -15,13 +15,15 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/api_integration/config')
   );
-  const xPackApiTestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.base.ts')
+  );
 
   const esVersion = EsVersion.getDefault();
   const willRunEsv9 = esVersion.matchRange('9');
 
   let esTestCluster = {
-    ...xPackApiTestsConfig.get('esTestCluster'),
+    ...xPackFunctionalTestsConfig.get('esTestCluster'),
     dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
   };
   if (willRunEsv9) {
@@ -32,7 +34,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   return {
     testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./upgrade_assistant')],
-    servers: xPackApiTestsConfig.get('servers'),
+    servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
       ...commonFunctionalServices,
       supertest: kibanaAPITestsConfig.get('services.supertest'),
@@ -41,9 +43,9 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },
     kbnTestServer: {
-      ...xPackApiTestsConfig.get('kbnTestServer'),
+      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xPackApiTestsConfig.get('kbnTestServer.serverArgs'),
+        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${path.resolve(__dirname, '../../../../examples/routing_example')}`,
         `--plugin-path=${path.resolve(__dirname, '../../../../examples/developer_examples')}`,
       ],
