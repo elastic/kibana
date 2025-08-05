@@ -158,7 +158,7 @@ export function getCompletionItemProvider(
 
         if (parseResult.fullKey) {
           scopedContext = _.get(context, parseResult.fullKey);
-          if (scopedContext) {
+          if (typeof scopedContext === 'object' && scopedContext !== null) {
             context = scopedContext;
           }
         }

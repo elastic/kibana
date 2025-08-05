@@ -38,6 +38,10 @@ function getAvailableOutputs(
 ) {
   const predecessors = getAllPredecessors(workflowGraph, getStepId(stepName));
 
+  if (predecessors.length === 0) {
+    return {};
+  }
+
   return predecessors?.reduce((acc, predecessor) => {
     const node = workflowGraph.node(predecessor);
     // Excluding triggers from the context for now. Maybe they should be included under 'triggers' key?
