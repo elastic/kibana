@@ -168,7 +168,7 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete unwired streams.
+   * It does NOT delete classic streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
     try {
@@ -524,14 +524,14 @@ export class StreamsClient {
    */
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
-  ): Streams.UnwiredStream.Definition {
-    const definition: Streams.UnwiredStream.Definition = {
+  ): Streams.ClassicStream.Definition {
+    const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        unwired: {},
+        classic: {},
       },
     };
 
@@ -592,10 +592,10 @@ export class StreamsClient {
   }
 
   /**
-   * Lists all unmanaged streams (unwired streams without a
+   * Lists all unmanaged streams (classic streams without a
    * stored definition).
    */
-  private async getUnmanagedDataStreams(): Promise<Streams.UnwiredStream.Definition[]> {
+  private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
     const response = await wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
     );
@@ -606,7 +606,7 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        unwired: {},
+        classic: {},
       },
     }));
   }
@@ -679,8 +679,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }

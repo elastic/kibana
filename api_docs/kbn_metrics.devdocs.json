@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/metrics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/metrics",
+        "id": "def-common.initMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "initMetrics",
+        "description": [
+          "\nInitialize the OpenTelemetry meter provider"
+        ],
+        "signature": [
+          "(initMetricsOptions: ",
+          {
+            "pluginId": "@kbn/metrics",
+            "scope": "common",
+            "docId": "kibKbnMetricsPluginApi",
+            "section": "def-common.InitMetricsOptions",
+            "text": "InitMetricsOptions"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-common.initMetrics.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "initMetricsOptions",
+            "description": [
+              "{@link InitMetricsOptions }"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics",
+                "scope": "common",
+                "docId": "kibKbnMetricsPluginApi",
+                "section": "def-common.InitMetricsOptions",
+                "text": "InitMetricsOptions"
+              }
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/metrics",
+        "id": "def-common.InitMetricsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "InitMetricsOptions",
+        "description": [
+          "\nOptions to the initMetrics method"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-common.InitMetricsOptions.resource",
+            "type": "Object",
+            "tags": [],
+            "label": "resource",
+            "description": [
+              "\nThe OpenTelemetry resource information"
+            ],
+            "signature": [
+              "Resource"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics",
+            "id": "def-common.InitMetricsOptions.metricsConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsConfig",
+            "description": [
+              "The OpenTelemetry metrics configuration"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/metrics-config",
+                "scope": "common",
+                "docId": "kibKbnMetricsConfigPluginApi",
+                "section": "def-common.MetricsConfig",
+                "text": "MetricsConfig"
+              }
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics/src/init_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

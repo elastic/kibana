@@ -10,9 +10,10 @@ import {
   parse,
   Walker,
   walk,
-  BasicPrettyPrinter,
+  Parser,
   isFunctionExpression,
   isColumn,
+  WrappingPrettyPrinter,
 } from '@kbn/esql-ast';
 
 import type {
@@ -138,9 +139,9 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { root } = parse(query);
-  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
+export const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {

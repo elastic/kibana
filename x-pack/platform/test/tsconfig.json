@@ -148,7 +148,7 @@
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin",
-    "@kbn/controls-plugin",
+    "@kbn/controls-constants",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
     "@kbn/visualizations-plugin",
