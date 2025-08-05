@@ -90,10 +90,15 @@ export function AdvancedConfiguration({
     });
   };
 
-  const deleteRow = (key: string) => {
+  const deleteRow = (key: string, index: number) => {
     if (newConfig.settings[key]) {
       setRemovedSettingsCount((prev) => prev + 1);
     }
+    setValidationErrors((prev) => ({
+      ...prev,
+      [`key${index}`]: false,
+      [`value${index}`]: false,
+    }));
     setNewConfig((prev) => {
       const { [key]: deleted, ...rest } = prev.settings;
       return {
@@ -292,7 +297,7 @@ function AdvancedConfigValueInput({
   index: number;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onUpdate: (key: string, value: string) => void;
-  onDelete: (key: string) => void;
+  onDelete: (key: string, index: number) => void;
 }) {
   const [touched, setTouched] = useState(false);
 
@@ -341,7 +346,7 @@ function AdvancedConfigValueInput({
             })}
             iconType="trash"
             color={'danger'}
-            onClick={() => onDelete(settingKey)}
+            onClick={() => onDelete(settingKey, index)}
           />
         }
       />
