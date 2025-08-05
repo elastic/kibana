@@ -27,10 +27,17 @@ import { getDocLinks } from '@kbn/doc-links';
 import { useAppContext } from '../../app_context';
 
 export function AiAssistantSelectionPage() {
-  const { capabilities, setBreadcrumbs, navigateToApp, buildFlavor, kibanaBranch } =
-    useAppContext();
+  const {
+    capabilities,
+    setBreadcrumbs,
+    navigateToApp,
+    buildFlavor,
+    kibanaBranch,
+    securityAIAssistantEnabled,
+  } = useAppContext();
 
-  const canViewAssistantSettings = capabilities.aiAssistantManagementSelection?.read;
+  const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
+  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
@@ -78,7 +85,7 @@ export function AiAssistantSelectionPage() {
             data-test-subj="aiAssistantSelectionPageObservabilityCard"
             description={
               <div>
-                {!canViewAssistantSettings ? (
+                {!observabilityAIAssistantEnabled ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
@@ -117,7 +124,7 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {canViewAssistantSettings && (
+                {observabilityAIAssistantEnabled && (
                   <EuiButton
                     iconType="gear"
                     data-test-subj="pluginsAiAssistantSelectionPageButton"
@@ -147,7 +154,7 @@ export function AiAssistantSelectionPage() {
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-            isDisabled={!canViewAssistantSettings}
+            isDisabled={!observabilityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
               { defaultMessage: 'Elastic AI Assistant for Observability and Search' }
@@ -159,7 +166,7 @@ export function AiAssistantSelectionPage() {
           <EuiCard
             description={
               <div>
-                {!canViewAssistantSettings ? (
+                {!isSecurityAIAssistantEnabled ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
@@ -198,7 +205,7 @@ export function AiAssistantSelectionPage() {
                     }}
                   />
                 </p>
-                {canViewAssistantSettings && (
+                {isSecurityAIAssistantEnabled && (
                   <EuiButton
                     data-test-subj="pluginsAiAssistantSelectionSecurityPageButton"
                     iconType="gear"
@@ -217,7 +224,7 @@ export function AiAssistantSelectionPage() {
             display="plain"
             hasBorder
             icon={<EuiIcon size="xxl" type="logoSecurity" />}
-            isDisabled={!canViewAssistantSettings}
+            isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
               { defaultMessage: 'Elastic AI Assistant for Security' }

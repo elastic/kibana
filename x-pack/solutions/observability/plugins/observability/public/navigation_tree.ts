@@ -467,7 +467,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                     title: 'AI',
                     children: [
                       { link: 'management:genAiSettings' },
-                      { link: 'management:observabilityAiAssistantManagement' },
+                      { link: 'management:aiAssistantManagementSelection' },
                     ],
                   },
                   {
