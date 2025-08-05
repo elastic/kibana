@@ -7,8 +7,6 @@
 
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
@@ -27,18 +25,14 @@ export function useSnapshot(
   props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
-  const config = usePluginConfig();
-
   const payload = useMemo(
     () =>
-      // TODO: Replace this with the schema selector value
       JSON.stringify(
         buildPayload({
           ...props,
-          schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
         })
       ),
-    [props, config.featureFlags.hostOtelEnabled]
+    [props]
   );
 
   const { data, status, error, refetch } = useFetcher(
