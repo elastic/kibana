@@ -20,10 +20,7 @@ paths:
                 type: object
                 properties:
                   status: 
-                    oneOf:
-                    - $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
-                    - type: string
-                      enum: [not_found]
+                    $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
                   error:
                     type: object
                     required:
