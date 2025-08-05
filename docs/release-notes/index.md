@@ -49,7 +49,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fixes an issue where the SSL configuration isn't properly added to agent policies with pre-configured output types [#230211]({{kib-pull}}230211).
 
 **Discover**:
-* Fixes an issue where HTML search highlighting markup is incorrectly carried over into filter values when using the **Filter for value** field action in the **Log overview** tab. [#227652]({{kib-pull}}227652).
+* Fixes an issue where HTML search highlighting markup is incorrectly carried over into filter values when using the **Filter for value** field action in the **Log overview** tab [#227652]({{kib-pull}}227652).
 
 
 **Elastic Observability solution**:
