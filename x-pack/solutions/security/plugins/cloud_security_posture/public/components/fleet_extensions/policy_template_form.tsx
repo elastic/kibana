@@ -20,7 +20,7 @@ import {
   KSPM_POLICY_TEMPLATE,
 } from '@kbn/cloud-security-posture-common/constants';
 import { useParams } from 'react-router-dom';
-import { CloudSetup } from '@kbn/cloud-security-posture';
+import { CloudSetup, CloudSetupConfig } from '@kbn/cloud-security-posture';
 import { i18n } from '@kbn/i18n';
 import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
@@ -68,6 +68,50 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
+    const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
+      policyTemplate: 'cspm',
+      defaultProvider: 'aws',
+      namespaceSupportEnabled: true,
+      name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
+        defaultMessage: 'Cloud Security Posture Management',
+      }),
+      shortName: i18n.translate(
+        'securitySolutionPackages.cspmIntegration.integration.shortNameTitle',
+        {
+          defaultMessage: 'CSPM',
+        }
+      ),
+      overviewPath: `https://ela.st/cspm-overview`,
+      getStartedPath: `https://ela.st/cspm-get-started`,
+      providers: {
+        aws: {
+          type: 'cloudbeat/cis_aws',
+          showCloudConnectors: true,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: '1.5.0-preview20',
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+          testId: 'cisAwsTestId',
+        },
+        gcp: {
+          type: 'cloudbeat/cis_gcp',
+          showCloudConnectors: false,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: '1.6.0',
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
+          minShowVersion: '1.5.2',
+          testId: 'cisGcpTestId',
+        },
+        azure: {
+          type: 'cloudbeat/cis_azure',
+          showCloudConnectors: false,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: '1.7.0',
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
+          testId: 'cisAzureTestId',
+        },
+      },
+    };
+
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
 
     const isParentSecurityPosture = !integrationParam;
@@ -148,6 +192,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         )}
         {input.policy_template === CSPM_POLICY_TEMPLATE && (
           <CloudSetup
+            configuration={CLOUD_SETUP_MAPPING}
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}

@@ -53,7 +53,11 @@ const EditScreenStepTitle = () => (
     <EuiSpacer />
   </>
 );
-interface CloudSetupProps {
+type CloudSetupProps = CloudIntegrationSetupProps & {
+  configuration: CloudSetupConfig;
+};
+
+interface CloudIntegrationSetupProps {
   cloud: ICloudSetup;
   defaultSetupTechnology?: SetupTechnology;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
@@ -66,7 +70,7 @@ interface CloudSetupProps {
   validationResults?: PackagePolicyValidationResults;
   uiSettings: IUiSettingsClient;
 }
-const CloudIntegrationSetup = memo<CloudSetupProps>(
+const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
   ({
     cloud,
     defaultSetupTechnology,
@@ -79,7 +83,7 @@ const CloudIntegrationSetup = memo<CloudSetupProps>(
     packageInfo,
     validationResults,
     uiSettings,
-  }: CloudSetupProps) => {
+  }: CloudIntegrationSetupProps) => {
     const {
       input,
       setEnabledPolicyInput,
@@ -310,6 +314,7 @@ const CloudIntegrationSetup = memo<CloudSetupProps>(
 
 export const CloudSetup = memo<CloudSetupProps>(
   ({
+    configuration,
     cloud,
     defaultSetupTechnology,
     handleSetupTechnologyChange,
@@ -322,57 +327,8 @@ export const CloudSetup = memo<CloudSetupProps>(
     validationResults,
     uiSettings,
   }: CloudSetupProps) => {
-    const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
-    const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.6.0';
-    const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
-    const MIN_VERSION_GCP_CIS = '1.5.2';
-
-    const TEMP_CSPM_MAPPING: CloudSetupConfig = {
-      policyTemplate: 'cspm',
-      defaultProvider: 'aws',
-      namespaceSupportEnabled: true,
-      name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
-        defaultMessage: 'Cloud Security Posture Management',
-      }),
-      shortName: i18n.translate(
-        'securitySolutionPackages.cspmIntegration.integration.shortNameTitle',
-        {
-          defaultMessage: 'CSPM',
-        }
-      ),
-      overviewPath: `https://ela.st/cspm-overview`,
-      getStartedPath: `https://ela.st/cspm-get-started`,
-      providers: {
-        aws: {
-          type: 'cloudbeat/cis_aws',
-          showCloudConnectors: true,
-          showCloudTemplate: true, // this should be checking the package version and set in CSPM
-          organizationMinimumVersion: AWS_ORG_MINIMUM_PACKAGE_VERSION,
-          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
-          testId: 'cisAwsTestId',
-        },
-        gcp: {
-          type: 'cloudbeat/cis_gcp',
-          showCloudConnectors: false,
-          showCloudTemplate: true, // this should be checking the package version and set in CSPM
-          organizationMinimumVersion: GCP_ORG_MINIMUM_PACKAGE_VERSION,
-          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
-          minShowVersion: MIN_VERSION_GCP_CIS,
-          testId: 'cisGcpTestId',
-        },
-        azure: {
-          type: 'cloudbeat/cis_azure',
-          showCloudConnectors: false,
-          showCloudTemplate: true, // this should be checking the package version and set in CSPM
-          organizationMinimumVersion: AZURE_ORG_MINIMUM_PACKAGE_VERSION,
-          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
-          testId: 'cisAzureTestId',
-        },
-      },
-    };
-
     return (
-      <CloudSetupProvider config={TEMP_CSPM_MAPPING}>
+      <CloudSetupProvider config={configuration}>
         <CloudIntegrationSetup
           cloud={cloud}
           defaultSetupTechnology={defaultSetupTechnology}
