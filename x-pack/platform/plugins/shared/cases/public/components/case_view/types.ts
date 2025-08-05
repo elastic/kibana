@@ -47,4 +47,5 @@ export type CaseViewAlertsTableProps = Pick<
   'id' | 'ruleTypeIds' | 'consumers' | 'query' | 'showAlertStatusWithFlapping' | 'onLoaded'
 > & {
   services?: AlertsTableProps['services'];
+  caseData?: CaseUI;
 };

@@ -20,6 +20,11 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { useDeleteComment } from '@kbn/cases-plugin/public';
+import {
+  useDeletePropertyAction,
+  DeleteAttachmentConfirmationModal,
+} from '@kbn/cases-plugin/public';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -34,6 +39,7 @@ import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
   observabilityRuleTypeRegistry,
   alert,
+  caseData,
   tableId,
   refresh,
   openAlertInFlyout,
@@ -53,6 +59,30 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
+
+  const { mutateAsync: deleteComment } = useDeleteComment();
+
+  const commentId = useMemo(() => {
+    return caseData?.comments?.find(
+      (comment) => 'alertId' in comment && comment.alertId[0] === alert._id
+    )?.id;
+  }, [caseData, alert._id]);
+
+  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
+    onDelete: () => {
+      if (caseData?.id && commentId)
+        deleteComment({
+          caseId: caseData.id,
+          commentId,
+          successToasterTitle: i18n.translate(
+            'xpack.observability.alerts.actions.removeFromCaseSuccess',
+            {
+              defaultMessage: 'Alert removed from case',
+            }
+          ),
+        });
+    },
+  });
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -97,6 +127,23 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     setIsPopoverOpen(!isPopoverOpen);
   };
 
+  const removeFromCaseAction = [
+    ...(commentId
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="remove-from-case-action"
+            key="removeFromCase"
+            onClick={onModalOpen}
+            size="s"
+          >
+            {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
+              defaultMessage: 'Remove from case',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
+
   const actionsMenuItems = [
     ...(userCasesPermissions?.createComment && userCasesPermissions?.read
       ? [
@@ -120,6 +167,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
               defaultMessage: 'Add to new case',
             })}
           </EuiContextMenuItem>,
+          ...removeFromCaseAction,
         ]
       : []),
     useMemo(
@@ -142,11 +190,13 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
           services={services}
+          caseData={caseData}
           {...rest}
         />
       ),
       [
         alert,
+        caseData,
         closeActionsPopover,
         observabilityRuleTypeRegistry,
         openAlertInFlyout,
@@ -244,6 +294,21 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
           />
         </EuiPopover>
       </EuiFlexItem>
+      {showDeletionModal && (
+        <DeleteAttachmentConfirmationModal
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          confirmButtonText={i18n.translate(
+            'xpack.observability.alerts.actions.removeFromCaseConfirm',
+            {
+              defaultMessage: 'Remove',
+            }
+          )}
+          title={i18n.translate('xpack.observability.alerts.actions.removeFromCaseTitle', {
+            defaultMessage: 'Remove alert from case',
+          })}
+        />
+      )}
     </>
   );
 };
