@@ -69,17 +69,17 @@ export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
 
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
-  TENANT_ID: 'cisAzureTenantId',
-  CLIENT_ID: 'cisAzureClientId',
+  TENANT_ID: 'cloudSetupAzureTenantId',
+  CLIENT_ID: 'cloudSetupAzureClientId',
   CLIENT_SECRET: 'passwordInput-client-secret',
-  CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
-  CLIENT_CERTIFICATE_PASSWORD: 'cisAzureClientCertificatePassword',
-  CLIENT_USERNAME: 'cisAzureClientUsername',
-  CLIENT_PASSWORD: 'cisAzureClientPassword',
+  CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
+  CLIENT_CERTIFICATE_PASSWORD: 'cloudSetupAzureClientCertificatePassword',
+  CLIENT_USERNAME: 'cloudSetupAzureClientUsername',
+  CLIENT_PASSWORD: 'cloudSetupAzureClientPassword',
 };
 export const CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
-  ARM_TEMPLATE: 'cisAzureArmTemplate',
-  MANUAL: 'cisAzureManual',
+  ARM_TEMPLATE: 'cloudSetupAzureArmTemplate',
+  MANUAL: 'cloudSetupAzureManual',
 };
 export const CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',

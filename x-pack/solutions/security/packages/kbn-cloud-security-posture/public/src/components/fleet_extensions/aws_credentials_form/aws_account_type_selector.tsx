@@ -9,19 +9,18 @@ import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AwsAccountType, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
+import { AWS_PROVIDER, getCloudSetupProviderConfig } from '../mappings';
 
-const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
-const getAwsAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
-): AwsAccountType | undefined => input.streams[0].vars?.['aws.account_type']?.value;
+const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
+  input.streams[0].vars?.['aws.account_type']?.value;
 
 const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -62,7 +61,7 @@ export const AwsAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
@@ -70,9 +69,11 @@ export const AwsAccountTypeSelect = ({
 }) => {
   // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const isValidSemantic = semverValid(packageInfo.version);
-  const isAwsOrgDisabled = isValidSemantic
-    ? semverCompare(packageInfo.version, AWS_ORG_MINIMUM_PACKAGE_VERSION) < 0
-    : true;
+  const minimumAwsOrgVersion = getCloudSetupProviderConfig(AWS_PROVIDER).organizationMinimumVersion;
+  const isAwsOrgDisabled =
+    isValidSemantic && minimumAwsOrgVersion
+      ? semverCompare(packageInfo.version, minimumAwsOrgVersion) < 0
+      : true;
 
   const awsAccountTypeOptions = useMemo(
     () => getAwsAccountTypeOptions(isAwsOrgDisabled),
@@ -82,7 +83,7 @@ export const AwsAccountTypeSelect = ({
   useEffect(() => {
     if (!getAwsAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
           'aws.account_type': {
             value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
             type: 'text',
@@ -119,7 +120,7 @@ export const AwsAccountTypeSelect = ({
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+            updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
               'aws.account_type': {
                 value: accountType,
                 type: 'text',

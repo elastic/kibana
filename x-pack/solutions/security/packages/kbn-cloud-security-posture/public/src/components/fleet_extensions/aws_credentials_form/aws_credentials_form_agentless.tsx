@@ -10,20 +10,16 @@
 import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import semverCompare from 'semver/functions/compare';
-import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
-  CLOUD_CREDENTIALS_PACKAGE_VERSION,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  cspIntegrationDocsNavigation,
   AWS_CREDENTIALS_TYPE,
 } from '../constants';
 import {
@@ -48,10 +44,16 @@ import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import { getAwsCredentialsType } from './aws_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { UpdatePolicy } from '../types';
+import {
+  AWS_PROVIDER,
+  getCloudSetupPolicyTemplate,
+  getCloudSetupProviderOverviewPath,
+  showCloudTemplate,
+} from '../mappings';
 
 interface AwsAgentlessFormProps {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
@@ -78,12 +80,12 @@ export const AwsCredentialsFormAgentless = ({
 
   const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
 
-  const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
+  const documentationLink = getCloudSetupProviderOverviewPath(AWS_PROVIDER);
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
       updatedPolicy: {
-        ...getPosturePolicy(newPolicy, input.type, {
+        ...getPosturePolicy(newPolicy, AWS_PROVIDER, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -97,16 +99,13 @@ export const AwsCredentialsFormAgentless = ({
     });
   }
 
-  const isValidSemantic = semverValid(packageInfo.version);
-  const showCloudCredentialsButton = isValidSemantic
-    ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
-    : false;
-
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
-    input.policy_template,
+    getCloudSetupPolicyTemplate() ?? '',
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
+
+  const showCloudCredentialsButton = showCloudTemplate(AWS_PROVIDER);
 
   const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({ input, cloud, packageInfo }) || undefined
@@ -215,12 +214,12 @@ export const AwsCredentialsFormAgentless = ({
           updatePolicy({
             updatedPolicy: getPosturePolicy(
               newPolicy,
-              input.type,
+              AWS_PROVIDER,
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
                 showCloudConnectors,
-                inputType: input.type,
+                provider: AWS_PROVIDER,
               })
             ),
           });
@@ -272,8 +271,9 @@ export const AwsCredentialsFormAgentless = ({
         fields={fields}
         packageInfo={packageInfo}
         onChange={(key, value) => {
+          const updatedPolicy = getPosturePolicy(newPolicy, AWS_PROVIDER, { [key]: { value } });
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+            updatedPolicy,
           });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}

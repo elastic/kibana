@@ -10,7 +10,7 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { AwsCredentialsType, NewPackagePolicyPostureInput } from '../types';
+import { AwsCredentialsType } from '../types';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { getAwsCredentialsType } from './aws_utils';
 
@@ -107,7 +107,7 @@ export type AwsCredentialsTypeOptions = Array<{
   text: string;
 }>;
 export const getAgentlessCredentialsType = (
-  postureInput: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>,
+  postureInput: NewPackagePolicyInput,
   showCloudConnectors: boolean
 ): AwsCredentialsType => {
   const credentialsType = getAwsCredentialsType(postureInput);

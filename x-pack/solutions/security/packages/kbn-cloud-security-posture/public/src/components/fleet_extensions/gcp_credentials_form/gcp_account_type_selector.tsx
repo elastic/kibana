@@ -9,15 +9,16 @@ import { i18n } from '@kbn/i18n';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { gcpField, getInputVarsFields } from './gcp_utils';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { UpdatePolicy } from '../types';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
+import { GCP_PROVIDER, getCloudSetupProviderConfig } from '../mappings';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -53,11 +54,8 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
 
 type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUNT;
 
-const getGcpAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
-): GcpAccountType | undefined => input.streams[0].vars?.['gcp.account_type']?.value;
-
-const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.6.0';
+const getGcpAccountType = (input: NewPackagePolicyInput): GcpAccountType | undefined =>
+  input.streams[0].vars?.['gcp.account_type']?.value;
 
 export const GcpAccountTypeSelect = ({
   input,
@@ -66,7 +64,7 @@ export const GcpAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
@@ -75,7 +73,11 @@ export const GcpAccountTypeSelect = ({
   // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const isGcpOrgDisabled = semverLt(integrationVersionNumberOnly, GCP_ORG_MINIMUM_PACKAGE_VERSION);
+  const gcpOrganizationMinimumVersion =
+    getCloudSetupProviderConfig(GCP_PROVIDER).organizationMinimumVersion;
+  const isGcpOrgDisabled =
+    !gcpOrganizationMinimumVersion ||
+    semverLt(integrationVersionNumberOnly, gcpOrganizationMinimumVersion);
 
   const gcpAccountTypeOptions = useMemo(
     () => getGcpAccountTypeOptions(isGcpOrgDisabled),
@@ -97,7 +99,7 @@ export const GcpAccountTypeSelect = ({
       // We need to store the last manual credentials type to restore it later
       lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
           'gcp.account_type': {
             value: 'single-account',
             type: 'text',
@@ -109,7 +111,7 @@ export const GcpAccountTypeSelect = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
           'gcp.account_type': {
             // Restoring last manual credentials type
             value: lastSetupAccessType.current || 'organization-account',
@@ -125,7 +127,7 @@ export const GcpAccountTypeSelect = ({
   useEffect(() => {
     if (!getGcpAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
           'gcp.account_type': {
             value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
             type: 'text',

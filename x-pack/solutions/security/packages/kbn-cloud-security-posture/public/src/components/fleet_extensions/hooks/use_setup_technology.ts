@@ -8,7 +8,12 @@ import { useState, useEffect } from 'react';
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_AZURE, CLOUDBEAT_GCP } from '../constants';
+import {
+  AWS_PROVIDER,
+  AZURE_PROVIDER,
+  GCP_PROVIDER,
+  getCloudSetupProviderByInputType,
+} from '../mappings';
 
 export const useSetupTechnology = ({
   input,
@@ -23,9 +28,10 @@ export const useSetupTechnology = ({
   defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
 }) => {
-  const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isCspmGcp = input.type === CLOUDBEAT_GCP;
-  const isCspmAzure = input.type === CLOUDBEAT_AZURE;
+  const provider = getCloudSetupProviderByInputType(input.type);
+  const isCspmAws = provider === AWS_PROVIDER;
+  const isCspmGcp = provider === GCP_PROVIDER;
+  const isCspmAzure = provider === AZURE_PROVIDER;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const defaultEditSetupTechnology =

@@ -156,7 +156,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             defaultSetupTechnology={defaultSetupTechnology}
             isAgentlessEnabled={isAgentlessEnabled}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            namespaceSupportEnabled={true}
             isValid={isValid}
             cloud={cloud}
             uiSettings={uiSettings}

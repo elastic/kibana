@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
 import type { PackageInfo, PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import {
-  GcpCredentialsType,
-  GcpFields,
-  GcpInputFields,
-  NewPackagePolicyPostureInput,
-} from '../types';
+import { GcpCredentialsType, GcpFields, GcpInputFields } from '../types';
 import { getCspmCloudShellDefaultValue } from '../utils';
 import { GCP_CREDENTIALS_TYPE } from '../constants';
 
@@ -77,7 +72,7 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 export const getGcpCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
+  input: NewPackagePolicyInput
 ): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
 
 export const getDefaultGcpHiddenVars = (
