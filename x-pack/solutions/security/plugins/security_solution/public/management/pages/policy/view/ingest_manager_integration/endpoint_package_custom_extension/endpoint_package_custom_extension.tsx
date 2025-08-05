@@ -23,6 +23,7 @@ import {
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../../common/routing';
 import {
   BLOCKLISTS_LABELS,
@@ -66,7 +67,7 @@ const TrustedDevicesArtifactCard = memo<PackageCustomExtensionComponentProps>((p
     <FleetArtifactsCard
       {...props}
       artifactApiClientInstance={trustedDevicesApiClientInstance}
-      getArtifactsPath={getTrustedAppsListPath}
+      getArtifactsPath={getTrustedDevicesListPath}
       labels={TRUSTED_DEVICES_LABELS}
       data-test-subj="trustedDevices"
     />
