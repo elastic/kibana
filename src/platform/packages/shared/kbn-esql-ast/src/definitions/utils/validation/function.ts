@@ -182,7 +182,7 @@ class FunctionValidator {
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
-    for (const arg of this.fn.args) {
+    for (const arg of this.fn.args.flat()) {
       if (isFunctionExpression(arg)) {
         nestedErrors.push(
           ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
@@ -209,12 +209,20 @@ function getSignatureWithMatchingTypes(
   types: Array<SupportedDataType | 'unknown'>
 ): FunctionDefinition['signatures'][number] | undefined {
   return definition.signatures.find((sig) => {
-    if (types.length < sig.params.length) {
+    // TODO check this - it may not be correct
+    if (types.length < sig.params.filter(({ optional }) => !optional).length) {
       return false;
     }
 
-    return sig.params.every((param, index) => {
-      return types[index] === param.type;
+    return types.every((type, index) => {
+      const paramType = getParamAtPosition(sig, index)!.type;
+      return (
+        paramType === 'any' ||
+        type === 'param' ||
+        type === 'null' ||
+        // safe to assume the param is there, because we checked the length above
+        type === paramType
+      );
     });
   });
 }
@@ -231,6 +239,8 @@ function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
 
   return { location, displayName };
 }
+
+// #endregion New stuff
 
 // #region Old stuff
 
@@ -1127,3 +1137,5 @@ function validateSignatureLicense(
     }),
   ];
 }
+
+// #endregion Old stuff

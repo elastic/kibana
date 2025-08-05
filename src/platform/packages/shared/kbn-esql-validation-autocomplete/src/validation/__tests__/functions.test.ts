@@ -11,6 +11,7 @@ import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
+import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -99,40 +100,49 @@ describe('function validation', () => {
         it('rejects arguments of an incorrect type', async () => {
           const { expectErrors } = await setup();
 
+          const getExpectedError = (fnName: string, givenTypes: string[]) => {
+            const definition = buildFunctionLookup().get(fnName)!;
+            return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
+              ', '
+            )}].\n\nExpected one of:\n  ${definition.signatures
+              .map((sig) => `- [${sig.params.map((p) => p.type).join(', ')}]`)
+              .join('\n  ')}`;
+          };
+
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // assignment
           await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // nested function
           await expectErrors('FROM a_index | EVAL TEST(RETURNS_DOUBLE())', [
-            'Argument of [test] must be [integer], found value [RETURNS_DOUBLE()] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            'Argument of [test] must be [integer], found value [1::DOUBLE] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // field
           await expectErrors('FROM a_index | EVAL TEST(doubleField)', [
-            'Argument of [test] must be [integer], found value [doubleField] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // userDefinedColumns
           await expectErrors('FROM a_index | EVAL col1 = 1. | EVAL TEST(col1)', [
-            'Argument of [test] must be [integer], found value [col1] type [double]',
+            getExpectedError('test', ['double']),
           ]);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1.1) | EVAL TEST(1.1)', [
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
-            'Argument of [test] must be [integer], found value [1.1] type [double]',
+            getExpectedError('test', ['double']),
+            getExpectedError('test', ['double']),
           ]);
         });
 

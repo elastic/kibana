@@ -78,7 +78,7 @@ Received [{argTypes}].
 Expected one of:
   {validSignatures}`,
           values: {
-            functionName: out.functionName.toUpperCase(),
+            functionName: out.functionName,
             argTypes: out.argTypes,
             validSignatures: signatureList,
           },
@@ -102,7 +102,7 @@ Expected one of:
           defaultMessage:
             '[{fn}] expected {expectedMin}-{expectedMax} arguments, but got {actual}.',
           values: {
-            fn: out.fn.toUpperCase(),
+            fn: out.fn,
             expectedMin: out.expectedMin,
             expectedMax: out.expectedMax,
             actual: out.actual,
@@ -115,7 +115,7 @@ Expected one of:
           defaultMessage:
             '[{fn}] expected {expected, plural, one {one argument} other {{expected} arguments}}, but got {actual}.',
           values: {
-            fn: out.fn.toUpperCase(),
+            fn: out.fn,
             expected: out.expected,
             actual: out.actual,
           },
