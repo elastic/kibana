@@ -22,11 +22,12 @@ import {
 } from '../runtime_types/private_locations';
 
 export const getPrivateLocations = async (
-  client: SavedObjectsClientContract
+  client: SavedObjectsClientContract,
+  spaceId?: string
 ): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
   try {
     const [results, legacyLocations] = await Promise.all([
-      getNewPrivateLocations(client),
+      getNewPrivateLocations(client, spaceId),
       getLegacyPrivateLocations(client),
     ]);
 
@@ -39,10 +40,11 @@ export const getPrivateLocations = async (
   }
 };
 
-const getNewPrivateLocations = async (client: SavedObjectsClientContract) => {
+const getNewPrivateLocations = async (client: SavedObjectsClientContract, spaceId?: string) => {
   const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
     type: privateLocationSavedObjectName,
     perPage: 1000,
+    ...(spaceId ? { namespaces: [spaceId] } : {}),
   });
 
   const results: Array<

@@ -21,8 +21,7 @@ import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { goToExecutionLogTab } from '../../../../tasks/rule_details';
 
-// Failing: See https://github.com/elastic/kibana/issues/229344
-describe.skip(
+describe(
   'bulk fill rule gaps',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
