@@ -19,7 +19,7 @@ import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 const createSearchPanelAction = {
   id: ADD_SEARCH_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
-  getDisplayName: () => 'Search example cc',
+  getDisplayName: () => 'Search example',
   getIconType: () => 'search',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return apiCanAddNewPanel(embeddable);
