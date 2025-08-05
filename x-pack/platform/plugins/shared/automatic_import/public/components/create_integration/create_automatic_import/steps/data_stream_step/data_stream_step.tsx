@@ -130,6 +130,15 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
     }, [setIntegrationValues, setInvalidFields, packageNames]);
 
     useEffect(() => {
+      if (!isValidName(integrationSettings?.title ?? '')) {
+        setInvalidFields((current) => ({ ...current, name: true }));
+        setName('');
+      } else {
+        setName(integrationSettings?.title ?? '');
+      }
+    }, [integrationSettings?.title]);
+
+    useEffect(() => {
       // Pre-populates the name from the title set in the previous step.
       // Only executed once when the packageNames are loaded
       if (packageNames != null && integrationSettings?.name == null && integrationSettings?.title) {
