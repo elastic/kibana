@@ -16,13 +16,13 @@ export function EmbeddableChangePointUserInput({
   coreStart,
   pluginStart,
   onConfirm,
-  closeFlyout,
+  onCancel,
   input,
 }: {
   coreStart: CoreStart;
   pluginStart: AiopsPluginStartDeps;
   onConfirm: (state: ChangePointEmbeddableState) => void;
-  closeFlyout: () => void;
+  onCancel: () => void;
   input?: ChangePointEmbeddableState;
 }) {
   return (
@@ -33,14 +33,7 @@ export function EmbeddableChangePointUserInput({
         ...pluginStart,
       }}
     >
-      <ChangePointChartInitializer
-        initialInput={input}
-        onCreate={(update) => {
-          onConfirm(update);
-          closeFlyout();
-        }}
-        onCancel={closeFlyout}
-      />
+      <ChangePointChartInitializer initialInput={input} onCreate={onConfirm} onCancel={onCancel} />
     </AiopsAppContext.Provider>
   );
 }

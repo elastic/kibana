@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import type { FunctionComponent } from 'react';
 import type { Plugin, PluggableList } from 'unified';
 // Remove after this issue is resolved: https://github.com/elastic/eui/issues/4688
@@ -26,3 +27,17 @@ export type TemporaryProcessingPluginsType = [
   ],
   ...PluggableList
 ];
+
+export interface MarkdownEditorRef {
+  textarea: HTMLTextAreaElement | null;
+  replaceNode: ContextShape['replaceNode'];
+  toolbar: HTMLDivElement | null;
+}
+
+export interface EditorBaseProps {
+  ariaLabel: string;
+  'data-test-subj': string;
+  editorId: string;
+  disabledUiPlugins?: string[];
+  errors?: Array<string | Error>;
+}

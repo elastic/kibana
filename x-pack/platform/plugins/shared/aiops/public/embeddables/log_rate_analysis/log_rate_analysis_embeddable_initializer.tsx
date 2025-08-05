@@ -141,7 +141,7 @@ export const LogRateAnalysisEmbeddableInitializer: FC<
         }}
       >
         <EuiTitle size="s" data-test-subj="inlineEditingFlyoutLabel">
-          <h2>
+          <h2 id="logRateAnalysisConfig">
             {isNewPanel
               ? i18n.translate('xpack.aiops.embeddableLogRateAnalysis.config.title.new', {
                   defaultMessage: 'Create log rate analysis',
