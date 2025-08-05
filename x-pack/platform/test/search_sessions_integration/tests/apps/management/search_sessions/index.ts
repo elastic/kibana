@@ -22,7 +22,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
         'x-pack/platform/test/fixtures/es_archives/dashboard/async_search'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_async/async_search'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
