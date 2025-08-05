@@ -18,7 +18,7 @@ import { Providers } from '../api_keys_management_app';
 
 /*
  * Note to engineers
- * we moved these 4 tests below to "x-pack/test/functional/apps/api_keys/home_page.ts":
+ * we moved these 4 tests below to "x-pack/platform/test/functional/apps/api_keys/home_page.ts":
  * 1-"creates API key when submitting form, redirects back and displays base64"
  * 2-"creates API key with optional expiration, redirects back and displays base64"
  * 3-"deletes multiple api keys using bulk select"
