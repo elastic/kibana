@@ -118,18 +118,6 @@ export class KibanaA2AAdapter {
       const { jsonRpcHandler } = await this.createA2AComponents(req, agentId);
       const result = await jsonRpcHandler.handle(req.body);
 
-      // Handle response (streaming or single)
-      if (Symbol.asyncIterator in result) {
-        const events = [];
-        for await (const event of result as AsyncGenerator<any>) {
-          events.push(event);
-        }
-        return res.ok({
-          headers: { 'Content-Type': 'application/json' },
-          body: events,
-        });
-      }
-
       return res.ok({
         headers: { 'Content-Type': 'application/json' },
         body: result,
