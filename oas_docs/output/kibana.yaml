@@ -55815,23 +55815,47 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            streams:
-                              items:
-                                type: string
-                              type: array
+                            all:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
                           required:
-                            - streams
+                            - all
                       required:
                         - objects
                     - additionalProperties: false
                       type: object
                       properties:
-                        all:
+                        objects:
                           additionalProperties: false
                           type: object
-                          properties: {}
+                          properties:
+                            queries:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                required:
+                                  - id
+                              type: array
+                            routing:
+                              items:
+                                allOf:
+                                  - {}
+                                  - type: object
+                                    properties:
+                                      destination:
+                                        type: string
+                                    required:
+                                      - destination
+                              type: array
+                          required:
+                            - queries
+                            - routing
                       required:
-                        - all
+                        - objects
                 name:
                   type: string
                 version:
@@ -56276,7 +56300,54 @@ paths:
       summary: Read the significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
+  /api/streams/{name}/significant_events/_generate:
+    get:
+      description: 'Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-significant-events-generate
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: connectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: currentDate
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: shortLookback
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: longLookback
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Generate significant events
+      tags:
+        - streams
+      x-state: Technical Preview; added in 9.2.0
   /api/streams/{name}/significant_events/_preview:
     post:
       description: 'Preview significant event results based on a given query<br/><br/>[Required authorization] Route required privileges: read_stream.'
@@ -56336,7 +56407,7 @@ paths:
       summary: Preview significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Technical Preview; added in 9.1.0
   /api/synthetics/monitor/test/{monitorId}:
     post:
       description: |

@@ -7,7 +7,11 @@
 
 import React, { useState } from 'react';
 import { Streams } from '@kbn/streams-schema';
-import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
+import {
+  ContentPackEntry,
+  ContentPackIncludedObjects,
+  ContentPackManifest,
+} from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,11 +28,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ContentPackObjectsList } from './content_pack_objects_list';
+import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
-import { ContentPackMetadata } from './content_pack_manifest';
+import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
-import { prepareIncludePayload } from './utils';
+import { hasSelectedObjects } from './helpers';
 
 export function ImportContentPackFlyout({
   definition,
@@ -48,9 +52,9 @@ export function ImportContentPackFlyout({
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
-  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
-    []
-  );
+  const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
+    objects: { all: {} },
+  });
   const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   return (
@@ -117,7 +121,7 @@ export function ImportContentPackFlyout({
             <ContentPackObjectsList
               definition={definition}
               objects={contentPackObjects}
-              onSelectionChange={setSelectedContentPackObjects}
+              onSelectionChange={setIncludedObjects}
             />
           </>
         ) : null}
@@ -126,13 +130,17 @@ export function ImportContentPackFlyout({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={() => onClose()}>
+              {i18n.translate('xpack.streams.importContentPackFlyout.cancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              disabled={!file}
+              isDisabled={!file || !hasSelectedObjects(includedObjects)}
               isLoading={isLoading}
               fill
               onClick={async () => {
@@ -145,7 +153,7 @@ export function ImportContentPackFlyout({
                     http,
                     file,
                     definition,
-                    include: prepareIncludePayload(contentPackObjects, selectedContentPackObjects),
+                    include: includedObjects,
                   });
 
                   setIsLoading(false);
