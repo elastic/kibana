@@ -32,7 +32,18 @@ if (!Object.hasOwn(global, 'TextEncoder')) {
 global.Blob = require('blob-polyfill').Blob;
 
 if (!Object.hasOwn(global, 'ResizeObserver')) {
-  global.ResizeObserver = require('resize-observer-polyfill');
+  global.ResizeObserver = class ResizeObserver {
+    constructor(callback) {
+      this.callback = callback;
+    }
+    observe(element) {
+      element.addEventListener('resize', this.callback);
+    }
+    unobserve(element) {
+      element.removeEventListener('resize', this.callback);
+    }
+    disconnect() {}
+  };
 }
 
 if (!Object.hasOwn(global, 'Worker')) {
