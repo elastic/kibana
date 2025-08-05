@@ -140,6 +140,12 @@ export const changeObjectAccessControl = async (
     securityExtension,
   } = params;
 
+  if (!securityExtension) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'Unable to proceed with changing access control without security extension.'
+    );
+  }
+
   validateChangeAccessControlParams({
     actionType,
     newOwnerProfileUid,
@@ -195,12 +201,10 @@ export const changeObjectAccessControl = async (
     _source: ['type', 'namespaces', 'accessControl'],
   }));
 
-  const bulkGetResponse = bulkGetDocs.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        { docs: bulkGetDocs },
-        { ignore: [404], meta: true }
-      )
-    : undefined;
+  const bulkGetResponse = await client.mget<SavedObjectsRawDocSource>(
+    { docs: bulkGetDocs },
+    { ignore: [404], meta: true }
+  );
 
   if (
     bulkGetResponse &&
@@ -215,7 +219,7 @@ export const changeObjectAccessControl = async (
   const authObjects = validObjects.map((element) => {
     const { type, id, esRequestIndex: index } = element.value;
 
-    const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+    const preflightResult = bulkGetResponse?.body.docs[index];
 
     return {
       type,
@@ -227,7 +231,7 @@ export const changeObjectAccessControl = async (
     };
   });
 
-  const authorizationResult = await securityExtension?.authorizeChangeAccessControl(
+  const authorizationResult = await securityExtension.authorizeChangeAccessControl(
     {
       namespace,
       objects: authObjects,
@@ -241,7 +245,7 @@ export const changeObjectAccessControl = async (
   const expectedBulkOperationResults: Array<
     Either<
       { id: string; type: string; error: any },
-      { id: string; type: string; esRequestIndex?: number }
+      { id: string; type: string; esRequestIndex: number }
     >
   > = expectedBulkGetResults.map((expectedBulkGetResult) => {
     if (isLeft(expectedBulkGetResult)) {
@@ -259,7 +263,7 @@ export const changeObjectAccessControl = async (
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       return left({ id, type, error });
     }
-    if (authorizationResult?.status === 'unauthorized') {
+    if (authorizationResult.status === 'unauthorized') {
       const error = SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(
           `User is not authorized to ${
