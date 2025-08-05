@@ -333,6 +333,7 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   return (
     <EuiPanel
       hasBorder
+      data-test-subj="streamsAppProcessorConfigurationListItem"
       css={css`
         border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};

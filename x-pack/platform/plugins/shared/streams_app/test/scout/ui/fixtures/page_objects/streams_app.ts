@@ -71,18 +71,18 @@ export class StreamsApp {
     await this.page.getByRole('button', { name: 'Remove' }).click();
   }
 
-  getDeleteModal() {
-    return this.page.getByRole('dialog');
+  getModal() {
+    return this.page.locator('[role="dialog"], [role="alertdialog"]');
   }
 
   async confirmDeleteInModal() {
-    await this.getDeleteModal().getByRole('button', { name: 'Delete' }).click();
-    await expect(this.getDeleteModal()).toBeHidden();
+    await this.getModal().getByRole('button', { name: 'Delete' }).click();
+    await expect(this.getModal()).toBeHidden();
   }
 
   async cancelDeleteInModal() {
-    await this.getDeleteModal().getByRole('button', { name: 'Cancel' }).click();
-    await expect(this.getDeleteModal()).toBeHidden();
+    await this.getModal().getByRole('button', { name: 'Cancel' }).click();
+    await expect(this.getModal()).toBeHidden();
   }
 
   // Condition editor utility methods
@@ -195,12 +195,23 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppStreamDetailEnrichmentAddProcessorButton').click();
   }
 
-  async clickCreateProcessor() {
+  async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
   }
 
   async clickCancelProcessorChanges() {
     await this.page.getByTestId('streamsAppProcessorConfigurationCancelButton').click();
+  }
+
+  async clickEditProcessor(pos: number) {
+    const processorEditButton = await this.getProcessorEditButton(pos);
+    await processorEditButton.click();
+  }
+
+  async getProcessorEditButton(pos: number) {
+    const processors = await this.getProcessorsListItems();
+    const targetProcessor = processors[pos];
+    return targetProcessor.getByRole('button', { name: 'Edit' });
   }
 
   async confirmDiscardInModal() {
@@ -221,10 +232,27 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async removeProcessor(pos: number) {
+    await this.clickEditProcessor(pos);
+    await this.page.getByRole('button', { name: 'Delete' }).click();
+  }
+
   async saveProcessorsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
     await expect(this.page.getByText("Stream's processors updated")).toBeVisible();
     await this.page.getByTestId('toastCloseButton').click();
+  }
+
+  async getProcessorsListItems() {
+    try {
+      await expect(this.page.getByRole('list', { name: 'Processors list' })).toBeVisible({
+        timeout: 5000,
+      });
+    } catch {
+      // If the list is not visible, it might be empty or not rendered yet
+      return [];
+    }
+    return this.page.getByTestId('streamsAppProcessorConfigurationListItem').all();
   }
 
   /**

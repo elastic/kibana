@@ -17,7 +17,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await apiServices.streams.enable();
     // Generate logs data only
     await logsSynthtraceEsClient.clean();
-    await generateLogsData(logsSynthtraceEsClient);
+    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs' });
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {

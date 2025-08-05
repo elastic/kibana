@@ -23,22 +23,24 @@ const getLogLevel = () => {
 /**
  * Generate synthetic logs data for testing
  */
-export async function generateLogsData(
+export function generateLogsData(
   logsSynthtraceEsClient: SynthtraceFixture['logsSynthtraceEsClient']
 ) {
-  const logsData = timerange(TEST_START_TIME, TEST_END_TIME)
-    .interval('1m')
-    .rate(10)
-    .generator((timestamp) =>
-      log
-        .createForIndex('logs')
-        .message('Test log message')
-        .timestamp(timestamp)
-        .logLevel(getLogLevel())
-        .defaults({
-          'service.name': 'test-service',
-        })
-    );
+  return async ({ index = 'logs' }) => {
+    const logsData = timerange(TEST_START_TIME, TEST_END_TIME)
+      .interval('1m')
+      .rate(10)
+      .generator((timestamp) =>
+        log
+          .createForIndex(index)
+          .message('Test log message')
+          .timestamp(timestamp)
+          .logLevel(getLogLevel())
+          .defaults({
+            'service.name': 'test-service',
+          })
+      );
 
-  await logsSynthtraceEsClient.index(logsData);
+    await logsSynthtraceEsClient.index(logsData);
+  };
 }

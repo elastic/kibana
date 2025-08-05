@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Condition } from '@kbn/streams-schema';
+import { Condition, ProcessorDefinition } from '@kbn/streams-schema';
 import { type Ingest, IngestStream } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
 import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
@@ -22,6 +22,12 @@ export interface StreamsApiService {
   updateStream: (streamName: string, updateBody: { ingest: Ingest }) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
   clearStreamProcessors: (streamName: string) => Promise<void>;
+  updateStreamProcessors: (
+    streamName: string,
+    getProcessors:
+      | ProcessorDefinition[]
+      | ((prevProcessors: ProcessorDefinition[]) => ProcessorDefinition[])
+  ) => Promise<void>;
 }
 
 export const getStreamsApiService = ({
@@ -111,6 +117,25 @@ export const getStreamsApiService = ({
           ingest: {
             ...definition.stream.ingest,
             processing: [],
+          },
+        });
+      });
+    },
+    updateStreamProcessors: async (
+      streamName: string,
+      getProcessors:
+        | ProcessorDefinition[]
+        | ((prevProcessors: ProcessorDefinition[]) => ProcessorDefinition[])
+    ) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        const processing = Array.isArray(getProcessors)
+          ? getProcessors
+          : getProcessors(definition.stream.ingest.processing);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing,
           },
         });
       });
