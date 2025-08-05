@@ -7,7 +7,7 @@
 
 import { monitoringCollectionSchema, type MonitoringCollectionConfig } from '@kbn/metrics-config';
 
-export { MonitoringCollectionConfig };
+export type { MonitoringCollectionConfig };
 
 export const configSchema = monitoringCollectionSchema;
 
