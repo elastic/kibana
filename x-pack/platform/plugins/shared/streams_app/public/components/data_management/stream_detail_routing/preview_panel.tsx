@@ -22,6 +22,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { PreviewMatches } from './preview_matches';
 import {
+  selectPreviewDocuments,
   useStreamSamplesSelector,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
@@ -44,7 +45,7 @@ export function PreviewPanel() {
 
   return (
     <>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="routingPreviewPanel">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexGroup component="span" gutterSize="s" alignItems="center">
             <EuiIcon type="inspect" />
@@ -117,18 +118,18 @@ const RuleCreationPanel = () => {
   const isUpdating =
     samplesSnapshot.matches('debouncingCondition') ||
     samplesSnapshot.matches({ fetching: { documents: 'loading' } });
-  const {
-    documents,
-    documentsError,
-    approximateMatchingPercentage,
-    approximateMatchingPercentageError,
-  } = samplesSnapshot.context;
-  const hasDocuments = !isEmpty(documents);
   const isLoadingDocumentCounts = samplesSnapshot.matches({
     fetching: { documentCounts: 'loading' },
   });
+  const { documentsError, approximateMatchingPercentage, approximateMatchingPercentageError } =
+    samplesSnapshot.context;
 
-  let content = null;
+  const documents = useStreamSamplesSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
+  const hasDocuments = !isEmpty(documents);
+
+  let content: React.ReactNode | null = null;
 
   if (isLoadingDocuments && !hasDocuments) {
     content = (
@@ -180,7 +181,7 @@ const RuleCreationPanel = () => {
     );
   } else if (hasDocuments) {
     content = (
-      <EuiFlexItem grow>
+      <EuiFlexItem grow data-test-subj="routingPreviewPanelWithResults">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <PreviewMatches

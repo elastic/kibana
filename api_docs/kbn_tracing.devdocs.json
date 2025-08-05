@@ -289,9 +289,13 @@
         "type": "Function",
         "tags": [],
         "label": "initTracing",
-        "description": [],
+        "description": [
+          "\nInitialize the OpenTelemetry tracing provider"
+        ],
         "signature": [
-          "({\n  tracingConfig,\n  apmConfig,\n}: { tracingConfig?: ",
+          "({\n  resource,\n  tracingConfig,\n}: { resource: ",
+          "Resource",
+          "; tracingConfig: ",
           {
             "pluginId": "@kbn/tracing-config",
             "scope": "common",
@@ -299,9 +303,7 @@
             "section": "def-common.TracingConfig",
             "text": "TracingConfig"
           },
-          " | undefined; apmConfig?: ",
-          "AgentConfigOptions",
-          " | undefined; }) => void"
+          "; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
         "deprecated": false,
@@ -312,12 +314,26 @@
             "id": "def-server.initTracing.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  tracingConfig,\n  apmConfig,\n}",
+            "label": "{\n  resource,\n  tracingConfig,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.initTracing.$1.resource",
+                "type": "Object",
+                "tags": [],
+                "label": "resource",
+                "description": [],
+                "signature": [
+                  "Resource"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
               {
                 "parentPluginId": "@kbn/tracing",
                 "id": "def-server.initTracing.$1.tracingConfig",
@@ -332,23 +348,7 @@
                     "docId": "kibKbnTracingConfigPluginApi",
                     "section": "def-common.TracingConfig",
                     "text": "TracingConfig"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/tracing",
-                "id": "def-server.initTracing.$1.apmConfig",
-                "type": "Object",
-                "tags": [],
-                "label": "apmConfig",
-                "description": [],
-                "signature": [
-                  "AgentConfigOptions",
-                  " | undefined"
+                  }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
                 "deprecated": false,
