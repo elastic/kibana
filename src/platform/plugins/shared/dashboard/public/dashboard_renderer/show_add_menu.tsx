@@ -136,9 +136,12 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           panel: 1,
         },
         {
-          name: i18n.translate('dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
-            defaultMessage: 'Add from library',
-          }),
+          name: i18n.translate(
+            'dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel',
+            {
+              defaultMessage: 'Add from library',
+            }
+          ),
           icon: 'folderOpen',
           onClick: () => {
             addFromLibrary(dashboardApi);
