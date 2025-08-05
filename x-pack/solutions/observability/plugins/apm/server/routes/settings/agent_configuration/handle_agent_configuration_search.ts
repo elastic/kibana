@@ -34,7 +34,7 @@ export async function handleAgentConfigurationSearch({
     return null;
   }
 
-  if (error && error.trim() !== '') {
+  if (error?.trim()) {
     await markError({
       id: configuration._id!,
       body: configuration._source,
