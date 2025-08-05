@@ -32,6 +32,7 @@ export interface ExternalServiceCredentials {
 
 export interface RunWorkflowParams {
   workflowId: string;
+  alerts?: any[];
   inputs?: Record<string, unknown>;
   [key: string]: unknown;
 }

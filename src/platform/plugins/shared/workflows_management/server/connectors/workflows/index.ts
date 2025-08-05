@@ -123,13 +123,13 @@ export async function executor(
   );
 
   if (!api[subAction]) {
-    const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+    const errorMessage = `[WorkflowsConnector][Action][ExternalService] Unsupported subAction type ${subAction}.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
 
   if (!supportedSubActions.includes(subAction)) {
-    const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
+    const errorMessage = `[WorkflowsConnector][Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
   }
@@ -170,6 +170,9 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           );
         }
 
+        // Extract only new alerts for workflow execution (similar to Cases pattern)
+        const workflowAlerts = [...alerts.new.data];
+
         // Merge alert context with user inputs
         const alertContext = {
           alerts: { new: alerts.new },
@@ -189,6 +192,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId,
+            alerts: workflowAlerts,
             inputs: { event: alertContext },
           },
         };
@@ -197,6 +201,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           subAction: 'run' as const,
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
+            alerts: [],
           },
         };
       }

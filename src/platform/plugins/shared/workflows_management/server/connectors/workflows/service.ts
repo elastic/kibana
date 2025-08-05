@@ -27,11 +27,11 @@ export type WorkflowsServiceFunction = (
 ) => Promise<string>;
 
 export const createExternalService = (
-  actionId: string,
-  { config, secrets }: ExternalServiceCredentials,
+  _actionId: string,
+  _config: ExternalServiceCredentials,
   logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  connectorUsageCollector: ConnectorUsageCollector,
+  _configurationUtilities: ActionsConfigurationUtilities,
+  _connectorUsageCollector: ConnectorUsageCollector,
   request: KibanaRequest,
   // This should be injected like getCasesClient in the cases connector
   runWorkflowService?: WorkflowsServiceFunction

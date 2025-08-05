@@ -30,6 +30,14 @@ export class WorkflowTemplatingEngine {
       return date;
     });
 
+    env.addFilter('json', function (value, spaces) {
+      if (value instanceof nunjucks.runtime.SafeString) {
+        value = value.toString();
+      }
+      const jsonString = JSON.stringify(value, null, spaces).replace(/</g, '\\u003c');
+      return new nunjucks.runtime.SafeString(jsonString);
+    });
+
     return env.renderString(template, context);
   }
 }

@@ -12,7 +12,20 @@ import type { ExternalServiceApiHandlerArgs, WorkflowsExecutorResultData } from 
 const run = async ({
   externalService,
   params,
+  logger,
 }: ExternalServiceApiHandlerArgs): Promise<WorkflowsExecutorResultData> => {
+  // Skip workflow execution if there are no alerts (similar to Cases pattern)
+  if (!params.alerts || params.alerts.length === 0) {
+    logger.debug(
+      `[WorkflowsConnector][run] No alerts. Skipping workflow execution for workflowId: ${params.workflowId}`
+    );
+
+    return {
+      workflowRunId: 'skipped-no-alerts',
+      status: 'skipped',
+    };
+  }
+
   const { workflowId, inputs } = params;
   const res = await externalService.runWorkflow({ workflowId, inputs });
   return { workflowRunId: res.workflowRunId, status: res.status };
