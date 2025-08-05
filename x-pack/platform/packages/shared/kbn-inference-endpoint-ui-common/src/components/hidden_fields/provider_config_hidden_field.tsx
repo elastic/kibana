@@ -12,13 +12,19 @@ import { ConfigEntryView } from '../../types/types';
 import { getNonEmptyValidator } from '../../utils/helpers';
 
 interface ProviderConfigHiddenFieldProps {
-  providerSchema: ConfigEntryView[];
-  setRequiredProviderFormFields: React.Dispatch<React.SetStateAction<ConfigEntryView[]>>;
+  requiredProviderFormFields: ConfigEntryView[];
+  setRequiredProviderFormFields: ({
+    settingsFormFields,
+    authFormFields,
+  }: {
+    settingsFormFields: ConfigEntryView[];
+    authFormFields: ConfigEntryView[];
+  }) => void;
   isSubmitting: boolean;
 }
 
 export const ProviderConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps> = ({
-  providerSchema,
+  requiredProviderFormFields,
   setRequiredProviderFormFields,
   isSubmitting,
 }) => (
@@ -29,7 +35,7 @@ export const ProviderConfigHiddenField: React.FC<ProviderConfigHiddenFieldProps>
       validations: [
         {
           validator: getNonEmptyValidator(
-            providerSchema,
+            requiredProviderFormFields,
             setRequiredProviderFormFields,
             isSubmitting
           ),

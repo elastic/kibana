@@ -22,11 +22,11 @@ import {
   EuiHorizontalRule,
   EuiInputPopover,
   EuiSpacer,
+  EuiTitle,
   keys,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
-
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
@@ -49,6 +49,7 @@ import {
   mapProviderFields,
 } from '../utils/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
+import { MoreOptionsFields } from './more_options_fields';
 import { AdditionalOptionsFields } from './additional_options_fields';
 import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidden_field';
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
@@ -95,12 +96,13 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   const [solutionFilter, setSolutionFilter] = useState<SolutionView | undefined>();
 
   const { updateFieldValues, setFieldValue, validateFields, isSubmitting } = useFormContext();
-  const [requiredProviderFormFields, setRequiredProviderFormFields] = useState<ConfigEntryView[]>(
-    []
-  );
   const [optionalProviderFormFields, setOptionalProviderFormFields] = useState<ConfigEntryView[]>(
     []
   );
+  const [providerSettingsFormFields, setProviderSettingsFormFields] = useState<ConfigEntryView[]>(
+    []
+  );
+  const [authenticationFormFields, setAuthenticationFormFields] = useState<ConfigEntryView[]>([]);
   const [{ config, secrets }] = useFormData<ConnectorFormSchema<Config, Secrets>>({
     watch: [
       'secrets.providerSecrets',
@@ -110,6 +112,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       'config.providerConfig',
     ],
   });
+
+  const updateFieldsForValidation = ({
+    settingsFormFields,
+    authFormFields,
+  }: {
+    settingsFormFields: ConfigEntryView[];
+    authFormFields: ConfigEntryView[];
+  }) => {
+    setProviderSettingsFormFields(settingsFormFields);
+    setAuthenticationFormFields(authFormFields);
+  };
 
   const toggleProviderPopover = useCallback(() => {
     setProviderPopoverOpen((isOpen) => !isOpen);
@@ -442,8 +455,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         })
       : [];
 
+    setProviderSettingsFormFields(existingConfiguration.filter((p) => p.required && !p.sensitive));
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
-    setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
+    setAuthenticationFormFields(existingConfiguration.filter((p) => p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
 
   const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
@@ -503,37 +517,79 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       </UseField>
       {config?.provider ? (
         <>
+          <EuiHorizontalRule margin="m" />
+          {/* SETTINGS */}
+          <EuiTitle size="xxs" data-test-subj="settings-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.inferenceEndpointUICommon.components.settingsLabel"
+                defaultMessage="Settings"
+              />
+            </h4>
+          </EuiTitle>
           <EuiSpacer size="m" />
           <ConfigurationFormItems
             isLoading={false}
             direction="column"
             descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
-            items={requiredProviderFormFields}
+            items={providerSettingsFormFields}
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
             isPreconfigured={isPreconfigured}
             isInternalProvider={isInternalProvider}
           />
-          <EuiSpacer size="m" />
-          <AdditionalOptionsFields
-            config={config}
+          <EuiSpacer size="s" />
+          <MoreOptionsFields
             optionalProviderFormFields={optionalProviderFormFields}
             onSetProviderConfigEntry={onSetProviderConfigEntry}
+            isEdit={isEdit}
+          />
+          <EuiHorizontalRule margin="m" />
+          {/* AUTHENTICATION */}
+          <EuiTitle size="xxs" data-test-subj="authentication-label">
+            <h4>
+              <FormattedMessage
+                id="xpack.inferenceEndpointUICommon.components.authenticationLabel"
+                defaultMessage="Authentication"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <ConfigurationFormItems
+            isLoading={false}
+            direction="column"
+            descriptionLinks={serviceProviderLinkComponents[config.provider as ServiceProviderKeys]}
+            items={authenticationFormFields}
+            setConfigEntry={onSetProviderConfigEntry}
+            isEdit={isEdit}
+            isPreconfigured={isPreconfigured}
+            isInternalProvider={isInternalProvider}
+          />
+          <EuiHorizontalRule margin="m" />
+          {/* ADDITIONAL OPTIONS */}
+          <AdditionalOptionsFields
+            config={config}
             onTaskTypeOptionsSelect={onTaskTypeOptionsSelect}
             taskTypeOptions={taskTypeOptions}
             selectedTaskType={selectedTaskType}
             isEdit={isEdit}
           />
-          <EuiSpacer size="m" />
-          <EuiHorizontalRule margin="xs" />
+          <EuiHorizontalRule margin="m" />
+          {/* HIDDEN VALIDATION */}
           <ProviderSecretHiddenField
-            providerSchema={providerSchema}
-            setRequiredProviderFormFields={setRequiredProviderFormFields}
+            requiredProviderFormFields={[
+              ...providerSettingsFormFields,
+              ...authenticationFormFields,
+            ]}
+            setRequiredProviderFormFields={updateFieldsForValidation}
             isSubmitting={isSubmitting}
           />
           <ProviderConfigHiddenField
-            providerSchema={providerSchema}
-            setRequiredProviderFormFields={setRequiredProviderFormFields}
+            requiredProviderFormFields={[
+              ...providerSettingsFormFields,
+              ...authenticationFormFields,
+            ]}
+            setRequiredProviderFormFields={updateFieldsForValidation}
             isSubmitting={isSubmitting}
           />
         </>

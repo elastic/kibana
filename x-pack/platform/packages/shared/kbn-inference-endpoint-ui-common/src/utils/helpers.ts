@@ -33,19 +33,26 @@ export const generateInferenceEndpointId = (config: Config) => {
 };
 
 export const getNonEmptyValidator = (
-  schema: ConfigEntryView[],
-  validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
+  requiredFieldsSchema: ConfigEntryView[],
+  validationEventHandler: ({
+    settingsFormFields,
+    authFormFields,
+  }: {
+    settingsFormFields: ConfigEntryView[];
+    authFormFields: ConfigEntryView[];
+  }) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const newSchema: ConfigEntryView[] = [];
+    const settingsFormFields: ConfigEntryView[] = [];
+    const authFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (schema) {
-      schema.map((field: ConfigEntryView) => {
+    if (requiredFieldsSchema) {
+      requiredFieldsSchema.map((field: ConfigEntryView) => {
         // validate if submitting or on field edit - value is not default to null
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular
@@ -63,10 +70,15 @@ export const getNonEmptyValidator = (
             }
           }
         }
-        newSchema.push(field);
+
+        if (field.sensitive) {
+          authFormFields.push(field);
+        } else {
+          settingsFormFields.push(field);
+        }
       });
 
-      validationEventHandler(newSchema);
+      validationEventHandler({ settingsFormFields, authFormFields });
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',

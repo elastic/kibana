@@ -7,7 +7,7 @@
 
 import React, { memo, Suspense } from 'react';
 
-import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
+import { EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
@@ -38,16 +38,6 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
       <ConnectorFormFieldsGlobal canSave={canSave} />
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
-        <>
-          <EuiTitle size="xxs" data-test-subj="connector-settings-label">
-            <h4>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"
-                defaultMessage="Connector settings"
-              />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
           <EuiErrorBoundary>
             <Suspense
               fallback={
@@ -65,8 +55,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
                 registerPreSubmitValidator={registerPreSubmitValidator}
               />
             </Suspense>
-          </EuiErrorBoundary>
-        </>
+          </EuiErrorBoundary> 
       ) : null}
     </>
   );
