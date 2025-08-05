@@ -26,8 +26,16 @@ export const createEngineStatusService = (
   });
 
   const get = async () => {
-    const engineDescriptor = await descriptorClient.get();
+    const findResponse = await descriptorClient.find();
+    const engineDescriptor =
+      findResponse.total > 0 ? findResponse.saved_objects[0].attributes : undefined;
 
+    if (!engineDescriptor) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
     return {
       status: engineDescriptor.status,
       error: engineDescriptor.error,
@@ -99,10 +107,9 @@ export const createEngineStatusService = (
     }
 
     const engineStatus = await get();
-
     if (engineStatus.status !== PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
       throw new Error(
-        `The Privileged Monitoring Engine must be enable to schedule a run. Current status: ${engineStatus.status}`
+        `The Privileged Monitoring Engine must be enabled to schedule a run. Current status: ${engineStatus.status}`
       );
     }
 

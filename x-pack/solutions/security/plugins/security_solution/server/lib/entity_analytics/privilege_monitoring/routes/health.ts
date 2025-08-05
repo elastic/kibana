@@ -59,12 +59,6 @@ export const healthCheckPrivilegeMonitoringRoute = (
         } catch (e) {
           const error = transformError(e);
 
-          if (error?.statusCode === 404) {
-            return response.ok({
-              body: { status: 'not_found' },
-            });
-          }
-
           logger.error(`Error checking privilege monitoring health: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
