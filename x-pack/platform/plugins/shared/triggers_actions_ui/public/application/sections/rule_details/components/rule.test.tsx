@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { Suspense } from 'react';
-import { render, waitFor, screen, act } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -641,7 +641,7 @@ describe('tabbed content', () => {
 
     // Click on event log tab
     const eventLogTab = screen.getByRole('tab', { name: /history/i });
-    await userEvent.click(eventLogTab)
+    await userEvent.click(eventLogTab);
 
     // Wait for the event log content to load (it's lazy-loaded)
     await waitFor(
@@ -653,7 +653,7 @@ describe('tabbed content', () => {
 
     // Click on alert list tab
     const alertListTab = screen.getByRole('tab', { name: /alerts/i });
-    await userEvent.click(alertListTab)
+    await userEvent.click(alertListTab);
 
     await waitFor(() => {
       expect(alertListTab).toHaveAttribute('aria-selected', 'true');
