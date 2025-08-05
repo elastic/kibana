@@ -134,4 +134,13 @@ describe('COMPLETION Autocomplete', () => {
       ['| ']
     );
   });
+
+  it('suggests pipe after incomplete but enclosed map expression', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" }`, [
+      '| ',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" } `, [
+      '| ',
+    ]);
+  });
 });

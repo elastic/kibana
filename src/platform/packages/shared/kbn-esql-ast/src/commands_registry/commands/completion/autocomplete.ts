@@ -60,7 +60,7 @@ function getPosition(
     return CompletionPosition.WITHIN_MAP_EXPRESSION;
   }
 
-  if (!inferenceId.incomplete) {
+  if (/WITH\s*{.*}\s*$/i.test(query)) {
     return CompletionPosition.AFTER_COMMAND;
   }
 
