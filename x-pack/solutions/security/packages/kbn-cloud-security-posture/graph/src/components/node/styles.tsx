@@ -37,6 +37,13 @@ export const NODE_WIDTH = 100;
 export const NODE_HEIGHT = 100;
 
 /**
+ * The height of a node details group in the graph, in pixels.
+ * Required to calculate total node's height in layout_graph.ts
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_DETAILS_HEIGHT = 100;
+
+/**
  * The width of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
@@ -47,26 +54,6 @@ export const NODE_LABEL_WIDTH = 140;
  * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_LABEL_HEIGHT = 20;
-
-/**
- * Required to calculate node's height in graph layout
- */
-export const NODE_TAG_HEIGHT = 10;
-
-/**
- * Required to calculate node's height in graph layout
- */
-export const NODE_IPS_HEIGHT = 10;
-
-/**
- * Required to calculate node's height in graph layout
- */
-export const NODE_COUNTRY_FLAGS_HEIGHT = 10;
-
-/**
- * Required to calculate node's height in graph layout
- */
-export const NODE_DETAILS_GAP = 8;
 
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;

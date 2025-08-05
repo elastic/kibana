@@ -37,10 +37,6 @@ export const NodeDetails = ({ count, tag, label, ips, countryCodes }: NodeDetail
       direction="column"
       gutterSize={shouldRenderTop && shouldRenderBottom ? 's' : 'none'}
       css={css`
-        position: absolute;
-        left: 50%;
-        top: 100%;
-        transform: translateX(-50%);
         white-space: nowrap;
       `}
     >
