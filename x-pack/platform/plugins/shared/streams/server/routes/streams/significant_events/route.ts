@@ -27,6 +27,7 @@ import { SecurityError } from '../../../lib/streams/errors/security_error';
 import type { StreamsServer } from '../../../types';
 import { createServerRoute } from '../../create_server_route';
 import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { generateUsingZeroShot } from '../../../lib/significant_events/zero_shot';
 
 async function assertLicenseAndPricingTier(
   server: StreamsServer,
@@ -196,6 +197,7 @@ const generateSignificantEventsRoute = createServerRoute({
       currentDate: dateFromString.optional(),
       shortLookback: durationSchema.optional(),
       longLookback: durationSchema.optional(),
+      method: z.union([z.literal('zero_shot'), z.literal('log_patterns')]).default('zero_shot'),
     }),
   }),
   options: {
@@ -228,8 +230,13 @@ const generateSignificantEventsRoute = createServerRoute({
       throw badRequest('Streams are not enabled');
     }
 
+    const selectedAlgorithmFn =
+      params.query.method === 'log_patterns'
+        ? generateSignificantEventDefinitions
+        : generateUsingZeroShot;
+
     return fromRxjs(
-      generateSignificantEventDefinitions(
+      selectedAlgorithmFn(
         {
           name: params.path.name,
           connectorId: params.query.connectorId,
