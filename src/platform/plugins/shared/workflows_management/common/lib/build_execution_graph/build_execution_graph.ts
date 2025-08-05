@@ -30,6 +30,10 @@ function getNodeId(node: BaseStep): string {
 
 function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
   const currentStepId = getNodeId(currentStep);
+  // Each step must have a unique id in the graph.
+  // If the step does not have an id, we generate one based on its name.
+  // We need to improve it in the future
+  currentStep.id = currentStepId; // Ensure the step has an id for consistency.
 
   if (currentStep.type === 'if') {
     return visitIfStep(graph, previousStep, currentStep);
