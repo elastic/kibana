@@ -86,13 +86,13 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     primaryAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.valueTextAlign.help', {
+      help: i18n.translate('expressionMetricVis.function.primaryAlign.help', {
         defaultMessage: 'The alignment of the Primary Metric.',
       }),
     },
     secondaryAlign: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.extraTextAlign.help', {
+      help: i18n.translate('expressionMetricVis.function.secondaryAlign.help', {
         defaultMessage: 'The alignment of the Secondary Metric.',
       }),
     },
@@ -111,7 +111,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The primary position.',
+        defaultMessage: 'The postion of the Primary Metric.',
       }),
     },
     titleWeight: {
@@ -191,8 +191,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     },
     secondaryValuePosition: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
-        defaultMessage: 'Specifies the secondary label value position',
+      help: i18n.translate('expressionMetricVis.function.secondaryValuePosition.help', {
+        defaultMessage:
+          'Specifies the position of the secondary metric value relative to its label (before or after)',
       }),
       required: false,
     },
