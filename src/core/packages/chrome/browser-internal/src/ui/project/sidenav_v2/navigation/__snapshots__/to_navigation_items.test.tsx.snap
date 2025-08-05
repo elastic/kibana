@@ -20,7 +20,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav_footer.node-2.stack_management nav-item-id-stack_management",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "gear",
     "id": "stack_management",
     "label": "Stack Management",
@@ -298,7 +298,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-2.securityGroup:rules nav-item-id-securityGroup:rules",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "securitySignal",
     "id": "securityGroup:rules",
     "label": "Rules",
@@ -386,7 +386,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:explore nav-item-id-securityGroup:explore",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "search",
     "id": "securityGroup:explore",
     "label": "Explore",
@@ -425,7 +425,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-3.securityGroup:investigations nav-item-id-securityGroup:investigations",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "casesApp",
     "id": "securityGroup:investigations",
     "label": "Investigations",
@@ -472,7 +472,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.node-4.securityGroup:assets nav-item-id-securityGroup:assets",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "indexManagementApp",
     "id": "securityGroup:assets",
     "label": "Assets",
@@ -583,7 +583,7 @@ Array [
   },
   Object {
     "data-test-subj": "nav-item nav-item-security_solution_nav.securityGroup:machineLearning nav-item-id-securityGroup:machineLearning",
-    "href": "",
+    "href": "missing-href-😭",
     "iconType": "machineLearningApp",
     "id": "securityGroup:machineLearning",
     "label": "Machine Learning",
