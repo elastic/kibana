@@ -9,18 +9,20 @@
 
 import React, { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import ReactDOM from 'react-dom';
+
+import { EuiContextMenu, EuiWrappingPopover } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DefaultControlApi } from '@kbn/controls-plugin/public';
 import { ESQLVariableType, EsqlControlType, apiPublishesESQLVariables } from '@kbn/esql-types';
-import { addFromLibrary } from './add_panel_from_library';
-import { DashboardApi } from '../dashboard_api/types';
+import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+
 import { executeAddLensPanelAction } from '../dashboard_actions/execute_add_lens_panel_action';
-import { AddPanelFlyout } from '../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout';
+import { DashboardApi } from '../dashboard_api/types';
 import {
   getAddControlButtonTitle,
   getControlButtonTitle,
@@ -28,9 +30,9 @@ import {
   getAddTimeSliderControlButtonTitle,
   getCreateVisualizationButtonTitle,
 } from '../dashboard_app/_dashboard_app_strings';
+import { AddPanelFlyout } from '../dashboard_app/top_nav/add_panel_button/components/add_panel_flyout';
 import { uiActionsService } from '../services/kibana_services';
-import { i18n } from '@kbn/i18n';
-import { ControlState } from '@kbn/controls-schemas';
+import { addFromLibrary } from './add_panel_from_library';
 
 interface AddMenuProps {
   dashboardApi: DashboardApi;
@@ -134,7 +136,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
           panel: 1,
         },
         {
-          name: i18n.translate('sharedUXPackages.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
+          name: i18n.translate('dashboard.buttonToolbar.buttons.addFromLibrary.libraryButtonLabel', {
             defaultMessage: 'Add from library',
           }),
           icon: 'folderOpen',
@@ -190,7 +192,7 @@ const AddMenu = ({ dashboardApi, anchorElement, coreServices }: AddMenuProps) =>
                 variableType: ESQLVariableType.VALUES,
                 controlType: EsqlControlType.VALUES_FROM_QUERY,
                 esqlVariables: variablesInParent,
-                onSaveControl: (controlState: ControlState) => {
+                onSaveControl: (controlState: DefaultControlApi) => {
                   controlGroupApi?.addNewPanel({
                     panelType: 'esqlControl',
                     serializedState: {
