@@ -51,7 +51,7 @@ export const LeafPrinter = {
     if (isKeyword || isQuotationNeeded) {
       // Escape backticks "`" with double backticks "``".
       const escaped = name.replace(/`/g, '``');
-      
+
       return '`' + escaped + '`';
     } else {
       return name;

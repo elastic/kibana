@@ -12,13 +12,7 @@ import { Token } from 'antlr4';
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
 
-export const SOURCE_COMMANDS = new Set<string>([
-  'FROM',
-  'ROW',
-  'SHOW',
-  'TS',
-  'EXPLAIN',
-]);
+export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
 
 export const PROCESSING_COMMANDS = new Set<string>([
   'EVAL',
@@ -45,10 +39,7 @@ export const PROCESSING_COMMANDS = new Set<string>([
   'FUSE',
 ]);
 
-export const COMMANDS = new Set<string>([
-  ...SOURCE_COMMANDS,
-  ...PROCESSING_COMMANDS,
-]);
+export const COMMANDS = new Set<string>([...SOURCE_COMMANDS, ...PROCESSING_COMMANDS]);
 
 export const KEYWORDS = new Set<string>([
   ...COMMANDS,
