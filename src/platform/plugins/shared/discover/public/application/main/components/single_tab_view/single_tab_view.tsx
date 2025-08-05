@@ -81,7 +81,7 @@ export const SingleTabView = ({
     runtimeStateManager,
     (tab) => tab.customizationService$
   );
-  const initializeTabAction = useCurrentTabAction(internalStateActions.initializeSingleTab);
+  const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
@@ -98,7 +98,7 @@ export const SingleTabView = ({
       });
 
       return dispatch(
-        initializeTabAction({
+        initializeSingleTab({
           initializeSingleTabParams: {
             stateContainer,
             customizationService,
