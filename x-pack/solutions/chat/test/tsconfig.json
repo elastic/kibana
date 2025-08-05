@@ -19,13 +19,6 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/test",
-    "@kbn/expect",
-    "@kbn/scout-info",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/test-suites-src",
-    "@kbn/ftr-common-functional-ui-services",
-    "@kbn/config-schema",
-    "@kbn/test-subj-selector",
-    "@kbn/dev-utils",
+    "@kbn/test-suites-xpack-platform",
   ]
 }
