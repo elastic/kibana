@@ -47,4 +47,10 @@ describe('column shorthand', () => {
 
     expect(query1 + '').toBe('FROM index | WHERE my_column.`❤️` >= 0.1');
   });
+
+  test('converts JavaScript strings to ESQL string literals', () => {
+    const query1 = query`ROW a = ${'b'}`;
+
+    expect(query1 + '').toBe('ROW a = "b"');
+  });
 });

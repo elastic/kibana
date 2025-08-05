@@ -41,6 +41,11 @@ const isColumnShorthand = (hole: unknown): hole is SynthColumnShorthand => {
  */
 export const holeToFragment = (hole: SynthTemplateHole): string => {
   switch (typeof hole) {
+    case 'string': {
+      const node = Builder.expression.literal.string(hole);
+
+      return LeafPrinter.string(node);
+    }
     case 'number': {
       const isInteger = Math.round(hole) === hole;
       const node = isInteger
