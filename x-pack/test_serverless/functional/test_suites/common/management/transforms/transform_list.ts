@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
 
       // For this test to work, make sure there are no pre-existing transform present.

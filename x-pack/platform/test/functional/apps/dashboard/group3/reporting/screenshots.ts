@@ -24,7 +24,8 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const png = getService('png');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
 
   const loadEcommerce = async () => {
     await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
@@ -275,7 +276,7 @@ export default function ({
 
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_76.json'
         );
 
         await dashboard.navigateToApp();
@@ -300,7 +301,7 @@ export default function ({
       after(async () => {
         await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_76.json'
         );
       });
 
