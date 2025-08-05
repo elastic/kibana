@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
@@ -18,10 +17,10 @@ import { LayoutView } from './layout_view';
 
 export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
+    useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
-  const config = usePluginConfig();
 
   const {
     loading,
@@ -38,7 +37,7 @@ export const SnapshotContainer = React.memo(() => {
       currentTime,
       accountId,
       region,
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
+      schema: preferredSchema ?? DataSchemaFormat.ECS,
     },
     { sendRequestImmediately: true }
   );

@@ -33,8 +33,10 @@ export const ToolbarWrapper = (props: Props) => {
     region,
     legend,
     sort,
+    preferredSchema,
     customMetrics,
     changeCustomMetrics,
+    changePreferredSchema,
   } = useWaffleOptionsContext();
   return (
     <EuiFlexGroup responsive={false} wrap gutterSize="m">
@@ -59,6 +61,8 @@ export const ToolbarWrapper = (props: Props) => {
         legend,
         customMetrics,
         changeCustomMetrics,
+        changePreferredSchema,
+        preferredSchema,
       })}
     </EuiFlexGroup>
   );

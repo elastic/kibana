@@ -6,10 +6,13 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
+import { SchemaSelector } from '../../../../../components/schema_selector';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
@@ -21,12 +24,33 @@ interface Props extends ToolbarProps {
   groupByFields: string[];
 }
 
-export const MetricsAndGroupByToolbarItems = (props: Props) => {
+export const MetricsAndGroupByToolbarItems = ({
+  preferredSchema,
+  changePreferredSchema,
+  ...props
+}: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
 
+  const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+  const schemas: DataSchemaFormat[] = useMemo(
+    () => timeRangeMetadata?.schemas || [],
+    [timeRangeMetadata]
+  );
+
+  useEffect(() => {
+    const current = preferredSchema;
+    if (current === null) {
+      const next = schemas.includes(DataSchemaFormat.SEMCONV)
+        ? DataSchemaFormat.SEMCONV
+        : schemas[0];
+      changePreferredSchema(next);
+    }
+  }, [changePreferredSchema, preferredSchema, schemas]);
+
   const { value: aggregations } = useAsync(
-    () => inventoryModel.metrics.getAggregations(),
-    [inventoryModel]
+    () =>
+      inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? DataSchemaFormat.ECS }),
+    [inventoryModel.metrics, preferredSchema]
   );
 
   const metricOptions = useMemo(
@@ -63,9 +87,21 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
           customOptions={props.customOptions}
         />
       </EuiFlexItem>
+
       {props.view === 'map' && (
         <EuiFlexItem grow={false}>
           <WaffleSortControls sort={props.sort} onChange={props.changeSort} />
+        </EuiFlexItem>
+      )}
+
+      {schemas.length > 0 && (
+        <EuiFlexItem>
+          <SchemaSelector
+            value={preferredSchema ?? DataSchemaFormat.ECS}
+            schemas={schemas}
+            isLoading={loading ?? false}
+            onChange={changePreferredSchema}
+          />
         </EuiFlexItem>
       )}
     </>

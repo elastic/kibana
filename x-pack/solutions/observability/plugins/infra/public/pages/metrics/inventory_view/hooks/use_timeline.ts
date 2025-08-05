@@ -13,6 +13,7 @@ import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_i
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import type { UseSnapshotRequest } from './use_snaphot';
 import { useSnapshot } from './use_snaphot';
+import { useWaffleOptionsContext } from './use_waffle_options';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -60,6 +61,7 @@ export function useTimeline({
   interval?: string;
   shouldReload: boolean;
 }) {
+  const { preferredSchema } = useWaffleOptionsContext();
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
   const config = usePluginConfig();
   const timeLengthResult = useMemo(
@@ -89,7 +91,7 @@ export function useTimeline({
       accountId,
       region,
       includeTimeseries: true,
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined,
+      schema: preferredSchema ?? DataSchemaFormat.ECS,
     },
     { sendRequestImmediately: false }
   );

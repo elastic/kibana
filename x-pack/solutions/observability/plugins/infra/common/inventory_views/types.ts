@@ -7,7 +7,7 @@
 
 import { isoToEpochRt, nonEmptyStringRt, inRangeRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import {
   SnapshotCustomMetricInputRT,
   SnapshotGroupByRT,
@@ -65,7 +65,16 @@ export const inventoryOptionsStateRT = rt.intersection([
     sort: inventorySortOptionRT,
     view: inventoryViewOptionsRT,
   }),
-  rt.partial({ legend: inventoryLegendOptionsRT, source: rt.string, timelineOpen: rt.boolean }),
+  rt.partial({
+    legend: inventoryLegendOptionsRT,
+    source: rt.string,
+    timelineOpen: rt.boolean,
+    preferredSchema: rt.union([
+      rt.literal(DataSchemaFormat.ECS),
+      rt.literal(DataSchemaFormat.SEMCONV),
+      rt.null,
+    ]),
+  }),
 ]);
 
 export const inventoryViewBasicAttributesRT = rt.type({

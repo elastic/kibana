@@ -13,7 +13,6 @@ import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-ac
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -36,10 +35,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   // prevents auto-refresh from cancelling ongoing requests to fetch the data for the tooltip
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
-  const { customMetrics } = useWaffleOptionsContext();
-  const config = usePluginConfig();
+  const { customMetrics, preferredSchema } = useWaffleOptionsContext();
 
-  const schema = config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined;
+  const schema = preferredSchema ?? DataSchemaFormat.ECS;
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
