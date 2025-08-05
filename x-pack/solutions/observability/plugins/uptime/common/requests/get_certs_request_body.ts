@@ -93,8 +93,8 @@ export const getCertsRequestBody = ({
             },
           },
           getRangeFilter({
-            from: 'now-7d/d',
-            to: 'now/d',
+            from: 'now-7d',
+            to: 'now',
           }),
           {
             range: {

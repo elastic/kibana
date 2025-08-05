@@ -206,8 +206,8 @@ describe('getCerts', () => {
                   Object {
                     "range": Object {
                       "@timestamp": Object {
-                        "gte": "now-7d/d",
-                        "lte": "now/d",
+                        "gte": "now-7d",
+                        "lte": "now",
                       },
                     },
                   },
