@@ -7,19 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { LinksState, StoredLinksState } from '../../server';
 
-export type {
-  DashboardLink,
-  ExternalLink,
-  Link,
-  LinkOptions,
-  LinksState,
-  StoredDashboardLink,
-  StoredLinksState,
-} from './content_management';
+export interface LinksByReferenceState {
+  savedObjectId: string;
+}
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { LinksServerPlugin } = await import('./plugin');
-  return new LinksServerPlugin(initContext);
-};
+export type LinksByValueState = Pick<LinksState, 'layout' | 'links'>;
+
+export type LinksEmbeddableState = SerializedTitles & (LinksByValueState | LinksByReferenceState);
+
+export type StoredLinksEmbeddableState = SerializedTitles & StoredLinksState;
