@@ -17,7 +17,13 @@ import type { TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
 
-export const fromSavedObjectTabToTabState = (tab: DiscoverSessionTab): TabState => ({
+export const fromSavedObjectTabToTabState = ({
+  tab,
+  fallbackGlobalState,
+}: {
+  tab: DiscoverSessionTab;
+  fallbackGlobalState?: TabState['globalState'];
+}): TabState => ({
   ...DEFAULT_TAB_STATE,
   id: tab.id,
   label: tab.label,
@@ -45,8 +51,8 @@ export const fromSavedObjectTabToTabState = (tab: DiscoverSessionTab): TabState 
     density: tab.density,
   },
   globalState: {
-    timeRange: tab.timeRestore ? tab.timeRange : undefined,
-    refreshInterval: tab.timeRange ? tab.refreshInterval : undefined,
+    timeRange: tab.timeRestore ? tab.timeRange : fallbackGlobalState?.timeRange,
+    refreshInterval: tab.timeRange ? tab.refreshInterval : fallbackGlobalState?.refreshInterval,
   },
 });
 
