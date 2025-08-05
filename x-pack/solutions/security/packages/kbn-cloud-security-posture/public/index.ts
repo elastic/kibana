@@ -13,6 +13,7 @@ export {
   GCP_ORGANIZATION_ACCOUNT,
   GCP_SINGLE_ACCOUNT,
 } from './src/components/fleet_extensions/constants';
+export type { CloudSetupConfig } from './src/components/fleet_extensions/types';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
