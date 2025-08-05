@@ -10,10 +10,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrConfigProviderContext } from '@kbn/test';
 import {
-  ENDPOINT,
-  SECURITY_DETECTION_ENGINE,
-  createPrebuiltRulesPackage,
-} from '../../../../../utils';
+  ENDPOINT_PACKAGE_NAME,
+  PREBUILT_RULES_PACKAGE_NAME,
+} from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { createPrebuiltRulesPackage } from '../../../../../utils';
 
 const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_fleet_packages/${uuidv4()}`;
 
@@ -92,12 +92,12 @@ export const PREBUILT_RULE_ASSET_B: PrebuiltRuleAsset = {
 
 function setUpBundledPackages(): void {
   const MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES = createPrebuiltRulesPackage({
-    packageName: SECURITY_DETECTION_ENGINE,
+    packageName: PREBUILT_RULES_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,
     prebuiltRuleAssets: [PREBUILT_RULE_ASSET_A, PREBUILT_RULE_ASSET_B],
   });
   const MOCK_BETA_PREBUILT_RULES_PKG = createPrebuiltRulesPackage({
-    packageName: SECURITY_DETECTION_ENGINE,
+    packageName: PREBUILT_RULES_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,
     prebuiltRuleAssets: [
       {
@@ -113,16 +113,18 @@ function setUpBundledPackages(): void {
     ],
   });
   const MOCK_ENDPOINT_PKG = createPrebuiltRulesPackage({
-    packageName: ENDPOINT,
+    packageName: ENDPOINT_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,
     prebuiltRuleAssets: [],
   });
 
   MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${SECURITY_DETECTION_ENGINE}-${MOCK_PKG_VERSION}.zip`
+    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
   );
   MOCK_BETA_PREBUILT_RULES_PKG.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${SECURITY_DETECTION_ENGINE}-${MOCK_BETA_PKG_VERSION}.zip`
+    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_BETA_PKG_VERSION}.zip`
   );
-  MOCK_ENDPOINT_PKG.writeZip(`${BUNDLED_PACKAGE_DIR}/${ENDPOINT}-${MOCK_PKG_VERSION}.zip`);
+  MOCK_ENDPOINT_PKG.writeZip(
+    `${BUNDLED_PACKAGE_DIR}/${ENDPOINT_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
+  );
 }

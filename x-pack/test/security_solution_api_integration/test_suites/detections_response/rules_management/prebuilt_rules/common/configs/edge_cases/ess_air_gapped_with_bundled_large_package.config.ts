@@ -9,7 +9,8 @@ import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { SECURITY_DETECTION_ENGINE, createPrebuiltRulesPackage } from '../../../../../utils';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
+import { createPrebuiltRulesPackage } from '../../../../../utils';
 
 const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_large_fleet_prebuilt_rules_package/${uuidv4()}`;
 
@@ -109,12 +110,12 @@ function setUpLargePrebuiltRulesBundledPackage(): void {
   }
 
   const MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES = createPrebuiltRulesPackage({
-    packageName: SECURITY_DETECTION_ENGINE,
+    packageName: PREBUILT_RULES_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,
     prebuiltRuleAssets,
   });
 
   MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${SECURITY_DETECTION_ENGINE}-${MOCK_PKG_VERSION}.zip`
+    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
   );
 }

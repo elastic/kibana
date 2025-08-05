@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -15,7 +16,6 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   installFleetPackage,
-  SECURITY_DETECTION_ENGINE,
 } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 import {
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // Install package without specifying version to check if latest stable version is installed
       const fleetPackageInstallationResponse = await installFleetPackage({
         getService,
-        packageName: SECURITY_DETECTION_ENGINE,
+        packageName: PREBUILT_RULES_PACKAGE_NAME,
       });
 
       expect(fleetPackageInstallationResponse.items.length).toBe(2);

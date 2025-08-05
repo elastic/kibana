@@ -12,9 +12,9 @@ import { EPM_API_ROUTES, epmRouteService } from '@kbn/fleet-plugin/common';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
 import expect from 'expect';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';
 import { createPrebuiltRulesPackage } from './create_prebuilt_rules_package';
-import { SECURITY_DETECTION_ENGINE } from './known_fleet_package_names';
 
 const MAX_RETRIES = 2;
 const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts (1 + MAX_RETRIES)
@@ -142,7 +142,7 @@ export const installMockPrebuiltRulesPackage = async ({
   log.info('Installing mock prebuilt rules package...');
 
   const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-    packageName: SECURITY_DETECTION_ENGINE,
+    packageName: PREBUILT_RULES_PACKAGE_NAME,
     // Use a high version to avoid conflicts with real packages
     // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
     packageSemver: '1000.0.0',

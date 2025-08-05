@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
@@ -13,7 +14,6 @@ import {
   createPrebuiltRulesPackage,
   installFleetPackageByUpload,
   deletePrebuiltRulesFleetPackage,
-  SECURITY_DETECTION_ENGINE,
 } from '../../../../utils';
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
         'installSecurityDetectionEnginePackage',
         async () => {
           const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
-            packageName: SECURITY_DETECTION_ENGINE,
+            packageName: PREBUILT_RULES_PACKAGE_NAME,
             // Use a high version to avoid conflicts with real packages
             // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
             packageSemver: '99.0.0',
