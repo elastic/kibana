@@ -31,6 +31,7 @@ import {
   getOnlyConnectorsFilter,
   getReferencesAggregationQuery,
   getSolutionValues,
+  getTotalWithAlerts,
   getUniqueAlertCommentsCountQuery,
   processWithAlertsByOwner,
 } from './utils';
@@ -1552,6 +1553,30 @@ describe('utils', () => {
         observability: 5,
         cases: 10,
       });
+    });
+  });
+  describe('getTotalWithAlerts', () => {
+    it('returns the total number of cases with alerts across solutions', () => {
+      const withAlertsByOwnerResults: AlertsTelemetryAggregationsByOwnerResults = {
+        by_owner: {
+          buckets: [
+            {
+              key: 'cases',
+              doc_count: 10,
+            },
+            {
+              key: 'observability',
+              doc_count: 5,
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 20,
+            },
+          ],
+        },
+      };
+
+      expect(getTotalWithAlerts(withAlertsByOwnerResults)).toEqual(35);
     });
   });
 });

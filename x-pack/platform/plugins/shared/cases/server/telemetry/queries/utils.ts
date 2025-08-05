@@ -499,8 +499,8 @@ const emptyFileAttachment = (): FileAttachmentStats => ({
 export const getTotalWithAlerts = (
   aggregations?: AlertsTelemetryAggregationsByOwnerResults
 ): number => {
-  return (
-    aggregations?.by_owner?.buckets.reduce((sum, item) => sum + Object.values(item)[0].value, 0) ||
+  return (aggregations?.by_owner?.buckets || []).reduce(
+    (sum, item) => sum + (item.doc_count || 0),
     0
   );
 };
@@ -515,7 +515,7 @@ export const processWithAlertsByOwner = (
   };
 
   if (aggregations) {
-    aggregations.by_owner.buckets.forEach((item) => {
+    aggregations.by_owner?.buckets.forEach((item) => {
       result[item.key as Owner] = item.doc_count;
     });
   }

@@ -36,7 +36,6 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
   getTotalWithAlerts,
-  processWithAlertsByOwner,
 } from './utils';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedStatus } from '../../common/types/case';
@@ -93,7 +92,6 @@ export const getCasesTelemetryData = async ({
       totalCasesForOwner: casesRes.total,
       filesAggregations: filesRes.aggregations,
     });
-    const withAlertsByOwner = processWithAlertsByOwner(totalAlertsRes.aggregations);
 
     return {
       all: {
