@@ -17,6 +17,7 @@ import {
   useGeneratedHtmlId,
   EuiIcon,
 } from '@elastic/eui';
+import { ShareModal } from './share_modal';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 
@@ -24,15 +25,17 @@ interface Props {
   selectedConversation: Conversation | undefined;
   isConversationOwner: boolean;
 }
-interface SharedBadgeOptionData {
+interface ShareBadgeOptionData {
   description?: string;
 }
-const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedConversation }) => {
+const ShareBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedConversation }) => {
   const isShared = useMemo(
     () => selectedConversation?.users.length !== 1,
     [selectedConversation?.users]
   );
-  const items = useMemo<Array<EuiSelectableOption<SharedBadgeOptionData>>>(
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const items = useMemo<Array<EuiSelectableOption<ShareBadgeOptionData>>>(
     () => [
       {
         checked: !isShared ? 'on' : undefined,
@@ -57,6 +60,8 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
   );
   const onSharedChange = () => {
     console.log('change');
+    setIsModalOpen(true);
+    setIsPopoverOpen(false);
   };
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
@@ -80,7 +85,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
       <EuiBadge
         aria-label={i18n.VISIBILITY}
         color="hollow"
-        data-test-subj="sharedBadgeButton"
+        data-test-subj="shareBadgeButton"
         iconType="arrowDown"
         iconSide="right"
         onClick={togglePopover}
@@ -100,7 +105,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
   );
 
   const renderOption = useCallback(
-    (option: EuiSelectableOption<SharedBadgeOptionData>) => (
+    (option: EuiSelectableOption<ShareBadgeOptionData>) => (
       <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
         <EuiFlexItem grow={false}>
           <EuiText
@@ -130,38 +135,45 @@ const SharedBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCo
     []
   );
   return (
-    <EuiPopover
-      button={button}
-      closePopover={closePopover}
-      data-test-subj="sharedBadgePopover"
-      id={filterGroupPopoverId}
-      isOpen={isPopoverOpen}
-      panelPaddingSize="none"
-    >
-      <EuiSelectable
-        aria-label={i18n.VISIBILITY}
-        data-test-subj="sharedBadge"
-        listProps={{
-          isVirtualized: false,
-          rowHeight: 60,
-        }}
-        options={items}
-        onChange={onSharedChange}
-        renderOption={renderOption}
-        singleSelection={true}
+    <>
+      <EuiPopover
+        button={button}
+        closePopover={closePopover}
+        data-test-subj="shareBadgePopover"
+        id={filterGroupPopoverId}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
       >
-        {(list) => (
-          <div
-            css={css`
-              width: 230px;
-            `}
-          >
-            {list}
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+        <EuiSelectable
+          aria-label={i18n.VISIBILITY}
+          data-test-subj="shareBadge"
+          listProps={{
+            isVirtualized: false,
+            rowHeight: 60,
+          }}
+          options={items}
+          onChange={onSharedChange}
+          renderOption={renderOption}
+          singleSelection={true}
+        >
+          {(list) => (
+            <div
+              css={css`
+                width: 230px;
+              `}
+            >
+              {list}
+            </div>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+      <ShareModal
+        selectedConversation={selectedConversation}
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+      />
+    </>
   );
 };
 
-export const SharedBadge = React.memo(SharedBadgeComponent);
+export const ShareBadge = React.memo(ShareBadgeComponent);

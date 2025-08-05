@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
-import { SharedBadge } from './shared_badge';
+import { ShareBadge } from '../share_conversation/share_badge';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -191,7 +191,7 @@ export const AssistantHeader: React.FC<Props> = ({
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <SharedBadge
+                <ShareBadge
                   isConversationOwner={isConversationOwner}
                   selectedConversation={selectedConversation}
                 />
