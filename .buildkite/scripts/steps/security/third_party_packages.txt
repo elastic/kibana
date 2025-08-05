@@ -2,3 +2,4 @@
 dom-to-image-more
 pdf-lib
 @a2a-js/sdk
+@opentelemetry/exporter-metrics-otlp-http
