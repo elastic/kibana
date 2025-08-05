@@ -13,6 +13,8 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
+
 import {
   type SerializedPanelState,
   apiHasExecutionContext,
@@ -36,6 +38,7 @@ import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type { LogRateAnalysisEmbeddableApi, LogRateAnalysisEmbeddableState } from './types';
 import { getDataviewReferences } from '../get_dataview_references';
+import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -130,26 +133,34 @@ export const getLogRateAnalysisEmbeddableFactory = (
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
-              './resolve_log_rate_analysis_config_input'
-            );
-
-            const result = await resolveEmbeddableLogRateAnalysisUserInput(
-              coreStart,
-              pluginStart,
-              parentApi,
-              uuid,
-              false,
-              logRateAnalysisControlsApi,
-              undefined,
-              serializeLogRateAnalysisChartState()
-            );
-
-            logRateAnalysisControlsApi.updateUserInput(result);
-          } catch (e) {
-            return Promise.reject();
-          }
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              hideCloseButton: true,
+              focusedPanelId: uuid,
+              'data-test-subj': 'aiopsLogRateAnalysisEmbeddableInitializer',
+              'aria-labelledby': 'logRateAnalysisConfig',
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const initState = serializeLogRateAnalysisChartState();
+              return (
+                <EmbeddableLogRateAnalysisUserInput
+                  pluginStart={pluginStart}
+                  logRateAnalysisControlsApi={logRateAnalysisControlsApi}
+                  onConfirm={(result) => {
+                    logRateAnalysisControlsApi.updateUserInput(result);
+                    closeFlyout();
+                  }}
+                  onCancel={() => {
+                    logRateAnalysisControlsApi.updateUserInput(initState);
+                    closeFlyout();
+                  }}
+                  initialState={initState}
+                />
+              );
+            },
+          });
         },
         dataLoading$,
         blockingError$,

@@ -246,7 +246,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
                 setPalette={(palette) => {
-                  updateColumnState(accessor, { palette });
+                  updateColumnState(accessor, { palette, colorMapping: undefined });
                 }}
                 setColorMapping={(colorMapping) => {
                   updateColumnState(accessor, { colorMapping });

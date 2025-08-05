@@ -587,7 +587,7 @@
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/get_image_editor.tsx"
             },
             {
               "plugin": "imageEmbeddable",
@@ -5117,6 +5117,10 @@
             {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/server/files/index.ts"
+            },
+            {
+              "plugin": "@kbn/test-suites-xpack-platform",
+              "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/files/index.ts"
             },
             {
               "plugin": "cases",

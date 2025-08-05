@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
-import { ShareMenuProvider, type IShareContext } from './context';
+import { ShareProvider, type IShareContext } from './context';
 import { screen, render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
@@ -21,9 +21,6 @@ import {
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClientFactory,
 } from '../url_service/short_urls/short_url_client_factory';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 const navigate = jest.fn(async () => {});
 const getUrl = jest.fn(
   async (location: KibanaLocation, params: LocatorGetUrlParams): Promise<string> => {
@@ -76,7 +73,6 @@ const mockShareContext: IShareContext = {
     },
   ],
   allowShortUrl: true,
-  theme: themeServiceMock.createStartContract(),
   objectTypeMeta: {
     title: 'title',
     config: {
@@ -89,17 +85,15 @@ const mockShareContext: IShareContext = {
   sharingData: { title: 'title', url: 'url' },
   isDirty: false,
   onClose: jest.fn(),
-  toasts: toastsServiceMock.createStartContract(),
-  i18n: i18nServiceMock.createStartContract(),
 };
 
 describe('Share modal tabs', () => {
   it('does not render an export tab', () => {
     render(
       <IntlProvider locale="en">
-        <ShareMenuProvider shareContext={{ ...mockShareContext }}>
+        <ShareProvider shareContext={{ ...mockShareContext }}>
           <ShareMenuTabs />
-        </ShareMenuProvider>
+        </ShareProvider>
       </IntlProvider>
     );
     expect(screen.queryByTestId('export')).not.toBeInTheDocument();
@@ -122,9 +116,9 @@ describe('Share modal tabs', () => {
 
       render(
         <IntlProvider locale="en">
-          <ShareMenuProvider shareContext={{ ...disabledLinkShareContext }}>
+          <ShareProvider shareContext={{ ...disabledLinkShareContext }}>
             <ShareMenuTabs />
-          </ShareMenuProvider>
+          </ShareProvider>
         </IntlProvider>
       );
       expect(screen.queryByTestId('link')).not.toBeInTheDocument();

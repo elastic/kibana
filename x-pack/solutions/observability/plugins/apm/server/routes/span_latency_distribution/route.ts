@@ -33,6 +33,7 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
         ),
         durationMin: toNumberRt,
         durationMax: toNumberRt,
+        isOtel: t.boolean,
       }),
       environmentRt,
       kueryRt,
@@ -59,6 +60,7 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
       durationMax,
       termFilters,
       chartType,
+      isOtel = false,
     } = resources.params.body;
 
     return getOverallLatencyDistribution({
@@ -83,6 +85,7 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
       durationMinOverride: durationMin,
       durationMaxOverride: durationMax,
       searchMetrics: false,
+      isOtel,
     });
   },
 });

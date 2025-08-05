@@ -303,6 +303,20 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigrator.kibanaVersionCheck",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersionCheck",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
             "id": "def-server.KibanaMigrator.Unnamed",
             "type": "Function",
             "tags": [],
@@ -322,7 +336,7 @@
                 "id": "def-server.KibanaMigrator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    hashToVersionMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n  }",
+                "label": "{\n    client,\n    typeRegistry,\n    kibanaIndex,\n    defaultIndexTypesMap,\n    hashToVersionMap,\n    soMigrationsConfig,\n    kibanaVersion,\n    logger,\n    docLinks,\n    waitForMigrationCompletion,\n    nodeRoles,\n    esCapabilities,\n    kibanaVersionCheck,\n  }",
                 "description": [],
                 "signature": [
                   "KibanaMigratorOptions"
@@ -360,7 +374,7 @@
             "label": "runMigrations",
             "description": [],
             "signature": [
-              "({ rerun }?: { rerun?: boolean | undefined; }) => Promise<",
+              "({ rerun, skipVersionCheck, }?: { rerun?: boolean | undefined; skipVersionCheck?: boolean | undefined; }) => Promise<",
               "MigrationResult",
               "[]>"
             ],
@@ -373,7 +387,7 @@
                 "id": "def-server.KibanaMigrator.runMigrations.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ rerun = false }",
+                "label": "{\n    rerun = false,\n    skipVersionCheck = false,\n  }",
                 "description": [],
                 "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
@@ -385,6 +399,20 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "rerun",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+                    "id": "def-server.KibanaMigrator.runMigrations.$1.skipVersionCheck",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "skipVersionCheck",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -3343,6 +3371,22 @@
             "description": [],
             "signature": [
               "ElasticsearchCapabilities"
+            ],
+            "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-server.KibanaMigratorOptions.kibanaVersionCheck",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersionCheck",
+            "description": [
+              "Specify a minimum supported Kibana version, e.g. '8.18.0'"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/saved-objects/migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,

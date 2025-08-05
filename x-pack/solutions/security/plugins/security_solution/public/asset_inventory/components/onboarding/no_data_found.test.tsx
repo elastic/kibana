@@ -6,40 +6,44 @@
  */
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { NoDataFound } from './no_data_found';
 import { renderWithTestProvider } from '../../test/test_provider';
+import { mockUseAddIntegrationPath } from './hooks/use_add_integration_path.mock';
+import { useAddIntegrationPath } from './hooks/use_add_integration_path';
 
-// Mocking components which implementation details are out of scope for this unit test
-jest.mock('../../../common/lib/integrations/hooks/integration_context', () => ({
-  IntegrationContextProvider: () => <div data-test-subj="integration-grid" />,
-}));
-
-jest.mock('../../../common/hooks/use_space_id');
+jest.mock('./hooks/use_add_integration_path');
 
 describe('NoDataFound Component', () => {
-  beforeEach(() => {
-    (useSpaceId as jest.Mock).mockReturnValue('default');
-  });
   afterEach(() => {
     jest.resetAllMocks();
   });
 
-  it('should render loading component when spaceId is not available', () => {
-    (useSpaceId as jest.Mock).mockReturnValue(null);
+  it('should render the No Data Found with an add integration link using the integration path', () => {
+    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+      mockUseAddIntegrationPath({ addIntegrationPath: '/test-integration-path', isLoading: false })
+    );
 
-    renderWithTestProvider(<NoDataFound />);
-
-    expect(screen.getByTestId('asset-inventory-loading')).toBeInTheDocument();
-  });
-
-  it('should render the No Data Found related content when spaceId is available', () => {
     renderWithTestProvider(<NoDataFound />);
 
     expect(
       screen.getByRole('heading', { name: /connect sources to discover assets/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByTestId('integration-grid')).toBeInTheDocument();
+    // Check that the add integration link is present and has the correct href
+    const addLink = screen.getByRole('link', { name: /add integration/i });
+    expect(addLink).toBeInTheDocument();
+    expect(addLink).toHaveAttribute('href', '/test-integration-path');
+    expect(addLink).not.toBeDisabled();
+  });
+
+  it('should disable the add integration button when loading', () => {
+    (useAddIntegrationPath as jest.Mock).mockReturnValue(
+      mockUseAddIntegrationPath({ isLoading: true })
+    );
+
+    renderWithTestProvider(<NoDataFound />);
+
+    const addButton = screen.getByRole('button', { name: /add integration/i });
+    expect(addButton).toBeDisabled();
   });
 });

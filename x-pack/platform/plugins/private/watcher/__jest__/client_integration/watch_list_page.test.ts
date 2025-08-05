@@ -76,17 +76,48 @@ describe('<WatchListPage />', () => {
           testBed.component.update();
         });
 
-        test('should retain the search query', async () => {
-          const { actions, find } = testBed;
+        test('should show error callout if search is invalid', async () => {
+          const { exists, actions } = testBed;
 
-          await actions.searchWatches('query text');
+          await actions.searchWatches('or');
+
+          expect(exists('watcherListSearchError')).toBe(true);
+        });
+
+        test('should retain the search query', async () => {
+          const { table, actions } = testBed;
+
+          await actions.searchWatches(watch1.name);
+
+          const { tableCellsValues } = table.getMetaData('watchesTable');
+
+          // Expect "watch1" is only visible in the table
+          expect(tableCellsValues.length).toEqual(1);
+          const row = tableCellsValues[0];
+          const { name, id } = watch1;
+
+          const expectedRow = [
+            '', // checkbox
+            id,
+            name,
+            '', // state
+            '', // lastMetCondition
+            '', // lastChecked
+            '', // comment
+            '', // row actions
+          ];
+
+          expect(row).toEqual(expectedRow);
 
           await actions.advanceTimeToTableRefresh();
 
-          const searchInput = find('watchesTableContainer').find('input.euiFieldSearch');
-          // Verify the query text is still in the search bar
-          // @ts-ignore
-          expect(searchInput.instance().value).toEqual('query text');
+          const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('watchesTable');
+
+          // Verify "watch1" is still the only watch visible in the table
+          expect(updatedTableCellsValues.length).toEqual(1);
+          const updatedRow = updatedTableCellsValues[0];
+
+          expect(updatedRow).toEqual(expectedRow);
         });
 
         test('should set the correct app title', () => {

@@ -39,6 +39,7 @@ export const initializeImportFileBodySchema = schema.object({
   mappings: schema.any(),
   /** Ingest pipeline definition */
   ingestPipelines: schema.arrayOf(ingestPipeline),
+  existingIndex: schema.maybe(schema.boolean()),
 });
 
 export const importFileBodySchema = schema.object({

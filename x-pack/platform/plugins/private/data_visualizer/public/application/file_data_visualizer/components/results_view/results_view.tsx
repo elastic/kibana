@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
-import { FILE_FORMATS } from '../../../../../common/constants';
+import { FILE_FORMATS } from '@kbn/file-upload-common';
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';

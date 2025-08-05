@@ -22,6 +22,7 @@ import {
 } from '../../../common/thehive/schema';
 import { THEHIVE_CONNECTOR_ID, THEHIVE_TITLE } from '../../../common/thehive/constants';
 import type { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
+import { renderParameterTemplates } from './render';
 
 export type TheHiveConnectorType = SubActionConnectorType<TheHiveConfig, TheHiveSecrets>;
 
@@ -41,6 +42,7 @@ export function getConnectorType(): TheHiveConnectorType {
       config: TheHiveConfigSchema,
       secrets: TheHiveSecretsSchema,
     },
+    renderParameterTemplates,
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   };
 }

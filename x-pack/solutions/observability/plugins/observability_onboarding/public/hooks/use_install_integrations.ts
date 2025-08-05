@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { i18n } from '@kbn/i18n';
+import { HttpFetchOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
 // Errors
@@ -46,8 +47,9 @@ export const useInstallIntegrations = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
-        const options = {
+        const options: HttpFetchOptions = {
           headers: { 'Elastic-Api-Version': '2023-10-31' },
+          query: { prerelease: true },
         };
 
         const integrations = [];
@@ -57,7 +59,9 @@ export const useInstallIntegrations = ({
           }>(`/api/fleet/epm/packages/${packageName}`, options);
 
           if (integration.status !== 'installed') {
-            await http.post(`/api/fleet/epm/packages/${packageName}`, options);
+            await http.post(`/api/fleet/epm/packages/${packageName}`, {
+              ...options,
+            });
           }
           integrations.push(integration);
         }

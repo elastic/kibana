@@ -8,9 +8,11 @@
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { StreamsPluginStartDependencies } from '../../types';
-import { StreamsClient } from './client';
 import { AssetClient } from './assets/asset_client';
+import { QueryClient } from './assets/query/query_client';
+import { StreamsClient } from './client';
 import { migrateOnRead } from './helpers/migrate_on_read';
 
 export const streamsStorageSettings = {
@@ -38,16 +40,17 @@ export class StreamsService {
   async getClientWithRequest({
     request,
     assetClient,
+    queryClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
+    queryClient: QueryClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
     const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, Streams.all.Definition>(
@@ -61,8 +64,10 @@ export class StreamsService {
 
     return new StreamsClient({
       assetClient,
+      queryClient,
       logger,
       scopedClusterClient,
+      lockManager: new LockManagerService(this.coreSetup, logger),
       storageClient: storageAdapter.getClient(),
       request,
       isServerless,

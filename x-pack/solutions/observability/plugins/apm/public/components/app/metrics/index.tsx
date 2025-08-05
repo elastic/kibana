@@ -16,29 +16,15 @@ import { ServiceMetrics } from './service_metrics';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
-import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
-  const {
-    agentName,
-    runtimeName,
-    serverlessType,
-    serviceEntitySummary,
-    telemetrySdkName,
-    telemetrySdkLanguage,
-  } = useApmServiceContext();
+  const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
+    useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
 
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
-  const hasLogsOnlySignal =
-    serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="metrics" />;
-  }
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
@@ -50,7 +36,7 @@ export function Metrics() {
         title={i18n.translate('xpack.apm.metrics.emptyState.title', {
           defaultMessage: 'Runtime metrics are not available for this Agent / SDK type.',
         })}
-        iconType="iInCircle"
+        iconType="info"
         data-test-subj="apmMetricsNoDashboardFound"
       />
     );

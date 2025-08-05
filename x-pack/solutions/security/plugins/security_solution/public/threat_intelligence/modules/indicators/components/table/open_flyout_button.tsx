@@ -36,7 +36,7 @@ export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
   isOpen,
 }) => {
   return (
-    <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL}>
+    <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         data-test-subj={BUTTON_TEST_ID}
         color={isOpen ? 'text' : 'primary'}

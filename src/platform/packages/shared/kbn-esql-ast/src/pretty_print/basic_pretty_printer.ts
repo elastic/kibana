@@ -8,14 +8,14 @@
  */
 
 import {
-  binaryExpressionGroup,
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isIntegerLiteral,
   isLiteral,
   isProperNode,
-} from '../ast/helpers';
+} from '../ast/is';
+import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
 import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
 import { ESQLAstExpressionNode, Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
@@ -274,7 +274,7 @@ export class BasicPrettyPrinter {
         elements += (elements ? ', ' : '') + arg;
       }
 
-      const formatted = `[${elements}]`;
+      const formatted = ctx.node.subtype === 'tuple' ? '(' + elements + ')' : '[' + elements + ']';
 
       return this.decorateWithComments(ctx.node, formatted);
     })
@@ -344,11 +344,17 @@ export class BasicPrettyPrinter {
           let leftFormatted = ctx.visitArgument(0);
           let rightFormatted = ctx.visitArgument(1);
 
-          if (groupLeft && groupLeft < group) {
+          const shouldGroupLeftExpressions =
+            groupLeft && (groupLeft === BinaryExpressionGroup.unknown || groupLeft < group);
+
+          if (shouldGroupLeftExpressions) {
             leftFormatted = `(${leftFormatted})`;
           }
 
-          if (groupRight && groupRight < group) {
+          const shouldGroupRightExpressions =
+            groupRight && (groupRight === BinaryExpressionGroup.unknown || groupRight < group);
+
+          if (shouldGroupRightExpressions) {
             rightFormatted = `(${rightFormatted})`;
           }
 
@@ -372,12 +378,6 @@ export class BasicPrettyPrinter {
           return this.decorateWithComments(ctx.node, formatted);
         }
       }
-    })
-
-    .on('visitRenameExpression', (ctx) => {
-      const formatted = `${ctx.visitArgument(0)} ${this.keyword('AS')} ${ctx.visitArgument(1)}`;
-
-      return this.decorateWithComments(ctx.node, formatted);
     })
 
     .on('visitOrderExpression', (ctx) => {

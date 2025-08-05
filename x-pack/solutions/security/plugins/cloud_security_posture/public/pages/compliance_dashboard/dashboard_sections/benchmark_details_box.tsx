@@ -23,23 +23,32 @@ import { getBenchmarkIdQuery } from './benchmarks_section';
 import { BenchmarkData } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-
 interface BenchmarkInfo {
   name: string;
   assetType: string;
   handleClick: () => void;
 }
 
-export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData }) => {
+export const BenchmarkDetailsBox = ({
+  benchmark,
+  activeNamespace,
+}: {
+  benchmark: BenchmarkData;
+  activeNamespace?: string;
+}) => {
   const navToFindings = useNavigateFindings();
 
-  const handleClickCloudProvider = () =>
-    navToFindings(getBenchmarkIdQuery(benchmark), [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]);
+  const handleClickCloudProvider = () => {
+    navToFindings(getBenchmarkIdQuery(benchmark, activeNamespace), [
+      FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID,
+    ]);
+  };
 
-  const handleClickCluster = () =>
-    navToFindings(getBenchmarkIdQuery(benchmark), [
+  const handleClickCluster = () => {
+    navToFindings(getBenchmarkIdQuery(benchmark, activeNamespace), [
       FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID,
     ]);
+  };
 
   const getBenchmarkInfo = (benchmarkId: string, cloudAssetCount: number): BenchmarkInfo => {
     const benchmarks: Record<string, BenchmarkInfo> = {
@@ -182,7 +191,7 @@ export const BenchmarkDetailsBox = ({ benchmark }: { benchmark: BenchmarkData })
           <EuiText size="xs">{benchmarkInfo.assetType}</EuiText>
         </EuiLink>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ justifyContent: 'flex-end' }}>
+      <EuiFlexItem grow={false} css={{ justifyContent: 'flex-end' }}>
         <EuiFlexGroup gutterSize="m" alignItems="center">
           <CISBenchmarkIcon type={benchmarkId} name={`${benchmarkName}`} />
           <EuiToolTip content={cisTooltip}>

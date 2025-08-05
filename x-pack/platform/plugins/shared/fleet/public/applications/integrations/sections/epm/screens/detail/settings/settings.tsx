@@ -85,10 +85,11 @@ interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isCustomPackage: boolean;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
     const authz = useAuthz();
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
@@ -441,6 +442,7 @@ export const SettingsPage: React.FC<Props> = memo(
                                   ? packageInfo.installationInfo.install_source
                                   : ''
                               }
+                              isCustomPackage={isCustomPackage}
                             />
                           </div>
                         </EuiFlexItem>

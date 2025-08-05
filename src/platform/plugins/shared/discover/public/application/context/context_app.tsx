@@ -14,22 +14,22 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  useEuiPaddingSize,
-  useEuiTheme,
+  euiPaddingSize,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -40,6 +40,7 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
+import { useScopedServices } from '../../components/scoped_services_provider';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -50,10 +51,11 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
   const services = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const {
-    analytics,
     locator,
     uiSettings,
     capabilities,
@@ -61,7 +63,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     navigation,
     filterManager,
     core,
-    ebtManager,
     fieldsMetadata,
   } = services;
 
@@ -134,7 +135,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
    */
   useEffect(() => {
     const doFetch = async () => {
-      const startTime = window.performance.now();
+      const surroundingDocsFetchTracker = scopedEBTManager.trackPerformanceEvent(
+        'discoverSurroundingDocsFetch'
+      );
+
       let fetchType = '';
       if (!prevAppState.current) {
         fetchType = 'all';
@@ -153,13 +157,8 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
         await fetchContextRows();
       }
 
-      if (analytics && fetchType) {
-        const fetchDuration = window.performance.now() - startTime;
-        reportPerformanceMetricEvent(analytics, {
-          eventName: 'discoverSurroundingDocsFetch',
-          duration: fetchDuration,
-          meta: { fetchType },
-        });
+      if (fetchType) {
+        surroundingDocsFetchTracker.reportEvent({ meta: { fetchType } });
       }
     };
 
@@ -168,7 +167,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     prevAppState.current = cloneDeep(appState);
     prevGlobalState.current = cloneDeep(globalState);
   }, [
-    analytics,
     appState,
     globalState,
     anchorId,
@@ -176,6 +174,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     fetchAllRows,
     fetchSurroundingRows,
     fetchedState.anchor.id,
+    scopedEBTManager,
   ]);
 
   const rows = useMemo(
@@ -207,30 +206,30 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       if (dataViews) {
         const fieldName = typeof field === 'string' ? field : field.name;
         await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void ebtManager.trackFilterAddition({
+        void scopedEBTManager.trackFilterAddition({
           fieldName: fieldName === '_exists_' ? String(values) : fieldName,
           filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
           fieldsMetadata,
         });
       }
     },
-    [filterManager, dataViews, dataView, capabilities, ebtManager, fieldsMetadata]
+    [filterManager, dataView, dataViews, capabilities, scopedEBTManager, fieldsMetadata]
   );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
@@ -245,8 +244,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       useDefaultBehaviors: true,
     };
   };
-
-  const titlePadding = useEuiPaddingSize('m');
 
   return (
     <Fragment>
@@ -272,28 +269,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               css={styles.docsContent}
               panelProps={{ role: 'main' }}
             >
-              <EuiText
-                data-test-subj="contextDocumentSurroundingHeader"
-                css={css`
-                  padding: ${titlePadding} ${titlePadding} 0;
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-              >
+              <EuiText data-test-subj="contextDocumentSurroundingHeader" css={styles.title}>
                 <FormattedMessage
                   id="discover.context.contextOfTitle"
                   defaultMessage="Documents surrounding {anchorId}"
                   values={{
-                    anchorId: (
-                      <span
-                        css={css`
-                          background-color: ${euiTheme.colors.backgroundBaseWarning};
-                          color: ${euiTheme.colors.textWarning};
-                          padding: 0 ${euiTheme.size.xs};
-                        `}
-                      >
-                        #{anchorId}
-                      </span>
-                    ),
+                    anchorId: <span css={styles.documentId}>#{anchorId}</span>,
                   }}
                 />
               </EuiText>
@@ -325,11 +306,26 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const styles = {
+const componentStyles = {
   docsContent: css({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
   }),
-  docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
+  docsPage: kbnFullBodyHeightCss('54px'), // 54px is the action bar height
+  title: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const titlePadding = euiPaddingSize(themeContext, 's');
+
+    return css({
+      padding: `${titlePadding} ${titlePadding} 0`,
+      fontWeight: euiTheme.font.weight.bold,
+    });
+  },
+  documentId: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      color: euiTheme.colors.textWarning,
+      padding: `0 ${euiTheme.size.xs}`,
+    }),
 };

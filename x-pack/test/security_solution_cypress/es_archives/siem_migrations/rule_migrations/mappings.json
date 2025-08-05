@@ -12,6 +12,9 @@
         }
       },
       "properties": {
+        "name": {
+          "type": "keyword"
+        },
         "created_at": {
           "type": "date"
         },

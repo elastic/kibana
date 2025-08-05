@@ -103,15 +103,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.clickHistogramBar();
         await discover.waitUntilSearchingHasFinished();
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
+        expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.end).to.be('Sep 21, 2015 @ 12:00:00.000');
         await retry.waitForWithTimeout(
           'table to contain the right search result',
           3000,
           async () => {
             const rowData = await discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
-            return rowData.includes('Sep 21, 2015 @ 14:59:08.840');
+            return rowData.includes('Sep 21, 2015 @ 11:59:22.316');
           }
         );
       });

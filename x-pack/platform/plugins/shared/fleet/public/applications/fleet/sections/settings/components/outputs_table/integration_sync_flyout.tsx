@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -39,11 +40,12 @@ interface Props {
 export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
   ({ onClose, syncedIntegrationsStatus, outputName, syncUninstalledIntegrations }) => {
     const { docLinks } = useStartServices();
+    const flyoutTitleId = useGeneratedHtmlId();
     return (
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.integrationSyncFlyout.titleText"
                 defaultMessage="Integration syncing status"

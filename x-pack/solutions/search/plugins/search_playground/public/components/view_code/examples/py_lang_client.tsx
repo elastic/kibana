@@ -7,12 +7,17 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import { PlaygroundForm } from '../../../types';
+import { FieldErrors } from 'react-hook-form';
+import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
 
-export const PY_LANG_CLIENT = (formValues: PlaygroundForm, clientDetails: string) => (
+export const PY_LANG_CLIENT = (
+  formValues: PlaygroundForm,
+  formErrors: FieldErrors<PlaygroundForm>,
+  clientDetails: string
+) => (
   <EuiCodeBlock language="py" isCopyable overflowHeight="100%">
     {`## Install the required packages
 ## pip install -qU elasticsearch openai
@@ -34,7 +39,7 @@ def get_elasticsearch_results(query):
       ...elasticsearchQueryObject(
         formValues.elasticsearch_query,
         formValues.user_elasticsearch_query,
-        formValues.user_elasticsearch_query_validations
+        formErrors[PlaygroundFormFields.userElasticsearchQuery]
       ),
       size: formValues.doc_size,
     })}

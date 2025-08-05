@@ -8,6 +8,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
+import type { MountPoint, UnmountCallback } from '@kbn/core-mount-utils-browser';
 
 import { ToastsApi } from './toasts_api';
 
@@ -24,6 +25,8 @@ jest.mock('@elastic/apm-rum', () => ({
 async function getCurrentToasts(toasts: ToastsApi) {
   return await firstValueFrom(toasts.get$());
 }
+
+type MockedUnmount = jest.MockedFunction<UnmountCallback>;
 
 function uiSettingsMock() {
   const mock = uiSettingsServiceMock.createSetupContract();
@@ -211,11 +214,29 @@ describe('#addWarning()', () => {
 });
 
 describe('#addDanger()', () => {
+  let unmounts: Record<string, MockedUnmount>;
+
+  const createMountPoint =
+    (id: string, content: string = id): MountPoint =>
+    (root): MockedUnmount => {
+      const container = document.createElement('DIV');
+      // eslint-disable-next-line no-unsanitized/property
+      container.innerHTML = content;
+      root.appendChild(container);
+      const unmount = jest.fn(() => container.remove());
+      unmounts[id] = unmount;
+      return unmount;
+    };
+
+  beforeEach(() => {
+    unmounts = {};
+  });
+
   it('adds a danger toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     expect(toasts.addDanger({})).toHaveProperty('color', 'danger');
     expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
-      labels: { errorType: 'ToastDanger' },
+      labels: { error_type: 'ToastDanger' },
     });
   });
 
@@ -225,16 +246,44 @@ describe('#addDanger()', () => {
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
     expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
-      labels: { errorType: 'ToastDanger' },
+      labels: { error_type: 'ToastDanger' },
     });
   });
 
   it('fallbacks to default values for undefined properties', async () => {
     const toasts = new ToastsApi(toastDeps());
-    const toast = toasts.addDanger({ title: 'foo', toastLifeTimeMs: undefined });
+    const toast = toasts.addDanger({
+      title: 'toast title',
+      text: 'toast text',
+      toastLifeTimeMs: undefined,
+    });
     expect(toast.toastLifeTimeMs).toEqual(10000);
-    expect(apm.captureError).toBeCalledWith('foo', {
-      labels: { errorType: 'ToastDanger' },
+    expect(apm.captureError).toBeCalledWith('Title: toast title, Text: toast text', {
+      labels: { error_type: 'ToastDanger' },
+    });
+  });
+
+  it('passes correct title and text to the apm.captureError when they are MountPoints', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addDanger({
+      title: createMountPoint('Toast Title MountPoint'),
+      text: createMountPoint('Toast Text MountPoint'),
+      toastLifeTimeMs: undefined,
+    });
+    expect(toast.toastLifeTimeMs).toEqual(10000);
+    expect(apm.captureError).toBeCalledWith(
+      'Title: Toast Title MountPoint, Text: Toast Text MountPoint',
+      {
+        labels: { error_type: 'ToastDanger' },
+      }
+    );
+  });
+
+  it('passes correct title to the apm.captureError', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    toasts.addDanger('Danger toast title');
+    expect(apm.captureError).toBeCalledWith('Danger toast title', {
+      labels: { error_type: 'ToastDanger' },
     });
   });
 });
@@ -244,11 +293,19 @@ describe('#addError', () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.start(startDeps());
     const error = new Error('unexpected error');
-    const toast = toasts.addError(error, { title: 'Something went wrong' });
+    const toast = toasts.addError(error, {
+      title: 'Something went wrong',
+      toastMessage: 'Please try again later.',
+    });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
+    expect(toast).toHaveProperty('toastMessage', 'Please try again later.');
     expect(apm.captureError).toBeCalledWith(error, {
-      labels: { errorType: 'ToastError' },
+      labels: {
+        error_type: 'ToastError',
+        title: 'Something went wrong',
+        toast_message: 'Please try again later.',
+      },
     });
   });
 
@@ -260,7 +317,7 @@ describe('#addError', () => {
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
     expect(apm.captureError).toBeCalledWith(error, {
-      labels: { errorType: 'ToastError' },
+      labels: { error_type: 'ToastError', title: 'Something went wrong' },
     });
   });
 });

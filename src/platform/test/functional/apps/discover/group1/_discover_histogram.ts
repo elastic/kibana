@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return actualCount <= expectedCount;
       });
       const newDurationHours = await timePicker.getTimeDurationInHours();
-      expect(Math.round(newDurationHours)).to.be(24); // might fail if histogram's width changes
+      expect(Math.round(newDurationHours)).to.be(23); // might fail if histogram's width changes
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await discover.getDocTableField(1);
@@ -309,24 +309,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearch);
       await discover.chooseBreakdownField('extension.keyword');
       await discover.setChartInterval('Second');
-      let requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 's',
-        breakdownField: 'extension.keyword',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 's',
+          breakdownField: 'extension.keyword',
+        });
       });
       await discover.toggleChartVisibility();
       await discover.waitUntilSearchingHasFinished();
       await discover.revertUnsavedChanges();
       await discover.waitUntilSearchingHasFinished();
-      requestData =
-        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
-      expect(JSON.parse(requestData)).to.eql({
-        dataViewId: 'long-window-logstash-*',
-        timeField: '@timestamp',
-        timeInterval: 'auto',
+      await retry.try(async () => {
+        const requestData =
+          (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
+        expect(JSON.parse(requestData)).to.eql({
+          dataViewId: 'long-window-logstash-*',
+          timeField: '@timestamp',
+          timeInterval: 'auto',
+        });
       });
     });
   });

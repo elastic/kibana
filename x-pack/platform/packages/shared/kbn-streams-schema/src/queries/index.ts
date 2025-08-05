@@ -24,16 +24,6 @@ export interface StreamQueryKql extends StreamQueryBase {
 
 export type StreamQuery = StreamQueryKql;
 
-export interface StreamGetResponseBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
-export interface StreamUpsertRequestBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
@@ -43,7 +33,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
     kql: z.object({
-      query: NonEmptyString,
+      query: z.string(),
     }),
   })
 );
@@ -57,7 +47,7 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   kql: z.object({
-    query: NonEmptyString,
+    query: z.string(),
   }),
 });
 

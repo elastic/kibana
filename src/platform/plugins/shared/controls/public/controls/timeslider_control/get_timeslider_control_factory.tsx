@@ -22,13 +22,12 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { TIME_SLIDER_CONTROL } from '../../../common';
+import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import {
   defaultControlComparators,
   initializeDefaultControlManager,
 } from '../default_control_manager';
 import { ControlFactory } from '../types';
-import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';

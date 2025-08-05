@@ -62,14 +62,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_cti_signals'
         );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/legacy_cti_signals'
         );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -212,13 +212,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Query', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
+        );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -382,6 +384,9 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
           'kibana.alert.rule.indices': ['.siem-signals-*'],
+          'kibana.alert.original_data_stream.dataset': 'elastic_agent.filebeat',
+          'kibana.alert.original_data_stream.namespace': 'default',
+          'kibana.alert.original_data_stream.type': 'logs',
           'kibana.alert.original_time': '2022-03-23T16:50:40.440Z',
           'kibana.alert.original_event.agent_id_status': 'verified',
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
@@ -552,6 +557,9 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.immutable': false,
           'kibana.alert.rule.indices': rule.index,
           'kibana.alert.original_time': '2022-03-23T16:50:40.440Z',
+          'kibana.alert.original_data_stream.dataset': 'elastic_agent.filebeat',
+          'kibana.alert.original_data_stream.namespace': 'default',
+          'kibana.alert.original_data_stream.type': 'logs',
           'kibana.alert.original_event.agent_id_status': 'verified',
           'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
           'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
@@ -563,13 +571,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Saved Query', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
+        );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -606,13 +616,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('EQL', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
+        );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
@@ -649,13 +661,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Threshold', () => {
       beforeEach(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
+        );
         await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/7.16.0'
         );
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);

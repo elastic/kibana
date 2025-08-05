@@ -26,7 +26,8 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
-if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
+# TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
+if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
@@ -35,7 +36,7 @@ if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install
+  yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then

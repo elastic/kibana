@@ -49,12 +49,6 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.ERROR_MESSAGE]: {
-    [FieldType.ERROR_MESSAGE]: {
-      type: 'keyword',
-      _meta: { description: 'A message from an error that was caught.' },
-    },
-  },
   [FieldType.TERMS]: {
     [FieldType.TERMS]: {
       type: 'keyword',
@@ -86,13 +80,6 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     eventType: EventMetric.SEARCH_BLUR,
     schema: {
       ...fields[FieldType.FOCUS_TIME],
-    },
-  },
-  {
-    eventType: EventMetric.ERROR,
-    schema: {
-      ...fields[FieldType.ERROR_MESSAGE],
-      ...fields[FieldType.TERMS],
     },
   },
 ];

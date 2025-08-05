@@ -482,7 +482,7 @@
             "id": "def-common.ValueWithSpaceWarning.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  value,\n  tooltipIconType = 'iInCircle',\n  tooltipIconText,\n}",
+            "label": "{\n  value,\n  tooltipIconType = 'info',\n  tooltipIconText,\n}",
             "description": [],
             "signature": [
               "ValueWithSpaceWarningProps"

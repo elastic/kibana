@@ -8,6 +8,10 @@
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 
+const isGetInfoResponse = (
+  integration: GetInfoResponse | undefined
+): integration is GetInfoResponse => integration !== undefined;
+
 export const useEntityAnalyticsIntegrations = () => {
   const { data: okta } = useGetPackageInfoByKeyQuery(
     'entityanalytics_okta',
@@ -15,14 +19,6 @@ export const useEntityAnalyticsIntegrations = () => {
     undefined, // No options required
     {
       suspense: true, // Make query suspend, it needs tu be wrapped by <Suspense />
-    }
-  );
-  const { data: entra } = useGetPackageInfoByKeyQuery(
-    'entityanalytics_entra_id',
-    undefined, // When package version is undefined it gets the latest version
-    undefined, // No options required
-    {
-      suspense: true,
     }
   );
   const { data: ad } = useGetPackageInfoByKeyQuery(
@@ -36,11 +32,20 @@ export const useEntityAnalyticsIntegrations = () => {
     }
   );
 
-  const integrations = [okta, entra, ad]
-    .filter<GetInfoResponse>(
-      (integration): integration is GetInfoResponse => integration !== undefined
-    )
-    .map(({ item }) => item);
+  return [okta, ad].filter<GetInfoResponse>(isGetInfoResponse).map(({ item }) => item);
+};
 
-  return integrations;
+export const usePrivilegedAccessDetectionIntegration = () => {
+  const { data: pad } = useGetPackageInfoByKeyQuery(
+    'pad',
+    undefined, // When package version is undefined it gets the latest version
+    {
+      prerelease: true, // This is a technical preview package, delete this line when it is GA
+    },
+    {
+      suspense: false,
+    }
+  );
+
+  return isGetInfoResponse(pad) ? pad.item : undefined;
 };

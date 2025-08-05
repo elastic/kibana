@@ -57,19 +57,6 @@ const testBoxes = [
     weight: 3,
   },
   {
-    id: 'synthetics',
-    title: 'Uptime',
-    description: 'Proactively monitor the availability and functionality of user journeys.',
-    addTitle: 'Add monitors',
-    addLink: '/app/home#/tutorial/uptimeMonitors',
-    learnMoreLink: 'http://lean-more-link-example.com',
-    goToAppTitle: 'Show monitors ',
-    goToAppLink: '/app/uptime',
-    hasData: false,
-    modules: [],
-    weight: 4,
-  },
-  {
     id: 'ux',
     title: 'User Experience',
     description:
@@ -81,7 +68,7 @@ const testBoxes = [
     goToAppLink: '/app/ux',
     hasData: true,
     modules: [],
-    weight: 5,
+    weight: 4,
   },
   {
     id: 'alert',
@@ -95,7 +82,7 @@ const testBoxes = [
     goToAppLink: '/app/observability/alerts',
     hasData: true,
     modules: [],
-    weight: 6,
+    weight: 5,
   },
 ];
 

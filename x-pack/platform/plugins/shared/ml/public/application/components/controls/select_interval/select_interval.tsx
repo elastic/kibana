@@ -101,7 +101,7 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
               'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
           })}
         >
-          <EuiIcon type="questionInCircle" color="subdued" />
+          <EuiIcon type="question" color="subdued" />
         </EuiToolTip>
       }
       compressed

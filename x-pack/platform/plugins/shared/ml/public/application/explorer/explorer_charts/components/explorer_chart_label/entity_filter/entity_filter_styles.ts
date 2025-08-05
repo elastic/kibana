@@ -24,6 +24,7 @@ export const useEntityFilterStyles = () => {
       '.euiIcon': {
         width: euiTheme.size.m,
         height: euiTheme.size.m,
+        color: euiTheme.colors.textSubdued,
       },
     }),
   };

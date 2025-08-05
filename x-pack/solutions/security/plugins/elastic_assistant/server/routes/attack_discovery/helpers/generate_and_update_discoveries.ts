@@ -22,6 +22,7 @@ import {
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 
+import { deduplicateAttackDiscoveries } from '../../../lib/attack_discovery/persistence/deduplication';
 import { updateAttackDiscoveries } from './helpers';
 import { handleGraphError } from '../post/helpers/handle_graph_error';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
@@ -90,26 +91,55 @@ export const generateAndUpdateAttackDiscoveries = async ({
       telemetry,
     });
 
+    let storedAttackDiscoveries = attackDiscoveries;
     if (attackDiscoveryAlertsEnabled) {
       const alertsContextCount = anonymizedAlerts.length;
+
+      /**
+       * Deduplicate attackDiscoveries before creating alerts
+       *
+       * We search for duplicates within the ad hoc index only,
+       * because there will be no duplicates in the scheduled index due to the
+       * fact that we use schedule ID (for the schedules) and
+       * user ID (for the ad hoc generations) as part of the alert ID hash
+       * generated for the deduplication purposes
+       */
+      const indexPattern = dataClient.getAdHocAlertsIndexPattern();
+      const dedupedDiscoveries = await deduplicateAttackDiscoveries({
+        esClient,
+        attackDiscoveries: attackDiscoveries ?? [],
+        connectorId: apiConfig.connectorId,
+        indexPattern,
+        logger,
+        ownerInfo: {
+          id: authenticatedUser.username ?? authenticatedUser.profile_uid,
+          isSchedule: false,
+        },
+        replacements: latestReplacements,
+        spaceId: dataClient.spaceId,
+      });
+      storedAttackDiscoveries = dedupedDiscoveries;
 
       const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
         alertsContextCount,
         anonymizedAlerts,
         apiConfig,
-        attackDiscoveries: attackDiscoveries ?? [],
+        attackDiscoveries: dedupedDiscoveries,
         connectorName: connectorName ?? apiConfig.connectorId,
         generationUuid: executionUuid,
         replacements: latestReplacements,
       };
-
       await dataClient.createAttackDiscoveryAlerts({
         authenticatedUser,
         createAttackDiscoveryAlertsParams,
       });
     }
 
-    return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };
+    return {
+      anonymizedAlerts,
+      attackDiscoveries: storedAttackDiscoveries,
+      replacements: latestReplacements,
+    };
   } catch (err) {
     await handleGraphError({
       apiConfig,

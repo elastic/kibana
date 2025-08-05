@@ -6,11 +6,12 @@
  */
 
 import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
@@ -40,6 +41,7 @@ export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> 
 
 export interface JobsQueryFactory {
   list(
+    req: KibanaRequest,
     user: ReportingUser,
     page: number,
     size: number,
@@ -73,8 +75,9 @@ export function jobsQueryFactory(
   }
 
   return {
-    async list(user, page = 0, size = defaultSize, jobIds) {
+    async list(req, user, page = 0, size = defaultSize, jobIds) {
       const username = getUsername(user);
+      const spaceId = reportingCore.getSpaceId(req) || DEFAULT_SPACE_ID;
       const body = getSearchBody({
         size,
         from: size * page,
@@ -85,6 +88,15 @@ export function jobsQueryFactory(
                 must: [
                   { term: { created_by: username } },
                   ...(jobIds ? [{ ids: { values: jobIds } }] : []),
+                  {
+                    bool: {
+                      should: [
+                        { term: { space_id: spaceId } },
+                        // also show all reports created before space_id was added
+                        { bool: { must_not: { exists: { field: 'space_id' } } } },
+                      ],
+                    },
+                  },
                 ],
               },
             },

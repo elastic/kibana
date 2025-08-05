@@ -23,7 +23,7 @@ const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dat
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut size="s" iconType="iInCircle" data-test-subj={dataTestSubj} title={title} />
+      <EuiCallOut size="s" iconType="info" data-test-subj={dataTestSubj} title={title} />
       <EuiSpacer size="m" />
     </>
   );

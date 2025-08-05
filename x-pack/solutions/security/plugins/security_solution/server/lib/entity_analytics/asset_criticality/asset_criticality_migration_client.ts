@@ -67,8 +67,22 @@ export class AssetCriticalityMigrationClient {
     return resp.hits.hits.length > 0;
   };
 
-  public migrateMappings = () => {
-    return this.assetCriticalityDataClient.createOrUpdateIndex();
+  public migrateMappings = async () => {
+    const spaceIds = await this.getAllSpacesWithAssetCriticalityInstalled();
+
+    for (const spaceId of spaceIds) {
+      const assetCriticalityDataClient = new AssetCriticalityDataClient({
+        ...this.options,
+        namespace: spaceId,
+      });
+      try {
+        await assetCriticalityDataClient.createOrUpdateIndex();
+      } catch (error) {
+        this.options.logger.error(
+          `Failed to create or update index for space ${spaceId}: ${error.message}`
+        );
+      }
+    }
   };
 
   public migrateEcsData = (abortSignal?: AbortSignal) => {
@@ -122,5 +136,28 @@ export class AssetCriticalityMigrationClient {
         signal: abortSignal,
       }
     );
+  };
+
+  public getAllSpacesWithAssetCriticalityInstalled = async (): Promise<string[]> => {
+    const indicesMappings = await this.assetCriticalityDataClient.getIndexMappings();
+    const indices = Object.keys(indicesMappings);
+
+    // we remove the last character from the index name to get the base index name
+    // the last character is * to match all spaces
+    const indexBase = this.assetCriticalityDataClient.getIndex().slice(0, -1);
+    const namespaces: string[] = [];
+
+    for (const index of indices) {
+      const maybeNamespace = index.split(indexBase).at(-1);
+      if (maybeNamespace) {
+        namespaces.push(maybeNamespace);
+      } else {
+        this.options.logger.warn(
+          `Index ${index} does not follow the expected naming convention for asset criticality indices.`
+        );
+      }
+    }
+
+    return namespaces;
   };
 }

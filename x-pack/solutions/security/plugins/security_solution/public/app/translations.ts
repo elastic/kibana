@@ -18,6 +18,10 @@ export const DATA_QUALITY = i18n.translate(
   }
 );
 
+export const AI_VALUE_DASHBOARD = i18n.translate('xpack.securitySolution.navigation.aiValue', {
+  defaultMessage: 'Value report',
+});
+
 export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.navigation.entityRiskScore',
   {
@@ -58,6 +62,13 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   'xpack.securitySolution.navigation.privilegedUserMonitoring',
   {
     defaultMessage: 'Privileged user monitoring',
+  }
+);
+
+export const ENTITY_ANALYTICS_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.entityAnalytics.overview',
+  {
+    defaultMessage: 'Entity Analytics overview',
   }
 );
 

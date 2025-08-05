@@ -210,7 +210,7 @@ class DataTableFormatClass extends Component<
         items={rows}
         sorting={sorting}
         pagination={pagination}
-        onChange={onTableChange}
+        onTableChange={onTableChange}
         css={css`
           // Set a min width on each column - you can use [data-test-subj] to target specific columns
           .euiTableHeaderCell {

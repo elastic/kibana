@@ -6,21 +6,29 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import {
   EuiPopover,
   EuiButton,
   type EuiContextMenuPanelDescriptor,
   EuiContextMenuItem,
   EuiContextMenu,
+  useEuiScrollBar,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FEEDBACK_LINK } from '@kbn/esql-utils';
-import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
+import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
+import {
+  getRecommendedQueriesTemplatesFromExtensions,
+  getRecommendedQueriesTemplates,
+} from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
+import { getCategorizationField } from '@kbn/aiops-utils';
 import type { IUnifiedSearchPluginServices } from '../types';
 
 export interface ESQLMenuPopoverProps {
@@ -35,12 +43,73 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
   onESQLQuerySubmit,
 }) => {
   const kibana = useKibana<IUnifiedSearchPluginServices>();
+  const { docLinks, http, chrome } = kibana.services;
 
-  const { docLinks } = kibana.services;
+  const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
 
-  const toggleLanguageComponent = useCallback(async () => {
+  const [solutionsRecommendedQueries, setSolutionsRecommendedQueries] = useState<
+    RecommendedQuery[]
+  >([]);
+
+  const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
+    if (adHocDataview && typeof adHocDataview !== 'string') {
+      const textFields = adHocDataview.fields?.getByType('string') ?? [];
+      let tempCategorizationField;
+      if (textFields.length) {
+        tempCategorizationField = getCategorizationField(textFields.map((field) => field.name));
+      }
+
+      return {
+        queryForRecommendedQueries: `FROM ${adHocDataview.name}`,
+        timeFieldName:
+          adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name,
+        categorizationField: tempCategorizationField,
+      };
+    }
+    return {
+      queryForRecommendedQueries: '',
+      timeFieldName: undefined,
+      categorizationField: undefined,
+    };
+  }, [adHocDataview]);
+
+  // Use a ref to store the *previous* fetched recommended queries
+  const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const getESQLExtensions = async () => {
+      if (!activeSolutionId || !queryForRecommendedQueries) {
+        return; // Don't fetch if we don't have the active solution or query
+      }
+
+      try {
+        const extensions: { recommendedQueries: RecommendedQuery[] } = await http.get(
+          `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryForRecommendedQueries}`
+        );
+
+        if (cancelled) return;
+
+        // Only update state if the new data is actually different from the *last successfully set* data
+        if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
+          setSolutionsRecommendedQueries(extensions.recommendedQueries);
+          lastFetchedQueries.current = extensions.recommendedQueries; // Update the ref with the new data
+        }
+      } catch (error) {
+        // Do nothing if the extensions are not available
+      }
+    };
+
+    getESQLExtensions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeSolutionId, http, queryForRecommendedQueries]);
+
+  const toggleLanguageComponent = useCallback(() => {
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
   }, [isLanguageComponentOpen]);
@@ -55,17 +124,31 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
 
   const esqlContextMenuPanels = useMemo(() => {
     const recommendedQueries = [];
-    if (adHocDataview && typeof adHocDataview !== 'string') {
-      const queryString = `FROM ${adHocDataview.name}`;
-      const timeFieldName =
-        adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name;
+    // If there are specific recommended queries for the current solution, process them.
+    if (solutionsRecommendedQueries.length) {
+      // Extract the core query templates by removing the 'FROM' clause.
+      const recommendedQueriesTemplatesFromExtensions =
+        getRecommendedQueriesTemplatesFromExtensions(solutionsRecommendedQueries);
 
+      // Construct the full recommended queries by prepending the base 'FROM' command
+      // and add them to the main list of recommended queries.
       recommendedQueries.push(
-        ...getRecommendedQueries({
-          fromCommand: queryString,
-          timeField: timeFieldName,
-        })
+        ...recommendedQueriesTemplatesFromExtensions.map((template) => ({
+          label: template.label,
+          queryString: `${queryForRecommendedQueries}${template.text}`,
+        }))
       );
+    }
+
+    // Handle the static recommended queries, no solutions specific
+    if (queryForRecommendedQueries && timeFieldName) {
+      const recommendedQueriesFromStaticTemplates = getRecommendedQueriesTemplates({
+        fromCommand: queryForRecommendedQueries,
+        timeField: timeFieldName,
+        categorizationField,
+      });
+
+      recommendedQueries.push(...recommendedQueriesFromStaticTemplates);
     }
     const panels = [
       {
@@ -75,7 +158,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.quickReference', {
               defaultMessage: 'Quick Reference',
             }),
-            icon: 'nedocumentationsted',
+            icon: 'nedocumentationsted', // Typo: Should be 'documentation'
             renderItem: () => (
               <EuiContextMenuItem
                 key="quickReference"
@@ -93,11 +176,11 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
             name: i18n.translate('unifiedSearch.query.queryBar.esqlMenu.documentation', {
               defaultMessage: 'Documentation',
             }),
-            icon: 'iInCircle',
+            icon: 'info',
             renderItem: () => (
               <EuiContextMenuItem
                 key="about"
-                icon="iInCircle"
+                icon="info"
                 data-test-subj="esql-about"
                 target="_blank"
                 href={docLinks.links.query.queryESQL}
@@ -160,7 +243,22 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
       },
     ];
     return panels as EuiContextMenuPanelDescriptor[];
-  }, [adHocDataview, docLinks.links.query.queryESQL, onESQLQuerySubmit, toggleLanguageComponent]);
+  }, [
+    docLinks.links.query.queryESQL,
+    onESQLQuerySubmit,
+    queryForRecommendedQueries,
+    timeFieldName,
+    toggleLanguageComponent,
+    solutionsRecommendedQueries, // This dependency is fine here, as it *uses* the state
+    categorizationField,
+  ]);
+
+  const esqlMenuPopoverStyles = css`
+    width: 240px;
+    max-height: 350px;
+    overflow-y: auto;
+    ${useEuiScrollBar()};
+  `;
 
   return (
     <>
@@ -179,7 +277,7 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',
-          css: { width: 240 },
+          css: esqlMenuPopoverStyles,
         }}
         isOpen={isESQLMenuPopoverOpen}
         closePopover={() => setIsESQLMenuPopoverOpen(false)}

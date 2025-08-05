@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { ClientPluginsStart } from '../../../../../../../plugin';
@@ -33,7 +33,7 @@ import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
 import { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 160;
+const METRIC_ITEM_HEIGHT = 170;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -86,9 +86,45 @@ export const MetricItem = ({
 
   const dispatch = useDispatch();
 
+  const trendMessage = useMemo(() => {
+    if (trendData === 'loading') {
+      return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.loadingCase', {
+        defaultMessage: 'Metrics are loading and have no value to display.',
+      });
+    }
+
+    if (!trendData) {
+      return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage.noData', {
+        defaultMessage: 'No data available for the selected time window.',
+      });
+    }
+
+    return i18n.translate('xpack.synthetics.overview.metricItem.trendMessage', {
+      defaultMessage:
+        'The duration statistics currently shown by the chart are: average: {avg}, median: {median}, max: {max}, min: {min}.',
+      values: {
+        max: trendData.max,
+        min: trendData.min,
+        median: trendData.median,
+        avg: trendData.avg,
+      },
+    });
+  }, [trendData]);
+
   return (
     <div
       data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      aria-label={i18n.translate('xpack.synthetics.overview.metricItem.label', {
+        defaultMessage:
+          'Monitor {name} in {location}. The background of this element also contains a sparkline chart indicating the status of test duration over the selected time window. {trendMessage}',
+        values: {
+          name: monitor.name,
+          location: locationName,
+          trendMessage,
+        },
+      })}
+      // this is the ID the Chart child will expect in its `aria-labelledby` attribute
+      id={`echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-title_echMetric-${monitor.configId}-${monitor.locationId}-metric-chart-0-0-trend-description`}
       style={style ?? { height: METRIC_ITEM_HEIGHT }}
     >
       <EuiPanel
@@ -119,7 +155,7 @@ export const MetricItem = ({
         `}
         title={moment(timestamp).format('LLL')}
       >
-        <Chart>
+        <Chart id={`${monitor.configId}-${monitor.locationId}-metric-chart`}>
           <Settings
             onElementClick={() => {
               if (testInProgress) {
@@ -135,7 +171,7 @@ export const MetricItem = ({
                   id: monitor.configId,
                   location: locationName,
                   locationId: monitor.locationId,
-                  spaceId: monitor.spaceId,
+                  spaces: monitor.spaces,
                 });
               }
             }}

@@ -40,8 +40,8 @@ export const LangSmithOptions = z.object({
 /**
  * The LangSmith settings object for evaluations.
  */
-export type LangSmithEvaluationSettings = z.infer<typeof LangSmithEvaluationSettings>;
-export const LangSmithEvaluationSettings = LangSmithOptions.merge(
+export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptions>;
+export const LangSmithEvaluationOptions = LangSmithOptions.merge(
   z.object({
     /**
      * The dataset name to use for evaluations.
@@ -49,3 +49,52 @@ export const LangSmithEvaluationSettings = LangSmithOptions.merge(
     dataset: z.string(),
   })
 );
+
+/**
+ * The status of migration.
+ */
+export type MigrationStatus = z.infer<typeof MigrationStatus>;
+export const MigrationStatus = z.enum(['pending', 'processing', 'completed', 'failed']);
+export type MigrationStatusEnum = typeof MigrationStatus.enum;
+export const MigrationStatusEnum = MigrationStatus.enum;
+
+/**
+ * The status of the migration task.
+ */
+export type MigrationTaskStatus = z.infer<typeof MigrationTaskStatus>;
+export const MigrationTaskStatus = z.enum([
+  'ready',
+  'running',
+  'stopped',
+  'finished',
+  'interrupted',
+]);
+export type MigrationTaskStatusEnum = typeof MigrationTaskStatus.enum;
+export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;
+
+/**
+ * The last execution of a migration task.
+ */
+export type MigrationLastExecution = z.infer<typeof MigrationLastExecution>;
+export const MigrationLastExecution = z.object({
+  /**
+   * The moment the last execution started.
+   */
+  started_at: z.string().optional(),
+  /**
+   * The moment the last execution finished.
+   */
+  finished_at: z.string().nullable().optional(),
+  /**
+   * The connector ID used for the last execution.
+   */
+  connector_id: z.string().optional(),
+  /**
+   * The error message if the last execution failed.
+   */
+  error: z.string().nullable().optional(),
+  /**
+   * Indicates if the last execution was stopped by the user.
+   */
+  is_stopped: z.boolean().optional(),
+});

@@ -105,7 +105,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           <EuiButtonEmpty
             href={docLinks.links.snapshotRestore.guide}
             target="_blank"
-            iconType="help"
+            iconType="question"
             data-test-subj="documentationLink"
           >
             <FormattedMessage

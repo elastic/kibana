@@ -17,8 +17,8 @@ import {
   EuiPanel,
   UseEuiTheme,
 } from '@elastic/eui';
-
-import { kibanaFullBodyHeightCss, useMemoizedStyles } from '@kbn/core/public';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,
@@ -41,7 +41,7 @@ const componentStyles = {
         overflow: 'hidden',
         flexShrink: 1,
       }, // adding dev tool top bar to the body offset
-      kibanaFullBodyHeightCss(`(${euiTheme.size.base} * 3)`),
+      kbnFullBodyHeightCss(`(${euiTheme.size.base} * 3)`),
     ]),
 };
 
@@ -103,7 +103,7 @@ export const App = () => {
     return null;
   };
 
-  const styles = useMemoizedStyles(componentStyles);
+  const styles = useMemoCss(componentStyles);
 
   return (
     <>

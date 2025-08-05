@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';

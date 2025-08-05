@@ -24,10 +24,12 @@ import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
-import { EntityLink } from '../app/entities/entity_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service groups',
+});
+const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
+  defaultMessage: 'Service inventory',
 });
 
 /**
@@ -35,18 +37,6 @@ const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title',
  * creates the routes.
  */
 const apmRoutes = {
-  '/link-to/entity/{serviceName}': {
-    element: <EntityLink />,
-    params: t.type({
-      path: t.type({
-        serviceName: t.string,
-      }),
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-      }),
-    }),
-  },
   '/link-to/transaction': {
     element: <TransactionDetailsByNameLink />,
     params: t.type({
@@ -109,9 +99,15 @@ const apmRoutes = {
       // this route fails on navigation unless it's defined before home
       '/service-groups': {
         element: (
-          <Breadcrumb title={ServiceGroupsTitle} href={'/service-groups'} omitOnServerless>
+          <Breadcrumb
+            title={ServiceGroupsTitle}
+            href={'/service-groups'}
+            parentTitle={ServiceInventoryTitle}
+            parentHref={'/services'}
+            omitOnServerless
+          >
             <ApmMainTemplate
-              pageTitle={ServiceGroupsTitle}
+              pageTitle={ServiceInventoryTitle}
               environmentFilter={false}
               showServiceGroupSaveButton={false}
               showServiceGroupsNav

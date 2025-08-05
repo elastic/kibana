@@ -150,7 +150,7 @@ export const registerExportRoute = (
         summary: `Export saved objects`,
         tags: ['oas-tag:saved objects'],
         access: 'public',
-        description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body.
+        description: `Retrieve sets of saved objects that you want to import into Kibana. You must include \`type\` or \`objects\` in the request body. The output of exporting saved objects must be treated as opaque. Tampering with exported data risks introducing unspecified errors and data loss.
 
 Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.
 

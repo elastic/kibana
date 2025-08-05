@@ -7,319 +7,43 @@
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { formatSyntheticsPolicy } from './format_synthetics_policy';
 import { PROFILE_VALUES_ENUM, PROFILES_MAP } from '../../../../common/constants/monitor_defaults';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
 
 const gParams = { proxyUrl: 'https://proxy.com' };
+const testMW = [
+  {
+    id: '190bd51b-985a-4553-9fba-57222ddde6b7',
+    title: 'test',
+    enabled: true,
+    duration: 1800000,
+    expirationDate: '2026-06-10T11:43:25.175Z',
+    events: [{ gte: '2025-06-10T11:40:29.124Z', lte: '2025-06-10T12:10:29.124Z' }],
+    rRule: { dtstart: '2025-06-10T11:40:29.124Z', tzid: 'Europe/Berlin', freq: 0, count: 1 },
+    createdBy: 'elastic',
+    updatedBy: 'elastic',
+    createdAt: '2025-06-10T11:43:25.176Z',
+    updatedAt: '2025-06-10T11:43:25.176Z',
+    eventStartTime: '2025-06-10T11:40:29.124Z',
+    eventEndTime: '2025-06-10T12:10:29.124Z',
+    status: 'running',
+    categoryIds: null,
+    scopedQuery: null,
+  },
+] as MaintenanceWindow[];
+
 describe('formatSyntheticsPolicy', () => {
   it('formats browser policy', () => {
     const { formattedPolicy } = formatSyntheticsPolicy(
       testNewPolicy,
       MonitorTypeEnum.BROWSER,
       browserConfig,
-      gParams
+      gParams,
+      testMW
     );
 
     expect(formattedPolicy).toEqual({
       enabled: true,
       inputs: [
-        {
-          enabled: false,
-          policy_template: 'synthetics',
-          streams: [
-            {
-              data_stream: {
-                dataset: 'http',
-                type: 'synthetics',
-              },
-              enabled: false,
-              vars: {
-                __ui: {
-                  type: 'yaml',
-                },
-                'check.request.body': {
-                  type: 'yaml',
-                },
-                'check.request.headers': {
-                  type: 'yaml',
-                },
-                'check.request.method': {
-                  type: 'text',
-                },
-                'check.response.body.negative': {
-                  type: 'yaml',
-                },
-                'check.response.body.positive': {
-                  type: 'yaml',
-                },
-                'check.response.headers': {
-                  type: 'yaml',
-                },
-                'check.response.status': {
-                  type: 'yaml',
-                },
-                config_id: {
-                  type: 'text',
-                },
-                enabled: {
-                  type: 'bool',
-                  value: true,
-                },
-                id: {
-                  type: 'text',
-                },
-                location_name: {
-                  type: 'text',
-                  value: 'Fleet managed',
-                },
-                max_redirects: {
-                  type: 'integer',
-                },
-                'monitor.project.id': {
-                  type: 'text',
-                },
-                'monitor.project.name': {
-                  type: 'text',
-                },
-                name: {
-                  type: 'text',
-                },
-                origin: {
-                  type: 'text',
-                },
-                password: {
-                  type: 'password',
-                },
-                proxy_url: {
-                  type: 'text',
-                },
-                'response.include_body': {
-                  type: 'text',
-                },
-                'response.include_headers': {
-                  type: 'bool',
-                },
-                run_once: {
-                  type: 'bool',
-                  value: false,
-                },
-                schedule: {
-                  type: 'text',
-                  value: '"@every 3m"',
-                },
-                'service.name': {
-                  type: 'text',
-                },
-                'ssl.certificate': {
-                  type: 'yaml',
-                },
-                'ssl.certificate_authorities': {
-                  type: 'yaml',
-                },
-                'ssl.key': {
-                  type: 'yaml',
-                },
-                'ssl.key_passphrase': {
-                  type: 'text',
-                },
-                'ssl.supported_protocols': {
-                  type: 'yaml',
-                },
-                'ssl.verification_mode': {
-                  type: 'text',
-                },
-                tags: {
-                  type: 'yaml',
-                },
-                timeout: {
-                  type: 'text',
-                },
-                type: {
-                  type: 'text',
-                  value: 'http',
-                },
-                urls: {
-                  type: 'text',
-                },
-                username: {
-                  type: 'text',
-                },
-              },
-            },
-          ],
-          type: 'synthetics/http',
-        },
-        {
-          enabled: false,
-          policy_template: 'synthetics',
-          streams: [
-            {
-              data_stream: {
-                dataset: 'tcp',
-                type: 'synthetics',
-              },
-              enabled: false,
-              vars: {
-                __ui: {
-                  type: 'yaml',
-                },
-                'check.receive': {
-                  type: 'text',
-                },
-                'check.send': {
-                  type: 'text',
-                },
-                config_id: {
-                  type: 'text',
-                },
-                enabled: {
-                  type: 'bool',
-                  value: true,
-                },
-                hosts: {
-                  type: 'text',
-                },
-                id: {
-                  type: 'text',
-                },
-                location_name: {
-                  type: 'text',
-                  value: 'Fleet managed',
-                },
-                'monitor.project.id': {
-                  type: 'text',
-                },
-                'monitor.project.name': {
-                  type: 'text',
-                },
-                name: {
-                  type: 'text',
-                },
-                origin: {
-                  type: 'text',
-                },
-                proxy_url: {
-                  type: 'text',
-                },
-                proxy_use_local_resolver: {
-                  type: 'bool',
-                  value: false,
-                },
-                run_once: {
-                  type: 'bool',
-                  value: false,
-                },
-                schedule: {
-                  type: 'text',
-                  value: '"@every 3m"',
-                },
-                'service.name': {
-                  type: 'text',
-                },
-                'ssl.certificate': {
-                  type: 'yaml',
-                },
-                'ssl.certificate_authorities': {
-                  type: 'yaml',
-                },
-                'ssl.key': {
-                  type: 'yaml',
-                },
-                'ssl.key_passphrase': {
-                  type: 'text',
-                },
-                'ssl.supported_protocols': {
-                  type: 'yaml',
-                },
-                'ssl.verification_mode': {
-                  type: 'text',
-                },
-                tags: {
-                  type: 'yaml',
-                },
-                timeout: {
-                  type: 'text',
-                },
-                type: {
-                  type: 'text',
-                  value: 'tcp',
-                },
-              },
-            },
-          ],
-          type: 'synthetics/tcp',
-        },
-        {
-          enabled: false,
-          policy_template: 'synthetics',
-          streams: [
-            {
-              data_stream: {
-                dataset: 'icmp',
-                type: 'synthetics',
-              },
-              enabled: false,
-              vars: {
-                __ui: {
-                  type: 'yaml',
-                },
-                config_id: {
-                  type: 'text',
-                },
-                enabled: {
-                  type: 'bool',
-                  value: true,
-                },
-                hosts: {
-                  type: 'text',
-                },
-                id: {
-                  type: 'text',
-                },
-                location_name: {
-                  type: 'text',
-                  value: 'Fleet managed',
-                },
-                'monitor.project.id': {
-                  type: 'text',
-                },
-                'monitor.project.name': {
-                  type: 'text',
-                },
-                name: {
-                  type: 'text',
-                },
-                origin: {
-                  type: 'text',
-                },
-                run_once: {
-                  type: 'bool',
-                  value: false,
-                },
-                schedule: {
-                  type: 'text',
-                  value: '"@every 3m"',
-                },
-                'service.name': {
-                  type: 'text',
-                },
-                tags: {
-                  type: 'yaml',
-                },
-                timeout: {
-                  type: 'text',
-                },
-                type: {
-                  type: 'text',
-                  value: 'icmp',
-                },
-                wait: {
-                  type: 'text',
-                  value: '1s',
-                },
-              },
-            },
-          ],
-          type: 'synthetics/icmp',
-        },
         {
           enabled: true,
           policy_template: 'synthetics',
@@ -432,6 +156,11 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: 'browser',
                 },
+                maintenance_windows: {
+                  type: 'yaml',
+                  value:
+                    '[{"dtstart":"2025-06-10T11:40:29.124Z","tzid":"Europe/Berlin","freq":"yearly","count":1,"duration":"1800000ms"}]',
+                },
               },
             },
             {
@@ -473,7 +202,8 @@ describe('formatSyntheticsPolicy', () => {
         ...httpPolicy,
         [ConfigKey.METADATA]: { is_tls_enabled: isTLSEnabled },
       },
-      gParams
+      gParams,
+      []
     );
 
     expect(formattedPolicy).toEqual({
@@ -628,186 +358,41 @@ describe('formatSyntheticsPolicy', () => {
                   type: 'text',
                   value: '"admin"',
                 },
+                maintenance_windows: { type: 'yaml' },
               },
             },
           ],
           type: 'synthetics/http',
         },
+      ],
+      is_managed: true,
+      name: 'Test HTTP Monitor 03-Test private location 0-default',
+      namespace: 'testnamespace',
+      package: {
+        experimental_data_stream_features: [],
+        name: 'synthetics',
+        title: 'Elastic Synthetics',
+        version: '0.11.4',
+      },
+      policy_ids: ['404812e0-90e1-11ed-8111-f7f9cad30b61'],
+    });
+  });
+
+  it('formats disabled monitor policy', async () => {
+    browserConfig.enabled = false;
+    const { formattedPolicy } = formatSyntheticsPolicy(
+      testNewPolicy,
+      MonitorTypeEnum.BROWSER,
+      browserConfig,
+      gParams,
+      testMW
+    );
+
+    expect(formattedPolicy).toEqual({
+      enabled: true,
+      inputs: [
         {
-          enabled: false,
-          policy_template: 'synthetics',
-          streams: [
-            {
-              data_stream: {
-                dataset: 'tcp',
-                type: 'synthetics',
-              },
-              enabled: false,
-              vars: {
-                __ui: {
-                  type: 'yaml',
-                },
-                'check.receive': {
-                  type: 'text',
-                },
-                'check.send': {
-                  type: 'text',
-                },
-                config_id: {
-                  type: 'text',
-                },
-                enabled: {
-                  type: 'bool',
-                  value: true,
-                },
-                hosts: {
-                  type: 'text',
-                },
-                id: {
-                  type: 'text',
-                },
-                location_name: {
-                  type: 'text',
-                  value: 'Fleet managed',
-                },
-                'monitor.project.id': {
-                  type: 'text',
-                },
-                'monitor.project.name': {
-                  type: 'text',
-                },
-                name: {
-                  type: 'text',
-                },
-                origin: {
-                  type: 'text',
-                },
-                proxy_url: {
-                  type: 'text',
-                },
-                proxy_use_local_resolver: {
-                  type: 'bool',
-                  value: false,
-                },
-                run_once: {
-                  type: 'bool',
-                  value: false,
-                },
-                schedule: {
-                  type: 'text',
-                  value: '"@every 3m"',
-                },
-                'service.name': {
-                  type: 'text',
-                },
-                'ssl.certificate': {
-                  type: 'yaml',
-                },
-                'ssl.certificate_authorities': {
-                  type: 'yaml',
-                },
-                'ssl.key': {
-                  type: 'yaml',
-                },
-                'ssl.key_passphrase': {
-                  type: 'text',
-                },
-                'ssl.supported_protocols': {
-                  type: 'yaml',
-                },
-                'ssl.verification_mode': {
-                  type: 'text',
-                },
-                tags: {
-                  type: 'yaml',
-                },
-                timeout: {
-                  type: 'text',
-                },
-                type: {
-                  type: 'text',
-                  value: 'tcp',
-                },
-              },
-            },
-          ],
-          type: 'synthetics/tcp',
-        },
-        {
-          enabled: false,
-          policy_template: 'synthetics',
-          streams: [
-            {
-              data_stream: {
-                dataset: 'icmp',
-                type: 'synthetics',
-              },
-              enabled: false,
-              vars: {
-                __ui: {
-                  type: 'yaml',
-                },
-                config_id: {
-                  type: 'text',
-                },
-                enabled: {
-                  type: 'bool',
-                  value: true,
-                },
-                hosts: {
-                  type: 'text',
-                },
-                id: {
-                  type: 'text',
-                },
-                location_name: {
-                  type: 'text',
-                  value: 'Fleet managed',
-                },
-                'monitor.project.id': {
-                  type: 'text',
-                },
-                'monitor.project.name': {
-                  type: 'text',
-                },
-                name: {
-                  type: 'text',
-                },
-                origin: {
-                  type: 'text',
-                },
-                run_once: {
-                  type: 'bool',
-                  value: false,
-                },
-                schedule: {
-                  type: 'text',
-                  value: '"@every 3m"',
-                },
-                'service.name': {
-                  type: 'text',
-                },
-                tags: {
-                  type: 'yaml',
-                },
-                timeout: {
-                  type: 'text',
-                },
-                type: {
-                  type: 'text',
-                  value: 'icmp',
-                },
-                wait: {
-                  type: 'text',
-                  value: '1s',
-                },
-              },
-            },
-          ],
-          type: 'synthetics/icmp',
-        },
-        {
-          enabled: false,
+          enabled: true,
           policy_template: 'synthetics',
           streams: [
             {
@@ -819,29 +404,36 @@ describe('formatSyntheticsPolicy', () => {
               vars: {
                 __ui: {
                   type: 'yaml',
+                  value:
+                    '{"script_source":{"is_generated_script":false,"file_name":""},"is_tls_enabled":false}',
                 },
                 config_id: {
                   type: 'text',
+                  value: '00bb3ceb-a242-4c7a-8405-8da963661374',
                 },
                 enabled: {
                   type: 'bool',
-                  value: true,
+                  value: false,
                 },
                 'filter_journeys.match': {
                   type: 'text',
+                  value: null,
                 },
                 'filter_journeys.tags': {
                   type: 'yaml',
+                  value: null,
                 },
                 id: {
                   type: 'text',
+                  value: '"00bb3ceb-a242-4c7a-8405-8da963661374"',
                 },
                 ignore_https_errors: {
                   type: 'bool',
+                  value: false,
                 },
                 location_name: {
                   type: 'text',
-                  value: 'Fleet managed',
+                  value: 'Test private location 0',
                 },
                 'monitor.project.id': {
                   type: 'text',
@@ -851,15 +443,20 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 name: {
                   type: 'text',
+                  value: '"Test HTTP Monitor 03"',
                 },
                 origin: {
                   type: 'text',
+                  value: 'ui',
                 },
                 params: {
                   type: 'yaml',
+                  value:
+                    '{"proxyUrl":"https://proxy.com/local","proxyUsername":"username","proxyPassword":"password"}',
                 },
                 playwright_options: {
                   type: 'yaml',
+                  value: '',
                 },
                 run_once: {
                   type: 'bool',
@@ -871,31 +468,45 @@ describe('formatSyntheticsPolicy', () => {
                 },
                 screenshots: {
                   type: 'text',
+                  value: 'on',
                 },
                 'service.name': {
                   type: 'text',
+                  value: '"Local Service"',
                 },
                 'source.inline.script': {
                   type: 'yaml',
+                  value:
+                    '"step(\\"Visit /users api route\\", async () => {\\\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\\\n  expect(response.status()).toEqual(200);\\\\n});"',
                 },
                 'source.project.content': {
                   type: 'text',
+                  value: '',
                 },
                 synthetics_args: {
                   type: 'text',
+                  value: null,
                 },
                 tags: {
                   type: 'yaml',
+                  value: '["cookie-test","browser"]',
                 },
                 'throttling.config': {
                   type: 'text',
+                  value: JSON.stringify({ download: 5, upload: 3, latency: 20 }),
                 },
                 timeout: {
                   type: 'text',
+                  value: '16s',
                 },
                 type: {
                   type: 'text',
                   value: 'browser',
+                },
+                maintenance_windows: {
+                  type: 'yaml',
+                  value:
+                    '[{"dtstart":"2025-06-10T11:40:29.124Z","tzid":"Europe/Berlin","freq":"yearly","count":1,"duration":"1800000ms"}]',
                 },
               },
             },
@@ -987,6 +598,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1026,6 +638,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1056,6 +669,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
       ],
@@ -1094,6 +708,7 @@ const testNewPolicy = {
             origin: { type: 'text' },
             'monitor.project.id': { type: 'text' },
             'monitor.project.name': { type: 'text' },
+            maintenance_windows: { type: 'yaml' },
           },
         },
         { enabled: true, data_stream: { type: 'synthetics', dataset: 'browser.network' } },
@@ -1157,6 +772,7 @@ const browserConfig: any = {
   fields: { config_id: '00bb3ceb-a242-4c7a-8405-8da963661374' },
   fields_under_root: true,
   location_name: 'Test private location 0',
+  maintenance_windows: ['190bd51b-985a-4553-9fba-57222ddde6b7'],
 };
 
 const httpPolicy: any = {

@@ -38,6 +38,11 @@ describe('Route utilities', () => {
           actionGenerator.toEsSearchHit(actionRequestMock),
         ]),
       });
+
+      (
+        testSetupMock.endpointAppContextMock.service.getInternalFleetServices()
+          .ensureInCurrentSpace as jest.Mock
+      ).mockResolvedValue(undefined);
     });
 
     it.each`

@@ -69,6 +69,7 @@ const IntegrationsCardGridTabs = withAvailablePackages<IntegrationsCardGridTabsP
         packageListGridOptions={{
           showCardLabels: true,
         }}
+        selectedTab={selectedTab}
       />
     );
   }

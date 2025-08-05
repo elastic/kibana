@@ -16,27 +16,35 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { setupApp } from './app/setup_app';
-import { DATA_TABLE_ID } from './react_embeddables/data_table/constants';
-import { registerCreateDataTableAction } from './react_embeddables/data_table/create_data_table_action';
-import { EUI_MARKDOWN_ID } from './react_embeddables/eui_markdown/constants';
-import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
+import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
+import {
+  ADD_EUI_MARKDOWN_ACTION_ID,
+  EUI_MARKDOWN_ID,
+} from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
+import { ADD_FIELD_LIST_ACTION_ID } from './react_embeddables/field_list/constants';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
-import { SAVED_BOOK_ID } from './react_embeddables/saved_book/constants';
-import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { setKibanaServices } from './kibana_services';
+import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
 
 export interface SetupDeps {
+  contentManagement: ContentManagementPublicSetup;
   developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsStart;
+  uiActions: UiActionsSetup;
 }
 
 export interface StartDeps {
+  contentManagement: ContentManagementPublicStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   embeddable: EmbeddableStart;
@@ -48,7 +56,10 @@ export interface StartDeps {
 }
 
 export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { embeddable, developerExamples }: SetupDeps) {
+  public setup(
+    core: CoreSetup<StartDeps>,
+    { contentManagement, embeddable, developerExamples }: SetupDeps
+  ) {
     setupApp(core, developerExamples);
 
     const startServicesPromise = core.getStartServices();
@@ -76,13 +87,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return getDataTableFactory(coreStart, deps);
     });
 
-    embeddable.registerReactEmbeddableFactory(SAVED_BOOK_ID, async () => {
-      const { getSavedBookEmbeddableFactory } = await import(
-        './react_embeddables/saved_book/saved_book_react_embeddable'
-      );
-      const [coreStart] = await startServicesPromise;
-      return getSavedBookEmbeddableFactory(coreStart);
-    });
+    setupBookEmbeddable(core, embeddable, contentManagement);
 
     registerSearchEmbeddable(
       embeddable,
@@ -91,16 +96,45 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
   }
 
   public start(core: CoreStart, deps: StartDeps) {
-    registerCreateFieldListAction(deps.uiActions);
+    setKibanaServices(core, deps);
+
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID, async () => {
+      const { createFieldListAction } = await import(
+        './react_embeddables/field_list/create_field_list_action'
+      );
+      return createFieldListAction;
+    });
+
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
-    registerCreateEuiMarkdownAction(deps.uiActions);
+    deps.uiActions.registerActionAsync(ADD_EUI_MARKDOWN_ACTION_ID, async () => {
+      const { createEuiMarkdownAction } = await import(
+        './react_embeddables/eui_markdown/create_eui_markdown_action'
+      );
+      return createEuiMarkdownAction();
+    });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
+    if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
+    }
 
     registerAddSearchPanelAction(deps.uiActions);
 
-    registerCreateDataTableAction(deps.uiActions);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
+      const { createDataTableAction } = await import(
+        './react_embeddables/data_table/create_data_table_action'
+      );
+      return createDataTableAction;
+    });
 
-    registerCreateSavedBookAction(deps.uiActions, core);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
+      const { createSavedBookAction } = await import(
+        './react_embeddables/saved_book/create_saved_book_action'
+      );
+      return createSavedBookAction(core);
+    });
   }
 
   public stop() {}

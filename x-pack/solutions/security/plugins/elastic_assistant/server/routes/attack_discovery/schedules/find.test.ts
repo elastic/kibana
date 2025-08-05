@@ -13,8 +13,8 @@ import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
 import { findAttackDiscoverySchedulesRequest } from '../../../__mocks__/request';
 import {
-  getInternalFindAttackDiscoverySchedulesMock,
-  getInternalAttackDiscoveryScheduleMock,
+  getAttackDiscoveryScheduleMock,
+  getFindAttackDiscoverySchedulesMock,
 } from '../../../__mocks__/attack_discovery_schedules.mock';
 import { AttackDiscoveryScheduleDataClient } from '../../../lib/attack_discovery/schedules/data_client';
 
@@ -63,8 +63,8 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     findAttackDiscoverySchedulesRoute(server.router);
     findAttackDiscoverySchedule.mockResolvedValue(
-      getInternalFindAttackDiscoverySchedulesMock([
-        getInternalAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock),
+      getFindAttackDiscoverySchedulesMock([
+        getAttackDiscoveryScheduleMock(basicAttackDiscoveryScheduleMock),
       ])
     );
   });

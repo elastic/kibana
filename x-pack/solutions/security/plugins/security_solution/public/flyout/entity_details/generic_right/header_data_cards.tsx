@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in the Elastic License
- * 2.0.
- */
-
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButtonIcon,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiSuperSelect,
   EuiTextTruncate,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
-import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
+
+type CustomCriticalityError = Error & {
+  body?: {
+    message?: string;
+  };
+};
 
 export const HeaderDataCards = ({
   id,
@@ -42,20 +43,6 @@ export const HeaderDataCards = ({
     idField: EntityIdentifierFields.generic,
     idValue: id,
   });
-
-  const criticality = getAssetCriticality.data?.criticality_level;
-
-  const assignCriticality = useCallback(
-    (value: CriticalityLevelWithUnassigned) => {
-      assignAssetCriticality.mutate({
-        criticalityLevel: value,
-        idField: EntityIdentifierFields.generic,
-        idValue: id,
-      });
-    },
-    [assignAssetCriticality, id]
-  );
-
   const cards = useMemo(
     () => [
       {
@@ -80,10 +67,15 @@ export const HeaderDataCards = ({
               compressed
               hasDividers
               options={assetCriticalityOptions}
-              valueOfSelected={criticality || 'unassigned'}
+              valueOfSelected={getAssetCriticality.data?.criticality_level || 'unassigned'}
               onChange={(newValue) => {
-                assignCriticality(newValue);
+                assignAssetCriticality.mutate({
+                  criticalityLevel: newValue,
+                  idField: EntityIdentifierFields.generic,
+                  idValue: id,
+                });
               }}
+              isInvalid={assignAssetCriticality.isError}
             />
           </div>
         ),
@@ -120,8 +112,40 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [id, subType, type, assignCriticality, criticality]
+    [getAssetCriticality.data?.criticality_level, id, type, subType, assignAssetCriticality]
   );
 
-  return <ResponsiveDataCards cards={cards} collapseWidth={750} />;
+  return (
+    <>
+      {assignAssetCriticality.isError && (
+        <>
+          <EuiCallOut
+            onDismiss={() => {
+              assignAssetCriticality.reset();
+            }}
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorTitle"
+                defaultMessage="We could not assign the selected criticality"
+              />
+            }
+            color="danger"
+            iconType="error"
+          >
+            <p>
+              {(assignAssetCriticality.error as CustomCriticalityError)?.body?.message ||
+                i18n.translate(
+                  'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.assignCriticalityErrorText',
+                  {
+                    defaultMessage: 'Something went wrong during validation. Please try again.',
+                  }
+                )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      <ResponsiveDataCards cards={cards} collapseWidth={750} />
+    </>
+  );
 };

@@ -14,7 +14,6 @@ export {
   KnowledgeBaseState,
 } from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
-export { FunctionVisibility } from './functions/function_visibility';
 export {
   VISUALIZE_ESQL_USER_INTENTIONS,
   VisualizeESQLUserIntention,
@@ -59,4 +58,5 @@ export {
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
   EIS_PRECONFIGURED_INFERENCE_IDS,
+  LEGACY_CUSTOM_INFERENCE_ID,
 } from './preconfigured_inference_ids';

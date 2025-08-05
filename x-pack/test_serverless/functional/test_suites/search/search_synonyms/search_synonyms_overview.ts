@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         deepLinkId: 'searchSynonyms',
       });
     });
-    describe('Synonyms get started Page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/216661
+    describe.skip('Synonyms get started Page', () => {
       it('is loaded successfully', async () => {
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.expectSynonymsGetStartedPageComponentsToExist();
       });

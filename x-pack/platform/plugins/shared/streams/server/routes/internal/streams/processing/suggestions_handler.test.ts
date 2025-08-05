@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { handleProcessingSuggestion, extractAndGroupPatterns } from './suggestions_handler';
+import { handleProcessingSuggestion } from './suggestions_handler';
 import { simulateProcessing } from './simulation_handler';
-import { InferenceClient } from '@kbn/inference-plugin/server';
+import { InferenceClient } from '@kbn/inference-common';
 import { ScopedClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { StreamsClient } from '../../../../lib/streams/client';
+import { ProcessingSuggestionBody } from './route';
 
 jest.mock('./simulation_handler', () => ({
   simulateProcessing: jest.fn((params) =>
     Promise.resolve({
-      is_non_additive_simulation: false,
+      documents: [],
       documents_metrics: {
         parsed_rate: 1,
       },
@@ -24,26 +25,666 @@ jest.mock('./simulation_handler', () => ({
   ),
 }));
 
+const samples = [
+  {
+    '@timestamp': '2025-04-22T09:28:31.329Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:31 2025] [error] [client 211.62.201.48] Directory index forbidden by rule: /var/www/html/',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:29.165Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:29 2025] [error] [client 218.62.18.218] Directory index forbidden by rule: /var/www/html/',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: "[Tue Apr 22 09:28:07 2025] [error] jk2_init() Can't find child 2085 in scoreboard",
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child init 1 -2',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: "[Tue Apr 22 09:28:07 2025] [error] jk2_init() Can't find child 2086 in scoreboard",
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child init 1 -2',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: "[Tue Apr 22 09:28:07 2025] [error] jk2_init() Can't find child 2087 in scoreboard",
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2084 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.768Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child init 1 -2',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2081 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: "[Tue Apr 22 09:28:07 2025] [error] jk2_init() Can't find child 2082 in scoreboard",
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2083 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child init 1 -2',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.767Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.536Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2061 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.535Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2059 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.535Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2060 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.387Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2051 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.310Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2045 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.262Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2042 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:07 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.015Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.011Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2032 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.010Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2030 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:07.010Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:07 2025] [notice] jk2_init() Found child 2031 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.980Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.980Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.976Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.976Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.953Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2028 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.953Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2027 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.953Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2029 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.698Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.692Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2008 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.691Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2007 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.691Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2006 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.682Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.681Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.645Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2005 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.645Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2004 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.628Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2002 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.628Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2001 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.573Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 10',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.573Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.573Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 10',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.566Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.566Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.566Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.548Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1999 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.548Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 2000 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.548Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1998 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.462Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1990 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.412Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1984 in scoreboard slot 10',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.294Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1970 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.218Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1966 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.218Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1967 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.218Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1965 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.200Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1964 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.164Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1962 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.164Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1963 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.140Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1961 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.078Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1959 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.078Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1958 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.072Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.071Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:06 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:06.011Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:06 2025] [notice] jk2_init() Found child 1957 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:05 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [error] mod_jk child workerEnv in error state 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:05 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [error] mod_jk child workerEnv in error state 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:05 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [error] mod_jk child workerEnv in error state 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:05 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.899Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.894Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1950 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.894Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1951 in scoreboard slot 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.894Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1949 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.894Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1948 in scoreboard slot 8',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.765Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1938 in scoreboard slot 9',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.744Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [notice] jk2_init() Found child 1937 in scoreboard slot 6',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.737Z',
+    filepath: 'Apache.log',
+    message: '[Tue Apr 22 09:28:05 2025] [error] mod_jk child workerEnv in error state 7',
+    'stream.name': 'logs.apache',
+  },
+  {
+    '@timestamp': '2025-04-22T09:28:05.733Z',
+    filepath: 'Apache.log',
+    message:
+      '[Tue Apr 22 09:28:05 2025] [notice] workerEnv.init() ok /etc/httpd/conf/workers2.properties',
+    'stream.name': 'logs.apache',
+  },
+];
+
 describe('handleProcessingSuggestion', () => {
   const dummyChatResponse = {
     output: {
-      rules: [{ parsing_rule: '%{common:message}' }],
+      description: 'Your pipeline name here',
+      processors: [
+        {
+          grok: {
+            field: 'message',
+            patterns: ['Your Grok pattern here'],
+            pattern_definitions: {
+              CUSTOM_TIMESTAMP: '...',
+            },
+          },
+        },
+      ],
     },
   };
 
   let inferenceClientMock: jest.Mocked<InferenceClient>;
 
   const scopedClusterClientMock = {} as unknown as ScopedClusterClient;
-  const streamsClientMock = {} as unknown as StreamsClient;
+  const streamsClientMock = {
+    getStream: jest.fn().mockResolvedValue({ name: 'test' }),
+  } as unknown as StreamsClient;
 
-  const field = 'message';
-  const sample1 = { message: 'Error 100: foo' };
-  const sample2 = { message: 'Error 101: bar' };
-
-  const body = {
-    field,
-    samples: [sample1, sample2],
+  const body: ProcessingSuggestionBody = {
     connectorId: 'connector1',
+    field: 'message',
+    samples,
   };
 
   beforeEach(() => {
@@ -62,178 +703,30 @@ describe('handleProcessingSuggestion', () => {
       streamsClientMock
     );
 
-    // The inferenceClient mock should be called once per unique group.
     expect(inferenceClientMock.output).toHaveBeenCalledTimes(1);
-
-    const expectedPattern = '%{common:message}';
-
-    result.simulations.forEach((sim: any) => {
-      expect(sim).toHaveProperty('pattern', expectedPattern);
-    });
-
-    // Also, the patterns array should reflect the sanitized rule once.
-    expect(result.patterns).toEqual([expectedPattern]);
-  });
-
-  it('limits example values to 8 per group', async () => {
-    // Create 10 distinct messages that produce the same pattern via evalPattern
-    const messages = Array.from({ length: 100 }, (_, i) => ({
-      message: `Error ${111 + i}: foo${i}`,
-    }));
-    const newBody = {
-      field: 'message',
-      samples: messages,
-      connectorId: 'connector1',
-    };
-
-    await handleProcessingSuggestion(
-      'test',
-      newBody,
-      inferenceClientMock,
-      scopedClusterClientMock,
-      streamsClientMock
+    expect(inferenceClientMock.output).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector1',
+      })
     );
-
-    expect(inferenceClientMock.output).toHaveBeenCalledTimes(1);
-    const calledArgs = inferenceClientMock.output.mock.calls[0][0];
-    const inputText = calledArgs.input as string;
-
-    // Extract example lines between "Logs:" and "Given the raw messages"
-    const inputBlockMatch = inputText.match(/Logs:\s*([\s\S]*?)\s*Given the raw messages/);
-    expect(inputBlockMatch).not.toBeNull();
-    const examplesBlock = inputBlockMatch![1].trim();
-    const exampleLines = examplesBlock
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-    expect(exampleLines.length).toBeLessThanOrEqual(8);
-  });
-
-  it('processes two distinct groups and returns multiple patterns', async () => {
-    // Group one: messages with comma, Group two: messages with colon
-    const groupOneMessages = Array.from({ length: 5 }, (_, i) => ({
-      message: `Error 123, foo${i}`,
-    }));
-    const groupTwoMessages = Array.from({ length: 5 }, (_, i) => ({
-      message: `[2025-02-02T12:00:00] Warning 456: bar${i}`,
-    }));
-    const newBody = {
-      field: 'message',
-      samples: [...groupOneMessages, ...groupTwoMessages],
-      connectorId: 'connector1',
-    };
-
-    // Setup inferenceClientMock to return a different chat response for each group
-    inferenceClientMock.output
-      .mockImplementationOnce(async () => ({
-        output: { rules: [{ parsing_rule: '%{common:message}' }] },
-        id: '',
-        content: '',
-      }))
-      .mockImplementationOnce(async () => ({
-        output: { rules: [{ parsing_rule: '%{other:pattern}' }] },
-        id: '',
-        content: '',
-      }));
-
-    const result = await handleProcessingSuggestion(
-      'test',
-      newBody,
-      inferenceClientMock as InferenceClient,
-      scopedClusterClientMock,
-      streamsClientMock
-    );
-
-    // Expect that the inferenceClientMock is called twice, once per group.
-    expect(inferenceClientMock.output).toHaveBeenCalledTimes(2);
-
-    expect(result.patterns).toEqual(['%{common:message}', '%{other:pattern}']);
-
-    result.simulations.forEach((sim: any) => {
-      expect(['%{common:message}', '%{other:pattern}']).toContain(sim.pattern);
-    });
-  });
-
-  it('returns non-matching simulations only when there are not matching simulations at all', async () => {
-    const messages = [{ message: 'Error 999: failed' }, { message: 'Error 999: failed duplicate' }];
-    const newBody = {
-      field: 'message',
-      samples: messages,
-      connectorId: 'connector1',
-    };
-
-    inferenceClientMock.output.mockResolvedValueOnce({
-      output: { rules: [{ parsing_rule: '%{common:message}' }] },
-      id: '',
-      content: '',
-    });
-
-    (simulateProcessing as jest.Mock).mockImplementationOnce(async () => ({
-      is_non_additive_simulation: false,
-      documents_metrics: {
-        parsed_rate: 0,
+    expect(result).toEqual([
+      {
+        description: 'Your pipeline name here',
+        grokProcessor: {
+          field: 'message',
+          pattern_definitions: {
+            CUSTOM_TIMESTAMP: '...',
+          },
+          patterns: ['Your Grok pattern here'],
+        },
+        simulationResult: {
+          documents: [],
+          documents_metrics: {
+            parsed_rate: 1,
+          },
+          simulationField: 'dummy',
+        },
       },
-      simulationField: 'dummy',
-    }));
-
-    const result = await handleProcessingSuggestion(
-      'test',
-      newBody,
-      inferenceClientMock as InferenceClient,
-      scopedClusterClientMock,
-      streamsClientMock
-    );
-
-    expect(result.simulations.length).toBe(1);
-    expect(result.patterns).toEqual(['%{common:message}']);
-  });
-});
-
-describe('extractAndGroupPatterns', () => {
-  it('groups samples correctly, limits exampleValues to 8 and produces expected truncatedPattern', () => {
-    // Create six groups with distinctive messages.
-    const createSample = (msg: string) => ({
-      // uniform message with random stuff and long tail to test cut-off of truncatedPattern
-      message: `${Math.random()} ${msg} 0123 Test 123 long 123 pattern 123`,
-    });
-    const group1Msg = 'Alpha001: test!';
-    const group2Msg = 'Beta002, check?';
-    const group3Msg = 'Gamma003; verify.';
-    const group4Msg = 'Delta004- confirm';
-    const group5Msg = 'Epsilon005/ proceed';
-    const group6Msg = 'Zeta006| complete';
-
-    // Create groups with varying counts
-    const group1 = Array.from({ length: 9 }, () => createSample(group1Msg));
-    const group2 = Array.from({ length: 5 }, () => createSample(group2Msg));
-    const group3 = Array.from({ length: 3 }, () => createSample(group3Msg));
-    const group4 = Array.from({ length: 4 }, () => createSample(group4Msg));
-    const group5 = Array.from({ length: 7 }, () => createSample(group5Msg));
-    const group6 = Array.from({ length: 8 }, () => createSample(group6Msg));
-
-    // Combine all samples
-    const samples = [...group1, ...group2, ...group3, ...group4, ...group5, ...group6];
-
-    // Calculate expected truncatedPatterns for each group.
-    const expectedG1 = 'p f: a! 0 ';
-    const expectedG2 = 'p f, a? 0 ';
-    // Group 3 has only 3 samples, so it should not be in the top 5.
-    const expectedG4 = 'p f- a 0 a';
-    const expectedG5 = 'p f/ a 0 a';
-    const expectedG6 = 'p f| a 0 a';
-
-    const expectedTruncs = [expectedG1, expectedG6, expectedG5, expectedG2, expectedG4];
-
-    const result = extractAndGroupPatterns(samples, 'message');
-
-    expect(result.length).toBe(5);
-
-    result.forEach((group) => {
-      expect(group.count).toBeGreaterThan(0);
-      expect(group.exampleValues.length).toBeLessThanOrEqual(8);
-      expect(group.truncatedPattern.length).toBeLessThanOrEqual(10);
-      // Ensure the truncatedPattern is one of the expected top five.
-      expect(expectedTruncs).toContain(group.truncatedPattern);
-    });
+    ]);
   });
 });

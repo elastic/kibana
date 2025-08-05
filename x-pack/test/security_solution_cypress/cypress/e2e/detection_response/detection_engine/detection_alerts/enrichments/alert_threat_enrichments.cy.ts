@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../../../objects/rule';
 import { login } from '../../../../../tasks/login';
 import {
@@ -15,6 +16,7 @@ import {
   INVESTIGATION_TIME_ENRICHMENT_SECTION,
   ENRICHMENT_SECTION_BUTTON_CONTENT,
 } from '../../../../../screens/alerts_details';
+import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import { TIMELINE_FIELD } from '../../../../../screens/rule_details';
 import { expandFirstAlert, setEnrichmentDates } from '../../../../../tasks/alerts';
 import { createRule } from '../../../../../tasks/api_calls/rules';
@@ -23,6 +25,7 @@ import {
   expandDocumentDetailsExpandableFlyoutLeftSection,
   openTableTab,
 } from '../../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { installMockPrebuiltRulesPackage } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { filterTableTabTable } from '../../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
 import { DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_THREAT_ENRICHMENTS } from '../../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import { openThreatIntelligenceTab } from '../../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
@@ -31,22 +34,44 @@ import { openInsightsTab } from '../../../../../tasks/expandable_flyout/alert_de
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
-    // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
+    installMockPrebuiltRulesPackage();
+  });
+
+  beforeEach(() => {
+    deleteAlertsAndRules();
+
     cy.task('esArchiverLoad', { archiveName: 'threat_indicator' });
     cy.task('esArchiverLoad', { archiveName: 'suspicious_source_event' });
+
     login();
+    createRule(
+      getNewThreatIndicatorRule({
+        rule_id: 'rule_testing',
+        query: '*:*',
+        index: ['auditbeat-*'],
+        threat_query: '*:*',
+        threat_index: ['logs-ti*'],
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'myhash.mysha256',
+                value: 'threat.indicator.file.hash.sha256',
+                type: 'mapping',
+              },
+            ],
+          },
+        ],
+        threat_indicator_path: 'threat.indicator',
+        enabled: true,
+      })
+    ).then((response) => visitRuleDetailsPage(response.body.id));
   });
 
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'threat_indicator' });
+    cy.task('esArchiverUnload', { archiveName: 'threat_indicator2' });
     cy.task('esArchiverUnload', { archiveName: 'suspicious_source_event' });
-  });
-
-  beforeEach(() => {
-    login();
-    createRule({ ...getNewThreatIndicatorRule(), rule_id: 'rule_testing', enabled: true }).then(
-      (rule) => visitRuleDetailsPage(rule.body.id)
-    );
   });
 
   // TODO: https://github.com/elastic/kibana/issues/161539
@@ -93,6 +118,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
       'indicator.file.size': [80280],
     };
 
+    waitForAlertsToPopulate();
     expandFirstAlert();
     openTableTab();
     filterTableTabTable('threat.enrichments');
@@ -135,6 +161,7 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
       { field: 'matched.type', value: 'indicator_match_rule' },
     ];
 
+    waitForAlertsToPopulate();
     expandFirstAlert();
     expandDocumentDetailsExpandableFlyoutLeftSection();
     openInsightsTab();
@@ -154,15 +181,10 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
   });
 
   describe('with additional indicators', () => {
-    before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
-    });
-
-    after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'threat_indicator2' });
-    });
-
     it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {
+      waitForAlertsToPopulate();
+      cy.task('esArchiverLoad', { archiveName: 'threat_indicator2' });
+
       expandFirstAlert();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();

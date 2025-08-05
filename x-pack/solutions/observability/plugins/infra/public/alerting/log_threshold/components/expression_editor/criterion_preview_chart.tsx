@@ -247,6 +247,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
         <Chart>
           <BarSeries
             id="criterion-preview"
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"

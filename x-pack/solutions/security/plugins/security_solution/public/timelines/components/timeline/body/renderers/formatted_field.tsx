@@ -11,7 +11,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
@@ -119,7 +119,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         value={value}
         tooltipProps={
-          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+          isUnifiedDataTable ? undefined : { position: 'bottom', css: dataGridToolTipOffset }
         }
       />
     );
@@ -227,7 +227,7 @@ const FormattedFieldValueComponent: React.FC<{
         <EuiToolTip
           data-test-subj="message-tool-tip"
           position="bottom"
-          className={dataGridToolTipOffset}
+          css={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>

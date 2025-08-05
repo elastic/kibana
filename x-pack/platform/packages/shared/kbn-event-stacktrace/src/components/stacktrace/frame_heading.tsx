@@ -70,7 +70,7 @@ function FrameHeading({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) 
   }
 
   return (
-    <FileDetails data-test-subj="FrameHeading">
+    <FileDetails data-test-subj="FrameHeading" data-library-frame={isLibraryFrame}>
       <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} idx={idx} />
     </FileDetails>
   );

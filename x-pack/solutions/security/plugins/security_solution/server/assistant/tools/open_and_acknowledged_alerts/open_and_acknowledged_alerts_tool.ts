@@ -19,12 +19,13 @@ import {
 import { tool } from '@langchain/core/tools';
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 
-export interface OpenAndAcknowledgedAlertsToolParams extends AssistantToolParams {
-  alertsIndexPattern: string;
-  size: number;
-}
+export type OpenAndAcknowledgedAlertsToolParams = Require<
+  AssistantToolParams,
+  'alertsIndexPattern' | 'size'
+>;
 
 export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION =
   'Call this for knowledge about the latest n open and acknowledged alerts (sorted by `kibana.alert.risk_score`) in the environment, or when answering questions about open alerts. Do not call this tool for alert count or quantity. The output is an array of the latest n open and acknowledged alerts.';
@@ -50,7 +51,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       !sizeIsOutOfRange(size)
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const {

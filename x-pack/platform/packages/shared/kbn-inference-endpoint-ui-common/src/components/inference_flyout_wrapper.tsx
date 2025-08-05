@@ -19,7 +19,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
@@ -27,11 +26,73 @@ import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
 import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
 
+const MIN_ALLOCATIONS = 0;
+const DEFAULT_NUM_THREADS = 1;
+
+const formDeserializer = (data: InferenceEndpoint) => {
+  if (
+    data?.config?.providerConfig &&
+    data?.config?.providerConfig['adaptive_allocations.max_number_of_allocations']
+  ) {
+    // remove num_allocations and num_threads from the data as form does not expect it
+    const {
+      num_allocations: numAllocations,
+      num_threads: numThreads,
+      ...restOfProviderConfig
+    } = data.config.providerConfig;
+    return {
+      ...data,
+      config: {
+        ...data.config,
+        providerConfig: {
+          ...restOfProviderConfig,
+          max_number_of_allocations:
+            restOfProviderConfig['adaptive_allocations.max_number_of_allocations'],
+        },
+      },
+    };
+  }
+
+  return data;
+};
+
+// This serializer is used to transform the form data before sending it to the server
+const formSerializer = (formData: InferenceEndpoint) => {
+  if (
+    // explicit check to see if this field exists as it only exists in serverless
+    formData.config?.providerConfig?.max_number_of_allocations !== undefined
+  ) {
+    const providerConfig = formData.config?.providerConfig;
+    const { max_number_of_allocations: maxAllocations, ...restProviderConfig } =
+      providerConfig || {};
+
+    return {
+      ...formData,
+      config: {
+        ...formData.config,
+        providerConfig: {
+          ...restProviderConfig,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: MIN_ALLOCATIONS,
+            ...(maxAllocations ? { max_number_of_allocations: maxAllocations } : {}),
+          },
+          // Temporary solution until the endpoint is updated to no longer require it and to set its own default for this value
+          num_threads: DEFAULT_NUM_THREADS,
+        },
+      },
+    };
+  }
+
+  return formData;
+};
+
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
 }
@@ -41,6 +102,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   http,
   toasts,
   isEdit,
+  enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
 }) => {
@@ -68,6 +130,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         providerSecrets: {},
       },
     },
+    serializer: formSerializer,
+    deserializer: formDeserializer,
   });
   const handleSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
@@ -98,6 +162,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
             http={http}
             toasts={toasts}
             isEdit={isEdit}
+            enforceAdaptiveAllocations={enforceAdaptiveAllocations}
             isPreconfigured={isPreconfigured}
           />
           <EuiSpacer size="m" />

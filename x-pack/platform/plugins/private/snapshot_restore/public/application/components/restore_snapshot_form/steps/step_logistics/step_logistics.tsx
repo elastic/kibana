@@ -196,7 +196,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             flush="right"
             href={docLinks.links.snapshotRestore.restoreSnapshot}
             target="_blank"
-            iconType="help"
+            iconType="question"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.restoreForm.stepLogistics.docsButtonLabel"
@@ -502,6 +502,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       error={errors.renamePattern}
                     >
                       <EuiFieldText
+                        isInvalid={Boolean(errors.renamePattern)}
                         value={renamePattern}
                         placeholder="data_(.+)"
                         onChange={(e) => {
@@ -529,6 +530,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       error={errors.renameReplacement}
                     >
                       <EuiFieldText
+                        isInvalid={Boolean(errors.renameReplacement)}
                         value={renameReplacement}
                         placeholder="restored_data_$1"
                         onChange={(e) => {
@@ -703,7 +705,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <EuiSpacer size="m" />
             <EuiCallOut
               size="s"
-              iconType="help"
+              iconType="question"
               color="warning"
               data-test-subj="noFeatureStatesCallout"
               title={i18n.translate(

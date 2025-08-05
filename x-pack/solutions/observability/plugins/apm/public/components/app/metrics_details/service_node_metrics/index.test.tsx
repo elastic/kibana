@@ -6,20 +6,44 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 import { ServiceNodeMetrics } from '.';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
+import { renderWithContext } from '../../../../utils/test_helpers';
+
+// Mock the breadcrumb hook
+jest.mock('../../../../context/breadcrumbs/use_breadcrumb', () => ({
+  useBreadcrumb: jest.fn(),
+}));
+
+// Mock the data source hook
+jest.mock('../../../../hooks/use_preferred_data_source_and_bucket_size', () => ({
+  usePreferredDataSourceAndBucketSize: jest.fn().mockReturnValue({
+    source: {
+      documentType: 'metrics',
+      rollupInterval: '1m',
+    },
+  }),
+}));
+
+jest.mock('../../../../hooks/use_apm_params', () => ({
+  useApmParams: jest.fn().mockReturnValue({
+    query: {
+      environment: 'ENVIRONMENT_ALL',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      kuery: '',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+  }),
+}));
 
 describe('ServiceNodeMetrics', () => {
-  describe('render', () => {
-    it('renders', () => {
-      expect(() =>
-        shallow(
-          <MockApmPluginContextWrapper>
-            <ServiceNodeMetrics serviceNodeName="foo" />
-          </MockApmPluginContextWrapper>
-        )
-      ).not.toThrowError();
-    });
+  it('renders without errors', async () => {
+    waitFor(() => {});
+
+    expect(() =>
+      renderWithContext(<ServiceNodeMetrics serviceNodeName="test-node" />)
+    ).not.toThrowError();
   });
 });

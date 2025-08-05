@@ -27,6 +27,7 @@ import {
   AttachmentType,
 } from '../common/types/domain';
 import type { CasePostRequest } from '../common/types/api';
+import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import type { CasesServerStart } from './types';
 
 const lensPersistableState = {
@@ -147,6 +148,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'This is a brand new case of a bad meanie defacing data',
       external_service: null,
+      incremental_id: undefined,
       title: 'Super Bad Security Issue',
       status: CaseStatuses.open,
       tags: ['defacement'],
@@ -191,6 +193,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie destroying data!',
       external_service: null,
+      incremental_id: undefined,
       title: 'Damaging Data Destruction Detected',
       status: CaseStatuses.open,
       tags: ['Data Destruction'],
@@ -235,6 +238,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
+      incremental_id: undefined,
       title: 'Another bad one',
       status: CaseStatuses.open,
       tags: ['LOLBins'],
@@ -283,6 +287,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       duration: null,
       description: 'Oh no, a bad meanie going LOLBins all over the place!',
       external_service: null,
+      incremental_id: undefined,
       status: CaseStatuses.closed,
       title: 'Another bad one',
       tags: ['LOLBins'],
@@ -730,6 +735,22 @@ export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getExternalReferenceAttachmentTypeRegistry: jest.fn(),
   getPersistableStateAttachmentTypeRegistry: jest.fn(),
+  config: {
+    enabled: true,
+    stack: {
+      enabled: true,
+    },
+    markdownPlugins: { lens: true },
+    files: {
+      allowedMimeTypes: ALLOWED_MIME_TYPES,
+      maxSize: 1,
+    },
+    analytics: {
+      index: {
+        enabled: true,
+      },
+    },
+  },
 });
 
 export const casesPluginMock = {

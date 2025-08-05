@@ -6,9 +6,9 @@
  */
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { kbnServerArgs as fleetKbnServerArgs } from '../../../api_integration/services/default_fleet_setup';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import { createTestConfig } from '../../config.base';
-import { kbnServerArgs as fleetKbnServerArgs } from '../../../api_integration/test_suites/common/fleet/default_setup';
 
 // TODO: Remove the agentless default config once Serverless API is merged  and default policy is deleted
 export default createTestConfig({

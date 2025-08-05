@@ -31,7 +31,7 @@ import type {
   FleetServerAgentMetadata,
 } from '../../common/types';
 
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, licenseService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
@@ -41,7 +41,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '30m';
@@ -141,6 +141,12 @@ export class AutomaticAgentUpgradeTask {
       );
       return;
     }
+    if (!licenseService.isEnterprise()) {
+      this.logger.debug(
+        '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature requires at least Enterprise license'
+      );
+      return;
+    }
 
     if (!this.wasStarted) {
       this.logger.debug('[AutomaticAgentUpgradeTask] Aborting runTask(): task not started yet');
@@ -193,6 +199,7 @@ export class AutomaticAgentUpgradeTask {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.required_versions:*`,
       perPage: AGENT_POLICIES_BATCHSIZE,
       fields: ['id', 'required_versions'],
+      spaceId: '*',
     });
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       this.logger.debug(
@@ -376,6 +383,9 @@ export class AutomaticAgentUpgradeTask {
 
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
     if (numberOfAgentsForUpgrade <= 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Number of agents ${numberOfAgentsForUpgrade}: no candidate agents found for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      );
       return;
     }
 
@@ -461,6 +471,7 @@ export class AutomaticAgentUpgradeTask {
         await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
           agents: agentsReadyForRetry,
           version,
+          spaceIds: agentPolicy.space_ids,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
         });
       }
@@ -523,6 +534,7 @@ export class AutomaticAgentUpgradeTask {
       await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
         agents: agentsForUpgrade,
         version,
+        spaceIds: agentPolicy.space_ids,
         ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
       });
     }

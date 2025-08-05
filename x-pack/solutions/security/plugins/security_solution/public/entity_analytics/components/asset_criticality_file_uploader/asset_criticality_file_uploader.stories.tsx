@@ -36,7 +36,7 @@ export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '800px' }}>
+        <div css={{ maxWidth: '800px' }}>
           <EuiPanel>
             <AssetCriticalityFileUploader />
           </EuiPanel>
@@ -50,7 +50,7 @@ export const FilePickerStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '800px' }}>
+        <div css={{ maxWidth: '800px' }}>
           <b>{'Loading state'}</b>
           <EuiSpacer size="s" />
 
@@ -79,7 +79,7 @@ export const ValidationStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '800px' }}>
+        <div css={{ maxWidth: '800px' }}>
           <b>{'Initial state'}</b>
           <EuiSpacer size="s" />
 
@@ -164,7 +164,7 @@ export const ResultsStep: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '800px' }}>
+        <div css={{ maxWidth: '800px' }}>
           <b>{'Success'}</b>
           <EuiSpacer size="s" />
 

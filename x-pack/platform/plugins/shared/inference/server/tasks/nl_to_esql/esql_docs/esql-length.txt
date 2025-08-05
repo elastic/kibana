@@ -1,6 +1,6 @@
-# LENGTH
+## LENGTH
 
-The LENGTH function calculates the character length of a given string.
+Returns the character length of a string.
 
 ## Syntax
 
@@ -8,21 +8,17 @@ The LENGTH function calculates the character length of a given string.
 
 ### Parameters
 
-#### string
+#### `string`
 
-The string expression for which the length is to be calculated.
+String expression. If `null`, the function returns `null`.
 
 ## Examples
 
-The following example calculates the character length of the `first_name` field:
-
 ```esql
-FROM employees
-| KEEP first_name, last_name
-| EVAL fn_length = LENGTH(first_name)
+FROM airports
+| WHERE country == "India"
+| KEEP city
+| EVAL fn_length = LENGTH(city)
 ```
 
-```esql
-ROW message = "Hello, World!"
-| EVAL message_length = LENGTH(message)
-```
+This example calculates the character length of the `city` field for airports located in India.

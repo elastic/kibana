@@ -24,7 +24,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
-import { getFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
+import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { useDocumentDetailsContext } from '../context';
@@ -74,7 +74,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   openDetailsPanel,
 }) => {
   const renderingId = useGeneratedHtmlId();
-  const { scopeId, isPreview } = useDocumentDetailsContext();
+  const { scopeId } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
     query: buildGenericEntityFlyoutPreviewQuery(fieldName, name),
@@ -101,10 +101,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     }
   }, [shouldRender, telemetryKey, renderingId]);
 
-  const misconfigurationsStats = useMemo(
-    () => getFindingsStats(passedFindings, failedFindings),
-    [passedFindings, failedFindings]
-  );
+  const misconfigurationsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   const count = useMemo(
     () => (
@@ -141,7 +138,6 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
             field={fieldName}
             value={name}
             scopeId={scopeId}
-            isPreview={isPreview}
             data-test-subj={`${dataTestSubj}-count`}
           >
             <FormattedCount count={totalFindings} />
@@ -154,7 +150,6 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
       fieldName,
       name,
       scopeId,
-      isPreview,
       dataTestSubj,
       euiTheme.size,
       isNewNavigationEnabled,

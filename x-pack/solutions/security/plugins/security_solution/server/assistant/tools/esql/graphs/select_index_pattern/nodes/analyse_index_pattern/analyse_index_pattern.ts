@@ -11,7 +11,7 @@ import type { getAnalyzeIndexPatternGraph } from '../../../analyse_index_pattern
 export const getAnalyzeIndexPattern = ({
   analyzeIndexPatternGraph,
 }: {
-  analyzeIndexPatternGraph: ReturnType<typeof getAnalyzeIndexPatternGraph>;
+  analyzeIndexPatternGraph: Awaited<ReturnType<typeof getAnalyzeIndexPatternGraph>>;
 }) => {
   return async ({
     input,

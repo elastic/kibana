@@ -26,7 +26,6 @@ import { embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
-import { DashboardApi } from '../dashboard_api/types';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -50,9 +49,8 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
-    const dashboard = api.parentApi as DashboardApi;
     // TODO handle getDashboardPanelFromId throw
-    const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid);
+    const panelToCopy = api.parentApi.getDashboardPanelFromId(api.uuid);
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,

@@ -1811,24 +1811,6 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-public.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
             "id": "def-public.Space.solution",
             "type": "CompoundType",
             "tags": [],
@@ -3723,24 +3705,6 @@
           },
           {
             "parentPluginId": "spaces",
-            "id": "def-server.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
             "id": "def-server.Space.solution",
             "type": "CompoundType",
             "tags": [],
@@ -4170,136 +4134,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-server.SpacesClientRepositoryFactory",
-        "type": "Type",
-        "tags": [
-          "private"
-        ],
-        "label": "SpacesClientRepositoryFactory",
-        "description": [
-          "\nFor consumption by the security plugin only."
-        ],
-        "signature": [
-          "(request: ",
-          "KibanaRequest",
-          "<unknown, unknown, unknown, any>, savedObjectsStart: ",
-          "SavedObjectsServiceStart",
-          ") => ",
-          "ISavedObjectsRepository"
-        ],
-        "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientRepositoryFactory.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientRepositoryFactory.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "savedObjectsStart",
-            "description": [],
-            "signature": [
-              "SavedObjectsServiceStart"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-server.SpacesClientWrapper",
-        "type": "Type",
-        "tags": [
-          "private"
-        ],
-        "label": "SpacesClientWrapper",
-        "description": [
-          "\nFor consumption by the security plugin only."
-        ],
-        "signature": [
-          "(request: ",
-          "KibanaRequest",
-          "<unknown, unknown, unknown, any>, baseClient: ",
-          {
-            "pluginId": "spaces",
-            "scope": "server",
-            "docId": "kibSpacesPluginApi",
-            "section": "def-server.ISpacesClient",
-            "text": "ISpacesClient"
-          },
-          ") => ",
-          {
-            "pluginId": "spaces",
-            "scope": "server",
-            "docId": "kibSpacesPluginApi",
-            "section": "def-server.ISpacesClient",
-            "text": "ISpacesClient"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientWrapper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "KibanaRequest",
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-server.SpacesClientWrapper.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "baseClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "spaces",
-                "scope": "server",
-                "docId": "kibSpacesPluginApi",
-                "section": "def-server.ISpacesClient",
-                "text": "ISpacesClient"
-              }
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/server/spaces_client/spaces_client_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -4333,40 +4167,6 @@
               "section": "def-server.SpacesServiceSetup",
               "text": "SpacesServiceSetup"
             }
-          ],
-          "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "spaces",
-          "id": "def-server.SpacesPluginSetup.spacesClient",
-          "type": "Object",
-          "tags": [
-            "private"
-          ],
-          "label": "spacesClient",
-          "description": [
-            "\nRegistries exposed for the security plugin to transparently provide authorization and audit logging."
-          ],
-          "signature": [
-            "{ setClientRepositoryFactory: (factory: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientRepositoryFactory",
-              "text": "SpacesClientRepositoryFactory"
-            },
-            ") => void; registerClientWrapper: (wrapper: ",
-            {
-              "pluginId": "spaces",
-              "scope": "server",
-              "docId": "kibSpacesPluginApi",
-              "section": "def-server.SpacesClientWrapper",
-              "text": "SpacesClientWrapper"
-            },
-            ") => void; }"
           ],
           "path": "x-pack/platform/plugins/shared/spaces/server/plugin.ts",
           "deprecated": false,
@@ -4523,64 +4323,6 @@
         ],
         "returnComment": [
           "the space-aware version of the requested path, inclusive of the server's base path."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "spaces",
-        "id": "def-common.getSpaceIdFromPath",
-        "type": "Function",
-        "tags": [
-          "private"
-        ],
-        "label": "getSpaceIdFromPath",
-        "description": [
-          "\nExtracts the space id from the given path.\n"
-        ],
-        "signature": [
-          "(requestBasePath: string | null | undefined, serverBasePath: string | null | undefined) => { spaceId: string; pathHasExplicitSpaceIdentifier: boolean; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.getSpaceIdFromPath.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "requestBasePath",
-            "description": [
-              "The base path of the current request."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.getSpaceIdFromPath.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "serverBasePath",
-            "description": [
-              "The server's base path."
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-spaces-utils/src/common/spaces_url_parser.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "the space id."
         ],
         "initialIsOpen": false
       },
@@ -4871,24 +4613,6 @@
             ],
             "signature": [
               "string[]"
-            ],
-            "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "spaces",
-            "id": "def-common.Space._reserved",
-            "type": "CompoundType",
-            "tags": [
-              "private"
-            ],
-            "label": "_reserved",
-            "description": [
-              "\nIndicates that this space is reserved (system controlled).\nReserved spaces cannot be created or deleted by end-users."
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/spaces/common/types/space/v1.ts",
             "deprecated": false,

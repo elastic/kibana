@@ -15,6 +15,9 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
 import type { SSLSettings } from '../types';
 
+/**
+ * Create http and https proxy agents with custom proxy /hosts/SSL settings from configurationUtilities
+ */
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;
   httpsAgent: HttpsAgent | undefined;
@@ -65,7 +68,8 @@ export function getCustomAgents(
     // This is where the global rejectUnauthorized is overridden by a custom host
     const customHostNodeSSLOptions = getNodeSSLOptions(
       logger,
-      sslSettingsFromConfig.verificationMode
+      sslSettingsFromConfig.verificationMode,
+      sslOverrides
     );
     if (customHostNodeSSLOptions.rejectUnauthorized !== undefined) {
       agentOptions.rejectUnauthorized = customHostNodeSSLOptions.rejectUnauthorized;
@@ -113,7 +117,8 @@ export function getCustomAgents(
 
   const proxyNodeSSLOptions = getNodeSSLOptions(
     logger,
-    proxySettings.proxySSLSettings.verificationMode
+    proxySettings.proxySSLSettings.verificationMode,
+    sslOverrides
   );
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into

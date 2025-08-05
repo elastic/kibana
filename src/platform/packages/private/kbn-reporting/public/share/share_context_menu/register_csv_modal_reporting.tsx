@@ -15,9 +15,41 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { ShareContext, type ExportShare } from '@kbn/share-plugin/public';
 import { LocatorParams } from '@kbn/reporting-common/types';
+import { ReportParamsGetter, ReportParamsGetterOptions } from '../../types';
 import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
+
+export const getCsvReportParams: ReportParamsGetter<
+  ReportParamsGetterOptions & { forShareUrl?: boolean },
+  CsvSearchModeParams
+> = ({ sharingData, forShareUrl = false }) => {
+  const getSearchSource = sharingData.getSearchSource as ({
+    addGlobalTimeFilter,
+    absoluteTime,
+  }: {
+    addGlobalTimeFilter?: boolean;
+    absoluteTime?: boolean;
+  }) => SerializedSearchSourceFields;
+
+  if (sharingData.isTextBased) {
+    // csv v2 uses locator params
+    return {
+      isEsqlMode: true,
+      locatorParams: sharingData.locatorParams as LocatorParams[],
+    };
+  }
+
+  // csv v1 uses search source and columns
+  return {
+    isEsqlMode: false,
+    columns: sharingData.columns as string[] | undefined,
+    searchSource: getSearchSource({
+      addGlobalTimeFilter: true,
+      absoluteTime: !forShareUrl,
+    }),
+  };
+};
 
 export const reportingCsvExportProvider = ({
   apiClient,
@@ -26,35 +58,9 @@ export const reportingCsvExportProvider = ({
   const getShareMenuItems = ({
     objectType,
     sharingData,
-    toasts,
   }: ShareContext): ReturnType<ExportShare['config']> => {
-    const getSearchSource = sharingData.getSearchSource as ({
-      addGlobalTimeFilter,
-      absoluteTime,
-    }: {
-      addGlobalTimeFilter?: boolean;
-      absoluteTime?: boolean;
-    }) => SerializedSearchSourceFields;
-
-    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams => {
-      if (sharingData.isTextBased) {
-        // csv v2 uses locator params
-        return {
-          isEsqlMode: true,
-          locatorParams: sharingData.locatorParams as LocatorParams[],
-        };
-      }
-
-      // csv v1 uses search source and columns
-      return {
-        isEsqlMode: false,
-        columns: sharingData.columns as string[] | undefined,
-        searchSource: getSearchSource({
-          addGlobalTimeFilter: true,
-          absoluteTime: !forShareUrl,
-        }),
-      };
-    };
+    const getSearchModeParams = (forShareUrl?: boolean): CsvSearchModeParams =>
+      getCsvReportParams({ sharingData, forShareUrl });
 
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({
@@ -63,50 +69,56 @@ export const reportingCsvExportProvider = ({
         title: sharingData.title as string,
       });
 
-      return apiClient
-        .createReportingShareJob(reportType, decoratedJobParams)
-        .then(() => firstValueFrom(startServices$))
-        .then(([startServices]) => {
-          toasts.addSuccess({
-            title: intl.formatMessage(
-              {
-                id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
-                defaultMessage: 'Queued report for {objectType}',
-              },
-              { objectType }
-            ),
-            text: toMountPoint(
-              <FormattedMessage
-                id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
-                defaultMessage="Track its progress in {path}."
-                values={{
-                  path: (
-                    <a href={apiClient.getManagementLink()}>
-                      <FormattedMessage
-                        id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
-                        defaultMessage="Stack Management &gt; Reporting"
-                      />
-                    </a>
-                  ),
-                }}
-              />,
-              startServices
-            ),
-            'data-test-subj': 'queueReportSuccess',
+      return firstValueFrom(startServices$).then(([startServices]) => {
+        const {
+          notifications: { toasts },
+          rendering,
+        } = startServices;
+
+        return apiClient
+          .createReportingShareJob(reportType, decoratedJobParams)
+          .then(() => {
+            toasts.addSuccess({
+              title: intl.formatMessage(
+                {
+                  id: 'reporting.share.modalContent.successfullyQueuedReportNotificationTitle',
+                  defaultMessage: 'Queued report for {objectType}',
+                },
+                { objectType }
+              ),
+              text: toMountPoint(
+                <FormattedMessage
+                  id="reporting.share.modalContent.successfullyQueuedReportNotificationDescription"
+                  defaultMessage="Track its progress in {path}."
+                  values={{
+                    path: (
+                      <a href={apiClient.getManagementLink()}>
+                        <FormattedMessage
+                          id="reporting.share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                          defaultMessage="Stack Management &gt; Reporting"
+                        />
+                      </a>
+                    ),
+                  }}
+                />,
+                rendering
+              ),
+              'data-test-subj': 'queueReportSuccess',
+            });
+          })
+          .catch((error) => {
+            toasts.addError(error, {
+              title: intl.formatMessage({
+                id: 'reporting.share.modalContent.notification.reportingErrorTitle',
+                defaultMessage: 'Unable to create report',
+              }),
+              toastMessage: (
+                // eslint-disable-next-line react/no-danger
+                <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
+              ) as unknown as string,
+            });
           });
-        })
-        .catch((error) => {
-          toasts.addError(error, {
-            title: intl.formatMessage({
-              id: 'reporting.share.modalContent.notification.reportingErrorTitle',
-              defaultMessage: 'Unable to create report',
-            }),
-            toastMessage: (
-              // eslint-disable-next-line react/no-danger
-              <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
-            ) as unknown as string,
-          });
-        });
+      });
     };
 
     const panelTitle = i18n.translate('reporting.share.contextMenu.export.csvReportsButtonLabel', {
@@ -127,6 +139,7 @@ export const reportingCsvExportProvider = ({
       name: panelTitle,
       exportType: reportType,
       label: 'CSV',
+      icon: 'tableDensityNormal',
       generateAssetExport: generateReportingJobCSV,
       helpText: (
         <FormattedMessage

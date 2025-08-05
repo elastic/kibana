@@ -9,9 +9,7 @@ import type { SiemMigrationTaskStatus } from '../../../common/siem_migrations/co
 import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
-  status: SiemMigrationTaskStatus;
-  /** The sequential number of the migration */
-  number: number;
+  status: SiemMigrationTaskStatus; // use the native enum instead of the zod enum from the model
 }
 
 export enum AuthorFilter {
@@ -30,4 +28,9 @@ export enum StatusFilter {
 export interface FilterOptions {
   status?: StatusFilter;
   author?: AuthorFilter;
+}
+
+export interface RuleMigrationSettings {
+  connectorId: string;
+  skipPrebuiltRulesMatching: boolean;
 }

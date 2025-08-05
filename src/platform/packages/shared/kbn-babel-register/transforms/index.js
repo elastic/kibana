@@ -8,11 +8,13 @@
  */
 
 const { peggyTransform } = require('./peggy');
+const { dotTextTransform } = require('./dot_text');
 const { babelTransform } = require('./babel');
 
 module.exports = {
   TRANSFORMS: {
     '.peggy': peggyTransform,
+    '.text': dotTextTransform,
     default: babelTransform,
   },
 };

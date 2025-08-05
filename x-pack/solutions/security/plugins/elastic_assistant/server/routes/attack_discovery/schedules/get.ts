@@ -17,7 +17,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
 import { performChecks } from '../../helpers';
 import { isFeatureAvailable } from './utils/is_feature_available';
 
@@ -87,9 +86,7 @@ export const getAttackDiscoverySchedulesRoute = (
             });
           }
 
-          const alertingRule = await dataClient.getSchedule(id);
-
-          const schedule = convertAlertingRuleToSchedule(alertingRule);
+          const schedule = await dataClient.getSchedule(id);
 
           return response.ok({ body: schedule });
         } catch (err) {

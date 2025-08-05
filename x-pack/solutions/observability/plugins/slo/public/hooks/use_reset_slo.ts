@@ -23,19 +23,10 @@ export function useResetSlo() {
 
   return useMutation<ResetSLOResponse, ServerError, { id: string; name: string }>(
     ['resetSlo'],
-    ({ id, name }) => {
-      try {
-        return sloClient.fetch('POST /api/observability/slos/{id}/_reset 2023-10-31', {
-          params: { path: { id } },
-        });
-      } catch (error) {
-        return Promise.reject(
-          i18n.translate('xpack.slo.slo.reset.errorMessage', {
-            defaultMessage: 'Failed to reset {name} (id: {id}), something went wrong: {error}',
-            values: { error: String(error), name, id },
-          })
-        );
-      }
+    ({ id }) => {
+      return sloClient.fetch('POST /api/observability/slos/{id}/_reset 2023-10-31', {
+        params: { path: { id } },
+      });
     },
     {
       onError: (error, { name, id }) => {

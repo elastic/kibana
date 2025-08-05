@@ -8,7 +8,6 @@
 import { Agent } from 'supertest';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
-import { EntitySourceDefinition } from '@kbn/entityManager-plugin/server/lib/v2/types';
 
 export interface Auth {
   username: string;
@@ -88,71 +87,5 @@ export const upgradeBuiltinDefinitions = async (
     .set('kbn-xsrf', 'xxx')
     .send({ definitions })
     .expect(200);
-  return response.body;
-};
-
-export const createEntityTypeDefinition = (
-  supertest: Agent,
-  params: {
-    type: {
-      id: string;
-      display_name: string;
-    };
-  }
-) => {
-  return supertest
-    .post('/internal/entities/v2/definitions/types')
-    .set('kbn-xsrf', 'xxx')
-    .send({ type: params.type })
-    .expect(201);
-};
-
-export const createEntitySourceDefinition = (
-  supertest: Agent,
-  params: {
-    source: EntitySourceDefinition;
-  }
-) => {
-  return supertest
-    .post('/internal/entities/v2/definitions/sources')
-    .set('kbn-xsrf', 'xxx')
-    .send({ source: params.source })
-    .expect(201);
-};
-
-export const searchEntities = async (
-  supertest: Agent,
-  params: {
-    type: string;
-    start?: string;
-    end?: string;
-    metadata_fields?: string[];
-    filters?: string[];
-  },
-  expectedCode?: number
-) => {
-  const response = await supertest
-    .post('/internal/entities/v2/_search')
-    .set('kbn-xsrf', 'xxx')
-    .send(params)
-    .expect(expectedCode ?? 200);
-  return response.body;
-};
-
-export const countEntities = async (
-  supertest: Agent,
-  params: {
-    types?: string[];
-    filters?: string[];
-    start?: string;
-    end?: string;
-  },
-  expectedCode?: number
-) => {
-  const response = await supertest
-    .post('/internal/entities/v2/_count')
-    .set('kbn-xsrf', 'xxx')
-    .send(params)
-    .expect(expectedCode ?? 200);
   return response.body;
 };

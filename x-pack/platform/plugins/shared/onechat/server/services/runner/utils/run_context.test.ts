@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { createBuiltinToolId, toSerializedToolIdentifier } from '@kbn/onechat-common';
 import type { RunContext } from '@kbn/onechat-server';
-import { createEmptyRunContext, forkContextForToolRun } from './run_context';
+import {
+  createEmptyRunContext,
+  forkContextForToolRun,
+  forkContextForAgentRun,
+} from './run_context';
 
 describe('RunContext utilities', () => {
   describe('creatEmptyRunContext', () => {
@@ -36,8 +39,7 @@ describe('RunContext utilities', () => {
         stack: [],
       };
 
-      const toolId = createBuiltinToolId('test-tool');
-      const expectedSerializedToolId = toSerializedToolIdentifier(toolId);
+      const toolId = 'test-tool';
       const forkedContext = forkContextForToolRun({ toolId, parentContext });
 
       expect(forkedContext).toEqual({
@@ -45,22 +47,22 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'tool',
-            toolId: expectedSerializedToolId,
+            toolId,
           },
         ],
       });
     });
 
     it('should preserve existing stack entries when forking', () => {
-      const existingToolId = createBuiltinToolId('existing-tool');
-      const newToolId = createBuiltinToolId('new-tool');
+      const existingToolId = 'existing-tool';
+      const newToolId = 'new-tool';
 
       const parentContext: RunContext = {
         runId: 'parent-run-id',
         stack: [
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(existingToolId),
+            toolId: existingToolId,
           },
         ],
       };
@@ -72,11 +74,64 @@ describe('RunContext utilities', () => {
         stack: [
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(existingToolId),
+            toolId: existingToolId,
           },
           {
             type: 'tool',
-            toolId: toSerializedToolIdentifier(newToolId),
+            toolId: newToolId,
+          },
+        ],
+      });
+    });
+  });
+
+  describe('forkContextForAgentRun', () => {
+    it('should fork context and add agent to stack', () => {
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [],
+      };
+
+      const agentId = 'test-agent';
+      const forkedContext = forkContextForAgentRun({ agentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId,
+          },
+        ],
+      });
+    });
+
+    it('should preserve existing stack entries when forking', () => {
+      const existingAgentId = 'existing-agent';
+      const newAgentId = 'new-agent';
+
+      const parentContext: RunContext = {
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: existingAgentId,
+          },
+        ],
+      };
+
+      const forkedContext = forkContextForAgentRun({ agentId: newAgentId, parentContext });
+
+      expect(forkedContext).toEqual({
+        runId: 'parent-run-id',
+        stack: [
+          {
+            type: 'agent',
+            agentId: existingAgentId,
+          },
+          {
+            type: 'agent',
+            agentId: newAgentId,
           },
         ],
       });

@@ -27,16 +27,14 @@ export const saveDashboardState = async ({
   saveOptions,
   dashboardState,
   panelReferences,
-  searchSourceReferences,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
   const { attributes, references } = getSerializedState({
     controlGroupReferences,
-    generateNewIds: saveOptions.saveAsCopy,
+    generateNewIds: saveOptions.saveAsCopy, // When saving a dashboard as a copy, we should generate new IDs for all panels
     dashboardState,
     panelReferences,
-    searchSourceReferences,
   });
 
   /**

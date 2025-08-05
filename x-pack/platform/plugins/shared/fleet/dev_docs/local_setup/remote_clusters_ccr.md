@@ -106,6 +106,24 @@ Save the responses as they will be required in Cluster A (see next section).
 - Choose a name, put `localhost:9300` for "Seed nodes", and save (check "Yes, I have setup trust")
 - Make sure the connection status is "Connected"
 
+- Equivalent Dev Tools API request
+```
+PUT /_cluster/settings
+{
+  "persistent" : {
+    "cluster" : {
+      "remote" : {
+        "local" : {
+          "seeds" : [
+            "localhost:9300"
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
 ### Set up CCR
 
 Please note that [CCR](https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-getting-started-tutorial.html) requires both clusters to have the same license. At the time of writing an `enterprise` license is needed.
@@ -113,6 +131,16 @@ On cluster 1, navigate to *Stack Management > Cross-Cluster Replication* and c
 
   - Leader index `fleet-synced-integrations`
   - Follower index `fleet-synced-integrations-ccr-remote1`
+
+  - Equivalent Dev Tools API request
+
+  ```
+  PUT /fleet-synced-integrations-ccr-local/_ccr/follow
+{
+  "remote_cluster" : "local",
+  "leader_index" : "fleet-synced-integrations"
+}
+  ```
 
 ### Set up local ES output
 This configuration is required to kick off the integration sync. The local host needs to match the remote ES output configured on A (see next section). Note that `kibana.dev.yml` is read by both kibana instances so it's better to add it in the UI to avoid conflicts.

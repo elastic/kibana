@@ -13,6 +13,7 @@ import type {
   ActionStatusRequestSchema,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
+  RunScriptActionRequestBody,
 } from '../../api/endpoint';
 
 import type {
@@ -146,6 +147,8 @@ export interface LogsEndpointAction<
    *        initializing the Response Actions Client to process pending actions.
    */
   originSpaceId: string;
+  /** Tags assigned to the action */
+  tags: string[];
   agent: {
     id: string | string[];
     /**
@@ -250,20 +253,7 @@ export interface ResponseActionScanParameters {
   path: string;
 }
 
-// Currently reflecting CrowdStrike's RunScript parameters
-interface ActionsRunScriptParametersBase {
-  Raw?: string;
-  HostPath?: string;
-  CloudFile?: string;
-  CommandLine?: string;
-  Timeout?: number;
-}
-
-// Enforce at least one of the script parameters is required
-export type ResponseActionRunScriptParameters = AtLeastOne<
-  ActionsRunScriptParametersBase,
-  'Raw' | 'HostPath' | 'CloudFile'
->;
+export type ResponseActionRunScriptParameters = RunScriptActionRequestBody['parameters'];
 
 export type EndpointActionDataParameterTypes =
   | undefined
@@ -622,7 +612,3 @@ export interface ResponseActionUploadOutputContent {
   /** The free space available (after saving the file) of the drive where the file was saved to, In Bytes  */
   disk_free_space: number;
 }
-
-type AtLeastOne<T, K extends keyof T = keyof T> = K extends keyof T
-  ? Required<Pick<T, K>> & Partial<Omit<T, K>>
-  : never;

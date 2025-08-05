@@ -115,6 +115,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFieldText
+          isInvalid={Boolean(hasValidationErrors && validation.errors.name)}
           defaultValue={repository.name}
           fullWidth
           onChange={(e) => {
@@ -146,7 +147,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
-              iconType="iInCircle"
+              iconType="info"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"

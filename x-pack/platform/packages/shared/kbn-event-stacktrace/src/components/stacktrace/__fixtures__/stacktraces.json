@@ -8,12 +8,12 @@
       "number": 307,
       "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())"
     },
+    "vars": {
+      "test_var": "test_value"
+    },
     "function": "<anonymous>",
     "context": {
-      "pre": [
-        "    })",
-        ""
-      ],
+      "pre": ["    })", ""],
       "post": [
         "    req.body.lines.forEach(function (line) {",
         "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())"

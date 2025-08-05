@@ -16,14 +16,12 @@ import type {
   StreamsApplicationComponentType,
   StreamsApplicationProps,
 } from './types';
-import { StreamsAppLocatorParams } from './app_locator';
 
 export type {
   StreamsAppPublicSetup,
   StreamsAppPublicStart,
   StreamsApplicationComponentType,
   StreamsApplicationProps,
-  StreamsAppLocatorParams,
 };
 
 export const plugin: PluginInitializer<

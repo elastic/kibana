@@ -41,10 +41,9 @@ const OPENAI_MODEL_NAMES = [
 
 function getOpenAiModelFromUrl(apiUrl: string) {
   const url = new URL(apiUrl);
-  if (url.hostname.endsWith('azure.com')) {
+  if (url.hostname === 'azure.com' || url.hostname.endsWith('.azure.com')) {
     return OPENAI_MODEL_NAMES.find((modelName) => {
       return url.pathname.includes(modelName);
     });
   }
-  return undefined;
 }

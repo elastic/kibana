@@ -216,6 +216,8 @@ export class LegacyAlertsClient<
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      this.options.logger,
+      this.maxAlerts,
       this.processedAlerts.trackedActiveAlerts,
       this.processedAlerts.trackedRecoveredAlerts,
       shouldOptimizeTaskState
@@ -225,14 +227,12 @@ export class LegacyAlertsClient<
   public determineFlappingAlerts() {
     if (this.flappingSettings.enabled) {
       const alerts = determineFlappingAlerts({
-        logger: this.options.logger,
         newAlerts: this.processedAlerts.new,
         activeAlerts: this.processedAlerts.active,
         recoveredAlerts: this.processedAlerts.recovered,
         flappingSettings: this.flappingSettings,
         previouslyRecoveredAlerts: this.trackedAlerts.recovered,
         actionGroupId: this.options.ruleType.defaultActionGroupId,
-        maxAlerts: this.maxAlerts,
       });
 
       this.processedAlerts.new = alerts.newAlerts;

@@ -21,7 +21,6 @@ import {
   type OverrideFieldGroupDetails,
   FieldsGroupNames,
   ExistenceFetchStatus,
-  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -45,7 +44,6 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
-  additionalFieldGroups?: AdditionalFieldGroups<T>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -73,7 +71,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   getNewFieldsBySpec,
-  additionalFieldGroups,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -185,8 +182,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .sort((a: T, b: T) => (b.count || 0) - (a.count || 0)) // sort by popularity score
           .slice(0, popularFieldsLimit)
       : [];
-
-    const smartFields = additionalFieldGroups?.smartFields || [];
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
@@ -311,19 +306,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           }
         ),
       },
-      SmartFields: {
-        fields: smartFields,
-        fieldCount: smartFields.length,
-        isAffectedByGlobalFilter: false,
-        isAffectedByTimeFilter: false,
-        isInitiallyOpen: true,
-        showInAccordion: true,
-        hideDetails: false,
-        hideIfEmpty: true,
-        title: i18n.translate('unifiedFieldList.useGroupedFields.smartFieldsLabel', {
-          defaultMessage: 'Smart fields',
-        }),
-      },
     };
 
     // the fieldsExistenceInfoUnavailable check should happen only for dataview based
@@ -366,7 +348,6 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
-    additionalFieldGroups,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {

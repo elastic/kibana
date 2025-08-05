@@ -10,13 +10,18 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import { EuiThemeProvider } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
 import { TimeRange } from '@kbn/es-query';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render as rtlRender } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
 import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('TimesliderControlApi', () => {
   const uuid = 'myControl1';

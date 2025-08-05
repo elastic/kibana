@@ -13,17 +13,22 @@ import { Streams } from '@kbn/streams-schema';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import { SchemaField } from '../schema_editor/types';
-import { useStreamEnrichmentEvents } from './state_management/stream_enrichment_state_machine';
+import {
+  useStreamEnrichmentEvents,
+  useStreamEnrichmentSelector,
+} from './state_management/stream_enrichment_state_machine';
 
 interface DetectedFieldsEditorProps {
-  definition: Streams.WiredStream.GetResponse;
   detectedFields: SchemaField[];
 }
 
-export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFieldsEditorProps) => {
+export const DetectedFieldsEditor = ({ detectedFields }: DetectedFieldsEditorProps) => {
   const { euiTheme } = useEuiTheme();
 
   const { mapField, unmapField } = useStreamEnrichmentEvents();
+
+  const definition = useStreamEnrichmentSelector((state) => state.context.definition);
+  const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
 
   const hasFields = detectedFields.length > 0;
 
@@ -49,26 +54,32 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
 
   return (
     <>
-      <EuiText
-        component="p"
-        color="subdued"
-        size="xs"
-        css={css`
-          margin-bottom: ${euiTheme.size.base};
-        `}
-      >
-        {i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
-          { defaultMessage: 'You can review and adjust saved fields further in the Schema Editor.' }
-        )}
-      </EuiText>
+      {isWiredStream && (
+        <EuiText
+          component="p"
+          color="subdued"
+          size="xs"
+          css={css`
+            margin-bottom: ${euiTheme.size.base};
+          `}
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFieldsHeadline',
+            {
+              defaultMessage:
+                'You can review and adjust saved fields further in the Schema Editor.',
+            }
+          )}
+        </EuiText>
+      )}
       <SchemaEditor
-        defaultColumns={['name', 'type', 'format', 'status']}
+        defaultColumns={isWiredStream ? ['name', 'type', 'format', 'status'] : ['name', 'type']}
         fields={detectedFields}
         stream={definition.stream}
         onFieldUnmap={unmapField}
         onFieldUpdate={mapField}
-        withTableActions
+        withTableActions={isWiredStream}
+        withToolbar={isWiredStream}
       />
     </>
   );

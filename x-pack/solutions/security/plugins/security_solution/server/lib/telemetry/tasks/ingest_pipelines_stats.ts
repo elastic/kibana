@@ -81,12 +81,12 @@ export function createIngestStatsTaskConfig() {
         } as LogMeta);
 
         return ingestStats.length;
-      } catch (err) {
+      } catch (error) {
         log.warn(`Error running ingest stats task`, {
-          error: err.message,
+          error,
           elapsed: performance.now() - start,
-        } as LogMeta);
-        await taskMetricsService.end(trace, err);
+        });
+        await taskMetricsService.end(trace, error);
         return 0;
       }
     },

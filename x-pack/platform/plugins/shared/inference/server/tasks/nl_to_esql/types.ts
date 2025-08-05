@@ -14,8 +14,8 @@ import {
   OutputCompleteEvent,
   ChatCompleteMetadata,
   ChatCompleteOptions,
+  InferenceClient,
 } from '@kbn/inference-common';
-import type { InferenceClient } from '../../inference_client';
 
 export type NlToEsqlTaskEvent<TToolOptions extends ToolOptions> =
   | OutputCompleteEvent<

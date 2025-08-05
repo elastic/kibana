@@ -10,28 +10,40 @@
 import { Client } from '@elastic/elasticsearch';
 import { ESDocumentWithOperation, InfraDocument } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
-import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import {
+  SynthtraceEsClientBase,
+  SynthtraceEsClient,
+  SynthtraceEsClientOptions,
+} from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
+import { PipelineOptions } from '../../cli/utils/clients_manager';
+import { PackageManagement } from '../shared/types';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-interface Pipeline {
-  includeSerialization?: boolean;
-}
+export interface InfraSynthtraceEsClient
+  extends SynthtraceEsClient<InfraDocument>,
+    PackageManagement {}
 
-export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
+export class InfraSynthtraceEsClientImpl
+  extends SynthtraceEsClientBase<InfraDocument>
+  implements InfraSynthtraceEsClient
+{
   constructor(
-    private readonly options: {
+    options: {
       client: Client;
       logger: Logger;
-      pipeline?: Pipeline;
-    } & InfraSynthtraceEsClientOptions
+      pipeline?: PipelineOptions;
+    } & InfraSynthtraceEsClientOptions &
+      PipelineOptions
   ) {
     super({
       ...options,
-      pipeline: infraPipeline({ includeSerialization: options.pipeline?.includeSerialization }),
+      pipeline: infraPipeline({
+        includePipelineSerialization: options.includePipelineSerialization,
+      }),
     });
     this.dataStreams = [
       'metrics-system*',
@@ -41,18 +53,43 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
     ];
   }
 
-  clone(): this {
-    return new InfraSynthtraceEsClient(this.options) as this;
+  async initializePackage(opts?: { version?: string; skipInstallation?: boolean }) {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+
+    const { version, skipInstallation = true } = opts ?? {};
+
+    let latestVersion = version;
+    if (!latestVersion || latestVersion === 'latest') {
+      latestVersion = await this.fleetClient.fetchLatestPackageVersion('system');
+    }
+
+    if (!skipInstallation) {
+      await this.fleetClient.installPackage('system', latestVersion);
+    }
+
+    return latestVersion;
+  }
+  async uninstallPackage() {
+    if (!this.fleetClient) {
+      throw new Error(
+        'InfraSynthtraceEsClient requires a FleetClient to be initialized. Please provide a valid Kibana client.'
+      );
+    }
+    await this.fleetClient.uninstallPackage('apm');
   }
 }
 
-function infraPipeline({ includeSerialization = true }: Pipeline) {
+function infraPipeline({ includePipelineSerialization = true }: PipelineOptions) {
   return (base: Readable) => {
-    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+    const serializationTransform = includePipelineSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),

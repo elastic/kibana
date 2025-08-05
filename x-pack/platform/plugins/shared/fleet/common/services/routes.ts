@@ -310,6 +310,9 @@ export const agentRouteService = {
   getAgentFileDeletePath: (fileId: string) =>
     AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
+  postMigrateSingleAgent: (agentId: string) =>
+    AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
+  postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
 };
 
 export const outputRoutesService = {

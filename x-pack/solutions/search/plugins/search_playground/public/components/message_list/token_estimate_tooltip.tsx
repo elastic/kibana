@@ -172,7 +172,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                             />
                           }
                           color="warning"
-                          iconType="iInCircle"
+                          iconType="info"
                           size="s"
                         >
                           <FormattedMessage

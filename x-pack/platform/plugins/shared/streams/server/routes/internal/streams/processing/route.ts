@@ -12,7 +12,7 @@ import {
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
@@ -83,7 +83,12 @@ export const processingSuggestionRoute = createServerRoute({
     },
   },
   params: suggestionsParamsSchema,
-  handler: async ({ params, request, logger, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError(`Cannot access API on the current pricing tier`);
+    }
+
     const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
       request,
     });
@@ -108,7 +113,12 @@ export const processingDateSuggestionsRoute = createServerRoute({
     },
   },
   params: processingDateSuggestionsSchema,
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients, server }) => {
+    const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
+    if (!isAvailableForTier) {
+      throw new SecurityError(`Cannot access API on the current pricing tier`);
+    }
+
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const { name } = params.path;
 

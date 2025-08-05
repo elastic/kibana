@@ -12,9 +12,15 @@ import { schema } from '@kbn/config-schema';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
+import { ESQLExtensionsRegistry } from './extensions_registry';
 
-export class EsqlServerPlugin implements Plugin {
+export interface EsqlServerPluginSetup {
+  getExtensionsRegistry: () => ESQLExtensionsRegistry;
+}
+
+export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
   private readonly initContext: PluginInitializerContext;
+  private extensionsRegistry: ESQLExtensionsRegistry = new ESQLExtensionsRegistry();
 
   constructor(initContext: PluginInitializerContext) {
     this.initContext = { ...initContext };
@@ -33,9 +39,11 @@ export class EsqlServerPlugin implements Plugin {
       }),
     });
 
-    registerRoutes(core, initContext);
+    registerRoutes(core, this.extensionsRegistry, initContext);
 
-    return {};
+    return {
+      getExtensionsRegistry: () => this.extensionsRegistry,
+    };
   }
 
   public start(core: CoreStart) {

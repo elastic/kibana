@@ -17,6 +17,7 @@ export interface AgentSelection {
   allAgentsSelected?: boolean;
   platformsSelected?: string[];
   policiesSelected?: string[];
+  spaceId: string;
 }
 
 const PER_PAGE = 9000;
@@ -90,7 +91,9 @@ export const parseAgentSelection = async (
     policiesSelected = [],
     agents = [],
   } = agentSelection;
-  const agentService = context.service.getAgentService()?.asInternalUser;
+  const agentService = context.service
+    .getAgentService()
+    ?.asInternalScopedUser(agentSelection.spaceId);
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = ['status:online'];
 
@@ -172,5 +175,16 @@ export const parseAgentSelection = async (
 
   agents.forEach(addAgent);
 
-  return Array.from(selectedAgents);
+  const selectedAgentsArray = Array.from(selectedAgents);
+
+  // validate if all selected agents are in current space. If not, getByIds will throw an error, caught by caller
+  try {
+    await agentService?.getByIds(selectedAgentsArray, { ignoreMissing: false });
+
+    return selectedAgentsArray;
+  } catch (error) {
+    context.logFactory.get().error(error);
+
+    return [];
+  }
 };

@@ -23,7 +23,7 @@ describe('IntegrationRetriever', () => {
     integrationRetriever = new IntegrationRetriever({
       data: mockRuleMigrationsDataClient,
     } as RuleMigrationsRetrieverClients);
-    mockRuleMigrationsDataClient.integrations.retrieveIntegrations.mockImplementation(
+    mockRuleMigrationsDataClient.integrations.semanticSearch.mockImplementation(
       async (_: string) => {
         return mockIntegrationItem;
       }
@@ -31,11 +31,9 @@ describe('IntegrationRetriever', () => {
   });
 
   it('should retrieve integrations', async () => {
-    const result = await integrationRetriever.getIntegrations('test');
+    const result = await integrationRetriever.search('test');
 
-    expect(mockRuleMigrationsDataClient.integrations.retrieveIntegrations).toHaveBeenCalledWith(
-      'test'
-    );
+    expect(mockRuleMigrationsDataClient.integrations.semanticSearch).toHaveBeenCalledWith('test');
     expect(result).toEqual(mockIntegrationItem);
   });
 });

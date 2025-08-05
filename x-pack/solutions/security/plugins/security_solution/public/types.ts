@@ -62,6 +62,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -69,6 +70,7 @@ import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
+import type { Reports } from './reports';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
@@ -153,6 +155,7 @@ export interface StartPlugins {
   automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -233,6 +236,7 @@ export interface SubPlugins {
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
+  reports: Reports;
   rules: Rules;
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
@@ -254,6 +258,7 @@ export interface StartedSubPlugins {
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;
+  reports: ReturnType<Reports['start']>;
   rules: ReturnType<Rules['start']>;
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;

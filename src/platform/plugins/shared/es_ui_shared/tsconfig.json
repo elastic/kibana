@@ -14,7 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-views-plugin",
+    "@kbn/data-view-validation",
     "@kbn/i18n",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/i18n-react",

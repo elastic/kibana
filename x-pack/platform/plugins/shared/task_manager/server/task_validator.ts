@@ -101,7 +101,8 @@ export class TaskValidator {
     task: T,
     options: { validate: boolean } = { validate: true }
   ): T {
-    const taskWithValidatedTimeout = this.validateTimeoutOverride(task);
+    const taskWithValidatedInterval = this.validateInterval(task);
+    const taskWithValidatedTimeout = this.validateTimeoutOverride(taskWithValidatedInterval);
 
     if (!options.validate) {
       return taskWithValidatedTimeout;
@@ -159,6 +160,15 @@ export class TaskValidator {
       return omit(task, 'timeoutOverride') as T;
     }
 
+    return task;
+  }
+
+  public validateInterval<T extends TaskInstance>(task: T): T {
+    if (task.schedule?.interval && !isInterval(task.schedule.interval)) {
+      throw new Error(
+        `[TaskValidator] Invalid interval "${task.schedule.interval}". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
+      );
+    }
     return task;
   }
 

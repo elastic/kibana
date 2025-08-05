@@ -16,6 +16,7 @@
       "reporting"
     ],
     "requiredPlugins": [
+      "actions",
       "data",
       "discover",
       "encryptedSavedObjects",
@@ -28,7 +29,8 @@
       "taskManager",
       "screenshotMode",
       "share",
-      "features"
+      "features",
+      "actions"
     ],
     "optionalPlugins": [
       "security",

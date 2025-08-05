@@ -32,6 +32,48 @@ jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
 const mockSend = jest.fn();
 const encodedModel = encodeURIComponent(DEFAULT_BEDROCK_MODEL);
+
+const DEFAULT_MESSAGES = [
+  {
+    role: 'user',
+    content: 'Hello world',
+  },
+];
+
+const DEFAULT_SYSTEM_MESSAGE = {
+  role: 'system',
+  content: 'Be a good chatbot',
+};
+
+const DEFAULT_ASSISTANT_MESSAGE = {
+  role: 'assistant',
+  content: 'Hi, I am a good chatbot',
+};
+
+const DEFAULT_USER_FOLLOWUP = {
+  role: 'user',
+  content: 'What is 2+2?',
+};
+
+const DEFAULT_PAYLOAD = {
+  messages: DEFAULT_MESSAGES,
+  stopSequences: ['\n\nHuman:'],
+};
+
+const DEFAULT_CONVERSE_REQUEST_PAYLOAD = {
+  messages: DEFAULT_MESSAGES,
+  inferenceConfig: { stopSequences: ['\n\nHuman:'] },
+  toolConfig: { toolChoice: {} },
+  modelId: DEFAULT_BEDROCK_MODEL,
+};
+
+const DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD = {
+  messages: DEFAULT_MESSAGES,
+  inferenceConfig: { stopSequences: ['\n\nHuman:'] },
+  toolConfig: {},
+  modelId: DEFAULT_BEDROCK_MODEL,
+};
+
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -694,6 +736,451 @@ describe('BedrockConnector', () => {
           connectorUsageCollector
         );
         expect(preconfiguredCommand.input.modelId).toBe(DEFAULT_BEDROCK_MODEL);
+      });
+    });
+
+    describe('converse', () => {
+      const aiAssistantBody = DEFAULT_PAYLOAD;
+
+      it('the API call is successful with correct parameters', async () => {
+        const response = await connector.converse(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify(DEFAULT_CONVERSE_REQUEST_PAYLOAD),
+          },
+          connectorUsageCollector
+        );
+        expect(response.completion).toEqual(mockResponseString);
+      });
+
+      it('formats messages from user, assistant, and system', async () => {
+        const response = await connector.converse(
+          {
+            messages: [
+              DEFAULT_SYSTEM_MESSAGE,
+              ...DEFAULT_MESSAGES,
+              DEFAULT_ASSISTANT_MESSAGE,
+              DEFAULT_USER_FOLLOWUP,
+            ],
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              ...DEFAULT_CONVERSE_REQUEST_PAYLOAD,
+              messages: [
+                DEFAULT_SYSTEM_MESSAGE,
+                ...DEFAULT_MESSAGES,
+                DEFAULT_ASSISTANT_MESSAGE,
+                DEFAULT_USER_FOLLOWUP,
+              ],
+              inferenceConfig: {},
+            }),
+          },
+          connectorUsageCollector
+        );
+        expect(response.completion).toEqual(mockResponseString);
+      });
+
+      it('adds system message from argument', async () => {
+        const response = await connector.converse(
+          {
+            messages: [
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
+            ],
+            system: [{ type: 'text', text: 'This is a system message' }],
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              messages: [
+                {
+                  role: 'user',
+                  content: 'Hello world',
+                },
+                {
+                  role: 'assistant',
+                  content: 'Hi, I am a good chatbot',
+                },
+                {
+                  role: 'user',
+                  content: 'What is 2+2?',
+                },
+              ],
+              inferenceConfig: {},
+              toolConfig: {
+                toolChoice: {},
+              },
+              system: [{ type: 'text', text: 'This is a system message' }],
+              modelId: DEFAULT_BEDROCK_MODEL,
+            }),
+          },
+          connectorUsageCollector
+        );
+        expect(response.completion).toEqual(mockResponseString);
+      });
+
+      it('combines argument system message with conversation system message', async () => {
+        const response = await connector.converse(
+          {
+            messages: [
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
+            ],
+            system: [{ type: 'text', text: 'This is a system message' }],
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              messages: [
+                {
+                  role: 'system',
+                  content: 'Be a good chatbot',
+                },
+                {
+                  role: 'user',
+                  content: 'Hello world',
+                },
+                {
+                  role: 'assistant',
+                  content: 'Hi, I am a good chatbot',
+                },
+                {
+                  role: 'user',
+                  content: 'What is 2+2?',
+                },
+              ],
+              inferenceConfig: {},
+              toolConfig: {
+                toolChoice: {},
+              },
+              system: [{ type: 'text', text: 'This is a system message' }],
+              modelId: DEFAULT_BEDROCK_MODEL,
+            }),
+          },
+          connectorUsageCollector
+        );
+        expect(response.completion).toEqual(mockResponseString);
+      });
+      it('signal and timeout is properly passed to runApi', async () => {
+        const signal = jest.fn();
+        const timeout = 180000;
+        await connector.converse({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              messages: [{ role: 'user', content: 'Hello world' }],
+              inferenceConfig: { stopSequences: ['\n\nHuman:'] },
+              toolConfig: { toolChoice: {} },
+              modelId: DEFAULT_BEDROCK_MODEL,
+            }),
+            timeout,
+            signal,
+          },
+          connectorUsageCollector
+        );
+      });
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.converse(aiAssistantBody, connectorUsageCollector)).rejects.toThrow(
+          'API Error'
+        );
+      });
+    });
+
+    describe('converseStream', () => {
+      let stream;
+      beforeEach(() => {
+        stream = createStreamMock();
+        stream.write(new Uint8Array([1, 2, 3]));
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        // @ts-ignore
+        connector.request = mockRequest;
+      });
+
+      const aiAssistantBody = DEFAULT_PAYLOAD;
+
+      it('the aws signature has streaming headers', async () => {
+        await connector.converseStream(aiAssistantBody, connectorUsageCollector);
+
+        expect(mockSigner).toHaveBeenCalledWith(
+          {
+            body: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
+            headers: {
+              accept: 'application/vnd.amazon.eventstream',
+              'Content-Type': 'application/json',
+              'x-amzn-bedrock-accept': '*/*',
+            },
+            host: 'bedrock-runtime.us-east-1.amazonaws.com',
+            path: `/model/${encodedModel}/converse-stream`,
+            service: 'bedrock',
+          },
+          { accessKeyId: '123', secretAccessKey: 'secret' }
+        );
+      });
+
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.converseStream(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            responseType: 'stream',
+            timeout: 200000,
+            signal: undefined,
+            data: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('signal and timeout is properly passed to streamApi', async () => {
+        const signal = jest.fn();
+        const timeout = 180000;
+        await connector.converseStream(
+          { ...aiAssistantBody, timeout, signal },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            responseType: 'stream',
+            data: JSON.stringify({
+              messages: [
+                {
+                  role: 'user',
+                  content: 'Hello world',
+                },
+              ],
+              inferenceConfig: {
+                stopSequences: ['\n\nHuman:'],
+              },
+              toolConfig: {},
+              modelId: DEFAULT_BEDROCK_MODEL,
+            }),
+            timeout,
+            signal,
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('ensureMessageFormat - formats messages from user, assistant, and system', async () => {
+        await connector.converseStream(
+          {
+            messages: [
+              DEFAULT_SYSTEM_MESSAGE,
+              ...DEFAULT_MESSAGES,
+              DEFAULT_ASSISTANT_MESSAGE,
+              DEFAULT_USER_FOLLOWUP,
+            ],
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            signal: undefined,
+            timeout: 200000,
+            data: JSON.stringify({
+              ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,
+              messages: [
+                DEFAULT_SYSTEM_MESSAGE,
+                ...DEFAULT_MESSAGES,
+                DEFAULT_ASSISTANT_MESSAGE,
+                DEFAULT_USER_FOLLOWUP,
+              ],
+              inferenceConfig: {},
+            }),
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('ensureMessageFormat - formats messages from when double user/assistant occurs', async () => {
+        const doubleAssistantMessage = {
+          role: 'assistant',
+          content: 'But I can be naughty',
+        };
+        const doubleUserMessage = {
+          role: 'user',
+          content: 'I can be naughty too',
+        };
+        const extraSystemMessage = {
+          role: 'system',
+          content: 'This is extra tricky',
+        };
+
+        await connector.converseStream(
+          {
+            messages: [
+              DEFAULT_SYSTEM_MESSAGE,
+              DEFAULT_ASSISTANT_MESSAGE,
+              doubleAssistantMessage,
+              DEFAULT_USER_FOLLOWUP,
+              doubleUserMessage,
+              extraSystemMessage,
+            ],
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/converse-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            signal: undefined,
+            timeout: 200000,
+            data: JSON.stringify({
+              ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,
+              messages: [
+                DEFAULT_SYSTEM_MESSAGE,
+                DEFAULT_ASSISTANT_MESSAGE,
+                doubleAssistantMessage,
+                DEFAULT_USER_FOLLOWUP,
+                doubleUserMessage,
+                extraSystemMessage,
+              ],
+              inferenceConfig: {},
+            }),
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('formats the system message as a user message for claude<2.1', async () => {
+        const modelOverride = 'anthropic.claude-v2';
+
+        await connector.converseStream(
+          {
+            messages: [
+              DEFAULT_SYSTEM_MESSAGE,
+              ...DEFAULT_MESSAGES,
+              DEFAULT_ASSISTANT_MESSAGE,
+              DEFAULT_USER_FOLLOWUP,
+            ],
+            model: modelOverride,
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/converse-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            timeout: 200000,
+            signal: undefined,
+            data: JSON.stringify({
+              ...DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD,
+              messages: [
+                DEFAULT_SYSTEM_MESSAGE,
+                ...DEFAULT_MESSAGES,
+                DEFAULT_ASSISTANT_MESSAGE,
+                DEFAULT_USER_FOLLOWUP,
+              ],
+              inferenceConfig: {},
+              modelId: modelOverride,
+            }),
+          },
+          connectorUsageCollector
+        );
+      });
+
+      it('should handle and split streaming response', async () => {
+        const result = (await connector.converseStream(
+          aiAssistantBody,
+          connectorUsageCollector
+        )) as unknown as {
+          stream?: unknown;
+          tokenStream?: unknown;
+        };
+        expect(result.stream instanceof PassThrough).toEqual(true);
+        expect(result.tokenStream instanceof PassThrough).toEqual(true);
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(
+          connector.converseStream(aiAssistantBody, connectorUsageCollector)
+        ).rejects.toThrow('API Error');
       });
     });
 

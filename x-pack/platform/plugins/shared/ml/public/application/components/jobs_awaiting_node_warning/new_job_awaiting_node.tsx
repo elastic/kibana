@@ -34,7 +34,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <div>
           <FormattedMessage
@@ -55,7 +55,7 @@ export const NewJobAwaitingNodeWarning: FC<Props> = () => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       />
       <EuiSpacer size="m" />
     </>

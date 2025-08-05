@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { combineToolProviders } from './combine_tool_providers';
-export { toolToDescriptor, toExecutableTool, addBuiltinSystemMeta } from './tool_conversion';
-export { createInternalRegistry } from './create_internal_registry';
+export { toDescriptorWithSchema, toExecutableTool } from './tool_conversion';
+export { registryToProvider } from './registry_to_provider';
+export { ensureValidId, isBuiltinToolId } from './validation';

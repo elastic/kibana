@@ -400,6 +400,20 @@
             "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-tabs",
+            "id": "def-public.TabItem.duplicatedFromId",
+            "type": "string",
+            "tags": [],
+            "label": "duplicatedFromId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-tabs/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

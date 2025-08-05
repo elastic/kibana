@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -59,7 +58,6 @@ const dataViews = {
 export const sloPublicPluginsStartMock = {
   createStart() {
     return {
-      cases: mockCasesContract(),
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       dataViewEditor: dataViewEditor.createStart(),

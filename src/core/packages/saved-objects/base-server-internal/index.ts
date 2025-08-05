@@ -15,6 +15,7 @@ export {
   getRootPropertiesObjects,
   getTypes,
   type IndexMapping,
+  type IndexMappingSafe,
   type IndexMappingMeta,
   type IndexTypesMap,
   type SavedObjectsTypeMappingDefinitions,
@@ -56,6 +57,7 @@ export {
 } from './src/utils';
 export {
   modelVersionVirtualMajor,
+  initialModelVersion,
   globalSwitchToModelVersionAt,
   assertValidModelVersion,
   isVirtualModelVersion,
@@ -64,7 +66,6 @@ export {
   getModelVersionMapForTypes,
   getLatestModelVersion,
   getCurrentVirtualVersion,
-  getLatestMigrationVersion,
   getVirtualVersionMap,
   getLatestMappingsVirtualVersionMap,
   type ModelVersionMap,

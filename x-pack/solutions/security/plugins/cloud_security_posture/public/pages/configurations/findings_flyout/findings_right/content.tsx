@@ -7,65 +7,19 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiPanel,
-  EuiTabs,
-  EuiTab,
-  EuiCallOut,
-  useEuiTheme,
-  EuiFlexGroup,
-  EuiFlyoutBody,
-} from '@elastic/eui';
-import {
-  CSP_MISCONFIGURATIONS_DATASET,
-  CspFinding,
-  CspVulnerabilityFinding,
-} from '@kbn/cloud-security-posture-common';
+import { EuiPanel, EuiTabs, EuiTab, EuiFlexGroup, EuiFlyoutBody } from '@elastic/eui';
+import { CSP_MISCONFIGURATIONS_DATASET, CspFinding } from '@kbn/cloud-security-posture-common';
 import { generatePath } from 'react-router-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { benchmarksNavigation, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
-import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { OverviewTab } from '../overview_tab';
 import { JsonTab } from '../json_tab';
 import { TableTab } from '../table_tab';
 
 type FindingsTab = (typeof tabs)[number];
-
-export const MissingFieldsCallout = ({
-  finding,
-}: {
-  finding: CspFinding | CspVulnerabilityFinding;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const vendor = getVendorName(finding);
-
-  return (
-    <EuiCallOut
-      css={{
-        borderRadius: 4,
-        overflow: 'hidden',
-      }}
-      size="s"
-      iconType="iInCircle"
-      title={
-        <span style={{ color: euiTheme.colors.text }}>
-          <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.calloutTitle"
-            defaultMessage="Some fields not provided by {vendor}"
-            values={{
-              vendor: vendor || 'the vendor',
-            }}
-          />
-        </span>
-      }
-    />
-  );
-};
 
 const tabs = [
   {
@@ -120,7 +74,6 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
 
 export const FindingsMisconfigurationFlyoutContent = ({ finding }: { finding: CspFinding }) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
-  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -145,11 +98,6 @@ export const FindingsMisconfigurationFlyoutContent = ({ finding }: { finding: Cs
             `}
           >
             <EuiFlyoutBody key={tab.id}>
-              {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-                <div style={{ marginBottom: euiTheme.size.base }}>
-                  <MissingFieldsCallout finding={finding} />
-                </div>
-              )}
               <FindingsTab tab={tab} finding={finding} />
             </EuiFlyoutBody>
           </EuiPanel>

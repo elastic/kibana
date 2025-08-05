@@ -43,7 +43,8 @@ describe('migrateLegacyPrivateLocations', () => {
     await migrateLegacyPrivateLocations(repositoryMock, loggerMockVal);
 
     expect(loggerMockVal.error).toHaveBeenCalledWith(
-      'Error migrating legacy private locations: Error: Get error'
+      'Error migrating legacy private locations: Get error',
+      { error }
     );
   });
 

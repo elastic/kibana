@@ -187,27 +187,6 @@ describe('dashboard locator', () => {
     });
   });
 
-  test('Control Group Input', async () => {
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async (dashboardId: string) => [],
-    });
-    const controlGroupState = {
-      autoApplySelections: false,
-    };
-    const location = await definition.getLocation({
-      controlGroupState,
-    });
-
-    expect(location).toMatchObject({
-      app: 'dashboards',
-      path: `#/create?_g=()`,
-      state: {
-        controlGroupState,
-      },
-    });
-  });
-
   test('if no useHash setting is given, uses the one was start services', async () => {
     const definition = new DashboardAppLocatorDefinition({
       useHashedUrl: true,

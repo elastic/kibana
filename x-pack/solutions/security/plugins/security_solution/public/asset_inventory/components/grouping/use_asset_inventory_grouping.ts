@@ -22,6 +22,8 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import dedent from 'dedent';
+import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { useDataViewContext } from '../../hooks/data_view_context';
 import type {
   AssetInventoryURLStateResult,
@@ -159,24 +161,81 @@ export const useAssetInventoryGrouping = ({
   // This is recommended by the grouping component to cover an edge case where `selectedGroup` has multiple values
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
-  const groupingQuery = getGroupingQuery({
-    additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
-    groupByField: currentSelectedGroup,
-    uniqueValue,
-    pageNumber: pageIndex * pageSize,
-    size: pageSize,
-    sort: [{ groupByField: { order: 'desc' } }],
-    statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    rootAggregations: [
-      {
-        ...(!isNoneGroup([currentSelectedGroup]) && {
-          nullGroupItems: {
-            missing: { field: currentSelectedGroup },
+  const groupingQuery = useMemo(
+    () => ({
+      ...getGroupingQuery({
+        additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
+        groupByField: currentSelectedGroup,
+        uniqueValue,
+        pageNumber: pageIndex * pageSize,
+        size: pageSize,
+        sort: [{ groupByField: { order: 'desc' } }],
+        statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
+        rootAggregations: [
+          {
+            ...(!isNoneGroup([currentSelectedGroup]) && {
+              nullGroupItems:
+                currentSelectedGroup === ASSET_FIELDS.ASSET_CRITICALITY
+                  ? {
+                      filter: {
+                        bool: {
+                          should: [
+                            { term: { [ASSET_FIELDS.ASSET_CRITICALITY]: 'deleted' } },
+                            {
+                              bool: {
+                                must_not: { exists: { field: ASSET_FIELDS.ASSET_CRITICALITY } },
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    }
+                  : { missing: { field: currentSelectedGroup } },
+            }),
           },
-        }),
+        ],
+      }),
+      runtime_mappings: {
+        groupByField: {
+          type: 'keyword' as MappingRuntimeFieldType,
+          script: {
+            source: dedent(`
+          def groupValues = [];
+          if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+            groupValues = doc[params['selectedGroup']];
+          }
+          // If selectedGroup is 'asset.criticality', treat 'deleted' as undefined group
+          boolean treatAsUndefined = false;
+          int count = groupValues.size();
+          if (params['selectedGroup'] == 'asset.criticality') {
+            boolean isDeleted = false;
+            for (def v : groupValues) {
+              if (v == 'deleted') {
+                isDeleted = true;
+                break;
+              }
+            }
+            treatAsUndefined = (count == 0 || count > 100 || isDeleted);
+          } else {
+            treatAsUndefined = (count == 0 || count > 100);
+          }
+          if (treatAsUndefined) {
+            emit(params['uniqueValue']);
+          } else {
+            emit(groupValues.join(params['uniqueValue']));
+          }
+        `),
+            params: {
+              selectedGroup: currentSelectedGroup,
+              uniqueValue,
+            },
+          },
+        },
       },
-    ],
-  });
+    }),
+    [currentSelectedGroup, uniqueValue, additionalFilters, query, pageIndex, pageSize]
+  );
 
   const { data, isFetching } = useFetchGroupedData({
     query: groupingQuery,

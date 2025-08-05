@@ -102,7 +102,10 @@ export const doesNotMatchOperator: OperatorOption = {
   value: 'does_not_match',
 };
 
-export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
+/**
+ * Operators valid for event filters, trusted apps and endpoint exceptions
+ */
+export const ENDPOINT_ARTIFACT_OPERATORS: OperatorOption[] = [
   isOperator,
   isNotOperator,
   isOneOfOperator,

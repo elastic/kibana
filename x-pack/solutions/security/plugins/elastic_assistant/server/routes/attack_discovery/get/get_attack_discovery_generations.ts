@@ -106,7 +106,7 @@ export const getAttackDiscoveryGenerationsRoute = (
           const error = transformError(err);
 
           return resp.error({
-            body: { success: false, error: error.message },
+            body: error.message,
             statusCode: error.statusCode,
           });
         }

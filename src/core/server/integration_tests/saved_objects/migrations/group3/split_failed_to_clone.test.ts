@@ -19,7 +19,7 @@ import {
   defaultKibanaTaskIndex,
   defaultKibanaIndex,
 } from '../kibana_migrator_test_kit';
-import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
+import { BASELINE_TEST_ARCHIVE_SMALL } from '../kibana_migrator_archive_utils';
 import {
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
@@ -53,7 +53,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
 
   beforeAll(async () => {
     await clearLog(logFilePath);
-    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_1K });
+    esServer = await startElasticsearch({ dataArchive: BASELINE_TEST_ARCHIVE_SMALL });
   });
 
   afterAll(async () => {
@@ -79,6 +79,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
       basic: 200,
       complex: 200,
       deprecated: 200,
+      old: 200,
       server: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
@@ -102,6 +103,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     // ensure we have a valid 'after' state
     expect(await getAggregatedTypesCount(client, defaultKibanaIndex)).toEqual({
       complex: 99,
+      old: 200,
     });
     expect(await getAggregatedTypesCount(client, defaultKibanaTaskIndex)).toEqual({
       task: 200,

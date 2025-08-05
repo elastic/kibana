@@ -65,8 +65,7 @@ export const PageConfig = ({
         label={
           <EuiToolTip content={strings.getBackgroundColorDescription()}>
             <span>
-              {strings.getBackgroundColorLabel()}{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              {strings.getBackgroundColorLabel()} <EuiIcon type="question" color="subdued" />
             </span>
           </EuiToolTip>
         }

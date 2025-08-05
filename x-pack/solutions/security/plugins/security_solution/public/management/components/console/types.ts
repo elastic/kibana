@@ -67,6 +67,11 @@ export interface CommandArgDefinition {
    * the argument's value.
    */
   SelectorComponent?: CommandArgumentValueSelectorComponent;
+
+  /**
+   * If defined, the selector will use `true` as the default value which results in empty array as args value
+   */
+  selectorShowTextValue?: boolean;
 }
 
 /** List of arguments for a Command */
@@ -176,6 +181,10 @@ export interface Command<
   inputDisplay: string;
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
+
+  /** Object containing state for any argument that is using a Value Selector component */
+  argState?: Record<string, ArgSelectorState[]>;
+
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }
@@ -276,6 +285,18 @@ export interface CommandArgumentValueSelectorProps<TSelection = any, TState = an
    * @param newData
    */
   onChange: (newData: ArgSelectorState<TState>) => void;
+
+  /**
+   * The full Command object containing command definition, input, and parsed arguments.
+   * This provides context that selector components can use to access command metadata.
+   */
+  command: Command;
+
+  /**
+   * Callback to request focus back to the console input after selector operations.
+   * Should be called when the selector component closes or completes its interaction.
+   */
+  requestFocus?: () => void;
 }
 
 /**
@@ -314,7 +335,7 @@ export interface ConsoleProps extends CommonProps {
   /**
    * For internal use only!
    * Provided by the ConsoleManager to indicate that the console is being managed by it
-   * @private
+   * @internal
    */
   managedKey?: symbol;
 }

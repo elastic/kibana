@@ -29,7 +29,12 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
 import { RawValue } from '@kbn/data-plugin/common';
 import { isDataLayer } from '../../common/utils/layer_types_guards';
-import { CommonXYDataLayerConfig, CommonXYLayerConfig, XScaleType } from '../../common';
+import {
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  XScaleType,
+  PointVisibility,
+} from '../../common';
 import { AxisModes, SeriesTypes } from '../../common/constants';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
@@ -66,6 +71,7 @@ type GetSeriesPropsFn = (config: {
   singleTable?: boolean;
   multipleLayersWithSplits: boolean;
   isDarkMode: boolean;
+  pointVisibility?: PointVisibility;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -99,6 +105,7 @@ type GetPointConfigFn = (config: {
   xAccessor: string | undefined;
   markSizeAccessor: string | undefined;
   showPoints?: boolean;
+  pointVisibility?: PointVisibility;
   pointsRadius?: number;
 }) => Partial<AreaSeriesStyle['point']>;
 
@@ -306,9 +313,14 @@ export const getSeriesName: GetSeriesNameFn = (
   return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
 };
 
-const getPointConfig: GetPointConfigFn = ({ markSizeAccessor, showPoints, pointsRadius }) => {
+const getPointConfig: GetPointConfigFn = ({
+  markSizeAccessor,
+  showPoints,
+  pointVisibility,
+  pointsRadius,
+}) => {
   return {
-    visible: showPoints || markSizeAccessor ? 'always' : 'auto',
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };
@@ -417,6 +429,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   singleTable,
   multipleLayersWithSplits,
   isDarkMode,
+  pointVisibility,
 }): SeriesSpec => {
   const { table, isStacked, markSizeAccessor } = layer;
   const isPercentage = layer.isPercentage;
@@ -550,6 +563,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
         showPoints: layer.showPoints,
+        pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
@@ -566,6 +580,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
         showPoints: layer.showPoints,
+        pointVisibility,
         pointsRadius: layer.pointsRadius,
       }),
       ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),

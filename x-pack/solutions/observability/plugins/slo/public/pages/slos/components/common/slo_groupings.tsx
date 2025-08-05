@@ -101,7 +101,7 @@ function Entries({
   direction,
   gutterSize = 's',
 }: {
-  entries: Array<[string, unknown]>;
+  entries: Array<[string, string | number]>;
   direction: 'row' | 'column';
   gutterSize?: 'none' | 's';
 }) {
@@ -114,11 +114,11 @@ function Entries({
           <EuiText size="s">
             <span>
               {`${key}: `}
-              <EuiCopy textToCopy={`${value}`}>
+              <EuiCopy textToCopy={String(value)}>
                 {(copy) => (
                   <EuiLink
                     data-test-subj="sloInstanceCopy"
-                    style={{
+                    css={{
                       fontWeight: euiTheme.font.weight.semiBold,
                     }}
                     color="text"
@@ -127,7 +127,7 @@ function Entries({
                       copy();
                     }}
                   >
-                    {`${value}`}
+                    {value}
                   </EuiLink>
                 )}
               </EuiCopy>

@@ -351,7 +351,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               flush="right"
               href={documentationService.getTemplatesDocumentationLink(isLegacy)}
               target="_blank"
-              iconType="help"
+              iconType="question"
             >
               <FormattedMessage
                 id="xpack.idxMgmt.templateForm.stepLogistics.docsButtonLabel"

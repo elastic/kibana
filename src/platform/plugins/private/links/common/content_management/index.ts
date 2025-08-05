@@ -19,6 +19,7 @@ export type {
   LinksItem,
   LinksCrudTypes,
   LinksAttributes,
+  LinksSearchOut,
 } from './latest';
 
 export {

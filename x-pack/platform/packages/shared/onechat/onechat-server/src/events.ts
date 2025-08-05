@@ -6,87 +6,32 @@
  */
 
 import type { OnechatEvent } from '@kbn/onechat-common';
-import type { RunContextStackEntry } from './runner';
-
-export enum OnechatRunEventType {
-  toolCall = 'toolCall',
-  toolResponse = 'toolResponse',
-}
-
-/**
- * Base set of meta for all onechat run events.
- */
-export interface OnechatRunEventMeta {
-  /**
-   * Current runId
-   */
-  runId: string;
-  /**
-   * Execution stack
-   */
-  stack: RunContextStackEntry[];
-}
 
 /**
  * Public-facing events, as received by the API consumer.
  */
-export type OnechatRunEvent<
+export type OnechatToolEvent<
   TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends OnechatRunEventMeta = OnechatRunEventMeta
-> = OnechatEvent<TEventType, TData, TMeta>;
+  TData extends Record<string, any> = Record<string, any>
+> = OnechatEvent<TEventType, TData>;
 
 /**
  * Internal-facing events, as emitted by tool or agent owners.
  */
-export type InternalRunEvent<
+export type InternalToolEvent<
   TEventType extends string = string,
-  TData extends Record<string, any> = Record<string, any>,
-  TMeta extends Record<string, any> = Record<string, any>
-> = Omit<OnechatEvent<TEventType, TData, TMeta>, 'meta'> & {
-  meta?: TMeta;
-};
+  TData extends Record<string, any> = Record<string, any>
+> = OnechatToolEvent<TEventType, TData>;
 /**
  * Event handler function to listen to run events during execution of tools, agents or other onechat primitives.
  */
-export type RunEventHandlerFn = (event: OnechatRunEvent) => void;
+export type ToolEventHandlerFn = (event: OnechatToolEvent) => void;
 
 /**
  * Event emitter function, exposed from tool or agent runnable context.
  */
-export type RunEventEmitterFn = (event: InternalRunEvent) => void;
+export type ToolEventEmitterFn = (event: InternalToolEvent) => void;
 
-export interface RunEventEmitter {
-  emit: RunEventEmitterFn;
+export interface ToolEventEmitter {
+  emit: ToolEventEmitterFn;
 }
-
-// toolCall
-
-export type ToolCallEvent = OnechatRunEvent<OnechatRunEventType.toolCall, ToolCallEventData>;
-
-export interface ToolCallEventData {
-  toolId: string;
-  toolParams: Record<string, unknown>;
-}
-
-export const isToolCallEvent = (event: OnechatEvent<any, any, any>): event is ToolCallEvent => {
-  return event.type === OnechatRunEventType.toolCall;
-};
-
-// toolResponse
-
-export type ToolResponseEvent = OnechatRunEvent<
-  OnechatRunEventType.toolResponse,
-  ToolResponseEventData
->;
-
-export interface ToolResponseEventData {
-  toolId: string;
-  toolResult: unknown;
-}
-
-export const isToolResponseEvent = (
-  event: OnechatEvent<any, any, any>
-): event is ToolResponseEvent => {
-  return event.type === OnechatRunEventType.toolResponse;
-};

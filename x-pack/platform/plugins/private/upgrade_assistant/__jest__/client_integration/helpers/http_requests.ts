@@ -169,6 +169,9 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
+  const setUpdateIndexResponse = (indexName: string, response?: object, error?: ResponseError) =>
+    mockResponse('POST', `${API_BASE_PATH}/update_index/${indexName}`, response, error);
+
   return {
     setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
@@ -191,6 +194,7 @@ const registerHttpRequestMockHelpers = (
     setClusterSettingsResponse,
     setDataStreamMigrationStatusResponse,
     setDataStreamMetadataResponse,
+    setUpdateIndexResponse,
   };
 };
 

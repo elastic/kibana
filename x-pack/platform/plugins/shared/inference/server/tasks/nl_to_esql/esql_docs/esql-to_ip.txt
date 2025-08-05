@@ -1,6 +1,6 @@
 # TO_IP
 
-The TO_IP function converts an input string into an IP value.
+Converts an input string to an IP value.
 
 ## Syntax
 
@@ -8,11 +8,13 @@ The TO_IP function converts an input string into an IP value.
 
 ### Parameters
 
-#### field
+#### `field`
 
-This is the input value. It can be a single or multi-valued column or an expression.
+The input value to be converted. This can be a single- or multi-valued column or an expression.
 
 ## Examples
+
+Converting strings to IP values
 
 ```esql
 ROW str1 = "1.1.1.1", str2 = "foo"
@@ -20,9 +22,18 @@ ROW str1 = "1.1.1.1", str2 = "foo"
 | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
 ```
 
+In this example:
+- The string `"1.1.1.1"` is successfully converted to an IP value and stored in `ip1`.
+- The string `"foo"` cannot be converted to an IP value, resulting in a `null` value for `ip2`.
+
+When a conversion fails, a *Warning* header is added to the response. The header provides details about the failure, including the source of the issue and the offending value. For instance:
+
 ```esql
-ROW ip_str = "192.168.1.1"
-| EVAL ip = TO_IP(ip_str)
-| KEEP ip
+"Line 1:68: evaluation of [TO_IP(str2)] failed, treating result as null. Only first 20 failures recorded."
 ```
 
+The failure reason and the problematic value are also included in a subsequent header:
+
+```esql
+"java.lang.IllegalArgumentException: 'foo' is not an IP string literal."
+```

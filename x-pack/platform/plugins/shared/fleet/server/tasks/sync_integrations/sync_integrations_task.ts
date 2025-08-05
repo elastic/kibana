@@ -24,6 +24,7 @@ import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
   canEnableSyncIntegrations,
+  createOrUpdateFleetSyncedIntegrationsIndex,
 } from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
@@ -31,16 +32,21 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.4';
+export const VERSION = '1.0.5';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const DEFAULT_INTERVAL = '5m';
 const TIMEOUT = '5m';
+
+interface SyncIntegrationsTaskConfig {
+  taskInterval?: string;
+}
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: SyncIntegrationsTaskConfig;
 }
 
 interface SyncIntegrationsTaskStartContract {
@@ -51,10 +57,12 @@ export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
+  private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -81,7 +89,7 @@ export class SyncIntegrationsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -89,7 +97,7 @@ export class SyncIntegrationsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -122,13 +130,14 @@ export class SyncIntegrationsTask {
 
     this.logger.info(`[runTask()] started`);
 
+    if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
+      return;
+    }
+
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-
-    if (!canEnableSyncIntegrations()) {
-      return;
-    }
 
     try {
       // write integrations on main cluster
@@ -153,15 +162,6 @@ export class SyncIntegrationsTask {
       this.logger.error(`[SyncIntegrationsTask] error: ${err}`);
       this.endRun('error');
     }
-  };
-
-  private syncedIntegrationsIndexExists = async (esClient: ElasticsearchClient) => {
-    return await esClient.indices.exists(
-      {
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-      },
-      { signal: this.abortController.signal }
-    );
   };
 
   private getSyncedIntegrationDoc = async (
@@ -191,15 +191,6 @@ export class SyncIntegrationsTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClient
   ) => {
-    const indexExists = await this.syncedIntegrationsIndexExists(esClient);
-
-    if (!indexExists) {
-      this.logger.info(
-        `[SyncIntegrationsTask] index ${FLEET_SYNCED_INTEGRATIONS_INDEX_NAME} does not exist`
-      );
-      return;
-    }
-
     const outputs = await outputService.list(soClient);
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
@@ -207,6 +198,10 @@ export class SyncIntegrationsTask {
     const isSyncEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
+
+    if (isSyncEnabled) {
+      await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
+    }
 
     const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
 
@@ -243,6 +238,7 @@ export class SyncIntegrationsTask {
         package_version: item.attributes.version,
         updated_at: item.updated_at ?? new Date().toISOString(),
         install_status: item.attributes.install_status,
+        install_source: item.attributes.install_source,
       };
     });
 

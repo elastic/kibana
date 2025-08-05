@@ -8,6 +8,7 @@
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
 import type { TableItemType } from './types';
 
 export const useColumns = (): Array<EuiBasicTableColumn<TableItemType>> => {
@@ -65,7 +66,7 @@ export const useColumns = (): Array<EuiBasicTableColumn<TableItemType>> => {
         dataType: 'date',
         sortable: true,
         render: (timestamp: string) => {
-          return new Date(timestamp).toLocaleString();
+          return <PreferenceFormattedDate value={new Date(timestamp)} />;
         },
       },
     ],

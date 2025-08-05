@@ -40,18 +40,8 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTableProps, 'services'>) {
-  const {
-    data,
-    http,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    cases,
-    settings,
-    observability,
-  } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
+export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
+  const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   return (
@@ -72,16 +62,6 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
       renderFlyoutBody={AlertsFlyoutBody}
       renderFlyoutFooter={AlertsFlyoutFooter}
       showAlertStatusWithFlapping
-      services={{
-        data,
-        http,
-        notifications,
-        fieldFormats,
-        application,
-        licensing,
-        cases,
-        settings,
-      }}
       {...props}
     />
   );

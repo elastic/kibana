@@ -10,19 +10,21 @@ import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EXPLORE_DATA_VIEW_PREFIX } from '../../../../common/constants';
 import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
-import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
+import { DataViewManagerScopeName } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
+import { useDataView } from '../../hooks/use_data_view';
+import { browserFieldsManager } from '../../utils/security_browser_fields_manager';
 
 interface DataViewPickerProps {
   /**
@@ -46,20 +48,38 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
   const {
     services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
+
+  const canEditDataView = useMemo(
+    () => Boolean(dataViewEditor?.userPermissions.editDataView()),
+    [dataViewEditor]
+  );
+
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec, status } = useDataViewSpec(scope);
+  const { dataView, status } = useDataView(scope);
+
+  const { adhocDataViews: adhocDataViewSpecs, defaultDataViewId } =
+    useSelector(sharedStateSelector);
+  const adhocDataViews = useMemo(() => {
+    return adhocDataViewSpecs
+      .filter((spec) => !spec.id?.startsWith(EXPLORE_DATA_VIEW_PREFIX))
+      .map((spec) => new DataView({ spec, fieldFormats }));
+  }, [adhocDataViewSpecs, fieldFormats]);
+
+  const managedDataViews = useManagedDataViews();
+  const savedDataViews = useSavedDataViews();
 
   const isDefaultSourcerer = scope === DataViewManagerScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
-  const dataViewId = dataViewSpec?.id;
+  const dataViewId = dataView?.id;
 
   // NOTE: this function is called in response to user interaction with the picker,
   // hence - it is the only place where we should update the url param for the data view selection.
   const handleChangeDataView = useCallback(
     (id: string, indexPattern: string = '') => {
+      browserFieldsManager.removeFromCache(scope);
       selectDataView({ id, scope });
 
       if (isDefaultSourcerer) {
@@ -96,6 +116,9 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       }
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
+      // Modifications to the fields do not trigger cache invalidation, but should as `fields` will be stale.
+      data.dataViews.clearInstanceCache(dataViewId);
+      browserFieldsManager.removeFromCache(scope);
 
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
@@ -111,54 +134,50 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         },
       });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
+    [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
-  const handleDataViewModified = useCallback(
-    (updatedDataView: DataView) => {
+  const handleDataViewModified = useMemo(() => {
+    if (!canEditDataView) {
+      return undefined;
+    }
+    return (updatedDataView: DataView) => {
       if (!updatedDataView.id) {
         return;
       }
       handleChangeDataView(updatedDataView.id, updatedDataView.getIndexPattern());
-    },
-    [handleChangeDataView]
-  );
+    };
+  }, [canEditDataView, handleChangeDataView]);
 
-  const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
+  const handleAddField = useMemo(
+    () => (canEditDataView ? () => editField(undefined, 'add') : undefined),
+    [editField, canEditDataView]
+  );
 
   const triggerConfig = useMemo(() => {
     if (status === 'loading') {
       return { label: LOADING };
     }
 
-    if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
+    if (dataView?.id === defaultDataViewId) {
       return {
         label: DEFAULT_SECURITY_DATA_VIEW,
       };
     }
 
     return {
-      label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
+      label: dataView?.name || dataView?.id || 'Data view',
     };
-  }, [dataViewSpec.id, dataViewSpec?.name, status]);
-
-  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
-
-  const adhocDataViews = useMemo(() => {
-    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
-  }, [adhocDataViewSpecs, fieldFormats]);
-
-  const managedDataViews = useManagedDataViews();
-  const savedDataViews = useSavedDataViews();
+  }, [dataView?.id, dataView?.name, defaultDataViewId, status]);
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
       <UnifiedDataViewPicker
         isDisabled={status !== 'ready' || disabled}
-        currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
+        currentDataViewId={dataViewId || (defaultDataViewId ?? undefined)}
         trigger={triggerConfig}
         onChangeDataView={handleChangeDataView}
         onEditDataView={handleDataViewModified}

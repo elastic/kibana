@@ -3417,7 +3417,7 @@
             "section": "def-common.Config",
             "text": "Config"
           },
-          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; inspect?: boolean | undefined; }) => Promise<void>"
+          "; installDir?: string | undefined; extraKbnOpts?: string[] | undefined; logsDir?: string | undefined; onEarlyExit?: ((msg: string) => void) | undefined; inspect?: boolean | undefined; remote?: boolean | undefined; }) => Promise<void>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
         "deprecated": false,
@@ -3554,6 +3554,20 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "inspect",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/functional_tests/lib/run_kibana_server.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runKibanaServer.$1.remote",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "remote",
                 "description": [],
                 "signature": [
                   "boolean | undefined"

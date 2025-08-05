@@ -8,6 +8,7 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { InterceptPublicPlugin } from './plugin';
 export type { InterceptsSetup, InterceptsStart } from './plugin';
+export type { Intercept } from './prompter';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new InterceptPublicPlugin(initializerContext);

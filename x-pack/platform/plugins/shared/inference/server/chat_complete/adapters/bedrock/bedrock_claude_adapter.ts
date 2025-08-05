@@ -12,22 +12,31 @@ import {
   createInferenceInternalError,
   ToolChoiceType,
 } from '@kbn/inference-common';
-import { parseSerdeChunkMessage } from './serde_utils';
+import { toUtf8 } from '@smithy/util-utf8';
+import type {
+  Message as BedRockConverseMessage,
+  ModelStreamErrorException,
+} from '@aws-sdk/client-bedrock-runtime';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { ImageBlock } from '@aws-sdk/client-bedrock-runtime';
+import { isDefined } from '@kbn/ml-is-defined';
+import type { DocumentType as JsonMember } from '@smithy/types';
+import type { Readable } from 'stream';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
+import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import {
-  BedrockChunkMember,
-  serdeEventstreamIntoObservable,
-} from './serde_eventstream_into_observable';
-import { processCompletionChunks } from './process_completion_chunks';
+  ConverseCompletionChunk,
+  processConverseCompletionChunks,
+} from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
-import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
+import { toolChoiceToConverse, toolsToConverseBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
-    system,
+    system = 'You are a helpful assistant for Elastic.',
     messages,
     toolChoice,
     tools,
@@ -38,37 +47,61 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
+    const converseMessages = messagesToBedrock(messages).map(
+      (message) =>
+        ({
+          role: message.role,
+          content: message.rawContent,
+        } as BedRockConverseMessage)
+    );
+    const systemMessage = noToolUsage
+      ? [{ text: addNoToolUsageDirective(system) }]
+      : [{ text: system }];
+    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+
     const subActionParams = {
-      system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      messages: messagesToBedrock(messages),
-      tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
-      toolChoice: toolChoiceToBedrock(toolChoice),
+      system: systemMessage,
+      messages: converseMessages,
+      tools: bedRockTools?.length ? bedRockTools : undefined,
+      toolChoice: toolChoiceToConverse(toolChoice),
       temperature,
       model: modelName,
       stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
-      ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
 
-    return defer(() => {
-      return executor.invoke({
-        subAction: 'invokeStream',
+    return defer(async () => {
+      const res = await executor.invoke({
+        subAction: 'converseStream',
         subActionParams,
       });
+      const result = res.data as { stream: Readable };
+      return { ...res, data: result?.stream };
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
-        if ('modelStreamErrorException' in eventData) {
+        if (
+          isPopulatedObject<'modelStreamErrorException', ModelStreamErrorException>(eventData, [
+            'modelStreamErrorException',
+          ])
+        ) {
           throw createInferenceInternalError(eventData.modelStreamErrorException.originalMessage);
         }
       }),
-      filter((value): value is BedrockChunkMember => {
-        return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
+      filter((value) => {
+        return typeof value === 'object' && !!value;
       }),
       map((message) => {
-        return parseSerdeChunkMessage(message.chunk);
+        const key = Object.keys(message)[0];
+        if (key && isPopulatedObject<string, { body: Uint8Array }>(message, [key])) {
+          return {
+            type: key,
+            body: JSON.parse(toUtf8(message[key].body)),
+          } as ConverseCompletionChunk;
+        }
       }),
-      processCompletionChunks()
+      filter((value): value is ConverseCompletionChunk => !!value),
+      processConverseCompletionChunks()
     );
   },
 };
@@ -79,24 +112,30 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
       case MessageRole.User:
         return {
           role: 'user' as const,
-          rawContent: (typeof message.content === 'string'
-            ? [message.content]
-            : message.content
-          ).map((contentPart) => {
-            if (typeof contentPart === 'string') {
-              return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
-            } else if (contentPart.type === 'text') {
-              return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
-            }
-            return {
-              type: 'image',
-              source: {
-                data: contentPart.source.data,
-                mediaType: contentPart.source.mimeType,
-                type: 'base64',
-              },
-            } satisfies BedRockImagePart;
-          }),
+          rawContent: (typeof message.content === 'string' ? [message.content] : message.content)
+            .map((contentPart) => {
+              if (typeof contentPart === 'string') {
+                return { text: contentPart, type: 'text' } satisfies BedRockTextPart;
+              } else if (contentPart.type === 'text') {
+                return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
+              }
+              if (contentPart.source?.data) {
+                const imageBlock: ImageBlock = {
+                  // Convert mimetype = 'image/png' to 'png'
+                  // https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                  format: contentPart.source.mimeType.split(
+                    '/'
+                  )[1] as BedRockImagePart['image']['format'],
+                  source: {
+                    bytes: new TextEncoder().encode(contentPart.source.data),
+                  },
+                };
+                return {
+                  image: imageBlock,
+                };
+              }
+            })
+            .filter<BedRockTextPart | BedRockImagePart>(isDefined),
         };
       case MessageRole.Assistant:
         return {
@@ -106,12 +145,11 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             ...(message.toolCalls
               ? message.toolCalls.map((toolCall) => {
                   return {
-                    type: 'tool_use' as const,
-                    id: toolCall.toolCallId,
-                    name: toolCall.function.name,
-                    input: ('arguments' in toolCall.function
-                      ? toolCall.function.arguments
-                      : {}) as Record<string, unknown>,
+                    toolUse: {
+                      toolUseId: toolCall.toolCallId,
+                      name: toolCall.function.name,
+                      input: 'arguments' in toolCall.function ? toolCall.function.arguments : {},
+                    },
                   };
                 })
               : []),
@@ -122,9 +160,18 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
           role: 'user' as const,
           rawContent: [
             {
-              type: 'tool_result' as const,
-              tool_use_id: message.toolCallId,
-              content: JSON.stringify(message.response),
+              toolResult: {
+                toolUseId: message.toolCallId,
+                content: [
+                  (typeof message.response === 'string'
+                    ? ({
+                        text: message.response,
+                      } as { text: string })
+                    : {
+                        json: message.response,
+                      }) as { json: JsonMember },
+                ],
+              },
             },
           ],
         };

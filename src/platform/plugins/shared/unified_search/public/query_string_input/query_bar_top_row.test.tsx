@@ -11,6 +11,7 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { BehaviorSubject } from 'rxjs';
 import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
@@ -22,8 +23,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { unifiedSearchPluginMock } from '../mocks';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const startMock = coreMock.createStart();
+startMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
 
 const mockTimeHistory = {
   get: () => {
@@ -103,11 +106,13 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   };
 
   return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <QueryBarTopRow {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
+    <EuiThemeProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <QueryBarTopRow {...defaultOptions} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </EuiThemeProvider>
   );
 }
 
@@ -398,6 +403,70 @@ describe('QueryBarTopRowTopRow', () => {
     );
 
     expect(component.find(CANCEL_BUTTON_SELECTOR).length).toBe(0);
+  });
+
+  describe('draft', () => {
+    it('should call onDraftChange when in dirty state', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith(state);
+    });
+
+    it('should call onDraftChange when in dirty state and no date picker', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: true,
+          showDatePicker: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith({
+        query: state.query,
+        dateRangeFrom: undefined,
+        dateRangeTo: undefined,
+      });
+    });
+
+    it('should call onDraftChange with empty draft when in normal state', () => {
+      const onDraftChange = jest.fn();
+      const state = {
+        query: kqlQuery,
+        dateRangeFrom: 'now-7d',
+        dateRangeTo: 'now',
+      };
+      const { getByText } = render(
+        wrapQueryBarTopRowInContext({
+          isDirty: false,
+          onDraftChange,
+          ...state,
+        })
+      );
+
+      expect(getByText(kqlQuery.query)).toBeInTheDocument();
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
+    });
   });
 });
 

@@ -847,46 +847,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.tracksOverlays",
-        "type": "Function",
-        "tags": [],
-        "label": "tracksOverlays",
-        "description": [],
-        "signature": [
-          "(root: unknown) => root is ",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.TracksOverlays",
-            "text": "TracksOverlays"
-          }
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.tracksOverlays.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "root",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1229,23 +1189,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, string | undefined> | undefined; lift: <R>(operator: ",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<string | undefined, R>) => ",
               "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; observers: ",
-              "Observer",
-              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string | undefined>; }"
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
@@ -1452,6 +1412,20 @@
             "tags": [],
             "label": "panelType",
             "description": [],
+            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-public.PanelPackage.maybePanelId",
+            "type": "string",
+            "tags": [],
+            "label": "maybePanelId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1822,23 +1796,23 @@
               "OperatorFunction",
               "<any, any>[]): ",
               "Observable",
-              "<unknown>; }; operator: ",
-              "Operator",
-              "<any, { [key: string]: ApiType; }> | undefined; lift: <R>(operator: ",
+              "<unknown>; }; observers: ",
+              "Observer",
+              "<{ [key: string]: ApiType; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
               "Operator",
               "<{ [key: string]: ApiType; }, R>) => ",
               "Observable",
-              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<{ [key: string]: ApiType; }>; operator: ",
+              "Operator",
+              "<any, { [key: string]: ApiType; }> | undefined; subscribe: { (observerOrNext?: Partial<",
               "Observer",
               "<{ [key: string]: ApiType; }>> | ((value: { [key: string]: ApiType; }) => void) | undefined): ",
               "Subscription",
               "; (next?: ((value: { [key: string]: ApiType; }) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
               "Subscription",
-              "; }; toPromise: { (): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: ApiType; } | undefined>; }; observers: ",
-              "Observer",
-              "<{ [key: string]: ApiType; }>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<{ [key: string]: ApiType; }>; }"
+              "; }; toPromise: { (): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructor): Promise<{ [key: string]: ApiType; } | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<{ [key: string]: ApiType; } | undefined>; }; }"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -1907,88 +1881,6 @@
               "() => void"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/performance_trackers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-public.TracksOverlays",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracksOverlays",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.openOverlay",
-            "type": "Function",
-            "tags": [],
-            "label": "openOverlay",
-            "description": [],
-            "signature": [
-              "(ref: ",
-              "OverlayRef",
-              ", options?: ",
-              "TracksOverlaysOptions",
-              " | undefined) => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "ref",
-                "description": [],
-                "signature": [
-                  "OverlayRef"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-public.TracksOverlays.openOverlay.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
-                "description": [],
-                "signature": [
-                  "TracksOverlaysOptions",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-public.TracksOverlays.clearOverlays",
-            "type": "Function",
-            "tags": [],
-            "label": "clearOverlays",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/tracks_overlays.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

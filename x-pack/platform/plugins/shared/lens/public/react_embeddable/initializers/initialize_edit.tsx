@@ -19,7 +19,6 @@ import {
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { Filter } from '@kbn/es-query';
@@ -27,6 +26,7 @@ import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
   LensEmbeddableStartServices,
+  LensHasEditPanel,
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
@@ -83,7 +83,7 @@ export function initializeEditApi(
     PublishesDisabledActionIds &
     HasEditCapabilities &
     HasReadOnlyCapabilities &
-    PublishesViewMode & { uuid: string };
+    PublishesViewMode & { uuid: string } & LensHasEditPanel;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
@@ -180,7 +180,7 @@ export function initializeEditApi(
   };
 
   // This will handle both edit and read only mode based on the view mode
-  const openInlineEditor = prepareInlineEditPanel(
+  const getInlineEditor = prepareInlineEditPanel(
     initialState,
     getModifiedState,
     updateState,
@@ -222,32 +222,25 @@ export function initializeEditApi(
     return isReadOnly(viewMode$) && Boolean(capabilities.visualize_v2.show);
   };
 
-  // this will force the embeddable to toggle the inline editing feature
-  const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
-    ? parentApi.canEditInline
-    : true;
-
-  const openConfigurationPanel = async (
-    { showOnly }: { showOnly: boolean } = { showOnly: false }
+  const getEditPanel = async (
+    { showOnly, closeFlyout }: { showOnly?: boolean; closeFlyout?: () => void } = {
+      closeFlyout: noop,
+    }
   ) => {
     // save the initial state in case it needs to revert later on
     const firstState = getState();
-
-    const rootEmbeddable = parentApi;
-    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-    const ConfigPanel = await openInlineEditor({
+    const ConfigPanel = await getInlineEditor({
       // restore the first state found when the panel opened
       onCancel: () => updateState({ ...firstState }),
       // the getState() here contains the wrong filters references but the input attributes
-      // are correct as openInlineEditor() handler is using the getModifiedState() function
+      // are correct as getInlineEditor() handler is using the getModifiedState() function
       onApply: showOnly
         ? noop
         : (attributes: LensRuntimeState['attributes']) =>
             updateState({ ...getState(), attributes }),
+      closeFlyout,
     });
-    if (ConfigPanel) {
-      mountInlinePanel(ConfigPanel, startDependencies.coreStart, overlayTracker, { uuid });
-    }
+    return ConfigPanel ?? undefined;
   };
 
   return {
@@ -270,6 +263,12 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
+
+        // this will force the embeddable to toggle the inline editing feature
+        const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
+          ? parentApi.canEditInline
+          : true;
+
         // just navigate directly to the editor
         if (!canEditInline) {
           const navigateFn = navigateToLensEditor(
@@ -282,8 +281,14 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        openConfigurationPanel({ showOnly: false });
+        mountInlinePanel({
+          core: startDependencies.coreStart,
+          api: parentApi,
+          loadContent: getEditPanel,
+          options: { uuid },
+        });
       },
+      getEditPanel,
       /**
        * Check everything here: user/app permissions and the current inline editing state
        */
@@ -305,7 +310,17 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        openConfigurationPanel({ showOnly: true });
+        mountInlinePanel({
+          core: startDependencies.coreStart,
+          api: parentApi,
+          loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
+            return getEditPanel({
+              showOnly: true,
+              closeFlyout,
+            });
+          },
+          options: { uuid },
+        });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {

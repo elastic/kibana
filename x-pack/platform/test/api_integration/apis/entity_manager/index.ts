@@ -12,7 +12,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['entityManager']);
 
     loadTestFile(require.resolve('./definitions'));
-    loadTestFile(require.resolve('./count'));
-    loadTestFile(require.resolve('./search'));
   });
 }

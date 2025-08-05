@@ -8,13 +8,13 @@
 import rison from '@kbn/rison';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { Reference } from '@kbn/content-management-utils';
 import type { DataViewSpec, SavedQuery } from '@kbn/data-plugin/common';
-import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DateRange } from '../types';
 
-export const LENS_APP_LOCATOR = 'LENS_APP_LOCATOR';
 export const LENS_SHARE_STATE_ACTION = 'LENS_SHARE_STATE_ACTION';
 
 interface LensShareableState {
@@ -61,7 +61,7 @@ interface LensShareableState {
   /**
    * Set the references used in the Lens state
    */
-  references: Array<SavedObjectReference & SerializableRecord>;
+  references: Array<Reference & SerializableRecord>;
 
   /**
    * Pass adHoc dataViews specs used in the Lens state
@@ -122,7 +122,7 @@ export interface LensAppLocatorParams extends SerializableRecord {
   /**
    * Set the references used in the Lens state
    */
-  references?: Array<SavedObjectReference & SerializableRecord>;
+  references?: Array<Reference & SerializableRecord>;
 
   /**
    * Pass adHoc dataViews specs used in the Lens state

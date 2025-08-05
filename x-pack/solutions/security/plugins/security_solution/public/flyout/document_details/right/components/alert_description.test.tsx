@@ -136,7 +136,7 @@ describe('<AlertDescription />', () => {
     it('should render rule preview button as disabled if flyout is in preview', () => {
       const { getByTestId } = renderDescription({
         ...panelContextValue([{ ...ruleUuid, values: [] }, ruleName, ruleDescription]),
-        isPreview: true,
+        isRulePreview: true,
       });
       expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(RULE_SUMMARY_BUTTON_TEST_ID)).toHaveAttribute('disabled');

@@ -8,6 +8,8 @@
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
@@ -44,11 +46,16 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
+
+        const space = await osqueryContext.service.getActiveSpace(request);
+        const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
         try {
-          const savedQueries = await savedObjectsClient.find<SavedQuerySavedObject>({
+          const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
             type: savedQuerySavedObjectType,
             page: request.query.page || 1,
             perPage: request.query.pageSize,
@@ -57,14 +64,22 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
           });
 
           const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
-            osqueryContext.service.getPackageService()?.asInternalUser
+            osqueryContext.service.getPackageService()?.asInternalUser,
+            spaceScopedClient,
+            spaceId
           );
           const savedObjects: SavedQueryResponse[] = savedQueries.saved_objects.map(
             (savedObject) => {
               // eslint-disable-next-line @typescript-eslint/naming-convention
               const ecs_mapping = savedObject.attributes.ecs_mapping;
 
-              savedObject.attributes.prebuilt = !!prebuiltSavedQueriesMap[savedObject.id];
+              const prebuiltById = savedObject.id && prebuiltSavedQueriesMap[savedObject.id];
+              const prebuiltByOriginId =
+                !prebuiltById && savedObject.originId
+                  ? prebuiltSavedQueriesMap[savedObject.originId]
+                  : false;
+
+              savedObject.attributes.prebuilt = !!(prebuiltById || prebuiltByOriginId);
 
               if (ecs_mapping) {
                 // @ts-expect-error update types

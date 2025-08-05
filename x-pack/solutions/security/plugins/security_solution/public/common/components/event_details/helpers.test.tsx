@@ -40,7 +40,7 @@ describe('helpers', () => {
       },
       {
         type: 'object',
-        expected: 'questionInCircle',
+        expected: 'question',
       },
       {
         type: 'float',
@@ -48,7 +48,7 @@ describe('helpers', () => {
       },
       {
         type: 'anything else',
-        expected: 'questionInCircle',
+        expected: 'question',
       },
     ].forEach(({ type, expected }) => {
       test(`it returns a ${expected} icon for type ${type}`, () =>

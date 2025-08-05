@@ -22,6 +22,10 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
 export { SetupTechnology } from './types';
+export {
+  SetupTechnologySelector,
+  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
+} from './services/setup_technology_selector';
 export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,
@@ -101,3 +105,4 @@ export { useGetDataStreams } from './hooks/use_request/data_stream';
 export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';
+export { NamespaceComboBox } from './components/namespace_combo_box';

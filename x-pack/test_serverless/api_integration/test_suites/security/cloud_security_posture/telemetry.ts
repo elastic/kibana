@@ -7,17 +7,14 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { data as telemetryMockData } from '@kbn/test-suites-xpack/cloud_security_posture_api/telemetry/data';
-import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
-import {
-  waitForPluginInitialized,
-  EsIndexDataProvider,
-} from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
+import { data as telemetryMockData } from './data';
+import { createPackagePolicy } from './helper';
+import { waitForPluginInitialized, EsIndexDataProvider } from './utils';
 import { SupertestWithRoleScopeType } from '../../../services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../shared/services';
 
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
 export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
@@ -54,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agent_policies`)
@@ -89,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     afterEach(async () => {
@@ -123,6 +120,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 1,
+          cspm_namespaces_count: 0,
         },
       ]);
       expect(apiResponse.stack_stats.kibana.plugins.cloud_security_posture.resources_stats).to.eql([
@@ -174,6 +173,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
       ]);
 
@@ -220,6 +221,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
         {
           account_id: 'my-k8s-cluster-5555',
@@ -234,6 +237,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 1,
+          cspm_namespaces_count: 0,
         },
       ]);
 
@@ -295,6 +300,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 0,
         },
       ]);
 
@@ -350,6 +357,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 1,
         },
         {
           account_id: 'my-k8s-cluster-5555',
@@ -364,6 +373,8 @@ export default function ({ getService }: FtrProviderContext) {
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
+          kspm_namespaces_count: 0,
+          cspm_namespaces_count: 0,
         },
       ]);
 

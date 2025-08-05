@@ -8,6 +8,7 @@
  */
 
 import { loadConfiguration } from './config_loader';
+import { piiFilter } from './filters/pii_filter';
 
 export const initApm = (
   argv: string[],
@@ -26,18 +27,7 @@ export const initApm = (
 
   // Filter out all user PII
   if (shouldRedactUsers) {
-    apm.addFilter((payload) => {
-      try {
-        if (payload.context?.user && typeof payload.context.user === 'object') {
-          Object.keys(payload.context.user).forEach((key) => {
-            payload.context.user[key] = '[REDACTED]';
-          });
-        }
-      } catch (e) {
-        // just silently ignore the error
-      }
-      return payload;
-    });
+    apm.addFilter(piiFilter);
   }
 
   apm.start(apmConfig);

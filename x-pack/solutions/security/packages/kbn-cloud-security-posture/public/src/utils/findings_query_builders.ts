@@ -10,7 +10,8 @@ import {
   buildMutedRulesFilter,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_EXTENDED_VULN_RETENTION_POLICY,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { UseCspOptions } from '../types';
@@ -102,7 +103,7 @@ const buildMisconfigurationsFindingsQueryWithFilters = (
         {
           range: {
             '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              gte: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
@@ -202,7 +203,7 @@ export const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions[
         {
           range: {
             '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              gte: `now-${CDR_EXTENDED_VULN_RETENTION_POLICY}`,
               lte: 'now',
             },
           },
@@ -254,12 +255,19 @@ export const createGetVulnerabilityFindingsQuery = (
   eventId?: string | string[]
 ) => {
   const filters: Array<{ terms: Record<string, string[]> }> = [];
+  const mustNotFilters: estypes.QueryDslQueryContainer[] = [];
 
   const addTermFilter = (field: string, value?: string | string[]) => {
     if (value !== undefined) {
       filters.push({
         terms: {
           [field]: Array.isArray(value) ? value : [value],
+        },
+      });
+    } else {
+      mustNotFilters.push({
+        exists: {
+          field,
         },
       });
     }
@@ -274,6 +282,7 @@ export const createGetVulnerabilityFindingsQuery = (
   return {
     bool: {
       filter: filters,
+      must_not: mustNotFilters,
     },
   };
 };

@@ -8,8 +8,12 @@
 import { StatusError } from './status_error';
 
 export class SecurityError extends StatusError {
-  constructor(message: string) {
+  constructor(message: string, options?: { cause?: Error }) {
     super(message, 403);
     this.name = 'SecurityError';
+    if (options?.cause) {
+      // Attach the cause to the error if provided (ES2022 standard)
+      this.cause = options.cause;
+    }
   }
 }

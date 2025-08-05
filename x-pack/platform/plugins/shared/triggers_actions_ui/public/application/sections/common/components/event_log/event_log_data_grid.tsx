@@ -142,14 +142,14 @@ const columnsWithToolTipMap: Record<string, Record<string, string>> = {
 
 export const ColumnHeaderWithToolTip = ({ id }: { id: string }) => {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" style={{ display: 'inline-flex' }}>
       <EuiFlexItem>{columnsWithToolTipMap[id].display}</EuiFlexItem>
       <EuiFlexItem>
         <EuiIconTip
           content={columnsWithToolTipMap[id].toolTip}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
       </EuiFlexItem>

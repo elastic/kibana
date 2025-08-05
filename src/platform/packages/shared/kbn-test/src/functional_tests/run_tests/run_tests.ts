@@ -127,6 +127,39 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             ],
           });
 
+          const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
+
+          if (startRemoteKibana) {
+            await runKibanaServer({
+              procs,
+              config: new Config({
+                settings: {
+                  ...config.getAll(),
+                  kbnTestServer: {
+                    sourceArgs: ['--no-base-path'],
+                    serverArgs: [
+                      ...config.get('kbnTestServer.serverArgs'),
+                      `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                      `--elasticsearch.hosts=http://localhost:9221`,
+                      `--server.port=5621`,
+                    ],
+                  },
+                },
+                path: config.path,
+                module: config.module,
+              }),
+              logsDir: options.logsDir,
+              installDir: options.installDir,
+              onEarlyExit,
+              extraKbnOpts: [
+                config.get('serverless')
+                  ? '--server.versioned.versionResolution=newest'
+                  : '--server.versioned.versionResolution=oldest',
+              ],
+              remote: true,
+            });
+          }
+
           if (abortCtrl.signal.aborted) {
             return;
           }

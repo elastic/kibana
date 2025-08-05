@@ -5,51 +5,23 @@
  * 2.0.
  */
 
-import { useCallback, useRef } from 'react';
-
-import { useBoolState } from '../../../../common/hooks/use_bool_state';
-import type { TimeRange } from '../../types';
+import { useScheduleBulkActionConfirmation } from '../../../common/components/schedule_bulk_action_modal/use_schedule_bulk_action_confirmation';
 
 /**
  * Hook that controls manual rule run confirmation modal window and its content
  */
 export const useManualRuleRunConfirmation = () => {
-  const [isManualRuleRunConfirmationVisible, showModal, hideModal] = useBoolState();
-  const confirmationPromiseRef = useRef<(timerange: TimeRange | null) => void>();
-
-  const onConfirm = useCallback((timerange: TimeRange) => {
-    confirmationPromiseRef.current?.(timerange);
-  }, []);
-
-  const onCancel = useCallback(() => {
-    confirmationPromiseRef.current?.(null);
-  }, []);
-
-  const initModal = useCallback(() => {
-    showModal();
-
-    return new Promise<TimeRange | null>((resolve) => {
-      confirmationPromiseRef.current = resolve;
-    }).finally(() => {
-      hideModal();
-    });
-  }, [showModal, hideModal]);
-
-  const showManualRuleRunConfirmation = useCallback(async () => {
-    const confirmation = await initModal();
-    if (confirmation) {
-      onConfirm(confirmation);
-    } else {
-      onCancel();
-    }
-
-    return confirmation;
-  }, [initModal, onConfirm, onCancel]);
+  const {
+    isScheduleBulkActionConfirmationVisible,
+    showScheduleBulkActionConfirmation,
+    cancelScheduleBulkAction,
+    confirmScheduleBulkAction,
+  } = useScheduleBulkActionConfirmation();
 
   return {
-    isManualRuleRunConfirmationVisible,
-    showManualRuleRunConfirmation,
-    cancelManualRuleRun: onCancel,
-    confirmManualRuleRun: onConfirm,
+    isManualRuleRunConfirmationVisible: isScheduleBulkActionConfirmationVisible,
+    showManualRuleRunConfirmation: showScheduleBulkActionConfirmation,
+    cancelManualRuleRun: cancelScheduleBulkAction,
+    confirmManualRuleRun: confirmScheduleBulkAction,
   };
 };

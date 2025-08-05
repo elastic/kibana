@@ -6,7 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../common/types/saved_objects';
 import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -44,7 +48,7 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
   handler: async ({ savedObjectsClient, request }): Promise<any> => {
     const showFromAllSpaces = request.query?.showFromAllSpaces;
     const data = await savedObjectsClient.find({
-      type: syntheticsMonitorType,
+      type: [legacySyntheticsMonitorTypeSingle, syntheticsMonitorSavedObjectType],
       perPage: 0,
       aggs,
       ...(showFromAllSpaces ? { namespaces: ['*'] } : {}),
@@ -87,31 +91,31 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
 const aggs = {
   monitorTypes: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
     },
   },
   tags: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.TAGS}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.TAGS}`,
       size: 10000,
     },
   },
   locations: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.LOCATIONS}.id`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
     },
   },
   projects: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.PROJECT_ID}`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.PROJECT_ID}`,
       size: 10000,
     },
   },
   schedules: {
     terms: {
-      field: `${monitorAttributes}.${ConfigKey.SCHEDULE}.number`,
+      field: `${syntheticsMonitorAttributes}.${ConfigKey.SCHEDULE}.number`,
       size: 10000,
     },
   },

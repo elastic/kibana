@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import { EuiBadgeGroup, EuiFlexGroup } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiFlexGroup,
+  EuiPageHeader,
+  useEuiTheme,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
+import type { ReactNode } from 'react';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useKibana } from '../../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { ClassicStreamBadge, LifecycleBadge } from '../../stream_badges';
+import { ClassicStreamBadge, DiscoverBadgeButton, LifecycleBadge } from '../../stream_badges';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../../common/feature_flags';
+import { ExportContentPackFlyout } from '../content/export_flyout';
+import { ImportContentPackFlyout } from '../content/import_flyout';
 
 export type ManagementTabs = Record<
   string,
   {
     content: JSX.Element;
-    label: string;
+    label: ReactNode;
   }
 >;
 
@@ -32,7 +45,17 @@ export function Wrapper({
   tab: string;
 }) {
   const router = useStreamsAppRouter();
-  const { definition } = useStreamDetail();
+  const { definition, refresh: refreshDefinition } = useStreamDetail();
+  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
+  const {
+    core: { featureFlags },
+  } = useKibana();
+
+  const renderContentPackItems = featureFlags.getBooleanValue(
+    FeatureFlagStreamsContentPackUIEnabled,
+    false
+  );
 
   const tabMap = Object.fromEntries(
     Object.entries(tabs).map(([tabName, currentTab]) => {
@@ -49,31 +72,103 @@ export function Wrapper({
     })
   );
 
+  const { euiTheme } = useEuiTheme();
   return (
     <>
-      <StreamsAppPageTemplate.Header
+      <EuiPageHeader
+        paddingSize="l"
         bottomBorder="extended"
+        breadcrumbs={[
+          {
+            href: router.link('/'),
+            text: (
+              <EuiButtonEmpty iconType="arrowLeft" size="s" flush="left">
+                {i18n.translate('xpack.streams.entityDetailViewWithoutParams.breadcrumb', {
+                  defaultMessage: 'Streams',
+                })}
+              </EuiButtonEmpty>
+            ),
+          },
+        ]}
+        css={css`
+          background: ${euiTheme.colors.backgroundBasePlain};
+        `}
         pageTitle={
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamTitle', {
               defaultMessage: 'Manage stream {streamId}',
               values: { streamId },
             })}
-            <EuiBadgeGroup gutterSize="s">
-              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
-              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
-            </EuiBadgeGroup>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <DiscoverBadgeButton definition={definition} />
+                  {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+                  <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiButton
+                      size="s"
+                      iconType="importAction"
+                      onClick={() => setIsImportFlyoutOpen(true)}
+                      data-test-subj="streamsAppImportButton"
+                    >
+                      {i18n.translate('xpack.streams.importButton', {
+                        defaultMessage: 'Import',
+                      })}
+                    </EuiButton>
+                    <EuiButton
+                      size="s"
+                      iconType="exportAction"
+                      onClick={() => setIsExportFlyoutOpen(true)}
+                      data-test-subj="streamsAppExportButton"
+                    >
+                      {i18n.translate('xpack.streams.exportButton', {
+                        defaultMessage: 'Export',
+                      })}
+                    </EuiButton>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-          return {
-            label,
-            href,
-            isSelected: tab === tabKey,
-          };
-        })}
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => ({
+          label,
+          href,
+          isSelected: tab === tabKey,
+        }))}
       />
-      <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body>{tabs[tab]?.content}</StreamsAppPageTemplate.Body>
+
+      {renderContentPackItems && Streams.WiredStream.GetResponse.is(definition) && (
+        <>
+          {isExportFlyoutOpen && (
+            <ExportContentPackFlyout
+              onClose={() => setIsExportFlyoutOpen(false)}
+              definition={definition}
+              onExport={() => {
+                setIsExportFlyoutOpen(false);
+              }}
+            />
+          )}
+
+          {isImportFlyoutOpen && (
+            <ImportContentPackFlyout
+              onClose={() => setIsImportFlyoutOpen(false)}
+              definition={definition}
+              onImport={() => {
+                setIsImportFlyoutOpen(false);
+                refreshDefinition();
+              }}
+            />
+          )}
+        </>
+      )}
     </>
   );
 }

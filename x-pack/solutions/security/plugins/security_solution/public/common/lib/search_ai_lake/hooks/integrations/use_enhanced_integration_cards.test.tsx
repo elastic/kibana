@@ -10,7 +10,6 @@ import {
   useEnhancedIntegrationCards,
   getCategoryBadgeIfAny,
 } from './use_enhanced_integration_cards';
-import { IntegrationsFacets } from '../../../../../configurations/constants';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { installationStatuses } from '@kbn/fleet-plugin/public';
 import { renderHook } from '@testing-library/react';
@@ -33,47 +32,51 @@ const mockCard = (name: string, categories?: string[]) =>
 describe('applyCategoryBadgeAndStyling', () => {
   const mockInt = mockCard('crowdstrike', ['edr_xdr']);
 
-  it('should add the correct return path to the URL', () => {
-    const callerView = IntegrationsFacets.available;
-    const result = applyCategoryBadgeAndStyling(mockInt, callerView);
+  it('should add the specified return path', () => {
+    const returnPath = `/my/custom/path`;
+    const result = applyCategoryBadgeAndStyling(mockInt, { returnPath });
 
     const urlParams = new URLSearchParams(result.url.split('?')[1]);
-    expect(urlParams.get('returnPath')).toBe(`/configurations/integrations/${callerView}`);
+    expect(urlParams.get('returnPath')).toBe(returnPath);
+  });
+
+  it('should add no return path details if not specified', () => {
+    const result = applyCategoryBadgeAndStyling(mockInt);
+
+    const urlParams = new URLSearchParams(result.url.split('?')[1]);
+    expect(urlParams.get('returnPath')).toBeNull();
   });
 
   it('should add the EDR/XDR badge if the category includes edr_xdr', () => {
     const cardWithEdrXdr = { ...mockInt, categories: ['edr_xdr'] };
-    const result = applyCategoryBadgeAndStyling(cardWithEdrXdr, IntegrationsFacets.available);
+    const result = applyCategoryBadgeAndStyling(cardWithEdrXdr);
 
     expect(result.extraLabelsBadges).toHaveLength(1);
   });
 
   it('should add the SIEM badge if the category includes siem', () => {
     const cardWithSiem = { ...mockInt, categories: ['siem'] };
-    const result = applyCategoryBadgeAndStyling(cardWithSiem, IntegrationsFacets.available);
+    const result = applyCategoryBadgeAndStyling(cardWithSiem);
 
     expect(result.extraLabelsBadges).toHaveLength(1);
   });
 
   it('should not add any badge if the category does not include edr_xdr or siem', () => {
     const cardWithOtherCategory = { ...mockInt, categories: ['other'] };
-    const result = applyCategoryBadgeAndStyling(
-      cardWithOtherCategory,
-      IntegrationsFacets.available
-    );
+    const result = applyCategoryBadgeAndStyling(cardWithOtherCategory);
 
     expect(result.extraLabelsBadges).toHaveLength(0);
   });
 
   it('should set showDescription and showReleaseBadge to false', () => {
-    const result = applyCategoryBadgeAndStyling(mockInt, IntegrationsFacets.available);
+    const result = applyCategoryBadgeAndStyling(mockInt);
 
     expect(result.showDescription).toBe(false);
     expect(result.showReleaseBadge).toBe(false);
   });
 
   it('should set minCardHeight to 88', () => {
-    const result = applyCategoryBadgeAndStyling(mockInt, IntegrationsFacets.available);
+    const result = applyCategoryBadgeAndStyling(mockInt);
 
     expect(result.minCardHeight).toBe(88);
   });

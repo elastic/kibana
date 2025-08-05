@@ -9,7 +9,9 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import semverGte from 'semver/functions/gte';
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -19,9 +21,14 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import {
+  SetupTechnology,
+  NamespaceComboBox,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -51,9 +58,8 @@ import {
   isPostureInput,
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
-  POSTURE_NAMESPACE,
-  POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
+  POLICY_TEMPLATE_FORM_DTS,
   getCloudDefaultAwsCredentialConfig,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
@@ -69,7 +75,6 @@ import {
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -543,26 +548,8 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-}) => {
-  useEffect(() => {
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
-};
-
 const usePolicyTemplateInitialName = ({
   isEditPage,
-  isLoading,
   integration,
   newPolicy,
   packagePolicyList,
@@ -570,7 +557,6 @@ const usePolicyTemplateInitialName = ({
   setCanFetchIntegration,
 }: {
   isEditPage: boolean;
-  isLoading: boolean;
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
@@ -580,7 +566,6 @@ const usePolicyTemplateInitialName = ({
   useEffect(() => {
     if (!integration) return;
     if (isEditPage) return;
-    if (isLoading) return;
 
     const packagePolicyListByIntegration = packagePolicyList?.filter(
       (policy) => policy?.vars?.posture?.value === integration
@@ -603,7 +588,7 @@ const usePolicyTemplateInitialName = ({
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, integration, isEditPage, packagePolicyList]);
+  }, [integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (
@@ -686,11 +671,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         ? integrationToEnable
         : undefined;
     const isParentSecurityPosture = !integrationParam;
+
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud, uiSettings } = useKibana().services;
     const cloudConnectorsEnabled =
       uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
+    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
     const isServerless = !!cloud.serverless.projectType;
     const input = getSelectedOption(newPolicy.inputs, integration);
@@ -703,6 +690,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       isEditPage,
       defaultSetupTechnology,
     });
+
+    const { euiTheme } = useEuiTheme();
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -761,8 +750,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       cloud,
       packageInfo,
     });
+
     const showCloudConnectors =
-      cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
+      cloudConnectorsEnabled &&
+      !!cloudConnectorRemoteRoleTemplate &&
+      semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
     /**
      * - Updates policy inputs by user selection
@@ -773,15 +765,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          inputType === CLOUDBEAT_AWS && isAgentlessAvailable
-            ? SetupTechnology.AGENTLESS
-            : SetupTechnology.AGENT_BASED,
+          setupTechnology,
           showCloudConnectors
         );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [packageInfo, newPolicy, updatePolicy, isAgentlessAvailable, showCloudConnectors]
+      [packageInfo, newPolicy, setupTechnology, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
@@ -841,8 +831,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
-
     useCloudFormationTemplate({
       packageInfo,
       updatePolicy,
@@ -852,7 +840,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     usePolicyTemplateInitialName({
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
-      isLoading,
       integration: integration as CloudSecurityPolicyTemplate,
       newPolicy,
       updatePolicy,
@@ -994,29 +981,73 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
 
+        {/* Namespace selector */}
+        {!input.type.includes('vuln_mgmt') && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id="advancedOptions"
+              data-test-subj="advancedOptionsAccordion"
+              buttonContent={
+                <EuiText
+                  size="xs"
+                  color={euiTheme.colors.textPrimary}
+                  css={{
+                    fontWeight: euiTheme.font.weight.medium,
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+                    defaultMessage="Advanced options"
+                  />
+                </EuiText>
+              }
+              paddingSize="m"
+            >
+              <NamespaceComboBox
+                fullWidth
+                namespace={newPolicy.namespace}
+                placeholder="default"
+                isEditPage={isEditPage}
+                validationError={validationResults?.namespace}
+                onNamespaceChange={(namespace: string) => {
+                  updatePolicy({ ...newPolicy, namespace });
+                }}
+                data-test-subj="namespaceInput"
+                labelId="xpack.csp.fleetIntegration.namespaceLabel"
+                helpTextId="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              />
+            </EuiAccordion>
+          </>
+        )}
         {shouldRenderAgentlessSelector && (
-          <SetupTechnologySelector
-            showLimitationsMessage={!isServerless}
-            disabled={isEditPage}
-            setupTechnology={setupTechnology}
-            isAgentless={!!newPolicy?.supports_agentless}
-            onSetupTechnologyChange={(value) => {
-              updateSetupTechnology(value);
-              updatePolicy(
-                getPosturePolicy(
-                  newPolicy,
-                  input.type,
-                  getDefaultCloudCredentialsType(
-                    value === SetupTechnology.AGENTLESS,
-                    input.type as Extract<
-                      PostureInput,
-                      'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                    >
+          <>
+            <EuiSpacer size="m" />
+            <SetupTechnologySelector
+              showLimitationsMessage={!isServerless}
+              disabled={isEditPage}
+              setupTechnology={setupTechnology}
+              allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+              onSetupTechnologyChange={(value) => {
+                updateSetupTechnology(value);
+                updatePolicy(
+                  getPosturePolicy(
+                    newPolicy,
+                    input.type,
+                    getDefaultCloudCredentialsType(
+                      value === SetupTechnology.AGENTLESS,
+                      input.type as Extract<
+                        PostureInput,
+                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
+                      >
+                    )
                   )
-                )
-              );
-            }}
-          />
+                );
+              }}
+              showBetaBadge={false}
+              useDescribedFormGroup={false}
+            />
+          </>
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}

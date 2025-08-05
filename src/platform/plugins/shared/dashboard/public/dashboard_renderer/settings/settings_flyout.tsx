@@ -38,11 +38,12 @@ import { savedObjectsTaggingService } from '../../services/kibana_services';
 
 interface DashboardSettingsProps {
   onClose: () => void;
+  ariaLabelledBy: string;
 }
 
 const DUPLICATE_TITLE_CALLOUT_ID = 'duplicateTitleCallout';
 
-export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => {
+export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSettingsProps) => {
   const dashboardApi = useDashboardApi();
 
   const [localSettings, setLocalSettings] = useState(dashboardApi.getSettings());
@@ -145,7 +146,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="dashboard.embeddableApi.showSettings.flyout.title"
               defaultMessage="Dashboard settings"
@@ -165,6 +166,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
             }
           >
             <EuiFieldText
+              autoFocus
               id="dashboardTitleInput"
               className="dashboardTitleInputText"
               data-test-subj="dashboardTitleInput"
@@ -282,7 +284,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         content={
                           <FormattedMessage
                             id="dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchHelp"
-                            defaultMessage="Only valid for {default} and {compatibility} palettes"
+                            defaultMessage="Only valid for legacy {default} and {compatibility} palettes"
                             values={{
                               default: (
                                 <strong>
@@ -306,7 +308,7 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
                         }}
                         position="top"
                         size="s"
-                        type="questionInCircle"
+                        type="question"
                       />
                     </EuiText>
                   }

@@ -10,13 +10,11 @@
 import { DashboardState } from '../../common';
 
 export const DEFAULT_DASHBOARD_STATE: DashboardState = {
-  viewMode: 'view',
   timeRestore: false,
   query: { query: '', language: 'kuery' },
   description: '',
   filters: [],
-  panels: {},
-  sections: {},
+  panels: [],
   title: '',
   tags: [],
 

@@ -106,6 +106,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
             id="Total"
             name="Total"
             data={totalSeries}
+            // Defaults to multi layer time axis as of Elastic Charts v70
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
@@ -121,6 +122,7 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
               id={`${metricType}-${stream.name}`}
               name={stream.name}
               data={stream.data}
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"

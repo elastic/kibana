@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useDatasetQualityState } from '../../../hooks/use_dataset_quality_state';
-import { noAccessToFailureStoreWarningDescription } from '../../../../common/translations';
 import { useDatasetQualityWarnings } from '../../../hooks/use_dataset_quality_warnings';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
   defaultMessage: 'Your request may take longer to complete',
@@ -84,7 +84,10 @@ const nonAggregatableWarningDescription = (nonAggregatableDatasets: string[]) =>
 // eslint-disable-next-line import/no-default-export
 export default function Warnings() {
   const { loading, nonAggregatableDatasets } = useDatasetQualityWarnings();
-  const { statsLoading, canUserReadFailureStore } = useDatasetQualityState();
+  const { statsLoading, canUserReadFailureStore, canUserReadAnyDataset, canUserMonitorAnyDataset } =
+    useDatasetQualityState();
+
+  const canAccessAnyDataset = canUserReadAnyDataset || canUserMonitorAnyDataset;
 
   return (
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
@@ -95,13 +98,9 @@ export default function Warnings() {
           </EuiCallOut>
         </EuiFlexItem>
       )}
-      {!statsLoading && !canUserReadFailureStore && (
+      {!statsLoading && !canUserReadFailureStore && canAccessAnyDataset && (
         <EuiFlexItem>
-          <EuiCallOut
-            title={noAccessToFailureStoreWarningDescription}
-            color="warning"
-            iconType="warning"
-          />
+          <FailureStoreWarning />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

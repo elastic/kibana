@@ -18,7 +18,6 @@
     "@kbn/config-schema",
     "@kbn/ebt-tools",
     "@kbn/core-notifications-browser",
-    "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser"
   ],

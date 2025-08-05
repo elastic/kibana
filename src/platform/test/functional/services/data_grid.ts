@@ -174,9 +174,13 @@ export class DataGridService extends FtrService {
     );
   }
 
+  private getCellElementByColumnNameSelector(rowIndex: number, columnName: string) {
+    return `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`;
+  }
+
   public async getCellElementByColumnName(rowIndex: number, columnName: string) {
     return await this.find.byCssSelector(
-      `[data-test-subj="euiDataGridBody"] [data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnName}"][data-gridcell-visible-row-index="${rowIndex}"]`
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
     );
   }
 
@@ -315,6 +319,12 @@ export class DataGridService extends FtrService {
    */
   public async getAllCellElements(rowIndex: number = 0, columnIndex: number = 0) {
     return await this.find.allByCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
+  }
+
+  public async getAllCellElementsByColumnName(rowIndex: number, columnName: string) {
+    return await this.find.allByCssSelector(
+      this.getCellElementByColumnNameSelector(rowIndex, columnName)
+    );
   }
 
   public async getDocCount(): Promise<number> {
@@ -848,9 +858,13 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('unifiedDataTableCompareSelectedDocuments');
   }
 
+  public async isComparisonModeActive() {
+    return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+  }
+
   public async waitForComparisonModeToLoad() {
-    await this.retry.try(async () => {
-      return await this.testSubjects.exists('unifiedDataTableCompareDocuments');
+    await this.retry.waitFor('comparison mode', async () => {
+      return await this.isComparisonModeActive();
     });
   }
 
@@ -901,6 +915,16 @@ export class DataGridService extends FtrService {
     await menuEntry.click();
   }
 
+  public async getComparisonDiffMode() {
+    await this.openComparisonSettingsMenu();
+    const modes = await this.testSubjects.findAll('^unifiedDataTableDiffMode-');
+    for (const mode of modes) {
+      if ((await mode.getAttribute('aria-current')) === 'true') {
+        return await mode.getVisibleText();
+      }
+    }
+  }
+
   public async getComparisonDiffSegments(rowIndex: number, cellIndex: number) {
     const columns = await this.getRow({ rowIndex }, 'unifiedDataTableCompareDocuments');
     const segments = await columns[cellIndex].findAllByClassName(
@@ -948,6 +972,13 @@ export class DataGridService extends FtrService {
   public async getCurrentPageNumber() {
     const currentPage = await this.find.byCssSelector('.euiPaginationButton[aria-current="page"]');
     return await currentPage.getVisibleText();
+  }
+
+  public async getInTableSearchTerm() {
+    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+      return null;
+    }
+    return await this.testSubjects.getAttribute(INPUT_TEST_SUBJ, 'value');
   }
 
   public async runInTableSearch(searchTerm: string) {
@@ -1037,5 +1068,22 @@ export class DataGridService extends FtrService {
       // Delay to make sure content is loaded
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
+  }
+
+  public async getScrollPosition() {
+    const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
+    const scrollTop = await this.browser.execute(
+      'return arguments[0].scrollTop',
+      container._webElement
+    );
+    const scrollLeft = await this.browser.execute(
+      'return arguments[0].scrollLeft',
+      container._webElement
+    );
+
+    return {
+      scrollTop,
+      scrollLeft,
+    };
   }
 }

@@ -13,10 +13,13 @@ import {
   ProcessorDefinitionWithId,
   ProcessorType,
   getProcessorType,
+  isSchema,
+  processorDefinitionSchema,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import { isEmpty, mapValues, omit, countBy, orderBy } from 'lodash';
+import { EnrichmentDataSource } from '../../../../common/url_schema';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -24,6 +27,8 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
+  ManualIngestPipelineFormState,
+  EnrichmentDataSourceWithUIAttributes,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -41,6 +46,12 @@ export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
+}
+interface RecalcColumnWidthsParams {
+  columnId: string;
+  width: number | undefined; // undefined -> reset width
+  prevWidths: Record<string, number | undefined>;
+  visibleColumns: string[];
 }
 
 const PRIORITIZED_CONTENT_FIELDS = [
@@ -118,6 +129,13 @@ const defaultGrokProcessorFormState: (
   if: ALWAYS_CONDITION,
 });
 
+const defaultManualIngestPipelineProcessorFormState = (): ManualIngestPipelineFormState => ({
+  type: 'manual_ingest_pipeline',
+  processors: [],
+  ignore_failure: true,
+  if: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -132,6 +150,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -173,6 +192,15 @@ export const getFormStateFrom = (
     });
   }
 
+  if (isManualIngestPipelineJsonProcessor(processor)) {
+    const { manual_ingest_pipeline } = processor;
+
+    return structuredClone({
+      ...manual_ingest_pipeline,
+      type: 'manual_ingest_pipeline',
+    });
+  }
+
   if (isDateProcessor(processor)) {
     const { date } = processor;
 
@@ -205,8 +233,8 @@ export const convertFormStateToProcessor = (
         grok: {
           if: formState.if,
           patterns: patterns
-            .map((pattern) => pattern.getExpression())
-            .filter((pattern): pattern is string => pattern !== undefined),
+            .map((pattern) => pattern.getExpression().trim())
+            .filter((pattern) => !isEmpty(pattern)),
           field,
           pattern_definitions,
           ignore_failure,
@@ -231,6 +259,20 @@ export const convertFormStateToProcessor = (
           append_separator: isEmpty(append_separator) ? undefined : append_separator,
           ignore_failure,
           ignore_missing,
+        },
+      },
+    };
+  }
+
+  if (formState.type === 'manual_ingest_pipeline') {
+    const { processors, ignore_failure } = formState;
+
+    return {
+      processorDefinition: {
+        manual_ingest_pipeline: {
+          if: formState.if,
+          processors,
+          ignore_failure,
         },
       },
     };
@@ -278,10 +320,13 @@ const createProcessorGuardByType =
 
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isManualIngestPipelineJsonProcessor =
+  createProcessorGuardByType('manual_ingest_pipeline');
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
-const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+
+const processorToUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
@@ -289,12 +334,14 @@ const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
   ...processor,
 });
 
-const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
+const processorToAPIDefinition = (
+  processor: ProcessorDefinitionWithUIAttributes
+): ProcessorDefinition => {
   const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
-const toSimulateDefinition = (
+const processorToSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
   const { type, ...processorConfig } = processor;
@@ -302,7 +349,61 @@ const toSimulateDefinition = (
 };
 
 export const processorConverter = {
-  toAPIDefinition,
-  toSimulateDefinition,
-  toUIDefinition,
+  toAPIDefinition: processorToAPIDefinition,
+  toSimulateDefinition: processorToSimulateDefinition,
+  toUIDefinition: processorToUIDefinition,
 };
+
+const dataSourceToUIDefinition = <TEnrichementDataSource extends EnrichmentDataSource>(
+  dataSource: TEnrichementDataSource
+): EnrichmentDataSourceWithUIAttributes => ({
+  id: createId(),
+  ...dataSource,
+});
+
+const dataSourceToUrlSchema = (
+  dataSourceWithUIAttributes: EnrichmentDataSourceWithUIAttributes
+): EnrichmentDataSource => {
+  const { id, ...dataSource } = dataSourceWithUIAttributes;
+  return dataSource;
+};
+
+export const dataSourceConverter = {
+  toUIDefinition: dataSourceToUIDefinition,
+  toUrlSchema: dataSourceToUrlSchema,
+};
+
+export const getDefaultGrokProcessor = ({ sampleDocs }: { sampleDocs: FlattenRecord[] }) => ({
+  grok: {
+    field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+    patterns: [''],
+    pattern_definitions: {},
+    ignore_failure: true,
+    ignore_missing: true,
+    if: ALWAYS_CONDITION,
+  },
+});
+
+export const recalcColumnWidths = ({
+  columnId,
+  width,
+  prevWidths,
+  visibleColumns,
+}: RecalcColumnWidthsParams): Record<string, number | undefined> => {
+  const next = { ...prevWidths };
+  if (width === undefined) {
+    delete next[columnId];
+  } else {
+    next[columnId] = width;
+  }
+
+  const allExplicit = visibleColumns.every((c) => next[c] !== undefined);
+  if (allExplicit) {
+    delete next[visibleColumns[visibleColumns.length - 1]];
+  }
+
+  return next;
+};
+
+export const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
+  isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));

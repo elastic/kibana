@@ -135,3 +135,56 @@ export const interceptFillGap = () => {
     body: {},
   }).as('fillGap');
 };
+
+interface InterceptBulkFillRulesGapsParams {
+  succeeded: number;
+  failed: number;
+  skipped: number;
+  errorsArray?: Array<{
+    message: string;
+    status_code: number;
+    rules: Array<{ id: string; name: string }>;
+  }>;
+  delay?: number;
+}
+export const interceptBulkFillRulesGaps = ({
+  succeeded,
+  failed,
+  skipped,
+  errorsArray = [],
+  delay = 0,
+}: InterceptBulkFillRulesGapsParams) => {
+  const rulesCount = succeeded + failed + skipped;
+  const statusCode = failed === 0 ? 200 : 500;
+  cy.intercept(
+    {
+      method: 'POST',
+      url: '/api/detection_engine/rules/_bulk_action?dry_run=false',
+    },
+    (req) => {
+      if (req.body.action === 'fill_gaps') {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            req.reply(statusCode, {
+              successful: failed === 0,
+              rules_count: rulesCount,
+              attributes: {
+                errors: errorsArray,
+                results: [],
+                summary: {
+                  failed,
+                  succeeded,
+                  skipped,
+                  total: rulesCount,
+                },
+              },
+            });
+            resolve();
+          }, delay);
+        });
+      } else {
+        req.continue();
+      }
+    }
+  ).as('bulkFillRulesGaps');
+};

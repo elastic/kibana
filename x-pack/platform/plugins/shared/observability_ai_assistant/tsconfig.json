@@ -55,7 +55,9 @@
     "@kbn/sse-utils",
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
-    "@kbn/lock-manager"
+    "@kbn/lock-manager",
+    "@kbn/i18n-react",
+    "@kbn/inference-tracing"
   ],
   "exclude": ["target/**/*"]
 }

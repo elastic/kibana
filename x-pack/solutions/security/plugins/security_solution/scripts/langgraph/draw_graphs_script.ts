@@ -7,7 +7,6 @@
 
 import type {
   ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -17,12 +16,12 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
 import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -53,17 +52,13 @@ async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
 }
 
 async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
-  const graph = getGenerateEsqlAgent({
+  const graph = await getGenerateEsqlAgent({
     esClient: {} as unknown as ElasticsearchClient,
     connectorId: 'test-connector-id',
     inference: {} as unknown as InferenceServerStart,
     logger,
     request: {} as unknown as KibanaRequest,
-    createLlmInstance: () =>
-      ({ bindTools: () => null } as unknown as
-        | ActionsClientChatBedrockConverse
-        | ActionsClientChatVertexAI
-        | ActionsClientChatOpenAI),
+    createLlmInstance: (() => ({ bindTools: () => null })) as unknown as CreateLlmInstance,
   });
   return graph.getGraphAsync({ xray: true });
 }

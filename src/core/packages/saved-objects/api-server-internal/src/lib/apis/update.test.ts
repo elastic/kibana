@@ -27,6 +27,8 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -53,6 +55,7 @@ describe('#update', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -75,6 +78,7 @@ describe('#update', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -92,6 +96,9 @@ describe('#update', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -523,7 +530,10 @@ describe('#update', () => {
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { namespace });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          namespace,
+        });
+        expect(res.namespaces).toEqual([namespace]);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.index).toHaveBeenCalledWith(
@@ -533,7 +543,10 @@ describe('#update', () => {
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, { references });
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
+          references,
+        });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
           expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
           expect.anything()
@@ -541,14 +554,19 @@ describe('#update', () => {
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        const res = await updateSuccess(client, repository, registry, type, id, attributes, {
           references,
           namespace: 'default',
         });
+        expect(res.namespaces).toEqual(['default']);
         expect(client.index).toHaveBeenCalledWith(
-          expect.objectContaining({ id: expect.stringMatching(`${type}:${id}`) }),
+          expect.objectContaining({
+            id: expect.stringMatching(`${type}:${id}`),
+          }),
           expect.anything()
         );
+        // Assert that 'namespace' does not exist at all
+        expect(client.index.mock.calls[0][0]).not.toHaveProperty('namespace');
       });
 
       it(`doesn't prepend namespace to the id when using agnostic-namespace type`, async () => {
@@ -790,6 +808,31 @@ describe('#update', () => {
           { originId }
         );
         expect(result).toMatchObject({ originId });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeUpdate', async () => {
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { references }
+        );
+
+        expect(securityExtension.authorizeUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: {
+              existingNamespaces: ['default'],
+              id: 'logstash-*',
+              name: 'Testing',
+              type: 'multiNamespaceIsolatedType',
+            },
+          })
+        );
       });
     });
   });

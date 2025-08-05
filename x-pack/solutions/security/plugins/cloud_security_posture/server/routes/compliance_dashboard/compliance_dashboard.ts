@@ -8,7 +8,11 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { getComplianceDashboardSchema } from '../../../common/schemas/stats';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import {
+  getComplianceDashboardSchema,
+  getComplianceDashboardQuerySchema,
+} from '../../../common/schemas/stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import type {
   PosturePolicyTemplate,
@@ -16,12 +20,12 @@ import type {
   GetComplianceDashboardRequest,
   ComplianceDashboardDataV2,
 } from '../../../common/types_old';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
-import { getTrends, Trends } from './get_trends';
+import { getTrends, TrendsDetails } from './get_trends';
 import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
@@ -31,7 +35,7 @@ export interface KeyDocCount<TKey = string> {
   doc_count: number;
 }
 
-const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) =>
+const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: TrendsDetails) =>
   clustersWithoutTrends.map((cluster) => ({
     ...cluster,
     trend: trends.map(({ timestamp, clusters: clustersTrendData }) => ({
@@ -40,7 +44,10 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
     })),
   }));
 
-const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) => {
+const getBenchmarksTrends = (
+  benchmarksWithoutTrends: BenchmarkWithoutTrend[],
+  trends: TrendsDetails
+) => {
   return benchmarksWithoutTrends.map((benchmark) => ({
     ...benchmark,
     trend: trends.map(({ timestamp, benchmarks: benchmarksTrendData }) => {
@@ -57,7 +64,7 @@ const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], t
   }));
 };
 
-const getSummaryTrend = (trends: Trends) =>
+const getSummaryTrend = (trends: TrendsDetails) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
 export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
@@ -88,13 +95,12 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const esClient = cspContext.esClient.asCurrentUser;
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 
           const params: GetComplianceDashboardRequest = request.params;
           const policyTemplate = params.policy_template as PosturePolicyTemplate;
-
           // runtime mappings create the `safe_posture_type` field, which equals to `kspm` or `cspm` based on the value and existence of the `posture_type` field which was introduced at 8.7
           // the `query` is then being passed to our getter functions to filter per posture type even for older findings before 8.7
           const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
@@ -118,8 +124,8 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 
-          const clusters = getClustersTrends(clustersWithoutTrends, trends);
-          const trend = getSummaryTrend(trends);
+          const clusters = getClustersTrends(clustersWithoutTrends, trends.trends);
+          const trend = getSummaryTrend(trends.trends);
 
           const body: ComplianceDashboardData = {
             stats,
@@ -149,6 +155,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
         validate: {
           request: {
             params: getComplianceDashboardSchema,
+            query: getComplianceDashboardQuerySchema,
           },
         },
       },
@@ -162,29 +169,37 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           const filteredRules = await getMutedRulesFilterQuery(encryptedSoClient);
 
           const { id: pitId } = await esClient.openPointInTime({
-            index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+            index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
             keep_alive: '30s',
           });
 
           const params: GetComplianceDashboardRequest = request.params;
           const policyTemplate = params.policy_template as PosturePolicyTemplate;
+          const namespace = request.query.namespace;
 
           // runtime mappings create the `safe_posture_type` field, which equals to `kspm` or `cspm` based on the value and existence of the `posture_type` field which was introduced at 8.7
           // the `query` is then being passed to our getter functions to filter per posture type even for older findings before 8.7
           const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+          const filter = namespace
+            ? [
+                { term: { safe_posture_type: policyTemplate } },
+                { term: { 'data_stream.namespace': namespace } },
+              ]
+            : [{ term: { safe_posture_type: policyTemplate } }];
+
           const query: QueryDslQueryContainer = {
             bool: {
-              filter: [{ term: { safe_posture_type: policyTemplate } }],
+              filter,
               must_not: filteredRules,
             },
           };
 
-          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trends] =
+          const [stats, groupedFindingsEvaluation, benchmarksWithoutTrends, trendDetails] =
             await Promise.all([
               getStats(esClient, query, pitId, runtimeMappings, logger),
               getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings, logger),
               getBenchmarks(esClient, query, pitId, runtimeMappings, logger),
-              getTrends(esClient, policyTemplate, logger),
+              getTrends(esClient, policyTemplate, logger, namespace),
             ]);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
@@ -193,14 +208,15 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 
-          const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends);
-          const trend = getSummaryTrend(trends);
+          const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trendDetails.trends);
+          const trend = getSummaryTrend(trendDetails.trends);
 
           const body: ComplianceDashboardDataV2 = {
             stats,
             groupedFindingsEvaluation,
             benchmarks,
             trend,
+            namespaces: trendDetails.namespaces,
           };
 
           return response.ok({

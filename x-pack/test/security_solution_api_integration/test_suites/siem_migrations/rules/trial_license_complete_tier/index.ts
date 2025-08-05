@@ -8,8 +8,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@ess @serverless SecuritySolution SIEM Migrations', () => {
+    /* Automatic Rule Migrations */
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./rules/create'));
     loadTestFile(require.resolve('./rules/get'));
@@ -21,5 +23,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./stop'));
     loadTestFile(require.resolve('./get_integrations'));
     loadTestFile(require.resolve('./integrations_stats'));
+
+    /* Automatic Dashboard Migrations */
+    loadTestFile(require.resolve('./dashboard_migrations'));
   });
 }

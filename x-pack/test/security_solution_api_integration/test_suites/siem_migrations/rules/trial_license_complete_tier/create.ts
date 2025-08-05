@@ -21,20 +21,20 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path', () => {
       it('should create migrations without any issues', async () => {
+        const name = 'creation test migration name';
         const {
           body: { migration_id: migrationId },
-        } = await ruleMigrationRoutes.create({});
+        } = await ruleMigrationRoutes.create({ body: { name } });
 
         expect(migrationId).not.toBeNull();
 
-        const {
-          body: { id, created_by: createdBy },
-        } = await ruleMigrationRoutes.get({
+        const { body } = await ruleMigrationRoutes.get({
           migrationId,
         });
 
-        expect(id).toBe(migrationId);
-        expect(createdBy).not.toBeNull();
+        expect(body.id).toBe(migrationId);
+        expect(body.name).toBe(name);
+        expect(body.created_by).not.toBeNull();
       });
     });
   });

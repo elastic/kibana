@@ -11,7 +11,7 @@ import { services } from './services';
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {

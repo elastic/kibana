@@ -95,7 +95,7 @@ describe('tracesDataSourceProfileProvider', () => {
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
-  it("should NOT match when the root context isn't Observability", () => {
+  it('should NOT match when the solutionType is NOT Observability', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
         rootContext: {
@@ -106,5 +106,28 @@ describe('tracesDataSourceProfileProvider', () => {
         dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  describe('getColumnsConfiguration', () => {
+    it('should return custom configuration for the "_source" column', () => {
+      const getColumnsConfiguration =
+        tracesDataSourceProfileProvider.profile.getColumnsConfiguration?.(() => ({}), {
+          context: {
+            category: DataSourceCategory.Traces,
+          },
+        });
+
+      const columnConfiguration = getColumnsConfiguration?.();
+      expect(columnConfiguration).toBeDefined();
+      expect(columnConfiguration).toHaveProperty('_source');
+
+      const config = columnConfiguration!._source({
+        column: { id: '_source', displayAsText: 'Summary' },
+        headerRowHeight: 1,
+      });
+
+      expect(config).toBeDefined();
+      expect(config).toHaveProperty('display');
+    });
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
+import React, { type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
@@ -15,6 +15,7 @@ import {
   useInternalStateSelector,
   type RuntimeStateManager,
   selectTabRuntimeState,
+  selectRestorableTabRuntimeHistogramLayoutProps,
   useRuntimeState,
   CurrentTabProvider,
   RuntimeStateProvider,
@@ -25,6 +26,7 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -84,6 +86,10 @@ const UnifiedHistogramGuard = ({
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentScopedProfilesManager = useRuntimeState(
+    currentTabRuntimeState.scopedProfilesManager$
+  );
+  const currentScopedEbtManager = useRuntimeState(currentTabRuntimeState.scopedEbtManager$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
@@ -92,8 +98,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentStateContainer ||
-    !currentDataView ||
-    !currentTabRuntimeState
+    !currentDataView
   ) {
     return null;
   }
@@ -105,10 +110,15 @@ const UnifiedHistogramGuard = ({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <UnifiedHistogramChartWrapper
-              stateContainer={currentStateContainer}
-              panelsToggle={panelsToggle}
-            />
+            <ScopedServicesProvider
+              scopedProfilesManager={currentScopedProfilesManager}
+              scopedEBTManager={currentScopedEbtManager}
+            >
+              <UnifiedHistogramChartWrapper
+                stateContainer={currentStateContainer}
+                panelsToggle={panelsToggle}
+              />
+            </ScopedServicesProvider>
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </DiscoverCustomizationProvider>
@@ -124,7 +134,17 @@ const UnifiedHistogramChartWrapper = ({
   stateContainer,
   panelsToggle,
 }: UnifiedHistogramChartProps) => {
-  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(stateContainer);
+  const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const [options] = useState(() => ({
+    initialLayoutProps: selectRestorableTabRuntimeHistogramLayoutProps(
+      stateContainer.runtimeStateManager,
+      currentTabId
+    ),
+  }));
+  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(
+    stateContainer,
+    options
+  );
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
@@ -132,8 +152,6 @@ const UnifiedHistogramChartWrapper = ({
       setUnifiedHistogramApi(unifiedHistogram.api);
     }
   }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
-
-  const currentTabId = useCurrentTabSelector((tab) => tab.id);
 
   useEffect(() => {
     if (unifiedHistogram.layoutProps) {

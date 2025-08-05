@@ -15,7 +15,7 @@ const PERFORMANCE_METRIC_EVENT_TYPE = 'performance_metric';
 /**
  * Register the `performance_metric` event type
  * @param analytics The {@link AnalyticsClient} during the setup phase (it has the method `registerEventType`)
- * @private To be called only by core's Analytics Service
+ * @internal To be called only by core's Analytics Service
  */
 export function registerPerformanceMetricEventType(
   analytics: Pick<AnalyticsClient, 'registerEventType'>

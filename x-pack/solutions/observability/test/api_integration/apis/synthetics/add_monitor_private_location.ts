@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.addPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation();
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...monitor,
             [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
             url: apiResponse.body.url,
+            spaces: [SPACE_ID],
           })
         );
         monitorId = apiResponse.body.id;

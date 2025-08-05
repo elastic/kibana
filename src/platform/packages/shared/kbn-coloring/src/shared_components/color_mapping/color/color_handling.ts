@@ -192,7 +192,7 @@ export function getGradientColorScale(
           ),
         ]
       : colorMode.steps.map((d) => getColor(d, palettes));
-  steps.sort(() => (colorMode.sort === 'asc' ? -1 : 1));
+  if (colorMode.sort === 'asc') steps.reverse();
   const scale = chroma.scale(steps).mode('lab');
   return (value: number) => scale(value).hex();
 }

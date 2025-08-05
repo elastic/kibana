@@ -87,6 +87,8 @@ components:
           enum:
             - esql
         prebuilt_rule_id:
+          ## null values helps in unsetting value in elasticsearch
+          nullable: true
           description: The Elastic prebuilt rule id matched.
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration_ids:
@@ -122,9 +124,13 @@ components:
         - type: object
           required:
             - id
+            - name
           properties:
             id:
               description: The rule migration id
+              $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            name:
+              description: The rule migration name
               $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         - $ref: '#/components/schemas/RuleMigrationData'
 
@@ -142,7 +148,7 @@ components:
           description:  The moment migration was created
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         last_execution:
-          description: The last execution of the rule migration task.
+          description: The last execution details of a rule migration task.
           $ref: '#/components/schemas/RuleMigrationLastExecution'
 
 
@@ -188,7 +194,7 @@ components:
           $ref: '#/components/schemas/RuleMigrationTranslationResult'
         status:
           description: The status of the rule migration process.
-          $ref: '#/components/schemas/RuleMigrationStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationStatus'
           default: pending
         comments:
           description: The comments for the migration including a summary from the LLM in markdown.
@@ -205,6 +211,7 @@ components:
       description: The rule migration task stats object.
       required:
         - id
+        - name
         - status
         - rules
         - created_at
@@ -213,9 +220,12 @@ components:
         id:
           description: The migration id
           $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        name:
+          description: The migration name
+          $ref: '../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         status:
           description: Indicates if the migration task status.
-          $ref: '#/components/schemas/RuleMigrationTaskStatus'
+          $ref: './common.schema.yaml#/components/schemas/MigrationTaskStatus'
         rules:
           type: object
           description: The rules migration stats.
@@ -247,19 +257,9 @@ components:
         last_updated_at:
           type: string
           description: The moment of the last update.
-        last_error:
-          type: string
-          description: The last error message if the migration task execution failed.
-
-    RuleMigrationTaskStatus:
-      type: string
-      description: The status of the migration task.
-      enum: # should match SiemMigrationTaskStatus enum at ../constants.ts
-        - ready
-        - running
-        - stopped
-        - finished
-        - aborted
+        last_execution:
+          description: The last execution of the migration task.
+          $ref: '#/components/schemas/RuleMigrationLastExecution'
 
     RuleMigrationTranslationStats:
       type: object
@@ -327,15 +327,6 @@ components:
         - full
         - partial
         - untranslatable
-
-    RuleMigrationStatus:
-      type: string
-      description: The status of each rule migration.
-      enum: # should match SiemMigrationsStatus enum at ../constants.ts
-        - pending
-        - processing
-        - completed
-        - failed
 
     RuleMigrationComment:
       type: object
@@ -470,23 +461,26 @@ components:
               description: The user who last updated the resource
 
     RuleMigrationLastExecution:
-      type: object
       description: The last execution of the rule migration task.
+      allOf:
+        - type: object
+          required:
+            - connector_id
+          properties:
+            skip_prebuilt_rules_matching:
+              type: boolean
+              description: Indicates if the last execution skipped matching prebuilt rules.
+        - $ref: './common.schema.yaml#/components/schemas/MigrationLastExecution'
+
+    RuleMigrationTaskExecutionSettings:
+      type: object
+      description: The rule migration task execution settings.
+      required:
+        - connector_id
       properties:
-        started_at:
-          type: string
-          description: The moment the last execution started.
-        ended_at:
-          type: string
-          nullable: true
-          description: The moment the last execution ended.
         connector_id:
           type: string
           description: The connector ID used for the last execution.
-        error:
-          type: string
-          nullable: true
-          description: The error message if the last execution failed.
-        is_aborted:
+        skip_prebuilt_rules_matching:
           type: boolean
-          description: Indicates if the last execution was aborted by the user.
+          description: Indicates if the current execution should skip matching prebuilt rules.

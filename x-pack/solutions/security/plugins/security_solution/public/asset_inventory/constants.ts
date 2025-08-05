@@ -13,6 +13,7 @@ export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';
 export const QUERY_KEY_GROUPING_DATA = 'asset-inventory-grouping-data';
+export const QUERY_KEY_ASSET_INVENTORY = 'asset-inventory-query-key';
 
 export const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
@@ -74,3 +75,5 @@ export const ASSET_GROUPING_OPTIONS = {
 };
 
 export const ASSET_INVENTORY_CLOUD_CREDENTIALS_PACKAGE_VERSION = '0.9.0-preview02';
+
+export const CLOUD_ASSET_DISCOVERY_INTEGRATION_PACKAGE_NAME = 'cloud_asset_inventory';

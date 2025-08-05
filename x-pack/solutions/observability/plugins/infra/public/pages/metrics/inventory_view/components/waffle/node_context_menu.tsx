@@ -101,8 +101,8 @@ export const NodeContextMenu = withEuiTheme(
     }, [nodeType, node.ip, node.id]);
 
     const nodeDetailMenuItemLinkProps = getAssetDetailUrl({
-      assetType: nodeType,
-      assetId: node.id,
+      entityType: nodeType,
+      entityId: node.id,
       search: {
         from: nodeDetailFrom,
         to: currentTime,

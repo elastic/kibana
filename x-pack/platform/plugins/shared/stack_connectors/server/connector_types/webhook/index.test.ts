@@ -222,7 +222,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      '"error validating action type config: error configuring webhook action: unable to parse url: TypeError: Invalid URL: example.com/do-something"'
+      `"error validating action type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -295,7 +295,25 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
+      `"error validating action type config: error validation webhook action config: target url is not present in allowedHosts"`
+    );
+  });
+
+  test('config validation fails when using disabled pfx certType', () => {
+    const config: Record<string, string | boolean> = {
+      url: 'https://mylisteningserver:9200/endpoint',
+      method: WebhookMethods.POST,
+      authType: AuthType.SSL,
+      certType: SSLCertType.PFX,
+      hasAuth: true,
+    };
+    configurationUtilities.getWebhookSettings = jest.fn(() => ({
+      ssl: { pfx: { enabled: false } },
+    }));
+    expect(() => {
+      validateConfig(connectorType, config, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
     );
   });
 });
@@ -740,5 +758,44 @@ describe('execute()', () => {
 
     expect(paramsObject.x).toBe(rogue);
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
+  });
+
+  test('404 response returns user error', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    requestMock.mockRejectedValueOnce({
+      tag: 'err',
+      response: {
+        status: 404,
+        statusText: 'Not Found',
+        data: {
+          message:
+            'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+        },
+      },
+    });
+    const result = await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result.errorSource).toBe('user');
+    expect(result.serviceMessage).toBe(
+      '[404] Not Found: The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.'
+    );
   });
 });

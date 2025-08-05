@@ -10,6 +10,7 @@
 export { AlertLifecycleStatusBadge } from './src/alert_lifecycle_status_badge';
 export type { AlertLifecycleStatusBadgeProps } from './src/alert_lifecycle_status_badge';
 export { MaintenanceWindowCallout } from './src/maintenance_window_callout';
+export { useFetchActiveMaintenanceWindows } from './src/maintenance_window_callout/use_fetch_active_maintenance_windows';
 export { AddMessageVariables } from './src/add_message_variables';
 
 export * from './src/common/hooks';
@@ -17,7 +18,7 @@ export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
 
 export * from './src/alert_fields_table';
-export * from './src/alert_filter_controls/types';
+export type * from './src/alert_filter_controls/types';
 export * from './src/common/types';
 export * from './src/check_action_type_enabled';
 export * from './src/action_variables';

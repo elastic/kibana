@@ -5,11 +5,9 @@
     "./cypress.config.ts",
     "./serverless_cypress.config.ts",
     "./serverless_cypress_qa.config.ts",
-    "../../../../../test_serverless/shared/lib",
   ],
   "exclude": [
     "target/**/*",
-    "../../../../../test_serverless/shared/lib/security/default_http_headers.ts"
   ],
   "compilerOptions": {
     "outDir": "target/types",
@@ -20,10 +18,6 @@
     "resolveJsonModule": true,
   },
   "kbn_references": [
-    "@kbn/test-suites-serverless",
-    {
-      "path": "../../../../../test/security_solution_cypress/cypress/tsconfig.json"
-    },
     "@kbn/cypress-config",
     // cypress projects that are nested inside of other ts project use code
     // from the parent ts project in ways that can't be automatically deteceted
@@ -32,10 +26,11 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
-    "@kbn/security-solution-plugin/public/management/cypress",
-    "@kbn/test-suites-xpack/security_solution_cypress/cypress",
+    "@kbn/cypress-test-helper",
+    "@kbn/security-plugin",
+    "@kbn/test",
+    "@kbn/tooling-log",
   ]
 }

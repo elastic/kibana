@@ -164,22 +164,22 @@ export const UpdatingData: StoryObj = {
   render: () => {
     const mockIndicators: ChartSeries[] = [
       {
-        x: '1 Jan 2022 06:00:00 GMT',
+        x: new Date('1 Jan 2022 06:00:00 GMT').getTime(),
         y: 0,
         g: '[Filebeat] AbuseCH Malware',
       },
       {
-        x: '1 Jan 2022 06:00:00 GMT',
+        x: new Date('1 Jan 2022 06:00:00 GMT').getTime(),
         y: 0,
         g: '[Filebeat] AbuseCH MalwareBazaar',
       },
       {
-        x: '1 Jan 2022 12:00:00 GMT',
+        x: new Date('1 Jan 2022 12:00:00 GMT').getTime(),
         y: 25,
         g: '[Filebeat] AbuseCH Malware',
       },
       {
-        x: '1 Jan 2022 18:00:00 GMT',
+        x: new Date('1 Jan 2022 18:00:00 GMT').getTime(),
         y: 15,
         g: '[Filebeat] AbuseCH MalwareBazaar',
       },

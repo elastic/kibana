@@ -202,7 +202,9 @@ export class SyntheticsServices {
       const getService = this.params.getService;
       const server = getService('kibanaServer');
 
-      await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
+      await server.savedObjects.clean({
+        types: ['synthetics-monitor', 'synthetics-monitor-multi-space', 'alert'],
+      });
       await this.cleanUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console

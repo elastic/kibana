@@ -16,6 +16,7 @@ export interface CloudUsageCollectorConfig {
   deploymentId: string | undefined;
   projectId: string | undefined;
   projectType: string | undefined;
+  productTier: string | undefined;
   orchestratorTarget: string | undefined;
 }
 
@@ -28,6 +29,7 @@ interface CloudUsage {
   deploymentId?: string;
   projectId?: string;
   projectType?: string;
+  productTier?: string;
   orchestratorTarget?: string;
 }
 
@@ -43,6 +45,7 @@ export function createCloudUsageCollector(
     deploymentId,
     projectId,
     projectType,
+    productTier,
     orchestratorTarget,
   } = config;
   const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
@@ -81,6 +84,10 @@ export function createCloudUsageCollector(
         type: 'keyword',
         _meta: { description: 'The Serverless Project type' },
       },
+      productTier: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Product Tier' },
+      },
       orchestratorTarget: {
         type: 'keyword',
         _meta: { description: 'The Orchestrator Target where it is deployed (canary/non-canary)' },
@@ -96,6 +103,7 @@ export function createCloudUsageCollector(
         deploymentId,
         projectId,
         projectType,
+        productTier,
         orchestratorTarget,
       };
     },

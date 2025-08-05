@@ -6,9 +6,9 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import type { UploadStatus } from '@kbn/file-upload';
 import type { FC } from 'react';
 import React from 'react';
-import { type UploadStatus } from './file_manager/file_manager';
 
 interface Props {
   uploadStatus: UploadStatus;

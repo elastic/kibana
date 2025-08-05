@@ -23,8 +23,8 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
 
   const link = getAssetDetailUrl({
-    assetId: name,
-    assetType: 'host',
+    entityId: name,
+    entityType: 'host',
     search: {
       from: parsedDateRange?.from ? new Date(parsedDateRange?.from).getTime() : undefined,
       to: parsedDateRange?.to ? new Date(parsedDateRange.to).getTime() : undefined,

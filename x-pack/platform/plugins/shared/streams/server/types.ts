@@ -23,6 +23,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -45,6 +46,7 @@ export interface StreamsPluginSetupDependencies {
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface StreamsPluginStartDependencies {

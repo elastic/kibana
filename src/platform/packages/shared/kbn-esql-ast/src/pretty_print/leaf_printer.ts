@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KEYWORDS } from '../parser/constants';
 import {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
@@ -29,11 +30,11 @@ const regexUnquotedIdPattern = /^([a-z\*_\@]{1})[a-z0-9_\*]*$/i;
  */
 export const LeafPrinter = {
   source: (node: ESQLSource): string => {
-    const { index, name, cluster, selector } = node;
+    const { index, name, prefix, selector } = node;
     let text = (index ? LeafPrinter.string(index) : name) || '';
 
-    if (cluster) {
-      text = `${LeafPrinter.string(cluster)}:${text}`;
+    if (prefix) {
+      text = `${LeafPrinter.string(prefix)}:${text}`;
     }
     if (selector) {
       text = `${text}::${LeafPrinter.string(selector)}`;
@@ -44,13 +45,16 @@ export const LeafPrinter = {
 
   identifier: (node: ESQLIdentifier) => {
     const name = node.name;
+    const isKeyword = KEYWORDS.has(name.toUpperCase());
+    const isQuotationNeeded = !regexUnquotedIdPattern.test(name);
 
-    if (regexUnquotedIdPattern.test(name)) {
-      return name;
-    } else {
+    if (isKeyword || isQuotationNeeded) {
       // Escape backticks "`" with double backticks "``".
       const escaped = name.replace(/`/g, '``');
+
       return '`' + escaped + '`';
+    } else {
+      return name;
     }
   },
 

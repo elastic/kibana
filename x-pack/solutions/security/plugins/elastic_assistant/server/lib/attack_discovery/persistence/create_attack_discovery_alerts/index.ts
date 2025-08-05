@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryAlert,
   CreateAttackDiscoveryAlertsParams,
@@ -13,16 +13,16 @@ import {
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import { transformToAlertDocuments } from '../transforms/transform_to_alert_documents';
 import { getCreatedDocumentIds } from './get_created_document_ids';
 import { getCreatedAttackDiscoveryAlerts } from './get_created_attack_discovery_alerts';
 
 interface CreateAttackDiscoveryAlerts {
-  attackDiscoveryAlertsIndex: string;
+  adhocAttackDiscoveryDataClient: IRuleDataClient;
   authenticatedUser: AuthenticatedUser;
   createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
-  esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;
 }
@@ -30,13 +30,16 @@ interface CreateAttackDiscoveryAlerts {
 const DEBUG_LOG_ID_PLACEHOLDER = `(uuid will replace missing ${ALERT_UUID})`;
 
 export const createAttackDiscoveryAlerts = async ({
-  attackDiscoveryAlertsIndex,
+  adhocAttackDiscoveryDataClient,
   authenticatedUser,
   createAttackDiscoveryAlertsParams,
-  esClient,
   logger,
   spaceId,
 }: CreateAttackDiscoveryAlerts): Promise<AttackDiscoveryAlert[]> => {
+  const attackDiscoveryAlertsIndex = adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId);
+  const readDataClient = adhocAttackDiscoveryDataClient.getReader({ namespace: spaceId });
+  const writeDataClient = await adhocAttackDiscoveryDataClient.getWriter({ namespace: spaceId });
+
   const now = new Date();
 
   const alertDocuments = transformToAlertDocuments({
@@ -76,11 +79,16 @@ export const createAttackDiscoveryAlerts = async ({
       alertDocument,
     ]);
 
-    const bulkResponse = await esClient.bulk({
+    const resp = await writeDataClient.bulk({
       body,
-      index: attackDiscoveryAlertsIndex,
       refresh: true,
     });
+
+    const bulkResponse = resp?.body;
+    if (!bulkResponse) {
+      logger.info(`Rule data client returned undefined as a result of the bulk operation.`);
+      return [];
+    }
 
     const createdDocumentIds = getCreatedDocumentIds(bulkResponse);
 
@@ -111,8 +119,8 @@ export const createAttackDiscoveryAlerts = async ({
     return getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
       createdDocumentIds,
-      esClient,
       logger,
+      readDataClient,
     });
   } catch (err) {
     logger.error(

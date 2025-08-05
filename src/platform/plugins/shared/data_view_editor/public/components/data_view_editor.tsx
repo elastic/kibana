@@ -12,7 +12,6 @@ import { EuiFlyout } from '@elastic/eui';
 import { DataViewEditorLazy } from './data_view_editor_lazy';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { createKibanaReactContext } from '../shared_imports';
-import './data_view_editor.scss';
 
 export interface DataViewEditorPropsWithServices extends DataViewEditorProps {
   services: DataViewEditorContext;

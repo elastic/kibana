@@ -9,11 +9,11 @@
 
 import { getBaselineDocuments } from '../kibana_migrator_test_kit.fixtures';
 import {
-  BASELINE_DOCUMENTS_PER_TYPE_1K,
-  BASELINE_DOCUMENTS_PER_TYPE_500K,
+  BASELINE_DOCUMENTS_PER_TYPE_SMALL,
+  BASELINE_DOCUMENTS_PER_TYPE_LARGE,
   BASELINE_ELASTICSEARCH_VERSION,
-  BASELINE_TEST_ARCHIVE_1K,
-  BASELINE_TEST_ARCHIVE_500K,
+  BASELINE_TEST_ARCHIVE_SMALL,
+  BASELINE_TEST_ARCHIVE_LARGE,
   createBaselineArchive,
 } from '../kibana_migrator_archive_utils';
 
@@ -24,16 +24,16 @@ describe.skip('migration tests toolkit', () => {
   it('can create a 1k documents ZIP archive', async () => {
     await createBaselineArchive({
       esVersion: BASELINE_ELASTICSEARCH_VERSION,
-      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_1K }),
-      dataArchive: BASELINE_TEST_ARCHIVE_1K,
+      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_SMALL }),
+      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
     });
   });
 
-  it('can create a 400k documents ZIP archive', async () => {
+  it('can create a 600k documents ZIP archive', async () => {
     await createBaselineArchive({
       esVersion: BASELINE_ELASTICSEARCH_VERSION,
-      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_500K }),
-      dataArchive: BASELINE_TEST_ARCHIVE_500K,
+      documents: getBaselineDocuments({ documentsPerType: BASELINE_DOCUMENTS_PER_TYPE_LARGE }),
+      dataArchive: BASELINE_TEST_ARCHIVE_LARGE,
     });
   });
 });

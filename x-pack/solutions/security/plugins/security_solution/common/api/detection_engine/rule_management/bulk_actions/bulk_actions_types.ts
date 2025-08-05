@@ -12,6 +12,7 @@ import type {
   BulkActionEditPayloadSchedule,
   BulkActionEditPayloadTags,
   BulkActionEditPayloadTimeline,
+  BulkActionEditPayloadAlertSuppression,
 } from './bulk_actions_route.gen';
 
 /**
@@ -29,4 +30,5 @@ export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadIndexPatterns
   | BulkActionEditPayloadInvestigationFields
   | BulkActionEditPayloadTimeline
+  | BulkActionEditPayloadAlertSuppression
   | BulkActionEditPayloadSchedule;

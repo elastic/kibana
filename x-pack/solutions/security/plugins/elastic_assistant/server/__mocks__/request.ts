@@ -49,10 +49,12 @@ import {
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
   PostEvaluateRequestBodyInput,
+  ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
+  getDeleteAllConversationsSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
 import { getCreateKnowledgeBaseEntrySchemaMock } from './knowledge_base_entry_schema.mock';
@@ -166,6 +168,13 @@ export const getCurrentUserPromptsRequest = () =>
     path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
   });
 
+export const getCurrentUserSecurityAIPromptsRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
+    query: { prompt_group_id: 'aiAssistant', prompt_ids: ['systemPrompt'] },
+  });
+
 export const getCurrentUserAlertSummaryRequest = () =>
   requestMock.create({
     method: 'get',
@@ -184,6 +193,13 @@ export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
     params: { id },
+  });
+
+export const getDeleteAllConversationsRequest = () =>
+  requestMock.create({
+    method: 'delete',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+    body: getDeleteAllConversationsSchemaMock(),
   });
 
 export const getCreateConversationRequest = () =>

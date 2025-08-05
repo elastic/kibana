@@ -14,8 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { MB } from '@kbn/file-upload-common/src/constants';
 import { getHttp } from '../kibana_services';
-import { MB } from '../../common/constants';
+
 import type {
   ImportDoc,
   ImportFailure,
@@ -123,7 +124,8 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipelines: Array<IngestPipeline | undefined>
+    pipelines: Array<IngestPipeline | undefined>,
+    existingIndex: boolean = false
   ) {
     this._initialize(index, mappings, pipelines);
 
@@ -132,6 +134,7 @@ export abstract class Importer implements IImporter {
       settings,
       mappings,
       ingestPipelines: this._pipelines,
+      existingIndex,
     });
   }
 

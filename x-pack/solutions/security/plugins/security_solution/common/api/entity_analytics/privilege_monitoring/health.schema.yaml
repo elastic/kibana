@@ -19,5 +19,15 @@ paths:
               schema:
                 type: object
                 properties:
-                  ok:
-                    type: boolean
+                  status: 
+                    $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  error:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      message:
+                        type: string
+
+                required:
+                  - status

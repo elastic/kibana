@@ -8,7 +8,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { flatten } from 'lodash';
 
 import type {
   BrushEndListener,
@@ -69,6 +68,7 @@ interface DurationDistributionChartProps {
   dataTestSubPrefix?: string;
   showAxisTitle?: boolean;
   showLegend?: boolean;
+  isOtelData?: boolean;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -115,6 +115,7 @@ export function DurationDistributionChart({
   dataTestSubPrefix,
   showAxisTitle = true,
   showLegend = true,
+  isOtelData = false,
 }: DurationDistributionChartProps) {
   const chartThemes = useChartThemes();
   const { euiTheme } = useEuiTheme();
@@ -136,8 +137,8 @@ export function DurationDistributionChart({
   );
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
-  const { yTicks, yAxisMaxDomain, yAxisDomain } = useMemo(() => {
-    const yMax = Math.max(...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)) ?? 0;
+  const { yTicks, yAxisMaxDomain, yAxisDomain, formattedData } = useMemo(() => {
+    const yMax = Math.max(...data.flatMap((d) => d.histogram).map((d) => d.doc_count)) ?? 0;
     const computedYTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
     const computedMaxDomain = Math.pow(10, computedYTicks);
 
@@ -148,8 +149,14 @@ export function DurationDistributionChart({
         min: Y_AXIS_MIN_DOMAIN,
         max: computedMaxDomain,
       },
+      formattedData: isOtelData
+        ? data.map((d) => ({
+            ...d,
+            histogram: d.histogram.map((hist) => ({ ...hist, key: hist.key * 0.001 })),
+          }))
+        : data,
     };
-  }, [data]);
+  }, [isOtelData, data]);
 
   const selectionAnnotation = useMemo(() => {
     return selection !== undefined
@@ -169,11 +176,11 @@ export function DurationDistributionChart({
 
   const chartData = useMemo(
     () =>
-      data.map((d) => ({
+      formattedData.map((d) => ({
         ...d,
         histogram: replaceHistogramZerosWithMinimumDomainValue(d.histogram),
       })),
-    [data]
+    [formattedData]
   );
 
   return (

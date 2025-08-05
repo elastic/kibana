@@ -17,8 +17,8 @@ export const initLiveQueryRoutes = (
   router: IRouter<DataRequestHandlerContext>,
   context: OsqueryAppContext
 ) => {
-  findLiveQueryRoute(router);
+  findLiveQueryRoute(router, context);
   createLiveQueryRoute(router, context);
-  getLiveQueryDetailsRoute(router);
-  getLiveQueryResultsRoute(router);
+  getLiveQueryDetailsRoute(router, context);
+  getLiveQueryResultsRoute(router, context);
 };

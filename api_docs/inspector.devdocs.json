@@ -107,9 +107,7 @@
                 "section": "def-public.InspectorViewDescription",
                 "text": "InspectorViewDescription"
               },
-              ") => void; __LEGACY: { views: ",
-              "InspectorViewRegistry",
-              "; }; }"
+              ") => void; }"
             ],
             "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
@@ -170,7 +168,7 @@
                 "section": "def-public.InspectorOptions",
                 "text": "InspectorOptions"
               },
-              " | undefined) => ",
+              " | undefined, parentApi?: unknown) => ",
               "OverlayRef",
               "; }"
             ],
@@ -250,7 +248,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
@@ -988,6 +987,7 @@
         "type": "Interface",
         "tags": [
           "property",
+          "property",
           "property"
         ],
         "label": "InspectorOptions",
@@ -1028,13 +1028,15 @@
           },
           {
             "parentPluginId": "inspector",
-            "id": "def-public.InspectorOptions.flyoutType",
+            "id": "def-public.InspectorOptions.flyoutProps",
             "type": "CompoundType",
             "tags": [],
-            "label": "flyoutType",
+            "label": "flyoutProps",
             "description": [],
             "signature": [
-              "\"push\" | \"overlay\" | undefined"
+              "(Partial<",
+              "OverlayFlyoutOpenOptions",
+              "> & { triggerId?: string | undefined; focusedPanelId?: string | undefined; }) | undefined"
             ],
             "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
@@ -1583,22 +1585,6 @@
               "trackAdoption": false
             }
           ]
-        },
-        {
-          "parentPluginId": "inspector",
-          "id": "def-public.Setup.__LEGACY",
-          "type": "Object",
-          "tags": [],
-          "label": "__LEGACY",
-          "description": [],
-          "signature": [
-            "{ views: ",
-            "InspectorViewRegistry",
-            "; }"
-          ],
-          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
-          "deprecated": false,
-          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1697,7 +1683,7 @@
               "section": "def-public.InspectorOptions",
               "text": "InspectorOptions"
             },
-            " | undefined) => ",
+            " | undefined, parentApi?: unknown) => ",
             "OverlayRef"
           ],
           "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
@@ -1750,6 +1736,23 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
+            },
+            {
+              "parentPluginId": "inspector",
+              "id": "def-public.Start.open.$3",
+              "type": "Unknown",
+              "tags": [],
+              "label": "parentApi",
+              "description": [
+                "- Optional parent api for trackingOverlays."
+              ],
+              "signature": [
+                "unknown"
+              ],
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
             }
           ],
           "returnComment": [
@@ -1791,7 +1794,8 @@
             "text": "RequestAdapter"
           },
           " extends ",
-          "events"
+          "events",
+          "<DefaultEventMap>"
         ],
         "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,

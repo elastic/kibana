@@ -22,24 +22,22 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
-import type {
-  RuleMigrationAllIntegrationsStats,
-  RuleMigrationRule,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
+  type RuleMigrationAllIntegrationsStats,
+  type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 
 export type AddRuleMigrationRulesInput = Omit<
   RuleMigrationRule,
   '@timestamp' | 'id' | 'status' | 'created_by'
 >;
-export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
+export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'name' | 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
 export interface RuleMigrationGetRulesOptions {
@@ -56,7 +54,7 @@ const BULK_MAX_SIZE = 500 as const;
  * when retrieving search results in batches. */
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
-export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
+export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient {
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: AddRuleMigrationRulesInput[]): Promise<void> {
     const index = await this.getIndexName();

@@ -12,6 +12,8 @@ import {
   type LogsContextService,
   createTracesContextService,
   type TracesContextService,
+  createApmErrorsContextService,
+  type ApmErrorsContextService,
 } from '@kbn/discover-utils';
 
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -35,6 +37,7 @@ export interface ProfileProviderServices extends DiscoverServices {
    */
   logsContextService: LogsContextService;
   tracesContextService: TracesContextService;
+  apmErrorsContextService: ApmErrorsContextService;
 }
 
 /**
@@ -51,6 +54,9 @@ export const createProfileProviderServices = async (
       logsDataAccess: discoverServices.logsDataAccess,
     }),
     tracesContextService: await createTracesContextService({
+      apmSourcesAccess: discoverServices.apmSourcesAccess,
+    }),
+    apmErrorsContextService: await createApmErrorsContextService({
       apmSourcesAccess: discoverServices.apmSourcesAccess,
     }),
   };

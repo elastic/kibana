@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
 import { chatClient, esClient, kibanaClient } from '../../services';
 
 const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
@@ -57,14 +58,19 @@ describe('Knowledge base', () => {
   describe('kb retrieval', () => {
     const testDocs = [
       {
-        id: 'doc_invention_1',
-        title: 'Quantum Revectorization Engine',
-        text: 'The Quantum Revectorization Engine (QRE), invented by Dr. Eliana Stone at Acme Labs in 2023, uses advanced quantum fields to reorder the subatomic structure of materials, effectively reconfiguring matter at a fundamental level. Its main achievement was to transform ordinary silicon wafers into superconductive materials without traditional cooling methods.',
+        id: 'acme_teams',
+        title: 'ACME DevOps Team Structure',
+        text: 'ACME maintains three primary DevOps teams: Platform Infrastructure (responsible for cloud infrastructure and Kubernetes clusters), Application Operations (responsible for application deployments and monitoring), and Security Operations (responsible for security monitoring and compliance). Each team maintains a separate on-call rotation accessible via PagerDuty. The current on-call schedule is available in the #oncall Slack channel or through the PagerDuty integration in Kibana.',
       },
       {
-        id: 'doc_invention_2',
-        title: 'Constraints of QRE',
-        text: 'Current constraints on the Quantum Revectorization Engine technology limit its revectorization radius to approximately 2 nanometers. Additionally, the energy required to maintain the quantum fields is extraordinarily high, necessitating specialized fusion reactors to sustain the process.',
+        id: 'acme_monitoring',
+        title: 'Alert Thresholds',
+        text: 'Standard alert thresholds for ACME services are: API response time > 500ms (warning) or > 1s (critical), error rate > 1% (warning) or > 5% (critical), CPU usage > 80% (warning) or > 90% (critical), memory usage > 85% (warning) or > 95% (critical). Custom thresholds for specific services are documented in the service runbooks stored in Confluence under the "Service Specifications" space.',
+      },
+      {
+        id: 'acme_infra',
+        title: 'Database Infrastructure',
+        text: 'Primary transactional data is stored in PostgreSQL clusters with read replicas in each region. Customer metadata is stored in MongoDB with M40 clusters in each region. Caching layer uses Redis Enterprise Cloud with 15GB instances. All database metrics are collected via Metricbeat with custom dashboards available under "ACME Databases" in Kibana. Database performance alerts are configured to notify the DBA team via the #db-alerts Slack channel.',
       },
     ];
 
@@ -91,30 +97,47 @@ describe('Knowledge base', () => {
       );
     });
 
-    it('retrieves inventor and purpose of the QRE', async () => {
-      const prompt = 'Who invented the Quantum Revectorization Engine and what does it do?';
-      const conversation = await chatClient.complete({ messages: prompt });
+    describe('when asking about DevOps teams', () => {
+      let conversation: Awaited<ReturnType<typeof chatClient.complete>>;
+      before(async () => {
+        const prompt = 'What DevOps teams does we have and how is the on-call rotation managed?';
+        conversation = await chatClient.complete({ messages: prompt });
+      });
 
-      const result = await chatClient.evaluate(conversation, [
-        'Uses context function response to find information about the Quantum Revectorization Engine',
-        'Correctly identifies Dr. Eliana Stone at Acme Labs in 2023 as the inventor',
-        'Accurately describes that it reorders the subatomic structure of materials and can transform silicon wafers into superconductive materials',
-        'Does not invent unrelated or hallucinated details not present in the KB',
-      ]);
+      it('retrieves one entry from the KB', async () => {
+        const contextResponseMessage = conversation.messages.find(
+          (msg) => msg.name === CONTEXT_FUNCTION_NAME
+        )!;
+        const { learnings } = JSON.parse(contextResponseMessage.content!);
+        const firstLearning = learnings[0];
 
-      expect(result.passed).to.be(true);
+        expect(learnings.length).to.be(1);
+        expect(firstLearning.llmScore).to.be.greaterThan(4);
+        expect(firstLearning.id).to.be('acme_teams');
+      });
+
+      it('retrieves DevOps team structure and on-call information', async () => {
+        const result = await chatClient.evaluate(conversation, [
+          'Uses context function response to find information about ACME DevOps team structure',
+          "Correctly identifies all three teams: Platform Infrastructure, Application Operations, and Security Operations and destcribes each team's responsibilities",
+          'Mentions that on-call rotations are managed through PagerDuty and includes information about accessing the on-call schedule via Slack or Kibana',
+          'Does not invent unrelated or hallucinated details not present in the KB',
+        ]);
+
+        expect(result.passed).to.be(true);
+      });
     });
 
-    it('retrieves constraints and energy requirements of the QRE', async () => {
+    it('retrieves monitoring thresholds and database infrastructure details', async () => {
       const prompt =
-        'What is the approximate revectorization radius of the QRE and what kind of reactor is required to power it?';
+        'What are our standard alert thresholds for services and what database technologies do we use?';
       const conversation = await chatClient.complete({ messages: prompt });
 
       const result = await chatClient.evaluate(conversation, [
-        'Uses context function response to find the correct document about QRE constraints',
-        'Mentions the 2 nanometer limit on the revectorization radius',
-        'Mentions that specialized fusion reactors are needed',
-        'Does not mention information unrelated to constraints or energy (i.e., does not mention the inventor or silicon wafer transformation from doc-invention-1)',
+        'Uses context function response to find the correct documents about alert thresholds and database infrastructure',
+        'Mentions the specific alert thresholds for API response time, error rate, CPU usage, and memory usage',
+        'Identifies the primary database technologies: PostgreSQL, MongoDB, and Redis and mentions that database metrics are collected via Metricbeat',
+        'Does not combine information incorrectly or hallucinate details not present in the KB',
       ]);
 
       expect(result.passed).to.be(true);
@@ -126,7 +149,7 @@ describe('Knowledge base', () => {
         ignore_unavailable: true,
         query: {
           match: {
-            text: 'Quantum Revectorization Engine',
+            text: 'ACME',
           },
         },
         refresh: true,

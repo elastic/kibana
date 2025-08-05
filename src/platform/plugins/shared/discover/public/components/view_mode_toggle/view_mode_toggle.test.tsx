@@ -9,7 +9,6 @@
 
 import { EuiTab } from '@elastic/eui';
 import { VIEW_MODE } from '../../../common/constants';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -22,6 +21,8 @@ import { FetchStatus } from '../../application/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { act } from 'react-dom/test-utils';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
+import type { DiscoverServices } from '../../build_services';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = async ({
@@ -39,9 +40,9 @@ describe('Document view mode toggle component', () => {
       aiops: {
         getPatternAnalysisAvailable: jest
           .fn()
-          .mockResolvedValue(jest.fn().mockResolvedValue(useDataViewWithTextFields)),
+          .mockResolvedValue(jest.fn(() => useDataViewWithTextFields)),
       },
-    };
+    } as unknown as DiscoverServices;
 
     const dataViewWithTextFields = {
       fields: [
@@ -68,7 +69,7 @@ describe('Document view mode toggle component', () => {
     }) as DataTotalHits$;
 
     const component = mountWithIntl(
-      <KibanaContextProvider services={services}>
+      <DiscoverTestProvider services={services}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
@@ -76,7 +77,7 @@ describe('Document view mode toggle component', () => {
           setDiscoverViewMode={setDiscoverViewMode}
           dataView={useDataViewWithTextFields ? dataViewWithTextFields : dataViewWithoutTextFields}
         />
-      </KibanaContextProvider>
+      </DiscoverTestProvider>
     );
 
     await act(async () => {

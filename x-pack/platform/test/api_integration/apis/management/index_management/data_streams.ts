@@ -14,7 +14,6 @@ import { datastreamsHelpers } from './lib/datastreams.helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   const {
     createDataStream,
@@ -59,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -74,6 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'yellow',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          failureStoreEnabled: false,
           indexMode: 'standard',
         });
       });
@@ -103,6 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -122,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
+          failureStoreEnabled: false,
           indexMode: 'standard',
         });
       });
@@ -142,6 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
           privileges: {
             delete_index: true,
             manage_data_stream_lifecycle: true,
+            read_failure_store: true,
           },
           timeStampField: { name: '@timestamp' },
           indices: [
@@ -161,75 +165,8 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
+          failureStoreEnabled: false,
           indexMode: 'standard',
-        });
-      });
-
-      describe('index mode', () => {
-        it('correctly returns index mode property based on index settings', async () => {
-          const logsdbDataStreamName = 'logsdb-test-data-stream';
-          const indexMode = 'logsdb';
-
-          await createDataStream(logsdbDataStreamName, indexMode);
-
-          const { body: dataStream } = await supertest
-            .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-            .set('kbn-xsrf', 'xxx')
-            .expect(200);
-
-          expect(dataStream.indexMode).to.eql(indexMode);
-
-          await deleteDataStream(logsdbDataStreamName);
-        });
-
-        describe('index mode of logs-*-* data streams', () => {
-          const logsdbDataStreamName = 'logs-test-ds';
-
-          before(async () => {
-            await createDataStream(logsdbDataStreamName);
-          });
-
-          after(async () => {
-            await deleteDataStream(logsdbDataStreamName);
-          });
-
-          const logsdbSettings: Array<{
-            enabled: boolean | null;
-            prior_logs_usage: boolean;
-            indexMode: string;
-          }> = [
-            { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
-            { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
-            // In stateful Kibana, if prior_logs_usage is set to true, the cluster.logsdb.enabled setting is false by default, so standard index mode
-            { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
-            // In stateful Kibana, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
-            { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
-          ];
-
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
-            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled} and logs.prior_logs_usage is ${prior_logs_usage}`, async () => {
-              await es.cluster.putSettings({
-                persistent: {
-                  cluster: {
-                    logsdb: {
-                      enabled,
-                    },
-                  },
-                  logsdb: {
-                    prior_logs_usage,
-                  },
-                },
-              });
-
-              const { body: dataStream } = await supertest
-                .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-                .set('kbn-xsrf', 'xxx')
-                .expect(200);
-
-              expect(dataStream.indexMode).to.eql(indexMode);
-            });
-          });
         });
       });
     });

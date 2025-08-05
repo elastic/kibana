@@ -49,7 +49,7 @@ import { getUntrackModalLazy } from './common/get_untrack_modal';
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-  const connectorServices = { validateEmailAddresses: jest.fn() };
+  const connectorServices = { validateEmailAddresses: jest.fn(), enabledEmailServices: ['*'] };
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
@@ -122,8 +122,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleSnoozeModal: (props) => {
       return getRuleSnoozeModalLazy(props);
     },
-    getRulesSettingsLink: () => {
-      return getRulesSettingsLinkLazy();
+    getRulesSettingsLink: (props) => {
+      return getRulesSettingsLinkLazy(props);
     },
     getUntrackModal: (props) => {
       return getUntrackModalLazy(props);

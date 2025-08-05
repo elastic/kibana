@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -75,6 +75,9 @@ import { registerFieldsRoute } from './suggestions/fields_rules';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+import { alertDeletePreviewRoute } from './alert_delete/apis/preview/get_alert_delete_preview_route';
+import { alertDeleteScheduleRoute } from './alert_delete/apis/schedule/create_alert_delete_schedule_route';
+import { alertDeleteLastRunRoute } from './alert_delete/apis/last_run/get_alert_delete_last_run_route';
 
 // backfill API
 import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
@@ -88,6 +91,8 @@ import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
+import type { AlertingPluginsStart } from '../plugin';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -98,6 +103,7 @@ export interface RouteOptions {
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
   alertingConfig: AlertingConfig;
+  core: CoreSetup<AlertingPluginsStart, unknown>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -109,6 +115,7 @@ export function defineRoutes(opts: RouteOptions) {
     config$,
     getAlertIndicesAlias,
     alertingConfig,
+    core,
   } = opts;
 
   createRuleRoute(opts);
@@ -149,6 +156,9 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
+  alertDeletePreviewRoute(router, licenseState);
+  alertDeleteScheduleRoute(router, licenseState, core);
+  alertDeleteLastRunRoute(router, licenseState);
 
   if (alertingConfig.maintenanceWindow.enabled) {
     // Maintenance Window - Internal APIs

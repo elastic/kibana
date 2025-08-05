@@ -11,7 +11,7 @@ import { useFormContext } from 'react-hook-form';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { APIRoutes, PlaygroundForm, PlaygroundFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
-import { DEFAULT_PAGINATION } from '../../common';
+import { DEFAULT_PAGINATION, SearchPlaygroundQueryKeys } from '../../common';
 import { elasticsearchQueryObject } from '../utils/user_query';
 
 export interface FetchSearchResultsArgs {
@@ -71,7 +71,10 @@ export const useSearchPreview = ({
   const {
     services: { http },
   } = useKibana();
-  const { getValues } = useFormContext<PlaygroundForm>();
+  const {
+    getValues,
+    formState: { errors: formErrors },
+  } = useFormContext<PlaygroundForm>();
   const indices = getValues(PlaygroundFormFields.indices);
   const elasticsearchQuery = getValues(PlaygroundFormFields.elasticsearchQuery);
   const queryFn = () => {
@@ -79,7 +82,7 @@ export const useSearchPreview = ({
     const elasticsearchQueryBody = elasticsearchQueryObject(
       formData[PlaygroundFormFields.elasticsearchQuery],
       formData[PlaygroundFormFields.userElasticsearchQuery],
-      formData[PlaygroundFormFields.userElasticsearchQueryValidations]
+      formErrors[PlaygroundFormFields.userElasticsearchQuery]
     );
     return fetchSearchResults({
       query,
@@ -91,7 +94,13 @@ export const useSearchPreview = ({
   };
 
   const { data } = useQuery({
-    queryKey: ['search-preview-results', query, indices, elasticsearchQuery, pagination],
+    queryKey: [
+      SearchPlaygroundQueryKeys.SearchPreviewResults,
+      query,
+      indices,
+      elasticsearchQuery,
+      pagination,
+    ],
     queryFn,
     initialData: DEFAULT_SEARCH_PREVIEW_DATA,
     enabled: !!query,

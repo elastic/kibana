@@ -43,13 +43,6 @@ exports[`isFullScreen 1`] = `
                 data-s=""
               >
                 
-                .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
-              </style>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
                 .css-1hok13p-mapScaleControlStyles-ScaleControl{position:absolute;z-index:1000;left:12px;bottom:12px;pointer-events:none;color:#1D2A3E;border-left:2px solid #1D2A3E99;border-bottom:2px solid #1D2A3E99;text-align:right;background-color:#F6F9FC;padding-left:4px;padding-right:4px;}
               </style>
               <style
@@ -147,13 +140,6 @@ exports[`render 1`] = `
             "_insertTag": [Function],
             "before": null,
             "container": <head>
-              <style
-                data-emotion="css"
-                data-s=""
-              >
-                
-                .css-721pd1-floatTopRight{position:absolute;top:-8px;right:-8px;}
-              </style>
               <style
                 data-emotion="css"
                 data-s=""

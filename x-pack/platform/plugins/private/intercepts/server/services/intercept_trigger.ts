@@ -6,6 +6,7 @@
  */
 
 import { type CoreSetup, type CoreStart, type Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { interceptTriggerRecordSavedObject, type InterceptTriggerRecord } from '../saved_objects';
 
@@ -54,7 +55,13 @@ export class InterceptTriggerService {
         triggerId
       );
     } catch (err) {
-      this.logger?.error(err);
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        // If the task is not found, it means it's not registered yet, so we return null
+        return null;
+      } else {
+        this.logger?.error(`Error fetching registered task: ${err.message}`);
+        return null;
+      }
     }
 
     return result?.attributes ?? null;

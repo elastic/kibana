@@ -316,7 +316,7 @@ export const serviceDetailRoute = {
       '/services/{serviceName}/service-map': page({
         tab: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
@@ -330,7 +330,10 @@ export const serviceDetailRoute = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showQueryInput: false,
+          showQueryInput: true,
+          searchBarPlaceholder: i18n.translate('xpack.apm.views.logs.searchBarPlaceholder', {
+            defaultMessage: 'Search for log entries',
+          }),
         },
       }),
       '/services/{serviceName}/infrastructure': {

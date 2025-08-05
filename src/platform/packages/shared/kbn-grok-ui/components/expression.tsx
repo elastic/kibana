@@ -17,11 +17,13 @@ export const Expression = ({
   draftGrokExpression,
   onChange,
   height = '100px',
+  dataTestSubj,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
   height?: CodeEditorProps['height'];
+  dataTestSubj?: string;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -48,6 +50,7 @@ export const Expression = ({
       editorDidMount={onGrokEditorMount}
       onChange={onGrokEditorChange}
       suggestionProvider={suggestionProvider}
+      dataTestSubj={dataTestSubj}
     />
   );
 };

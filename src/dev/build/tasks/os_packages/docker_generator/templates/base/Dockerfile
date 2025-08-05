@@ -23,7 +23,7 @@ RUN cd /tmp && \
   {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
   curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$arch.tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-${arch}.tar.gz && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
@@ -45,7 +45,7 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}}
+    {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}}; \
     case "$arch" in \
         aarch64) \
             TINI_BIN='tini-arm64' ; \

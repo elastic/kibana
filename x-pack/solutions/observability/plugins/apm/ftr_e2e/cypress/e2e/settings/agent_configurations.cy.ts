@@ -175,7 +175,6 @@ describe('Agent configuration', () => {
       cy.contains('Send traces');
       cy.contains('Send metrics');
       cy.contains('Send logs');
-      cy.contains('Recording');
       cy.get('[data-test-subj="row_deactivate_all_instrumentations"')
         .find('[data-test-subj="apmSelectWithPlaceholderSelect"]')
         .select('true');

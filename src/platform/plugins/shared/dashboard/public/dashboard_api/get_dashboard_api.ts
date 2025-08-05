@@ -12,10 +12,7 @@ import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import {
-  getReferencesForControls,
-  getReferencesForPanelId,
-} from '../../common/dashboard_container/persistable_state/dashboard_container_references';
+import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -71,17 +68,12 @@ export function getDashboardApi({
     if (id === CONTROL_GROUP_EMBEDDABLE_ID) {
       return getReferencesForControls(references$.value ?? []);
     }
-
-    const panelReferences = getReferencesForPanelId(id, references$.value ?? []);
-    // references from old installations may not be prefixed with panel id
-    // fall back to passing all references in these cases to preserve backwards compatability
-    return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
+    return getReferencesForPanelId(id, references$.value ?? []);
   };
 
   const layoutManager = initializeLayoutManager(
     incomingEmbeddable,
     initialState.panels,
-    initialState.sections,
     trackPanel,
     getReferences
   );
@@ -116,19 +108,12 @@ export function getDashboardApi({
   });
 
   function getState() {
-    const {
-      panels,
-      sections,
-      references: panelReferences,
-    } = layoutManager.internalApi.serializeLayout();
-    const { state: unifiedSearchState, references: searchSourceReferences } =
-      unifiedSearchManager.internalApi.getState();
+    const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
+    const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      sections,
-      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const { controlGroupInput, controlGroupReferences } =
@@ -138,8 +123,7 @@ export function getDashboardApi({
     return {
       dashboardState,
       controlGroupReferences,
-      panelReferences,
-      searchSourceReferences,
+      panelReferences: panelReferences ?? [],
     };
   }
 
@@ -185,11 +169,12 @@ export function getDashboardApi({
         ...getState(),
       });
 
+      if (!saveResult || saveResult.error) {
+        return;
+      }
+
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(
-          saveResult.savedState,
-          saveResult.references ?? []
-        );
+        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -208,18 +193,17 @@ export function getDashboardApi({
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences, searchSourceReferences } =
-        getState();
+      const { controlGroupReferences, dashboardState, panelReferences } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         controlGroupReferences,
         dashboardState,
         panelReferences,
-        searchSourceReferences,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
+      if (saveResult?.error) return;
+      unsavedChangesManager.internalApi.onSave(dashboardState);
       references$.next(saveResult.references);
 
       return;

@@ -33,7 +33,7 @@
             "label": "elasticsearch",
             "description": [],
             "signature": [
-              "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"full\" | \"certificate\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
+              "{ sniffOnStart: boolean; sniffIntervalMs?: number | undefined; sniffOnConnectionFault: boolean; numberOfHostsConfigured: number; requestHeadersWhitelistConfigured: boolean; customHeadersConfigured: boolean; shardTimeoutMs: number; requestTimeoutMs: number; pingTimeoutMs: number; logQueries: boolean; ssl: { verificationMode: \"none\" | \"certificate\" | \"full\"; certificateAuthoritiesConfigured: boolean; certificateConfigured: boolean; keyConfigured: boolean; keystoreConfigured: boolean; truststoreConfigured: boolean; alwaysPresentCertificate: boolean; }; apiVersion: string; healthCheckDelayMs: number; principal: \"unknown\" | \"elastic_user\" | \"kibana_user\" | \"kibana_system_user\" | \"other_user\" | \"kibana_service_account\"; }"
             ],
             "path": "src/core/packages/usage-data/server/src/core_usage_data.ts",
             "deprecated": false,

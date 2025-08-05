@@ -15,7 +15,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  ConnectorSelectorBase,
+  navigateToConnectorsManagementApp,
+  navigateToSettingsManagementApp,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
@@ -31,20 +35,8 @@ export function ChatActionsMenu({
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleNavigateToConnectors = () => {
-    application?.navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
-  };
-
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
-  };
-
-  const handleNavigateToSettings = () => {
-    application?.navigateToUrl(
-      http!.basePath.prepend(`/app/management/kibana/observabilityAiAssistantManagement`)
-    );
   };
 
   const handleNavigateToSettingsKnowledgeBase = () => {
@@ -108,7 +100,7 @@ export function ChatActionsMenu({
                 }),
                 onClick: () => {
                   toggleActionsMenu();
-                  handleNavigateToSettings();
+                  navigateToSettingsManagementApp(application!);
                 },
               },
               {
@@ -143,7 +135,10 @@ export function ChatActionsMenu({
                   flush="left"
                   size="xs"
                   data-test-subj="settingsTabGoToConnectorsButton"
-                  onClick={handleNavigateToConnectors}
+                  onClick={() => {
+                    toggleActionsMenu();
+                    navigateToConnectorsManagementApp(application!);
+                  }}
                 >
                   {i18n.translate('xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel', {
                     defaultMessage: 'Manage connectors',

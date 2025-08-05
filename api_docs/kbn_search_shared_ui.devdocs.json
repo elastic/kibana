@@ -108,6 +108,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "GLOBAL_EMPTY_STATE_SKIP_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_global_empty_state_skip\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
         "type": "string",
         "tags": [],

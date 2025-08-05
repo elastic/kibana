@@ -7,15 +7,7 @@
 
 import type { OutputOptions, OutputCompositeResponse } from './api';
 import type { ToolSchema } from '../chat_complete/tool_schema';
-
-/**
- * Static options used to call the {@link BoundOutputAPI}
- */
-export type BoundOutputOptions<
-  TId extends string = string,
-  TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
-> = Pick<OutputOptions<TId, TOutputSchema, TStream>, 'connectorId' | 'functionCalling'>;
+import { UnboundOptions } from '../bind/bind_api';
 
 /**
  * Options used to call the {@link BoundOutputAPI}
@@ -24,7 +16,7 @@ export type UnboundOutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
   TStream extends boolean = false
-> = Omit<OutputOptions<TId, TOutputSchema, TStream>, 'connectorId' | 'functionCalling'>;
+> = UnboundOptions<OutputOptions<TId, TOutputSchema, TStream>>;
 
 /**
  * Version of {@link OutputAPI} that got pre-bound to a set of static parameters

@@ -238,7 +238,7 @@ export const DeprecationDetailsFlyout = ({
                 <EuiCallOut
                   title={i18nTexts.quickResolveCalloutTitle}
                   color="primary"
-                  iconType="iInCircle"
+                  iconType="info"
                   data-test-subj="quickResolveCallout"
                 />
 

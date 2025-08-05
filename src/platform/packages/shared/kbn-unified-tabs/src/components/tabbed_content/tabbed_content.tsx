@@ -131,6 +131,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onDuplicate = useCallback(
     (item: TabItem) => {
       const newItem = createItem();
+      newItem.duplicatedFromId = item.id;
+
       const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
       const escapedCopyLabel = escapeRegExp(copyLabel);
       const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);

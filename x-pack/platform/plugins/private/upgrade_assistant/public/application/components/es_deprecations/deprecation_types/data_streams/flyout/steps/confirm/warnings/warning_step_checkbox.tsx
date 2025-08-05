@@ -7,62 +7,35 @@
 
 import React from 'react';
 
-import {
-  EuiCheckbox,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCheckableCard } from '@elastic/eui';
 import { DocLinksStart } from '@kbn/core/public';
+import { EuiCode, EuiSpacer } from '@elastic/eui';
 
 export const WarningCheckbox: React.FunctionComponent<{
   isChecked: boolean;
   warningId: string;
-  label: React.ReactNode;
   description: React.ReactNode;
-  documentationUrl?: string;
+  label: React.ReactNode;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
-  <>
-    <EuiText>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false} data-test-subj="migrationWarningCheckbox">
-          <EuiCheckbox
-            id={warningId}
-            label={<strong>{label}</strong>}
-            checked={isChecked}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-        {documentationUrl !== undefined && (
-          <EuiFlexItem grow={false}>
-            <EuiLink href={documentationUrl} target="_blank" external={false}>
-              <EuiIconTip
-                content={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.documentationLinkLabel"
-                    defaultMessage="Documentation"
-                  />
-                }
-                position="right"
-                type="help"
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xs" />
-
+  dataStreamName?: string;
+}> = ({ isChecked, warningId, label, onChange, description, dataStreamName }) => (
+  <div data-test-subj="migrationWarningCheckbox">
+    <EuiCheckableCard
+      id={warningId}
+      checkableType="checkbox"
+      checked={isChecked}
+      onChange={onChange}
+      label={label}
+    >
+      {dataStreamName && (
+        <p>
+          Data stream: <EuiCode>{dataStreamName}</EuiCode>
+        </p>
+      )}
+      <EuiSpacer size="s" />
       {description}
-    </EuiText>
-
-    <EuiSpacer />
-  </>
+    </EuiCheckableCard>
+  </div>
 );
 
 export interface WarningCheckboxProps {
@@ -72,5 +45,7 @@ export interface WarningCheckboxProps {
   id: string;
   meta?: {
     oldestIncompatibleDocTimestamp?: number;
+    indicesRequiringUpgradeCount?: number;
+    dataStreamName?: string;
   };
 }

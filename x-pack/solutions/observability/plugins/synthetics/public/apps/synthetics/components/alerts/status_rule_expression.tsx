@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiSpacer,
+  EuiSwitch,
   EuiTitle,
   EuiHorizontalRule,
   EuiIconTip,
@@ -19,16 +20,27 @@ import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { GroupByExpression } from './common/group_by_field';
 import { WindowValueExpression } from './common/condition_window_value';
-import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
+import {
+  DEFAULT_CONDITION,
+  ForTheLastExpression,
+  SHOW_RECOVERY_STRATEGY_SWITCH,
+} from './common/for_the_last_expression';
 import { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
   setRuleParams: StatusRuleParamsProps['setRuleParams'];
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  showRecoveryStrategySwitch?: boolean;
 }
 
-export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
+export const StatusRuleExpression: React.FC<Props> = ({
+  ruleParams,
+  setRuleParams,
+  showRecoveryStrategySwitch = SHOW_RECOVERY_STRATEGY_SWITCH,
+}) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
 
@@ -51,6 +63,40 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         ...(ruleParams?.condition ?? DEFAULT_CONDITION),
         groupBy: groupByLocation ? 'locationId' : 'none',
       });
+    },
+    [ruleParams?.condition, setRuleParams]
+  );
+
+  const onAlertOnNoDataChange = useCallback(
+    (isChecked: boolean) => {
+      let newCondition = ruleParams?.condition ?? DEFAULT_CONDITION;
+      if (isChecked) {
+        newCondition = {
+          ...newCondition,
+          alertOnNoData: true,
+        };
+      } else if ('alertOnNoData' in newCondition) {
+        const { alertOnNoData, ...rest } = newCondition;
+        newCondition = rest;
+      } else {
+        throw new Error(
+          'Switch was unchecked but alertOnNoData was not set, this should not happen'
+        );
+      }
+      setRuleParams('condition', newCondition);
+    },
+    [ruleParams?.condition, setRuleParams]
+  );
+
+  const onFirstUpRecoveryStrategyChange = useCallback(
+    (isChecked: boolean) => {
+      let newCondition = ruleParams?.condition ?? DEFAULT_CONDITION;
+      newCondition = {
+        ...newCondition,
+        recoveryStrategy: isChecked ? 'firstUp' : 'conditionNotMet',
+      };
+
+      setRuleParams('condition', newCondition);
     },
     [ruleParams?.condition, setRuleParams]
   );
@@ -126,6 +172,33 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         onChange={onGroupByChange}
         locationsThreshold={locationsThreshold}
       />
+      <EuiSpacer size="m" />
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          compressed
+          label={ALERT_ON_NO_DATA_SWITCH_LABEL}
+          checked={ruleParams.condition?.alertOnNoData !== undefined}
+          onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
+        />
+      </EuiFlexItem>
+      {showRecoveryStrategySwitch && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                compressed
+                label={FIRST_UP_RECOVERY_STRATEGY_SWITCH_LABEL}
+                checked={ruleParams.condition?.recoveryStrategy === 'firstUp'}
+                onChange={(e) => onFirstUpRecoveryStrategyChange(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={FIRST_UP_RECOVERY_STRATEGY_TOOLTIP} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
       <EuiSpacer size="l" />
     </>
   );
@@ -155,3 +228,23 @@ export const StatusTranslations = {
     }
   ),
 };
+
+const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
+  'xpack.synthetics.statusRule.euiSwitch.alertOnNoData',
+  {
+    defaultMessage: "Alert me if there's no data",
+  }
+);
+
+const FIRST_UP_RECOVERY_STRATEGY_SWITCH_LABEL = i18n.translate(
+  'xpack.synthetics.statusRule.euiSwitch.firstUpRecoveryStrategy',
+  {
+    defaultMessage: 'Recover the alert as soon as the monitor is up',
+  }
+);
+const FIRST_UP_RECOVERY_STRATEGY_TOOLTIP = i18n.translate(
+  'xpack.synthetics.statusRule.tooltip.firstUpRecoveryStrategy',
+  {
+    defaultMessage: 'If not selected, the alert will recover when the condition is no longer met',
+  }
+);

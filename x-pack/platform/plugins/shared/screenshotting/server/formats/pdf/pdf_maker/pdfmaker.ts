@@ -140,18 +140,24 @@ export class PdfMaker {
     image: Buffer,
     opts: { title?: string; description?: string } = { title: '', description: '' }
   ) {
-    this.logger.debug(`Adding image to PDF. Image size: ${image.byteLength}`); // prettier-ignore
+    // Convert the image buffer to a transferable buffer.
+    // See https://github.com/nodejs/node/issues/55593 for the rationale behind this decision.
+    const _transferableImage = new ArrayBuffer(image.byteLength);
+    new Uint8Array(_transferableImage).set(new Uint8Array(image));
+
+    this.logger.debug(`Adding image to PDF. Image size: ${_transferableImage.byteLength}`); // prettier-ignore
     const size = this.layout.getPdfImageSize();
     const img = {
       // The typings are incomplete for the image property.
       // It's possible to pass a Buffer as the image data.
       // @see https://github.com/bpampuch/pdfmake/blob/0.2/src/printer.js#L654
-      image,
+      image: _transferableImage,
       alignment: 'center' as 'center',
       height: size.height,
       width: size.width,
     } as unknown as ContentImage;
-    this.transferList.push(image.buffer);
+
+    this.transferList.push(_transferableImage);
 
     if (this.layout.useReportingBranding) {
       return this.addBrandedImage(img, opts);
@@ -254,6 +260,7 @@ export class PdfMaker {
         const generatePdfRequest: GeneratePdfRequest = {
           data: this.getGeneratePdfRequestData(),
         };
+
         myPort.postMessage(generatePdfRequest, this.transferList);
       });
     } finally {

@@ -35,6 +35,15 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
   RecursivePartial<BaseKibanaFeatureConfig> & {
     subFeatureIds?: T[];
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
+
+    /** An option for product features to modify the base kibana feature.
+     *
+     * @param baseFeatureConfig
+     * @returns modified baseFeatureConfig
+     */
+    baseFeatureConfigModifier?: (
+      baseFeatureConfig: BaseKibanaFeatureConfig
+    ) => BaseKibanaFeatureConfig;
   };
 export type ProductFeaturesConfig<T extends string = string> = Map<
   ProductFeatureKeyType,

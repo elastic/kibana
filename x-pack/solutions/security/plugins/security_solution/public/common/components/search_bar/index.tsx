@@ -42,6 +42,8 @@ import { hostsActions } from '../../../explore/hosts/store';
 import { networkActions } from '../../../explore/network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';
 import { useSyncTimerangeUrlParam } from '../../hooks/search_bar/use_sync_timerange_url_param';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface SiemSearchBarProps {
   id: InputsModelId.global | InputsModelId.timeline;
@@ -97,6 +99,9 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       dispatch(hostsActions.setHostTablesActivePageToZero());
       dispatch(networkActions.setNetworkTablesActivePageToZero());
     }, [dispatch]);
+
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+    const { dataView: experimentalDataView } = useDataView();
 
     useSyncSearchBarUrlParams();
     useSyncTimerangeUrlParam();
@@ -302,12 +307,19 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     }, []);
 
     const dataViews: DataView[] | null = useMemo(() => {
+      if (newDataViewPickerEnabled) {
+        if (experimentalDataView) {
+          return [experimentalDataView];
+        }
+        return null;
+      }
+
       if (sourcererDataView != null) {
         return [new DataView({ spec: sourcererDataView, fieldFormats })];
       } else {
         return null;
       }
-    }, [sourcererDataView, fieldFormats]);
+    }, [sourcererDataView, fieldFormats, newDataViewPickerEnabled, experimentalDataView]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {

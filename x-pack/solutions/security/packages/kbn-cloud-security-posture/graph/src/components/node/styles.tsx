@@ -22,19 +22,43 @@ import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
-export const LABEL_HEIGHT = 24;
-export const LABEL_PADDING_X = 15;
+/**
+ * The width of a node in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_WIDTH = 100;
+
+/**
+ * The height of a node in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_HEIGHT = 100;
+
+/**
+ * The width of a node label in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_LABEL_WIDTH = 140;
+
+/**
+ * The height of a node label in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_LABEL_HEIGHT = 20;
+
 export const LABEL_BORDER_WIDTH = 1;
-export const NODE_WIDTH = 90;
-export const NODE_HEIGHT = 90;
-export const NODE_LABEL_WIDTH = 160;
+export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
+export const LABEL_PADDING_X = 15;
+
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
 export const LabelNodeContainer = styled.div`
   position: relative;
+  top: ${(NODE_LABEL_HEIGHT - ACTUAL_LABEL_HEIGHT) / 2}px;
   text-wrap: nowrap;
-  min-width: 100px;
-  height: ${LABEL_HEIGHT}px;
+  width: ${NODE_LABEL_WIDTH}px;
+  max-width: ${NODE_LABEL_WIDTH}px;
+  height: ${ACTUAL_LABEL_HEIGHT}px;
 `;
 
 interface LabelShapeProps extends EuiTextProps {
@@ -43,6 +67,8 @@ interface LabelShapeProps extends EuiTextProps {
 
 export const LabelShape = styled(EuiText)<LabelShapeProps>`
   background: ${(props) => useNodeFillColor(props.color)};
+  max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
+  max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
@@ -61,7 +87,7 @@ export const LabelShape = styled(EuiText)<LabelShapeProps>`
 
   line-height: 1.5;
 
-  padding: 5px ${LABEL_PADDING_X}px;
+  padding: 6px ${LABEL_PADDING_X}px;
   border-radius: 16px;
   min-height: 100%;
   min-width: 100%;
@@ -225,13 +251,14 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size?: {
+export const GroupStyleOverride = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({
   backgroundColor: 'transparent',
+  padding: 0,
   border: '0px solid',
   boxShadow: 'none',
-  width: size?.width ?? 140,
-  height: size?.height ?? 75,
+  width: size.width,
+  height: size.height,
 });

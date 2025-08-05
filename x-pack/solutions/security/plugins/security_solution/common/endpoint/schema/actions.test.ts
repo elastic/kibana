@@ -22,6 +22,7 @@ import {
   ExecuteActionRequestSchema,
   ScanActionRequestSchema,
   NoParametersRequestSchema,
+  RunScriptActionRequestSchema,
 } from '../../api/endpoint';
 
 // NOTE: Even though schemas are kept in common/api/endpoint - we keep tests here, because common/api should import from outside
@@ -828,6 +829,234 @@ describe('actions schemas', () => {
           parameters: { path: 'some/path' },
         });
       }).not.toThrow();
+    });
+  });
+
+  describe('RunScriptActionRequestSchema', () => {
+    describe('CrowdStrike agent type', () => {
+      const validCrowdStrikeBase = {
+        endpoint_ids: ['endpoint_id'],
+        agent_type: 'crowdstrike' as const,
+      };
+      it('should accept valid raw parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept valid hostPath parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              hostPath: '/path/to/script.ps1',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept valid cloudFile parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              cloudFile: 'cloud-script-id',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept multiple parameters together', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+              commandLine: '-ProcessName explorer',
+              timeout: 30000,
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept valid timeout parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+              timeout: 60000,
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept valid commandLine parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+              commandLine: '-ProcessName explorer',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject empty raw parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: '  ',
+            },
+          });
+        }).toThrow('Raw cannot be an empty string');
+      });
+
+      it('should reject empty hostPath parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              hostPath: '  ',
+            },
+          });
+        }).toThrow('HostPath cannot be an empty string');
+      });
+
+      it('should reject empty cloudFile parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              cloudFile: '  ',
+            },
+          });
+        }).toThrow('CloudFile cannot be an empty string');
+      });
+
+      it('should reject when no required parameters are provided', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              commandLine: '-ProcessName explorer',
+            },
+          });
+        }).toThrow('At least one of Raw, HostPath, or CloudFile must be provided');
+      });
+
+      it('should reject when parameters object is empty', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {},
+          });
+        }).toThrow('At least one of Raw, HostPath, or CloudFile must be provided');
+      });
+
+      it('should reject negative timeout values', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+              timeout: -1,
+            },
+          });
+        }).toThrow();
+      });
+
+      it('should reject zero timeout values', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validCrowdStrikeBase,
+            parameters: {
+              raw: 'Get-Process',
+              timeout: 0,
+            },
+          });
+        }).toThrow();
+      });
+    });
+
+    describe('Microsoft Defender Endpoint agent type', () => {
+      const validMdeBase = {
+        endpoint_ids: ['endpoint_id'],
+        agent_type: 'microsoft_defender_endpoint' as const,
+      };
+
+      it('should accept valid scriptName parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {
+              scriptName: 'MyScript.ps1',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should accept scriptName with args parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {
+              scriptName: 'MyScript.ps1',
+              args: '-Parameter Value',
+            },
+          });
+        }).not.toThrow();
+      });
+
+      it('should reject empty scriptName parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {
+              scriptName: '',
+            },
+          });
+        }).toThrow();
+      });
+
+      it('should reject when scriptName is missing', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {
+              args: '-Parameter Value',
+            },
+          });
+        }).toThrow('[parameters.scriptName]: expected value of type [string] but got [undefined]');
+      });
+
+      it('should reject when parameters object is empty', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {},
+          });
+        }).toThrow('[parameters.scriptName]: expected value of type [string] but got [undefined]');
+      });
+
+      it('should reject empty args parameter', () => {
+        expect(() => {
+          RunScriptActionRequestSchema.body.validate({
+            ...validMdeBase,
+            parameters: {
+              scriptName: 'MyScript.ps1',
+              args: '',
+            },
+          });
+        }).toThrow();
+      });
     });
   });
 });

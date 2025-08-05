@@ -12,8 +12,9 @@ import { filter, flatMap, mapKeys, uniq } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { processAggregations } from '../../../common/utils/aggregations';
-import { getInternalSavedObjectsClient } from '../utils';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
 import type { GetAgentsRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -54,29 +55,26 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           getStatusSummary?: boolean;
         };
 
-        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-          osqueryContext.getStartServices
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
         );
+        const space = await osqueryContext.service.getActiveSpace(request);
+
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(
-          internalSavedObjectsClient,
-          {
-            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-            perPage: 1000,
-            page: 1,
-          }
-        )) ?? { items: [] as PackagePolicy[] };
+        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        })) ?? { items: [] as PackagePolicy[] };
         const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
           satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
         );
         const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
 
-        const agentPolicies = await agentPolicyService?.getByIds(
-          internalSavedObjectsClient,
-          agentPolicyIds
-        );
+        const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);
 
         // FIND agents by policy_name
         const policyNamePattern = /policy_name:([^ ]+)/;
@@ -101,32 +99,35 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         const agentPolicyById = mapKeys(agentPolicies, 'id');
 
         try {
-          esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
-            page: query.page,
-            perPage: query.perPage,
-            sortField: query.sortField,
-            sortOrder: query.sortOrder,
-            showUpgradeable: query.showUpgradeable,
-            getStatusSummary: query.getStatusSummary,
-            pitId: query.pitId,
-            searchAfter: query.searchAfter,
-            kuery,
-            showAgentless: query.showAgentless,
-            showInactive: query.showInactive,
-            aggregations: {
-              platforms: {
-                terms: {
-                  field: 'local_metadata.os.platform',
+          esAgents = await osqueryContext.service
+            .getAgentService()
+            ?.asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
+            .listAgents({
+              page: query.page,
+              perPage: query.perPage,
+              sortField: query.sortField,
+              sortOrder: query.sortOrder,
+              showUpgradeable: query.showUpgradeable,
+              getStatusSummary: query.getStatusSummary,
+              pitId: query.pitId,
+              searchAfter: query.searchAfter,
+              kuery,
+              showAgentless: query.showAgentless,
+              showInactive: query.showInactive,
+              aggregations: {
+                platforms: {
+                  terms: {
+                    field: 'local_metadata.os.platform',
+                  },
+                },
+                policies: {
+                  terms: {
+                    field: 'policy_id',
+                    size: 2000,
+                  },
                 },
               },
-              policies: {
-                terms: {
-                  field: 'policy_id',
-                  size: 2000,
-                },
-              },
-            },
-          });
+            });
         } catch (error) {
           return response.badRequest({ body: error });
         }

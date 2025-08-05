@@ -8,37 +8,36 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { css } from '@emotion/react';
+import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Metric,
+import { Chart, Metric, Settings, isMetricElementEvent } from '@elastic/charts';
+import type {
   MetricSpec,
   MetricWProgress,
-  isMetricElementEvent,
   RenderChangeListener,
-  Settings,
   MetricWTrend,
   MetricWNumber,
-  SettingsProps,
   MetricWText,
+  SettingsProps,
 } from '@elastic/charts';
+import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { css } from '@emotion/react';
-import { useResizeObserver, useEuiScrollBar, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
-import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { VisParams } from '../../common';
+import type { MetricVisParam, VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig } from './secondary_metric';
+import { SecondaryMetric } from './secondary_metric';
+import type { TrendConfig } from './secondary_metric_info';
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
   const column = table.columns[columnIdx];
@@ -69,6 +68,22 @@ export interface MetricVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   filterable: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
+}
+
+function buildTrendConfig(
+  { palette, visuals, baseline }: MetricVisParam['secondaryTrend'],
+  value: number | string
+): TrendConfig | undefined {
+  if (!palette) return undefined;
+
+  return {
+    showIcon: visuals !== 'value',
+    showValue: visuals !== 'icon',
+    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    palette,
+    borderColor: undefined,
+    compareToPrimary: baseline === 'primary',
+  };
 }
 
 export const MetricVis = ({
@@ -165,33 +180,20 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const trendConfig: TrendConfig | undefined = config.metric.secondaryTrend.palette
-      ? {
-          icon: config.metric.secondaryTrend.visuals !== 'value',
-          value: config.metric.secondaryTrend.visuals !== 'icon',
-          baselineValue:
-            config.metric.secondaryTrend.baseline === 'primary' && typeof value === 'number'
-              ? value
-              : Number(config.metric.secondaryTrend.baseline),
-          palette: config.metric.secondaryTrend.palette,
-          borderColor: undefined,
-          compareToPrimary: config.metric.secondaryTrend.baseline === 'primary',
-        }
-      : undefined;
+    const trendConfig = buildTrendConfig(config.metric.secondaryTrend, value);
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: ({ fontSize, color }) => (
+        extra: ({ color }) => (
           <SecondaryMetric
             row={row}
             config={config}
             columns={data.columns}
             getMetricFormatter={getMetricFormatter}
-            color={config.metric.secondaryColor}
-            fontSize={fontSize}
+            staticColor={config.metric.secondaryColor}
             trendConfig={
               hasDynamicColoring && trendConfig
                 ? { ...trendConfig, borderColor: color }
@@ -212,14 +214,13 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: ({ fontSize, color }) => (
+      extra: ({ color }) => (
         <SecondaryMetric
           row={row}
           config={config}
           columns={data.columns}
           getMetricFormatter={getMetricFormatter}
-          color={config.metric.secondaryColor}
-          fontSize={fontSize}
+          staticColor={config.metric.secondaryColor}
           trendConfig={
             hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
           }
@@ -300,12 +301,15 @@ export const MetricVis = ({
   return (
     <div
       ref={scrollContainerRef}
-      css={css`
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-        ${useEuiScrollBar()}
-      `}
+      css={[
+        styles.layout,
+        css`
+          height: 100%;
+          width: 100%;
+          overflow-y: auto;
+          ${useEuiScrollBar()}
+        `,
+      ]}
     >
       <div
         css={css`
@@ -362,4 +366,18 @@ export const MetricVis = ({
       </div>
     </div>
   );
+};
+
+const styles = {
+  layout: css({
+    '.echMetricText__valuesBlock': {
+      display: 'flex',
+      minWidth: 0,
+      maxWidth: '100%',
+    },
+    '.echMetricText__valuesBlock > div': {
+      minWidth: 'inherit',
+      maxWidth: 'inherit',
+    },
+  }),
 };

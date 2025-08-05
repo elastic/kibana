@@ -427,7 +427,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             <EuiPanel grow={false} paddingSize="l" color="subdued">
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="iInCircle" />
+                  <EuiIcon type="info" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="xs">
@@ -541,13 +541,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                 )}
                 onClick={onToggleChange}
               >
-                <EuiFilterButton hasActiveFilters={!isJSONVisible} withNext>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={!isJSONVisible}
+                  hasActiveFilters={!isJSONVisible}
+                  withNext
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.tableView"
                     defaultMessage="List"
                   />
                 </EuiFilterButton>
-                <EuiFilterButton hasActiveFilters={isJSONVisible}>
+                <EuiFilterButton
+                  isToggle
+                  isSelected={isJSONVisible}
+                  hasActiveFilters={isJSONVisible}
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.mappings.json"
                     defaultMessage="JSON"

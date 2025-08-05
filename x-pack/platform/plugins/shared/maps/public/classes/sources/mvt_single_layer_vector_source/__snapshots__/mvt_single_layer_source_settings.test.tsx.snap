@@ -32,7 +32,7 @@ exports[`should not render fields-editor when there is no layername 1`] = `
            
           <EuiIcon
             color="subdued"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       </EuiToolTip>
@@ -85,7 +85,7 @@ exports[`should render with fields 1`] = `
            
           <EuiIcon
             color="subdued"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       </EuiToolTip>
@@ -130,7 +130,7 @@ exports[`should render with fields 1`] = `
            
           <EuiIcon
             color="subdued"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       </EuiToolTip>
@@ -176,7 +176,7 @@ exports[`should render without fields 1`] = `
            
           <EuiIcon
             color="subdued"
-            type="questionInCircle"
+            type="question"
           />
         </span>
       </EuiToolTip>

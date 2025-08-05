@@ -133,7 +133,7 @@ export const Actions = ({
       : undefined;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize={'none'} {...props}>
+    <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       {showToggleSearch && (
         <EuiFlexItem grow={false}>
           <EuiTourStep
@@ -154,6 +154,7 @@ export const Actions = ({
                 css={[
                   css`
                     position: relative;
+                    overflow: visible;
                     width: 40px;
                   `,
                   !searchToggled
@@ -163,6 +164,11 @@ export const Actions = ({
                       `
                     : undefined,
                 ]}
+                contentProps={{
+                  css: css`
+                    position: initial;
+                  `,
+                }}
                 minWidth={false}
                 size="m"
                 aria-label={toggleSearchBarTooltip}
@@ -209,10 +215,18 @@ export const Actions = ({
           </EuiTourStep>
         </EuiFlexItem>
       )}
-      {showToggleSearch && showInvestigateInTimeline && <EuiHorizontalRule margin="xs" />}
+      {showToggleSearch && showInvestigateInTimeline && (
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+      )}
       {showInvestigateInTimeline && (
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={investigateInTimelineTooltip} position="left">
+          <EuiToolTip
+            content={investigateInTimelineTooltip}
+            position="left"
+            disableScreenReaderOutput
+          >
             <EuiButtonIcon
               iconType="timeline"
               display="base"

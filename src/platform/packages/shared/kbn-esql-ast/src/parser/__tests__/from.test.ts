@@ -226,7 +226,7 @@ describe('FROM', () => {
                     valueUnquoted: 'index',
                   },
                   sourceType: 'index',
-                  cluster: {
+                  prefix: {
                     type: 'literal',
                     literalType: 'keyword',
                     valueUnquoted: 'cluster',
@@ -238,8 +238,8 @@ describe('FROM', () => {
           ]);
         });
 
-        it('can parse single-double quoted cluster', () => {
-          const text = 'FROM "cluster":index';
+        it('can parse single-double quoted cluster pair', () => {
+          const text = 'FROM "cluster:index"';
           const { root, errors } = parse(text);
 
           expect(errors.length).toBe(0);
@@ -251,22 +251,18 @@ describe('FROM', () => {
                 {
                   type: 'source',
                   index: {
-                    valueUnquoted: 'index',
+                    valueUnquoted: 'cluster:index',
                   },
                   sourceType: 'index',
-                  cluster: {
-                    type: 'literal',
-                    literalType: 'keyword',
-                    valueUnquoted: 'cluster',
-                  },
+                  prefix: undefined,
                 },
               ],
             },
           ]);
         });
 
-        it('can parse triple-double quoted cluster', () => {
-          const text = 'FROM """cluster""":index';
+        it('can parse triple-double quoted cluster pair', () => {
+          const text = 'FROM """cluster:index"""';
           const { root, errors } = parse(text);
 
           expect(errors.length).toBe(0);
@@ -278,14 +274,10 @@ describe('FROM', () => {
                 {
                   type: 'source',
                   index: {
-                    valueUnquoted: 'index',
+                    valueUnquoted: 'cluster:index',
                   },
                   sourceType: 'index',
-                  cluster: {
-                    type: 'literal',
-                    literalType: 'keyword',
-                    valueUnquoted: 'cluster',
-                  },
+                  prefix: undefined,
                 },
               ],
             },
@@ -323,7 +315,7 @@ describe('FROM', () => {
         });
 
         it('can parse single and triple quoted selectors', () => {
-          const text = 'FROM index1::"selector1", index2::"""selector2"""';
+          const text = 'FROM "index1::selector1", "index2::selector2"';
           const { root, errors } = parse(text);
 
           expect(errors.length).toBe(0);
@@ -335,26 +327,18 @@ describe('FROM', () => {
                 {
                   type: 'source',
                   index: {
-                    valueUnquoted: 'index1',
+                    valueUnquoted: 'index1::selector1',
                   },
                   sourceType: 'index',
-                  selector: {
-                    type: 'literal',
-                    literalType: 'keyword',
-                    valueUnquoted: 'selector1',
-                  },
+                  selector: undefined,
                 },
                 {
                   type: 'source',
                   index: {
-                    valueUnquoted: 'index2',
+                    valueUnquoted: 'index2::selector2',
                   },
                   sourceType: 'index',
-                  selector: {
-                    type: 'literal',
-                    literalType: 'keyword',
-                    valueUnquoted: 'selector2',
-                  },
+                  selector: undefined,
                 },
               ],
             },

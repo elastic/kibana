@@ -91,7 +91,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                     'xpack.contentConnectors.content.searchIndex.mappings.noIndex.title',
                     { defaultMessage: 'Access Control Index not found' }
                   )}
-                  iconType="iInCircle"
+                  iconType="info"
                 >
                   <p>
                     {i18n.translate(
@@ -134,7 +134,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
+                <EuiIcon type="info" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">
@@ -176,7 +176,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
           <EuiPanel grow={false} hasShadow={false} hasBorder>
             <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="iInCircle" />
+                <EuiIcon type="info" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs">

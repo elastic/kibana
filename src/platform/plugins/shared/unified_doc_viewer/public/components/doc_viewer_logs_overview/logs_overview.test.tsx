@@ -9,13 +9,15 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
+import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -69,11 +71,11 @@ dataView.fields.getByName = (name: string) => {
   return dataView.fields.getAll().find((field) => field.name === name);
 };
 
-const buildHit = (fields?: Record<string, unknown>) =>
+const buildHit = (fields: Record<string, unknown> = {}, customIndex: string = DATA_STREAM_NAME) =>
   buildDataTableRecord(
     {
-      _index: DATA_STREAM_NAME,
-      _id: DATA_STREAM_NAME,
+      _index: customIndex,
+      _id: customIndex,
       _score: 1,
       _source: {
         '@timestamp': NOW + 1000,
@@ -110,6 +112,7 @@ const buildHit = (fields?: Record<string, unknown>) =>
         'agent.name': 'node',
         ...fields,
       },
+      fields,
       ignored_field_values: {
         'cloud.availability_zone': [MORE_THAN_1024_CHARS],
       },
@@ -119,16 +122,10 @@ const buildHit = (fields?: Record<string, unknown>) =>
 
 const fullHit = buildHit();
 
-const getCustomUnifedDocViewerServices = (params?: {
-  showApm: boolean;
-  entityCentricExperienceEnabled?: boolean;
-}) => ({
+const getCustomUnifedDocViewerServices = (params?: { showApm: boolean }) => ({
   core: {
     application: {
       capabilities: { apm: { show: params?.showApm || false } },
-    },
-    uiSettings: {
-      get: () => params?.entityCentricExperienceEnabled || false,
     },
   },
   share: {
@@ -228,24 +225,86 @@ describe('LogsOverview', () => {
       ).toBeInTheDocument();
 
       // The accordion must be closed by default
-      const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion1');
-
-      if (accordion === null) {
-        return;
-      }
-      const button = accordion.querySelector('button');
-
-      if (button === null) {
-        return;
-      }
-      // Check the aria-expanded property of the button
-      const isExpanded = button.getAttribute('aria-expanded');
-      expect(isExpanded).toBe('false');
-
-      button.click();
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[0];
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
+      const user = userEvent.setup();
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      await user.click(button);
       expect(
         screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable')
       ).toBeInTheDocument();
+    });
+
+    it('should render the dataset quality link for local indices', async () => {
+      const sourceFields = {
+        'data_stream.type': ['logs'],
+        'data_stream.dataset': [DATASET_NAME],
+        'data_stream.namespace': [NAMESPACE],
+      };
+
+      const hitWithDataStream = buildHit(sourceFields);
+
+      const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
+      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+        if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
+          return {
+            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
+            navigate: jest.fn(),
+          };
+        }
+        return originalGet(id);
+      });
+
+      renderLogsOverview({ hit: hitWithDataStream });
+
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[accordions.length - 1];
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
+
+      const user = userEvent.setup();
+      await user.click(button);
+
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
+      ).toBeInTheDocument();
+
+      mockUnifiedDocViewerServices.share.url.locators.get = originalGet;
+    });
+
+    it('should not render the dataset quality link for CCS remote indices', async () => {
+      const sourceFields = {
+        'data_stream.type': ['logs'],
+        'data_stream.dataset': [DATASET_NAME],
+        'data_stream.namespace': [NAMESPACE],
+      };
+
+      const remoteHit = buildHit(sourceFields, `remoteCluster:${DATA_STREAM_NAME}`);
+
+      const originalGet = mockUnifiedDocViewerServices.share.url.locators.get;
+      mockUnifiedDocViewerServices.share.url.locators.get = jest.fn().mockImplementation((id) => {
+        if (id === DATA_QUALITY_DETAILS_LOCATOR_ID) {
+          return {
+            getRedirectUrl: jest.fn().mockReturnValue('/data-quality'),
+            navigate: jest.fn(),
+          };
+        }
+        return originalGet(id);
+      });
+
+      renderLogsOverview({ hit: remoteHit });
+
+      const accordions = screen.getAllByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+      const accordion = accordions[accordions.length - 1];
+      const button = within(accordion).getByRole('button', { name: /quality issues/i });
+
+      const user = userEvent.setup();
+      await user.click(button);
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldDatasetLink')
+      ).not.toBeInTheDocument();
+
+      mockUnifiedDocViewerServices.share.url.locators.get = originalGet;
     });
   });
 });
@@ -263,16 +322,8 @@ describe('LogsOverview with accordion state', () => {
       screen.queryByTestId('unifiedDocViewLogsOverviewStacktraceAccordion')
     ).toBeInTheDocument();
 
-    const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewStacktraceAccordion');
-    if (accordion === null) {
-      return;
-    }
-    const button = accordion.querySelector('button');
-
-    if (button === null) {
-      return;
-    }
-
+    const accordion = screen.getByTestId('unifiedDocViewLogsOverviewStacktraceAccordion');
+    const button = within(accordion).getByRole('button', { name: /stacktrace/i });
     // Check the aria-expanded property of the button
     const isExpanded = button.getAttribute('aria-expanded');
     expect(isExpanded).toBe('true');
@@ -290,16 +341,8 @@ describe('LogsOverview with accordion state', () => {
       screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion')
     ).toBeInTheDocument();
 
-    const accordion = screen.queryByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
-    if (accordion === null) {
-      return;
-    }
-    const button = accordion.querySelector('button');
-
-    if (button === null) {
-      return;
-    }
-
+    const accordion = screen.getByTestId('unifiedDocViewLogsOverviewDegradedFieldsAccordion');
+    const button = within(accordion).getByRole('button', { name: /quality issues/i });
     // Check the aria-expanded property of the button
     const isExpanded = button.getAttribute('aria-expanded');
     expect(isExpanded).toBe('true');
@@ -308,40 +351,13 @@ describe('LogsOverview with accordion state', () => {
 
 describe('LogsOverview with APM links', () => {
   describe('Highlights section', () => {
-    describe('When APM and Entity centric experience are enabled', () => {
+    describe('When APM is enabled', () => {
       beforeEach(() => {
         setUnifiedDocViewerServices(
           merge(
             mockUnifiedDocViewerServices,
             getCustomUnifedDocViewerServices({
               showApm: true,
-              entityCentricExperienceEnabled: true,
-            })
-          )
-        );
-        renderLogsOverview();
-      });
-      it('should render service name link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
-        ).toBeInTheDocument();
-      });
-
-      it('should render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).toBeInTheDocument();
-      });
-    });
-
-    describe('When APM is enabled and Entity centric experience is disabled', () => {
-      beforeEach(() => {
-        setUnifiedDocViewerServices(
-          merge(
-            mockUnifiedDocViewerServices,
-            getCustomUnifedDocViewerServices({
-              showApm: true,
-              entityCentricExperienceEnabled: false,
             })
           )
         );
@@ -357,32 +373,6 @@ describe('LogsOverview with APM links', () => {
         expect(
           screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
         ).toBeInTheDocument();
-      });
-    });
-
-    describe('When APM is disabled and Entity centric experience is enabled', () => {
-      beforeEach(() => {
-        setUnifiedDocViewerServices(
-          merge(
-            mockUnifiedDocViewerServices,
-            getCustomUnifedDocViewerServices({
-              showApm: false,
-              entityCentricExperienceEnabled: true,
-            })
-          )
-        );
-        renderLogsOverview();
-      });
-      it('should not render service name link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewServiceNameHighlightLink')
-        ).not.toBeInTheDocument();
-      });
-
-      it('should not render trace id link', () => {
-        expect(
-          screen.queryByTestId('unifiedDocViewLogsOverviewTraceIdHighlightLink')
-        ).not.toBeInTheDocument();
       });
     });
   });

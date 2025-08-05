@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner } from './lib';
@@ -48,7 +49,7 @@ export interface BuildOptions {
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
-  log.write('--- Running global Kibana build tasks');
+  log.write(`--- ${chalk`{dim [ global ]}`} Kibana build tasks`);
 
   const config = await Config.create(options);
   const globalRun = createRunner({ config, log });
@@ -142,42 +143,49 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     if (options.createDebPackage) {
       // control w/ --deb or --skip-os-packages
-      artifactTasks.push(Tasks.CreateDebPackage);
+      artifactTasks.push(Tasks.CreateDebPackageX64);
+      artifactTasks.push(Tasks.CreateDebPackageARM64);
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackage);
+      artifactTasks.push(Tasks.CreateRpmPackageX64);
+      artifactTasks.push(Tasks.CreateRpmPackageARM64);
     }
   }
 
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerUBI);
+    artifactTasks.push(Tasks.CreateDockerUBIX64);
+    artifactTasks.push(Tasks.CreateDockerUBIARM64);
   }
 
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerWolfi);
+    artifactTasks.push(Tasks.CreateDockerWolfiX64);
+    artifactTasks.push(Tasks.CreateDockerWolfiARM64);
   }
 
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
-    artifactTasks.push(Tasks.CreateDockerCloud);
+    artifactTasks.push(Tasks.CreateDockerCloudX64);
+    artifactTasks.push(Tasks.CreateDockerCloudARM64);
   }
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    artifactTasks.push(Tasks.CreateDockerServerless);
+    artifactTasks.push(Tasks.CreateDockerServerlessX64);
+    artifactTasks.push(Tasks.CreateDockerServerlessARM64);
   }
 
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
-    artifactTasks.push(Tasks.CreateDockerFIPS);
+    artifactTasks.push(Tasks.CreateDockerFIPSX64);
   }
 
   if (options.createDockerCloudFIPS) {
     // control w/ --docker-images and --skip-docker-cloud-fips
-    artifactTasks.push(Tasks.CreateDockerCloudFIPS);
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSX64);
+    artifactTasks.push(Tasks.CreateDockerCloudFIPSARM64);
   }
 
   if (options.createDockerContexts) {
@@ -185,14 +193,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     artifactTasks.push(Tasks.CreateDockerContexts);
   }
 
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     // createRunner for each task to ensure each task gets its own Build instance
     artifactTasks.map(async (task) => await createRunner({ config, log, bufferLogs: true })(task))
   );
 
+  log.write('--- Finalizing Kibana artifacts');
+
+  if (results.some((result) => result.status === 'rejected')) {
+    throw new Error('One or more artifact tasks failed. Check the logs for details.');
+  }
+
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
    */
-  log.write('--- Finalizing Kibana artifacts');
   await globalRun(Tasks.WriteShaSums);
 }

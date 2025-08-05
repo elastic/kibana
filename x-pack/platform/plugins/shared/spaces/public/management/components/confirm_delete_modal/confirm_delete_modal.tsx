@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -32,6 +32,8 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
   spacesManager,
 }) => {
   const { services } = useKibana();
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const { value: isCurrentSpace } = useAsync(
     async () => space.id === (await spacesManager.getActiveSpace()).id,
@@ -65,10 +67,12 @@ export const ConfirmDeleteModal: FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate('xpack.spaces.management.confirmDeleteModal.title', {
         defaultMessage: "Delete space ''{name}''?",
         values: { name: space.name },
       })}
+      titleProps={{ id: modalTitleId }}
       onCancel={onCancel}
       onConfirm={deleteSpace}
       cancelButtonText={i18n.translate('xpack.spaces.management.confirmDeleteModal.cancelButton', {

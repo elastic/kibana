@@ -9,6 +9,7 @@ import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
 
 import type { Agent } from '../../../types';
 
@@ -43,6 +44,7 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentMigrateFlyout,
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
@@ -83,6 +85,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+
+  // migrateAgentState
+  const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
+  const [protectedAndFleetAgents, setProtectedAndFleetAgents] = useState<Agent[]>([]);
+  const [migrateFlyoutOpen, setMigrateFlyoutOpen] = useState(false);
 
   const {
     allTags,
@@ -174,6 +181,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
+  const openMigrateFlyout = (agents: Agent[]) => {
+    const protectedAgents = agents.filter(
+      (agent) => agentPoliciesIndexedById[agent.policy_id as string]?.is_protected
+    );
+    const fleetAgents = agents.filter((agent) =>
+      agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+        (p) => p.package?.name === FLEET_SERVER_PACKAGE
+      )
+    );
+
+    const unallowedAgents = [...protectedAgents, ...fleetAgents];
+    setProtectedAndFleetAgents(unallowedAgents);
+    setAgentsToMigrate(agents.filter((agent) => !unallowedAgents.some((a) => a.id === agent.id)));
+    setMigrateFlyoutOpen(true);
+  };
+
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -196,6 +219,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
+        onMigrateAgentClick={() => openMigrateFlyout([agent])}
       />
     );
   };
@@ -388,13 +412,39 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           allTags={allTags ?? []}
           selectedTags={agentToAddRemoveTags?.tags ?? []}
           button={tagsPopoverButton!}
-          onTagsUpdated={() => {
-            refreshAgents();
+          onTagsUpdated={(tagsToAdd: string[]) => {
+            refreshAgents({ refreshTags: true });
+            // close popover if agent is going to disappear from view to prevent UI error
+            if (
+              tagsToAdd.length > 0 &&
+              (selectedTags[0] === 'No Tags' || kuery.includes('not tags:*'))
+            ) {
+              setShowTagsAddRemove(false);
+            }
           }}
           onClosePopover={() => {
             setShowTagsAddRemove(false);
           }}
         />
+      )}
+      {migrateFlyoutOpen && (
+        <EuiPortal>
+          <AgentMigrateFlyout
+            agents={agentsToMigrate ?? []}
+            protectedAndFleetAgents={protectedAndFleetAgents ?? []}
+            onClose={() => {
+              setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
+              setMigrateFlyoutOpen(false);
+            }}
+            onSave={() => {
+              setAgentsToMigrate(undefined);
+              setProtectedAndFleetAgents([]);
+              setMigrateFlyoutOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
       )}
       {showUnhealthyCallout && (
         <>
@@ -448,6 +498,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}
+        onBulkMigrateClicked={(agents: Agent[]) => openMigrateFlyout(agents)}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

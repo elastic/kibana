@@ -4,6 +4,28 @@ navigation_title: "Known issues"
 
 # Kibana known issues
 
+For Elastic {{observability}} known issues, refer to [Elastic Observability known issues](docs-content://release-notes/elastic-observability/known-issues.md).
+
+For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
+
+::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
+
+Applies to: {{stack}} 9.0.3
+
+**Details**
+
+When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+
+**Action**
+
+To avoid this error, don't upgrade {{kib}} to {{stack}} 9.0.3 or upgrade {{kib}} to {{stack}} 9.0.4 when available.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.4.
+
+::::
+
 ::::{dropdown} Upgrading Kibana from 8.18.x to 9.0.2 fails due to a configuration conflict in the kibana.yml file
 
 Applies to: {{stack}} 9.0.2
@@ -26,11 +48,15 @@ To temporarily resolve the issue and allow the upgrade to proceed, follow these 
 1. Remove the `xpack.alerting.cancelAlertsOnRuleTimeout: false` setting from the `kibana.yml` file.
 2. Restart {{kib}} to apply the changes.
 
+**Resolved**
+
+This was resolved in {{stack}} 9.0.3.
+
 ::::
 
 ::::{dropdown} Errors in rule executions occur when maintenance windows have filters
 
-Applies to: {{stack}} 9.0.0, 9.0.1
+Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
 
 **Details** 
 Errors occur when rules run during an active maintenance window that has filters and a matching rule category. 
@@ -38,74 +64,9 @@ Errors occur when rules run during an active maintenance window that has filters
 **Workaround** 
 Remove any filters added to the active maintenance window.
 
-::::
+**Resolved**
 
-::::{dropdown} Observability AI assistant gets stuck in a loop when attempting to call the `execute_connector` function
-:name:known-issue-1508
-
-Applies to: {{stack}} 9.0.0, 9.0.1, 9.0.2
-
-**Details** 
-
-The Observability AI assistant gets stuck in a loop when calling the `execute_connector` function. Instead of completing queries, it times out with the error message `Failed to parse function call arguments when converting messages for inference: SyntaxError: Unexpected non-whitespace character after JSON at position 72 and Error: Tool call arguments for execute_connector (...) were invalid`. 
-
-
-::::
-
-::::{dropdown} Observability AI assistant Knowledge Base entries with empty text can lead to Kibana OOM or restarts
-:name:known-issue-220339
-
-Applies to: {{stack}} 9.0.0
-
-**Details** 
-
-The semantic text migration can cause excessive traffic to a cluster and might eventually cause the Kibana instance to crash due to OOM, together with increase of requests to Elasticsearch & ML nodes.
-
-The problem can occur when there is one or more empty text Knowledge Base documents.
-
-The migration script does not handle this scenario and will indefinitely update the same document.
-
-Because the document update involves semantic_text an ML node is kept warm further increasing the costs.
-
-The issue involves semantic_text field type (and thus the semantic_text migration which is causing this issue), introduced in the knowledge base feature in 8.17.
-
-**Workaround** 
-
-1. Pause the Kibana instance if possible. If not possible, skip this step.
-2. Run a dry run query to identify if you have empty Knowledge Base documents. If you have at least 1 hit, you can be affected by the problem.
-
-    ```sh
-    GET .kibana-observability-ai-assistant-kb/_search
-    {
-      "query": {
-        "bool": {
-          "must": [{ "exists": { "field": "text" }}],
-          "must_not": [ { "wildcard": { "text": "*" } }
-          ]
-        }
-      }
-    }
-    ```
-
-3. Execute the deletion. For extra safety, you might want to trigger a snapshot before executing it.
-
-    ```sh
-    POST .kibana-observability-ai-assistant-kb/_delete_by_query
-    {
-      "query": {
-        "bool": {
-          "must": [{ "exists": { "field": "text" }}],
-          "must_not": [ { "wildcard": { "text": "*" } }
-          ]
-        }
-      }
-    }
-    ```
-
-For more information, check:
-
-- [#220339](https://github.com/elastic/kibana/issues/220339)
-- [#220342](https://github.com/elastic/kibana/issues/220342)
+This was resolved in {{stack}} 9.0.3.
 
 ::::
 

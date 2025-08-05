@@ -11,7 +11,7 @@ import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { QUERY_RULES_QUERY_RULESET_FETCH_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
-export const useFetchQueryRuleset = (rulesetId: string) => {
+export const useFetchQueryRuleset = (rulesetId: string, enabled = true) => {
   const {
     services: { http },
   } = useKibana();
@@ -24,5 +24,6 @@ export const useFetchQueryRuleset = (rulesetId: string) => {
       );
     },
     retry: false,
+    enabled,
   });
 };

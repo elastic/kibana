@@ -8,7 +8,6 @@
 import datemath from '@elastic/datemath';
 import { KibanaRequest } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
 import { getRelevantFieldNames } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
@@ -75,7 +74,6 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: GET_ALERTS_DATASET_INFO_NAME,
-        visibility: FunctionVisibility.AssistantOnly,
         description: `Use this function to get information about alerts data.`,
         parameters: {
           type: 'object',
@@ -136,7 +134,7 @@ export function registerAlertsFunction({
     functions.registerFunction(
       {
         name: 'alerts',
-        description: `Get alerts for Observability.  Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
+        description: `Get alerts for Observability. Make sure ${GET_ALERTS_DATASET_INFO_NAME} was called before.
         Use this to get open (and optionally recovered) alerts for Observability assets, like services,
         hosts or containers.
         Display the response in tabular format if appropriate.

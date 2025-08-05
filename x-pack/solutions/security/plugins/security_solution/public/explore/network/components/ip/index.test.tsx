@@ -7,12 +7,33 @@
 
 import { screen, render } from '@testing-library/react';
 import React from 'react';
-
 import { TestProviders } from '../../../../common/mock/test_providers';
-
 import { Ip } from '.';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useWhichFlyout } from '../../../../flyout/document_details/shared/hooks/use_which_flyout';
+import { NetworkPanelKey } from '../../../../flyout/network_details';
 
-jest.mock('../../../../common/lib/kibana');
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  return {
+    useKibana: () => ({
+      services: {
+        telemetry: mockedTelemetry,
+      },
+    }),
+  };
+});
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
+jest.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => ({
+  useWhichFlyout: jest.fn(),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -25,6 +46,11 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
+  beforeEach(() => {
+    jest.mocked(useWhichFlyout).mockReturnValue(null);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+  });
+
   test('renders correctly against snapshot', () => {
     const { container } = render(
       <TestProviders>
@@ -44,16 +70,19 @@ describe('Port', () => {
     expect(screen.getByTestId('network-details')).toHaveTextContent('10.1.2.3');
   });
 
-  test('it displays a button which opens the network/ip side panel', () => {
+  test('it displays a button which opens the network flyout', () => {
     render(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
-
-    expect(screen.getByTestId('network-details')).toHaveAttribute(
-      'href',
-      '/ip/10.1.2.3/source/events'
-    );
+    const link = screen.getByTestId('network-details');
+    link.click();
+    expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+      right: {
+        id: NetworkPanelKey,
+        params: { ip: '10.1.2.3', scopeId: '', flowTarget: 'destination' },
+      },
+    });
   });
 });

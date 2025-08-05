@@ -376,6 +376,148 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.toHttpHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "toHttpHandler",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/kibana-api-cli",
+            "scope": "common",
+            "docId": "kibKbnKibanaApiCliPluginApi",
+            "section": "def-common.KibanaClient",
+            "text": "KibanaClient"
+          },
+          ") => ",
+          "HttpHandler"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.toHttpHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/kibana-api-cli",
+                "scope": "common",
+                "docId": "kibKbnKibanaApiCliPluginApi",
+                "section": "def-common.KibanaClient",
+                "text": "KibanaClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.toolingLogToLogger",
+        "type": "Function",
+        "tags": [],
+        "label": "toolingLogToLogger",
+        "description": [],
+        "signature": [
+          "({ flags, log }: { flags: ",
+          {
+            "pluginId": "@kbn/dev-cli-runner",
+            "scope": "common",
+            "docId": "kibKbnDevCliRunnerPluginApi",
+            "section": "def-common.Flags",
+            "text": "Flags"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.toolingLogToLogger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ flags, log }",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.toolingLogToLogger.$1.flags",
+                "type": "Object",
+                "tags": [],
+                "label": "flags",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-cli-runner",
+                    "scope": "common",
+                    "docId": "kibKbnDevCliRunnerPluginApi",
+                    "section": "def-common.Flags",
+                    "text": "Flags"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.toolingLogToLogger.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

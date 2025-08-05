@@ -5,12 +5,7 @@ exports[`it renders with custom logo 1`] = `
   css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
-  <EuiPortal>
-    <div
-      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-      role="presentation"
-    />
-  </EuiPortal>
+  <Memo(BackgroundPortal) />
   <_EuiPageSection
     color="transparent"
     paddingSize="xl"
@@ -65,12 +60,7 @@ exports[`it renders without crashing 1`] = `
   css="unknown styles"
   data-test-subj="kibanaSpaceSelector"
 >
-  <EuiPortal>
-    <div
-      className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
-      role="presentation"
-    />
-  </EuiPortal>
+  <Memo(BackgroundPortal) />
   <_EuiPageSection
     color="transparent"
     paddingSize="xl"
