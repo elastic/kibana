@@ -55,7 +55,6 @@ export const WorkflowYAMLEditor = ({
   onValidationErrors,
   ...props
 }: WorkflowYAMLEditorProps) => {
-  const { euiTheme } = useEuiTheme();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | monaco.editor.IDiffEditor | null>(
     null
   );
