@@ -28,14 +28,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     metric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.metric.help', {
-        defaultMessage: 'The primary metric.',
+        defaultMessage: 'The Primary Metric.',
       }),
       required: true,
     },
     secondaryMetric: {
       types: ['vis_dimension', 'string'],
       help: i18n.translate('expressionMetricVis.function.secondaryMetric.help', {
-        defaultMessage: 'The secondary metric (shown above the primary).',
+        defaultMessage: 'The Secondary Metric (shown above the primary).',
       }),
     },
     max: {
@@ -65,7 +65,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryLabel: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage: 'Optional text to be show next to the secondary metric.',
+        defaultMessage: 'Optional text to be show next to the Secondary Metric.',
       }),
     },
     progressDirection: {
@@ -161,28 +161,28 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryColor: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryColor.help', {
-        defaultMessage: 'A static color to use for the secondary metric',
+        defaultMessage: 'A static color to use for the Secondary Metric',
       }),
       required: false,
     },
     secondaryTrendVisuals: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.visuals.help', {
-        defaultMessage: 'Specifies the mode for the secondary metric trend value',
+        defaultMessage: 'Specifies the mode for the Secondary Metric trend value',
       }),
       required: false,
     },
     secondaryTrendBaseline: {
       types: ['string', 'number'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.baseline.help', {
-        defaultMessage: 'Specifies the baseline used for the secondary metric trend',
+        defaultMessage: 'Specifies the baseline used for the Secondary Metric trend',
       }),
       required: false,
     },
     secondaryTrendPalette: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryTrend.palette.help', {
-        defaultMessage: 'Specifies the palette used for the secondary metric trend',
+        defaultMessage: 'Specifies the palette used for the Secondary Metric trend',
       }),
       multi: true,
       required: false,
@@ -191,7 +191,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryValuePosition.help', {
         defaultMessage:
-          'Specifies the position of the secondary metric value relative to its label (before or after)',
+          'Specifies the position of the Secondary Metric value relative to its label (before or after)',
       }),
       required: false,
     },
