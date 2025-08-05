@@ -18,6 +18,9 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "areaSeriesStyle": Object {
           "area": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
             "opacity": 0.3,
             "visible": true,
           },
@@ -46,11 +49,20 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": "auto",
           },
           "line": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
+            "focused": Object {
+              "strokeWidth": 1,
+            },
             "opacity": 1,
             "strokeWidth": 2,
             "visible": true,
           },
           "point": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
             "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,
@@ -167,6 +179,9 @@ exports[`GaugeComponent renders the chart 1`] = `
         },
         "bubbleSeriesStyle": Object {
           "point": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
             "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 2,
@@ -419,11 +434,20 @@ exports[`GaugeComponent renders the chart 1`] = `
             "visible": "auto",
           },
           "line": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
+            "focused": Object {
+              "strokeWidth": 1,
+            },
             "opacity": 1,
             "strokeWidth": 2,
             "visible": true,
           },
           "point": Object {
+            "dimmed": Object {
+              "opacity": 0.25,
+            },
             "fill": "__use__series__color__",
             "opacity": 1,
             "radius": 3,

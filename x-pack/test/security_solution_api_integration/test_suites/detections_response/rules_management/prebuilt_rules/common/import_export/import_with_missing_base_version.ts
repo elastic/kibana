@@ -9,7 +9,6 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
-  installMockPrebuiltRulesPackage,
   installPrebuiltRules,
   importRulesWithSuccess,
   assertImportedRule,
@@ -32,22 +31,48 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 
   describe('@ess @serverless @skipInServerlessMKI Import prebuilt rule with missing base version', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
     });
 
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
-    });
-
     describe('without override (prebuilt rule is not installed)', () => {
+      it('imports prebuilt rule as a custom rule when there are no matching prebuilt rule assets', async () => {
+        const UNKNOWN_PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
+          rule_id: 'test-unknown-prebuilt-rule',
+          version: 5,
+          name: 'Stock rule name',
+          description: 'Stock rule description',
+        });
+        const UNKNOWN_PREBUILT_RULE_TO_IMPORT = {
+          ...UNKNOWN_PREBUILT_RULE_ASSET['security-rule'],
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [UNKNOWN_PREBUILT_RULE_TO_IMPORT],
+          overwrite: false,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...UNKNOWN_PREBUILT_RULE_TO_IMPORT,
+            version: 5,
+            immutable: false,
+            rule_source: {
+              type: 'internal',
+            },
+          },
+        });
+      });
+
       for (const version of [
         CURRENT_PREBUILT_RULE_VERSION - 1,
         CURRENT_PREBUILT_RULE_VERSION + 1,

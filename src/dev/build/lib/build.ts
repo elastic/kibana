@@ -14,7 +14,6 @@ import { Platform } from './platform';
 
 export class Build {
   private buildDesc: string = '';
-  private buildArch: string = '';
   private name = 'kibana';
   private logTag = chalk`{cyan [  kibana  ]}`;
 
@@ -65,13 +64,5 @@ export class Build {
 
   getBuildDesc() {
     return this.buildDesc;
-  }
-
-  setBuildArch(arch: string) {
-    this.buildArch = arch;
-  }
-
-  getBuildArch() {
-    return this.buildArch;
   }
 }

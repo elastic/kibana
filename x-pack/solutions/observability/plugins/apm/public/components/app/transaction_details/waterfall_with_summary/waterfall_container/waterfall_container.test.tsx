@@ -29,7 +29,7 @@ describe('WaterfallContainer', () => {
     const { getAllByRole } = render(<Example />);
     const buttons = await waitFor(() => getAllByRole('button'));
     const parentItem = buttons[1];
-    const childItem = buttons[2];
+    const childItem = buttons[3];
 
     await userEvent.click(parentItem);
 

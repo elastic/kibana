@@ -32,8 +32,10 @@ info:
 
     This documentation is derived from the `8.x` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+    This documentation contains work-in-progress information for future Elastic Stack releases.
   title: Kibana APIs
-  version: 1.0.2
+  version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
@@ -147,7 +149,7 @@ tags:
     x-displayName: Security detections
   - description: Endpoint Exceptions API allows you to manage detection rule endpoint exceptions to prevent a rule from generating an alert from incoming events even when the rule's other criteria are met.
     name: Security Endpoint Exceptions API
-    x-displayName: Security endpoint exceptions
+    x-displayName: Security Elastic Endpoint exceptions
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
@@ -11349,7 +11351,7 @@ paths:
               type: object
               properties:
                 objects:
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -12486,7 +12488,7 @@ paths:
         - saved objects
   /api/endpoint_list:
     post:
-      description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
+      description: Create the exception list for Elastic Endpoint rule exceptions. When you create the exception list, it will have a `list_id` of `endpoint_list`. If the Elastic Endpoint exception list already exists, your request will return an empty response.
       operationId: CreateEndpointList
       responses:
         '200':
@@ -12521,12 +12523,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list
+      summary: Create an Elastic Endpoint rule exception list
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items:
     delete:
-      description: Delete an endpoint exception list item using the `id` or `item_id` field.
+      description: Delete an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: DeleteEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12580,11 +12582,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Delete an endpoint exception list item
+      summary: Delete an Elastic Endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
     get:
-      description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
+      description: Get the details of an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: ReadEndpointListItem
       parameters:
         - description: Either `id` or `item_id` must be specified
@@ -12640,11 +12642,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get an endpoint exception list item
+      summary: Get an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     post:
-      description: Create an endpoint exception list item, and associate it with the endpoint exception list.
+      description: Create an Elastic Endpoint exception list item, and associate it with the Elastic Endpoint exception list.
       operationId: CreateEndpointListItem
       requestBody:
         content:
@@ -12719,11 +12721,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Create an endpoint exception list item
+      summary: Create an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
     put:
-      description: Update an endpoint exception list item using the `id` or `item_id` field.
+      description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
       requestBody:
         content:
@@ -12803,12 +12805,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Update an endpoint exception list item
+      summary: Update an Elastic Endpoint rule exception list item
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint_list/items/_find:
     get:
-      description: Get a list of all endpoint exception list items.
+      description: Get a list of all Elastic Endpoint exception list items.
       operationId: FindEndpointListItems
       parameters:
         - description: |
@@ -12908,7 +12910,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_SiemErrorResponse'
           description: Internal server error
-      summary: Get endpoint exception list items
+      summary: Get Elastic Endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
   /api/endpoint/action:
@@ -19345,11 +19347,37 @@ paths:
             default: 20
             minimum: 0
             type: integer
+        - description: If true, additionally fetch all anonymization fields, otherwise fetch only the provided page
+          in: query
+          name: all_data
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
             application/json:
               example:
+                aggregations:
+                  anonymized:
+                    buckets:
+                      allowed:
+                        doc_count: 1
+                      anonymized:
+                        doc_count: 1
+                      denied:
+                        doc_count: 1
+                all:
+                  - allowed: true
+                    anonymized: true
+                    createdAt: '2023-10-31T12:00:00Z'
+                    createdBy: user1
+                    field: user.name
+                    id: '1'
+                    namespace: default
+                    timestamp: '2023-10-31T12:00:00Z'
+                    updatedAt: '2023-10-31T12:00:00Z'
+                    updatedBy: user1
                 data:
                   - allowed: true
                     anonymized: true
@@ -19367,6 +19395,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  aggregations:
+                    type: object
+                    properties:
+                      field_status:
+                        type: object
+                        properties:
+                          buckets:
+                            type: object
+                            properties:
+                              allowed:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              anonymized:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                              denied:
+                                type: object
+                                properties:
+                                  doc_count:
+                                    default: 0
+                                    type: integer
+                  all:
+                    items:
+                      $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
+                    type: array
                   data:
                     items:
                       $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
@@ -35838,7 +35897,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -35862,7 +35923,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -35899,7 +35962,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -35997,7 +36062,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -36026,7 +36093,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -36052,7 +36121,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -36093,7 +36164,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -36118,7 +36191,9 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: Array of rule IDs. Array of rule IDs to which a bulk action will be applied. Only valid when query property is undefined.
+          description: |
+            Array of rule `id`s to which a bulk action will be applied. Do not use rule's `rule_id` here.
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -41512,7 +41587,7 @@ components:
       type: string
     Security_Endpoint_Exceptions_API_ExceptionListHumanId:
       $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: The exception list's human readable string identifier, `endpoint_list`.
     Security_Endpoint_Exceptions_API_ExceptionListId:
       $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
     Security_Endpoint_Exceptions_API_ExceptionListItem:
@@ -43810,7 +43885,7 @@ components:
       type: string
     Security_Exceptions_API_ExceptionListHumanId:
       $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
-      description: Human readable string identifier, e.g. `trusted-linux-processes`
+      description: The exception list's human readable string identifier, `endpoint_list`.
     Security_Exceptions_API_ExceptionListId:
       $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
     Security_Exceptions_API_ExceptionListItem:

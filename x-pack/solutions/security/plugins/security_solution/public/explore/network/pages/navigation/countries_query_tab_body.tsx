@@ -22,7 +22,6 @@ export const CountriesQueryTabBody = ({
   filterQuery,
   flowTarget,
   indexNames,
-  indexPattern,
   ip,
   setQuery,
   skip,

@@ -32,7 +32,7 @@ image::management/connectors/images/opsgenie-connector.png[Opsgenie connector]
 Opsgenie connectors have the following configuration properties:
 
 Name:: The name of the connector. The name is used to identify a connector in the management UI connector listing, or in the connector list when configuring an action.
-URL:: The Opsgenie URL. For example, https://api.opsgenie.com or https://api.eu.opsgenie.com.
+URL:: The Opsgenie URL.
 +
 NOTE: If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 

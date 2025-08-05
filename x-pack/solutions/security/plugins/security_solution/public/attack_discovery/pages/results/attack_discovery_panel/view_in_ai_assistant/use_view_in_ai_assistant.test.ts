@@ -29,6 +29,7 @@ describe('useViewInAiAssistant', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: true,
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
 
     (getAttackDiscoveryMarkdown as jest.Mock).mockResolvedValue('Test markdown');
@@ -58,6 +59,7 @@ describe('useViewInAiAssistant', () => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
       hasAssistantPrivilege: false, // <-- the user does NOT have assistant privileges
       isAssistantEnabled: true,
+      isAssistantVisible: true,
     });
 
     const { result } = renderHook(() =>

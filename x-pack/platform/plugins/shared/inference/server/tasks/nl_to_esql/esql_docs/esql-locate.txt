@@ -1,6 +1,6 @@
 # LOCATE
 
-The LOCATE function returns the position of a specified substring within a string.
+Returns an integer indicating the position of a substring within another string. If the substring is not found, it returns `0`. Note that string positions start from `1`.
 
 ## Syntax
 
@@ -8,29 +8,28 @@ The LOCATE function returns the position of a specified substring within a strin
 
 ### Parameters
 
-#### string
+#### `string`
 
-The string in which you want to search for the substring.
+An input string.
 
-#### substring
+#### `substring`
 
-The substring you want to find in the string.
+A substring to locate within the input string.
 
-#### start
+#### `start`
 
-The starting index for the search.
+The start index. This parameter is optional.
 
 ## Examples
+
+Locate a substring within a string
 
 ```esql
 ROW a = "hello"
 | EVAL a_ll = LOCATE(a, "ll")
 ```
 
-```esql
-ROW phrase = "Elasticsearch is powerful"
-| EVAL position = LOCATE(phrase, "powerful")
-```
+This example finds the position of the substring `"ll"` within the string `"hello"`. The result is `3`.
 
 ## Notes
 

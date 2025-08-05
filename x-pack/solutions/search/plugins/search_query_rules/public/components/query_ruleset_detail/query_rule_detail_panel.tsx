@@ -144,7 +144,12 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                 setRuleIdToEdit(ruleId);
               }}
               tourInfo={tourInfo}
-              deleteRule={deleteRule}
+              deleteRule={(ruleId: string) => {
+                if (setIsFormDirty) {
+                  setIsFormDirty(true);
+                }
+                deleteRule?.(ruleId);
+              }}
             />
           )}
         </EuiFlexItem>

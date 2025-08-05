@@ -23,7 +23,6 @@ import {
   getResilientConnector,
 } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

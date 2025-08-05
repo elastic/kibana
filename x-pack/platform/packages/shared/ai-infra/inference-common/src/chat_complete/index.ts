@@ -67,3 +67,17 @@ export {
   isTokenLimitReachedError,
   isToolNotFoundError,
 } from './errors';
+
+export type {
+  AnonymizationRule,
+  AnonymizationEntity,
+  Anonymization,
+  Deanonymization,
+  AnonymizationOutput,
+  DeanonymizationOutput,
+  DeanonymizedMessage,
+  RegexAnonymizationRule,
+  NamedEntityRecognitionRule,
+  AnonymizationSettings,
+  AnonymizationRegexWorkerTaskPayload,
+} from './anonymization';

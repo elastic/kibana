@@ -11,7 +11,7 @@
     "server/**/*",
     "server/config.ts",
     "../../../../../typings/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",

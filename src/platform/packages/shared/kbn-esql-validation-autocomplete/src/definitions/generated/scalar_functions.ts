@@ -2979,7 +2979,7 @@ const kqlDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a KQL query. Returns true if the provided KQL query string matches the row.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -3999,7 +3999,7 @@ const matchDefinition: FunctionDefinition = {
     defaultMessage:
       'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like  text and  semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\nWhen Match is used on a  semantic_text field, it will perform a semantic query on the field.\n\nMatch can use function named parameters to specify additional options for the match query.\nAll match query parameters are supported.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -4742,9 +4742,9 @@ const matchPhraseDefinition: FunctionDefinition = {
   name: 'match_phrase',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match_phrase', {
     defaultMessage:
-      'Use `MATCH_PHRASE` to perform a [`match_phrase`](/reference/query-languages/query-dsl/query-dsl-match-query-phrase.md) on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.\n\nMatchPhrase can be used on  text fields, as well as other field types like keyword, boolean, or date types.\nMatchPhrase is not supported for  semantic_text or numeric types.\n\nMatchPhrase can use function named parameters to specify additional options for the\nmatch_phrase query.\nAll [`match_phrase`](/reference/query-languages/query-dsl/query-dsl-match-query-phrase.md) query parameters are supported.\n\n`MATCH_PHRASE` returns true if the provided query matches the row.',
+      'Use `MATCH_PHRASE` to perform a `match_phrase` query on the\nspecified field.\nUsing `MATCH_PHRASE` is equivalent to using the `match_phrase` query in the Elasticsearch Query DSL.\n\nMatchPhrase can be used on  text fields, as well as other field types like keyword, boolean, or date types.\nMatchPhrase is not supported for  semantic_text or numeric types.\n\nMatchPhrase can use function named parameters to specify additional options for the\nmatch_phrase query.\nAll `match_phrase` query query parameters are supported.\n\n`MATCH_PHRASE` returns true if the provided query matches the row.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {
@@ -7780,7 +7780,7 @@ const qstrDefinition: FunctionDefinition = {
     defaultMessage:
       'Performs a query string query. Returns true if the provided query string matches the row.',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

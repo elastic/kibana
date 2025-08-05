@@ -37,11 +37,15 @@ export function processVertexStream() {
           }
         }
 
-        if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_TOOL_CALL') {
+        if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_FUNCTION_CALL') {
+          const finishMessage = value.candidates?.[0].finishMessage;
+          const validationErrorMessage = finishMessage
+            ? `${finishReason} - ${finishMessage}`
+            : finishReason;
           emitTokenCountIfApplicable();
           subscriber.error(
-            createToolValidationError(finishReason, {
-              errorsText: value.candidates?.[0].finishMessage,
+            createToolValidationError(validationErrorMessage, {
+              errorsText: finishMessage,
               toolCalls: [],
             })
           );

@@ -32,7 +32,7 @@ const csvPayload: JobParamsCSV = {
   columns: [],
   version: '7.13.0',
 };
-// eslint-disable-next-line import/no-default-export
+
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 

@@ -30,13 +30,21 @@ import {
   DEFINITION_EDIT_TAB,
   SCHEDULE_EDIT_TAB,
 } from '../../../../screens/create_new_rule';
-import { ABOUT_RULE_DESCRIPTION } from '../../../../screens/rule_details';
+import {
+  ABOUT_RULE_DESCRIPTION,
+  MODIFIED_PREBUILT_RULE_BADGE,
+  MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION,
+  MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE,
+  RULE_CUSTOMIZATIONS_DIFF_FLYOUT,
+} from '../../../../screens/rule_details';
 import { goToRuleEditSettings } from '../../../../tasks/rule_details';
 import { getIndexPatterns, getNewRule } from '../../../../objects/rule';
 import {
   editFirstRule,
-  expectModifiedBadgeToBeDisplayed,
-  expectModifiedBadgeToNotBeDisplayed,
+  expectModifiedRuleBadgeToBeDisplayed,
+  expectModifiedRuleBadgeToNotBeDisplayed,
+  expectModifiedRulePerFieldBadgeToBeDisplayed,
+  expectModifiedRulePerFieldBadgeToNotBeDisplayed,
   expectToContainModifiedBadge,
   expectToNotContainModifiedBadge,
   filterByCustomRules,
@@ -116,7 +124,7 @@ describe(
         fillDescription(newDescriptionValue);
         saveEditedRule();
 
-        expectModifiedBadgeToBeDisplayed();
+        expectModifiedRuleBadgeToBeDisplayed();
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
       });
 
@@ -126,14 +134,14 @@ describe(
         visitRulesManagementTable();
 
         cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
-        expectModifiedBadgeToBeDisplayed(); // Expect modified badge to already be displayed
+        expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to already be displayed
 
         goToRuleEditSettings();
         goToAboutStepTab();
         fillDescription(newDescriptionValue);
         saveEditedRule();
 
-        expectModifiedBadgeToBeDisplayed();
+        expectModifiedRuleBadgeToBeDisplayed();
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', newDescriptionValue);
       });
 
@@ -261,77 +269,125 @@ describe(
       });
 
       describe('calculating the Modified badge', () => {
-        it('modified badge should appear on the rule details page when prebuilt rule is customized', function () {
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+        describe('on the rule details page', () => {
+          it('should open the rule diff flyout on click when rule is customized', function () {
+            patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+            visitRulesManagementTable();
+
+            cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+            expectModifiedRuleBadgeToBeDisplayed(); // Expect modified badge to be displayed
+            cy.get(MODIFIED_PREBUILT_RULE_BADGE).click();
+            cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
+          });
+
+          it('should not open the rule diff flyout on click when rule is customized but base version does not exist', function () {
+            patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+            deletePrebuiltRulesAssets();
+            visitRulesManagementTable();
+
+            cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+            cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).should('exist'); // Expect modified badge to be displayed
+            cy.get(MODIFIED_PREBUILT_RULE_BADGE_NO_BASE_VERSION).click();
+            cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('not.exist');
+          });
+
+          it("should not be displayed when rule isn't customized", function () {
+            visitRulesManagementTable();
+
+            cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
+            expectModifiedRuleBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
+          });
+
+          it('should not be displayed when rule is not prebuilt', function () {
+            visitRulesManagementTable();
+
+            cy.get(RULE_NAME).contains('Custom rule').click();
+            expectModifiedRuleBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
+          });
+        });
+
+        describe('on the rule management table', () => {
+          it('should be displayed in row when prebuilt rule is customized', function () {
+            patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+            visitRulesManagementTable();
+
+            filterByElasticRules();
+            expectToContainModifiedBadge('Customized prebuilt rule');
+          });
+
+          it("should not be displayed in row when prebuilt rule isn't customized", function () {
+            visitRulesManagementTable();
+
+            filterByElasticRules();
+            expectToNotContainModifiedBadge('Non-customized prebuilt rule');
+          });
+
+          it('should not be displayed in row when rule is not prebuilt', function () {
+            visitRulesManagementTable();
+
+            filterByCustomRules();
+            expectToNotContainModifiedBadge('Custom rule');
+          });
+        });
+
+        describe('on the rule updates table', () => {
+          it('should be displayed when prebuilt rule is customized', function () {
+            // Create a new version of the rule to trigger the rule update logic
+            installPrebuiltRuleAssets([
+              {
+                ...PREBUILT_RULE,
+                'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
+              },
+            ]);
+            patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
+            visitRulesManagementTable();
+            clickRuleUpdatesTab();
+
+            cy.get(MODIFIED_RULE_BADGE).should('exist');
+          });
+
+          it("should not be displayed when prebuilt rule isn't customized", function () {
+            // Create a new version of the rule to trigger the rule update logic
+            installPrebuiltRuleAssets([
+              {
+                ...PREBUILT_RULE,
+                'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
+              },
+            ]);
+            visitRulesManagementTable();
+            clickRuleUpdatesTab();
+
+            cy.get(MODIFIED_RULE_BADGE).should('not.exist');
+          });
+        });
+      });
+
+      describe('calculating the per-field modified badge', () => {
+        it('should appear next to fields that have been customized', function () {
+          patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
           visitRulesManagementTable();
 
           cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
-          expectModifiedBadgeToBeDisplayed(); // Expect modified badge to be displayed
+          expectModifiedRulePerFieldBadgeToBeDisplayed('tags'); // Customized fields should have a badge present
+          expectModifiedRulePerFieldBadgeToNotBeDisplayed('max_signals'); // Non-customized fields should not have a badge present
         });
 
-        it("modified badge should not appear on the rule details page when prebuilt rule isn't customized", function () {
+        it('should open the rule customizations diff flyout on click', function () {
+          patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
           visitRulesManagementTable();
 
-          cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
-          expectModifiedBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
+          cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+          cy.get(MODIFIED_PREBUILT_RULE_PER_FIELD_BADGE('tags')).click();
+          cy.get(RULE_CUSTOMIZATIONS_DIFF_FLYOUT).should('exist');
         });
 
-        it("modified badge should not appear on a custom rule's rule details page", function () {
+        it('should not be displayed when the rule base version does not exist', function () {
+          patchRule('rule_1', { name: 'Customized prebuilt rule', tags: ['test'] }); // We want to make this a customized prebuilt rule
+          deletePrebuiltRulesAssets();
           visitRulesManagementTable();
 
-          cy.get(RULE_NAME).contains('Custom rule').click();
-          expectModifiedBadgeToNotBeDisplayed(); // Expect modified badge to not be displayed
-        });
-
-        it('modified badge should appear on the rule management table when prebuilt rule is modified', function () {
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-          visitRulesManagementTable();
-
-          filterByElasticRules();
-          expectToContainModifiedBadge('Customized prebuilt rule');
-        });
-
-        it("modified badge should not appear on the rule management table when prebuilt rule isn't customized", function () {
-          visitRulesManagementTable();
-
-          filterByElasticRules();
-          expectToNotContainModifiedBadge('Non-customized prebuilt rule');
-        });
-
-        it('modified badge should not appear on the rule management table when row is a custom rule', function () {
-          visitRulesManagementTable();
-
-          filterByCustomRules();
-          expectToNotContainModifiedBadge('Custom rule');
-        });
-
-        it('modified badge should appear on the rule updates table when prebuilt rule is customized', function () {
-          // Create a new version of the rule to trigger the rule update logic
-          installPrebuiltRuleAssets([
-            {
-              ...PREBUILT_RULE,
-              'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
-            },
-          ]);
-          patchRule('rule_1', { name: 'Customized prebuilt rule' }); // We want to make this a customized prebuilt rule
-          visitRulesManagementTable();
-          clickRuleUpdatesTab();
-
-          cy.get(MODIFIED_RULE_BADGE).should('exist');
-        });
-
-        it("Modified badge should not appear on the rule updates table when prebuilt rule isn't customized", function () {
-          // Create a new version of the rule to trigger the rule update logic
-          installPrebuiltRuleAssets([
-            {
-              ...PREBUILT_RULE,
-              'security-rule': { ...PREBUILT_RULE['security-rule'], version: 2 },
-            },
-          ]);
-          visitRulesManagementTable();
-          clickRuleUpdatesTab();
-
-          cy.get(MODIFIED_RULE_BADGE).should('not.exist');
+          cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+          expectModifiedRulePerFieldBadgeToNotBeDisplayed('tags');
         });
       });
     });

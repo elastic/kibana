@@ -28,7 +28,6 @@ import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_
 import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
 import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
 import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import {
@@ -39,6 +38,8 @@ import {
 } from '../../../shared/components/test_ids';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
@@ -101,11 +102,8 @@ const renderCorrelationsOverview = (contextValue: DocumentDetailsContext) => (
 
 const NO_DATA_MESSAGE = 'No correlations data available.';
 
-jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
-  useTimelineDataFilters: jest.fn(),
-}));
-const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
-
+jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
   useTourContext: jest.fn(),
 }));
@@ -133,7 +131,12 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
     jest.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
-    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
+    (useEnableExperimental as jest.Mock).mockReturnValue({
+      newDataViewPickerEnabled: true,
+    });
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      indexPatterns: ['index'],
+    });
     (useNavigateToLeftPanel as jest.Mock).mockReturnValue({
       navigateToLeftPanel: mockNavigateToLeftPanel,
       isEnabled: true,

@@ -27,6 +27,12 @@ describe('BackfillTaskRunner', () => {
 
   let taskRunner: BackfillTaskRunner;
 
+  const analyticsConfig = {
+    index: {
+      enabled: true,
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -61,6 +67,7 @@ describe('BackfillTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -68,8 +75,7 @@ describe('BackfillTaskRunner', () => {
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
-      timeout: '300ms',
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
@@ -101,6 +107,7 @@ describe('BackfillTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -112,8 +119,7 @@ describe('BackfillTaskRunner', () => {
       expect(esClient.cluster.health).toBeCalledWith({
         index: destIndex,
         wait_for_status: 'green',
-        timeout: '300ms',
-        wait_for_active_shards: 'all',
+        timeout: '30s',
       });
 
       expect(logger.error).toBeCalledWith(
@@ -132,6 +138,7 @@ describe('BackfillTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -144,6 +151,31 @@ describe('BackfillTaskRunner', () => {
         '[.dest-index] Backfill reindex failed. Error: My unrecoverable error',
         { tags: ['cai-backfill', 'cai-backfill-error', '.dest-index'] }
       );
+    });
+  });
+
+  describe('Analytics index disabled', () => {
+    const analyticsConfigDisabled = {
+      index: {
+        enabled: false,
+      },
+    };
+
+    it('does not call the reindex API if analytics is disabled', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getESClient = async () => esClient;
+
+      taskRunner = new BackfillTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+        analyticsConfig: analyticsConfigDisabled,
+      });
+
+      await taskRunner.run();
+
+      expect(esClient.cluster.health).not.toBeCalled();
+      expect(esClient.reindex).not.toBeCalled();
     });
   });
 });

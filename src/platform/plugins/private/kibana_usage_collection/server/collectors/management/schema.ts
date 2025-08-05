@@ -499,6 +499,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'ai:anonymizationSettings': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
@@ -657,12 +661,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
-    },
-  },
-  'cases:incrementalIdDisplay:enabled': {
-    type: 'boolean',
-    _meta: {
-      description: 'Display the incremental id of a case in the relevant pages',
     },
   },
 };

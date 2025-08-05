@@ -42,7 +42,7 @@ import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
-import type { RulesConflictStats } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal/upgrade_modal';
+import type { RulesConflictStats } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal/conflicts_description';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
@@ -301,7 +301,14 @@ export function usePrebuiltRulesUpgrade({
       }
 
       let updateTabContent = (
-        <PerFieldRuleDiffTab header={headerCallout} ruleDiff={ruleUpgradeState.diff} />
+        <PerFieldRuleDiffTab
+          header={headerCallout}
+          ruleDiff={ruleUpgradeState.diff}
+          leftDiffSideLabel={i18n.CURRENT_RULE_VERSION}
+          rightDiffSideLabel={i18n.ELASTIC_UPDATE_VERSION}
+          leftDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+          rightDiffSideDescription={i18n.UPDATED_VERSION_DESCRIPTION}
+        />
       );
 
       // Show the resolver tab only if rule customization is enabled and there
@@ -338,6 +345,10 @@ export function usePrebuiltRulesUpgrade({
             <RuleDiffTab
               oldRule={ruleUpgradeState.current_rule}
               newRule={ruleUpgradeState.target_rule}
+              leftDiffSideLabel={i18n.CURRENT_RULE_VERSION}
+              rightDiffSideLabel={i18n.ELASTIC_UPDATE_VERSION}
+              leftDiffSideDescription={i18n.CURRENT_VERSION_DESCRIPTION}
+              rightDiffSideDescription={i18n.UPDATED_VERSION_DESCRIPTION}
             />
           </div>
         ),

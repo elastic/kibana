@@ -566,6 +566,27 @@ const styles = {
       paddingBottom: 0,
     },
 
+    '.kbnDocViewer__fieldName': {
+      padding: euiThemeVars.euiSizeXS,
+      paddingLeft: 0,
+      lineHeight: euiThemeVars.euiLineHeight,
+
+      '.euiDataGridRowCell__popover &': {
+        fontSize: euiThemeVars.euiFontSizeS,
+      },
+    },
+
+    '.kbnDocViewer__fieldName_icon': {
+      paddingTop: `calc(${euiThemeVars.euiSizeXS} * 1.5)`,
+      lineHeight: euiThemeVars.euiSize,
+    },
+
+    '.kbnDocViewer__fieldName_multiFieldBadge': {
+      margin: `${euiThemeVars.euiSizeXS} 0`,
+      fontWeight: euiThemeVars.euiFontWeightRegular,
+      fontFamily: euiThemeVars.euiFontFamily,
+    },
+
     '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
       padding: `calc(${euiThemeVars.euiSizeXS} / 2) 0 0 ${euiThemeVars.euiSizeXS}`,
     },

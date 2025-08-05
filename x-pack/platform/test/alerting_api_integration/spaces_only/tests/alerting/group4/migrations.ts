@@ -15,7 +15,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { getUrlPrefix } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');

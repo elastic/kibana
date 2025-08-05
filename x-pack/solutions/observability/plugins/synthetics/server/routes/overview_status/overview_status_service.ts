@@ -338,7 +338,7 @@ export class OverviewStatusService {
       EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
     >({
       showFromAllSpaces,
-      search: query ? `${query}*` : '',
+      search: query,
       filter: filtersStr,
       fields: [
         ConfigKey.ENABLED,

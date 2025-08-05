@@ -61,6 +61,20 @@
     "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
     "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
 
+    "genai_ad_schedules:server:serverless": "npm run initialize-server:genai:trial_complete attack_discovery/schedules serverless",
+    "genai_ad_schedules:runner:serverless": "npm run run-tests:genai:trial_complete attack_discovery/schedules serverless serverlessEnv",
+    "genai_ad_schedules:qa:serverless": "npm run run-tests:genai:trial_complete attack_discovery/schedules serverless qaPeriodicEnv",
+    "genai_ad_schedules:qa:serverless:release": "npm run run-tests:genai:trial_complete attack_discovery/schedules serverless qaEnv",
+    "genai_ad_schedules:server:ess": "npm run initialize-server:genai:trial_complete attack_discovery/schedules ess",
+    "genai_ad_schedules:runner:ess": "npm run run-tests:genai:trial_complete attack_discovery/schedules ess essEnv",
+
+    "genai_ad_schedules:essentials:server:serverless": "npm run initialize-server:genai:basic_essentials attack_discovery/schedules serverless",
+    "genai_ad_schedules:essentials:runner:serverless": "npm run run-tests:genai:basic_essentials attack_discovery/schedules serverless serverlessEnv",
+    "genai_ad_schedules:essentials:qa:serverless": "npm run run-tests:genai:basic_essentials attack_discovery/schedules serverless qaPeriodicEnv",
+    "genai_ad_schedules:essentials:qa:serverless:release": "npm run run-tests:genai:basic_essentials attack_discovery/schedules serverless qaEnv",
+    "genai_ad_schedules:basic:server:ess": "npm run initialize-server:genai:basic_essentials attack_discovery/schedules ess",
+    "genai_ad_schedules:basic:runner:ess": "npm run run-tests:genai:basic_essentials attack_discovery/schedules ess essEnv",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",

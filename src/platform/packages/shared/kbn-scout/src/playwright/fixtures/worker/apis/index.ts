@@ -8,12 +8,14 @@
  */
 
 import { coreWorkerFixtures } from '../core_fixtures';
+import { CoreApiService, getCoreApiHelper } from './core';
 import { FleetApiService, getFleetApiHelper } from './fleet';
 import { StreamsApiService, getStreamsApiService } from './streams';
 
 export interface ApiServicesFixture {
   fleet: FleetApiService;
   streams: StreamsApiService;
+  core: CoreApiService;
   // add more services here
 }
 
@@ -29,6 +31,7 @@ export const apiServicesFixture = coreWorkerFixtures.extend<
       const services = {
         fleet: getFleetApiHelper(log, kbnClient),
         streams: getStreamsApiService({ kbnClient, log }),
+        core: getCoreApiHelper(log, kbnClient),
       };
 
       log.serviceLoaded('apiServices');

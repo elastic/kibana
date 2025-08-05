@@ -18,7 +18,8 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 import { interceptBulkFillRulesGaps } from '../../../../tasks/api_calls/gaps';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/229346
+describe.skip(
   'bulk fill rule gaps',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

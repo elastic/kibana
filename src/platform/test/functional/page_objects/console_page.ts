@@ -85,19 +85,32 @@ export class ConsolePageObject extends FtrService {
   public async promptAutocomplete(letter = 'b') {
     const textArea = await this.getTextArea();
     await textArea.type(letter);
-    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
+    await this.retry.waitFor(
+      'autocomplete to be visible',
+      async () => await this.isAutocompleteVisible()
+    );
   }
 
   public async isAutocompleteVisible() {
     const element = await this.find.byClassName('suggest-widget').catch(() => null);
     if (!element) return false;
 
-    const attribute = await element.getAttribute('style');
-    return !attribute?.includes('display: none;');
+    return await element.isDisplayed();
   }
 
   public async getAutocompleteSuggestion(index: number) {
+    await this.retry.waitFor(
+      'verify suggestions widget is displayed',
+      async () => await this.isAutocompleteVisible()
+    );
+
     const suggestionsWidget = await this.find.byClassName('suggest-widget');
+
+    await this.retry.waitFor(
+      'verify suggestions widget to be displayed',
+      async () => await suggestionsWidget.isDisplayed()
+    );
+
     const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
     const suggestion = suggestions[index];
     if (!suggestion) {

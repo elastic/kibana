@@ -10,12 +10,14 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export * from '../common/types';
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   console?: ConsolePluginStart;
   share?: SharePluginStart;
+  cloud?: CloudStart;
   searchNavigation?: SearchNavigationPluginStart;
   usageCollection?: UsageCollectionStart;
 }

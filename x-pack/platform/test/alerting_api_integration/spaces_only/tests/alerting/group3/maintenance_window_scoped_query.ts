@@ -22,7 +22,6 @@ import { Spaces } from '../../../scenarios';
 
 const alertAsDataIndex = '.internal.alerts-test.patternfiring.alerts-default-000001';
 
-// eslint-disable-next-line import/no-default-export
 export default function maintenanceWindowScopedQueryTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');

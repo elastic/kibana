@@ -23,20 +23,20 @@ export interface PluginManifest {
  * Resolves the path to the `kibana.jsonc` manifest based on the Playwright configuration file path.
  * @param configPath - Absolute path to the Playwright configuration file.
  * @returns Absolute path to the `kibana.jsonc` file.
- * @throws Error if `ui_tests` is not found in the path.
+ * @throws Error if `scout` is not found in the path.
  */
 export const getManifestPath = (configPath: string): string => {
   const pathSegments = configPath.split(path.sep);
-  const testDirIndex = pathSegments.indexOf('ui_tests');
+  const testDirIndex = pathSegments.indexOf('scout');
 
   if (testDirIndex === -1) {
     throw new Error(
-      `Invalid path: "ui_tests" directory not found in ${configPath}.
-  Ensure playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/ui_tests/<config-file>'`
+      `Invalid path: "scout" directory not found in ${configPath}.
+  Ensure playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/test/scout/ui/<config-file>'`
     );
   }
 
-  const manifestSegments = pathSegments.slice(0, testDirIndex).concat('kibana.jsonc');
+  const manifestSegments = pathSegments.slice(0, testDirIndex - 1).concat('kibana.jsonc');
   return path.resolve('/', ...manifestSegments); // Ensure absolute path
 };
 

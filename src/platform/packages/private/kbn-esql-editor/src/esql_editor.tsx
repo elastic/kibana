@@ -162,7 +162,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
-  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -445,10 +444,18 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart, boolean]) => ({
-      timestamp: Date.now(),
-      result: getESQLSources(...args),
-    }));
+    const fn = memoize(
+      (
+        ...args: [
+          DataViewsPublicPluginStart,
+          CoreStart,
+          (() => Promise<ILicense | undefined>) | undefined
+        ]
+      ) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      })
+    );
 
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
@@ -457,9 +464,8 @@ export const ESQLEditor = memo(function ESQLEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
-        const ccrFeature = license?.getFeature('ccr');
-        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-        const sources = await memoizedSources(dataViews, core, areRemoteIndicesAvailable).result;
+        const getLicense = kibana.services?.esql?.getLicense;
+        const sources = await memoizedSources(dataViews, core, getLicense).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -541,7 +547,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     kibana.services?.esql,
     dataSourcesCache,
     fixedQuery,
-    license,
     memoizedSources,
     dataViews,
     core,
@@ -615,20 +620,6 @@ export const ESQLEditor = memo(function ESQLEditor({
       setQueryToTheCache();
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
-
-  useEffect(() => {
-    async function fetchLicense() {
-      try {
-        const ls = await kibana.services?.esql?.getLicense();
-        if (!isEqual(license, ls)) {
-          setLicense(ls);
-        }
-      } catch (error) {
-        // failed to fetch
-      }
-    }
-    fetchLicense();
-  }, [kibana.services?.esql, license]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {

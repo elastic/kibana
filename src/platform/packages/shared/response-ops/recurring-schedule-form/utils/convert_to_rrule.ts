@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Moment } from 'moment';
+import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { ISO_WEEKDAYS_TO_RRULE } from '../constants';
 import { getPresets } from './get_presets';
-import type { RRuleParams, RecurringSchedule } from '../types';
+import { parseSchedule } from './parse_schedule';
 import { getNthByWeekday } from './get_nth_by_weekday';
+import type { RRuleParams, RecurringSchedule } from '../types';
 
 export const convertToRRule = ({
   startDate,
@@ -20,22 +21,25 @@ export const convertToRRule = ({
   recurringSchedule,
   includeTime = false,
 }: {
-  startDate: Moment;
+  startDate: string;
   timezone: string;
   recurringSchedule?: RecurringSchedule;
   includeTime?: boolean;
 }): RRuleParams => {
-  const presets = getPresets(startDate);
+  const startDateMoment = moment(startDate);
+  const presets = getPresets(startDateMoment);
+
+  const parsedSchedule = parseSchedule(recurringSchedule);
 
   const rRule: RRuleParams = {
-    dtstart: startDate.toISOString(),
+    dtstart: startDateMoment.toISOString(),
     tzid: timezone,
     ...(Boolean(includeTime)
-      ? { byhour: [startDate.get('hour')], byminute: [startDate.get('minute')] }
+      ? { byhour: [startDateMoment.get('hour')], byminute: [startDateMoment.get('minute')] }
       : {}),
   };
 
-  if (!recurringSchedule)
+  if (!parsedSchedule)
     return {
       ...rRule,
       // default to yearly and a count of 1
@@ -44,9 +48,9 @@ export const convertToRRule = ({
       count: 1,
     };
 
-  let form = recurringSchedule;
-  if (recurringSchedule.frequency !== 'CUSTOM') {
-    form = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
+  let form = parsedSchedule;
+  if (parsedSchedule.frequency !== 'CUSTOM') {
+    form = { ...parsedSchedule, ...presets[parsedSchedule.frequency] };
   }
 
   const frequency = form.customFrequency ?? (form.frequency as Frequency);
@@ -71,16 +75,16 @@ export const convertToRRule = ({
 
   if (form.bymonth) {
     if (form.bymonth === 'day') {
-      rRule.bymonthday = [startDate.date()];
+      rRule.bymonthday = [startDateMoment.date()];
     } else if (form.bymonth === 'weekday') {
-      rRule.byweekday = [getNthByWeekday(startDate)];
+      rRule.byweekday = [getNthByWeekday(startDateMoment)];
     }
   }
 
   if (frequency === Frequency.YEARLY) {
     // rRule expects 1 based indexing for months
-    rRule.bymonth = [startDate.month() + 1];
-    rRule.bymonthday = [startDate.date()];
+    rRule.bymonth = [startDateMoment.month() + 1];
+    rRule.bymonthday = [startDateMoment.date()];
   }
 
   return rRule;

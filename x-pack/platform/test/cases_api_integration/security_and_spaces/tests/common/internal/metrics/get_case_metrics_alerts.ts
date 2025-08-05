@@ -18,7 +18,6 @@ import {
 } from '../../../../../common/lib/api';
 import { arraysToEqual } from '../../../../../common/lib/validation';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

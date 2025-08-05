@@ -26,7 +26,8 @@ import { keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('PrivateLocationAddMonitor', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/229365
+  describe.skip('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -53,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.addPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation();
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);

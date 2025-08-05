@@ -11,12 +11,15 @@ import { XJsonLang } from '@kbn/monaco';
 import useMount from 'react-use/lib/useMount';
 import hjson from 'hjson';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
+import { css } from '@emotion/react';
+import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { type CSSInterpolation } from '@emotion/css';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
@@ -48,7 +51,38 @@ function format(
   }
 }
 
+type EmotionStyles = Record<string, CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)>;
+
+const useMemoCss = <T extends EmotionStyles>(styleMap: T): { [K in keyof T]: CSSInterpolation } => {
+  const euiThemeContext = useEuiTheme();
+
+  const outputStyles = useMemo(() => {
+    return Object.entries(styleMap).reduce<{ [K in keyof T]: CSSInterpolation }>(
+      (acc, [key, value]) => {
+        acc[key as keyof T] = typeof value === 'function' ? value(euiThemeContext) : value;
+        return acc;
+      },
+      {} as { [K in keyof T]: CSSInterpolation }
+    );
+  }, [euiThemeContext, styleMap]);
+
+  return outputStyles;
+};
+
+const monacoOverride = {
+  override: ({ colorMode }: UseEuiTheme) =>
+    css({
+      // See discussion: https://github.com/elastic/kibana/issues/228296#issuecomment-3126033291
+      ...(colorMode === 'DARK' && {
+        '.monaco-editor': {
+          '--vscode-editor-inactiveSelectionBackground': '#3a3d41',
+        },
+      }),
+    }),
+};
+
 function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+  const monacoStyles = useMemoCss(monacoOverride);
   const [languageId, setLanguageId] = useState<string>();
 
   useMount(() => {
@@ -103,6 +137,7 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
         <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
       </div>
       <CodeEditor
+        classNameCss={monacoStyles.override}
         width="100%"
         height="100%"
         languageId={languageId}

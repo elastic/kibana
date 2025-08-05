@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -89,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -116,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -159,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -196,6 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -258,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -277,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -298,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -473,6 +481,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -514,6 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},

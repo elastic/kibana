@@ -11,7 +11,6 @@ import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getComment } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

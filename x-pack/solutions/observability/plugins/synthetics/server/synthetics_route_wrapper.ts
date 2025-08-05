@@ -105,6 +105,9 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           },
         });
       } catch (e) {
+        if (isKibanaResponse(e)) {
+          return e;
+        }
         if (e.statusCode === 403) {
           const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
           if (!privileges.has_all_requested) {

@@ -113,7 +113,7 @@ export const OverviewPage: FC = () => {
               </EuiLink>,
             ]}
             ariaLabel={i18n.translate('xpack.ml.overview.nodesPanel.ariaLabel', {
-              defaultMessage: 'overview panel',
+              defaultMessage: 'Nodes panel',
             })}
           >
             <NodesList compactView />

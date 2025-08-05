@@ -168,7 +168,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         title: formData.title,
         duration: endDate.diff(startDate),
         rRule: convertToRRule({
-          startDate,
+          startDate: startDate.toISOString(),
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),

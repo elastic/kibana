@@ -33,7 +33,6 @@ function sortAlertDocsByInstanceId(a: SearchHit<AlertDoc>, b: SearchHit<AlertDoc
   return a._source![ALERT_INSTANCE_ID].localeCompare(b._source![ALERT_INSTANCE_ID]);
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');

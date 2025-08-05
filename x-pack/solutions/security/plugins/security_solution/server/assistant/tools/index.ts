@@ -8,7 +8,6 @@
 import { PRODUCT_DOCUMENTATION_TOOL } from './product_docs/product_documentation_tool';
 import { GENERATE_ESQL_TOOL } from './esql/generate_esql_tool';
 import { ASK_ABOUT_ESQL_TOOL } from './esql/ask_about_esql_tool';
-import { NL_TO_ESQL_TOOL } from './esql/nl_to_esql_tool';
 import { ALERT_COUNTS_TOOL } from './alert_counts/alert_counts_tool';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts/open_and_acknowledged_alerts_tool';
 import { DEFEND_INSIGHTS_TOOL } from './defend_insights';
@@ -25,7 +24,6 @@ export const assistantTools = [
   KNOWLEDGE_BASE_WRITE_TOOL,
   GENERATE_ESQL_TOOL,
   ASK_ABOUT_ESQL_TOOL,
-  NL_TO_ESQL_TOOL,
   OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
   PRODUCT_DOCUMENTATION_TOOL,
   SECURITY_LABS_KNOWLEDGE_BASE_TOOL,

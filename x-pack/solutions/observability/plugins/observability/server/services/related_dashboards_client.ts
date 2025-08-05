@@ -119,10 +119,7 @@ export class RelatedDashboardsClient {
     perPage?: number;
     limit?: number;
   }) {
-    const dashboards = await this.dashboardClient.search(
-      { limit: perPage, cursor: `${page}` },
-      { spaces: ['*'] }
-    );
+    const dashboards = await this.dashboardClient.search({ limit: perPage, cursor: `${page}` });
     const {
       result: { hits },
     } = dashboards;

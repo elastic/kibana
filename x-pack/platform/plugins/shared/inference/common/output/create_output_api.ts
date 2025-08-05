@@ -92,8 +92,8 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
           return {
             id,
             output:
-              event.toolCalls.length && 'arguments' in event.toolCalls[0].function
-                ? event.toolCalls[0].function.arguments
+              event?.toolCalls?.length && 'arguments' in event?.toolCalls[0]?.function
+                ? event.toolCalls[0]?.function?.arguments
                 : undefined,
             content: event.content,
             type: OutputEventType.OutputComplete,
@@ -107,8 +107,8 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
             id,
             content: chatResponse.content,
             output:
-              chatResponse.toolCalls.length && 'arguments' in chatResponse.toolCalls[0].function
-                ? chatResponse.toolCalls[0].function.arguments
+              chatResponse?.toolCalls?.length && 'arguments' in chatResponse?.toolCalls[0]?.function
+                ? chatResponse?.toolCalls[0]?.function?.arguments
                 : undefined,
           };
         },

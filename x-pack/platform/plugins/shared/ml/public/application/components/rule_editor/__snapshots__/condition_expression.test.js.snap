@@ -1,369 +1,139 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ConditionExpression renders with appliesTo, operator and value supplied 1`] = `
-<EuiFlexGroup
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="when"
-              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value="diff from typical"
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
       id="appliesToPopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="When"
-            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
-          style={
-            Object {
-              "width": 200,
-            }
-          }
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
         >
-          <EuiSelect
-            onChange={[Function]}
-            options={
-              Array [
-                Object {
-                  "text": "actual",
-                  "value": "actual",
-                },
-                Object {
-                  "text": "typical",
-                  "value": "typical",
-                },
-                Object {
-                  "text": "diff from typical",
-                  "value": "diff_from_typical",
-                },
-              ]
-            }
-            value="diff_from_typical"
-          />
-        </div>
-      </div>
-    </EuiPopover>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+          when
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          diff from typical
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="is {operator}"
-              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
-              values={
-                Object {
-                  "operator": "greater than",
-                }
-              }
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value="123"
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
       id="operatorValuePopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
-      withTitle={true}
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="Is"
-            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
         >
-          <EuiFlexGroup
-            style={
-              Object {
-                "maxWidth": 450,
-              }
-            }
-          >
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 250,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "less than",
-                      "value": "lt",
-                    },
-                    Object {
-                      "text": "less than or equal to",
-                      "value": "lte",
-                    },
-                    Object {
-                      "text": "greater than",
-                      "value": "gt",
-                    },
-                    Object {
-                      "text": "greater than or equal to",
-                      "value": "gte",
-                    },
-                  ]
-                }
-                value="gt"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 200,
-                }
-              }
-            >
-              <EuiFieldNumber
-                onChange={[Function]}
-                value={123}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
-    </EuiPopover>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+          is greater than
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          123
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiButtonIcon
+    <button
       aria-label="Delete condition"
-      color="danger"
-      iconType="trash"
-      onClick={[Function]}
-      size="s"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+      class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+    </button>
+  </div>
+</div>
 `;
 
 exports[`ConditionExpression renders with only value supplied 1`] = `
-<EuiFlexGroup
-  gutterSize="m"
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
 >
-  <EuiFlexItem
-    grow={false}
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="when"
-              id="xpack.ml.ruleEditor.conditionExpression.appliesToButtonLabel"
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value=""
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
       id="appliesToPopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="When"
-            id="xpack.ml.ruleEditor.conditionExpression.appliesToPopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
-          style={
-            Object {
-              "width": 200,
-            }
-          }
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
         >
-          <EuiSelect
-            onChange={[Function]}
-            options={
-              Array [
-                Object {
-                  "text": "actual",
-                  "value": "actual",
-                },
-                Object {
-                  "text": "typical",
-                  "value": "typical",
-                },
-                Object {
-                  "text": "diff from typical",
-                  "value": "diff_from_typical",
-                },
-              ]
-            }
-          />
-        </div>
-      </div>
-    </EuiPopover>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+          when
+        </span>
+         
+        
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiPopover
-      anchorPosition="downLeft"
-      button={
-        <EuiExpression
-          description={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="is {operator}"
-              id="xpack.ml.ruleEditor.conditionExpression.operatorValueButtonLabel"
-              values={
-                Object {
-                  "operator": "",
-                }
-              }
-            />
-          }
-          isActive={false}
-          onClick={[Function]}
-          value="123"
-        />
-      }
-      closePopover={[Function]}
-      display="inline-block"
-      hasArrow={true}
+    <div
+      class="euiPopover emotion-euiPopover-inline-block"
       id="operatorValuePopover"
-      isOpen={false}
-      ownFocus={true}
-      panelPaddingSize="s"
-      repositionToCrossAxis={true}
-      withTitle={true}
     >
-      <div>
-        <EuiPopoverTitle>
-          <MemoizedFormattedMessage
-            defaultMessage="Is"
-            id="xpack.ml.ruleEditor.conditionExpression.operatorValuePopoverTitle"
-          />
-        </EuiPopoverTitle>
-        <div
-          className="euiExpression"
+      <button
+        class="euiExpression emotion-euiExpression-isClickable-success"
+      >
+        <span
+          class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
         >
-          <EuiFlexGroup
-            style={
-              Object {
-                "maxWidth": 450,
-              }
-            }
-          >
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 250,
-                }
-              }
-            >
-              <EuiSelect
-                onChange={[Function]}
-                options={
-                  Array [
-                    Object {
-                      "text": "less than",
-                      "value": "lt",
-                    },
-                    Object {
-                      "text": "less than or equal to",
-                      "value": "lte",
-                    },
-                    Object {
-                      "text": "greater than",
-                      "value": "gt",
-                    },
-                    Object {
-                      "text": "greater than or equal to",
-                      "value": "gte",
-                    },
-                  ]
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={
-                Object {
-                  "width": 200,
-                }
-              }
-            >
-              <EuiFieldNumber
-                onChange={[Function]}
-                value={123}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      </div>
-    </EuiPopover>
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
+          is 
+        </span>
+         
+        <span
+          class="euiExpression__value emotion-euiExpression__value"
+        >
+          123
+        </span>
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
-    <EuiButtonIcon
+    <button
       aria-label="Delete condition"
-      color="danger"
-      iconType="trash"
-      onClick={[Function]}
-      size="s"
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+      class="euiButtonIcon emotion-euiButtonIcon-s-empty-danger"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="trash"
+      />
+    </button>
+  </div>
+</div>
 `;

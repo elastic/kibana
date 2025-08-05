@@ -26,7 +26,7 @@ export class QueryRulesPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchQueryRulesPluginStart>,
     _: AppPluginSetupDependencies
   ): SearchQueryRulesPluginSetup {
-    if (!core.settings.client.get<boolean>(QUERY_RULES_UI_FLAG, false)) {
+    if (!core.settings.client.get<boolean>(QUERY_RULES_UI_FLAG, true)) {
       return {};
     }
     core.application.register({

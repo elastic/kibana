@@ -13,19 +13,13 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiText,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
 import { ConfirmRulesUpgrade } from './use_upgrade_modal';
 import * as i18n from './translations';
+import { ConflictsDescription, type RulesConflictStats } from './conflicts_description';
 
-export interface RulesConflictStats {
-  numOfRulesWithoutConflicts: number;
-  numOfRulesWithSolvableConflicts: number;
-  numOfRulesWithNonSolvableConflicts: number;
-}
-
-interface UpgradeWithConflictsModalProps extends RulesConflictStats {
+export interface UpgradeWithConflictsModalProps extends RulesConflictStats {
   onCancel: () => void;
   onConfirm: (result: ConfirmRulesUpgrade) => void;
 }
@@ -53,76 +47,37 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiText>
-          {getModalBodyText({
-            numOfRulesWithoutConflicts,
-            numOfRulesWithSolvableConflicts,
-            numOfRulesWithNonSolvableConflicts,
-          })}
-        </EuiText>
+        <ConflictsDescription
+          numOfRulesWithoutConflicts={numOfRulesWithoutConflicts}
+          numOfRulesWithSolvableConflicts={numOfRulesWithSolvableConflicts}
+          numOfRulesWithNonSolvableConflicts={numOfRulesWithNonSolvableConflicts}
+        />
       </EuiModalBody>
 
       <EuiModalFooter>
         {numOfRulesWithoutConflicts > 0 && (
-          <EuiButton onClick={confirmUpgradingRulesWithoutConflicts}>
+          <EuiButton
+            onClick={confirmUpgradingRulesWithoutConflicts}
+            data-test-subj="conflicts-modal-upgrade-conflict-free-rules"
+          >
             {i18n.UPGRADE_RULES_WITHOUT_CONFLICTS(numOfRulesWithoutConflicts)}
           </EuiButton>
         )}
         {numOfRulesWithSolvableConflicts > 0 && (
-          <EuiButton onClick={confirmUpgradingRulesWithSolvableConflicts} color="warning">
+          <EuiButton
+            onClick={confirmUpgradingRulesWithSolvableConflicts}
+            color="warning"
+            data-test-subj="conflicts-modal-upgrade-rules-with-solvable-conflicts"
+          >
             {i18n.UPGRADE_RULES_WITH_CONFLICTS(
               numOfRulesWithoutConflicts + numOfRulesWithSolvableConflicts
             )}
           </EuiButton>
         )}
-        <EuiButtonEmpty onClick={onCancel}>{i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}</EuiButtonEmpty>
+        <EuiButtonEmpty onClick={onCancel} data-test-subj="conflicts-modal-cancel">
+          {i18n.UPGRADE_CONFLICTS_MODAL_CANCEL}
+        </EuiButtonEmpty>
       </EuiModalFooter>
     </EuiModal>
   );
 });
-
-function getModalBodyText({
-  numOfRulesWithoutConflicts,
-  numOfRulesWithSolvableConflicts,
-  numOfRulesWithNonSolvableConflicts,
-}: RulesConflictStats): JSX.Element {
-  // Only solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithNonSolvableConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_SOLVABLE_CONFLICTS(numOfRulesWithSolvableConflicts);
-  }
-
-  // Only non-solvable conflicts
-  if (numOfRulesWithoutConflicts === 0 && numOfRulesWithSolvableConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_NON_SOLVABLE_CONFLICTS(numOfRulesWithNonSolvableConflicts);
-  }
-
-  // Only conflicts
-  if (numOfRulesWithoutConflicts === 0) {
-    return i18n.ONLY_RULES_WITH_CONFLICTS({
-      numOfRulesWithSolvableConflicts,
-      numOfRulesWithNonSolvableConflicts,
-    });
-  }
-
-  // Rules without conflicts + rules with solvable conflicts
-  if (numOfRulesWithNonSolvableConflicts === 0) {
-    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_SOLVABLE_CONFLICTS({
-      numOfRulesWithoutConflicts,
-      numOfRulesWithSolvableConflicts,
-    });
-  }
-
-  // Rules without conflicts + rules with non-solvable conflicts
-  if (numOfRulesWithSolvableConflicts === 0) {
-    return i18n.RULES_WITHOUT_CONFLICTS_AND_RULES_WITH_NON_SOLVABLE_CONFLICTS({
-      numOfRulesWithoutConflicts,
-      numOfRulesWithNonSolvableConflicts,
-    });
-  }
-
-  return i18n.ALL_KINDS_OF_RULES({
-    numOfRulesWithoutConflicts,
-    numOfRulesWithSolvableConflicts,
-    numOfRulesWithNonSolvableConflicts,
-  });
-}

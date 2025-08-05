@@ -14,7 +14,6 @@ import {
   getConnectorMappingsFromES,
 } from '../../../../common/lib/api';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

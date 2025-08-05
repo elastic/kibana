@@ -23,6 +23,7 @@ import {
   CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS,
   DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS,
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
+  UPGRADE_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
   type UseRequestConfig,
@@ -306,6 +307,7 @@ export class ApiService {
     }>({
       path: `${API_BASE_PATH}/status`,
       method: 'get',
+      pollIntervalMs: UPGRADE_STATUS_POLL_INTERVAL_MS,
     });
   }
 

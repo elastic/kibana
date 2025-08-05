@@ -62,7 +62,6 @@ describe('getUnitedEntityDefinition', () => {
       expect(entityManagerDefinition).toMatchSnapshot();
     });
   });
-
   describe('service', () => {
     const description = createEngineDescription({
       entityType: 'service',

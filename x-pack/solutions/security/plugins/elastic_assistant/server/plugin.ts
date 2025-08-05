@@ -136,7 +136,7 @@ export class ElasticAssistantPlugin
     const featureFlagDefinitions: FeatureFlagDefinition[] = [
       {
         featureFlagName: ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-        fallbackValue: false,
+        fallbackValue: true,
         fn: (assistantAttackDiscoverySchedulingEnabled) => {
           if (assistantAttackDiscoverySchedulingEnabled) {
             // Register Attack Discovery Schedule type
@@ -153,7 +153,7 @@ export class ElasticAssistantPlugin
       },
       {
         featureFlagName: ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-        fallbackValue: false,
+        fallbackValue: true,
         fn: (attackDiscoveryAlertsEnabled) => {
           let adhocAttackDiscoveryDataClient: IRuleDataClient | undefined;
           if (attackDiscoveryAlertsEnabled) {
@@ -194,7 +194,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
     };
@@ -220,7 +220,7 @@ export class ElasticAssistantPlugin
       getRegisteredFeatures: (pluginName: string) => {
         return appContextService.getRegisteredFeatures(pluginName);
       },
-      getRegisteredTools: (pluginName: string) => {
+      getRegisteredTools: (pluginName: string | string[]) => {
         return appContextService.getRegisteredTools(pluginName);
       },
       registerFeatures: (pluginName: string, features: Partial<AssistantFeatures>) => {

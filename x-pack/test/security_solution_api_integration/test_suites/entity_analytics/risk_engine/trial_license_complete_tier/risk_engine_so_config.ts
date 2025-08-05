@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
       const currentSoConfig = await getRiskEngineConfigSO({ kibanaServer });
 
       expect(currentSoConfig.attributes).to.not.have.property('excludeAlertTags');
-      expect(currentSoConfig.attributes).to.not.have.property('excludeAlertStatuses');
+      expect(currentSoConfig.attributes).to.have.property('excludeAlertStatuses');
 
       const updatedSoBody = {
         exclude_alert_tags: ['False Positive'],

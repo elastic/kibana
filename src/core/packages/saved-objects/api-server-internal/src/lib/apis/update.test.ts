@@ -27,6 +27,8 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 import {
   NAMESPACE_AGNOSTIC_TYPE,
   MULTI_NAMESPACE_ISOLATED_TYPE,
@@ -53,6 +55,7 @@ describe('#update', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -75,6 +78,7 @@ describe('#update', () => {
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
     logger = loggerMock.create();
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = createSpySerializer(registry);
@@ -92,6 +96,9 @@ describe('#update', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -801,6 +808,31 @@ describe('#update', () => {
           { originId }
         );
         expect(result).toMatchObject({ originId });
+      });
+    });
+
+    describe('security', () => {
+      it('correctly passes params to securityExtension.authorizeUpdate', async () => {
+        await updateSuccess(
+          client,
+          repository,
+          registry,
+          MULTI_NAMESPACE_ISOLATED_TYPE,
+          id,
+          attributes,
+          { references }
+        );
+
+        expect(securityExtension.authorizeUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            object: {
+              existingNamespaces: ['default'],
+              id: 'logstash-*',
+              name: 'Testing',
+              type: 'multiNamespaceIsolatedType',
+            },
+          })
+        );
       });
     });
   });

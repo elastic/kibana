@@ -108,6 +108,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private _isMounted = false;
   private hasCustomBrandingSubscription?: Subscription;
 
+  // Ref for delete button for accessibility/focus
+  deleteButtonRef = React.createRef<HTMLButtonElement>();
+
   constructor(props: SavedObjectsTableProps) {
     super(props);
 
@@ -342,7 +345,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
-    this.setState({ selectedSavedObjects: selection });
+    this.setState({ selectedSavedObjects: selection }, () => {
+      if (selection.length > 0 && this.deleteButtonRef.current) {
+        if (this.deleteButtonRef.current && !this.deleteButtonRef.current.disabled) {
+          this.deleteButtonRef.current.focus();
+        }
+      }
+    });
   };
 
   onQueryChange = ({ query }: { query: Query }) => {
@@ -696,6 +705,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <div>
+        {/* ARIA live region for selection changes (optional but a11y best practice) */}
+        <div aria-live="polite" style={{ position: 'absolute', left: '-9999px' }}>
+          {selectedSavedObjects.length > 0
+            ? i18n.translate(
+                'savedObjectsManagement.objectsTable.selected.selectedSavedObjectsLabel',
+                {
+                  defaultMessage: '{count, plural, one {# item} other {# items}} selected.',
+                  values: {
+                    count: selectedSavedObjects.length,
+                  },
+                }
+              )
+            : ''}
+        </div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -738,6 +761,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
+            deleteButtonRef={this.deleteButtonRef}
           />
         </RedirectAppLinks>
       </div>

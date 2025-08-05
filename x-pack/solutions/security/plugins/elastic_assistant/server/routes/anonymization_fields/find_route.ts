@@ -70,6 +70,17 @@ export const findAnonymizationFieldsRoute = (
 
           const dataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
+          const aggs = {
+            field_status: {
+              filters: {
+                filters: {
+                  allowed: { term: { allowed: true } },
+                  anonymized: { term: { anonymized: true } },
+                  denied: { term: { allowed: false } },
+                },
+              },
+            },
+          };
 
           const result = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
             perPage: query.per_page,
@@ -78,8 +89,18 @@ export const findAnonymizationFieldsRoute = (
             sortOrder: query.sort_order,
             filter: query.filter,
             fields: query.fields?.map((f) => _.snakeCase(f)),
+            aggs,
           });
 
+          let fullPageResult;
+          if (query.all_data) {
+            fullPageResult = await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
+              perPage: 1000,
+              page: 1,
+              fields: query.fields?.map((f) => _.snakeCase(f)),
+              aggs,
+            });
+          }
           if (result) {
             return response.ok({
               body: {
@@ -87,6 +108,14 @@ export const findAnonymizationFieldsRoute = (
                 page: result.page,
                 total: result.total,
                 data: transformESSearchToAnonymizationFields(result.data),
+                ...(fullPageResult?.data.aggregations
+                  ? {
+                      aggregations: fullPageResult.data.aggregations ?? result.data.aggregations,
+                    }
+                  : {}),
+                ...(fullPageResult?.data
+                  ? { all: transformESSearchToAnonymizationFields(fullPageResult?.data) }
+                  : {}),
               },
             });
           }

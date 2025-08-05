@@ -6,7 +6,7 @@
  */
 
 import { groupAttackDiscoveryAlerts } from './group_alerts';
-import { attackDiscoveryAlerts } from './group_alerts.mock';
+import { attackDiscoveryAlertWithAnonymizedId, attackDiscoveryAlerts } from './group_alerts.mock';
 
 describe('groupAttackDiscoveryAlerts', () => {
   const getAttackDiscoveryDocument = () => attackDiscoveryAlerts[0];
@@ -98,5 +98,27 @@ describe('groupAttackDiscoveryAlerts', () => {
     expect(() => groupAttackDiscoveryAlerts(invalidAlerts)).toThrow(
       '[0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
     );
+  });
+
+  it('returns a group for a valid attack discovery alert with anonymized `_id` field', () => {
+    const groups = groupAttackDiscoveryAlerts([attackDiscoveryAlertWithAnonymizedId]);
+    expect(groups.length).toEqual(1);
+    expect(groups[0].alerts).toEqual([
+      {
+        _id: '5429aba88d09ac8afa1a5b55755aaa98fb09249abc5dc5ac243034977a4b23d3',
+        _index: '.alerts-security.alerts-default',
+      },
+      {
+        _id: 'fef0ce55b49650196e72f5590f65800e37edff396ffa4acfbb595fb192e579db',
+        _index: '.alerts-security.alerts-default',
+      },
+    ]);
+    expect(groups[0].grouping).toEqual({
+      attack_discovery: '79d9d501-15cf-4b83-835d-fde194606638',
+    });
+    expect(
+      groups[0].comments?.[0].startsWith('## Coordinated credential access across hosts')
+    ).toBeTruthy();
+    expect(groups[0].title).toEqual('Coordinated credential access across hosts');
   });
 });

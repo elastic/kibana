@@ -8,7 +8,10 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
@@ -93,6 +96,87 @@ const ruleType: RuleType = {
 };
 
 describe('rule_details', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('Lifecycle alerts', () => {
+    const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      return render(
+        <IntlProvider locale="en">
+          <RuleDetails
+            rule={rule}
+            ruleType={{ ...ruleType, autoRecoverAlerts }}
+            actionTypes={[]}
+            {...mockRuleApis}
+            requestRefresh={requestRefresh}
+          />
+        </IntlProvider>
+      );
+    };
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      renderComponent({ autoRecoverAlerts: true });
+
+      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(await screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      renderComponent({ autoRecoverAlerts: undefined });
+
+      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(await screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
+        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
+      });
+
+      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(async () => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      renderComponent({ autoRecoverAlerts: false });
+
+      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
+      await waitForEuiPopoverOpen();
+      await userEvent.click(await screen.getByTestId('disableButton'));
+
+      await waitFor(async () => {
+        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+          expect.objectContaining({ untrack: false })
+        );
+      });
+    });
+  });
+
   describe('page', () => {
     it('renders the rule name as a title', () => {
       const rule = mockRule();
@@ -889,6 +973,41 @@ describe('rule_details', () => {
 
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
+    });
+
+    it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
+      const rule = mockRule();
+      const requestRefresh = jest.fn();
+      const wrapper = mountWithIntl(
+        <RuleDetails
+          rule={rule}
+          ruleType={{ ...ruleType, autoRecoverAlerts: false }}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
+      );
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
+      actionsButton.simulate('click');
+
+      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
+      expect(disableButton.exists()).toBeTruthy();
+
+      disableButton.simulate('click');
+
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).not.toBeTruthy();
+
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
+      });
     });
   });
 

@@ -24,8 +24,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   function createCustomThresholdRule({ ruleName }: { ruleName: string }) {
     it('navigates to the rules page', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-      await testSubjects.click('manageRulesPageButton');
+      await retry.try(async () => {
+        await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+        expect(await testSubjects.exists('manageRulesPageButton')).toBeTruthy();
+        await testSubjects.click('manageRulesPageButton');
+      });
     });
 
     it('should open the rule creation flyout', async () => {

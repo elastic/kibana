@@ -153,7 +153,7 @@ You may provide `locations` or `private_locations`, or both. At least one is req
 
 *TCP Monitor Fields*:
 
-`host`:: (Required, string): The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon (e.g., "example.com:9200").
+`host`:: (Required, string): The host to monitor; it can be an IP address or a hostname. The host can include the port using a colon (for example, "<URL>:<PORT>").
 
 `ssl`:: (Optional, object): The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used. See https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-ssl.html for full SSL Options.
 
@@ -239,7 +239,7 @@ POST /api/synthetics/monitors
 {
   "type": "browser",
   "name": "Example journey",
-  "inline_script": "step('Go to https://google.com.co', () => page.goto('https://www.google.com'))",
+  "inline_script": "step('Go to https://google.com', () => page.goto('https://www.google.com'))",
   "locations": ["united_kingdom"]
 }
 --------------------------------------------------

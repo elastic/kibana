@@ -49,11 +49,6 @@ describe('<FindingsFlyout/>', () => {
       });
     });
 
-    it('displays missing info callout when data source is not CSP', () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
-      getByText('Some fields not provided by Wiz');
-    });
-
     it('does not display missing info callout when data source is CSP', () => {
       const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
@@ -72,13 +67,6 @@ describe('<FindingsFlyout/>', () => {
       mockFindingsHit.rule.tags.forEach((tag) => {
         getAllByText(tag);
       });
-    });
-
-    it('displays missing info callout when data source is not CSP', async () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
-      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
-
-      getByText('Some fields not provided by Wiz');
     });
 
     it('does not display missing info callout when data source is CSP', async () => {

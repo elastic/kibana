@@ -110,7 +110,5 @@
     "@kbn/alerts-ui-shared",
     "@kbn/core-pricing-browser-mocks"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

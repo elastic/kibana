@@ -38,6 +38,8 @@ export const getScheduledReportFormSchema = (
       },
     ],
   },
+  startDate: {},
+  timezone: {},
   recurringSchedule: getRecurringScheduleFormSchema({ allowInfiniteRecurrence: false }),
   sendByEmail: {
     type: FIELD_TYPES.TOGGLE,

@@ -46,7 +46,7 @@ import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 import {
   saveEditedRule,
   saveEditedRuleWithNonBlockingErrors,
-  visitEditRulePage,
+  visitRuleEditPage,
 } from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -201,7 +201,7 @@ describe(
           query: 'from fake-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
         };
         createRule(esqlRule).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
           saveEditedRuleWithNonBlockingErrors();
         });
       });
@@ -212,7 +212,7 @@ describe(
           query: 'from auditbeat-* metadata _id, _version, _index | keep hello.world',
         };
         createRule(esqlRule).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
           saveEditedRuleWithNonBlockingErrors();
         });
       });

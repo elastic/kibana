@@ -116,7 +116,7 @@ const MaybeWrapper = ({
       size="s"
       hideCloseButton
       css={css`
-        clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+        clip-path: none; // needed to override the eui-flyout clip-path for dnd outside of the flyout
       `}
     >
       {children}

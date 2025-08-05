@@ -294,6 +294,34 @@ describe('ES deprecations table', () => {
       expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(1);
       expect(find('deprecationTableRow').length).toEqual(reindexDeprecations.length);
     });
+
+    it('maintains correct row state across pagination', async () => {
+      const { find, actions } = testBed;
+
+      // Verify we have multiple pages
+      expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toBeGreaterThan(
+        1
+      );
+
+      // Get the message of the first deprecation on page 1
+      const firstDeprecationMessagePage1 = find('deprecationTableRow').at(0).text();
+
+      // Navigate to page 2
+      await actions.pagination.clickPaginationAt(1);
+
+      // Get the message of the first deprecation on page 2
+      const firstDeprecationMessagePage2 = find('deprecationTableRow').at(0).text();
+
+      // The first items on different pages should be different
+      expect(firstDeprecationMessagePage1).not.toEqual(firstDeprecationMessagePage2);
+
+      // Navigate back to page 1
+      await actions.pagination.clickPaginationAt(0);
+
+      // Verify the first deprecation on page 1 is still the same
+      const firstDeprecationMessagePage1Again = find('deprecationTableRow').at(0).text();
+      expect(firstDeprecationMessagePage1Again).toEqual(firstDeprecationMessagePage1);
+    });
   });
 
   describe('no deprecations', () => {
@@ -784,6 +812,40 @@ describe('ES deprecations table', () => {
         expect(exists('deprecation-reindex-readonly')).toBe(false);
         expect(exists('deprecation-reindex-reindex')).toBe(false);
         expect(exists('deprecation-reindex-delete')).toBe(true);
+      });
+      it('it only displays reindexing button if reindex in progress', async () => {
+        httpRequestsMockHelpers.setReindexStatusResponse(
+          esDeprecationsMockResponse.migrationsDeprecations[3].index!,
+          {
+            reindexOp: {
+              status: ReindexStatus.inProgress,
+              lastCompletedStep: ReindexStep.readonly,
+              reindexTaskPercComplete: null,
+            },
+            warnings: [],
+            hasRequiredPrivileges: true,
+            meta: {
+              indexName: 'foo',
+              reindexName: 'reindexed-foo',
+              aliases: [],
+              isFrozen: false,
+              isReadonly: false,
+              isInDataStream: false,
+              isFollowerIndex: false,
+            },
+          }
+        );
+
+        await act(async () => {
+          testBed = await setupElasticsearchPage(httpSetup);
+        });
+        testBed.component.update();
+        const { find, exists } = testBed;
+        expect(find('reindexTableCell-actions').length).toBe(1);
+
+        expect(exists('deprecation-reindex-readonly')).toBe(false);
+        expect(exists('deprecation-reindex-reindex')).toBe(true);
+        expect(exists('deprecation-reindex-delete')).toBe(false);
       });
     });
   });

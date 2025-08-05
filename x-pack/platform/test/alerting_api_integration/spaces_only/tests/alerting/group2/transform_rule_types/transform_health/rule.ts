@@ -61,7 +61,6 @@ export function generateTransformConfig(transformId: string): PutTransformsReque
   };
 }
 
-// eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');

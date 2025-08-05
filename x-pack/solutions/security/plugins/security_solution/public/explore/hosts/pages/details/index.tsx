@@ -20,6 +20,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -84,7 +85,6 @@ import { ResponderActionButton } from '../../../../common/components/endpoint/re
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 
@@ -143,13 +143,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -167,7 +165,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...hostDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -176,7 +176,15 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     } catch (e) {
       return [undefined, e];
     }
-  }, [sourcererDataView, query, hostDetailsPageFilters, globalFilters, uiSettings]);
+  }, [
+    newDataViewPickerEnabled,
+    experimentalDataView,
+    oldSourcererDataView,
+    query,
+    hostDetailsPageFilters,
+    globalFilters,
+    uiSettings,
+  ]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -236,7 +244,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={oldSourcererDataView} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper
@@ -294,7 +302,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
-                    scopeId={SourcererScopeName.default}
+                    scopeId={SourcererScopeName.explore}
                   />
                 )}
               </AnomalyTableProvider>
@@ -346,7 +354,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
-              dataViewSpec={sourcererDataView}
             />
           </SecuritySolutionPageWrapper>
         </>

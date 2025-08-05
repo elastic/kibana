@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Plugin,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Logger,
-} from '@kbn/core/server';
+import type { Plugin, CoreSetup, PluginInitializerContext, Logger } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -93,6 +87,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
   }
 
-  public start(core: CoreStart, plugins: FixtureStartDeps) {}
+  public start() {}
+
   public stop() {}
 }

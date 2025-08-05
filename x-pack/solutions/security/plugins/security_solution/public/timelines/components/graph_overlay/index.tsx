@@ -34,6 +34,8 @@ import { useTimelineDataFilters } from '../../containers/use_timeline_data_filte
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { isFullScreen } from '../timeline/helpers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 
@@ -129,9 +131,9 @@ const GraphOverlayComponent: React.FC<GraphOverlayProps> = ({
     };
   }, [dispatch, scopeId]);
 
-  const { from, to, shouldUpdate, selectedPatterns } = useTimelineDataFilters(
-    isActiveTimeline(scopeId)
-  );
+  const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
+
   const filters = useMemo(() => {
     return { from, to };
   }, [from, to]);

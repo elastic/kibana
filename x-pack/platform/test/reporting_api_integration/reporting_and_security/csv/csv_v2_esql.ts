@@ -14,7 +14,6 @@ import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
