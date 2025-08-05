@@ -73,7 +73,7 @@ export const ConfirmModalProvider: React.FunctionComponent<{ children?: React.Re
 
   const confirmModalTitleId = useGeneratedHtmlId();
 
-  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: any) => {
+  const showModal = useCallback(({ title, description, onConfirm, onCancel, options }: ModalState) => {
     setIsVisible(true);
     setModal({
       title,
