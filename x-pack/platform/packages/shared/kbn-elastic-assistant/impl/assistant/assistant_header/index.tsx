@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { SharedBadge } from './shared_badge';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -176,6 +177,13 @@ export const AssistantHeader: React.FC<Props> = ({
                 refetchCurrentUserConversations={refetchCurrentUserConversations}
               />
             )}
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <SharedBadge
+              isConversationOwner={isConversationOwner}
+              selectedConversation={selectedConversation}
+            />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

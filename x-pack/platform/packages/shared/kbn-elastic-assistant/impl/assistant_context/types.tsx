@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
+import { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
 import { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
@@ -25,26 +25,7 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
  * Includes all messages, connector configured, and relevant UI state.
  *
  */
-export interface Conversation {
-  '@timestamp'?: string;
-  apiConfig?: ApiConfig;
-  user?: {
-    id?: string;
-    name?: string;
-  };
-  category: string;
-  id: string;
-  title: string;
-  messages: ClientMessage[];
-  updatedAt?: string;
-  createdAt?: string;
-  createdBy: {
-    id?: string;
-    name?: string;
-  };
-  replacements: Replacements;
-  excludeFromLastConversationStorage?: boolean;
-}
+export type Conversation = ConversationResponse;
 
 export interface AssistantTelemetry {
   reportAssistantInvoked: (params: { invokedBy: string }) => void;
