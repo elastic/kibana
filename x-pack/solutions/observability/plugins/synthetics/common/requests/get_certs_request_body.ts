@@ -92,6 +92,7 @@ export const getCertsRequestBody = ({
               field: 'tls.server.hash.sha256',
             },
           },
+          // fetch large enough date range to cover the last 7 days, no particular reason for 7 days
           getRangeFilter({
             from: 'now-7d/d',
             to: 'now/d',
