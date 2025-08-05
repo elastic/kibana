@@ -96,7 +96,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         {
           index: {
             _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-integration-1.2.0-setup-guide.md',
+            _id: 'test-integration-setup-guide.md',
           },
         },
         {
@@ -108,7 +108,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         {
           index: {
             _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-integration-1.2.0-troubleshooting.md',
+            _id: 'test-integration-troubleshooting.md',
           },
         },
         {
@@ -248,7 +248,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         {
           index: {
             _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-package-2.0.0-new-guide.md',
+            _id: 'test-package-new-guide.md',
           },
         },
         {
@@ -260,7 +260,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         {
           index: {
             _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-package-2.0.0-features.md',
+            _id: 'test-package-features.md',
           },
         },
         {
