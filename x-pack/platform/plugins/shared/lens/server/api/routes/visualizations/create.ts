@@ -78,14 +78,21 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      // TODO: Find a better way to conditionally omit id
-      const { references, ...lensItem } = omit(
-        ConfigBuilderStub.in({
-          id: '',
-          ...req.body.data,
-        }),
-        'id'
-      );
+      const { references, ...lensItem } =
+        'isNewApiFormat' in req.body.data.state
+          ? omit(
+              ConfigBuilderStub.in({
+                id: '', // TODO: Find a better way to conditionally omit id
+                ...req.body.data.state,
+              }),
+              'id'
+            )
+          : // For now we need to be able to create old SO, this may be moved to the config builder
+            ({
+              ...req.body.data,
+              description: req.body.data.description ?? undefined,
+              visualizationType: req.body.data.visualizationType ?? null,
+            } satisfies LensCreateIn['data']);
 
       try {
         // Note: these types are to enforce loose param typings of client methods
