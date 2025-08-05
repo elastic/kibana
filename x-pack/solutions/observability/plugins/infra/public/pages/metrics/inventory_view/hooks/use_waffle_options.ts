@@ -192,6 +192,8 @@ export const useWaffleOptions = () => {
       setUrlState((previous) => ({
         ...previous,
         preferredSchema,
+        metric: DEFAULT_WAFFLE_OPTIONS_STATE.metric,
+        groupBy: DEFAULT_WAFFLE_OPTIONS_STATE.groupBy,
       }));
     },
     [setUrlState]
@@ -216,6 +218,8 @@ export const useWaffleOptions = () => {
 
   return {
     ...urlState,
+    preferredSchema:
+      urlState.preferredSchema === null ? ('ecs' as DataSchemaFormat) : urlState.preferredSchema,
     changeMetric,
     changeGroupBy,
     changeNodeType,

@@ -7,7 +7,7 @@
 
 import { isoToEpochRt, nonEmptyStringRt, inRangeRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { DataSchemaFormat, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import {
   SnapshotCustomMetricInputRT,
   SnapshotGroupByRT,

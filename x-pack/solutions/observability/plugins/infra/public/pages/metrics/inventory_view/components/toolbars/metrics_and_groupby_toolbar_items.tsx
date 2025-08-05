@@ -72,9 +72,7 @@ export const MetricsAndGroupByToolbarItems = ({
   useEffect(() => {
     const current = preferredSchema;
     if (current === null) {
-      const next = schemas.includes(DataSchemaFormat.SEMCONV)
-        ? DataSchemaFormat.SEMCONV
-        : schemas[0];
+      const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
       changePreferredSchema(next);
     }
   }, [changePreferredSchema, preferredSchema, schemas]);
