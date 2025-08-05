@@ -39,8 +39,7 @@ export function assertFieldValidation({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fieldName = rawFieldName as any;
 
-  // Failing: See https://github.com/elastic/kibana/issues/230123
-  describe.skip('field value validation', () => {
+  describe('field value validation', () => {
     it('blocks saving field value when value is invalid', async () => {
       mockRuleUpgradeReviewData({
         ruleType,
