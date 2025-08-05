@@ -8911,23 +8911,6 @@ components:
         Defines the path to the threat indicator in the indicator documents
         (optional)
       type: string
-    ThreatMapEntry:
-      type: object
-      properties:
-        field:
-          $ref: '#/components/schemas/NonEmptyString'
-        negate:
-          type: boolean
-        type:
-          enum:
-            - mapping
-          type: string
-        value:
-          $ref: '#/components/schemas/NonEmptyString'
-      required:
-        - field
-        - type
-        - value
     ThreatMapping:
       description: >
         Array of entries objects that define mappings between the source event
@@ -8951,12 +8934,29 @@ components:
         properties:
           entries:
             items:
-              $ref: '#/components/schemas/ThreatMapEntry'
+              $ref: '#/components/schemas/ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     ThreatMatchRule:
       allOf:
         - type: object
