@@ -179,8 +179,6 @@ describe('COMPLETION command', () => {
 
       const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
 
-      expect(completionCommand.incomplete).toBe(true);
-
       expect(completionCommand.args[0]).toMatchObject({
         type: 'literal',
         literalType: 'keyword',
@@ -225,7 +223,6 @@ describe('COMPLETION command', () => {
       expect(ast.commands).toHaveLength(2);
 
       const completionCommand = ast.commands[1] as ESQLAstCompletionCommand;
-      expect(completionCommand.incomplete).toBe(true);
 
       expect(completionCommand.args[1]).toMatchObject({
         type: 'option',

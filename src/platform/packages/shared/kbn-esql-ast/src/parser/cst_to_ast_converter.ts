@@ -1141,8 +1141,7 @@ export class CstToAstConverter {
   private fromCompletionCommand(ctx: cst.CompletionCommandContext): ast.ESQLAstCompletionCommand {
     const command = this.createCommand<'completion', ast.ESQLAstCompletionCommand>(
       'completion',
-      ctx,
-      { incomplete: true }
+      ctx
     );
 
     if (ctx._targetField && ctx.ASSIGN()) {
@@ -1204,7 +1203,6 @@ export class CstToAstConverter {
     }
 
     command.inferenceId = inferenceId;
-    command.incomplete = inferenceId.incomplete;
     return command;
   }
 
