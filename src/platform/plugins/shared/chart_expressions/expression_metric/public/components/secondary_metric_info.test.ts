@@ -118,7 +118,8 @@ describe('getSecondaryMetricInfo', () => {
       trendConfig,
     });
 
-    expect(result.value).toBe(`${VALUE} ↑`);
+    expect(result.value).toBe(`${VALUE}`);
+    expect(result.icon).toBe(INCREASE_ICON);
     expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe('#00f');
   });
@@ -184,7 +185,8 @@ describe('getSecondaryMetricInfo', () => {
       trendConfig,
     });
 
-    expect(result.value).toBe(`-2 ${DECREASE_ICON}`);
+    expect(result.value).toBe(`-2`);
+    expect(result.icon).toBe(DECREASE_ICON);
     expect(result.label).toBe(SECONDARY_LABEL);
     expect(result.badgeColor).toBe(PALETTE[0]);
   });
@@ -219,7 +221,8 @@ describe('getSecondaryMetricInfo', () => {
       trendConfig,
     });
 
-    expect(result.value).toBe(`${-1 * (rawValue - BASELINE_VALUE)} ${INCREASE_ICON}`);
+    expect(result.value).toBe(`${-1 * (rawValue - BASELINE_VALUE)}`);
+    expect(result.icon).toBe(INCREASE_ICON);
     expect(result.badgeColor).toBe(PALETTE[2]);
   });
 
@@ -254,7 +257,8 @@ describe('getSecondaryMetricInfo', () => {
       trendConfig,
     });
 
-    expect(result.value).toBe(`0 ${STABLE_ICON}`);
+    expect(result.value).toBe('0');
+    expect(result.icon).toBe(STABLE_ICON);
     expect(result.badgeColor).toBe(PALETTE[1]);
   });
 

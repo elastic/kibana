@@ -138,14 +138,17 @@ function getValueToShow(
   formatter: FieldFormatConvertFunction | undefined,
   compareToPrimary: boolean
 ) {
-  // In comparison mode the NaN delta should be converted to N/A
-  if (compareToPrimary) {
-    if (Number.isNaN(deltaValue)) {
-      return notAvailable;
-    }
-    return formatter?.(deltaValue) ?? String(deltaValue);
+  if (!compareToPrimary) {
+    return String(value);
   }
-  return String(value);
+
+  // In comparison mode the NaN delta should be converted to N/A
+  if (Number.isNaN(deltaValue)) {
+    return notAvailable;
+  }
+
+  const formattedDelta = formatter ? formatter(deltaValue) : deltaValue;
+  return String(formattedDelta);
 }
 
 function getTrendDescription(hasIcon: boolean, value: string, direction: string) {
