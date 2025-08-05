@@ -225,7 +225,6 @@ export async function buildMetric(
     title: config.title,
     visualizationType: 'lnsMetric',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

@@ -128,7 +128,6 @@ export async function buildHeatmap(
     title: config.title,
     visualizationType: 'lnsHeatmap',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

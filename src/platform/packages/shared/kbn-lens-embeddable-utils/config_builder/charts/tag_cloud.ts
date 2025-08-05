@@ -104,7 +104,6 @@ export async function buildTagCloud(
     title: config.title,
     visualizationType: 'lnsTagcloud',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

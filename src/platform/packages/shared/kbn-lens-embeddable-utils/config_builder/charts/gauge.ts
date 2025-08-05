@@ -142,7 +142,6 @@ export async function buildGauge(
     title: config.title,
     visualizationType: 'lnsGauge',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

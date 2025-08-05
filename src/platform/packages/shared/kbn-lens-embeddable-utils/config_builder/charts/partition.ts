@@ -131,7 +131,6 @@ export async function buildPartitionChart(
     title: config.title,
     visualizationType: 'lnsPie',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

@@ -120,7 +120,6 @@ export async function buildTable(
     title: config.title,
     visualizationType: 'lnsDatatable',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

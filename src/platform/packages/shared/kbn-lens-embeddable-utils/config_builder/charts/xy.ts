@@ -238,7 +238,6 @@ export async function buildXY(
     title: config.title,
     visualizationType: 'lnsXY',
     references,
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],

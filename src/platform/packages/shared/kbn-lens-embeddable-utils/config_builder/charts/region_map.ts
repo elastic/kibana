@@ -105,7 +105,6 @@ export async function buildRegionMap(
     title: config.title,
     visualizationType: 'lnsChoropleth',
     references: buildReferences(dataviews),
-    version: 1 as const,
     state: {
       datasourceStates,
       internalReferences: [],
