@@ -31,20 +31,8 @@ export const HostMetrics = (props: Props) => {
     <EuiFlexGroup gutterSize="m" direction="column">
       <HostCharts {...props} metric="cpu" onShowAll={onClick} overview schema={schema} />
       <EuiFlexGrid columns={2} gutterSize="s">
-        <HostCharts
-          {...props}
-          metric="memory"
-          onShowAll={onClick}
-          overview
-          schema={schema}
-        />
-        <HostCharts
-          {...props}
-          metric="network"
-          onShowAll={onClick}
-          overview
-          schema={schema}
-        />
+        <HostCharts {...props} metric="memory" onShowAll={onClick} overview schema={schema} />
+        <HostCharts {...props} metric="network" onShowAll={onClick} overview schema={schema} />
       </EuiFlexGrid>
       <HostCharts {...props} metric="disk" onShowAll={onClick} overview schema={schema} />
       <KubernetesNodeCharts {...props} onShowAll={onClick} overview />
