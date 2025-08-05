@@ -134,9 +134,10 @@ export const AddDocumentsCodeExample = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
-                content={'SUPS'}
                 request={
-                  quickstartExamples.basics({ indexName: codeParams.indexName })
+                  // TODO: Feature flag to enable/disable the Try in Console button with
+                  // the quickstart example
+                  quickstartExamples.basics({ indexName: codeParams.indexName, createIndex: false })
                   // !indexHasMappings
                   //   ? `${ingestExamples.sense.updateMappingsCommand(
                   //       codeParams

@@ -125,7 +125,7 @@ export const basicsQuickstartCommands: QuickstartCodeSnippetFunction<
 > = (params) => {
   let steps = quickstartSteps;
   // Skip index creation step if an index name is provided
-  if (params?.indexName !== undefined) {
+  if (!params.createIndex) {
     steps = steps.slice(1);
   }
   return steps

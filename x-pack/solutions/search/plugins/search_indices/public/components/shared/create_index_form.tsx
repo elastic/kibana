@@ -24,6 +24,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { TryInConsoleButton } from '@kbn/try-in-console';
+import { quickstartExamples } from '@kbn/code-examples';
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { SampleDataPanel } from './sample_data_panel';
 import { useIngestSampleData } from '../../hooks/use_ingest_data';
@@ -53,6 +55,7 @@ export const CreateIndexForm = ({
   userPrivileges,
 }: CreateIndexFormProps) => {
   const { sampleDataIngest } = useKibana().services;
+  const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
   const onIngestSampleData = useCallback(() => {
@@ -107,25 +110,33 @@ export const CreateIndexForm = ({
                 ) : undefined
               }
             >
-              <EuiButton
-                fill
-                color="primary"
-                iconSide="left"
-                iconType="sparkles"
-                data-test-subj="createIndexBtn"
-                disabled={
-                  userPrivileges?.privileges?.canManageIndex === false ||
-                  indexNameHasError ||
-                  isLoading ||
-                  isIngestingSampleData
-                }
-                isLoading={isLoading}
-                type="submit"
-              >
-                {i18n.translate('xpack.searchIndices.shared.createIndex.action.text', {
-                  defaultMessage: 'Create my index',
-                })}
-              </EuiButton>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiButton
+                  fill
+                  color="primary"
+                  iconSide="left"
+                  iconType="sparkles"
+                  data-test-subj="createIndexBtn"
+                  disabled={
+                    userPrivileges?.privileges?.canManageIndex === false ||
+                    indexNameHasError ||
+                    isLoading ||
+                    isIngestingSampleData
+                  }
+                  isLoading={isLoading}
+                  type="submit"
+                >
+                  {i18n.translate('xpack.searchIndices.shared.createIndex.action.text', {
+                    defaultMessage: 'Create my index',
+                  })}
+                </EuiButton>
+                {/* // TODO: Feature flag to enable/disable the Run in Console button here*/}
+                <TryInConsoleButton
+                  request={quickstartExamples.basics({ indexName, createIndex: true })}
+                  application={application}
+                  sharePlugin={share}
+                />
+              </EuiFlexGroup>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -12,11 +12,12 @@ export interface QuickstartCodeExamples {
 }
 
 export type QuickstartCodeSnippetFunction<T extends QuickstartCodeSnippetParameters> = (
-  params?: T
+  params: T
 ) => string;
 
 export type QuickstartCodeSnippetParameters = BasicsCodeSnippetParameters;
 
 export interface BasicsCodeSnippetParameters {
   indexName?: string;
+  createIndex: boolean;
 }
