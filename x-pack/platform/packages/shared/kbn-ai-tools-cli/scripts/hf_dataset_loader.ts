@@ -9,8 +9,11 @@ import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
 import { castArray } from 'lodash';
 import { loadHuggingFaceDatasets } from '../src/hf_dataset_loader/load_hugging_face_datasets';
-import { PREDEFINED_HUGGING_FACE_DATASETS, getDatasetSpecs } from '../src/hf_dataset_loader/config';
-import { listAllOneChatDatasets } from '../src/hf_dataset_loader/onechat_datasets';
+import {
+  PREDEFINED_HUGGING_FACE_DATASETS,
+  getDatasetSpecs,
+} from '../src/hf_dataset_loader/datasets/config';
+import { listAllOneChatDatasets } from '../src/hf_dataset_loader/datasets/onechat';
 import { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
 
 interface Flags {

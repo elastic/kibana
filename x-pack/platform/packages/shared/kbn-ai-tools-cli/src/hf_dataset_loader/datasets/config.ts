@@ -6,8 +6,8 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import type { HuggingFaceDatasetSpec } from './types';
-import { createOneChatDatasetSpec, isOneChatDataset } from './onechat_datasets';
+import type { HuggingFaceDatasetSpec } from '../types';
+import { createOneChatDatasetSpec, isOneChatDataset } from './onechat';
 
 const BEIR_NAMES = [
   'trec-covid',

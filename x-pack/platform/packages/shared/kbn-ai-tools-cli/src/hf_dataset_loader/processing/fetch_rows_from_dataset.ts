@@ -12,8 +12,8 @@ import * as readline from 'node:readline';
 import { pickBy } from 'lodash';
 import { format } from 'util';
 import Papa from 'papaparse';
-import { HuggingFaceDatasetSpec } from './types';
-import { createFileStream } from './huggingface_utils';
+import { HuggingFaceDatasetSpec } from '../types';
+import { createFileStream } from '../huggingface_utils';
 
 function toMb(bytes: number): string {
   return (bytes / 1024 / 1024).toFixed(1) + 'mb';

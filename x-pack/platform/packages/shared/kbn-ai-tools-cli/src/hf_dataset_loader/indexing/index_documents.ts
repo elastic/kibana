@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import { inspect } from 'util';
-import { HuggingFaceDatasetSpec } from './types';
+import { HuggingFaceDatasetSpec } from '../types';
 import { ensureDatasetIndexExists } from './ensure_dataset_index_exists';
 
 export async function indexDocuments({
