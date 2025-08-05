@@ -953,12 +953,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         beforeEach(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
           );
         });
         afterEach(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
           );
         });
 
@@ -966,7 +966,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it('importing a non-default-space 7.16 rule with a connector made in the non-default space should result in a 200', async () => {
             const spaceId = '714-space';
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
             const { body } = await supertest
@@ -1008,7 +1008,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           it('should import a non-default-space 7.16 rule with a connector made in the non-default space into the default space successfully', async () => {
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             const differentSpaceConnectorId = '963ec960-a21a-11ed-84a4-a33e4c2558c9';
             const buffer = getImportRuleWithConnectorsBuffer(differentSpaceConnectorId);
 
@@ -1033,7 +1033,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           it('importing a non-default-space 7.16 rule with a connector made in the non-default space into the default space should result in a 404 if the file does not contain connectors', async () => {
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
             const { body } = await supertest
@@ -1059,7 +1059,7 @@ export default ({ getService }: FtrProviderContext): void => {
           it('importing a non-default-space 7.16 rule with a connector made in the non-default space into a different non-default space should result in a 404', async () => {
             const spaceId = '4567-space';
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             // it
             const buffer = getImportRuleBuffer(space714ActionConnectorId);
 
@@ -1087,13 +1087,13 @@ export default ({ getService }: FtrProviderContext): void => {
         describe('should be imported into the default space', () => {
           it('should import a default-space 7.16 rule with a connector made in the default space into a non-default space successfully', async () => {
             await esArchiver.load(
-              'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+              'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
             );
             const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
 
             const spaceId = '4567-space';
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             // it
             const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
 
@@ -1119,7 +1119,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           it('importing a default-space 7.16 rule with a connector made in the default space into the default space should result in a 200', async () => {
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             // it
             const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
 
@@ -1139,11 +1139,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           it('importing a default-space 7.16 rule with a connector made in the default space into a non-default space should result in a 404', async () => {
             await esArchiver.load(
-              'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+              'x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector'
             );
             const spaceId = '4567-space';
             // connectorId is from the 7.x connector here
-            // x-pack/test/functional/es_archives/security_solution/import_rule_connector
+            // x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector
             // it
             const buffer = getImportRuleBuffer(defaultSpaceActionConnectorId);
 

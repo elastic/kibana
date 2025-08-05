@@ -239,6 +239,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   render() {
     const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
+
     const idGenerator = htmlIdGenerator();
     const modalTitleId = idGenerator('modal');
     const confirmModalId = idGenerator('confirmModal');

@@ -165,7 +165,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     user: [
       props.user || null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setUser: (_, { user }) => user || null,
       },
     ],
