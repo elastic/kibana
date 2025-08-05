@@ -17,7 +17,13 @@ export const BadgesColumn: React.FC<{
   items && items.length > 0 ? (
     <div>
       {items.map((title, idx) => (
-        <EuiBadge key={`${prefix}-${idx}`} color={color} css={css`max-width: 400px;`}>
+        <EuiBadge
+          key={`${prefix}-${idx}`}
+          color={color}
+          css={css`
+            max-width: 400px;
+          `}
+        >
           {title}
         </EuiBadge>
       ))}
