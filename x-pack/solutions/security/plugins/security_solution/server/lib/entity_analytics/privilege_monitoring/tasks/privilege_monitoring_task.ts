@@ -54,6 +54,7 @@ interface StartParams {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
+  interval?: SyncIntervalConfig;
 }
 
 const getTaskName = (): string => TYPE;
@@ -194,7 +195,7 @@ export const startPrivilegeMonitoringTask = async ({
   namespace,
   taskManager,
   interval = INTERVAL,
-}: StartParams & { interval?: SyncIntervalConfig }) => {
+}: StartParams) => {
   const taskId = getTaskId(namespace);
   try {
     await taskManager.ensureScheduled({

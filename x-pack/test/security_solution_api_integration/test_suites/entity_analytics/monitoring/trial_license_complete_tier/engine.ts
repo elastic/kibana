@@ -27,6 +27,13 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const retry = getService('retry');
 
+  const waitForPrivMonUsersToBeSynced = async () => {
+    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 40000, async () => {
+      const res = await api.listPrivMonUsers({ query: {} });
+      return res.body.length > 0; // wait until we have at least one user
+    });
+  };
+
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     before(async () => {
@@ -190,7 +197,7 @@ export default ({ getService }: FtrProviderContext) => {
         const names = result.saved_objects.map((so) => so.attributes.name);
         expect(names).to.contain('default-monitoring-index-default');
         expect(names).to.contain('StarWars');
-        await waitForPrivMonUsersToBeSynced(api, retry);
+        await waitForPrivMonUsersToBeSynced();
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);
@@ -199,12 +206,5 @@ export default ({ getService }: FtrProviderContext) => {
         expect(userNames.filter((name: string) => name === 'C-3PO')).to.have.length(1);
       });
     });
-  });
-};
-
-const waitForPrivMonUsersToBeSynced = async (api: any, retry: any) => {
-  retry.waitForWithTimeout('Wait for PrivMon users to be synced', 40000, async () => {
-    const res = await api.listPrivMonUsers({ query: {} });
-    return res.body.length > 0; // // wait until we have at least one user
   });
 };
