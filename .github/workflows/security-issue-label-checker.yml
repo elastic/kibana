@@ -16,6 +16,7 @@ jobs:
         with:
           script: |
             const currentLabels = context.payload.issue.labels.map(l => l.name);
+            const currentLabelSet = new Set(currentLabels);
 
             const hasDetectionEngine = currentLabels.includes("Team:Detection Engine");
             const hasRuleManagement = currentLabels.includes("Team:Detection Rule Management");
@@ -36,22 +37,21 @@ jobs:
 
             const labelsToAdd = new Set();
 
+            // Utility: set difference
+            function difference(setA, setB) {
+              return new Set([...setA].filter(x => !setB.has(x)));
+            }
+
             // Add missing labels for Detection Engine group
             if (hasDetectionEngine) {
-              for (const label of detectionGroup) {
-                if (!currentLabels.includes(label)) {
-                  labelsToAdd.add(label);
-                }
-              }
+              const missing = difference(new Set(detectionGroup), currentLabelSet);
+              missing.forEach(label => labelsToAdd.add(label));
             }
 
             // Add missing labels for Rule Management group
             if (hasRuleManagement) {
-              for (const label of ruleManagementGroup) {
-                if (!currentLabels.includes(label)) {
-                  labelsToAdd.add(label);
-                }
-              }
+              const missing = difference(new Set(ruleManagementGroup), currentLabelSet);
+              missing.forEach(label => labelsToAdd.add(label));
             }
 
             // Add 'needs-team' when only shared labels are present (ambiguous ownership)
@@ -61,10 +61,10 @@ jobs:
               (currentLabels.includes("Team:Security Solution") || currentLabels.includes("Team:Detections and Resp"));
 
             if (hasOnlyShared) {
-              if (!currentLabels.includes("needs-team")) {
+              if (!currentLabelSet.has("needs-team")) {
                 labelsToAdd.add("needs-team");
               }
-              if (!currentLabels.includes("triage_needed")) {
+              if (!currentLabelSet.has("triage_needed")) {
                 labelsToAdd.add("triage_needed");
               }
             }
@@ -76,7 +76,7 @@ jobs:
                 issue_number: context.issue.number,
                 labels: Array.from(labelsToAdd)
               });
-              console.log(`Added missing labels: ${Array.from(labelsToAdd).join(", ")}`);
+              console.log(`Added missing labels to issue #${context.issue.number}: ${Array.from(labelsToAdd).join(", ")}`);
             } else {
-              console.log("No labels to add.");
+              console.log(`No labels to add for issue #${context.issue.number}.`);
             }
