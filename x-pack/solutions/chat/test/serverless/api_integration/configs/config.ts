@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/api_integration/config.base';
+import { services } from '../services';
 
 export default createTestConfig({
   serverlessProject: 'chat',
-  testFiles: [require.resolve('.')],
+  services,
+  testFiles: [require.resolve('../test_suites/platform_security')],
   junit: {
     reportName: 'Serverless Chat API Integration Tests',
   },
