@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/global_search/basic'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/global_search/basic'
         );
       });
 

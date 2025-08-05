@@ -1058,5 +1058,6 @@ function emptyActionsByType(): ActionsByType {
     delete_datastream: [],
     upsert_dot_streams_document: [],
     delete_dot_streams_document: [],
+    delete_queries: [],
   };
 }

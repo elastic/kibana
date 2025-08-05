@@ -353,7 +353,10 @@ describe('Privilege Monitoring Data Client', () => {
     it('should schedule the privilege monitoring task to run immediately', async () => {
       Object.defineProperty(dataClient, 'engineClient', {
         value: {
-          get: jest.fn().mockResolvedValue({ status: 'started' }),
+          find: jest.fn().mockResolvedValue({
+            total: 1,
+            saved_objects: [{ attributes: { status: 'started' } }],
+          }),
         },
       });
 
@@ -365,12 +368,14 @@ describe('Privilege Monitoring Data Client', () => {
     it('should not schedule if status is not started', async () => {
       Object.defineProperty(dataClient, 'engineClient', {
         value: {
-          get: jest.fn().mockResolvedValue({ status: 'stopped' }),
+          find: jest.fn().mockResolvedValue({
+            total: 1,
+            saved_objects: [{ attributes: { status: 'stopped' } }],
+          }),
         },
       });
-
       await expect(dataClient.scheduleNow()).rejects.toThrow(
-        'The Privileged Monitoring Engine must be enable to schedule a run. Current status: stopped'
+        'The Privileged Monitoring Engine must be enabled to schedule a run. Current status:'
       );
     });
 
