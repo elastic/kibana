@@ -12,7 +12,7 @@ import {
   singleEntryThreat,
 } from '../../../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
-import type { ThreatMapEntries } from '../../../../../common/components/threat_match/types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { THREAT_MATCH_MAPPING_ERROR_CODES } from './error_codes';
 import { getUnknownThreatMatchMappingFieldNames } from './get_unknown_threat_match_mapping_field_names';
 import {
@@ -28,7 +28,7 @@ interface ThreatMatchMappingValidatorFactoryParams {
 export function threatMatchMappingValidatorFactory({
   indexPatterns,
   threatIndexPatterns,
-}: ThreatMatchMappingValidatorFactoryParams): ValidationFunc<FormData, string, ThreatMapEntries[]> {
+}: ThreatMatchMappingValidatorFactoryParams): ValidationFunc<FormData, string, ThreatMapping> {
   return (...args) => {
     const [{ path, value }] = args;
 

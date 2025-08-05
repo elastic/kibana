@@ -11,8 +11,9 @@ import { css } from '@emotion/react';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { FormattedEntry, Entry } from './types';
+import type { FormattedEntry } from './types';
 import * as i18n from './translations';
 import {
   getEntryOnFieldChange,
@@ -25,7 +26,7 @@ interface EntryItemProps {
   indexPattern: DataViewBase;
   threatIndexPatterns: DataViewBase;
   showLabel: boolean;
-  onChange: (arg: Entry, i: number) => void;
+  onChange: (arg: ThreatMappingEntry, i: number) => void;
   doesNotMatchDisabled?: boolean;
 }
 

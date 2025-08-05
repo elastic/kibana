@@ -13,7 +13,7 @@ import { useKibana } from '../../lib/kibana';
 import { fields } from '@kbn/data-plugin/common/mocks';
 
 import { ListItemComponent } from './list_item';
-import type { ThreatMapEntries } from './types';
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { DataViewBase } from '@kbn/es-query';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 
@@ -28,7 +28,7 @@ jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-const singlePayload = (): ThreatMapEntries => ({
+const singlePayload = (): ThreatMapping[number] => ({
   entries: [
     {
       field: 'field.one',
@@ -38,7 +38,7 @@ const singlePayload = (): ThreatMapEntries => ({
   ],
 });
 
-const doublePayload = (): ThreatMapEntries => ({
+const doublePayload = (): ThreatMapping[number] => ({
   entries: [
     {
       field: 'field.one',
@@ -210,7 +210,7 @@ describe('ListItemComponent', () => {
 
   describe('delete button logic', () => {
     test('it renders delete button disabled when it is only entry left', () => {
-      const item: ThreatMapEntries = {
+      const item: ThreatMapping[number] = {
         entries: [{ ...singlePayload(), field: '', type: 'mapping', value: '' }],
       };
       const wrapper = mount(
@@ -367,7 +367,7 @@ describe('ListItemComponent', () => {
 
       wrapper.find('[data-test-subj="itemEntryDeleteButton"] button').at(0).simulate('click');
 
-      const expected: ThreatMapEntries = {
+      const expected: ThreatMapping[number] = {
         entries: [
           {
             field: 'field.two',

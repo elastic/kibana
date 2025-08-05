@@ -6,7 +6,6 @@
  */
 
 import type { DataViewFieldBase } from '@kbn/es-query';
-import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
 
 export interface FormattedEntry {
   id: string;
@@ -15,17 +14,4 @@ export interface FormattedEntry {
   value: DataViewFieldBase | undefined;
   entryIndex: number;
   negate?: boolean;
-}
-
-export interface EmptyEntry {
-  field: string | undefined;
-  type: 'mapping';
-  value: string | undefined;
-  negate?: boolean;
-}
-
-export type Entry = ThreatMappingEntry | EmptyEntry;
-
-export interface ThreatMapEntries {
-  entries: Entry[];
 }

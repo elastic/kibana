@@ -7,7 +7,6 @@
 
 import type {
   ThreatMapping,
-  ThreatMappingEntry,
   RuleCreateProps,
   RulePatchProps,
   RuleUpdateProps,
@@ -27,9 +26,7 @@ import type {
  *```
  * is not allowed.
  */
-export const containsInvalidDoesNotMatchEntries = (
-  items: ThreatMapping | Array<{ entries: Array<Partial<ThreatMappingEntry>> }>
-): boolean => {
+export const containsInvalidDoesNotMatchEntries = (items: ThreatMapping): boolean => {
   return items.some((item) => {
     const hasNegate = item.entries.some((subEntry) => subEntry.negate === true);
     if (!hasNegate) {
@@ -52,9 +49,7 @@ export const containsInvalidDoesNotMatchEntries = (
 /**
  * Checks if there are any entries that have a only entry with negate set to true(DOES_NOT_MATCH)
  */
-export const containsDoesNotMatchEntriesOnly = (
-  items: ThreatMapping | Array<{ entries: Array<Partial<ThreatMappingEntry>> }>
-): boolean => {
+export const containsDoesNotMatchEntriesOnly = (items: ThreatMapping): boolean => {
   return items.some((item) => {
     return item.entries.every((entry) => entry.negate === true);
   });
