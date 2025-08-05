@@ -16,7 +16,7 @@ const TAB_REGEX = /^Untitled( (\d+))?$/;
 describe('getNextTabNumber', () => {
   it('should return null when no tabs match the regex pattern', () => {
     const tabs: TabItem[] = [
-      { id: '1', label: 'Some other tab' },
+      { id: '1', label: 'Some tab' },
       { id: '2', label: 'Another tab' },
       { id: '3', label: 'Different label' },
     ];
