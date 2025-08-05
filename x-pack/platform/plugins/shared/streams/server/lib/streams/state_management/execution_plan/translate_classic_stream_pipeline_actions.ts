@@ -15,7 +15,7 @@ import type {
   AppendProcessorToIngestPipelineAction,
   DeleteProcessorFromIngestPipelineAction,
   ElasticsearchAction,
-  UpsertWriteIndexOrRolloverAction,
+  UpdateDefaultIngestPipelineAction,
 } from './types';
 
 export const MANAGED_BY_STREAMS = 'streams';
@@ -133,11 +133,12 @@ async function createStreamsManagedPipeline({
     },
   });
 
-  actionsByType.upsert_write_index_or_rollover.push(
-    ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-      type: 'upsert_write_index_or_rollover',
+  actionsByType.update_default_ingest_pipeline.push(
+    ...actions.map<UpdateDefaultIngestPipelineAction>((action) => ({
+      type: 'update_default_ingest_pipeline',
       request: {
         name: action.dataStream,
+        pipeline: pipelineName,
       },
     }))
   );
@@ -223,11 +224,12 @@ async function updateExistingStreamsManagedPipeline({
       },
     });
 
-    actionsByType.upsert_write_index_or_rollover.push(
-      ...actions.map<UpsertWriteIndexOrRolloverAction>((action) => ({
-        type: 'upsert_write_index_or_rollover',
+    actionsByType.update_default_ingest_pipeline.push(
+      ...actions.map<UpdateDefaultIngestPipelineAction>((action) => ({
+        type: 'update_default_ingest_pipeline',
         request: {
           name: action.dataStream,
+          pipeline: pipelineName,
         },
       }))
     );

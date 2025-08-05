@@ -520,7 +520,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       existsAsManagedDataStream
         ? {
-            type: 'upsert_write_index_or_rollover',
+            type: 'rollover',
             request: {
               name: this._definition.name,
             },
@@ -579,7 +579,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     });
     if (this.hasChangedFields() || hasAncestorsWithChangedFields) {
       actions.push({
-        type: 'upsert_write_index_or_rollover',
+        type: 'rollover',
         request: {
           name: this._definition.name,
         },
