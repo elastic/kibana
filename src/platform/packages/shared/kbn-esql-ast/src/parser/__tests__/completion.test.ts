@@ -218,7 +218,7 @@ describe('COMPLETION command', () => {
     });
 
     it('define a new column name as target of the completion', () => {
-      const text = `FROM index | COMPLETION columnName`; // HD
+      const text = `FROM index | COMPLETION columnName`;
       const { errors, ast } = EsqlQuery.fromSrc(text);
       expect(errors.length).toBe(0);
 

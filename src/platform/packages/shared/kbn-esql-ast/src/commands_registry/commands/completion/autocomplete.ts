@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
 import { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
@@ -21,7 +22,6 @@ import {
   findFinalWord,
   handleFragment,
   columnExists,
-  getCommandNamedParametersSuggestions,
 } from '../../../definitions/utils/autocomplete/helpers';
 import {
   type ISuggestionItem,
@@ -40,7 +40,7 @@ export enum CompletionPosition {
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
   AFTER_WITH = 'after_with',
-  WITHIN_NAMED_PARAMS = 'within_named_params',
+  WITHIN_MAP_EXPRESSION = 'within_map_expression',
   AFTER_COMMAND = 'after_command',
 }
 
@@ -57,7 +57,7 @@ function getPosition(
 
   // Checking for open bracket after WITH and not a closing one
   if (/WITH\s*{\s*[^}]*$/i.test(query)) {
-    return CompletionPosition.WITHIN_NAMED_PARAMS;
+    return CompletionPosition.WITHIN_MAP_EXPRESSION;
   }
 
   if (!inferenceId.incomplete) {
@@ -240,12 +240,12 @@ export async function autocomplete(
     case CompletionPosition.AFTER_WITH:
       return [namedParamsCompletionItem];
 
-    case CompletionPosition.WITHIN_NAMED_PARAMS:
+    case CompletionPosition.WITHIN_MAP_EXPRESSION:
       const availableParameters = {
         inference_id: endpoints?.map(inferenceEndpointToCompletionItem) || [],
       };
 
-      return getCommandNamedParametersSuggestions(innerText, availableParameters);
+      return getCommandMapExpressionSuggestions(innerText, availableParameters);
 
     case CompletionPosition.AFTER_COMMAND:
       return [pipeCompleteItem];

@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../../..';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -749,63 +748,4 @@ export function getValidSignaturesAndTypesToSuggestNext(
     argIndex,
     currentArg,
   };
-}
-
-/**
- * This function provides suggestions for named parameters within a command.
- * It suggests parameter names and values based on the current text input and available parameters.
- *
- * Provide a record of available parameters, where each key is a parameter name and the value is an
- * array of suggestions for that parameter.
- *
- * Examples:
- *  | COMPLETION "prompt" WITH {                    ---> suggests parameters names
- *  | COMPLETION "prompt" WITH { "param1": "        ---> suggests parameter values
- *  | COMPLETION "prompt" WITH { "param1": "value", ---> suggests parameter names
- *
- * This helper does not suggest enclosing brackets.
- *
- * @param innerText
- * @param availableParams
- */
-export function getCommandNamedParametersSuggestions(
-  innerText: string,
-  availableParams: Record<string, ISuggestionItem[]>
-): ISuggestionItem[] {
-  // Suggest a parameter entry after { or after a comma
-  if (/{\s*$/i.test(innerText) || /,\s*$/.test(innerText)) {
-    const usedParams = new Set<string>();
-    const regex = /"([^"]+)"\s*:/g;
-    let match;
-    while ((match = regex.exec(innerText)) !== null) {
-      usedParams.add(match[1]);
-    }
-
-    const availableParamNames = Object.keys(availableParams).filter(
-      (paramName) => !usedParams.has(paramName)
-    );
-
-    return availableParamNames.map(
-      (paramName) =>
-        ({
-          label: paramName,
-          kind: 'Constant',
-          asSnippet: true,
-          text: `"${paramName}": "$0"`,
-          detail: paramName,
-          sortText: '1',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        } as ISuggestionItem)
-    );
-  }
-
-  // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
-  if (/:\s*"[^"]*$/i.test(innerText)) {
-    const match = innerText.match(/"([^"]+)"\s*:\s*"[^"]*$/);
-    const paramName = match ? match[1] : undefined;
-    if (paramName && availableParams[paramName]) {
-      return availableParams[paramName];
-    }
-  }
-  return [];
 }
