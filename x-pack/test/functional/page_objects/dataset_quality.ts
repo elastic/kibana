@@ -154,6 +154,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
+    datasetQualityTypesSelectableButton: 'datasetQualityFilterTypeSelectableButton',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',

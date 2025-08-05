@@ -16,6 +16,7 @@ import { createAlertText, datasetQualityAppTitle } from '../../../common/transla
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
+import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -28,6 +29,7 @@ export default function Header() {
   const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
+  const { authorizedDatasetTypes } = useDatasetQualityFilters();
 
   return (
     <EuiPageHeader
@@ -73,7 +75,7 @@ export default function Header() {
         />
       }
       rightSideItems={
-        isAlertingAvailable
+        isAlertingAvailable && authorizedDatasetTypes.length
           ? [
               <>
                 <EuiButton
