@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MultipleLicenseInfo, getLicensesArray } from './get_license_array';
+import { MultipleLicenseInfo } from '../types';
+import { getLicensesArray } from './get_license_array';
 
 describe('getLicensesArray', () => {
   test('should returns licenses array when valid MultipleLicenseInfo is provided', () => {
