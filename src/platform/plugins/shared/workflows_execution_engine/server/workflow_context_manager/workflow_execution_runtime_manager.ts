@@ -220,7 +220,6 @@ export class WorkflowExecutionRuntimeManager {
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
       workflowId: this.workflowExecution.workflowId,
-      triggeredBy: this.workflowExecution.triggeredBy,
     };
     await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
     this.workflowExecution = {
@@ -256,7 +255,6 @@ export class WorkflowExecutionRuntimeManager {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       startedAt: this.workflowExecution.startedAt,
-      triggeredBy: this.workflowExecution.triggeredBy,
     };
 
     if (this.isWorkflowFinished()) {
