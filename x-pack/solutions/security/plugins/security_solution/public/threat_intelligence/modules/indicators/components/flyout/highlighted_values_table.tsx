@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo, type FC } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { unwrapValue } from '../../utils/unwrap_value';
 import { IndicatorFieldsTable } from './fields_table';
-import { EuiPanel } from '@elastic/eui';
 
 /**
  * Pick indicator fields starting with the indicator type
