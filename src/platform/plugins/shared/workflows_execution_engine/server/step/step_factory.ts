@@ -62,7 +62,7 @@ export class StepFactory {
       case 'merge':
       // return new MergeStepImpl(step as MergeStep, contextManager);
       default:
-        return new ConnectorStepImpl(step as any, contextManager, connectorExecutor, workflowState);
+        throw new Error(`Unknown node type: ${stepType}`);
     }
   }
 }
