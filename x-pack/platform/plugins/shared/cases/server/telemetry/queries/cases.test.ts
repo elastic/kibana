@@ -252,8 +252,26 @@ describe('getCasesTelemetryData', () => {
 
       mockFind(caseAggsResult);
       mockFind(attachmentAggsResult);
-      mockFind({ references: { referenceType: { referenceAgg: { value: 3 } } } });
+      mockFind({
+        by_owner: {
+          buckets: [
+            {
+              key: 'cases',
+              doc_count: 10,
+            },
+            {
+              key: 'observability',
+              doc_count: 5,
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 20,
+            },
+          ],
+        },
+      });
       mockFind({ references: { referenceType: { referenceAgg: { value: 4 } } } });
+
       mockSavedObjectResponse({
         created_at: '2022-03-08T12:24:11.429Z',
       });
@@ -360,7 +378,7 @@ describe('getCasesTelemetryData', () => {
           totalParticipants: 2,
           totalTags: 2,
           totalUsers: 1,
-          totalWithAlerts: 3,
+          totalWithAlerts: 35,
           totalWithConnectors: 4,
           assignees: {
             total: 5,
@@ -380,6 +398,7 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          totalWithAlerts: 10,
         },
         obs: {
           assignees: {
@@ -392,6 +411,7 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          totalWithAlerts: 5,
         },
         sec: {
           assignees: {
@@ -404,6 +424,7 @@ describe('getCasesTelemetryData', () => {
           daily: 3,
           weekly: 2,
           monthly: 1,
+          totalWithAlerts: 20,
         },
       });
     });
