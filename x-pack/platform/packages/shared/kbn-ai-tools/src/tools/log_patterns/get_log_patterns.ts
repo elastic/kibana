@@ -16,13 +16,12 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import { ChangePointType } from '@kbn/es-types/src';
-import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_label';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { kqlQuery } from '../es/queries/kql_query';
-import { rangeQuery } from '../es/queries/range_query';
+import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
+import { pValueToLabel } from '../../utils/p_value_to_label';
 
 interface FieldPatternResultBase {
   field: string;
@@ -184,9 +183,10 @@ export async function runCategorizeTextAggregation({
     index,
     size: 0,
     track_total_hits: false,
+    timeout: '10s',
     query: {
       bool: {
-        filter: [query, ...rangeQuery(start, end)],
+        filter: [query, ...dateRangeQuery(start, end)],
       },
     },
     aggregations: {
@@ -259,9 +259,9 @@ interface LogPatternOptions {
   start: number;
   end: number;
   index: string | string[];
-  kuery: string;
-  metadata?: string[];
   fields: string[];
+  metadata?: string[];
+  kql?: string;
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
@@ -273,7 +273,7 @@ export async function getLogPatterns({
   start,
   end,
   index,
-  kuery,
+  kql,
   includeChanges,
   metadata = [],
   fields,
@@ -282,7 +282,7 @@ export async function getLogPatterns({
     fields,
     index_filter: {
       bool: {
-        filter: [...rangeQuery(start, end)],
+        filter: [...dateRangeQuery(start, end)],
       },
     },
     index,
@@ -301,7 +301,7 @@ export async function getLogPatterns({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [...kqlQuery(kuery), ...rangeQuery(start, end)],
+        filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)],
       },
     },
   });
@@ -330,7 +330,7 @@ export async function getLogPatterns({
         fields: fieldGroup,
         query: {
           bool: {
-            filter: kqlQuery(kuery),
+            filter: kqlQuery(kql),
           },
         },
         samplingProbability,
@@ -346,15 +346,18 @@ export async function getLogPatterns({
         return [];
       }
 
-      const patternsToExclude = topMessagePatterns.filter((pattern) => {
-        // elasticsearch will barf because the query is too complex. this measures
-        // the # of groups to capture for a measure of complexity.
-        const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
-        return (
-          complexity <= 25 &&
-          // anything less than 50 messages should be re-processed with the ml_standard tokenizer
-          pattern.count > 50
-        );
+      const patternsToExclude = topMessagePatterns.filter((pattern) => pattern.count >= 50);
+      const excludeQueries = patternsToExclude.map((pattern) => {
+        return {
+          match: {
+            [pattern.field]: {
+              query: pattern.pattern,
+              fuzziness: 0,
+              operator: 'and' as const,
+              auto_generate_synonyms_phrase_query: false,
+            },
+          },
+        };
       });
 
       const rareMessagePatterns = await runCategorizeTextAggregation({
@@ -365,34 +368,8 @@ export async function getLogPatterns({
         end,
         query: {
           bool: {
-            filter: kqlQuery(kuery),
-            must_not: [
-              ...patternsToExclude.map((pattern) => {
-                return {
-                  bool: {
-                    filter: [
-                      {
-                        regexp: {
-                          [pattern.field]: {
-                            value: pattern.regex,
-                          },
-                        },
-                      },
-                      {
-                        match: {
-                          [pattern.field]: {
-                            query: pattern.pattern,
-                            fuzziness: 0,
-                            operator: 'and' as const,
-                            auto_generate_synonyms_phrase_query: false,
-                          },
-                        },
-                      },
-                    ],
-                  },
-                };
-              }),
-            ],
+            filter: kqlQuery(kql),
+            must_not: excludeQueries,
           },
         },
         size: 1000,
