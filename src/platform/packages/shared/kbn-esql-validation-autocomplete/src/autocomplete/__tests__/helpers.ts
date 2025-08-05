@@ -27,6 +27,7 @@ import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/gener
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { ESQLLicenseType } from '@kbn/esql-types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -273,7 +274,9 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
+  }>,
+  customLicenseType = 'platinum',
+  customActiveProduct: PricingProduct = { type: 'observability', tier: 'complete' }
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
@@ -303,7 +306,10 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
-    getLicense: jest.fn(),
+    getLicense: jest.fn(async () => ({
+      hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
+    })),
+    getActiveProduct: jest.fn(() => customActiveProduct),
   };
 }
 

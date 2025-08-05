@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EsqlDashboardPanel, DEFAULT_PAGE_SIZE } from './esql_dashboard_panel';
 import { TestProviders } from '../../../../../common/mock';
+import { right, left } from 'fp-ts/Either';
 
 jest.mock(
   '../../../../../common/components/visualization_actions/visualization_embeddable',
@@ -72,8 +73,8 @@ describe('EsqlDashboardPanel', () => {
       { text: 'Option 2', value: 'option2' },
     ],
     stackByField: 'option1',
-    generateVisualizationQuery: jest.fn(),
-    generateTableQuery: jest.fn(),
+    generateVisualizationQuery: jest.fn().mockReturnValue(right('mockQuery')),
+    generateTableQuery: jest.fn().mockReturnValue(right('mockQuery')),
     getLensAttributes: jest.fn(),
     columns: [
       { field: 'field1', name: 'Field 1' },
@@ -94,7 +95,10 @@ describe('EsqlDashboardPanel', () => {
   it('calls generateVisualizationQuery with the selected stackBy option', () => {
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
-    expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith('option1');
+    expect(mockProps.generateVisualizationQuery).toHaveBeenCalledWith(
+      'option1',
+      mockProps.timerange
+    );
   });
 
   it('renders the table with the provided columns', () => {
@@ -154,5 +158,22 @@ describe('EsqlDashboardPanel', () => {
     render(<EsqlDashboardPanel {...mockProps} />, { wrapper: TestProviders });
 
     expect(screen.getByText('Show more')).toBeInTheDocument();
+  });
+
+  it('render invalid fields when the query is invalid', () => {
+    const invalidQuery = left({ invalidFields: ['invalidField1', 'invalidField2'] });
+
+    render(
+      <EsqlDashboardPanel
+        {...mockProps}
+        generateVisualizationQuery={() => invalidQuery}
+        generateTableQuery={() => invalidQuery}
+      />,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByText('There was a problem rendering the visualization')).toBeInTheDocument();
+    expect(screen.getByText('invalidField1')).toBeInTheDocument();
+    expect(screen.getByText('invalidField2')).toBeInTheDocument();
   });
 });

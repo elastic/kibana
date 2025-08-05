@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Export import saved objects between versions', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
-        'x-pack/test/functional/es_archives/getting_started/shakespeare'
+        'x-pack/platform/test/fixtures/es_archives/getting_started/shakespeare'
       );
       await kibanaServer.uiSettings.replace({});
       await settings.navigateTo();
@@ -44,7 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/getting_started/shakespeare');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/getting_started/shakespeare'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

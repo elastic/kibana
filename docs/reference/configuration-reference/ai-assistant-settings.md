@@ -10,11 +10,17 @@ applies_to:
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
 `xpack.productDocBase.artifactRepositoryUrl`
-:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Supports both HTTP(S) URLs and local file paths (`file://`).  Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`
+:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co` Supports:
+    
+    * HTTP(S) URLs
+    * {applies_to}`stack: ga 9.1` Local file paths (`file://`).
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-Installing product documentation requires network access to its artifact repository. In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+Installing product documentation requires network access to its artifact repository. 
+
+* {applies_to}`stack: ga 9.1` In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
+* {applies_to}`stack: ga 9.0` In air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 

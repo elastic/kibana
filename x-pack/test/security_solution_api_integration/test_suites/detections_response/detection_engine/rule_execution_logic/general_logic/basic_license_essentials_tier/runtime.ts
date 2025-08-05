@@ -33,11 +33,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Tests involving runtime fields of source indexes and the alerts index', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/runtime');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/runtime'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/runtime');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/runtime'
+      );
     });
 
     describe('Regular runtime field mappings', () => {
@@ -88,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/runtime_conflicting_fields'
         );
       });
 
@@ -96,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/runtime_conflicting_fields'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/runtime_conflicting_fields'
         );
       });
 

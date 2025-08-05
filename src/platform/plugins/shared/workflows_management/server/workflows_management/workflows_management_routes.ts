@@ -8,17 +8,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { CreateWorkflowCommandSchema } from '@kbn/workflows';
 import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
 
-export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
+export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logger: Logger) {
   router.get(
     {
       path: '/api/workflows/{id}',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
         },
       },
       validate: {
@@ -52,12 +59,19 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.post(
     {
       path: '/api/workflows/search',
-      validate: false,
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
         },
       },
+      validate: false,
     },
     async (context, request, response) => {
       try {
@@ -81,9 +95,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.post(
     {
       path: '/api/workflows',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_create'],
+            },
+          ],
         },
       },
       validate: {
@@ -107,9 +128,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.put(
     {
       path: '/api/workflows/{id}',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_update'],
+            },
+          ],
         },
       },
       validate: {
@@ -138,9 +166,17 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.delete(
     {
       path: '/api/workflows/{id}',
+
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_delete'],
+            },
+          ],
         },
       },
       validate: {
@@ -167,9 +203,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.delete(
     {
       path: '/api/workflows',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_delete'],
+            },
+          ],
         },
       },
       validate: {
@@ -196,9 +239,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.post(
     {
       path: '/api/workflows/{id}/run',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_execute', 'workflow_execution_create'],
+            },
+          ],
         },
       },
       validate: {
@@ -232,12 +282,56 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
       }
     }
   );
-  router.get(
+  router.post(
     {
-      path: '/api/workflowExecutions',
+      path: '/api/workflows/test',
       security: {
         authz: {
           requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        body: schema.object({
+          inputs: schema.recordOf(schema.string(), schema.any()),
+          workflowYaml: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const workflowExecutionId = await api.testWorkflow(
+          request.body.workflowYaml,
+          request.body.inputs
+        );
+
+        return response.ok({
+          body: {
+            workflowExecutionId,
+          },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/api/workflowExecutions',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_execution_read'],
+            },
+          ],
         },
       },
       validate: {
@@ -265,9 +359,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi) {
   router.get(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}',
+      options: {
+        tags: ['access:workflowsManagement'],
+      },
       security: {
         authz: {
-          requiredPrivileges: ['all'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_execution_read'],
+            },
+          ],
         },
       },
       validate: {

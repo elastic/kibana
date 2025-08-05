@@ -6,50 +6,43 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { JsonObject } from '@kbn/utility-types';
-import type {
-  InventoryItemType,
-  MetricsUIAggregation,
-} from '@kbn/metrics-data-access-plugin/common';
+import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
-import type { SnapshotMetricInput, SnapshotRequest } from '../../../../common/http_api';
+import type { SnapshotRequest } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
 
-export interface InfraSnapshotRequestOptions
-  extends Omit<SnapshotRequest, 'sourceId' | 'filterQuery'> {
+export interface InfraSnapshotRequestOptions extends Omit<SnapshotRequest, 'sourceId'> {
   sourceConfiguration: InfraSourceConfiguration;
-  filterQuery: JsonObject | undefined;
 }
 
-export const metricToAggregation = (
-  nodeType: InventoryItemType,
-  metric: SnapshotMetricInput,
-  index: number
-) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  if (SnapshotCustomMetricInputRT.is(metric)) {
-    if (metric.aggregation === 'rate') {
-      return networkTraffic(`custom_${index}`, metric.field);
-    }
-    return {
-      [`custom_${index}`]: {
-        [metric.aggregation]: {
-          field: metric.field,
-        },
-      },
-    };
-  }
-  return inventoryModel.metrics.snapshot?.[metric.type];
-};
-
-export const getMetricsAggregations = (
+export const getMetricsAggregations = async (
   options: InfraSnapshotRequestOptions
-): MetricsUIAggregation => {
-  const { metrics } = options;
-  return metrics.reduce((aggs, metric, index) => {
-    const aggregation = metricToAggregation(options.nodeType, metric, index);
+): Promise<MetricsUIAggregation> => {
+  const { metrics, nodeType } = options;
+
+  const inventoryModel = findInventoryModel(nodeType);
+  const aggregations = await inventoryModel.metrics.getAggregations({
+    schema: options.schema,
+  });
+
+  return metrics.reduce<MetricsUIAggregation>((aggs, metric, index) => {
+    if (SnapshotCustomMetricInputRT.is(metric)) {
+      if (metric.aggregation === 'rate') {
+        return networkTraffic(`custom_${index}`, metric.field);
+      }
+      return {
+        [`custom_${index}`]: {
+          [metric.aggregation]: {
+            field: metric.field,
+          },
+        },
+      };
+    }
+
+    const aggregation = aggregations.get(metric.type);
+
     if (!aggregation) {
       throw new Error(
         i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {

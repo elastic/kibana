@@ -20,7 +20,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
-import { ESQLLangEditor } from '@kbn/esql/public';
+import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
@@ -186,6 +186,9 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableExternalPadding?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: ESQLMenuPopoverProps['onESQLDocsFlyoutVisibilityChanged'];
   bubbleSubmitEvent?: boolean;
+
+  esqlEditorInitialState?: ESQLEditorProps['initialState'];
+  onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -750,7 +753,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem
           grow={!shouldShowDatePickerAsBadge()}
-          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 300, maxWidth: '100%' }}
         >
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterButtonGroup}
@@ -787,6 +790,8 @@ export const QueryBarTopRow = React.memo(
             hideRunQueryText={true}
             data-test-subj="unifiedTextLangEditor"
             isLoading={props.isLoading}
+            initialState={props.esqlEditorInitialState}
+            onInitialStateChange={props.onEsqlEditorInitialStateChange}
           />
         )
       );

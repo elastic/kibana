@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('x-pack/test/functional/es_archives/monitoring/standalone_cluster_mb', {
+        await setup('x-pack/platform/test/fixtures/es_archives/monitoring/standalone_cluster_mb', {
           from: 'Feb 4, 2019 @ 17:50:00.000',
           to: 'Feb 4, 2019 @ 17:52:00.000',
           useCreate: true,

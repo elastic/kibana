@@ -9,7 +9,11 @@ applies_to:
 
 # OpenAI connector and action [openai-action-type]
 
-The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider, either OpenAI, Azure OpenAI, or Other (OpenAI-compatible service).
+The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider: 
+
+* OpenAI
+* Azure OpenAI
+* {applies_to}`stack: ga 9.1` Other (OpenAI-compatible service).
 
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
@@ -33,7 +37,7 @@ OpenAI connectors have the following configuration properties:
 | Field            | Required for         | Description                                                                                 |
 |------------------|---------------------|---------------------------------------------------------------------------------------------|
 | Name             | All                 | The name of the connector.                                                                  |
-| OpenAI provider  | All                 | The API provider: `OpenAI`, `Azure OpenAI`, or `Other` (OpenAI-compatible service).         |
+| OpenAI provider  | All                 | The API provider: `OpenAI`, `Azure OpenAI`, or {applies_to}`stack: ga 9.1` `Other` (OpenAI-compatible service).         |
 | URL              | All                 | The API endpoint URL for the selected provider.                                             |
 | Default model    | OpenAI/Other        | The default model for requests. **Required** for `Other`, optional for `OpenAI`.            |
 | Headers          | Optional            | Custom HTTP headers to include in requests.                                                 |
@@ -42,6 +46,10 @@ OpenAI connectors have the following configuration properties:
 | PKI fields       | Other (PKI only)    | See below. Only available for `Other` provider.                                             |
 
 #### PKI Authentication (Other provider only)
+```{applies_to}
+stack: ga 9.1
+serverless: ga
+```
 
 When using the `Other` provider, you can use PKI (certificate-based) authentication. With PKI, you can also optionally include an API key if your OpenAI-compatible service supports or requires one. The following fields are supported for PKI:
 
