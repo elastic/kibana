@@ -19,6 +19,7 @@ import { ReportingPageObject } from './reporting_page';
 import { WatcherPageObject } from './watcher_page';
 import { SearchProfilerPageProvider } from './search_profiler_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
+import { SnapshotRestorePageProvider } from './snapshot_restore_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
 import { GraphPageObject } from './graph_page';
@@ -51,6 +52,7 @@ export const pageObjects = {
   searchProfiler: SearchProfilerPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
+  snapshotRestore: SnapshotRestorePageProvider,
   userProfiles: UserProfilePageProvider,
   maintenanceWindows: MaintenanceWindowsPageProvider,
   banners: BannersPageObject,

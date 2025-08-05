@@ -241,10 +241,10 @@ enabled:
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/test/functional/apps/rollup_job/config.ts
-  - x-pack/test/functional/apps/saved_objects_management/config.ts
-  - x-pack/test/functional/apps/saved_query_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
-  - x-pack/test/functional/apps/snapshot_restore/config.ts
+  - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
