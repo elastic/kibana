@@ -90,7 +90,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     [setHasErrors]
   );
 
-  const onChange = useCallback((selected: Array<{ value: string; label: string; integration?: string }>) => {
+  const onChange = useCallback((selected: any) => {
     setSelectedOptions(selected);
   }, []);
 
