@@ -55,7 +55,7 @@ export const CreateIndexForm = ({
   userPrivileges,
 }: CreateIndexFormProps) => {
   const { sampleDataIngest } = useKibana().services;
-  const { application, share, console: consolePlugin } = useKibana().services;
+  const { application, share } = useKibana().services;
   const usageTracker = useUsageTracker();
   const { ingestSampleData, isLoading: isIngestingSampleData } = useIngestSampleData();
   const onIngestSampleData = useCallback(() => {
