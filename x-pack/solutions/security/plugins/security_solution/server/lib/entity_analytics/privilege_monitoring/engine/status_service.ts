@@ -25,22 +25,7 @@ export const createEngineStatusService = (
     namespace: deps.namespace,
   });
 
-  const get = async () => {
-    const findResponse = await descriptorClient.find();
-    const engineDescriptor =
-      findResponse.total > 0 ? findResponse.saved_objects[0].attributes : undefined;
-
-    if (!engineDescriptor) {
-      return {
-        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
-        error: undefined,
-      };
-    }
-    return {
-      status: engineDescriptor.status,
-      error: engineDescriptor.error,
-    };
-  };
+  const get = descriptorClient.get.bind(descriptorClient);
 
   const disable = async () => {
     dataClient.log('info', 'Disabling Privileged Monitoring Engine');

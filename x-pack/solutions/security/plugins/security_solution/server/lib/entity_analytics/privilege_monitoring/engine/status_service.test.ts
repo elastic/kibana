@@ -113,7 +113,7 @@ describe('Privileged User Monitoring: Engine Status Service', () => {
       mockGetEngineDescriptor.mockResolvedValue({ status: 'stopped' });
 
       await expect(statusService.scheduleNow()).rejects.toThrow(
-        'The Privileged Monitoring Engine must be enable to schedule a run. Current status: stopped'
+        'The Privileged Monitoring Engine must be enabled to schedule a run. Current status: stopped'
       );
     });
 

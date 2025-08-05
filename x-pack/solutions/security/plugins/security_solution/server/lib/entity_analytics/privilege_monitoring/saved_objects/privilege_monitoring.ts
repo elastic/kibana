@@ -88,11 +88,19 @@ export class PrivilegeMonitoringEngineDescriptorClient {
 
   async get() {
     const id = this.getSavedObjectId();
-    const { attributes } = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
+    const so = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
       privilegeMonitoringTypeName,
       id
     );
-    return attributes;
+
+    if (!so) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
+
+    return so.attributes;
   }
 
   async getStatus() {
