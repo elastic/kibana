@@ -75,3 +75,7 @@ query.toRequest();
 // Params are captured from tagged templates
 query.toRequest().params; // [{ input : 123 }]
 ```
+
+## Reference
+
+TODO: ...

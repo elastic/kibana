@@ -1,11 +1,9 @@
-load("@npm//webpack-cli:index.bzl", "webpack_cli")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 SRCS = glob(
   [
-    "src/**/*",
-    "index.ts",
-    "server.ts",
+    "**/*.ts",
+    "**/*.js",
   ],
   exclude = [
     "**/*.config.js",
@@ -33,29 +31,5 @@ js_library(
   package_name = "@kbn/esql-ast",
   srcs = ["package.json"] + SRCS,
   deps = SHARED_DEPS,
-  visibility = ["//visibility:public"],
-)
-
-webpack_cli(
-  name = "target_workers",
-  data = SRCS + SHARED_DEPS,
-  output_dir = True,
-  args = [
-    "--config",
-    "$(location webpack.config.js)",
-    "--output-path",
-    "$(@D)",
-    "--env",
-    "prod",
-    "--stats=errors-only"
-  ],
-  env = select({
-    "//:dist": {
-      "NODE_ENV": "production",
-    },
-    "//conditions:default": {
-      "NODE_ENV": "development",
-    },
-  }),
   visibility = ["//visibility:public"],
 )

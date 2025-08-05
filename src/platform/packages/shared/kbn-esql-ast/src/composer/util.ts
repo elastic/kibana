@@ -55,7 +55,6 @@ export const processTemplateHoles = (
 
       validateParamName(name);
 
-      // TODO: add test for this
       if (params.has(name)) {
         throw new Error(`Duplicate parameter name "${name}" found in the query.`);
       }
