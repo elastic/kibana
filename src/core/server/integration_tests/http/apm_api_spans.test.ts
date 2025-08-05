@@ -55,7 +55,7 @@ describe('APM HTTP API spans', () => {
       }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
-    const { server: innerServer, createRouter, ...rest } = await server.setup(setupDeps);
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     router = createRouter('/');
     supertest = Supertest(innerServer.listener);
   }

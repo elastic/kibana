@@ -63,8 +63,6 @@ describe('Routing versioned requests', () => {
   };
 
   beforeEach(async () => {
-    endMock.mockClear();
-    (apm.startSpan as jest.Mock).mockClear();
     await setupServer();
   });
 
