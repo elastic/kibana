@@ -21,6 +21,10 @@ const renderWithIntl = (ui: React.ReactElement) => {
 };
 
 describe('value expression', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders description and value', async () => {
     const user = userEvent.setup();
     renderWithIntl(
@@ -42,9 +46,8 @@ describe('value expression', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('valueFieldTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
     });
-
+    expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
     expect(screen.getByTestId('valueFieldTitle')).toHaveTextContent('test');
     expect(screen.getByTestId('valueFieldNumber')).toHaveValue(1000);
   });
@@ -93,8 +96,8 @@ describe('value expression', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('valueFieldTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
   });
 
   it('emits onChangeSelectedValue action when value is updated', async () => {

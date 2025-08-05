@@ -22,7 +22,6 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
 }));
 
-// Helper function to render with IntlProvider
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
@@ -33,10 +32,8 @@ const renderWithIntl = (ui: React.ReactElement) => {
 
 describe('view in app', () => {
   beforeEach(() => {
-    // Reset mocks before each test
     jest.clearAllMocks();
 
-    // Set up default mock implementation
     mockUseKibana.mockReturnValue({
       services: {
         application: {
@@ -64,12 +61,12 @@ describe('view in app', () => {
       alerting!.getNavigation = jest.fn().mockResolvedValue(null);
 
       renderWithIntl(<ViewInApp rule={rule} />);
+      const button = screen.getByRole('button', { name: /view in app/i });
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /view in app/i });
         expect(button).toBeDisabled();
-        expect(button).toHaveTextContent('View in app');
       });
+      expect(button).toHaveTextContent('View in app');
 
       expect(alerting!.getNavigation).toBeCalledWith(rule.id);
     });
@@ -83,13 +80,11 @@ describe('view in app', () => {
       alerting!.getNavigation = jest.fn().mockResolvedValue('/rule');
 
       renderWithIntl(<ViewInApp rule={rule} />);
+      const button = screen.getByRole('button', { name: /view in app/i });
 
       await waitFor(() => {
-        const button = screen.getByRole('button', { name: /view in app/i });
         expect(button).not.toBeDisabled();
       });
-
-      const button = screen.getByRole('button', { name: /view in app/i });
       button.click();
 
       expect(navigateToUrl).toBeCalledWith('/rule');

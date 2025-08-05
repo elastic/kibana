@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from 'styled-components';
 import ActionsConnectorsList from './actions_connectors_list';
@@ -367,9 +367,9 @@ describe('actions_connectors_list', () => {
 
       await waitFor(() => {
         expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
-        expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
-        expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
       });
+      expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
+      expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');
       replaceStateSpy.mockRestore();
     });
   });
@@ -393,20 +393,18 @@ describe('actions_connectors_list', () => {
     });
 
     it('renders no permissions to create connector', async () => {
-      await act(async () => {
-        render(
-          <IntlProvider>
-            <ActionsConnectorsList
-              setAddFlyoutVisibility={() => {}}
-              loadActions={async () => {}}
-              editItem={() => {}}
-              isLoadingActions={false}
-              actions={[]}
-              setActions={() => {}}
-            />
-          </IntlProvider>
-        );
-      });
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={[]}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
       expect(screen.getByText(/no permissions to create connectors/i)).toBeInTheDocument();
       expect(screen.queryByTestId('createConnectorButton')).not.toBeInTheDocument();
     });
@@ -522,7 +520,6 @@ describe('actions_connectors_list', () => {
       );
 
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
-      // You may need to adjust this if you have a class or attribute for disabled rows
     });
   });
 
@@ -618,32 +615,17 @@ describe('actions_connectors_list', () => {
         </ThemeProvider>
       );
 
-      // Wait for the table to be rendered
-      await screen.findByTestId('actionsTable');
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      expect(loadActionTypes).toHaveBeenCalled();
+      expect(screen.getAllByTestId('connectorsTableCell-actionType')).toHaveLength(2);
+      expect(screen.getByTestId('edit1')).toBeInTheDocument();
+      expect(screen.getByTestId('edit2')).toBeInTheDocument();
 
-      // Wait for loadActionTypes to be called
-      await waitFor(() => {
-        expect(loadActionTypes).toHaveBeenCalled();
-      });
-
-      // Wait for action types to be loaded and processed
-      await waitFor(() => {
-        expect(screen.getAllByTestId('connectorsTableCell-actionType')).toHaveLength(2);
-      });
-
-      // Wait for the connectors to be rendered
-      await waitFor(() => {
-        expect(screen.getByTestId('edit1')).toBeInTheDocument();
-        expect(screen.getByTestId('edit2')).toBeInTheDocument();
-      });
-
-      // Look for warning icons by their data-euiicon-type attribute
-      await waitFor(() => {
-        const warningIcons = screen
+      const warningIcons = screen
           .getByTestId('actionsTable')
           .querySelectorAll('[data-euiicon-type="warning"]');
-        expect(warningIcons.length).toBeGreaterThan(0);
-      });
+      expect(warningIcons.length).toBeGreaterThan(0);
+
     });
   });
 });

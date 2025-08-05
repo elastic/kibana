@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
@@ -21,13 +21,10 @@ describe('rules_summary_route', () => {
     const rule = mockRule();
     const ruleType = mockRuleType();
 
-    const renderResult = render(
-      <RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />
-    );
+    render(<RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />);
 
     await waitFor(() => {
-      // Wait for the component to be rendered
-      expect(renderResult.container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByTestId('euiLoadingSpinner')).toBeInTheDocument();
     });
   });
 });

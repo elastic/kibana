@@ -212,12 +212,12 @@ describe('Rule Definition', () => {
   });
 
   it('hide edit button when user DOES NOT have permissions', async () => {
-    // Since the capabilities are mocked at the module level and can't be easily changed per test,
-    // we'll skip this test for now or adjust the expectation
+    const capabilities = require('../../../lib/capabilities');
+    capabilities.hasAllPrivilege.mockReturnValue(false);
+
     await setup();
     const editButton = screen.queryByTestId('ruleDetailsEditButton');
-    // The edit buttons are still present because the mock returns true
-    expect(editButton).toBeInTheDocument();
+    expect(editButton).toBeNull();
   });
 });
 

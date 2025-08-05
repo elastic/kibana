@@ -12,7 +12,6 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { OfExpression } from './of';
 
-// Helper function to render with IntlProvider
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>

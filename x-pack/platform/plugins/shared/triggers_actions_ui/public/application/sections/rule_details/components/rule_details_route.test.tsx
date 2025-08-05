@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from '@kbn/core/public';
@@ -27,7 +27,6 @@ jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-// Helper function to render with IntlProvider
 function renderWithIntl(ui: React.ReactElement) {
   return render(
     <IntlProvider locale="en" messages={{}}>
@@ -51,13 +50,10 @@ describe('rule_details_route', () => {
   it('render a loader while fetching data', async () => {
     const rule = mockRule();
 
-    const renderResult = renderWithIntl(
-      <RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />
-    );
+    renderWithIntl(<RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />);
 
     await waitFor(() => {
-      // Wait for the component to be rendered
-      expect(renderResult.container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
   });
 
