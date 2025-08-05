@@ -31,9 +31,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       before(async () => {
         await svlCommonPage.loginWithPrivilegedRole();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await svlObltNavigation.navigateToLandingPage();
@@ -47,9 +49,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       after(async () => {
         await svlCases.api.deleteAllCaseItems();
 
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await kibanaServer.savedObjects.cleanStandardList();

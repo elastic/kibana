@@ -6,10 +6,6 @@
  */
 
 import {
-  ENTRA_ID_PACKAGE_NAME,
-  OKTA_PACKAGE_NAME,
-} from '@kbn/security-solution-plugin/public/flyout/entity_details/shared/constants';
-import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
   selectAssetCriticalityLevel,
@@ -32,16 +28,6 @@ import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
 import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
-import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
-import {
-  expandManagedDataEntraPanel,
-  expandManagedDataOktaPanel,
-} from '../../tasks/users/flyout_user_panel';
-import {
-  ASSET_TYPE_FIELD,
-  ENTRA_DOCUMENT_TAB,
-  OKTA_DOCUMENT_TAB,
-} from '../../screens/users/flyout_asset_panel';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -138,42 +124,6 @@ describe(
           cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
             .contains('Unassigned')
             .should('be.visible');
-        });
-      });
-
-      // https://github.com/elastic/kibana/issues/179248
-      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
-        beforeEach(() => {
-          mockFleetIntegrations([
-            {
-              package_name: ENTRA_ID_PACKAGE_NAME,
-              package_title: 'azure entra',
-              latest_package_version: 'test_package_version',
-              installed_package_version: 'test_package_version',
-              is_installed: true,
-              is_enabled: true,
-            },
-            {
-              package_name: OKTA_PACKAGE_NAME,
-              package_title: 'okta',
-              latest_package_version: 'test_package_version',
-              installed_package_version: 'test_package_version',
-              is_installed: true,
-              is_enabled: true,
-            },
-          ]);
-        });
-
-        it('should show okta and azure managed data sections and expand panel', () => {
-          expandFirstAlertUserFlyout();
-
-          expandManagedDataEntraPanel();
-          cy.get(ENTRA_DOCUMENT_TAB).should('have.attr', 'aria-selected');
-          cy.get(ASSET_TYPE_FIELD).should('contain.text', 'microsoft_entra_id_user');
-
-          expandManagedDataOktaPanel();
-          cy.get(OKTA_DOCUMENT_TAB).should('have.attr', 'aria-selected');
-          cy.get(ASSET_TYPE_FIELD).should('contain.text', 'okta_user');
         });
       });
     });

@@ -47,9 +47,6 @@ const streams: StreamPutItem[] = [
             'scope.version': {
               type: 'keyword',
             },
-            observed_timestamp: {
-              type: 'date',
-            },
             trace_id: {
               type: 'keyword',
             },
@@ -69,6 +66,9 @@ const streams: StreamPutItem[] = [
               type: 'long',
             },
             'resource.attributes.host.name': {
+              type: 'keyword',
+            },
+            'resource.attributes.service.name': {
               type: 'keyword',
             },
             'stream.name': {

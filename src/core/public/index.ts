@@ -35,7 +35,7 @@ export type { I18nStart } from '@kbn/core-i18n-browser';
 export type {
   FatalErrorsSetup,
   FatalErrorsStart,
-  FatalErrorInfo,
+  FatalError,
 } from '@kbn/core-fatal-errors-browser';
 export type {
   EvaluationContext,

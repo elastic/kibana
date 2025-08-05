@@ -22,12 +22,12 @@ export interface LayoutNavigationProps {
  */
 export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
   return (
-    <nav
+    <div
       css={styles.root}
       className="kbnChromeLayoutNavigation"
       data-test-subj="kbnChromeLayoutNavigation"
     >
       {children}
-    </nav>
+    </div>
   );
 };

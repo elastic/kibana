@@ -19,10 +19,10 @@ export const GrantedRightsTile: React.FC<{ spaceId: string; sourcerDataView: Dat
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.grantedRights.title', {
-        defaultMessage: 'Granted Rights',
+        defaultMessage: 'Granted rights',
       })}
       label={i18n.translate('xpack.securitySolution.privmon.grantedRights.label', {
-        defaultMessage: 'Granted Rights',
+        defaultMessage: 'Granted rights',
       })}
       getEsqlQuery={(namespace) => getGrantedRightsEsqlCount(namespace, sourcerDataView)}
       id="privileged-user-monitoring-granted-rights"

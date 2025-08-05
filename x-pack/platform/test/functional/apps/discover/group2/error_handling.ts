@@ -16,7 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('errors', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );

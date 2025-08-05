@@ -16,7 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
-import { ActionButtonProps, DashboardTile, DashboardMetadata } from './dashboard_tile';
+import type { RelatedDashboard } from '@kbn/observability-schema';
+import { ActionButtonProps, DashboardTile } from './dashboard_tile';
 
 export function DashboardTiles({
   title,
@@ -26,7 +27,7 @@ export function DashboardTiles({
 }: {
   title: string;
   isLoadingDashboards: boolean;
-  dashboards?: Array<DashboardMetadata & { actionButtonProps?: ActionButtonProps }>;
+  dashboards?: Array<RelatedDashboard & { actionButtonProps?: ActionButtonProps }>;
   dataTestSubj: string;
 }) {
   const wrapWithHeader = (component: React.ReactNode) => {
