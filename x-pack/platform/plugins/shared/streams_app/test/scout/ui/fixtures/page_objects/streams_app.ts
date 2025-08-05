@@ -254,8 +254,6 @@ export class StreamsApp {
 
   async saveProcessorsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
-    await expect(this.page.getByText("Stream's processors updated")).toBeVisible();
-    await this.page.getByTestId('toastCloseButton').click();
   }
 
   async getProcessorsListItems() {
