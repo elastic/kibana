@@ -118,7 +118,6 @@ export class TimeRangeSelector extends Component {
         index: 2,
         label: startLabels[2],
         body: (
-          // eslint-disable-next-line no-use-before-define
           <DatePickerWithInput
             date={datePickerTimes.start}
             onChange={this.setStartTime}
@@ -148,7 +147,6 @@ export class TimeRangeSelector extends Component {
           />
         ),
         body: (
-          // eslint-disable-next-line no-use-before-define
           <DatePickerWithInput
             date={datePickerTimes.end}
             onChange={this.setEndTime}
