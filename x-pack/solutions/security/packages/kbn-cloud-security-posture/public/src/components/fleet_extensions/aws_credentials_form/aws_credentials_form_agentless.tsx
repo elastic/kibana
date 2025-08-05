@@ -102,6 +102,8 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
+  const showCloudCredentialsButton = showCloudTemplate(AWS_PROVIDER);
+
   const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({
         input,

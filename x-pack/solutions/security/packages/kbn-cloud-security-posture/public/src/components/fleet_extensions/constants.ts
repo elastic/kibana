@@ -27,7 +27,6 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
 };
 
 // Azure constants
-export const AZURE_PROVIDER_TEST_ID = 'cloudSetupAzureTestId';
 export const AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
   MANUAL: 'manual',
@@ -48,7 +47,6 @@ export const AZURE_CREDENTIALS_TYPE = {
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
-export const AWS_PROVIDER_TEST_ID = 'cloudSetupAwsTestId';
 export const AWS_SETUP_FORMAT = {
   CLOUD_FORMATION: 'cloud_formation',
   MANUAL: 'manual',
@@ -73,7 +71,6 @@ export const DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE =
   AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 
 // GCP constants
-export const GCP_PROVIDER_TEST_ID = 'cloudSetupGcpTestId';
 export const GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',
   MANUAL: 'manual',
