@@ -12,7 +12,6 @@ import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import { once } from 'lodash';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { LOCKS_CONCRETE_INDEX_NAME, setupLockManagerIndex } from './setup_lock_manager_index';
