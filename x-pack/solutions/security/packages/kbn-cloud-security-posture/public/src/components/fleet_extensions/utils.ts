@@ -369,7 +369,6 @@ export const getCloudShellDefaultValue = (
   if (!packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
-
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
