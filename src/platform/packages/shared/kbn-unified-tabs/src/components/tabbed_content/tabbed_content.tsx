@@ -133,6 +133,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     (item: TabItem) => {
       const newItem = createItem();
       newItem.duplicatedFromId = item.id;
+
       const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
       const escapedCopyLabel = escapeRegExp(copyLabel);
       const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
@@ -144,6 +145,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       newItem.label = nextNumber
         ? `${baseLabel} (${copyLabel}) ${nextNumber}`
         : `${baseLabel} (${copyLabel})`;
+
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
       changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
     },
