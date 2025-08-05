@@ -46,7 +46,7 @@ export const policyFactory = ({
       },
       device_control: {
         enabled: true,
-        usb_storage: DeviceControlAccessLevel.block,
+        usb_storage: DeviceControlAccessLevel.deny_all,
       },
       malware: {
         mode: ProtectionModes.prevent,
@@ -116,7 +116,7 @@ export const policyFactory = ({
       },
       device_control: {
         enabled: true,
-        usb_storage: DeviceControlAccessLevel.block,
+        usb_storage: DeviceControlAccessLevel.deny_all,
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,

@@ -281,16 +281,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables advanced mode for Trusted Apps creation and update
    */
   trustedAppsAdvancedMode: false,
-  /**
-   * Enables the ability to import and migration dashboards through automatic migration service
-   */
-  automaticDashboardsMigration: false,
 
   /**
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
-  trustedDevicesEnabled: false,
+  trustedDevices: false,
+
+  /**
+   * Enables the ability to import and migration dashboards through automatic migration service
+   */
+  automaticDashboardsMigration: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

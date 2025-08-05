@@ -873,6 +873,14 @@ export const getSecurityV3SubFeaturesMap = ({
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
     ],
+    ...((experimentalFeatures.trustedDevices
+      ? [
+          [
+            SecuritySubFeatureId.trustedDevices,
+            enableSpaceAwarenessIfNeeded(trustedDevicesSubFeature()),
+          ],
+        ]
+      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
     [
       SecuritySubFeatureId.hostIsolationExceptionsBasic,
       enableSpaceAwarenessIfNeeded(hostIsolationExceptionsBasicSubFeature()),
@@ -909,19 +917,6 @@ export const getSecurityV3SubFeaturesMap = ({
       SecuritySubFeatureId.workflowInsights,
       enableSpaceAwarenessIfNeeded(workflowInsightsSubFeature()),
     ]);
-  }
-
-  if (experimentalFeatures.trustedDevicesEnabled) {
-    // place between trusted applications and host isolation exceptions
-    const trustedAppsIndex = securitySubFeaturesList.findIndex(
-      ([id]) => id === SecuritySubFeatureId.trustedApplications
-    );
-    if (trustedAppsIndex !== -1) {
-      securitySubFeaturesList.splice(trustedAppsIndex + 1, 0, [
-        SecuritySubFeatureId.trustedDevices,
-        enableSpaceAwarenessIfNeeded(trustedDevicesSubFeature()),
-      ]);
-    }
   }
 
   const securitySubFeaturesMap = new Map<SecuritySubFeatureId, SubFeatureConfig>(

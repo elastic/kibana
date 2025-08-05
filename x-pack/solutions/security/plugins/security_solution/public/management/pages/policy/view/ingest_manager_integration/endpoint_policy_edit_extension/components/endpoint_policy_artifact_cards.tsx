@@ -217,9 +217,7 @@ export const EndpointPolicyArtifactCards = memo<EndpointPolicyArtifactCardsProps
     const isEnterprise = useLicense().isEnterprise();
 
     const trustedDevicesVisible =
-      useIsExperimentalFeatureEnabled('trustedDevicesEnabled') &&
-      canReadTrustedDevices &&
-      isEnterprise;
+      useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
 
     if (loading) {
       return <EuiSkeletonText lines={4} />;

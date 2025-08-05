@@ -139,7 +139,7 @@ describe('Fleet integrations', () => {
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
     experimentalFeatures = {
-      trustedDevicesEnabled: true,
+      trustedDevices: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -1108,9 +1108,9 @@ describe('Fleet integrations', () => {
         expect(removeDeviceControlSpy).toHaveBeenCalledWith(mockPolicy);
       });
 
-      it('should remove device control when trustedDevicesEnabled experimental feature is disabled', async () => {
+      it('should remove device control when trustedDevices experimental feature is disabled', async () => {
         // @ts-expect-error
-        experimentalFeatures.trustedDevicesEnabled = false;
+        experimentalFeatures.trustedDevices = false;
 
         const mockPolicy = policyFactory();
         // Add some device control settings to test removal
@@ -1147,7 +1147,7 @@ describe('Fleet integrations', () => {
       it('should not remove device control when both features are enabled', async () => {
         // Reset to enabled states
         // @ts-expect-error
-        experimentalFeatures.trustedDevicesEnabled = true;
+        experimentalFeatures.trustedDevices = true;
         // @ts-expect-error
         productFeaturesService = createProductFeaturesServiceMock(ALL_PRODUCT_FEATURE_KEYS);
 

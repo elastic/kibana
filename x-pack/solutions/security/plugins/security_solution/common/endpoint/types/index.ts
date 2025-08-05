@@ -1183,8 +1183,8 @@ export enum AntivirusRegistrationModes {
 export const DeviceControlAccessLevel = {
   audit: 'audit', // read and write
   read_only: 'read_only',
-  execute_only: 'no_execute',
-  block: 'deny_all',
+  no_execute: 'no_execute',
+  deny_all: 'deny_all',
 } as const;
 
 export type DeviceControlAccessLevel =

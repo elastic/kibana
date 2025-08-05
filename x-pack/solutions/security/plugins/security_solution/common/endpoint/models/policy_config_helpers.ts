@@ -111,11 +111,6 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
       popup: {
         ...result.windows.popup,
         ...getDisabledWindowsSpecificPopups(result),
-        device_control: {
-          ...result.windows.popup.device_control,
-          enabled: false,
-          message: result.windows.popup.device_control?.message || '',
-        },
       },
       device_control: {
         ...result.windows.device_control,
@@ -223,6 +218,7 @@ const getDisabledWindowsSpecificPopups = (policy: PolicyConfig) => ({
   device_control: {
     ...policy.windows.popup.device_control,
     enabled: false,
+    message: policy.windows.popup.device_control?.message || '',
   },
 });
 

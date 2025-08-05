@@ -70,7 +70,7 @@ export const createDefaultPolicy = (
 
   if (
     !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointTrustedDevices) ||
-    !experimentalFeatures.trustedDevicesEnabled
+    !experimentalFeatures.trustedDevices
   ) {
     defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
   }
