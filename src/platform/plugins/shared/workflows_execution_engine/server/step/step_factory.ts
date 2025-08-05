@@ -21,6 +21,7 @@ import {
 } from './if_step';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -30,7 +31,7 @@ import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 
 export class StepFactory {
   public create<TStep extends BaseStep>(
-    step: TStep, // Use z.infer<typeof StepSchema> when fully defined
+    step: TStep, // TODO: TStep must refer to a node type, not BaseStep (IfElseNode, ForeachNode, etc.)
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     workflowState: WorkflowExecutionRuntimeManager
@@ -55,7 +56,7 @@ export class StepFactory {
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
-      // return new AtomicStepImpl(step as AtomicStep, contextManager);
+        return new AtomicStepImpl(step as any, contextManager, connectorExecutor, workflowState);
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':
