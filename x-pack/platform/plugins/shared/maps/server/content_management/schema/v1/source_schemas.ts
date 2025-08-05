@@ -235,3 +235,26 @@ export const ESGeoLineSourceSchema = ESAggSourceSchema.extends(
     unknowns: 'forbid',
   }
 );
+
+export const ESPewPewSourceSchema = ESAggSourceSchema.extends(
+  {
+    destGeoField: schema.string({
+      meta: {
+        description: `Field containing indexed geo-point values.`,
+      },
+    }),
+    sourceGeoField: schema.string({
+      meta: {
+        description: `Field containing indexed geo-point values.`,
+      },
+    }),
+    type: schema.literal(SOURCE_TYPES.ES_PEW_PEW),
+  },
+  {
+    meta: {
+      description:
+        'Vector feature source returning lines from Elasticsearch nested geotile_grid aggregation. Results grouped by destintation point, creating one feature per destination point and source geotile_grid bucket.',
+    },
+    unknowns: 'forbid',
+  }
+);

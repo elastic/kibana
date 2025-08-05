@@ -100,12 +100,6 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   topHitsSize: number;
 };
 
-export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
-  type: SOURCE_TYPES.ES_PEW_PEW;
-  sourceGeoField: string;
-  destGeoField: string;
-};
-
 export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
   type: string;
   whereQuery?: Query;

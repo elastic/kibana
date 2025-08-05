@@ -18,4 +18,5 @@ export type {
   EMSTMSSourceDescriptor,
   ESGeoGridSourceDescriptor,
   ESGeoLineSourceDescriptor,
+  ESPewPewSourceDescriptor,
 } from '../../server';
