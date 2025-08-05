@@ -1057,6 +1057,7 @@ x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/w
 x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
