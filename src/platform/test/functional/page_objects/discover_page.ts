@@ -245,7 +245,10 @@ export class DiscoverPageObject extends FtrService {
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'
       );
-      return (await breakdownButton.getAttribute('data-selected-value')) === optionValue;
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
+      );
     });
   }
 
