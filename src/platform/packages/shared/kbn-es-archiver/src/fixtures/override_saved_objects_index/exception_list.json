@@ -22,7 +22,6 @@
   "x-pack/platform/test/fixtures/es_archives/fleet/agents",
   "x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules",
   "x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks",
-  "x-pack/solutions/security/test/fixtures/es_archives/security_solution/import_rule_connector",
   "x-pack/solutions/security/test/fixtures/es_archives/security_solution/migrations",
   "x-pack/solutions/security/test/fixtures/es_archives/security_solution/resolve_read_rules/7_14",
   "x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0",
