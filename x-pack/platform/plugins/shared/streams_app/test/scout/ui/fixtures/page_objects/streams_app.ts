@@ -223,6 +223,19 @@ export class StreamsApp {
     await processorEditButton.click();
   }
 
+  async clickManageDataSourcesButton() {
+    await this.page.getByTestId('streamsAppProcessingManageDataSourcesButton').click();
+  }
+
+  async addDataSource(type: 'kql' | 'custom') {
+    await this.page.getByTestId('streamsAppProcessingAddDataSourcesContextMenu').click();
+    const dataSourcesMap = {
+      kql: 'streamsAppProcessingAddKqlDataSource',
+      custom: 'streamsAppProcessingAddCustomDataSource',
+    };
+    await this.page.getByTestId(dataSourcesMap[type]).click();
+  }
+
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
@@ -245,6 +258,18 @@ export class StreamsApp {
     await this.page.keyboard.press('Backspace');
     // Fill with new condition
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async fillCustomSamplesEditor(value: string) {
+    // Clean previous content
+    await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppCustomSamplesDataSourceEditor')
+      .getByRole('textbox')
+      .fill(value);
   }
 
   async removeProcessor(pos: number) {
@@ -281,6 +306,14 @@ export class StreamsApp {
     expect(actualOrder).toStrictEqual(expectedOrder);
   }
 
+  getDataSourcesList() {
+    return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  getDataSourcesListItems() {
+    return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
+  }
+
   /**
    * Utility for data preview
    */
@@ -311,5 +344,10 @@ export class StreamsApp {
   async closeToast() {
     await this.page.getByTestId('toastCloseButton').click();
     await expect(this.page.getByRole('log')).toBeHidden();
+  }
+
+  async closeFlyout() {
+    await this.page.getByTestId('euiFlyoutCloseButton').click();
+    await expect(this.page.getByTestId('euiFlyoutCloseButton')).toBeHidden();
   }
 }
