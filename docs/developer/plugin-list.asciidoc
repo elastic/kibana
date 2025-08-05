@@ -933,8 +933,8 @@ require the encrypted saved objects plugin directly.
 |Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/transform/readme.md[transform]
-|This plugin provides access to the transforms features provided by Elastic.
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/transform[transform]
+|WARNING: Missing or empty README.
 
 
 |<<translations-plugin>>
