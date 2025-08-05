@@ -489,7 +489,13 @@ const runTests = (
       const mon = await saveMonitor({ ...httpMonitor, name }, legacySyntheticsMonitorTypeSingle);
       expect(mon.name).eql(name);
 
-      retry.try(async () => {
+      // adding a parameter to trigger the task
+      await supertestEditorWithApiKey
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .send({ key: 'test', value: 'http://proxy.com' })
+        .expect(200);
+
+      await retry.try(async () => {
         // first verify the monitor has been created
         // Verify migration
         const response = await kibanaServer.savedObjects.find({
@@ -549,7 +555,13 @@ const runTests = (
       );
       expect(mon.name).eql(name);
 
-      retry.try(async () => {
+      // adding a parameter to trigger the task
+      await supertestEditorWithApiKey
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .send({ key: 'test2', value: 'http://proxy.com' })
+        .expect(200);
+
+      await retry.try(async () => {
         // Verify migration
         const response = await kibanaServer.savedObjects.find({
           type: syntheticsMonitorSavedObjectType,
