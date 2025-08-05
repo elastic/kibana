@@ -7,15 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
-import type {
-  EuiThemeComputed,
+import {
+  type EuiThemeComputed,
   EuiLoadingSpinner,
   EuiFlexItem,
   EuiText,
-  EuiFlexGroupProps,
+  type EuiFlexGroupProps,
   EuiLink,
   EuiToolTip,
-  useEuiTheme,
+  useEuiTheme
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';

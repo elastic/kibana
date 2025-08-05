@@ -16,10 +16,10 @@ import type {
   QueryMatch,
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
-import type {
-  RowRendererId,
-  TimelineType,
-  DataProviderType,
+import {
+  type RowRendererId,
+  type TimelineType,
+  type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
   TimelineTypeEnum,

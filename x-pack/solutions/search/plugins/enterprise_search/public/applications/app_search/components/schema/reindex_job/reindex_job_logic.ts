@@ -43,7 +43,6 @@ export const ReindexJobLogic = kea<MakeLogicType<ReindexJobValues, ReindexJobAct
     fieldCoercionErrors: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onLoadSuccess: (_, { fieldCoercionErrors }) => fieldCoercionErrors,
       },
     ],
