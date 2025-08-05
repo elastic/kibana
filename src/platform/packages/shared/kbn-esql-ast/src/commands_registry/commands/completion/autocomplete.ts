@@ -9,13 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
 import { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
 import {
   pipeCompleteItem,
-  getNewUserDefinedColumnSuggestion,
   assignCompletionItem,
+  getNewUserDefinedColumnSuggestion,
 } from '../../complete_items';
 import {
   getFieldsOrFunctionsSuggestions,
@@ -51,16 +52,17 @@ function getPosition(
 ): CompletionPosition | undefined {
   const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
 
+  const paramsMap = command.args[1] as ast.ESQLMap | undefined;
+
   if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
     return CompletionPosition.AFTER_WITH;
   }
 
-  // Checking for open bracket after WITH and not a closing one
-  if (/WITH\s*{\s*[^}]*$/i.test(query)) {
+  if (paramsMap?.text && paramsMap.incomplete) {
     return CompletionPosition.WITHIN_MAP_EXPRESSION;
   }
 
-  if (/WITH\s*{.*}\s*$/i.test(query)) {
+  if (paramsMap && !paramsMap.incomplete) {
     return CompletionPosition.AFTER_COMMAND;
   }
 
@@ -157,6 +159,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
   const position = getPosition(innerText, command, context);
+
   const endpoints = context?.inferenceEndpoints;
 
   const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
@@ -211,7 +214,7 @@ export async function autocomplete(
         suggestions.push(defaultPrompt);
       }
 
-      if (position !== CompletionPosition.AFTER_TARGET_ID) {
+      if (position !== CompletionPosition.AFTER_TARGET_ID && !lastWord) {
         suggestions.push(
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
         );
