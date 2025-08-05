@@ -128,7 +128,6 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.fullScreen,
         id: 'full-screen',
         iconType: 'fullScreen',
-        iconOnly: true,
         testId: 'dashboardFullScreenMode',
         run: () => dashboardApi.setFullScreenMode(true),
         disableButton: disableTopNav,
@@ -172,8 +171,7 @@ export const useDashboardMenuItems = ({
         emphasize: isCreatingNewDashboard,
         id: 'interactive-save',
         testId: 'dashboardInteractiveSaveMenuItem',
-        iconType: lastSavedId ? 'copy' : 'save',
-        iconOnly: !isCreatingNewDashboard,
+        iconType: lastSavedId ? undefined : 'save',
         run: dashboardInteractiveSave,
         label: isCreatingNewDashboard
           ? topNavStrings.quickSave.label
@@ -207,8 +205,6 @@ export const useDashboardMenuItems = ({
       settings: {
         ...topNavStrings.settings,
         id: 'settings',
-        iconType: 'gear',
-        iconOnly: true,
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         htmlId: 'dashboardSettingsButton',
