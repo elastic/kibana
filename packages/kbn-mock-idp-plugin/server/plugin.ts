@@ -44,15 +44,15 @@ const projectToAlias = new Map<string, string>([
 
 const readServerlessRoles = (
   projectType: string,
-  productTier: 'complete' | 'logs_essentials' | 'essentials' | 'search_ai_lake'
+  productTier?: 'complete' | 'logs_essentials' | 'essentials' | 'search_ai_lake'
 ) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
-    const rolesResourcePath = resolve(
-      SERVERLESS_ROLES_ROOT_PATH,
-      alias,
-      productTier === 'search_ai_lake' ? 'search_ai_lake.roles.yml' : 'roles.yml'
-    );
+    const rolesResourcePath =
+      productTier
+        ? resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml')
+        : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
+
     return readRolesFromResource(rolesResourcePath);
   } else {
     throw new Error(`Unsupported projectType: ${projectType}`);
@@ -101,9 +101,8 @@ export const plugin: PluginInitializer<
           if (roles.length === 0) {
             const projectType = plugins.cloud?.serverless?.projectType;
             const productTier = plugins.cloud?.serverless?.productTier;
-            const shouldLoadServerlessRoles = projectType && productTier;
             roles.push(
-              ...(shouldLoadServerlessRoles ? readServerlessRoles(projectType, productTier) : readStatefulRoles())
+              ...(projectType ? readServerlessRoles(projectType, productTier) : readStatefulRoles())
             );
           }
           return response.ok({

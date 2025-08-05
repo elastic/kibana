@@ -64,11 +64,13 @@ interface BaseOptions extends ImageOptions {
 }
 
 export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
+export const ServerlessProductTiers = new Set<string>(['essentials', 'logs_essentials', 'complete', 'search_ai_lake']);
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
 export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
+export type ServerlessProductTier = 'essentials' | 'logs_essentials' | 'complete' | 'search_ai_lake';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
@@ -79,6 +81,8 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   host?: string;
   /**  Serverless project type */
   projectType: ServerlessProjectType;
+  /** Product tier for serverless project */
+  productTier?: ServerlessProductTier;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Full path where the ES cluster will store data */
@@ -630,6 +634,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     files,
     resources,
     projectType,
+    productTier,
     dataPath = 'stateless',
   } = options;
   const objectStorePath = resolve(basePath, dataPath);
@@ -690,7 +695,9 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     : {};
 
   // Read roles for the specified projectType
-  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+  const rolesResourcePath = productTier
+    ? resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml')
+    : resolve(SERVERLESS_ROLES_ROOT_PATH, projectType  , 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
 

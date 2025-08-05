@@ -1,6 +1,5 @@
 # -----
-# Copy from internal roles config in elasticsearch-controller
-# -----
+# Source: https://github.com/elastic/elasticsearch-controller/blob/main/internal/config/roles/security.yaml# -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
   cluster: []
