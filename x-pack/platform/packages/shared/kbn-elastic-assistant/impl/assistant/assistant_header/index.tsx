@@ -161,34 +161,45 @@ export const AssistantHeader: React.FC<Props> = ({
           padding-bottom: ${euiTheme.size.s};
         `}
       >
-        <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
+        <EuiFlexGroup gutterSize="xs" wrap justifyContent="flexEnd">
           <EuiFlexItem
             css={css`
               overflow: hidden;
+              min-width: 200px;
             `}
           >
-            {isLoading ? (
-              <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
-            ) : (
-              <AssistantTitle
-                isDisabled={isDisabled || selectedConversation?.id === '' || !isConversationOwner}
-                title={selectedConversation?.title || NEW_CHAT}
-                selectedConversation={selectedConversation}
-                refetchCurrentUserConversations={refetchCurrentUserConversations}
-              />
-            )}
-          </EuiFlexItem>
+            <EuiFlexGroup alignItems={'center'} justifyContent="flexStart" gutterSize="s">
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  overflow: hidden;
+                `}
+              >
+                {isLoading ? (
+                  <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
+                ) : (
+                  <AssistantTitle
+                    isDisabled={
+                      isDisabled || selectedConversation?.id === '' || !isConversationOwner
+                    }
+                    title={selectedConversation?.title || NEW_CHAT}
+                    selectedConversation={selectedConversation}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
+                  />
+                )}
+              </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <SharedBadge
-              isConversationOwner={isConversationOwner}
-              selectedConversation={selectedConversation}
-            />
+              <EuiFlexItem grow={false}>
+                <SharedBadge
+                  isConversationOwner={isConversationOwner}
+                  selectedConversation={selectedConversation}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
-              <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xs" alignItems={'center'} justifyContent="spaceBetween">
+              <EuiFlexItem data-test-subj="heyhey1">
                 <ElasticLLMCostAwarenessTour
                   isDisabled={isDisabled}
                   selectedConnectorId={selectedConnectorId}
@@ -204,13 +215,15 @@ export const AssistantHeader: React.FC<Props> = ({
                   />
                 </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
-              <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
-                <SettingsContextMenu
-                  isConversationOwner={isConversationOwner}
-                  isDisabled={isDisabled}
-                  onChatCleared={onChatCleared}
-                  selectedConversation={selectedConversation}
-                />
+              <EuiFlexItem data-test-subj="heyhey2">
+                <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
+                  <SettingsContextMenu
+                    isConversationOwner={isConversationOwner}
+                    isDisabled={isDisabled}
+                    onChatCleared={onChatCleared}
+                    selectedConversation={selectedConversation}
+                  />
+                </div>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
