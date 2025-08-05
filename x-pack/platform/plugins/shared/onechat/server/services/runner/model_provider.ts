@@ -9,8 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider, ScopedModel } from '@kbn/onechat-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { getConnectorList } from '@kbn/inference-common';
-import { getDefaultConnector } from './utils';
+import { getConnectorList, getDefaultConnector } from './utils';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;

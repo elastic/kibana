@@ -25,10 +25,9 @@
     "@kbn/wc-genai-utils",
     "@kbn/inference-plugin",
     "@kbn/actions-plugin",
-    "@kbn/i18n",
-    "@kbn/inference-common"
+    "@kbn/i18n"
   ],
   "exclude": [
     "target/**/*"
   ]
-} 
+}
