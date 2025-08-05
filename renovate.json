@@ -2384,6 +2384,7 @@
     {
       "groupName": "workchat gen-ai dependencies",
       "matchDepNames": [
+        "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
         "@n8n/json-schema-to-zod",
         "expr-eval"
