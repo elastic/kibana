@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-import type { Query } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
 import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
 
@@ -39,15 +38,6 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   narrowByGlobalTime: boolean;
   narrowByMapBounds: boolean;
   applyForceRefresh: boolean;
-};
-
-type AbstractESSourceDescriptor = {
-  // id: UUID
-  id: string;
-  indexPatternId: string;
-  applyGlobalQuery?: boolean;
-  applyGlobalTime?: boolean;
-  applyForceRefresh?: boolean;
 };
 
 type AbstractAggDescriptor = {
@@ -81,27 +71,6 @@ export type PercentileAggDescriptor = AbstractAggDescriptor & {
 };
 
 export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
-
-type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
-  metrics?: AggDescriptor[];
-};
-
-export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
-  type: string;
-  whereQuery?: Query;
-};
-
-export type ESDistanceSourceDescriptor = AbstractESJoinSourceDescriptor & {
-  distance: number; // km
-  geoField: string;
-  type: SOURCE_TYPES.ES_DISTANCE_SOURCE;
-};
-
-export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
-  term: string; // term field name
-  size?: number;
-  type: SOURCE_TYPES.ES_TERM_SOURCE;
-};
 
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
@@ -163,8 +132,3 @@ export type TableSourceDescriptor = {
   __columns: InlineFieldDescriptor[];
   term: string;
 };
-
-export type JoinSourceDescriptor =
-  | ESDistanceSourceDescriptor
-  | ESTermSourceDescriptor
-  | TableSourceDescriptor;

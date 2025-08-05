@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ESDistanceSourceDescriptor, ESTermSourceDescriptor } from '../../server';
+import type { TableSourceDescriptor } from './source_descriptor_types';
+
 export type * from './data_request_descriptor_types';
 export type * from './source_descriptor_types';
 export type * from './layer_descriptor_types';
@@ -13,6 +16,7 @@ export type * from './style_property_descriptor_types';
 
 export type {
   AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
@@ -20,5 +24,12 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
 } from '../../server';
+
+export type JoinSourceDescriptor =
+  | ESDistanceSourceDescriptor
+  | ESTermSourceDescriptor
+  | TableSourceDescriptor;

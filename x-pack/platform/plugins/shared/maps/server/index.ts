@@ -11,6 +11,7 @@ import { configSchema, MapsXPackConfig } from './config';
 
 export type {
   AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
@@ -18,6 +19,8 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
 } from './content_management';
 

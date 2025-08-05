@@ -16,6 +16,7 @@ import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } fro
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
@@ -49,6 +50,7 @@ import {
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  JoinSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { isESVectorTileSource } from '../../sources/es_source';
@@ -198,49 +200,55 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     const clonedDescriptor = clones[0] as VectorLayerDescriptor;
     if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
-        if (!joinDescriptor.right) {
-          return;
-        }
-        const joinSourceDescriptor =
-          joinDescriptor.right as Partial<AbstractESJoinSourceDescriptor>;
-        const originalJoinId = joinSourceDescriptor.id ?? '';
+      clonedDescriptor.joins.forEach(
+        (
+          joinDescriptor: Partial<
+            JoinDescriptor & { right: Writable<Partial<JoinSourceDescriptor>> }
+          >
+        ) => {
+          if (!joinDescriptor.right) {
+            return;
+          }
+          const joinSourceDescriptor =
+            joinDescriptor.right as Partial<AbstractESJoinSourceDescriptor>;
+          const originalJoinId = joinSourceDescriptor.id ?? '';
 
-        // right.id is uuid used to track requests in inspector
-        const clonedJoinId = uuidv4();
-        joinDescriptor.right.id = clonedJoinId;
+          // right.id is uuid used to track requests in inspector
+          const clonedJoinId = uuidv4();
+          joinDescriptor.right.id = clonedJoinId;
 
-        // Update all data driven styling properties using join fields
-        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics = joinSourceDescriptor.metrics ?? [{ type: AGG_TYPE.COUNT }];
-          metrics.forEach((metricsDescriptor: AggDescriptor) => {
-            const originalJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: originalJoinId,
-            });
-            const newJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: clonedJoinId,
-            });
+          // Update all data driven styling properties using join fields
+          if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
+            const metrics = joinSourceDescriptor.metrics ?? [{ type: AGG_TYPE.COUNT }];
+            metrics.forEach((metricsDescriptor: AggDescriptor) => {
+              const originalJoinKey = getJoinAggKey({
+                aggType: metricsDescriptor.type,
+                aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+                rightSourceId: originalJoinId,
+              });
+              const newJoinKey = getJoinAggKey({
+                aggType: metricsDescriptor.type,
+                aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+                rightSourceId: clonedJoinId,
+              });
 
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
-              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
-                const options = styleProp.options as DynamicStylePropertyOptions;
-                if (
-                  options.field &&
-                  options.field.origin === FIELD_ORIGIN.JOIN &&
-                  options.field.name === originalJoinKey
-                ) {
-                  options.field.name = newJoinKey;
+              Object.keys(clonedDescriptor.style.properties).forEach((key) => {
+                const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
+                if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+                  const options = styleProp.options as DynamicStylePropertyOptions;
+                  if (
+                    options.field &&
+                    options.field.origin === FIELD_ORIGIN.JOIN &&
+                    options.field.name === originalJoinKey
+                  ) {
+                    options.field.name = newJoinKey;
+                  }
                 }
-              }
+              });
             });
-          });
+          }
         }
-      });
+      );
     }
     return [clonedDescriptor];
   }

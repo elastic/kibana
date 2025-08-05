@@ -7,6 +7,7 @@
 
 export type {
   AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,
   EMSFileSourceDescriptor,
   EMSTMSSourceDescriptor,
@@ -14,6 +15,8 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
 } from './schema/v1/types';
 

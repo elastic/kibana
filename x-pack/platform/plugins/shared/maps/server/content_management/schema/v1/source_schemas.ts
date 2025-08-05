@@ -75,6 +75,18 @@ export const EMSTMSSourceSchema = schema.object(
   }
 );
 
+export const KibanaTilemapSourceSchema = schema.object(
+  {
+    type: schema.literal(SOURCE_TYPES.KIBANA_TILEMAP),
+  },
+  {
+    meta: {
+      description: 'Tile map service configured by map.tilemap.url kibana.yml setting.',
+    },
+    unknowns: 'forbid',
+  }
+);
+
 // base schema for Elasticsearch DSL sources
 export const ESSourceSchema = schema.object(
   {
@@ -234,9 +246,11 @@ export const AggSchema = schema.oneOf([countAggSchema, fieldedAggSchema, percent
 
 // base schema for Elasticsearch DSL aggregation sources
 export const ESAggSourceSchema = ESSourceSchema.extends({
-  metrics: schema.maybe(schema.arrayOf(AggSchema, {
-    defaultValue: [{ type: AGG_TYPE.COUNT }]
-  })),
+  metrics: schema.maybe(
+    schema.arrayOf(AggSchema, {
+      defaultValue: [{ type: AGG_TYPE.COUNT }],
+    })
+  ),
 });
 
 export const ESGeoGridSourceSchema = ESAggSourceSchema.extends(
@@ -342,12 +356,49 @@ export const ESPewPewSourceSchema = ESAggSourceSchema.extends(
   }
 );
 
-export const KibanaTilemapSourceSchema = schema.object({
-  type: schema.literal(SOURCE_TYPES.KIBANA_TILEMAP),
-}, {
-  meta: {
-    description:
-      'Tile map service configured in kibana.yml map.tilemap.url.',
-  },
-  unknowns: 'forbid',
+// TODO - replace querySchema with reusable querySchema
+export const querySchema = schema.object({
+  query: schema.oneOf([
+    schema.string({
+      meta: {
+        description:
+          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
+      },
+    }),
+    schema.recordOf(schema.string(), schema.any()),
+  ]),
+  language: schema.string({
+    meta: { description: 'The query language such as KQL or Lucene.' },
+  }),
 });
+
+export const ESJoinSourceSchema = ESAggSourceSchema.extends({
+  type: schema.string(),
+  whereQuery: schema.maybe(querySchema),
+});
+
+export const ESDistanceSourceSchema = ESJoinSourceSchema.extends(
+  {
+    distance: schema.number(),
+    geoField: schema.string(),
+    type: schema.literal(SOURCE_TYPES.ES_DISTANCE_SOURCE),
+  },
+  {
+    unknowns: 'forbid',
+  }
+);
+
+export const ESTermSourceSchema = ESJoinSourceSchema.extends(
+  {
+    size: schema.maybe(
+      schema.number({
+        min: 1,
+      })
+    ),
+    term: schema.string(),
+    type: schema.literal(SOURCE_TYPES.ES_TERM_SOURCE),
+  },
+  {
+    unknowns: 'forbid',
+  }
+);

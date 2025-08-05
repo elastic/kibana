@@ -17,7 +17,7 @@ import {
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
+import { AbstractSourceDescriptor, JoinSourceDescriptor } from '.';
 import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
