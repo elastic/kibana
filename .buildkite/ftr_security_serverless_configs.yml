@@ -19,6 +19,10 @@ disabled:
   # MKI only configs files
   - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
 
+  # Detection Rules Management base configs
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.essentials.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/configs/serverless/rules_management.complete.config.ts
+
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
