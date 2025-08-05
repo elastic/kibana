@@ -6,28 +6,24 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import {
-  cspIntegrationDocsNavigation,
-  AZURE_SETUP_FORMAT,
-  AZURE_CREDENTIALS_TYPE,
-  CLOUDBEAT_AZURE,
-} from '../constants';
-import {
-  AzureCredentialsType,
-  AzureSetupFormat,
-  NewPackagePolicyPostureInput,
-  UpdatePolicy,
-} from '../types';
+import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
+import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
 import { getArmTemplateUrlFromCspmPackage } from './azure_utils';
+import {
+  AZURE_PROVIDER,
+  GCP_PROVIDER,
+  getCloudSetupPolicyType,
+  getCloudSetupProviderOverviewPath,
+} from '../mappings';
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
+  input: NewPackagePolicyInput,
   hasArmTemplateUrl: boolean
 ): AzureSetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
@@ -41,13 +37,13 @@ const getSetupFormatFromInput = (
   return AZURE_SETUP_FORMAT.ARM_TEMPLATE;
 };
 
-const getAzureCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
-): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type']?.value;
+const getAzureCredentialsType = (input: NewPackagePolicyInput): AzureCredentialsType | undefined =>
+  input.streams[0].vars?.['azure.credentials.type']?.value;
 
 const getAzureArmTemplateUrl = (newPolicy: NewPackagePolicy) => {
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === CLOUDBEAT_AZURE)
-    ?.config?.arm_template_url?.value;
+  const template: string | undefined = newPolicy?.inputs?.find(
+    (i) => i.type === getCloudSetupPolicyType(GCP_PROVIDER)
+  )?.config?.arm_template_url?.value;
 
   return template || undefined;
 };
@@ -58,8 +54,8 @@ const updateAzureArmTemplateUrlInPolicy = (
   templateUrl: string | undefined
 ) => {
   if (
-    newPolicy.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.config?.arm_template_url ===
-    templateUrl
+    newPolicy.inputs.find((input) => input.type === getCloudSetupPolicyType(GCP_PROVIDER))?.config
+      ?.arm_template_url === templateUrl
   ) {
     return;
   }
@@ -68,7 +64,7 @@ const updateAzureArmTemplateUrlInPolicy = (
     updatedPolicy: {
       ...newPolicy,
       inputs: newPolicy.inputs.map((input) => {
-        if (input.type === CLOUDBEAT_AZURE) {
+        if (input.type === getCloudSetupPolicyType(GCP_PROVIDER)) {
           return {
             ...input,
             config: { arm_template_url: { value: templateUrl } },
@@ -108,7 +104,8 @@ const useUpdateAzureArmTemplate = ({
 
     if (
       templateUrl !==
-      newPolicy?.inputs.find((input) => input.type === CLOUDBEAT_AZURE)?.config?.arm_template_url
+      newPolicy?.inputs.find((input) => input.type === getCloudSetupPolicyType(GCP_PROVIDER))
+        ?.config?.arm_template_url
     ) {
       updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
     }
@@ -124,7 +121,7 @@ export const useAzureCredentialsForm = ({
   isValid,
 }: {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: NewPackagePolicyInput;
   packageInfo: PackageInfo;
   updatePolicy: UpdatePolicy;
   isValid: boolean;
@@ -154,7 +151,7 @@ export const useAzureCredentialsForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupFormat, input.type]);
 
-  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
+  const documentationLink = getCloudSetupProviderOverviewPath(AZURE_PROVIDER);
 
   useUpdateAzureArmTemplate({
     packageInfo,
@@ -174,7 +171,7 @@ export const useAzureCredentialsForm = ({
       lastManualCredentialsType.current = getAzureCredentialsType(input);
 
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, {
           'azure.credentials.type': {
             value: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
             type: 'text',
@@ -184,7 +181,7 @@ export const useAzureCredentialsForm = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+        updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, {
           'azure.credentials.type': {
             value: lastManualCredentialsType.current || defaultAzureManualCredentialType,
             type: 'text',

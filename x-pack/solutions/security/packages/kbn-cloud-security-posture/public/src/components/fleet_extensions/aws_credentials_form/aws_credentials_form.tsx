@@ -21,7 +21,8 @@ import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { AwsSetupFormat, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { AwsSetupFormat, UpdatePolicy } from '../types';
+import { AWS_PROVIDER } from '../mappings';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -40,7 +41,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 
 interface AwsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -194,7 +195,7 @@ export const AwsCredentialsForm = ({
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+                updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
                   'aws.credentials.type': { value: optionId },
                 }),
               });
@@ -210,7 +211,7 @@ export const AwsCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+                updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, { [key]: { value } }),
               });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}

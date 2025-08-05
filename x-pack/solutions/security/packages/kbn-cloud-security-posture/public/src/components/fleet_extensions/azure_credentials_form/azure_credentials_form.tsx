@@ -20,30 +20,26 @@ import { getPosturePolicy } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from './azure_test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import {
-  AzureCredentialsType,
-  AzureSetupFormat,
-  NewPackagePolicyPostureInput,
-  UpdatePolicy,
-} from '../types';
+import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
+import { AZURE_PROVIDER } from '../mappings';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
+    testId: AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
     label: i18n.translate('securitySolutionPackages.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
+    testId: AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 
@@ -201,7 +197,7 @@ const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -301,7 +297,7 @@ export const AzureCredentialsForm = ({
             type={azureCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+                updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, {
                   'azure.credentials.type': { value: optionId },
                 }),
               });
@@ -313,7 +309,7 @@ export const AzureCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+                updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, { [key]: { value } }),
               });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}

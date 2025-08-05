@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiHorizontalRule, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { cspIntegrationDocsNavigation } from '../constants';
+import { GCP_PROVIDER, getCloudSetupProviderOverviewPath } from '../mappings';
 
 export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) => (
   <>
@@ -29,7 +29,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
     step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
-              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+              <EuiLink href={getCloudSetupProviderOverviewPath(GCP_PROVIDER)} target="_blank">
                 <FormattedMessage
                   id="securitySolutionPackages.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
                   defaultMessage="Getting Started"
@@ -46,7 +46,7 @@ method of providing the GCP credentials this integration will use. You can follo
 step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
-              <EuiLink href={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} target="_blank">
+              <EuiLink href={getCloudSetupProviderOverviewPath(GCP_PROVIDER)} target="_blank">
                 <FormattedMessage
                   id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"

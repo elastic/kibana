@@ -11,24 +11,21 @@ import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import {
-  cspIntegrationDocsNavigation,
-  ARM_TEMPLATE_EXTERNAL_DOC_URL,
-  AZURE_CREDENTIALS_TYPE,
-} from '../constants';
+import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_CREDENTIALS_TYPE } from '../constants';
 import { getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { UpdatePolicy } from '../types';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
+import { AZURE_PROVIDER, getCloudSetupProviderOverviewPath } from '../mappings';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   hasInvalidRequiredVars: boolean;
@@ -41,7 +38,7 @@ export const AzureCredentialsFormAgentless = ({
   packageInfo,
   hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
-  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
+  const documentationLink = getCloudSetupProviderOverviewPath(AZURE_PROVIDER);
   const options = getAzureCredentialsFormOptions();
   const group = options[AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET];
   const fields = getInputVarsFields(input, group.fields);
@@ -55,7 +52,7 @@ export const AzureCredentialsFormAgentless = ({
         fields={fields}
         onChange={(key, value) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+            updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, { [key]: { value } }),
           });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}

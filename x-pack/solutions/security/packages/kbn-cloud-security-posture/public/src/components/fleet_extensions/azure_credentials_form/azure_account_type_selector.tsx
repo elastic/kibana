@@ -6,18 +6,19 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy, isBelowMinVersion } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AzureAccountType, NewPackagePolicyPostureInput, UpdatePolicy } from '../types';
+import { AzureAccountType, UpdatePolicy } from '../types';
 import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '../constants';
+import { getCloudSetupProviderConfig } from '../mappings';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean
@@ -53,14 +54,11 @@ const getAzureAccountTypeOptions = (
   },
 ];
 
-const getAzureAccountType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
-): AzureAccountType | undefined => input.streams[0].vars?.['azure.account_type']?.value;
-
-const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
+const getAzureAccountType = (input: NewPackagePolicyInput): AzureAccountType | undefined =>
+  input.streams[0].vars?.['azure.account_type']?.value;
 
 interface AzureAccountTypeSelectProps {
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   disabled: boolean;
@@ -75,16 +73,17 @@ export const AzureAccountTypeSelect = ({
   packageInfo,
   setupTechnology,
 }: AzureAccountTypeSelectProps) => {
-  const isAzureOrganizationDisabled = isBelowMinVersion(
-    packageInfo.version,
-    AZURE_ORG_MINIMUM_PACKAGE_VERSION
-  );
+  const azureOrganizationMinimumVersion =
+    getCloudSetupProviderConfig('azure').organizationMinimumVersion;
+  const isAzureOrganizationDisabled =
+    !azureOrganizationMinimumVersion ||
+    isBelowMinVersion(packageInfo.version, azureOrganizationMinimumVersion);
   const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   if (!getAzureAccountType(input)) {
     updatePolicy({
-      updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+      updatedPolicy: getPosturePolicy(newPolicy, 'azure', {
         'azure.account_type': {
           value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
           type: 'text',
@@ -114,7 +113,7 @@ export const AzureAccountTypeSelect = ({
         options={azureAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+            updatedPolicy: getPosturePolicy(newPolicy, 'azure', {
               'azure.account_type': {
                 value: accountType,
                 type: 'text',

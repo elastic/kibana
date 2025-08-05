@@ -17,9 +17,9 @@ import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/service
 import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import type { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from './types';
+import type { UpdatePolicy } from './types';
 import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
-import { PolicyTemplateInputSelector } from './policy_template_selectors';
+import { ProviderSelector } from './provider_selector';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_selector';
 import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_selector';
@@ -31,6 +31,7 @@ import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER, getCloudSetupConfig } from './mappings';
 
 const EditScreenStepTitle = () => (
   <>
@@ -49,11 +50,9 @@ interface CloudSetupProps {
   cloud: ICloudSetup;
   defaultSetupTechnology?: SetupTechnology;
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
-  integrationToEnable?: CloudSecurityPolicyTemplate;
   isAgentlessEnabled?: boolean;
   isEditPage: boolean;
   isValid: boolean;
-  namespaceSupportEnabled?: boolean;
   newPolicy: NewPackagePolicy;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
@@ -66,11 +65,9 @@ export const CloudSetup = memo<CloudSetupProps>(
     cloud,
     defaultSetupTechnology,
     handleSetupTechnologyChange,
-    integrationToEnable,
     isAgentlessEnabled,
     isEditPage,
     isValid,
-    namespaceSupportEnabled = false,
     newPolicy,
     updatePolicy,
     packageInfo,
@@ -80,6 +77,7 @@ export const CloudSetup = memo<CloudSetupProps>(
     const {
       input,
       setEnabledPolicyInput,
+      selectedProvider,
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
@@ -95,10 +93,11 @@ export const CloudSetup = memo<CloudSetupProps>(
       handleSetupTechnologyChange,
       isAgentlessEnabled,
       defaultSetupTechnology,
-      integrationToEnable,
       cloud,
       uiSettings,
     });
+
+    const namespaceSupportEnabled = getCloudSetupConfig().namespaceSupportEnabled;
 
     const { euiTheme } = useEuiTheme();
 
@@ -112,15 +111,15 @@ export const CloudSetup = memo<CloudSetupProps>(
         />
         <EuiSpacer size="l" />
         {/* Defines the single enabled input of the active policy template */}
-        <PolicyTemplateInputSelector
-          input={input}
+        <ProviderSelector
+          selectedProvider={selectedProvider}
           setInput={setEnabledPolicyInput}
           disabled={isEditPage}
         />
         <EuiSpacer size="l" />
 
         {/* AWS account type selection box */}
-        {input.type === 'cloudbeat/cis_aws' && (
+        {selectedProvider && selectedProvider === AWS_PROVIDER && (
           <AwsAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
@@ -130,7 +129,7 @@ export const CloudSetup = memo<CloudSetupProps>(
           />
         )}
 
-        {input.type === 'cloudbeat/cis_gcp' && (
+        {selectedProvider && selectedProvider === GCP_PROVIDER && (
           <GcpAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
@@ -140,7 +139,7 @@ export const CloudSetup = memo<CloudSetupProps>(
           />
         )}
 
-        {input.type === 'cloudbeat/cis_azure' && (
+        {selectedProvider && selectedProvider === AZURE_PROVIDER && (
           <AzureAccountTypeSelect
             input={input}
             newPolicy={newPolicy}
@@ -214,13 +213,10 @@ export const CloudSetup = memo<CloudSetupProps>(
                 updatePolicy({
                   updatedPolicy: getPosturePolicy(
                     newPolicy,
-                    input.type,
+                    selectedProvider,
                     getDefaultCloudCredentialsType(
                       value === SetupTechnology.AGENTLESS,
-                      input.type as Extract<
-                        PostureInput,
-                        'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'
-                      >,
+                      selectedProvider,
                       packageInfo,
                       showCloudConnectors
                     )
@@ -231,20 +227,22 @@ export const CloudSetup = memo<CloudSetupProps>(
           </>
         )}
 
-        {input.type === 'cloudbeat/cis_aws' && setupTechnology === SetupTechnology.AGENTLESS && (
-          <AwsCredentialsFormAgentless
-            input={input}
-            newPolicy={newPolicy}
-            packageInfo={packageInfo}
-            updatePolicy={updatePolicy}
-            isEditPage={isEditPage}
-            setupTechnology={setupTechnology}
-            hasInvalidRequiredVars={hasInvalidRequiredVars}
-            showCloudConnectors={showCloudConnectors}
-            cloud={cloud}
-          />
-        )}
-        {input.type === 'cloudbeat/cis_aws' && setupTechnology !== SetupTechnology.AGENTLESS && (
+        {selectedProvider &&
+          selectedProvider === AWS_PROVIDER &&
+          setupTechnology === SetupTechnology.AGENTLESS && (
+            <AwsCredentialsFormAgentless
+              input={input}
+              newPolicy={newPolicy}
+              packageInfo={packageInfo}
+              updatePolicy={updatePolicy}
+              isEditPage={isEditPage}
+              setupTechnology={setupTechnology}
+              hasInvalidRequiredVars={hasInvalidRequiredVars}
+              showCloudConnectors={showCloudConnectors}
+              cloud={cloud}
+            />
+          )}
+        {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
           <AwsCredentialsForm
             input={input}
             newPolicy={newPolicy}
@@ -255,7 +253,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             isValid={isValid}
           />
         )}
-        {input.type === 'cloudbeat/cis_gcp' && setupTechnology === SetupTechnology.AGENTLESS && (
+        {selectedProvider === GCP_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <GcpCredentialsFormAgentless
             input={input}
             newPolicy={newPolicy}
@@ -265,7 +263,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
-        {input.type === 'cloudbeat/cis_gcp' && setupTechnology !== SetupTechnology.AGENTLESS && (
+        {selectedProvider === GCP_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
           <GcpCredentialsForm
             input={input}
             newPolicy={newPolicy}
@@ -275,7 +273,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
-        {input.type === 'cloudbeat/cis_azure' && setupTechnology === SetupTechnology.AGENTLESS && (
+        {selectedProvider === AZURE_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AzureCredentialsFormAgentless
             input={input}
             newPolicy={newPolicy}
@@ -284,7 +282,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
-        {input.type === 'cloudbeat/cis_azure' && setupTechnology !== SetupTechnology.AGENTLESS && (
+        {selectedProvider === AZURE_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
           <AzureCredentialsForm
             input={input}
             newPolicy={newPolicy}

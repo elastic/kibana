@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
@@ -16,7 +15,8 @@ import {
 } from './get_aws_credentials_form_options';
 import { hasPolicyTemplateInputs } from '../utils';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
-import { NewPackagePolicyPostureInput, AwsCredentialsType } from '../types';
+import { AwsCredentialsType } from '../types';
+import { getCloudSetupPolicyTemplate } from '../mappings';
 
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
@@ -28,7 +28,7 @@ export const getDefaultAwsCredentialsType = (
       ? AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS
       : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
   }
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getCspmFormationDefaultValue(packageInfo);
 
   if (hasCloudFormationTemplate) {
     return AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
@@ -47,7 +47,7 @@ export const getCloudDefaultAwsCredentialConfig = ({
   showCloudConnectors: boolean;
 }) => {
   let credentialsType;
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getCspmFormationDefaultValue(packageInfo);
   if (!showCloudConnectors && isAgentless) {
     credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   } else if (showCloudConnectors && isAgentless) {
@@ -79,13 +79,15 @@ export const getCloudDefaultAwsCredentialConfig = ({
 };
 
 export const getAwsCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
+  input: NewPackagePolicyInput
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
+export const getCspmFormationDefaultValue = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
 
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === CSPM_POLICY_TEMPLATE);
+  const policyTemplate = packageInfo.policy_templates.find(
+    (p) => p.name === getCloudSetupPolicyTemplate()
+  );
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
