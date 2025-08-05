@@ -1,3 +1,4 @@
 @langchain/langgraph-checkpoint
 dom-to-image-more
 pdf-lib
+@a2a-js/sdk
