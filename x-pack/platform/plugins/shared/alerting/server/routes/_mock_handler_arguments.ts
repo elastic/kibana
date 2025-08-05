@@ -18,12 +18,13 @@ import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_c
 import { rulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
 import type { MaintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
-import type { AlertsHealth, RuleType } from '../../common';
+import type { AlertsHealth } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 import {
   alertDeletionClientMock,
   type AlertDeletionClientMock,
 } from '../alert_deletion/alert_deletion_client.mock';
+import type { RegistryRuleType } from '../rule_type_registry';
 
 export function mockHandlerArguments(
   {
@@ -31,7 +32,7 @@ export function mockHandlerArguments(
     actionsClient = actionsClientMock.create(),
     rulesSettingsClient = rulesSettingsClientMock.create(),
     maintenanceWindowClient = maintenanceWindowClientMock.create(),
-    listTypes: listTypesRes = [],
+    listTypes: listTypesRes = new Map(),
     getFrameworkHealth,
     areApiKeysEnabled,
     alertDeletionClient,
@@ -41,7 +42,7 @@ export function mockHandlerArguments(
     actionsClient?: ActionsClientMock;
     rulesSettingsClient?: RulesSettingsClientMock;
     maintenanceWindowClient?: MaintenanceWindowClientMock;
-    listTypes?: RuleType[];
+    listTypes?: Map<string, RegistryRuleType>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
