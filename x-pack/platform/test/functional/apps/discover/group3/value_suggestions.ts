@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
