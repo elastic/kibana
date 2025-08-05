@@ -290,7 +290,7 @@ components:
                 - result
                 - installable
                 - prebuilt
-                - hasPlaceholder
+                - missingIndex
               properties:
                 total:
                   type: integer
@@ -318,7 +318,7 @@ components:
                 prebuilt:
                   type: integer
                   description: The number of rules that have been successfully translated and matched Elastic prebuilt rules.
-                hasPlaceholder:
+                missingIndex:
                   type: integer
                   description: The number of rules that have a placeholder in the query.
             failed:

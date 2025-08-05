@@ -156,6 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
               result: { full: 4, partial: 5, untranslatable: 1 },
               installable: 4,
               prebuilt: 0,
+              missingIndex: 0,
             },
             failed,
           },

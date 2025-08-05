@@ -238,6 +238,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
           result: { terms: { field: 'translation_result' } },
           installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
           prebuilt: { filter: searchConditions.isPrebuilt() },
+          missingIndex: { filter: { bool: { must_not: searchConditions.isMissingIndex() } } },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
@@ -263,8 +264,7 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataBaseClient 
           result: this.translationResultAggCount(translationResultsAgg),
           installable: (successAgg.installable as AggregationsFilterAggregate)?.doc_count ?? 0,
           prebuilt: (successAgg.prebuilt as AggregationsFilterAggregate)?.doc_count ?? 0,
-          hasPlaceholder:
-            (successAgg.hasPlaceholder as AggregationsFilterAggregate)?.doc_count ?? 0,
+          missingIndex: (successAgg.missingIndex as AggregationsFilterAggregate)?.doc_count ?? 0,
         },
         failed: (aggs.failed as AggregationsFilterAggregate)?.doc_count ?? 0,
       },

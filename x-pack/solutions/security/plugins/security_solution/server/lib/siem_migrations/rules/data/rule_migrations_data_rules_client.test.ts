@@ -543,7 +543,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             },
             installable: { doc_count: 6 },
             prebuilt: { doc_count: 4 },
-            hasPlaceholder: { doc_count: 2 },
+            missingIndex: { doc_count: 2 },
           },
           failed: { doc_count: 2 },
         },
@@ -566,7 +566,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             },
             installable: 6,
             prebuilt: 4,
-            hasPlaceholder: 2,
+            missingIndex: 2,
           },
           failed: 2,
         },
@@ -601,8 +601,8 @@ describe('RuleMigrationsDataRulesClient', () => {
               { key: SiemMigrationStatus.FAILED, doc_count: 1 },
             ],
           },
-          createdAt: { value_as_string: '2023-01-01T00:00:00.000Z' },
-          lastUpdatedAt: { value_as_string: '2023-01-02T00:00:00.000Z' },
+          createdAt: { value_as_string: '2025-01-01T00:00:00.000Z' },
+          lastUpdatedAt: { value_as_string: '2025-01-02T00:00:00.000Z' },
         },
       };
 
@@ -619,8 +619,8 @@ describe('RuleMigrationsDataRulesClient', () => {
           [SiemMigrationStatus.COMPLETED]: 4,
           [SiemMigrationStatus.FAILED]: 1,
         },
-        created_at: '2025-08-04T00:00:00.000Z',
-        last_updated_at: '2025-08-04T00:00:00.000Z',
+        created_at: '2025-01-01T00:00:00.000Z',
+        last_updated_at: '2025-01-02T00:00:00.000Z',
       });
     });
   });
@@ -662,8 +662,8 @@ describe('RuleMigrationsDataRulesClient', () => {
             [SiemMigrationStatus.COMPLETED]: 3,
             [SiemMigrationStatus.FAILED]: 2,
           },
-          created_at: '2023-01-01T00:00:00.000Z',
-          last_updated_at: '2023-01-02T00:00:00.000Z',
+          created_at: '2025-08-04T00:00:00.000Z',
+          last_updated_at: '2025-08-04T00:00:00.000Z',
         },
       ]);
     });

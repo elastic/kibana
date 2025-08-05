@@ -126,7 +126,7 @@ export const mockedMigrationTranslationStats: Record<
         },
         installable: 1,
         prebuilt: 0,
-        hasPlaceholder: 0,
+        missingIndex: 0,
       },
       failed: 0,
     },

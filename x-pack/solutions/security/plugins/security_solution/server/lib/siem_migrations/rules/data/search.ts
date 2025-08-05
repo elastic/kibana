@@ -57,7 +57,7 @@ export const conditions = {
   isNotFailed(): QueryDslQueryContainer {
     return { bool: { must_not: conditions.isFailed() } };
   },
-  hasPlaceholder(): QueryDslQueryContainer {
+  isMissingIndex(): QueryDslQueryContainer {
     return {
       query_string: {
         query: 'elastic_rule.query:"FROM [indexPattern]"',
