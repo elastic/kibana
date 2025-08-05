@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type * from './agent';
+export * from './agent';
 export type * from './agent_policy';
 export type * from './package_policy';
 export type * from './data_stream';
@@ -19,5 +19,5 @@ export type * from './download_sources';
 export type * from './fleet_server_policy_config';
 export type * from './fleet_proxy';
 export type * from './secret';
-export type * from './setup_technology';
+export * from './setup_technology';
 export type * from './fleet_setup_lock';
