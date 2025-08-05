@@ -7,6 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useParentBreadcrumbResolver } from '../../../hooks/use_parent_breadcrumb_resolver';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -42,6 +43,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
     },
     {
       text: entity.name,
+    },
+    {
+      text: capitalize(activeTabId),
     },
   ]);
 
