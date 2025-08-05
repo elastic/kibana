@@ -10,8 +10,7 @@
 import { FeatureCollection } from 'geojson';
 import type { Query } from '@kbn/es-query';
 import type { ESQLColumn } from '@kbn/es-types';
-import { SortDirection } from '@kbn/data-plugin/common/search';
-import { AGG_TYPE, MASK_OPERATOR, SCALING_TYPES, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
+import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -85,19 +84,6 @@ export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | Percenti
 
 type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
-};
-
-export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
-  type: SOURCE_TYPES.ES_SEARCH;
-  geoField: string;
-  filterByMapBounds: boolean;
-  tooltipProperties: string[];
-  sortField: string;
-  sortOrder: SortDirection;
-  scalingType: SCALING_TYPES;
-  topHitsGroupByTimeseries: boolean;
-  topHitsSplitField: string;
-  topHitsSize: number;
 };
 
 export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {

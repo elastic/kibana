@@ -19,4 +19,5 @@ export type {
   ESGeoGridSourceDescriptor,
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
+  ESSearchSourceDescriptor,
 } from '../../server';

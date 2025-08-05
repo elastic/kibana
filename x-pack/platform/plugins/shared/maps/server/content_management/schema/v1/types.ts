@@ -21,6 +21,7 @@ import {
   ESGeoGridSourceSchema,
   ESGeoLineSourceSchema,
   ESPewPewSourceSchema,
+  ESSearchSourceSchema,
   ESSourceSchema,
 } from './source_schemas';
 
@@ -35,9 +36,10 @@ export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
 
 export type AbstractESAggSourceDescriptor = TypeOf<typeof ESAggSourceSchema>;
-export type AbstractESSourceDescriptor =TypeOf<typeof ESSourceSchema>;
+export type AbstractESSourceDescriptor = TypeOf<typeof ESSourceSchema>;
 export type EMSFileSourceDescriptor = TypeOf<typeof EMSFileSourceSchema>;
-export type EMSTMSSourceDescriptor =TypeOf<typeof EMSTMSSourceSchema>;
+export type EMSTMSSourceDescriptor = TypeOf<typeof EMSTMSSourceSchema>;
 export type ESGeoGridSourceDescriptor = TypeOf<typeof ESGeoGridSourceSchema>;
 export type ESGeoLineSourceDescriptor = TypeOf<typeof ESGeoLineSourceSchema>;
 export type ESPewPewSourceDescriptor = TypeOf<typeof ESPewPewSourceSchema>;
+export type ESSearchSourceDescriptor = TypeOf<typeof ESSearchSourceSchema>;

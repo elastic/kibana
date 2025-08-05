@@ -17,6 +17,7 @@ export type {
   ESGeoGridSourceDescriptor,
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
+  ESSearchSourceDescriptor,
 } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
