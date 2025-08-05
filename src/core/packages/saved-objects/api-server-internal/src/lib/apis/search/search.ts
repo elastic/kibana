@@ -8,14 +8,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { flow } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
 import {
+  GetFindRedactTypeMapParams,
   SavedObjectsErrorHelpers,
+  SavedObjectsRawDoc,
   type CheckAuthorizationResult,
   type SavedObjectsRawDocSource,
-  type GetFindRedactTypeMapParams,
 } from '@kbn/core-saved-objects-server';
 import { SearchParams } from '@kbn/core-saved-objects-api-server';
 import deepMerge from 'deepmerge';
@@ -27,6 +27,10 @@ export interface PerformSearchParams {
   options: SearchParams;
 }
 
+/**
+ * TODO(@jloleysens) support disabling extensions, test, comments
+ * Adapted from existing performFind
+ */
 export const performSearch = async <
   T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource,
   A = unknown
@@ -142,21 +146,46 @@ export const performSearch = async <
     return {};
   }
 
+  const redactTypeMapParams: GetFindRedactTypeMapParams = {
+    previouslyCheckedNamespaces: spacesToAuthorize,
+    objects: [],
+  };
+  for (const hit of result.body.hits.hits) {
+    if (serializer.isRawSavedObject(hit as SavedObjectsRawDoc)) {
+      redactTypeMapParams.objects.push({
+        type: hit._source!.type,
+        id: hit._id!,
+        existingNamespaces: hit._source!.namespaces ?? [],
+      });
+    }
+  }
+
+  const redactTypeMap = redactTypeMapParams
+    ? await securityExtension?.getFindRedactTypeMap(redactTypeMapParams)
+    : undefined;
+
   const hasFieldsOption = Boolean(options.fields?.length);
 
-  // This is a bit silly, maybe we can just return saved objects in `hits.hits`? But that is also a bit weird.
-  const migrateStorageDocument = flow(
-    serializer.rawToSavedObject,
-    migrationHelper.migrateStorageDocument,
-    serializer.savedObjectToRaw
-  );
-
-  const migratedHits = result.body.hits.hits.map((hit: estypes.SearchHit<T>) => {
+  const migratedHits: estypes.SearchHit<T>[] = [];
+  for (const hit of result.body.hits.hits) {
     if (hit._source?.type && hit._id && !hasFieldsOption) {
-      hit._source = migrateStorageDocument(hit._source);
+      // This is a bit silly, maybe we can just return saved objects in `hits.hits`? But that is also a bit weird.
+      const so = serializer.rawToSavedObject(hit as SavedObjectsRawDoc);
+      const migratedSo = await migrationHelper.migrateAndDecryptStorageDocument({
+        document: so,
+        typeMap: redactTypeMap,
+      });
+      migratedHits.push(
+        {
+          ...hit,
+          ...serializer.savedObjectToRaw(migratedSo),
+          _index: hit._index,
+        } as estypes.SearchHit<T> // need to figure something better out here
+      );
+    } else {
+      migratedHits.push(hit);
     }
-    return hit;
-  });
+  }
 
   result.body.hits.hits = migratedHits;
 
