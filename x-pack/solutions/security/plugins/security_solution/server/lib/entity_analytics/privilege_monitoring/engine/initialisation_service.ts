@@ -8,6 +8,7 @@
 import moment from 'moment';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { CreateMonitoringEntitySource } from '../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/constants';
 import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { InitMonitoringEngineResponse } from '../../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
@@ -58,31 +59,8 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
 
     const descriptor = await descriptorClient.init();
     dataClient.log('debug', `Initialized privileged monitoring engine saved object`);
-    // create default index source for privilege monitoring for each namespace
-    try {
-      const indexSourceDescriptor = await monitoringIndexSourceClient.create({
-        type: 'index',
-        managed: true,
-        indexPattern: defaultMonitoringUsersIndex(deps.namespace),
-        name: `default-monitoring-index-${deps.namespace}`,
-      });
-      dataClient.log(
-        'debug',
-        `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-      );
-    } catch (e) {
-      dataClient.log(
-        'error',
-        `Failed to create default index source for privilege monitoring: ${e.message}`
-      );
-      dataClient.audit(
-        PrivilegeMonitoringEngineActions.INIT,
-        EngineComponentResourceEnum.privmon_engine,
-        'Failed to create default index source for privilege monitoring',
-        e
-      );
-    }
 
+    await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
     try {
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
       await IndexService.createIngestPipelineIfDoesNotExist();
@@ -129,5 +107,67 @@ export const createInitialisationService = (dataClient: PrivilegeMonitoringDataC
 
     return descriptor;
   };
+
+  const createOrUpdateDefaultDataSource = async (
+    monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
+  ) => {
+    const sourceName = `default-monitoring-index-${deps.namespace}`;
+
+    const defaultIndexSource: CreateMonitoringEntitySource = {
+      type: 'index',
+      managed: true,
+      indexPattern: defaultMonitoringUsersIndex(deps.namespace),
+      name: sourceName,
+    };
+
+    const existingSources = await monitoringIndexSourceClient.find({
+      name: sourceName,
+    });
+
+    if (existingSources.saved_objects.length > 0) {
+      dataClient.log('info', 'Default index source already exists, updating it.');
+      const existingSource = existingSources.saved_objects[0];
+      try {
+        await monitoringIndexSourceClient.update({
+          id: existingSource.id,
+          ...defaultIndexSource,
+        });
+      } catch (e) {
+        dataClient.log(
+          'error',
+          `Failed to update default index source for privilege monitoring: ${e.message}`
+        );
+        dataClient.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to update default index source for privilege monitoring',
+          e
+        );
+      }
+    } else {
+      dataClient.log('info', 'Creating default index source for privilege monitoring.');
+
+      try {
+        const indexSourceDescriptor = monitoringIndexSourceClient.create(defaultIndexSource);
+
+        dataClient.log(
+          'debug',
+          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
+        );
+      } catch (e) {
+        dataClient.log(
+          'error',
+          `Failed to create default index source for privilege monitoring: ${e.message}`
+        );
+        dataClient.audit(
+          PrivilegeMonitoringEngineActions.INIT,
+          EngineComponentResourceEnum.privmon_engine,
+          'Failed to create default index source for privilege monitoring',
+          e
+        );
+      }
+    }
+  };
+
   return { init };
 };
