@@ -11,7 +11,7 @@ import { createMockStartDependencies } from '../../../editor_frame_service/mocks
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
 import { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { BehaviorSubject } from 'rxjs';
-import { LENS_ITEM_LATEST_VERSION } from '../../../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../../../common/constants';
 
 describe('inapp editing of Lens embeddable', () => {
   const core = coreMock.createStart();

@@ -6,7 +6,7 @@
  */
 
 import type { XYState } from '../../../../../public';
-import type { PieVisualizationState } from '../../../../types';
+import type { PieVisualizationState } from '../../../../../common/types';
 import type { LensAttributes } from '../../types';
 import {
   convertPartitionToLegendStats,

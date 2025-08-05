@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LensItem, LensItemMeta, LensSavedObject } from '../../common/content_management';
+import type { LensItem, LensItemMeta, LensSavedObject } from '../../server/content_management';
 
 /**
  * Converts Lens Response Item to Lens Saved Object

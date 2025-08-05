@@ -7,7 +7,7 @@
 
 import type { DatatableVisualizationState, TagcloudState, XYState } from '../../../../../public';
 import type { StructuredDatasourceStates } from '../../../../../public/react_embeddable/types';
-import type { PieVisualizationState } from '../../../../types';
+import type { PieVisualizationState } from '../../../../../common/types';
 import type { LensAttributes } from '../../types';
 import { convertXYToRawColorMappings, type DeprecatedColorMappingsXYState } from './xy';
 import {

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export { LENS_ITEM_LATEST_VERSION, LENS_CONTENT_TYPE } from './constants';
-export { servicesDefinitions } from './services';
-export * from './v1/schema/utils';
+import { LENS_ITEM_VERSION_V1 } from '../../../common/content_management/constants';
 
-export * from './latest';
-
-export type * as LensV1 from './v1';
+/**
+ * Lens CM Item Version `v1`
+ */
+export const LENS_ITEM_VERSION = LENS_ITEM_VERSION_V1;

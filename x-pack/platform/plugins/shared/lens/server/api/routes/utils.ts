@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensResponseItem, LensSavedObject } from '../../../common/content_management';
+import type { LensResponseItem, LensSavedObject } from '../../content_management';
 import { ConfigBuilderStub } from '../../../common/transforms';
 
 /**

@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const LENS_ITEM_VERSION = 1 as const;
+export { LENS_ITEM_VERSION } from './constants';
+
+export * from './service';
+export * from './schema';
+export type * from './types';
+
+export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

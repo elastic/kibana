@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAPIConfig, LensItem } from '../content_management';
+import type { LensAPIConfig, LensItem } from '../../server/content_management';
 
 export const ConfigBuilderStub = {
   /**

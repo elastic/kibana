@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import {
-  lensCMGetResultSchema,
-  lensResponseItemSchema,
-} from '../../../../../common/content_management';
+import { lensCMGetResultSchema, lensResponseItemSchema } from '../../../../content_management';
 
 export const lensGetRequestParamsSchema = schema.object(
   {

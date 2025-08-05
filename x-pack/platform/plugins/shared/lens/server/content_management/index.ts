@@ -6,3 +6,9 @@
  */
 
 export { LensStorage } from './lens_storage';
+export { servicesDefinitions } from './services';
+export * from './v1/schema/utils';
+
+export * from './latest';
+
+export type * as LensV1 from './v1';

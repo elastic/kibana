@@ -11,7 +11,7 @@ import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { HttpStart } from '@kbn/core/public';
-import type { LensAttributes } from '../common/content_management';
+import type { LensAttributes } from '../server/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';

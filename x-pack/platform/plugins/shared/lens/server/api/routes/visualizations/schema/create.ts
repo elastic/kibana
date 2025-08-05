@@ -13,8 +13,8 @@ import {
   lensAPIConfigSchema,
   lensAPIAttributesSchema,
   lensCMCreateOptionsSchema,
-} from '../../../../../common/content_management';
-import { lensCreateRequestBodyDataSchemaV0 } from '../../../../../common/content_management/v0';
+} from '../../../../content_management';
+import { lensCreateRequestBodyDataSchemaV0 } from '../../../../content_management/v0';
 
 const apiConfigData = schema.object(
   {

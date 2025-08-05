@@ -12,7 +12,7 @@ import {
   pickFromObjectSchema,
   lensCMSearchOptionsSchema,
   lensResponseItemSchema,
-} from '../../../../../common/content_management';
+} from '../../../../content_management';
 
 // TODO cleanup and align search options types with client side options
 // TODO align defaults with cm and other schema definitions (i.e. searchOptionsSchemas)

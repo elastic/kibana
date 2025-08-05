@@ -12,11 +12,11 @@ import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';
-import { lensItemAttributesSchemaV0 } from '../common/content_management/v0';
+import { lensItemAttributesSchemaV0 } from './content_management/v0';
 import {
   LENS_ITEM_VERSION as LENS_ITEM_VERSION_V1,
   lensItemAttributesSchema as lensItemAttributesSchemaV1,
-} from '../common/content_management/v1';
+} from './content_management/v1';
 
 export function setupSavedObjects(
   core: CoreSetup,

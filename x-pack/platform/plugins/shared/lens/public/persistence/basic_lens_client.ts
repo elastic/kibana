@@ -12,8 +12,8 @@ import type {
   BasicVisualizationClient,
 } from '@kbn/visualizations-plugin/public';
 
+import type { LensAttributes } from '../../server/content_management';
 import { LensClient } from './lens_client';
-import { LensAttributes } from '../../common/content_management';
 import { getLensSOFromResponse } from './utils';
 
 /**

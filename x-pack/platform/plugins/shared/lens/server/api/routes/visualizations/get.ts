@@ -9,8 +9,13 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
-import { LENS_CONTENT_TYPE, type LensSavedObject } from '../../../../common/content_management';
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_CONTENT_TYPE,
+} from '../../../../common/constants';
+import type { LensSavedObject } from '../../../content_management';
 import { RegisterAPIRouteFn } from '../../types';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';

@@ -33,7 +33,7 @@ import { getLensInspectorService } from '../lens_inspector_service';
 import { LensDocument, LensDocumentService } from '../persistence';
 import { LensAttributesService } from '../lens_attribute_service';
 import { mockDatasourceStates } from './store_mocks';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const startMock = coreMock.createStart();
 

@@ -8,12 +8,13 @@
 import { isBoom, boomify } from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
   LENS_CONTENT_TYPE,
-  LensSearchIn,
-  type LensSavedObject,
-} from '../../../../common/content_management';
+} from '../../../../common/constants';
+import type { LensSearchIn, LensSavedObject } from '../../../content_management';
 import { RegisterAPIRouteFn } from '../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';

@@ -14,7 +14,7 @@ import {
   pickFromObjectSchema,
   lensAPIConfigSchema,
   lensCMUpdateOptionsSchema,
-} from '../../../../../common/content_management';
+} from '../../../../content_management';
 
 export const lensUpdateRequestParamsSchema = schema.object(
   {

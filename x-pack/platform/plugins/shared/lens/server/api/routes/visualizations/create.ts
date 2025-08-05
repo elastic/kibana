@@ -10,12 +10,13 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
   LENS_CONTENT_TYPE,
-  LensCreateIn,
-  type LensSavedObject,
-} from '../../../../common/content_management';
+} from '../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import { RegisterAPIRouteFn } from '../../types';
 import { ConfigBuilderStub } from '../../../../common/transforms';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';

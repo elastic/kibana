@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 
-import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import { LensClient } from './lens_client';
 import { LensDocumentService } from './lens_document_service';
 import { LensDocument } from './types';

@@ -15,7 +15,7 @@ import {
   Visualization,
   VisualizationMap,
 } from '../types';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const visualizationType = 'lnsSomeVis';
 

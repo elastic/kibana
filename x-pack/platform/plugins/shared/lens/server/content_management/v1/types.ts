@@ -34,7 +34,7 @@ import {
   lensAPIAttributesSchema,
   lensAPIConfigSchema,
 } from './schema';
-import type { LENS_CONTENT_TYPE } from '../constants';
+import { LENS_CONTENT_TYPE } from '../../../common/constants';
 
 export type LensAttributes = TypeOf<typeof lensItemAttributesSchema>;
 export type LensAPIAttributes = TypeOf<typeof lensAPIAttributesSchema>;
