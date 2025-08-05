@@ -140,7 +140,7 @@ function inferenceEndpointToCompletionItem(
     }),
     kind: 'Reference',
     label: inferenceEndpoint.inference_id,
-    sortText: inferenceEndpoint.inference_id,
+    sortText: '1',
     text: inferenceEndpoint.inference_id,
     command: TRIGGER_SUGGESTION_COMMAND,
   };
