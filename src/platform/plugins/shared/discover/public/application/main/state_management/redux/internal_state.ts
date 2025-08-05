@@ -222,6 +222,14 @@ export const internalStateSlice = createSlice({
         state.expandedDoc = undefined;
       }),
 
+    setESQLEditorUiState: (
+      state,
+      action: TabAction<{ esqlEditorUiState: Partial<TabState['uiState']['esqlEditor']> }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.esqlEditor = action.payload.esqlEditorUiState;
+      }),
+
     setDataGridUiState: (
       state,
       action: TabAction<{ dataGridUiState: Partial<TabState['uiState']['dataGrid']> }>

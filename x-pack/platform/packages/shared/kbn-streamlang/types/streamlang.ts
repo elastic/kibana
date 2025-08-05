@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { isSchema } from '@kbn/streams-schema';
 import { Condition, conditionSchema } from './conditions';
 import { StreamlangProcessorDefinition, streamlangProcessorSchema } from './processors';
 
@@ -35,6 +36,10 @@ export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.obj
   where: conditionWithStepsSchema,
 });
 
+export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
+  return isSchema(streamlangWhereBlockSchema, obj);
+};
+
 /**
  * A step can be either a processor or a where block (optionally recursive)
  */
@@ -42,6 +47,10 @@ export type StreamlangStep = StreamlangProcessorDefinition | StreamlangWhereBloc
 export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
   z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
 );
+
+export const isActionBlock = (obj: any): obj is StreamlangProcessorDefinition => {
+  return isSchema(streamlangProcessorSchema, obj);
+};
 
 /**
  * Streamlang DSL Root Type

@@ -39,19 +39,20 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 Note that we use tags in order to select which tests we want to execute:
 
-- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
+- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless.
 
 ## Running the tests
 
 ### Run them locally
+
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
 Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
 
-| Script Name | Description |
-| ----------- | ----------- |
+| Script Name                     | Description                                                                                                                                                                              |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | cypress:open:ai4dsoc:serverless | Opens the Cypress UI with all tests in the `e2e/aid4soc` directory. This also runs a mocked serverless environment using the `ai_soc` pruduct line and `search_ai_lake` tier by default. |
-| cypress:run:ai4dsoc:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai4dsoc` directory in headless mode using the `ai_soc` pruduct line and `search_ai_lake` tier by default.|
+| cypress:run:ai4dsoc:serverless  | Runs all tests tagged as SERVERLESS in the `e2e/ai4dsoc` directory in headless mode using the `ai_soc` pruduct line and `search_ai_lake` tier by default.                                |
 
 Please note that the headless mode command do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
@@ -66,13 +67,11 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'MY_EXPERIMENTAL_FLAG',
-          ])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['MY_EXPERIMENTAL_FLAG'])}`,
         ],
       },
     },
-  },
+  }
   // ...
 );
 ```
@@ -185,16 +184,15 @@ Archives used only for Cypress tests purposes are stored in `x-pack/test/securit
 
 ```typescript
 cy.task('esArchiverLoad', { archiveName: 'overview' });
-cy.task('esArchiverUnload', { archiveName: 'overview'});
-
+cy.task('esArchiverUnload', { archiveName: 'overview' });
 ```
 
-You can also use archives located in `x-pack/test/functional/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
+You can also use archives located in `x-pack/solutions/security/test/fixtures/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
 
 ```typescript
-// loads then unloads from x-pack/test/functional/es_archives/security_solution/alias
-cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr'});
-cy.task('esArchiverUnload', { archiveName: 'alias', type:'ftr'});
+// loads then unloads from x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias
+cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr' });
+cy.task('esArchiverUnload', { archiveName: 'alias', type: 'ftr' });
 ```
 
 ## Serverless
@@ -205,6 +203,7 @@ Note that we use tags in order to select which tests we want to execute in the d
 `@serverlessQA` for the tests that we want to execute as part of the Kibana QA quality gate.
 
 #### PLIs
+
 When running AI4DSOC Cypress tests, the following PLI is set by default:
 
 ```
@@ -218,6 +217,7 @@ Custom roles for serverless is currently supported only for stateless environmen
 ##### Creating a Custom Role
 
 To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
+
 - **`roleDescriptor`**: Defines the permissions and access for the role.
 - **`roleName`**: A unique name for the custom role.
 
@@ -248,7 +248,6 @@ Once the custom role is created, you can log in to the application using your re
 ```typescript
 login('customRole');
 ```
-
 
 ##### Deleting a Custom Role
 

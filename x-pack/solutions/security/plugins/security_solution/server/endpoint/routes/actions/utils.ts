@@ -105,13 +105,19 @@ export const ensureUserHasAuthzToFilesForAction = async (
   const spaceId = securitySolution.getSpaceId();
   const endpointService = securitySolution.getEndpointService();
   const userAuthz = await securitySolution.getEndpointAuthz();
+  const logger = endpointService.createLogger('ensureUserHasAuthzToFilesForAction');
   const { action_id: actionId } = request.params as { action_id: string };
+
+  logger.debug(`Validating action id [${actionId}] has access to files in space [${spaceId}]`);
+
   const {
     EndpointActions: {
       data: { command },
       input_type: agentType,
     },
   } = await fetchActionRequestById(endpointService, spaceId, actionId);
+
+  logger.debug(`Action [${actionId}] is for command [${command}] with agentType [${agentType}]`);
 
   // Check if command is supported by the agent type
   if (!isActionSupportedByAgentType(agentType, command, 'manual')) {

@@ -120,6 +120,7 @@ paths-ignore:
   - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/packages/kbn-synthetics-private-location
   - x-pack/platform/packages/shared/kbn-ai-tools-cli
+  - x-pack/platform/packages/shared/kbn-data-forge
   - x-pack/platform/packages/shared/kbn-inference-cli
   - x-pack/platform/packages/shared/kbn-kibana-api-cli
   - x-pack/platform/packages/shared/kbn-sample-parser

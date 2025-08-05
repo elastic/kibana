@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
+import { PrivilegeMonitoringEngineStatusEnum } from '../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics/privilege_monitoring/health.gen';
 import type { InitMonitoringEngineResponse } from '../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import { SecurityPageName } from '../../app/types';
@@ -39,9 +40,9 @@ import { usePrivilegedMonitoringEngineStatus } from '../api/hooks/use_privileged
 import { PrivilegedUserMonitoringManageDataSources } from '../components/privileged_user_monitoring_manage_data_sources';
 import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { useLinkInfo, useUpdateLinkConfig } from '../../common/links/links_hooks';
 import { PageLoader } from '../../common/components/page_loader';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { forceHiddenTimeline } from '../../common/utils/timeline/force_hidden_timeline';
 
 type PageState =
   | { type: 'fetchingEngineStatus' }
@@ -166,7 +167,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       });
     }
 
-    if (engineStatus.data?.status === 'not_found') {
+    if (engineStatus.data?.status === PrivilegeMonitoringEngineStatusEnum.not_installed) {
       return dispatch({ type: 'SHOW_ONBOARDING' });
     } else {
       return dispatch({ type: 'SHOW_DASHBOARD' });
@@ -179,24 +180,12 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
     engineStatus.isLoading,
   ]);
 
-  const linkInfo = useLinkInfo(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring);
-  const updateLinkConfig = useUpdateLinkConfig();
-
-  // Update UrlParam to add hideTimeline to the URL when the onboarding is loaded and removes it when dashboard is loaded
+  // Hide the timeline bottom bar when the page is in onboarding or initializing state
   useEffect(() => {
-    // do not change the link config when the engine status is being fetched
-    if (state.type === 'fetchingEngineStatus') {
-      return;
-    }
-
     const hideTimeline = ['onboarding', 'initializingEngine'].includes(state.type);
-    // update the hideTimeline property in the link config. This call triggers expensive operations, use with love
-    const hideTimelineConfig = linkInfo?.hideTimeline ?? false;
-
-    if (hideTimeline !== hideTimelineConfig) {
-      updateLinkConfig(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring, { hideTimeline });
-    }
-  }, [linkInfo?.hideTimeline, state.type, updateLinkConfig]);
+    const cleanup = forceHiddenTimeline(hideTimeline);
+    return cleanup;
+  }, [state.type]);
 
   const fullHeightCSS = css`
     min-height: calc(100vh - 240px);

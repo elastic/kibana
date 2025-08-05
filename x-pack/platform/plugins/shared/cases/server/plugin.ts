@@ -198,6 +198,7 @@ export class CasePlugin
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
       },
+      config: this.caseConfig,
     };
   }
 
@@ -256,6 +257,7 @@ export class CasePlugin
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
+      config: this.caseConfig,
     };
   }
 

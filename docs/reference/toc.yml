@@ -25,6 +25,8 @@ toc:
       - file: configuration-reference/task-manager-settings.md
       - file: configuration-reference/telemetry-settings.md
       - file: configuration-reference/url-drilldown-settings.md
+      - file: configuration-reference/product-intercept-settings.md
+      - file: configuration-reference/share-settings.md
   - file: advanced-settings.md
   - file: kibana-audit-events.md
   - file: connectors-kibana.md

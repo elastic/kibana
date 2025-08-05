@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import { KibanaSavedObjectType } from '@kbn/fleet-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { MonitoringStartServices } from '../../../types';
@@ -80,14 +80,17 @@ export const IngestPipelineModal = ({
 }) => {
   const [installing, setInstalling] = useState(false);
   const [error, setError] = useState<string>();
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!canInstallPackages) {
     return (
       <EuiConfirmModal
+        aria-labelledby={modalTitleId}
         title={i18n.translate(
           'xpack.monitoring.esNavigation.ingestPipelineModal.noPermissionToInstallPackage.packageRequiredTitle',
           { defaultMessage: 'Elasticsearch integration is required' }
         )}
+        titleProps={{ id: modalTitleId }}
         confirmButtonText={i18n.translate(
           'xpack.monitoring.esNavigation.ingestPipelineModal.noPermissionToInstallPackage.confirmButtonText',
           { defaultMessage: 'OK' }
@@ -107,12 +110,14 @@ export const IngestPipelineModal = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.translate(
         'xpack.monitoring.esNavigation.ingestPipelineModal.installPromptTitle',
         {
           defaultMessage: 'Install Elasticsearch integration?',
         }
       )}
+      titleProps={{ id: modalTitleId }}
       confirmButtonText={i18n.translate(
         'xpack.monitoring.esNavigation.ingestPipelineModal.installButtonText',
         { defaultMessage: 'Install' }

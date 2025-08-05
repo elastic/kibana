@@ -24,9 +24,15 @@ import { getEcsOpsMetricsLog } from './logging';
 import { registerEluHistoryRoute } from './routes/elu_history';
 import { exponentialMovingAverage } from './exponential_moving_average';
 
-const ELU_SHORT = 15000;
-const ELU_MEDIUM = 30000;
-const ELU_LONG = 60000;
+/**
+ * The period of time for the average ELU calculation.
+ * @public
+ */
+export enum EluTerm {
+  Short = 15000,
+  Medium = 30000,
+  Long = 60000,
+}
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -91,9 +97,9 @@ export class MetricsService
         map((metrics) => metrics.process.event_loop_utilization.utilization),
         (elu$) =>
           zip(
-            elu$.pipe(exponentialMovingAverage(ELU_SHORT, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(ELU_MEDIUM, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(ELU_LONG, collectionInterval))
+            elu$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
           ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);
