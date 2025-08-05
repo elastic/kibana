@@ -292,6 +292,14 @@ describe('convertToWorkflowGraph', () => {
     const workflowDefinition = {
       steps: [
         {
+          name: 'firstConnectorStep',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from first step',
+          },
+        } as ConnectorStep,
+        {
           name: 'testForeachStep',
           foreach: '["item1", "item2", "item3"]',
           type: 'foreach',
@@ -338,6 +346,7 @@ describe('convertToWorkflowGraph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topsort = graphlib.alg.topsort(executionGraph);
       const expectedComplexOrder = [
+        'firstConnectorStep',
         'testForeachStep',
         'testIfStep',
         'enterThen(testIfStep)',

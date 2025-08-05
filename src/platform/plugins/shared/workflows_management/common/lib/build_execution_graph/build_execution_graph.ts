@@ -51,6 +51,10 @@ export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, curren
   };
   graph.setNode(atomicNode.id, atomicNode);
 
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), atomicNode.id);
+  }
+
   return atomicNode;
 }
 
@@ -178,12 +182,6 @@ export function convertToWorkflowGraph(workflowSchema: WorkflowSchema): graphlib
 
   workflowSchema.steps.forEach((currentStep, index) => {
     const currentNode = visitAbstractStep(graph, previousNode, currentStep);
-    graph.setNode(currentNode.id, currentNode);
-
-    if (previousNode) {
-      graph.setEdge(currentNode.id, previousNode.id);
-    }
-
     previousNode = currentNode;
   });
 
