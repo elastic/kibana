@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services,
     junit: {
       ...xpackFunctionalConfig.get('junit'),
-      reportName: 'Chrome X-Pack UI Screenshot Creation',
+      reportName: 'Chrome Observability Solution X-Pack UI Screenshot Creation',
     },
   };
 }

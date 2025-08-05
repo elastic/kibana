@@ -16,7 +16,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     require.resolve('@kbn/test-suites-src/api_integration/config')
   );
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   const esVersion = EsVersion.getDefault();
@@ -46,8 +46,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        `--plugin-path=${path.resolve(__dirname, '../../../examples/routing_example')}`,
-        `--plugin-path=${path.resolve(__dirname, '../../../examples/developer_examples')}`,
+        `--plugin-path=${path.resolve(__dirname, '../../../../examples/routing_example')}`,
+        `--plugin-path=${path.resolve(__dirname, '../../../../examples/developer_examples')}`,
       ],
     },
     esTestCluster,

@@ -14,7 +14,7 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return (
