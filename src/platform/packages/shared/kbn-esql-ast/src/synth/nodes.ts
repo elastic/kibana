@@ -12,8 +12,21 @@ import {
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
   ESQLParamLiteral,
+  ESQLSource,
   ESQLStringLiteral,
 } from '../types';
+
+/**
+ * Creates an ES|QL source node.
+ *
+ * @param index Elasticsearch index name to create a source node for.
+ * @returns ES|QL source node.
+ */
+export const src = (index: string): ESQLSource => {
+  const node = Builder.expression.source.index(index);
+
+  return node;
+};
 
 /**
  * Crates an ES|QL integer literal node.

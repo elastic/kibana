@@ -34,7 +34,12 @@ export type SynthTemplateHole =
    * - integer for integers
    * - decimal for floats
    */
-  | number;
+  | number
+
+  /**
+   * A string will be converted to a string literal AST node.
+   */
+  | string;
 
 /**
  * A developer-friendly way to specify nested column names in ESQL queries.
