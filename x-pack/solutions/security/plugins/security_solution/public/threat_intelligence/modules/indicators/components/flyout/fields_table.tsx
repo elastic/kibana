@@ -6,14 +6,24 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
+import { EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
-import { IndicatorValueActions } from './indicator_value_actions';
+import { unwrapValue } from '../../utils/unwrap_value';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../../common/components/cell_actions';
 
+interface TableItem {
+  key: string;
+  value: string | null;
+}
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
@@ -25,6 +35,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {
+  const smallFontSize = useEuiFontSize('xs').fontSize;
   const columns = useMemo(
     () =>
       [
@@ -35,7 +46,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
               defaultMessage="Field"
             />
           ),
-          render: (field: string) => field,
+          render: (item: TableItem) => item.key,
         },
         {
           name: (
@@ -44,36 +55,54 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
               defaultMessage="Value"
             />
           ),
-          render: (field: string) => <IndicatorFieldValue indicator={indicator} field={field} />,
+          render: (item: TableItem) => (
+            <SecurityCellActions
+              data={{ field: item.key, value: item.value }}
+              mode={CellActionsMode.HOVER_DOWN}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+            >
+              <IndicatorFieldValue indicator={indicator} field={item.key} />
+            </SecurityCellActions>
+          ),
         },
-        {
-          actions: [
-            {
-              render: (field: string) => (
-                <IndicatorValueActions
-                  field={field}
-                  indicator={indicator}
-                  data-test-subj={dataTestSubj}
-                />
-              ),
-              width: '72px',
-            },
-          ],
-        },
-        // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
-      ] as Array<EuiBasicTableColumn<string>>,
-    [indicator, dataTestSubj]
+      ] as Array<EuiBasicTableColumn<TableItem>>,
+    [indicator]
   );
+
+  const search = useMemo(
+    () => ({
+      box: {
+        schema: true,
+        incremental: true,
+      },
+    }),
+    []
+  );
+
+  const items = useMemo(() => {
+    return fields.toSorted().reduce<TableItem[]>((acc, field) => {
+      return [
+        ...acc,
+        {
+          key: field,
+          value: unwrapValue(indicator, field),
+        },
+      ];
+    }, []);
+  }, [fields, indicator]);
 
   return (
     <EuiInMemoryTable
-      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
-      items={fields.sort()}
-      // @ts-expect-error - EuiInMemoryTable wants an array of objects, but will accept strings if coerced
+      items={items}
       columns={columns}
       sorting={true}
       data-test-subj={dataTestSubj}
-      compressed
+      css={css`
+        .euiTableRow {
+          font-size: ${smallFontSize};
+        }
+      `}
+      search={search}
     />
   );
 };
