@@ -62,9 +62,13 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const [removedSettingsCount, setRemovedSettingsCount] = useState<number>(0);
-  const [areChangesInvalid, setInvalidChanges] = useState<boolean>(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
+
+  const areAdvancedConfigsInvalid: boolean = useMemo(() => {
+    return Object.values(validationErrors).some((error) => error);
+  }, [validationErrors]);
 
   const settingsDefinitionsByAgent = useMemo(
     () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
@@ -209,9 +213,9 @@ export function SettingsPage({
               <AdvancedConfiguration
                 newConfig={newConfig}
                 setNewConfig={setNewConfig}
+                setValidationErrors={setValidationErrors}
                 settingsDefinitionsByAgent={settingsDefinitionsByAgent}
                 setRemovedSettingsCount={setRemovedSettingsCount}
-                setInvalidChanges={setInvalidChanges}
               />
             </>
           )}
@@ -233,7 +237,7 @@ export function SettingsPage({
           })}
           unsavedChangesCount={unsavedChangesCount + removedSettingsCount}
           appTestSubj="apm"
-          areChangesInvalid={areChangesInvalid}
+          areChangesInvalid={areAdvancedConfigsInvalid}
         />
       )}
     </>

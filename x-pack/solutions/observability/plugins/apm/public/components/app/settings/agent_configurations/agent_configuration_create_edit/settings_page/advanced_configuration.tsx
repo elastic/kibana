@@ -27,13 +27,13 @@ export function AdvancedConfiguration({
   settingsDefinitionsByAgent,
   setNewConfig,
   setRemovedSettingsCount,
-  setInvalidChanges,
+  setValidationErrors,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitionsByAgent: SettingDefinition[];
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   setRemovedSettingsCount: React.Dispatch<React.SetStateAction<number>>;
-  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }) {
   const agentSettingKeys = useMemo(
     () => settingsDefinitionsByAgent.map((setting) => setting.key),
@@ -151,7 +151,7 @@ export function AdvancedConfiguration({
                 index={index}
                 agentSettingKeys={agentSettingKeys}
                 unknownAgentSettings={unknownAgentSettings}
-                setInvalidChanges={setInvalidChanges}
+                setValidationErrors={setValidationErrors}
                 onUpdate={updateKey}
               />
             </EuiFlexItem>
@@ -160,7 +160,7 @@ export function AdvancedConfiguration({
                 settingValue={settingValue}
                 settingKey={settingKey}
                 index={index}
-                setInvalidChanges={setInvalidChanges}
+                setValidationErrors={setValidationErrors}
                 onUpdate={updateValue}
                 onDelete={deleteRow}
               />
@@ -179,7 +179,7 @@ function AdvancedConfigKeyInput({
   index,
   agentSettingKeys,
   unknownAgentSettings,
-  setInvalidChanges,
+  setValidationErrors,
   onUpdate,
 }: {
   settingKey: string;
@@ -187,7 +187,7 @@ function AdvancedConfigKeyInput({
   index: number;
   agentSettingKeys: string[];
   unknownAgentSettings: Array<[string, string]>;
-  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onUpdate: (oldKey: string, newKey: string, value: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
@@ -234,7 +234,10 @@ function AdvancedConfigKeyInput({
   const handleKeyChange = (newKey: string) => {
     setTouched(true);
     setLocalKey(newKey);
-    setInvalidChanges(isInvalidInput(newKey));
+    setValidationErrors((prev) => ({
+      ...prev,
+      [`key${index}`]: isInvalidInput(newKey),
+    }));
     // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
     // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
     if (!checkIfAdvancedConfigKeyExists(newKey)) {
@@ -273,14 +276,14 @@ function AdvancedConfigValueInput({
   settingValue,
   settingKey,
   index,
-  setInvalidChanges,
+  setValidationErrors,
   onUpdate,
   onDelete,
 }: {
   settingValue: string;
   settingKey: string;
   index: number;
-  setInvalidChanges: React.Dispatch<React.SetStateAction<boolean>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   onUpdate: (key: string, value: string) => void;
   onDelete: (key: string) => void;
 }) {
@@ -290,10 +293,13 @@ function AdvancedConfigValueInput({
     return value === '';
   };
 
-  const handleValueChange = (value: string) => {
+  const handleValueChange = (newValue: string) => {
     setTouched(true);
-    onUpdate(settingKey, value);
-    setInvalidChanges(isInvalidInput(value));
+    onUpdate(settingKey, newValue);
+    setValidationErrors((prev) => ({
+      ...prev,
+      [`value${index}`]: isInvalidInput(newValue),
+    }));
   };
 
   return (
