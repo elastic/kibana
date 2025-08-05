@@ -14,15 +14,15 @@ import {
   EuiNotificationBadge,
   EuiPopover,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
-import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
-import { AI_ASSISTANT_MENU } from './translations';
+import * as i18n from './translations';
 
 interface Params {
   isDisabled?: boolean;
@@ -145,28 +145,30 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
 
     return (
       <>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              aria-label={AI_ASSISTANT_MENU}
-              isDisabled={isDisabled}
-              iconType="controls"
-              onClick={onButtonClick}
-              data-test-subj="chat-context-menu"
+        <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                aria-label={i18n.AI_ASSISTANT_MENU}
+                isDisabled={isDisabled}
+                iconType="controls"
+                onClick={onButtonClick}
+                data-test-subj="chat-context-menu"
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="leftUp"
+          >
+            <EuiContextMenuPanel
+              items={items}
+              css={css`
+                width: 280px;
+              `}
             />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="leftUp"
-        >
-          <EuiContextMenuPanel
-            items={items}
-            css={css`
-              width: 280px;
-            `}
-          />
-        </EuiPopover>
+          </EuiPopover>
+        </EuiToolTip>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (
           <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />

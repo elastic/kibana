@@ -27,8 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Conversation, useAssistantContext } from '../../../..';
-import * as i18n from '../../assistant_header/translations';
-import { AI_ASSISTANT_MENU } from './translations';
+import * as i18n from './translations';
 import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
@@ -317,28 +316,30 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
 
     return (
       <>
-        <EuiPopover
-          button={
-            <EuiButtonIcon
-              aria-label={AI_ASSISTANT_MENU}
-              isDisabled={isDisabled}
-              iconType="boxesVertical"
-              onClick={onButtonClick}
-              data-test-subj="conversation-settings-menu"
+        <EuiToolTip content={i18n.CONVO_ASSISTANT_MENU}>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                aria-label={i18n.CONVO_ASSISTANT_MENU}
+                isDisabled={isDisabled}
+                iconType="boxesVertical"
+                onClick={onButtonClick}
+                data-test-subj="conversation-settings-menu"
+              />
+            }
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="leftUp"
+          >
+            <EuiContextMenuPanel
+              items={items}
+              css={css`
+                width: 280px;
+              `}
             />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="leftUp"
-        >
-          <EuiContextMenuPanel
-            items={items}
-            css={css`
-              width: 280px;
-            `}
-          />
-        </EuiPopover>
+          </EuiPopover>
+        </EuiToolTip>
         {isResetConversationModalVisible && (
           <EuiConfirmModal
             aria-labelledby={confirmModalTitleId}
