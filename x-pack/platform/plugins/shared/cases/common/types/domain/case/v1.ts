@@ -138,13 +138,13 @@ export const CaseAttributesRt = rt.intersection([
   ),
 ]);
 
-export const AlertMetadataRt = rt.strict({
+const AlertMetadataRt = rt.strict({
   grouping: rt.union([rt.record(rt.string, rt.unknown), rt.undefined]),
   tags: rt.union([rt.array(rt.string), rt.undefined]),
   id: rt.string,
 });
 
-export const CaseMetadataRt = rt.strict({
+const CaseMetadataRt = rt.strict({
   alerts: rt.array(AlertMetadataRt),
 });
 
