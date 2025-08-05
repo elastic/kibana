@@ -68,6 +68,9 @@ export const OptionsList = ({ controlSize }: { controlSize: 'normal' | 'compress
         flex-grow: 1;
         max-inline-size: none;
         inline-size: auto;
+        .euiFormControlLayout {
+          z-index: 1; // allows border to darken on hover to match range slider behaviour
+        }
       `}
       prepend={<EuiFormLabel htmlFor={'someId'}>Label</EuiFormLabel>}
     >
@@ -78,7 +81,8 @@ export const OptionsList = ({ controlSize }: { controlSize: 'normal' | 'compress
         valueOfSelected={value}
         onChange={(value) => onChange(value)}
         css={css`
-          box-shadow: none;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
         `}
       />
     </EuiFormControlLayout>

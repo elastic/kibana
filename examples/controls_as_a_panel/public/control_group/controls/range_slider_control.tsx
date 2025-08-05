@@ -67,33 +67,31 @@ export const RangeSlider = ({ controlSize }: { controlSize: 'normal' | 'compress
         flex-grow: 1;
         max-inline-size: none;
         inline-size: auto;
+
+        .euiFormControlLayout {
+          border: none;
+          border-top-left-radius: 0px;
+          border-bottom-left-radius: 0px;
+          input {
+            min-inline-size: auto;
+          }
+        }
       `}
       prepend={<EuiFormLabel htmlFor={'someId'}>Label</EuiFormLabel>}
     >
-      <span
-        css={css`
-          .euiFormControlLayout {
-            border: none;
-            input {
-              min-inline-size: auto;
-            }
-          }
-        `}
-      >
-        <EuiDualRange
-          compressed
-          fullWidth
-          id={'dualInputRangeSlider'}
-          min={0}
-          max={100}
-          value={dualValue}
-          onChange={(value) => setDualValue(value)}
-          showInput="inputWithPopover"
-          showLabels
-          levels={levels}
-          aria-label="An example of EuiDualRange with showInput prop"
-        />
-      </span>
+      <EuiDualRange
+        compressed
+        fullWidth
+        id={'dualInputRangeSlider'}
+        min={0}
+        max={100}
+        value={dualValue}
+        onChange={(value) => setDualValue(value)}
+        showInput="inputWithPopover"
+        showLabels
+        levels={levels}
+        aria-label="An example of EuiDualRange with showInput prop"
+      />
     </EuiFormControlLayout>
   );
 };

@@ -11,7 +11,7 @@ import React from 'react';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
-import { tracksOverlays } from '@kbn/presentation-containers';
+import { tracksOverlays } from '@kbn/presentation-util';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
