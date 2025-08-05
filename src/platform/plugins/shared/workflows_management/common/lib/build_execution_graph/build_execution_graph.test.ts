@@ -18,11 +18,55 @@ import {
   EnterConditionBranchNode,
   ExitConditionBranchNode,
   ConnectorStep,
+  AtomicGraphNode,
 } from '@kbn/workflows';
 import { convertToWorkflowGraph } from './build_execution_graph';
 import { graphlib } from '@dagrejs/dagre';
 
 describe('convertToWorkflowGraph', () => {
+  describe('atomic step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowSchema>;
+
+    it('should return nodes for atomic step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(1);
+      expect(topSort).toEqual(['testAtomicStep']);
+    });
+
+    it('should return correct edges for atomic step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([]);
+    });
+
+    it('should configure the atomic step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testAtomicStep');
+      expect(node).toEqual({
+        id: 'testAtomicStep',
+        type: 'atomic',
+        configuration: {
+          name: 'testAtomicStep',
+          type: 'slack',
+          connectorId: 'slack',
+          with: { message: 'Hello from atomic step' },
+        },
+      } as AtomicGraphNode);
+    });
+  });
+
   describe('if step', () => {
     const workflowDefinition = {
       steps: [
