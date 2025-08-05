@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// Expose the various quickstart examples found at
-// https://www.elastic.co/docs/solutions/search/api-quickstarts
 export interface QuickstartCodeExamples {
   basics: QuickstartCodeSnippetFunction<BasicsCodeSnippetParameters>;
 }
