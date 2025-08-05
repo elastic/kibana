@@ -20,11 +20,15 @@ export default ({ getService }: FtrProviderContext) => {
     const retry = getService('retry');
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     describe('Without alerts', function () {

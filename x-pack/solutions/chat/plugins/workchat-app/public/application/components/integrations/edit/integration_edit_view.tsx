@@ -20,6 +20,7 @@ import {
   EuiConfirmModal,
   EuiButtonEmpty,
   EuiTextArea,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
@@ -40,6 +41,7 @@ interface IntegrationEditViewProps {
 }
 
 export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integrationId }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const { navigateToWorkchatUrl } = useNavigation();
   const {
     services: { notifications },
@@ -274,7 +276,9 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
             {isDeleteModalVisible && (
               <EuiConfirmModal
+                aria-labelledby={confirmModalTitleId}
                 title={toolLabels.editView.deleteModalTitle}
+                titleProps={{ id: confirmModalTitleId }}
                 onCancel={closeDeleteModal}
                 onConfirm={handleDelete}
                 cancelButtonText={toolLabels.editView.cancelButtonLabel}

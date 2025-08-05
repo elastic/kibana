@@ -16,18 +16,6 @@ import {
   selectEuiComboBoxOption,
 } from '../../../../../../../common/test/eui/combobox';
 import { selectEuiSuperSelectOption } from '../../../../../../../common/test/eui/super_select';
-import type {
-  AlertSuppression,
-  AnomalyThreshold,
-  HistoryWindowStart,
-  InlineKqlQuery,
-  MachineLearningJobId,
-  NewTermsFields,
-  RuleEqlQuery,
-  RuleKqlQuery,
-  ThreatIndex,
-  Threshold,
-} from '../../../../../../../../common/api/detection_engine';
 import {
   DataSourceType,
   type BuildingBlockObject,
@@ -42,6 +30,16 @@ import {
   type Threat,
   type TimelineTemplateReference,
   type TimestampOverrideObject,
+  type AlertSuppression,
+  type AnomalyThreshold,
+  type HistoryWindowStart,
+  type InlineKqlQuery,
+  type MachineLearningJobId,
+  type NewTermsFields,
+  type RuleEqlQuery,
+  type RuleKqlQuery,
+  type ThreatIndex,
+  type Threshold,
   KqlQueryType,
 } from '../../../../../../../../common/api/detection_engine';
 import type { RuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';

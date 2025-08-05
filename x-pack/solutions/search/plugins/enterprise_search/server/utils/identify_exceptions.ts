@@ -88,6 +88,7 @@ export function getErrorMessage(payload?: unknown): string {
   }
   try {
     return JSON.stringify(payload);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // If all else fails, we return a generic error
     return i18n.translate('xpack.enterpriseSearch.server.errorIdentifyingException', {
