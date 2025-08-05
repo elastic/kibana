@@ -23,7 +23,12 @@ RUN apk --no-cache add curl
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
+  {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \{{#ubuntu}}
+  case "$arch" in \
+    amd64) arch='x86_64' ;; \
+    arm64) arch='aarch64' ;; \
+    *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
+  esac && \{{/ubuntu}}
   curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-${arch}.tar.gz && \
@@ -62,7 +67,6 @@ RUN set -e ; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
   curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
   echo "${TINI_CHECKSUM} ${TINI_BIN}" | sha256sum -c - ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
