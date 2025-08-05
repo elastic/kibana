@@ -38,11 +38,4 @@ export {
 
 export type { ESQLLicenseType, ESQLSignatureLicenseType, ESQLLicenseResult } from './src/license';
 
-export type {
-  ESQActiveProductObservabilityResult as ESQLPricingResult,
-  PricingProduct,
-  PricingProductObservability,
-  PricingProductSecurity,
-} from './src/active_product_observability';
-
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';

@@ -26,7 +26,8 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { ESQLLicenseType, PricingProduct } from '@kbn/esql-types';
+import { ESQLLicenseType } from '@kbn/esql-types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';

@@ -11,6 +11,7 @@ import {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,
@@ -18,7 +19,6 @@ import type {
   RecommendedField,
   InferenceEndpointsAutocompleteResult,
   ESQLLicenseResult,
-  PricingProduct,
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
