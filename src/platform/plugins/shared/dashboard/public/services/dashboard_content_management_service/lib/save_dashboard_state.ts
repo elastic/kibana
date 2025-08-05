@@ -63,7 +63,6 @@ export const saveDashboardState = async ({
             references,
           },
         });
-    console.log('result----------', result);
 
     const newId = result.id;
 

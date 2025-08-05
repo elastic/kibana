@@ -333,7 +333,6 @@ export const dashboardAttributesSchemaResponse = dashboardAttributesSchema.exten
 );
 
 export const dashboardResponseMetaSchema = schema.object({
-  type: schema.string(),
   updatedAt: schema.maybe(schema.string()),
   createdAt: schema.maybe(schema.string()),
   updatedBy: schema.maybe(schema.string()),
@@ -378,6 +377,7 @@ export const dashboardUpdateOptionsSchema = schema.object({
 export const dashboardItemSchema = schema.object({
   data: dashboardAttributesSchemaResponse,
   meta: dashboardResponseMetaSchema,
+  type: schema.string(),
   id: schema.string(),
 });
 export const dashboardCreateResultSchema = dashboardItemSchema;
@@ -410,6 +410,7 @@ export const dashboardGetResultMetaSchema = dashboardResponseMetaSchema.extends(
 export const dashboardGetResultSchema = schema.object(
   {
     id: schema.string(),
+    type: schema.string(),
     data: dashboardAttributesSchemaResponse,
     meta: dashboardResponseMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
   },

@@ -32,7 +32,6 @@ describe('savedObjectToItem', () => {
   const id = '3d8459d9-0f1a-403d-aa82-6d93713a54b5';
 
   const meta = {
-    type: 'dashboard',
     updatedAt: '2023-10-01T12:00:00Z',
     updatedBy: 'user1',
     createdAt: '2023-10-01T12:00:00Z',
@@ -130,6 +129,7 @@ describe('savedObjectToItem', () => {
       },
       meta,
       id,
+      type: 'dashboard',
     });
   });
 
@@ -194,6 +194,7 @@ describe('savedObjectToItem', () => {
       },
       meta,
       id,
+      type: 'dashboard',
     });
   });
 
@@ -225,6 +226,7 @@ describe('savedObjectToItem', () => {
       },
       meta,
       id,
+      type: 'dashboard',
     });
   });
 
@@ -253,6 +255,7 @@ describe('savedObjectToItem', () => {
       },
       meta,
       id,
+      type: 'dashboard',
     });
   });
 

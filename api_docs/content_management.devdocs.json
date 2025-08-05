@@ -2814,9 +2814,9 @@
         "description": [],
         "signature": [
           "ResultMeta extends void ? { hits: ",
-          "ItemResult",
+          "DashboardItemResult",
           "<T, ItemMeta>[]; } : { hits: ",
-          "ItemResult",
+          "DashboardItemResult",
           "<T, ItemMeta>[]; meta: ResultMeta; }"
         ],
         "path": "src/platform/plugins/shared/content_management/common/rpc/bulk_get.ts",

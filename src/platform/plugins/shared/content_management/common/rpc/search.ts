@@ -97,5 +97,5 @@ export type SearchResult<T = unknown, M = void> = M extends void
         /** Page number or cursor */
         cursor?: string;
       };
-      meta: M[];
+      meta: M;
     };

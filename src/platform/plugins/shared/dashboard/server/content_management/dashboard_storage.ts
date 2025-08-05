@@ -208,6 +208,7 @@ export class DashboardStorage {
       data: item.data,
       meta: { ...item.meta, aliasPurpose, aliasTargetId, outcome },
       id: item.id,
+      type: item.type,
     };
 
     const validationError = transforms.get.out.result.validate(response);

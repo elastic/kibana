@@ -94,7 +94,6 @@ export function savedObjectToItem(
           version,
         },
         meta: {
-          type,
           updatedAt,
           updatedBy,
           createdAt,
@@ -102,6 +101,7 @@ export function savedObjectToItem(
           ...(managed ? { managed } : {}),
         },
         id,
+        type,
       },
       error: null,
     };
