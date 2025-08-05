@@ -219,11 +219,30 @@ export const toNavigationItems = (
 
     warnUnsupportedNavNodeOptions(navNode);
 
+    // for primary menu items there should always be a href
+    // if it's a panel opener, we use the first link inside the section as the href
+    // if there are no sections, we use the href directly
+    let itemHref: string;
+    if (secondarySections?.length) {
+      // If this is a panel opener, we don't use href directly, but rather the find first link inside section
+      const firstSectionWithItems = secondarySections.find((section) => section.items.length > 0);
+      const firstItemWithHref = firstSectionWithItems?.items.find((item) => item.href);
+      itemHref = warnIfMissing(firstItemWithHref, 'href', 'missing-href-😭');
+
+      if (navNode.href) {
+        warnOnce(
+          `Panel opener node "${navNode.id}" has a href "${navNode.href}", but it should not. We're using it as a panel opener that contains sections with links and we use the first link inside the section as the href ${itemHref}.`
+        );
+      }
+    } else {
+      itemHref = warnIfMissing(navNode, 'href', 'missing-href-😭');
+    }
+
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
       iconType: warnIfMissing(navNode, 'icon', AppDeepLinkIdToIcon[navNode.id] || 'broom'),
-      href: warnIfMissing(navNode, 'href', 'missing-href-😭'),
+      href: itemHref,
       sections: secondarySections,
       'data-test-subj': getTestSubj(navNode),
     };

@@ -56,7 +56,6 @@ describe('toNavigationItems', () => {
       • Navigation item \\"dashboards\\" is missing a \\"icon\\". Using fallback value: \\"dashboardApp\\".
       • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.
       • Navigation item \\"securityGroup:rules\\" is missing a \\"icon\\". Using fallback value: \\"securitySignal\\".
-      • Navigation item \\"securityGroup:rules\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Navigation item \\"alerts\\" is missing a \\"icon\\". Using fallback value: \\"bell\\".
       • Navigation item \\"attack_discovery\\" is missing a \\"icon\\". Using fallback value: \\"lensApp\\".
       • Navigation item \\"cloud_security_posture-findings\\" is missing a \\"icon\\". Using fallback value: \\"logoSecurity\\".
@@ -65,21 +64,16 @@ describe('toNavigationItems', () => {
       • Panel opener node \\"securityGroup:entityAnalytics\\" has no children. Ignoring it.
       • Panel opener node \\"securityGroup:explore\\" should contain panel sections, not direct links. Flattening links \\"hosts, network, users\\" into secondary items and creating a placeholder section for these links.
       • Navigation item \\"securityGroup:explore\\" is missing a \\"icon\\". Using fallback value: \\"search\\".
-      • Navigation item \\"securityGroup:explore\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Panel opener node \\"securityGroup:investigations\\" should contain panel sections, not direct links. Flattening links \\"timelines, notes, osquery\\" into secondary items and creating a placeholder section for these links.
       • Navigation item \\"securityGroup:investigations\\" is missing a \\"icon\\". Using fallback value: \\"casesApp\\".
-      • Navigation item \\"securityGroup:investigations\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Navigation item \\"threat_intelligence\\" is missing a \\"icon\\". Using fallback value: \\"bug\\".
       • Navigation node \\"node-4\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:assets.
       • Secondary menu item node \\"fleet\\" has a href \\"/tzo/s/sec/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
       • Navigation item \\"node-0\\" is missing a \\"title\\". Using fallback value: \\"Missing Title 😭\\".
       • Navigation item \\"node-0\\" is missing a \\"href\\". Using fallback value: \\"Missing Href 😭\\".
       • Navigation item \\"securityGroup:assets\\" is missing a \\"icon\\". Using fallback value: \\"indexManagementApp\\".
-      • Navigation item \\"securityGroup:assets\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Navigation item \\"securityGroup:machineLearning\\" is missing a \\"icon\\". Using fallback value: \\"machineLearningApp\\".
-      • Navigation item \\"securityGroup:machineLearning\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Navigation item \\"stack_management\\" is missing a \\"icon\\". Using fallback value: \\"gear\\".
-      • Navigation item \\"stack_management\\" is missing a \\"href\\". Using fallback value: \\"missing-href-😭\\".
       • Navigation item \\"monitoring\\" is missing a \\"icon\\". Using fallback value: \\"monitoringApp\\".
       • Navigation item \\"integrations\\" is missing a \\"icon\\". Using fallback value: \\"plugs\\".
       • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
