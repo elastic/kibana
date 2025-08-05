@@ -41,6 +41,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Fixes incorrect panel rendering when the **Defer loading panels below "the fold"** advanced setting is on [#229662]({{kib-pull}}229662).
+* Fixes an issue in reports where a PNG or PDF export would offset and clip part of the visualization in *Lens* [#228603]({{kib-pull}}228603).
 * Fixes {{esql}} loading button state for long running queries in *Lens* [#226565]({{kib-pull}}226565).
 * Improves the layout and accessibility of the {{esql}} control editor [#228103]({{kib-pull}}228103).
 
