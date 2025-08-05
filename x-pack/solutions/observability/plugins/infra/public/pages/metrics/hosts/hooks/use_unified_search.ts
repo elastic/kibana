@@ -12,6 +12,7 @@ import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -28,15 +29,28 @@ import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }
 ) => {
-  const { panelFilters, filters, parsedDateRange, query: queryObj, limit } = hostState;
+  const {
+    panelFilters,
+    filters,
+    parsedDateRange,
+    query: queryObj,
+    limit,
+    preferredSchema,
+  } = hostState;
 
-  return {
+  const payload: HostsViewQuerySubmittedParams = {
     control_filter_fields: retrieveFieldsFromFilter(panelFilters),
     filter_fields: retrieveFieldsFromFilter(filters),
     interval: telemetryTimeRangeFormatter(parsedDateRange.to - parsedDateRange.from),
     with_query: !!queryObj.query,
     limit,
   };
+
+  if (preferredSchema) {
+    payload.preferred_schema = preferredSchema;
+  }
+
+  return payload;
 };
 
 export const useUnifiedSearch = () => {
@@ -89,6 +103,14 @@ export const useUnifiedSearch = () => {
   const onLimitChange = useCallback(
     (limit: number) => {
       setSearch({ type: 'SET_LIMIT', limit });
+      updateReloadRequestTime();
+    },
+    [setSearch, updateReloadRequestTime]
+  );
+
+  const onPreferredSchemaChange = useCallback(
+    (preferredSchema: HostsState['preferredSchema']) => {
+      setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
       updateReloadRequestTime();
     },
     [setSearch, updateReloadRequestTime]
@@ -227,6 +249,7 @@ export const useUnifiedSearch = () => {
     onDateRangeChange,
     onLimitChange,
     onPanelFiltersChange,
+    onPreferredSchemaChange,
   };
 };
 

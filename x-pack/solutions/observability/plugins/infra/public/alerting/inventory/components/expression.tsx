@@ -31,19 +31,10 @@ import type { ChangeEvent, FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import {
-  findInventoryModel,
-  awsEC2SnapshotMetricTypes,
-  awsRDSSnapshotMetricTypes,
-  awsS3SnapshotMetricTypes,
-  awsSQSSnapshotMetricTypes,
-  containerSnapshotMetricTypes,
-  hostSnapshotMetricTypes,
-  podSnapshotMetricTypes,
-  SnapshotMetricTypeRT,
-} from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -323,6 +314,9 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.expressions.addconditionButton.ariaLabel', {
+            defaultMessage: 'Add condition',
+          })}
           data-test-subj="infraExpressionsAddConditionButton"
           color="primary"
           iconSide="left"
@@ -538,34 +532,17 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     />
   );
 
-  const ofFields = useMemo(() => {
-    let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
+  const inventoryModels = findInventoryModel(nodeType);
+  const { value: aggregations } = useAsync(
+    () => inventoryModels.metrics.getAggregations(),
+    [inventoryModels]
+  );
 
-    switch (nodeType) {
-      case 'awsEC2':
-        myMetrics = awsEC2SnapshotMetricTypes;
-        break;
-      case 'awsRDS':
-        myMetrics = awsRDSSnapshotMetricTypes;
-        break;
-      case 'awsS3':
-        myMetrics = awsS3SnapshotMetricTypes;
-        break;
-      case 'awsSQS':
-        myMetrics = awsSQSSnapshotMetricTypes;
-        break;
-      case 'host':
-        myMetrics = hostSnapshotMetricTypes;
-        break;
-      case 'pod':
-        myMetrics = podSnapshotMetricTypes;
-        break;
-      case 'container':
-        myMetrics = containerSnapshotMetricTypes;
-        break;
-    }
-    return myMetrics.map((myMetric) => toMetricOpt(myMetric, nodeType));
-  }, [nodeType]);
+  const ofFields = useMemo(() => {
+    return (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[]).map((key) =>
+      toMetricOpt(key, nodeType)
+    );
+  }, [aggregations, nodeType]);
 
   return (
     <>
@@ -645,6 +622,10 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
               <EuiSpacer size="xs" />
               <EuiFlexGroup css={StyledExpressionRowCss}>
                 <EuiButtonEmpty
+                  aria-label={i18n.translate(
+                    'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',
+                    { defaultMessage: 'Add warning threshold' }
+                  )}
                   data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color="primary"
                   flush="left"

@@ -21,6 +21,7 @@ const createStartContractMock = () => {
     getHeaderBanner: jest.fn(),
     getProjectAppMenuComponent: jest.fn(),
     getProjectHeaderComponentForGridLayout: jest.fn(),
+    getProjectSideNavV2ComponentForGridLayout: jest.fn(),
     navLinks: {
       getNavLinks$: jest.fn(),
       has: jest.fn(),
@@ -86,7 +87,6 @@ const createStartContractMock = () => {
       setCloudUrls: jest.fn(),
       setProjectName: jest.fn(),
       initNavigation: jest.fn(),
-      setSideNavComponent: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),

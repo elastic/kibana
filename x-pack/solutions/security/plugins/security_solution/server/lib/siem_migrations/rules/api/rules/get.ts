@@ -15,9 +15,9 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { RuleMigrationGetRulesOptions } from '../../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger } from '../util/audit';
-import { authz } from '../util/authz';
-import { withLicense } from '../util/with_license';
+import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
+import { authz } from '../../../common/utils/authz';
+import { withLicense } from '../../../common/utils/with_license';
 import { withExistingMigration } from '../util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsGetRulesRoute = (
@@ -48,7 +48,7 @@ export const registerSiemRuleMigrationsGetRulesRoute = (
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
             try {
               const ctx = await context.resolve(['securitySolution']);
-              const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+              const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
 
               const { page, per_page: size } = req.query;
               const options: RuleMigrationGetRulesOptions = {

@@ -297,3 +297,8 @@ export const getColumns = (
     },
   ];
 };
+
+export type AvailableColumns = Extract<
+  ReturnType<typeof getColumns>[number],
+  { field: string }
+>['field'];

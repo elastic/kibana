@@ -19,7 +19,6 @@ import type {
   EuiSelectableOnChangeEvent,
   EuiSelectableSearchableSearchProps,
 } from '@elastic/eui/src/components/selectable/selectable';
-import { css } from '@emotion/react';
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
@@ -53,9 +52,32 @@ interface Props {
   eventTracker: EventTracker;
 }
 class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
+  private calculateOptimalWidth = (): number => {
+    const minWidth = 300;
+    const maxWidth = 400;
+
+    const { euiTheme } = this.props.theme;
+    const avatarWidth = parseInt(euiTheme.size.l, 10); // EUI theme size.l = 24px, matches avatar 's' size
+    const solutionBadgeWidth = this.props.allowSolutionVisibility ? 110 : 0; // 110px for badges like "Elasticsearch" or "Observability"
+    const paddingAndMargins = 48; // Rough estimate for internal padding and gaps between elements
+
+    // Find the longest space name
+    const longestSpaceName = this.props.spaces.reduce((longest, space) => {
+      return space.name.length > longest.length ? space.name : longest;
+    }, '');
+
+    // Rough estimation: 8px per character
+    const estimatedTextWidth = longestSpaceName.length * 8;
+    const totalEstimatedWidth =
+      estimatedTextWidth + avatarWidth + solutionBadgeWidth + paddingAndMargins;
+
+    // Clamp between min and max
+    return Math.min(Math.max(minWidth, totalEstimatedWidth), maxWidth);
+  };
+
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
-    const { euiTheme } = this.props.theme;
+    const calculatedWidth = this.calculateOptimalWidth();
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -97,9 +119,6 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          css={css`
-            max-width: calc(${euiTheme.size.l} * 10);
-          `}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
             defaultMessage: 'Change current space',
           })}
@@ -107,7 +126,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}
-          style={{ minWidth: 300, maxWidth: 320 }}
+          style={{ minWidth: calculatedWidth, maxWidth: calculatedWidth }}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,

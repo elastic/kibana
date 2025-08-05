@@ -24,7 +24,7 @@ import {
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
-import { UiSettingsSolution } from '@kbn/core-ui-settings-common';
+import { UiSettingsSolutions } from '@kbn/core-ui-settings-common';
 import { SolutionView } from '@kbn/spaces-plugin/common';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
@@ -45,7 +45,7 @@ const createRootMock = () => {
 
 export const createSettingsApplicationServicesMock = (
   hasGlobalSettings?: boolean,
-  settingsSolution?: UiSettingsSolution,
+  settingsSolution?: UiSettingsSolutions,
   spaceSolution: SolutionView = 'classic'
 ): SettingsApplicationServices => ({
   ...createFormServicesMock(),

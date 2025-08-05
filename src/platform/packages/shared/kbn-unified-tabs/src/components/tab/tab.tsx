@@ -82,7 +82,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
-    defaultMessage: 'Close session',
+    defaultMessage: 'Close tab',
   });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);

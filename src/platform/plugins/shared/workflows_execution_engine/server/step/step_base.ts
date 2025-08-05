@@ -12,6 +12,7 @@
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   output: any;
@@ -29,36 +30,40 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
-export abstract class StepBase<TStep extends BaseStep> {
+export interface StepImplementation {
+  run(): Promise<void>;
+}
+
+export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
+  protected workflowState: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor,
+    connectorExecutor: ConnectorExecutor | undefined,
+    workflowState: WorkflowExecutionRuntimeManager,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     this.step = step;
     this.contextManager = contextManager;
     this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
-    this.connectorExecutor = connectorExecutor;
+    this.connectorExecutor = connectorExecutor as any;
+    this.workflowState = workflowState;
   }
 
   public getName(): string {
     return this.step.name;
   }
 
-  public async run(): Promise<RunStepResult> {
-    const stepName = this.getName();
+  public async run(): Promise<void> {
+    const stepId = (this.step as any).id || this.getName();
 
-    // Set step context for logging
-    this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
-
-    // Log step start
-    this.contextManager.logStepStart(stepName);
+    // RuntimeManager handles logging via startStep()
+    await this.workflowState.startStep(stepId);
 
     // const stepEvent = {
     //   event: { action: 'step-execution' },
@@ -77,10 +82,8 @@ export abstract class StepBase<TStep extends BaseStep> {
       //   event: { ...stepEvent.event, outcome: 'success' },
       // });
 
-      this.contextManager.logStepComplete(stepName, stepName, true);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      // RuntimeManager handles logging via finishStep()
+      await this.workflowState.setStepResult(stepId, result);
     } catch (error) {
       // Log failure
       // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
@@ -92,15 +95,12 @@ export abstract class StepBase<TStep extends BaseStep> {
       //   event: { ...stepEvent.event, outcome: 'failure' },
       // });
 
-      this.contextManager.logStepComplete(stepName, stepName, false);
-
+      // RuntimeManager handles logging via finishStep()
       const result = await this.handleFailure(error);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      await this.workflowState.setStepResult(stepId, result);
     } finally {
-      // Clear step context
-      this.contextManager.clearCurrentStep();
+      // RuntimeManager handles all logging and cleanup
+      await this.workflowState.finishStep(stepId);
     }
   }
 

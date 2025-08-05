@@ -31,6 +31,7 @@ export function generateIndexTemplate(name: string) {
     _meta: {
       managed: true,
       description: `The index template for ${name} stream`,
+      managed_by: 'streams',
     },
     data_stream: {
       hidden: false,

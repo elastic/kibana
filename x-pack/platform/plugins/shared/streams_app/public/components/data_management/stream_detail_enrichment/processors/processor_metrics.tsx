@@ -9,7 +9,6 @@
 
 import {
   EuiBadge,
-  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCallOutProps,
@@ -39,7 +38,7 @@ export const ProcessorMetricBadges = ({
   const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
-    <EuiBadgeGroup gutterSize="xs">
+    <EuiFlexGroup gutterSize="none" alignItems="center">
       {parsedRate && (
         <EuiBadge
           color="hollow"
@@ -68,7 +67,7 @@ export const ProcessorMetricBadges = ({
       )}
       {failedRate && (
         <EuiBadge
-          color="hollow"
+          color="danger"
           iconType="warning"
           title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failedRate', {
             defaultMessage: '{failedRate} of the sampled documents were not parsed due to an error',
@@ -93,7 +92,7 @@ export const ProcessorMetricBadges = ({
           })}
         </EuiBadge>
       )}
-    </EuiBadgeGroup>
+    </EuiFlexGroup>
   );
 };
 

@@ -34,7 +34,7 @@ export interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 export * from '../../../../../common/runtime_types/monitor_management';
-export * from '../../../../../common/types/monitor_validation';
+export type * from '../../../../../common/types/monitor_validation';
 
 export interface FormLocation {
   id: string;

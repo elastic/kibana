@@ -27,6 +27,7 @@ export {
   type EsqlToolFieldTypes,
   type EsqlToolParam,
   type EsqlToolDefinition,
+  type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
   idRegexp,
 } from './tools';
