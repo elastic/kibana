@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo, useState, useEffect } from 'react';
+import React, { Fragment, useMemo, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -198,13 +198,18 @@ function AdvancedConfigKeyInput({
     setLocalKey(settingKey);
   }, [settingKey]);
 
+  const checkIfAdvancedConfigKeyExists = useCallback(
+    (key: string) => {
+      return unknownAgentSettings.some(
+        ([unknownConfigKey], unknownConfigIndex) =>
+          unknownConfigKey === key && unknownConfigIndex !== index
+      );
+    },
+    [unknownAgentSettings, index]
+  );
+
   const isInvalidInput = (key: string) => {
-    return (
-      touched &&
-      (key === '' ||
-        agentSettingKeys.includes(key) ||
-        unknownAgentSettings.some(([k], idx) => k === key && idx !== index))
-    );
+    return key === '' || agentSettingKeys.includes(key) || checkIfAdvancedConfigKeyExists(key);
   };
 
   const getKeyValidationError = (key: string) => {
@@ -218,7 +223,7 @@ function AdvancedConfigKeyInput({
         defaultMessage: 'This key is already predefined in the standard configuration above',
       });
     }
-    if (unknownAgentSettings.some(([k], idx) => k === key && idx !== index)) {
+    if (checkIfAdvancedConfigKeyExists(key)) {
       return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
         defaultMessage: 'This key is already used in another advanced configuration',
       });
@@ -229,12 +234,11 @@ function AdvancedConfigKeyInput({
   const handleKeyChange = (newKey: string) => {
     setTouched(true);
     setLocalKey(newKey);
-
-    if (!isInvalidInput(newKey)) {
-      setInvalidChanges(false);
+    setInvalidChanges(isInvalidInput(newKey));
+    // Skip updating if key already exists to prevent overwriting existing values,
+    // which would lead to data loss and poor user experience
+    if (!checkIfAdvancedConfigKeyExists(newKey)) {
       onUpdate(settingKey, newKey, settingValue);
-    } else {
-      setInvalidChanges(true);
     }
   };
 
@@ -248,7 +252,7 @@ function AdvancedConfigKeyInput({
           : undefined
       }
       error={getKeyValidationError(localKey)}
-      isInvalid={isInvalidInput(localKey)}
+      isInvalid={touched && isInvalidInput(localKey)}
       fullWidth
     >
       <EuiFieldText
@@ -258,7 +262,7 @@ function AdvancedConfigKeyInput({
         })}
         fullWidth
         value={localKey}
-        isInvalid={isInvalidInput(localKey)}
+        isInvalid={touched && isInvalidInput(localKey)}
         onChange={(e) => handleKeyChange(e.target.value)}
       />
     </EuiFormRow>
@@ -283,13 +287,13 @@ function AdvancedConfigValueInput({
   const [touched, setTouched] = useState(false);
 
   const isInvalidInput = (value: string) => {
-    return touched && value === '';
+    return value === '';
   };
 
   const handleValueChange = (value: string) => {
     setTouched(true);
     onUpdate(settingKey, value);
-    setInvalidChanges(!isInvalidInput(value) ? false : true);
+    setInvalidChanges(isInvalidInput(value));
   };
 
   return (
@@ -304,11 +308,11 @@ function AdvancedConfigValueInput({
       error={i18n.translate('xpack.apm.agentConfig.settingsPage.valueEmptyError', {
         defaultMessage: 'Value cannot be empty',
       })}
-      isInvalid={isInvalidInput(settingValue)}
+      isInvalid={touched && isInvalidInput(settingValue)}
       fullWidth
     >
       <EuiFieldText
-        isInvalid={isInvalidInput(settingValue)}
+        isInvalid={touched && isInvalidInput(settingValue)}
         data-test-subj="apmSettingsAdvancedConfigurationValueField"
         aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
           defaultMessage: 'Advanced configuration value',
