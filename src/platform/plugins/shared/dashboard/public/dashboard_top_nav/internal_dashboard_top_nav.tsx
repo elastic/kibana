@@ -410,6 +410,10 @@ const topNavStyles = {
         zIndex: euiTheme.levels.mask,
         top: `var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, ${euiTheme.size.base}))`,
         background: euiTheme.colors.backgroundBasePlain,
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          position: 'unset', // on smaller screens, the top nav should not be sticky
+        },
       },
     }),
   updateIcon: ({ euiTheme }: UseEuiTheme) =>
