@@ -22,7 +22,7 @@ export const HostHeaderTitle = ({
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>{title}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AgentIcon agentName="opentelemetry" size="m" role="presentation" />
+        <AgentIcon agentName="opentelemetry" role="presentation" />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
