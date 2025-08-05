@@ -26,14 +26,11 @@
     "@kbn/enterprise-search-plugin",
     "@kbn/test-suites-src",
     "@kbn/guided-onboarding",
-<<<<<<< HEAD
     "@kbn/core-http-common",
-=======
     "@kbn/search-playground",
     "@kbn/tooling-log",
     "@kbn/test-suites-xpack",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/core-chrome-browser",
->>>>>>> fbb8d95cf8c ([ska] relocate functional tests to solutions and platform (#228243))
   ]
 }

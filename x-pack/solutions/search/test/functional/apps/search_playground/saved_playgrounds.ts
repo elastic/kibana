@@ -5,163 +5,198 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { createOpenAIConnector } from './utils/create_openai_connector';
+import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
-import { createPlayground, deletePlayground } from './utils/create_playground';
+const COMMON_REQUEST_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  'x-elastic-internal-origin': 'Kibana',
+};
 
-const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
+export function MachineLearningCommonAPIProvider({}: FtrProviderContext) {
+  return {
+    getCommonRequestHeader,
+  };
+}
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'searchPlayground', 'solutionNavigation']);
-  const log = getService('log');
+export function getCommonRequestHeader(apiVersion?: string) {
+  if (apiVersion === undefined) {
+    return COMMON_REQUEST_HEADERS;
+  }
+
+  return Object.assign(COMMON_REQUEST_HEADERS, { [ELASTIC_HTTP_VERSION_HEADER]: apiVersion });
+}
+
+const esArchiveIndex =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+
+export default function (ftrContext: FtrProviderContext) {
+  const { getService, getPageObjects } = ftrContext;
+  const pageObjects = getPageObjects(['common', 'searchPlayground']);
+  const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  const createIndices = async () => {
-    await esArchiver.load(archivedBooksIndex);
-  };
-  const deleteIndices = async () => {
-    await esArchiver.unload(archivedBooksIndex);
+  const log = getService('log');
+  const browser = getService('browser');
+
+  const createIndex = async () => await esArchiver.load(esArchiveIndex);
+
+  let proxy: LlmProxy;
+  let removeOpenAIConnector: () => Promise<void>;
+  const createConnector = async () => {
+    removeOpenAIConnector = await createOpenAIConnector({
+      supertest,
+      requestHeader: commonAPI.getCommonRequestHeader(),
+      proxy,
+    });
   };
 
-  describe('Search Playground - Saved Playgrounds', function () {
-    let testPlaygroundId: string;
+  describe('Playground', () => {
     before(async () => {
-      await createIndices();
-      // Note: replace with creating playground via UI once thats supported
-      testPlaygroundId = await createPlayground(
-        {
-          name: 'FTR Search Playground',
-          indices: ['search-books'],
-          queryFields: { 'search-books': ['name', 'author'] },
-          elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["name","author"]}}}}}`,
-        },
-        { log, supertest }
-      );
+      proxy = await createLlmProxy(log);
+      await pageObjects.common.navigateToApp('searchPlayground');
     });
+
     after(async () => {
-      if (testPlaygroundId) {
-        await deletePlayground(testPlaygroundId, { log, supertest });
-      }
-      await deleteIndices();
+      await esArchiver.unload(esArchiveIndex);
+      proxy.close();
     });
-    describe('View a Saved Playground', function () {
-      it('should open saved playground', async () => {
-        expect(testPlaygroundId).not.to.be(undefined);
 
-        await pageObjects.common.navigateToUrl('searchPlayground', `p/${testPlaygroundId}`, {
-          shouldUseHashForSubUrl: false,
+    describe('setup Page', () => {
+      it('is loaded successfully', async () => {
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
+      });
+
+      describe('with gen ai connectors', () => {
+        before(async () => {
+          await createConnector();
+          await browser.refresh();
         });
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
-          'FTR Search Playground'
-        );
-        const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'FTR Search Playground',
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await browser.refresh();
+        });
+        it('show success llm button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
         });
       });
-      it('should be able to search index', async () => {
-        // Should default to search mode for this playground
-        await pageObjects.searchPlayground.expectPageModeToBeSelected('search');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.hasModeSelectors();
-        // Preview mode enum shares data test subj with chat page mode
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectModeIsSelected('chatMode');
 
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectSearchBarToExist();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.executeSearchQuery('Neal');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectSearchResultsToExist();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.executeSearchQuery('gibberish');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectSearchResultsNotToExist();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clearSearchInput();
+      describe('without gen ai connectors', () => {
+        it('should display the set up connectors button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectAddConnectorButtonExists();
+        });
+
+        it('creates a connector successfully', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenConnectorPagePlayground();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectSuccessButtonAfterCreatingConnector(
+            createConnector
+          );
+        });
+
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await browser.refresh();
+        });
       });
-      it('should have query mode', async () => {
-        await pageObjects.searchPlayground.PlaygroundSearchPage.selectPageMode(
-          'queryMode',
-          testPlaygroundId
-        );
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeComponentsToExist();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsEmptyState();
+
+      describe('without any indices', () => {
+        it('show create index button', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
+        });
+
+        it('show success button when index added', async () => {
+          await createIndex();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
+        });
+
+        after(async () => {
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+        });
       });
-      it('should support changing fields to search', async () => {
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('author');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('name');
-        const queryEditorTextBefore =
-          await pageObjects.searchPlayground.PlaygroundSearchPage.getQueryEditorText();
-        expect(queryEditorTextBefore).to.contain(`"author"`);
-        expect(queryEditorTextBefore).to.contain('"name"');
 
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('name', true);
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldNotToBeSelected('name');
+      describe('with existing indices', () => {
+        before(async () => {
+          await createConnector();
+          await createIndex();
+          await browser.refresh();
+        });
 
-        let queryEditorText =
-          await pageObjects.searchPlayground.PlaygroundSearchPage.getQueryEditorText();
-        expect(queryEditorText).to.contain('"author"');
-        expect(queryEditorText).not.to.contain('"name"');
+        it('can select index from dropdown and load chat page', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+        });
 
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('name', false);
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('name');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', true);
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldNotToBeSelected(
-          'author'
-        );
-
-        queryEditorText =
-          await pageObjects.searchPlayground.PlaygroundSearchPage.getQueryEditorText();
-        expect(queryEditorText).not.to.contain('"author"');
-
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', false);
-      });
-      it('should support running query in query mode', async () => {
-        await pageObjects.searchPlayground.PlaygroundSearchPage.runQueryInQueryMode('atwood');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeResultsCodeEditor();
+        after(async () => {
+          await removeOpenAIConnector?.();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+        });
       });
     });
-    describe('Update Saved Playground', function () {
+
+    describe('chat page', () => {
       before(async () => {
-        expect(testPlaygroundId).not.to.be(undefined);
+        await createConnector();
+        await createIndex();
+        await browser.refresh();
+        await pageObjects.searchPlayground.PlaygroundChatPage.navigateToChatPage();
+      });
+      it('loads successfully', async () => {
+        await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWindowLoaded();
+      });
 
-        await pageObjects.common.navigateToUrl('searchPlayground', `p/${testPlaygroundId}`, {
-          shouldUseHashForSubUrl: false,
+      describe('chat', () => {
+        it('works', async () => {
+          const conversationInterceptor = proxy.intercept(
+            'conversation',
+            (body) =>
+              body.tools?.find((fn) => fn.function.name === 'title_conversation') === undefined
+          );
+
+          await pageObjects.searchPlayground.PlaygroundChatPage.sendQuestion();
+
+          const conversationSimulator = await conversationInterceptor.waitForIntercept();
+
+          await conversationSimulator.next('My response');
+
+          await conversationSimulator.complete();
+
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectChatWorks();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectTokenTooltipExists();
         });
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
-          'FTR Search Playground'
-        );
+
+        it('open view code', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectOpenViewCode();
+        });
+
+        it('show fields and code in view query', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
+        });
+
+        it('show edit context', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+        });
+
+        it('save selected fields between modes', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
+        });
       });
-      it('should allow updating playground name', async () => {
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToExist();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.clickEditPlaygroundNameButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditModal(
-          'Test Search Playground'
-        );
-        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundNameInModal();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
-          'Test Search Playground'
-        );
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.clickSavedPlaygroundSaveButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
-      });
-      it('should allow updating playground query fields', async () => {
-        await pageObjects.searchPlayground.PlaygroundSearchPage.selectPageMode(
-          'queryMode',
-          testPlaygroundId
-        );
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectQueryModeComponentsToExist();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('author');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.expectFieldToBeSelected('name');
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', true);
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeExists();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeEnabled();
-        await pageObjects.searchPlayground.PlaygroundSearchPage.clickFieldSwitch('author', false);
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectUnSavedChangesBadegeNotExists();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
+
+      after(async () => {
+        await removeOpenAIConnector?.();
+        await esArchiver.unload(esArchiveIndex);
+        await browser.refresh();
       });
     });
   });
