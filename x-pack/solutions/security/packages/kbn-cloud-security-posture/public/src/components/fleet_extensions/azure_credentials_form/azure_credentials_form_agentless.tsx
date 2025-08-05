@@ -21,7 +21,7 @@ import {
 import { UpdatePolicy } from '../types';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
-import { AZURE_PROVIDER, getCloudSetupProviderOverviewPath } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -38,21 +38,24 @@ export const AzureCredentialsFormAgentless = ({
   packageInfo,
   hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
-  const documentationLink = getCloudSetupProviderOverviewPath(AZURE_PROVIDER);
+  const { azureOverviewPath, azurePolicyType } = useCloudSetup();
+
   const options = getAzureCredentialsFormOptions();
   const group = options[AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET];
   const fields = getInputVarsFields(input, group.fields);
 
   return (
     <>
-      <AzureSetupInfoContent documentationLink={documentationLink} />
+      <AzureSetupInfoContent documentationLink={azureOverviewPath} />
       <EuiSpacer size="l" />
       <AzureInputVarFields
         packageInfo={packageInfo}
         fields={fields}
         onChange={(key, value) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, { [key]: { value } }),
+            updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+              [key]: { value },
+            }),
           });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}

@@ -16,11 +16,11 @@ import {
 import { hasPolicyTemplateInputs } from '../utils';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { AwsCredentialsType } from '../types';
-import { getCloudSetupPolicyTemplate } from '../mappings';
 
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
   showCloudConnectors: boolean,
+  templateName: string,
   setupTechnology?: SetupTechnology
 ): AwsCredentialsType => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
@@ -28,7 +28,7 @@ export const getDefaultAwsCredentialsType = (
       ? AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS
       : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
   }
-  const hasCloudFormationTemplate = !!getCspmFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
 
   if (hasCloudFormationTemplate) {
     return AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
@@ -41,13 +41,15 @@ export const getCloudDefaultAwsCredentialConfig = ({
   isAgentless,
   showCloudConnectors,
   packageInfo,
+  templateName,
 }: {
   isAgentless: boolean;
   packageInfo: PackageInfo;
   showCloudConnectors: boolean;
+  templateName: string;
 }) => {
   let credentialsType;
-  const hasCloudFormationTemplate = !!getCspmFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
   if (!showCloudConnectors && isAgentless) {
     credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   } else if (showCloudConnectors && isAgentless) {
@@ -82,12 +84,13 @@ export const getAwsCredentialsType = (
   input: NewPackagePolicyInput
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const getCspmFormationDefaultValue = (packageInfo: PackageInfo): string => {
+export const getCloudFormationDefaultValue = (
+  packageInfo: PackageInfo,
+  templateName: string
+): string => {
   if (!packageInfo.policy_templates) return '';
 
-  const policyTemplate = packageInfo.policy_templates.find(
-    (p) => p.name === getCloudSetupPolicyTemplate()
-  );
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;

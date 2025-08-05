@@ -9,14 +9,14 @@ import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { hasPolicyTemplateInputs } from '../utils';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
-import { getCloudSetupPolicyTemplate } from '../mappings';
 
-export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
+export const getArmTemplateUrlFromCspmPackage = (
+  packageInfo: PackageInfo,
+  templateName: string
+): string => {
   if (!packageInfo.policy_templates) return '';
 
-  const policyTemplate = packageInfo.policy_templates.find(
-    (p) => p.name === getCloudSetupPolicyTemplate()
-  );
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
@@ -33,13 +33,14 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
 
 export const getDefaultAzureCredentialsType = (
   packageInfo: PackageInfo,
+  templateName: string,
   setupTechnology?: SetupTechnology
 ): string => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
     return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
   }
 
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
   if (hasArmTemplateUrl) {
     return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
   }

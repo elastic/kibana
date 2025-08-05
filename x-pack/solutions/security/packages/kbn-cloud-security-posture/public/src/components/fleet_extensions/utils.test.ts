@@ -11,7 +11,7 @@ import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
-  getCspmCloudShellDefaultValue,
+  getCloudShellDefaultValue,
   isBelowMinVersion,
   findVariableDef,
 } from './utils';
@@ -108,7 +108,7 @@ describe('getCspmCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates is missing', () => {
     const packagePolicy = { name: 'test' } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -116,7 +116,7 @@ describe('getCspmCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates.name is not cspm', () => {
     const packagePolicy = { name: 'test', policy_templates: [{ name: 'kspm' }] } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -124,7 +124,7 @@ describe('getCspmCloudShellDefaultValue', () => {
   it('should return empty string when policy_templates.inputs is missing', () => {
     const packagePolicy = { name: 'test', policy_templates: [{ name: 'cspm' }] } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -142,7 +142,7 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -160,7 +160,7 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -178,7 +178,7 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -196,7 +196,7 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('');
   });
@@ -221,7 +221,7 @@ describe('getCspmCloudShellDefaultValue', () => {
       ],
     } as PackageInfo;
 
-    const result = getCspmCloudShellDefaultValue(packagePolicy);
+    const result = getCloudShellDefaultValue(packagePolicy);
 
     expect(result).toBe('URL');
   });

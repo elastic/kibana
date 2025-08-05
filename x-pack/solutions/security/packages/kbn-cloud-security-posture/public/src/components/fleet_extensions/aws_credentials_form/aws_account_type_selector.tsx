@@ -15,9 +15,9 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AwsAccountType, UpdatePolicy } from '../types';
+import { AWS_PROVIDER, AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
-import { AWS_PROVIDER, getCloudSetupProviderConfig } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
   input.streams[0].vars?.['aws.account_type']?.value;
@@ -67,12 +67,12 @@ export const AwsAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
+  const { awsOrganizationMinimumVersion, awsPolicyType } = useCloudSetup();
   // This will disable the aws org option for any version below 1.5.0-preview20 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const isValidSemantic = semverValid(packageInfo.version);
-  const minimumAwsOrgVersion = getCloudSetupProviderConfig(AWS_PROVIDER).organizationMinimumVersion;
   const isAwsOrgDisabled =
-    isValidSemantic && minimumAwsOrgVersion
-      ? semverCompare(packageInfo.version, minimumAwsOrgVersion) < 0
+    isValidSemantic && awsOrganizationMinimumVersion
+      ? semverCompare(packageInfo.version, awsOrganizationMinimumVersion) < 0
       : true;
 
   const awsAccountTypeOptions = useMemo(
@@ -83,12 +83,17 @@ export const AwsAccountTypeSelect = ({
   useEffect(() => {
     if (!getAwsAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
-          'aws.account_type': {
-            value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
-            type: 'text',
-          },
-        }),
+        updatedPolicy: getPosturePolicy(
+          newPolicy,
+          awsPolicyType,
+
+          {
+            'aws.account_type': {
+              value: isAwsOrgDisabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
+              type: 'text',
+            },
+          }
+        ),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +125,7 @@ export const AwsAccountTypeSelect = ({
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
+            updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
               'aws.account_type': {
                 value: accountType,
                 type: 'text',

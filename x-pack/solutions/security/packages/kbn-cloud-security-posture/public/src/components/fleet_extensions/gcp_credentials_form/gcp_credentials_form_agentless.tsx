@@ -21,12 +21,7 @@ import { ReadDocumentation } from '../common';
 import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
 import { getInputVarsFields, gcpField } from './gcp_utils';
 import { UpdatePolicy } from '../types';
-import {
-  GCP_PROVIDER,
-  getCloudSetupPolicyTemplate,
-  getCloudSetupProviderOverviewPath,
-  showCloudTemplate,
-} from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 interface GcpFormAgentlessProps {
   input: NewPackagePolicyInput;
@@ -45,11 +40,11 @@ export const GcpCredentialsFormAgentless = ({
   packageInfo,
   hasInvalidRequiredVars,
 }: GcpFormAgentlessProps) => {
+  const { gcpShowCloudTemplate, templateName, gcpPolicyType, gcpOverviewPath } = useCloudSetup();
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
-  const showCloudCredentialsButton = showCloudTemplate(GCP_PROVIDER);
 
   /*
     For Agentless only JSON credentials type is supported.
@@ -65,7 +60,7 @@ export const GcpCredentialsFormAgentless = ({
 
   const cloudShellUrl = getTemplateUrlFromPackageInfo(
     packageInfo,
-    getCloudSetupPolicyTemplate(),
+    templateName,
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
@@ -77,7 +72,7 @@ export const GcpCredentialsFormAgentless = ({
     <>
       <GCPSetupInfoContent isAgentless={true} />
       <EuiSpacer size="m" />
-      {!showCloudCredentialsButton && (
+      {!gcpShowCloudTemplate && (
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
@@ -88,7 +83,7 @@ export const GcpCredentialsFormAgentless = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {showCloudCredentialsButton && (
+      {gcpShowCloudTemplate && (
         <>
           <EuiSpacer size="m" />
           <EuiAccordion
@@ -123,7 +118,9 @@ export const GcpCredentialsFormAgentless = ({
         fields={fields}
         onChange={(key, value) =>
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, GCP_PROVIDER, { [key]: { value } }),
+            updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+              [key]: { value },
+            }),
           })
         }
         isOrganization={isOrganization}
@@ -131,7 +128,7 @@ export const GcpCredentialsFormAgentless = ({
         hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
       <EuiSpacer size="s" />
-      <ReadDocumentation url={getCloudSetupProviderOverviewPath(GCP_PROVIDER)} />
+      <ReadDocumentation url={gcpOverviewPath} />
       <EuiSpacer />
     </>
   );

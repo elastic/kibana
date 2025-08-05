@@ -17,7 +17,13 @@ import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/service
 import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import type { UpdatePolicy } from './types';
+import {
+  AWS_PROVIDER,
+  AZURE_PROVIDER,
+  CloudSetupConfig,
+  GCP_PROVIDER,
+  type UpdatePolicy,
+} from './types';
 import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
@@ -31,7 +37,8 @@ import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
-import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER, getCloudSetupConfig } from './mappings';
+import { CloudSetupProvider, useCloudSetup } from './cloud_setup_context';
+import { i18n } from '@kbn/i18n';
 
 const EditScreenStepTitle = () => (
   <>
@@ -59,8 +66,7 @@ interface CloudSetupProps {
   validationResults?: PackagePolicyValidationResults;
   uiSettings: IUiSettingsClient;
 }
-
-export const CloudSetup = memo<CloudSetupProps>(
+const CloudIntegrationSetup = memo<CloudSetupProps>(
   ({
     cloud,
     defaultSetupTechnology,
@@ -97,7 +103,9 @@ export const CloudSetup = memo<CloudSetupProps>(
       uiSettings,
     });
 
-    const namespaceSupportEnabled = getCloudSetupConfig().namespaceSupportEnabled;
+    const { templateName, config } = useCloudSetup();
+
+    const namespaceSupportEnabled = config.namespaceSupportEnabled;
 
     const { euiTheme } = useEuiTheme();
 
@@ -213,12 +221,13 @@ export const CloudSetup = memo<CloudSetupProps>(
                 updatePolicy({
                   updatedPolicy: getPosturePolicy(
                     newPolicy,
-                    selectedProvider,
+                    config.providers[selectedProvider].type,
                     getDefaultCloudCredentialsType(
                       value === SetupTechnology.AGENTLESS,
                       selectedProvider,
                       packageInfo,
-                      showCloudConnectors
+                      showCloudConnectors,
+                      templateName
                     )
                   ),
                 });
@@ -227,21 +236,19 @@ export const CloudSetup = memo<CloudSetupProps>(
           </>
         )}
 
-        {selectedProvider &&
-          selectedProvider === AWS_PROVIDER &&
-          setupTechnology === SetupTechnology.AGENTLESS && (
-            <AwsCredentialsFormAgentless
-              input={input}
-              newPolicy={newPolicy}
-              packageInfo={packageInfo}
-              updatePolicy={updatePolicy}
-              isEditPage={isEditPage}
-              setupTechnology={setupTechnology}
-              hasInvalidRequiredVars={hasInvalidRequiredVars}
-              showCloudConnectors={showCloudConnectors}
-              cloud={cloud}
-            />
-          )}
+        {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
+          <AwsCredentialsFormAgentless
+            input={input}
+            newPolicy={newPolicy}
+            packageInfo={packageInfo}
+            updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
+            setupTechnology={setupTechnology}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            showCloudConnectors={showCloudConnectors}
+            cloud={cloud}
+          />
+        )}
         {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
           <AwsCredentialsForm
             input={input}
@@ -253,6 +260,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             isValid={isValid}
           />
         )}
+
         {selectedProvider === GCP_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <GcpCredentialsFormAgentless
             input={input}
@@ -273,6 +281,7 @@ export const CloudSetup = memo<CloudSetupProps>(
             hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         )}
+
         {selectedProvider === AZURE_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AzureCredentialsFormAgentless
             input={input}
@@ -299,7 +308,90 @@ export const CloudSetup = memo<CloudSetupProps>(
   }
 );
 
-CloudSetup.displayName = 'CloudSetup';
+export const CloudSetup = memo<CloudSetupProps>(
+  ({
+    cloud,
+    defaultSetupTechnology,
+    handleSetupTechnologyChange,
+    isAgentlessEnabled,
+    isEditPage,
+    isValid,
+    newPolicy,
+    updatePolicy,
+    packageInfo,
+    validationResults,
+    uiSettings,
+  }: CloudSetupProps) => {
+    const AWS_ORG_MINIMUM_PACKAGE_VERSION = '1.5.0-preview20';
+    const GCP_ORG_MINIMUM_PACKAGE_VERSION = '1.6.0';
+    const AZURE_ORG_MINIMUM_PACKAGE_VERSION = '1.7.0';
+    const MIN_VERSION_GCP_CIS = '1.5.2';
+
+    const TEMP_CSPM_MAPPING: CloudSetupConfig = {
+      policyTemplate: 'cspm',
+      defaultProvider: 'aws',
+      namespaceSupportEnabled: true,
+      name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
+        defaultMessage: 'Cloud Security Posture Management',
+      }),
+      shortName: i18n.translate(
+        'securitySolutionPackages.cspmIntegration.integration.shortNameTitle',
+        {
+          defaultMessage: 'CSPM',
+        }
+      ),
+      overviewPath: `https://ela.st/cspm-overview`,
+      getStartedPath: `https://ela.st/cspm-get-started`,
+      providers: {
+        aws: {
+          type: 'cloudbeat/cis_aws',
+          showCloudConnectors: true,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: AWS_ORG_MINIMUM_PACKAGE_VERSION,
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
+          testId: 'cisAwsTestId',
+        },
+        gcp: {
+          type: 'cloudbeat/cis_gcp',
+          showCloudConnectors: false,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: GCP_ORG_MINIMUM_PACKAGE_VERSION,
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
+          minShowVersion: MIN_VERSION_GCP_CIS,
+          testId: 'cisGcpTestId',
+        },
+        azure: {
+          type: 'cloudbeat/cis_azure',
+          showCloudConnectors: false,
+          showCloudTemplate: true, // this should be checking the package version and set in CSPM
+          organizationMinimumVersion: AZURE_ORG_MINIMUM_PACKAGE_VERSION,
+          getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
+          testId: 'cisAzureTestId',
+        },
+      },
+    };
+
+    return (
+      <CloudSetupProvider config={TEMP_CSPM_MAPPING}>
+        <CloudIntegrationSetup
+          cloud={cloud}
+          defaultSetupTechnology={defaultSetupTechnology}
+          handleSetupTechnologyChange={handleSetupTechnologyChange}
+          isAgentlessEnabled={isAgentlessEnabled}
+          isEditPage={isEditPage}
+          isValid={isValid}
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+          validationResults={validationResults}
+          uiSettings={uiSettings}
+        />
+      </CloudSetupProvider>
+    );
+  }
+);
+
+CloudIntegrationSetup.displayName = 'CloudSetup';
 
 // eslint-disable-next-line import/no-default-export
-export { CloudSetup as default };
+export { CloudIntegrationSetup as default };

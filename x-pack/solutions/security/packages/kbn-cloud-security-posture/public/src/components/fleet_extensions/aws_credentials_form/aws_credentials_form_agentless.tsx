@@ -44,13 +44,8 @@ import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import { getAwsCredentialsType } from './aws_utils';
-import { UpdatePolicy } from '../types';
-import {
-  AWS_PROVIDER,
-  getCloudSetupPolicyTemplate,
-  getCloudSetupProviderOverviewPath,
-  showCloudTemplate,
-} from '../mappings';
+import { AWS_PROVIDER, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../cloud_setup_context';
 
 interface AwsAgentlessFormProps {
   input: NewPackagePolicyInput;
@@ -76,16 +71,16 @@ export const AwsCredentialsFormAgentless = ({
   showCloudConnectors,
   cloud,
 }: AwsAgentlessFormProps) => {
+  const { awsOverviewPath, awsShowCloudConnectors, awsPolicyType, templateName } = useCloudSetup();
+
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
   const awsCredentialsType = getAgentlessCredentialsType(input, showCloudConnectors);
-
-  const documentationLink = getCloudSetupProviderOverviewPath(AWS_PROVIDER);
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
       updatedPolicy: {
-        ...getPosturePolicy(newPolicy, AWS_PROVIDER, {
+        ...getPosturePolicy(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -101,14 +96,19 @@ export const AwsCredentialsFormAgentless = ({
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
-    getCloudSetupPolicyTemplate() ?? '',
+    templateName ?? '',
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const showCloudCredentialsButton = showCloudTemplate(AWS_PROVIDER);
+  const showCloudCredentialsButton = awsShowCloudConnectors;
 
   const cloudConnectorRemoteRoleTemplate = cloud
-    ? getCloudConnectorRemoteRoleTemplate({ input, cloud, packageInfo }) || undefined
+    ? getCloudConnectorRemoteRoleTemplate({
+        input,
+        cloud,
+        packageInfo,
+        templateName,
+      }) || undefined
     : undefined;
 
   const cloudFormationSettings: Record<
@@ -172,7 +172,7 @@ export const AwsCredentialsFormAgentless = ({
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
-                  <EuiLink href={documentationLink} target="_blank">
+                  <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
                       id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
@@ -187,7 +187,7 @@ export const AwsCredentialsFormAgentless = ({
               defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 gettingStartedLink: (
-                  <EuiLink href={documentationLink} target="_blank">
+                  <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
                       id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
                       defaultMessage="Getting Started"
@@ -214,7 +214,7 @@ export const AwsCredentialsFormAgentless = ({
           updatePolicy({
             updatedPolicy: getPosturePolicy(
               newPolicy,
-              AWS_PROVIDER,
+              awsPolicyType,
               getCloudCredentialVarsConfig({
                 setupTechnology,
                 optionId,
@@ -271,14 +271,16 @@ export const AwsCredentialsFormAgentless = ({
         fields={fields}
         packageInfo={packageInfo}
         onChange={(key, value) => {
-          const updatedPolicy = getPosturePolicy(newPolicy, AWS_PROVIDER, { [key]: { value } });
+          const updatedPolicy = getPosturePolicy(newPolicy, awsPolicyType, {
+            [key]: { value },
+          });
           updatePolicy({
             updatedPolicy,
           });
         }}
         hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
-      <ReadDocumentation url={documentationLink} />
+      <ReadDocumentation url={awsOverviewPath} />
     </>
   );
 };
