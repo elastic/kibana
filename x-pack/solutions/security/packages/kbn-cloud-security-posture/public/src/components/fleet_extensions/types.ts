@@ -16,7 +16,33 @@ import {
   AZURE_SETUP_FORMAT,
   AZURE_SINGLE_ACCOUNT,
 } from './constants';
-import { CloudProviders } from './mappings';
+
+// Cloud Provider Types
+export const AWS_PROVIDER = 'aws';
+export const GCP_PROVIDER = 'gcp';
+export const AZURE_PROVIDER = 'azure';
+
+export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
+
+export type CloudProviderConfig = {
+  type: string;
+  showCloudConnectors: boolean;
+  showCloudTemplate: boolean;
+  organizationMinimumVersion?: string;
+  getStartedPath: string;
+  minShowVersion?: string;
+  testId: string;
+};
+export type CloudSetupConfig = {
+  policyTemplate: string;
+  name: string;
+  shortName: string;
+  defaultProvider: CloudProviders;
+  namespaceSupportEnabled?: boolean;
+  overviewPath: string;
+  getStartedPath: string;
+  providers: Record<CloudProviders, CloudProviderConfig>;
+};
 
 export type UpdatePolicy = ({
   updatedPolicy,
@@ -40,6 +66,7 @@ export interface GetCloudConnectorRemoteRoleTemplateParams {
     | 'isServerlessEnabled'
   >;
   packageInfo: PackageInfo;
+  templateName: string;
 }
 
 export interface GetAwsCredentialTypeConfigParams {

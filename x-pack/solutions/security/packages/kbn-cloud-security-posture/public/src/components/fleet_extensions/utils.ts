@@ -28,29 +28,24 @@ import {
   AZURE_CREDENTIALS_TYPE,
   GCP_CREDENTIALS_TYPE,
 } from './constants';
-import type {
-  GetAwsCredentialTypeConfigParams,
-  GetCloudConnectorRemoteRoleTemplateParams,
-} from './types';
-import { getCloudDefaultAwsCredentialConfig } from './aws_credentials_form/aws_utils';
-import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
-import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
 import {
   AWS_PROVIDER,
   AZURE_PROVIDER,
   CloudProviders,
   GCP_PROVIDER,
-  getCloudSetupPolicyTemplate,
-  getCloudSetupPolicyType,
-} from './mappings';
+  type GetAwsCredentialTypeConfigParams,
+  type GetCloudConnectorRemoteRoleTemplateParams,
+} from './types';
+import { getCloudDefaultAwsCredentialConfig } from './aws_credentials_form/aws_utils';
+import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
+import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
 
 const getPostureInput = (
   input: NewPackagePolicyInput,
-  provider: CloudProviders,
+  selectedPolicyType: string,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ) => {
-  const policyInputType = getCloudSetupPolicyType(provider);
-  const isInputEnabled = input.type === policyInputType;
+  const isInputEnabled = input.type === selectedPolicyType;
 
   const newInput = {
     ...input,
@@ -77,20 +72,25 @@ const getPostureInput = (
  */
 export const getPosturePolicy = (
   newPolicy: NewPackagePolicy,
-  provider: CloudProviders,
+  selectedPolicyType?: string,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => {
-  const inputs = newPolicy.inputs.map((item) => getPostureInput(item, provider, inputVars));
+  if (!selectedPolicyType) {
+    return newPolicy;
+  }
+  const inputs = newPolicy.inputs.map((item) =>
+    getPostureInput(item, selectedPolicyType, inputVars)
+  );
   return {
     ...newPolicy,
     namespace: newPolicy.namespace,
     // Enable new policy input and disable all others
     inputs,
     // Set hidden policy vars
-    vars: merge({}, newPolicy.vars, {
-      deployment: { value: provider },
-      posture: { value: getCloudSetupPolicyTemplate() },
-    }),
+    // vars: merge({}, newPolicy.vars, {
+    //   deployment: { value:  },
+    //   posture: { value: templateName },
+    // }),
   };
 };
 
@@ -110,7 +110,8 @@ export const getDefaultCloudCredentialsType = (
   isAgentless: boolean,
   provider: CloudProviders,
   packageInfo: PackageInfo,
-  showCloudConnectors: boolean
+  showCloudConnectors: boolean,
+  templateName: string
 ) => {
   const credentialsTypes: Record<
     CloudProviders,
@@ -125,6 +126,7 @@ export const getDefaultCloudCredentialsType = (
       isAgentless,
       showCloudConnectors,
       packageInfo,
+      templateName,
     }),
     gcp: {
       'gcp.credentials.type': {
@@ -151,17 +153,19 @@ export const getDefaultCloudCredentialsType = (
  * Input vars that are hidden from the user
  */
 export const getPostureInputHiddenVars = (
-  inputType: CloudProviders,
+  provider: CloudProviders,
   packageInfo: PackageInfo,
+  templateName: string,
   setupTechnology: SetupTechnology,
   showCloudConnectors: boolean
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
-  switch (inputType) {
+  switch (provider) {
     case AWS_PROVIDER:
       return getCloudDefaultAwsCredentialConfig({
         isAgentless: setupTechnology === SetupTechnology.AGENTLESS,
         packageInfo,
         showCloudConnectors,
+        templateName,
       });
     case AZURE_PROVIDER:
       return {
@@ -177,12 +181,13 @@ export const getPostureInputHiddenVars = (
   }
 };
 
-export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
+export const getCloudShellDefaultValue = (
+  packageInfo: PackageInfo,
+  templateName: string
+): string => {
   if (!packageInfo.policy_templates) return '';
 
-  const policyTemplate = packageInfo.policy_templates.find(
-    (p) => p.name === getCloudSetupPolicyTemplate()
-  );
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
@@ -278,6 +283,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
   packageInfo,
+  templateName,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
   let elasticResourceId: string | undefined;
   const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
@@ -302,7 +308,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
 
   return getTemplateUrlFromPackageInfo(
     packageInfo,
-    getCloudSetupPolicyTemplate(),
+    templateName,
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)

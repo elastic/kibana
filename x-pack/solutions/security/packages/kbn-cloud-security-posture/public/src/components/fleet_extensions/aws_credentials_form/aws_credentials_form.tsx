@@ -22,7 +22,7 @@ import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AwsSetupFormat, UpdatePolicy } from '../types';
-import { AWS_PROVIDER } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -130,6 +130,7 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
+  const { awsPolicyType } = useCloudSetup();
   const {
     awsCredentialsType,
     setupFormat,
@@ -195,7 +196,7 @@ export const AwsCredentialsForm = ({
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, {
+                updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
                   'aws.credentials.type': { value: optionId },
                 }),
               });
@@ -211,10 +212,11 @@ export const AwsCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, AWS_PROVIDER, { [key]: { value } }),
+                updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
+                  [key]: { value },
+                }),
               });
             }}
-            hasInvalidRequiredVars={hasInvalidRequiredVars}
           />
         </>
       )}

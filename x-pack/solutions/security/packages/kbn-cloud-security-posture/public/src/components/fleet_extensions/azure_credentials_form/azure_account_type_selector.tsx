@@ -18,7 +18,7 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '../constants';
-import { getCloudSetupProviderConfig } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean
@@ -73,8 +73,7 @@ export const AzureAccountTypeSelect = ({
   packageInfo,
   setupTechnology,
 }: AzureAccountTypeSelectProps) => {
-  const azureOrganizationMinimumVersion =
-    getCloudSetupProviderConfig('azure').organizationMinimumVersion;
+  const { azurePolicyType, azureOrganizationMinimumVersion } = useCloudSetup();
   const isAzureOrganizationDisabled =
     !azureOrganizationMinimumVersion ||
     isBelowMinVersion(packageInfo.version, azureOrganizationMinimumVersion);
@@ -83,7 +82,7 @@ export const AzureAccountTypeSelect = ({
 
   if (!getAzureAccountType(input)) {
     updatePolicy({
-      updatedPolicy: getPosturePolicy(newPolicy, 'azure', {
+      updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
         'azure.account_type': {
           value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
           type: 'text',
@@ -113,7 +112,7 @@ export const AzureAccountTypeSelect = ({
         options={azureAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, 'azure', {
+            updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
               'azure.account_type': {
                 value: accountType,
                 type: 'text',

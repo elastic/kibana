@@ -26,7 +26,7 @@ import {
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
-import { AZURE_PROVIDER } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -230,6 +230,7 @@ export const AzureCredentialsForm = ({
     updatePolicy,
     isValid,
   });
+  const { azurePolicyType } = useCloudSetup();
 
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
@@ -297,7 +298,7 @@ export const AzureCredentialsForm = ({
             type={azureCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, {
+                updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
                   'azure.credentials.type': { value: optionId },
                 }),
               });
@@ -309,7 +310,9 @@ export const AzureCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, AZURE_PROVIDER, { [key]: { value } }),
+                updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+                  [key]: { value },
+                }),
               });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}

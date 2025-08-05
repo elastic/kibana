@@ -19,37 +19,18 @@ import {
   hasErrors,
 } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
-import {
-  CloudProviders,
-  getCloudSetupProviderByInputType,
-  getCloudSetupDefaultProvider,
-  getCloudSetupProviderConfig,
-  isCloudSetupProvider,
-} from '../mappings';
-import { UpdatePolicy } from '../types';
+import { CloudProviders, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../cloud_setup_context';
 
-const assert: (condition: unknown, msg?: string) => asserts condition = (
-  condition: unknown,
-  msg?: string
-): asserts condition => {
-  if (!condition) {
-    throw new Error(msg);
-  }
-};
-
-const getSelectedInput = (options: NewPackagePolicyInput[], defaultProvider?: CloudProviders) => {
+const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
-  // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
+  // Initial state when all inputs are disabled is to choose the default provider type
   const selectedInput =
-    options.find((i) => i.enabled) ||
-    options.find(
-      (i) => i.type === getCloudSetupProviderConfig(getCloudSetupDefaultProvider()).type
-    );
+    options.find((i) => i.enabled) || options.find((i) => i.type === defaultProviderType);
 
-  assert(selectedInput, 'Failed to determine selected option'); // We can't provide a default input without knowing the policy template
-  assert(isCloudSetupProvider(selectedInput), `Unknown option: ${selectedInput.type}`);
-
+  if (!selectedInput) {
+    throw new Error('Failed to determine selected input');
+  }
   return selectedInput;
 };
 
@@ -78,8 +59,10 @@ export const useLoadCloudSetup = ({
   uiSettings,
   cloud,
 }: UseLoadCloudSetupProps) => {
+  const { getCloudSetupProviderByInputType, config, defaultProviderType, templateName } =
+    useCloudSetup();
   const isServerless = !!cloud.serverless.projectType;
-  const input = getSelectedInput(newPolicy.inputs);
+  const input = getSelectedInput(newPolicy.inputs, defaultProviderType);
   const selectedProvider = getCloudSetupProviderByInputType(input.type);
 
   const hasInvalidRequiredVars = !!hasErrors(validationResults);
@@ -102,6 +85,7 @@ export const useLoadCloudSetup = ({
     input,
     cloud,
     packageInfo,
+    templateName,
   });
 
   const showCloudConnectors =
@@ -110,10 +94,12 @@ export const useLoadCloudSetup = ({
     semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
 
   const setEnabledPolicyInput = useCallback(
-    (inputType: CloudProviders) => {
+    (provider: CloudProviders) => {
+      const inputType = config.providers[provider].type;
       const inputVars = getPostureInputHiddenVars(
-        inputType,
+        provider,
         packageInfo,
+        templateName,
         setupTechnology,
         showCloudConnectors
       );

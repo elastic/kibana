@@ -16,9 +16,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { gcpField, getInputVarsFields } from './gcp_utils';
-import { UpdatePolicy } from '../types';
+import { GCP_PROVIDER, UpdatePolicy } from '../types';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
-import { GCP_PROVIDER, getCloudSetupProviderConfig } from '../mappings';
+import { useCloudSetup } from '../cloud_setup_context';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
   {
@@ -70,11 +70,10 @@ export const GcpAccountTypeSelect = ({
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
+  const { gcpOrganizationMinimumVersion, gcpPolicyType } = useCloudSetup();
   // This will disable the gcp org option for any version below 1.6.0 which introduced support for account_type. https://github.com/elastic/integrations/pull/6682
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
-  const gcpOrganizationMinimumVersion =
-    getCloudSetupProviderConfig(GCP_PROVIDER).organizationMinimumVersion;
   const isGcpOrgDisabled =
     !gcpOrganizationMinimumVersion ||
     semverLt(integrationVersionNumberOnly, gcpOrganizationMinimumVersion);
@@ -99,7 +98,7 @@ export const GcpAccountTypeSelect = ({
       // We need to store the last manual credentials type to restore it later
       lastSetupAccessType.current = input.streams[0].vars?.['gcp.account_type'].value;
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
+        updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
             value: 'single-account',
             type: 'text',
@@ -111,7 +110,7 @@ export const GcpAccountTypeSelect = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
+        updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
             // Restoring last manual credentials type
             value: lastSetupAccessType.current || 'organization-account',
@@ -127,7 +126,7 @@ export const GcpAccountTypeSelect = ({
   useEffect(() => {
     if (!getGcpAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, 'gcp', {
+        updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
           'gcp.account_type': {
             value: isGcpOrgDisabled ? GCP_SINGLE_ACCOUNT : GCP_ORGANIZATION_ACCOUNT,
             type: 'text',

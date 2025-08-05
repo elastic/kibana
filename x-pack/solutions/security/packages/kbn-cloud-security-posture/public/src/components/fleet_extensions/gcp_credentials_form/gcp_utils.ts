@@ -10,7 +10,7 @@ import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/public/types';
 import type { PackageInfo, PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { GcpCredentialsType, GcpFields, GcpInputFields } from '../types';
-import { getCspmCloudShellDefaultValue } from '../utils';
+import { getCloudShellDefaultValue } from '../utils';
 import { GCP_CREDENTIALS_TYPE } from '../constants';
 
 export const gcpField: GcpInputFields = {
@@ -77,6 +77,7 @@ export const getGcpCredentialsType = (
 
 export const getDefaultGcpHiddenVars = (
   packageInfo: PackageInfo,
+  templateName: string,
   setupTechnology?: SetupTechnology
 ): Record<string, PackagePolicyConfigRecordEntry> => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
@@ -88,7 +89,7 @@ export const getDefaultGcpHiddenVars = (
     };
   }
 
-  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
+  const hasCloudShellUrl = !!getCloudShellDefaultValue(packageInfo, templateName);
   if (hasCloudShellUrl) {
     return {
       'gcp.credentials.type': {

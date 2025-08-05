@@ -217,7 +217,6 @@ export const useLoadFleetExtension = ({
       isExtensionLoaded?: boolean;
       isValid?: boolean;
     }) => {
-      // Bubble up the state to the parent component
       onChange({
         isValid: isValid !== undefined ? isValid : isValidFormState,
         updatedPolicy,

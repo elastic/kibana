@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { CloudProviders, getCloudSetupTemplateInputOptions } from './mappings';
+import { CloudProviders } from './types';
+import { useCloudSetup } from './cloud_setup_context';
 
 interface ProviderSelectorProps {
   disabled: boolean;
@@ -19,8 +20,8 @@ export const ProviderSelector = ({
   disabled,
   setInput,
 }: ProviderSelectorProps) => {
-  const baseOptions = getCloudSetupTemplateInputOptions();
-  const options = baseOptions.map((option) => ({
+  const { templateInputOptions } = useCloudSetup();
+  const options = templateInputOptions.map((option) => ({
     ...option,
     label: option.label,
     icon: option.icon,

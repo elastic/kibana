@@ -8,12 +8,8 @@ import { useState, useEffect } from 'react';
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import {
-  AWS_PROVIDER,
-  AZURE_PROVIDER,
-  GCP_PROVIDER,
-  getCloudSetupProviderByInputType,
-} from '../mappings';
+import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from '../types';
+import { useCloudSetup } from '../cloud_setup_context';
 
 export const useSetupTechnology = ({
   input,
@@ -28,6 +24,7 @@ export const useSetupTechnology = ({
   defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
 }) => {
+  const { getCloudSetupProviderByInputType } = useCloudSetup();
   const provider = getCloudSetupProviderByInputType(input.type);
   const isCspmAws = provider === AWS_PROVIDER;
   const isCspmGcp = provider === GCP_PROVIDER;
