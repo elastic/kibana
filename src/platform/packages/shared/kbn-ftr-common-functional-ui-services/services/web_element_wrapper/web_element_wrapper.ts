@@ -13,8 +13,9 @@ import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
-// @ts-ignore not supported yet
+
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../remote/browsers';
 
@@ -46,6 +47,7 @@ export class WebElementWrapper {
     driver: WebDriver,
     timeout: number,
     fixedHeaderHeight: number,
+    fixedFooterHeight: number,
     logger: ToolingLog,
     browserType: Browsers
   ): WebElementWrapper {
@@ -59,6 +61,7 @@ export class WebElementWrapper {
       driver,
       timeout,
       fixedHeaderHeight,
+      fixedFooterHeight,
       logger,
       browserType
     );
@@ -70,6 +73,7 @@ export class WebElementWrapper {
     private driver: WebDriver,
     private timeout: number,
     private fixedHeaderHeight: number,
+    private fixedFooterHeight: number,
     private logger: ToolingLog,
     private browserType: Browsers
   ) {
@@ -97,6 +101,7 @@ export class WebElementWrapper {
       this.driver,
       this.timeout,
       this.fixedHeaderHeight,
+      this.fixedFooterHeight,
       this.logger,
       this.browserType
     );
@@ -779,8 +784,9 @@ export class WebElementWrapper {
     await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
+      APP_MAIN_SCROLL_CONTAINER_ID,
       topOffset || this.fixedHeaderHeight,
-      bottomOffset
+      bottomOffset || this.fixedFooterHeight
     );
   }
 

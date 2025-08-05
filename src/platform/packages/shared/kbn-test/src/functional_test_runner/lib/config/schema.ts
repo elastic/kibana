@@ -335,6 +335,7 @@ export const schema = Joi.object()
     layout: Joi.object()
       .keys({
         fixedHeaderHeight: Joi.number().default(100),
+        fixedFooterHeight: Joi.number().default(100),
       })
       .default(),
 
