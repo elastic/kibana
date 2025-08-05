@@ -50,7 +50,8 @@ export interface ToolDefinition<TConfig extends object = Record<string, unknown>
   configuration: TConfig;
 }
 
-export interface ToolDefinitionWithSchema extends ToolDefinition {
+export interface ToolDefinitionWithSchema<TConfig extends object = Record<string, unknown>>
+  extends ToolDefinition<TConfig> {
   /**
    * the JSON schema associated with this tool's input parameters.
    */

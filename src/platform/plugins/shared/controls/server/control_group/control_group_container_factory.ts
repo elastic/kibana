@@ -9,7 +9,7 @@
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/server';
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { CONTROL_GROUP_TYPE } from '../../common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   createControlGroupExtract,
   createControlGroupInject,
@@ -21,7 +21,7 @@ export const controlGroupContainerPersistableStateServiceFactory = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddableRegistryDefinition => {
   return {
-    id: CONTROL_GROUP_TYPE,
+    id: CONTROLS_GROUP_TYPE,
     extract: createControlGroupExtract(persistableStateService),
     inject: createControlGroupInject(persistableStateService),
     telemetry: controlGroupTelemetry,

@@ -6,7 +6,11 @@
  */
 
 import { resolve } from 'path';
-import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import {
+  getKibanaCliLoggers,
+  type FtrConfigProviderContext,
+  type GenericFtrProviderContext,
+} from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   KibanaEBTServerProvider,
@@ -48,6 +52,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
+          {
+            name: 'plugins.cloudSecurityPosture',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
         /**
          * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
          *

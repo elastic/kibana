@@ -7,4 +7,4 @@
 
 export * from './selectors';
 export * from './use_stream_routing';
-export * from './types';
+export type * from './types';

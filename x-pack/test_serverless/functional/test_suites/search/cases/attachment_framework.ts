@@ -25,9 +25,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('lens visualization', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+        );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
 
         await settings.refreshDataViewFieldList('default:all-data', { ignoreMissing: true });
@@ -42,9 +44,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
         );
       });
 

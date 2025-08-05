@@ -37,7 +37,7 @@ jest.mock('@elastic/eui', () => ({
   EuiSpacer: 'eui-spacer',
   EuiText: 'eui-text',
   EuiTextArea: 'eui-textArea',
-  htmlIdGenerator: () => 42,
+  htmlIdGenerator: () => () => 42,
   euiPaletteColorBlind: () => ['red'],
 }));
 

@@ -7,11 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { extractReferences } from '@kbn/data-plugin/common';
 import { DashboardAttributes } from '../../types';
 
 export function transformSearchSourceIn(
-  kibanaSavedObjectMeta: DashboardAttributes['kibanaSavedObjectMeta']
+  kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta']
 ) {
+  if (!kibanaSavedObjectMeta || !kibanaSavedObjectMeta.searchSource) {
+    return { searchSourceJSON: '{}', references: [] };
+  }
   const { searchSource } = kibanaSavedObjectMeta;
-  return { searchSourceJSON: JSON.stringify(searchSource ?? {}) };
+
+  // Extract references expects an object with singular `filter` and `query`.
+  // But `DashboardState` uses plural `filters` and singular `query`.
+  const [extractedState, references] = extractReferences({
+    filter: searchSource.filters,
+    query: searchSource.query,
+  });
+  return { searchSourceJSON: JSON.stringify(extractedState), references };
 }

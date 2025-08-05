@@ -26,7 +26,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Search Solution UI Functional Tests',
     },
-    testFiles: [require.resolve('.')],
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
       serverArgs: [
@@ -41,5 +40,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.searchIndices.enabled=true',
       ],
     },
+    testFiles: [require.resolve('.')],
   };
 }

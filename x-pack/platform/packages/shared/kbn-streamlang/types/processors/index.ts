@@ -11,7 +11,7 @@ import { createIsNarrowSchema } from '@kbn/streams-schema';
 import {
   ElasticsearchProcessorType,
   elasticsearchProcessorTypes,
-} from './ingest_pipeline_processors';
+} from './manual_ingest_pipeline_processors';
 import { Condition, conditionSchema } from '../conditions';
 
 /**
@@ -47,6 +47,7 @@ export type ElasticsearchProcessor = Partial<Record<ElasticsearchProcessorType, 
 export interface ManualIngestPipelineProcessor extends ProcessorBaseWithWhere {
   action: 'manual_ingest_pipeline';
   processors: ElasticsearchProcessor[];
+  /* Ignore failure of individual processors */
   ignore_failure?: boolean;
   tag?: string;
   on_failure?: Array<Record<string, unknown>>;
@@ -64,17 +65,15 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema.
  */
 export interface GrokProcessor extends ProcessorBaseWithWhere {
   action: 'grok';
-  field: string;
+  from: string;
   patterns: string[];
-  pattern_definitions?: Record<string, string>;
   ignore_missing?: boolean;
 }
 
 export const grokProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('grok'),
-  field: NonEmptyString,
+  from: NonEmptyString,
   patterns: z.array(NonEmptyString).nonempty(),
-  pattern_definitions: z.optional(z.record(z.string())),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<GrokProcessor>;
 
@@ -84,7 +83,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema.extend({
 
 export interface DissectProcessor extends ProcessorBaseWithWhere {
   action: 'dissect';
-  field: string;
+  from: string;
   pattern: string;
   append_separator?: string;
   ignore_missing?: boolean;
@@ -92,7 +91,7 @@ export interface DissectProcessor extends ProcessorBaseWithWhere {
 
 export const dissectProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('dissect'),
-  field: NonEmptyString,
+  from: NonEmptyString,
   pattern: NonEmptyString,
   append_separator: z.optional(NonEmptyString),
   ignore_missing: z.optional(z.boolean()),
@@ -104,82 +103,19 @@ export const dissectProcessorSchema = processorBaseWithWhereSchema.extend({
 
 export interface DateProcessor extends ProcessorBaseWithWhere {
   action: 'date';
-  field: string;
+  from: string;
+  to?: string;
   formats: string[];
-  locale?: string;
-  target_field?: string;
-  timezone?: string;
   output_format?: string;
 }
 
 export const dateProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('date'),
-  field: NonEmptyString,
+  from: NonEmptyString,
+  to: z.optional(NonEmptyString),
   formats: z.array(NonEmptyString),
-  locale: z.optional(NonEmptyString),
-  target_field: z.optional(NonEmptyString),
-  timezone: z.optional(NonEmptyString),
   output_format: z.optional(NonEmptyString),
 }) satisfies z.Schema<DateProcessor>;
-
-/**
- * KV processor
- */
-
-export interface KvProcessor extends ProcessorBaseWithWhere {
-  action: 'kv';
-  field: string;
-  field_split: string;
-  value_split: string;
-  target_field?: string;
-  include_keys?: string[];
-  exclude_keys?: string[];
-  ignore_missing?: boolean;
-  prefix?: string;
-  trim_key?: string;
-  trim_value?: string;
-  strip_brackets?: boolean;
-}
-
-export const kvProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('kv'),
-  field: NonEmptyString,
-  // These aren't NonEmptyString on purpose as a space (for example) can be a valid use case here.
-  field_split: z.string(),
-  value_split: z.string(),
-  target_field: z.optional(NonEmptyString),
-  include_keys: z.optional(z.array(NonEmptyString)),
-  exclude_keys: z.optional(z.array(NonEmptyString)),
-  ignore_missing: z.optional(z.boolean()),
-  prefix: z.optional(NonEmptyString),
-  trim_key: z.optional(NonEmptyString),
-  trim_value: z.optional(NonEmptyString),
-  strip_brackets: z.optional(z.boolean()),
-}) satisfies z.Schema<KvProcessor>;
-
-/**
- * GeoIP processor
- */
-
-export interface GeoIpProcessor {
-  action: 'geoip';
-  field: string;
-  target_field?: string;
-  database_file?: string;
-  properties?: string[];
-  ignore_missing?: boolean;
-  first_only?: boolean;
-}
-
-export const geoIpProcessorSchema = z.object({
-  action: z.literal('geoip'),
-  field: NonEmptyString,
-  target_field: z.optional(NonEmptyString),
-  database_file: z.optional(NonEmptyString),
-  properties: z.optional(z.array(NonEmptyString)),
-  ignore_missing: z.optional(z.boolean()),
-  first_only: z.optional(z.boolean()),
-}) satisfies z.Schema<GeoIpProcessor>;
 
 /**
  * Rename processor
@@ -187,16 +123,16 @@ export const geoIpProcessorSchema = z.object({
 
 export interface RenameProcessor extends ProcessorBaseWithWhere {
   action: 'rename';
-  field: string;
-  target_field: string;
+  from: string;
+  to: string;
   ignore_missing?: boolean;
   override?: boolean;
 }
 
 export const renameProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('rename'),
-  field: NonEmptyString,
-  target_field: NonEmptyString,
+  from: NonEmptyString,
+  to: NonEmptyString,
   ignore_missing: z.optional(z.boolean()),
   override: z.optional(z.boolean()),
 }) satisfies z.Schema<RenameProcessor>;
@@ -207,73 +143,46 @@ export const renameProcessorSchema = processorBaseWithWhereSchema.extend({
 
 export interface SetProcessor extends ProcessorBaseWithWhere {
   action: 'set';
-  field: string;
+  to: string;
   value: string;
   override?: boolean;
-  ignore_empty_value?: boolean;
-  media_type?: string;
 }
 
 export const setProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('set'),
-  field: NonEmptyString,
+  to: NonEmptyString,
   value: NonEmptyString,
   override: z.optional(z.boolean()),
-  ignore_empty_value: z.optional(z.boolean()),
-  media_type: z.optional(z.string()),
 }) satisfies z.Schema<SetProcessor>;
 
 /**
- * URL Decode processor
+ * Append processor
  */
 
-export interface UrlDecodeProcessor extends ProcessorBaseWithWhere {
-  action: 'urldecode';
-  field: string;
-  target_field?: string;
-  ignore_missing?: boolean;
+export interface AppendProcessor extends ProcessorBaseWithWhere {
+  action: 'append';
+  to: string;
+  // Value is actually required, but due to 'any' values being allowed here we need to mark this as optional
+  // to "satisfy" the Zod schema.
+  value?: any | any[];
+  allow_duplicates?: boolean;
 }
 
-export const urlDecodeProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('urldecode'),
-  field: NonEmptyString,
-  target_field: z.optional(NonEmptyString),
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<UrlDecodeProcessor>;
-
-/**
- * User agent processor
- */
-
-export interface UserAgentProcessor {
-  action: 'user_agent';
-  field: string;
-  target_field?: string;
-  regex_file?: string;
-  properties?: string[];
-  ignore_missing?: boolean;
-}
-
-export const userAgentProcessorSchema = z.object({
-  action: z.literal('user_agent'),
-  field: NonEmptyString,
-  target_field: z.optional(NonEmptyString),
-  regex_file: z.optional(NonEmptyString),
-  properties: z.optional(z.array(NonEmptyString)),
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<UserAgentProcessor>;
+export const appendProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('append'),
+  to: NonEmptyString,
+  value: z.union([z.any(), z.array(z.any())]),
+  allow_duplicates: z.optional(z.boolean()),
+}) satisfies z.Schema<AppendProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
   | GrokProcessor
-  | KvProcessor
-  | GeoIpProcessor
   | RenameProcessor
   | SetProcessor
-  | ManualIngestPipelineProcessor
-  | UrlDecodeProcessor
-  | UserAgentProcessor;
+  | AppendProcessor
+  | ManualIngestPipelineProcessor;
 
 export type ProcessorDefinitionWithId = StreamlangProcessorDefinition & { id: string };
 
@@ -281,13 +190,9 @@ export const streamlangProcessorSchema = z.discriminatedUnion('action', [
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
-  kvProcessorSchema,
-  geoIpProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   manualIngestPipelineProcessorSchema,
-  urlDecodeProcessorSchema,
-  userAgentProcessorSchema,
 ]);
 
 export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
@@ -295,12 +200,8 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   dissectProcessorSchema.merge(z.object({ id: z.string() })),
   grokProcessorSchema.merge(z.object({ id: z.string() })),
   manualIngestPipelineProcessorSchema.merge(z.object({ id: z.string() })),
-  kvProcessorSchema.merge(z.object({ id: z.string() })),
-  geoIpProcessorSchema.merge(z.object({ id: z.string() })),
   renameProcessorSchema.merge(z.object({ id: z.string() })),
   setProcessorSchema.merge(z.object({ id: z.string() })),
-  urlDecodeProcessorSchema.merge(z.object({ id: z.string() })),
-  userAgentProcessorSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(

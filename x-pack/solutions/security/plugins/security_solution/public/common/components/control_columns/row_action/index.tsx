@@ -22,8 +22,6 @@ import type {
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
-import { useTourContext } from '../../guided_onboarding_tour';
-import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
@@ -74,12 +72,6 @@ const RowActionComponent = ({
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
 
-  const { activeStep, isTourShown } = useTourContext();
-  const shouldFocusOnOverviewTab =
-    (activeStep === AlertsCasesTourSteps.expandEvent ||
-      activeStep === AlertsCasesTourSteps.reviewAlertDetailsFlyout) &&
-    isTourShown(SecurityStepId.alertsCases);
-
   const columnValues = useMemo(
     () =>
       timelineNonEcsData &&
@@ -108,7 +100,6 @@ const RowActionComponent = ({
     openFlyout({
       right: {
         id: DocumentDetailsRightPanelKey,
-        path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
         params: {
           id: eventId,
           indexName,
@@ -120,7 +111,7 @@ const RowActionComponent = ({
       location: tableId,
       panel: 'right',
     });
-  }, [eventId, indexName, tableId, openFlyout, shouldFocusOnOverviewTab, telemetry]);
+  }, [eventId, indexName, tableId, openFlyout, telemetry]);
 
   const toggleShowNotes = useCallback(() => {
     openFlyout({

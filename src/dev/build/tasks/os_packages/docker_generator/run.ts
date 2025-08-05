@@ -50,7 +50,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:350eea0e8b97e1332f3bfa20866a4a9af0be6daebea8c3fd3ea954a8662bb585';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:442a5663000b3d66d565e61d400b30a4638383a72d90494cfc3104b34dfb3211';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,7 +60,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:65cf5330da1a537c4d5aa528fb80b0969799ce813d6942cc802aa5fd74248aef';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:4a8fe3e7390fcf11a88b216b4608f1db322c327e801898386808551ebbdc7523';
   }
 
   // General docker var config
@@ -89,7 +89,7 @@ export async function runDockerGenerator(
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
-  const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
+  const imageArchitecture = flags.architecture === 'aarch64' ? '-arm64' : '-amd64';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );

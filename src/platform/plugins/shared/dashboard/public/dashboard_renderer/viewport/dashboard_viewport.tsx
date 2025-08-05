@@ -14,7 +14,7 @@ import { EuiPortal, UseEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -119,7 +119,7 @@ export const DashboardViewport = ({
             key={dashboardApi.uuid}
             hidePanelChrome={true}
             panelProps={{ hideLoader: true }}
-            type={CONTROL_GROUP_TYPE}
+            type={CONTROLS_GROUP_TYPE}
             maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
             getParentApi={() => {
               return {
