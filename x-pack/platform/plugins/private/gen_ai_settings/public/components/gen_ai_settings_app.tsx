@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiLink,
   EuiButton,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,6 +37,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const { services } = useKibana();
   const { application, http, docLinks } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
+  const { euiTheme } = useEuiTheme();
 
   const canManageSpaces = application.capabilities.management.kibana.spaces;
 
@@ -79,7 +81,12 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
         </h2>
       </EuiTitle>
 
-      <EuiPageSection>
+      <EuiPageSection
+        paddingSize="none"
+        css={{
+          paddingTop: euiTheme.size.l,
+        }}
+      >
         <EuiPanel hasBorder grow={false}>
           <EuiDescribedFormGroup
             data-test-subj="connectorsSection"
