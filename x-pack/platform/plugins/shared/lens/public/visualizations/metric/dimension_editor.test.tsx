@@ -261,18 +261,18 @@ describe('dimension editor', () => {
         />
       );
 
-      const customPrefixGroup = screen.getByRole('group', { name: 'Prefix' });
-      const getCustomPrefixTextbox = () =>
-        customPrefixGroup.parentElement?.parentElement
-          ? queryByRole<HTMLInputElement>(customPrefixGroup.parentElement.parentElement, 'textbox')
+      const customLabelGroup = screen.getByRole('group', { name: 'Label' });
+      const getCustomLabelTextbox = () =>
+        customLabelGroup.parentElement?.parentElement
+          ? queryByRole<HTMLInputElement>(customLabelGroup.parentElement.parentElement, 'textbox')
           : null;
-      const typePrefix = async (prefix: string) => {
-        const customPrefixTextbox = getCustomPrefixTextbox();
-        if (customPrefixTextbox === null) {
-          throw new Error('custom prefix textbox not found');
+      const typeLabel = async (label: string) => {
+        const customLabelTextbox = getCustomLabelTextbox();
+        if (customLabelTextbox === null) {
+          throw new Error('custom label textbox not found');
         }
-        await userEvent.clear(customPrefixTextbox);
-        await userEvent.type(customPrefixTextbox, prefix);
+        await userEvent.clear(customLabelTextbox);
+        await userEvent.type(customLabelTextbox, label);
       };
 
       const getBaselineGroup = () => screen.getByRole('group', { name: 'Compare to' });
@@ -325,11 +325,11 @@ describe('dimension editor', () => {
       };
 
       return {
-        getSettingNone: () => getByTitle(customPrefixGroup, 'none', { exact: false }),
-        getSettingAuto: () => getByTitle(customPrefixGroup, 'auto', { exact: false }),
-        getSettingCustom: () => getByTitle(customPrefixGroup, 'custom', { exact: false }),
-        getCustomPrefixTextbox,
-        typePrefix,
+        getSettingNone: () => getByTitle(customLabelGroup, 'none', { exact: false }),
+        getSettingAuto: () => getByTitle(customLabelGroup, 'auto', { exact: false }),
+        getSettingCustom: () => getByTitle(customLabelGroup, 'custom', { exact: false }),
+        getCustomLabelTextbox,
+        typeLabel,
         getSelectedPalette,
         getCustomBaselineTextbox,
         getBaselineGroup,
@@ -363,7 +363,7 @@ describe('dimension editor', () => {
       expect(screen.getByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).toBeInTheDocument();
     });
 
-    describe('metric prefix', () => {
+    describe('metric label', () => {
       const NONE_SECONDARY_LABEL = '';
       const AUTO_SECONDARY_LABEL = undefined;
       const localState = {
@@ -371,8 +371,8 @@ describe('dimension editor', () => {
         secondaryLabel: AUTO_SECONDARY_LABEL,
         secondaryMetricAccessor: accessor,
       };
-      it('correctly renders chosen auto prefix', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
+      it('correctly renders chosen auto label', () => {
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
           renderSecondaryMetricEditor({
             state: localState,
           });
@@ -380,11 +380,11 @@ describe('dimension editor', () => {
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'true');
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
+        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
       });
 
-      it('correctly renders chosen none prefix', () => {
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
+      it('correctly renders chosen none label', () => {
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
           renderSecondaryMetricEditor({
             state: { ...localState, secondaryLabel: NONE_SECONDARY_LABEL },
           });
@@ -392,18 +392,18 @@ describe('dimension editor', () => {
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'true');
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'false');
-        expect(getCustomPrefixTextbox()).not.toBeInTheDocument();
+        expect(getCustomLabelTextbox()).not.toBeInTheDocument();
       });
 
-      it('correctly renders custom prefix', () => {
-        const customPrefixState = { ...localState, secondaryLabel: faker.lorem.word(3) };
-        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomPrefixTextbox } =
-          renderSecondaryMetricEditor({ state: customPrefixState });
+      it('correctly renders custom label', () => {
+        const customLabelState = { ...localState, secondaryLabel: faker.lorem.word(3) };
+        const { getSettingAuto, getSettingCustom, getSettingNone, getCustomLabelTextbox } =
+          renderSecondaryMetricEditor({ state: customLabelState });
 
         expect(getSettingAuto()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingNone()).toHaveAttribute('aria-pressed', 'false');
         expect(getSettingCustom()).toHaveAttribute('aria-pressed', 'true');
-        expect(getCustomPrefixTextbox()).toHaveValue(customPrefixState.secondaryLabel);
+        expect(getCustomLabelTextbox()).toHaveValue(customLabelState.secondaryLabel);
       });
 
       it('clicking on the buttons calls setState with a correct secondaryLabel', async () => {
@@ -426,21 +426,21 @@ describe('dimension editor', () => {
         );
       });
 
-      it('sets a custom prefix value', async () => {
-        const customPrefix = faker.lorem.word(3);
+      it('sets a custom label value', async () => {
+        const customSecondaryLabel = faker.lorem.word(3);
         const setState = jest.fn();
 
-        const { typePrefix } = renderSecondaryMetricEditor({
+        const { typeLabel } = renderSecondaryMetricEditor({
           setState,
-          state: { ...localState, secondaryLabel: customPrefix },
+          state: { ...localState, secondaryLabel: customSecondaryLabel },
         });
 
-        const newCustomPrefix = faker.lorem.word(3);
-        await typePrefix(newCustomPrefix);
+        const newCustomSecondaryLabel = faker.lorem.word(3);
+        await typeLabel(newCustomSecondaryLabel);
 
         await waitFor(() =>
           expect(setState).toHaveBeenCalledWith(
-            expect.objectContaining({ secondaryLabel: newCustomPrefix })
+            expect.objectContaining({ secondaryLabel: newCustomSecondaryLabel })
           )
         );
       });
@@ -602,8 +602,8 @@ describe('dimension editor', () => {
         expect(getCustomBaselineTextbox()).not.toBeInTheDocument();
       });
 
-      it('should set a default prefix if auto is set and Primary Metric is chosen', async () => {
-        const { getCustomPrefixTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+      it('should set a default secondary label if auto is set and Primary Metric is chosen', async () => {
+        const { getCustomLabelTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
           state: {
             ...localState,
             secondaryLabel: undefined,
@@ -621,9 +621,9 @@ describe('dimension editor', () => {
           'aria-pressed',
           'true'
         );
-        const el = getCustomPrefixTextbox();
+        const el = getCustomLabelTextbox();
         if (el == null) {
-          fail('Prefix textbox not in view');
+          fail('secondary label textbox not in view');
         }
         expect(el.value).toBe('Difference');
       });
@@ -632,12 +632,12 @@ describe('dimension editor', () => {
         // mind that auto gets converted into {name: 'custom', value: 'Difference'}
         { name: 'auto', value: undefined },
         { name: 'none', value: '' },
-        { name: 'custom', value: 'customPrefix' },
+        { name: 'custom', value: 'customSecondaryLabel' },
       ])(
-        'should preserve the current prefix is set to $name and Primary Metric is chosen',
+        'should preserve the current secondary label is set to $name and Primary Metric is chosen',
         async ({ name, value }) => {
           const {
-            getCustomPrefixTextbox,
+            getCustomLabelTextbox,
             getBaselineGroup,
             getSettingAuto,
             getSettingCustom,
@@ -663,16 +663,16 @@ describe('dimension editor', () => {
 
           expect(getSettingAuto()).toHaveAttribute('aria-pressed', `false`);
           expect(getSettingNone()).toHaveAttribute('aria-pressed', `${name === 'none'}`);
-          // When primary is chosen auto gets converted into Custom with the default 'Difference' prefix
+          // When primary is chosen auto gets converted into Custom with the default 'Difference' secondary label
           expect(getSettingCustom()).toHaveAttribute(
             'aria-pressed',
             `${name === 'custom' || name === 'auto'}`
           );
 
           if (value || name === 'auto') {
-            const el = getCustomPrefixTextbox();
+            const el = getCustomLabelTextbox();
             if (el == null) {
-              fail('Prefix textbox not in view');
+              fail('secondary label textbox not in view');
             }
             expect(el.value).toBe(value ?? 'Difference');
           }
