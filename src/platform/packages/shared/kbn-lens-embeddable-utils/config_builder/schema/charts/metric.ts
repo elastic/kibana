@@ -1,30 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { schema } from '@kbn/config-schema';
-import { countMetricOperationSchema, counterRateOperationSchema, cumulativeSumOperationSchema, differencesOperationSchema, formulaOperationDefinitionSchema, lastValueOperationSchema, metricOperationDefinitionSchema, metricOperationSchema, movingAverageOperationSchema, percentileOperationSchema, percentileRanksOperationSchema, staticOperationDefinitionSchema, uniqueValuesMetricOperationSchema, valueOperationSchema } from '../metric_ops';
+import {
+  countMetricOperationSchema,
+  counterRateOperationSchema,
+  cumulativeSumOperationSchema,
+  differencesOperationSchema,
+  formulaOperationDefinitionSchema,
+  lastValueOperationSchema,
+  metricOperationDefinitionSchema,
+  metricOperationSchema,
+  movingAverageOperationSchema,
+  percentileOperationSchema,
+  percentileRanksOperationSchema,
+  staticOperationDefinitionSchema,
+  uniqueValuesMetricOperationSchema,
+  valueOperationSchema,
+} from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema } from '../dataset';
-import { bucketDateHistogramOperationSchema, bucketTermsOperationSchema, bucketHistogramOperationSchema, bucketRangesOperationSchema, bucketFilterOperationSchema } from '../bucket_ops';
+import {
+  bucketDateHistogramOperationSchema,
+  bucketTermsOperationSchema,
+  bucketHistogramOperationSchema,
+  bucketRangesOperationSchema,
+  bucketFilterOperationSchema,
+} from '../bucket_ops';
 import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 
 export const complementaryVizSchema = schema.oneOf([
   schema.object({
-    type: schema.literal("bar"),
+    type: schema.literal('bar'),
     /**
      * Direction of the bar. Possible values:
      * - 'vertical': Bar is oriented vertically
      * - 'horizontal': Bar is oriented horizontally
      */
     direction: schema.maybe(
-      schema.oneOf([schema.literal("vertical"), schema.literal("horizontal")]), 
+      schema.oneOf([schema.literal('vertical'), schema.literal('horizontal')])
     ),
     /**
      * Goal value
      */
-    goal_value: metricOperationDefinitionSchema
+    goal_value: metricOperationDefinitionSchema,
   }),
   schema.object({
-    type: schema.literal("trend")
-  })
-])
+    type: schema.literal('trend'),
+  }),
+]);
 
 const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
@@ -35,52 +65,65 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
    * Alignments of the labels and values for the primary metric.
    * For example, align the labels to the left and the values to the right.
    */
-  alignments: schema.maybe(schema.object({
-    /**
-     * Alignments for labels. Possible values:
-     * - 'left': Align label to the left
-     * - 'center': Align label to the center
-     * - 'right': Align label to the right
-     */
-    labels: schema.maybe(schema.oneOf([
-      schema.literal("left"),
-      schema.literal("center"),
-      schema.literal("right")
-    ], { meta: { description: 'Alignments for labels' }, defaultValue: 'left' })),
-    /**
-     * Alignments for value. Possible values:
-     * - 'left': Align value to the left
-     * - 'center': Align value to the center
-     * - 'right': Align value to the right
-     */
-    value: schema.maybe(schema.oneOf([
-      schema.literal("left"),
-      schema.literal("center"),
-      schema.literal("right")
-    ], { meta: { description: 'Alignments for value' }, defaultValue: 'left' })),
-  }, { defaultValue: { labels: 'left', value: 'left' } })),
+  alignments: schema.maybe(
+    schema.object(
+      {
+        /**
+         * Alignments for labels. Possible values:
+         * - 'left': Align label to the left
+         * - 'center': Align label to the center
+         * - 'right': Align label to the right
+         */
+        labels: schema.maybe(
+          schema.oneOf(
+            [schema.literal('left'), schema.literal('center'), schema.literal('right')],
+            { meta: { description: 'Alignments for labels' }, defaultValue: 'left' }
+          )
+        ),
+        /**
+         * Alignments for value. Possible values:
+         * - 'left': Align value to the left
+         * - 'center': Align value to the center
+         * - 'right': Align value to the right
+         */
+        value: schema.maybe(
+          schema.oneOf(
+            [schema.literal('left'), schema.literal('center'), schema.literal('right')],
+            { meta: { description: 'Alignments for value' }, defaultValue: 'left' }
+          )
+        ),
+      },
+      { defaultValue: { labels: 'left', value: 'left' } }
+    )
+  ),
   /**
    * Whether to fit the value`
    */
-  fit: schema.maybe(schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })),
+  fit: schema.maybe(
+    schema.boolean({ meta: { description: 'Whether to fit the value' }, defaultValue: false })
+  ),
   /**
    * Icon configuration
    */
-  icon: schema.maybe(schema.object({
-    /**
-     * Icon name
-     */
-    name: schema.string({ meta: { description: 'Icon name' } }),
-    /**
-     * Icon alignment. Possible values:
-     * - 'right': Icon is aligned to the right
-     * - 'left': Icon is aligned to the left
-     */
-    align: schema.maybe(schema.oneOf([
-      schema.literal("right"),
-      schema.literal("left")
-    ], { meta: { description: 'Icon alignment' }, defaultValue: 'right' })),
-  })),
+  icon: schema.maybe(
+    schema.object({
+      /**
+       * Icon name
+       */
+      name: schema.string({ meta: { description: 'Icon name' } }),
+      /**
+       * Icon alignment. Possible values:
+       * - 'right': Icon is aligned to the right
+       * - 'left': Icon is aligned to the left
+       */
+      align: schema.maybe(
+        schema.oneOf([schema.literal('right'), schema.literal('left')], {
+          meta: { description: 'Icon alignment' },
+          defaultValue: 'right',
+        })
+      ),
+    })
+  ),
   /**
    * Color configuration
    */
@@ -88,7 +131,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Complementary visualization
    */
-  background_chart: schema.maybe(complementaryVizSchema)
+  background_chart: schema.maybe(complementaryVizSchema),
 });
 
 const metricStateSecondaryMetricOptionsSchema = schema.object({
@@ -108,53 +151,52 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
 
 const metricStateBreakdownByOptionsSchema = schema.object({
   /**
-  * Number of columns
-  */
-  columns: schema.maybe(schema.number({ 
-    defaultValue: 5, 
-    meta: { description: 'Number of columns' } 
-  })),
+   * Number of columns
+   */
+  columns: schema.maybe(
+    schema.number({
+      defaultValue: 5,
+      meta: { description: 'Number of columns' },
+    })
+  ),
   /**
-     * Collapse by function. This parameter is used to collapse the
-     * metric chart when the number of columns is bigger than the
-     * number of columns specified in the columns parameter.
-     * Possible values:
-     * - 'avg': Collapse by average
-     * - 'sum': Collapse by sum
-     * - 'max': Collapse by max
-     * - 'min': Collapse by min
-     * - 'none': Do not collapse
-     */
-  collapse_by: schema.maybe(collapseBySchema)
+   * Collapse by function. This parameter is used to collapse the
+   * metric chart when the number of columns is bigger than the
+   * number of columns specified in the columns parameter.
+   * Possible values:
+   * - 'avg': Collapse by average
+   * - 'sum': Collapse by sum
+   * - 'max': Collapse by max
+   * - 'min': Collapse by min
+   * - 'none': Do not collapse
+   */
+  collapse_by: schema.maybe(collapseBySchema),
 });
 
-
-
 export const metricStateSchema = schema.object({
-  type: schema.literal("metric"),
+  type: schema.literal('metric'),
   ...datasetSchema,
   /**
    * Primary value configuration, must define operation.
    */
-  metric:
+  metric: schema.oneOf([
+    // oneOf allows only 12 items
     schema.oneOf([
-      // oneOf allows only 12 items
-      schema.oneOf([
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueValuesMetricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
-        schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
-      ]),
-      schema.allOf([metricStatePrimaryMetricOptionsSchema, valueOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, countMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, uniqueValuesMetricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, metricOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, lastValueOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, percentileRanksOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, differencesOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, movingAverageOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, cumulativeSumOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, counterRateOperationSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
+      schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
     ]),
+    schema.allOf([metricStatePrimaryMetricOptionsSchema, valueOperationSchema]),
+  ]),
   /**
    * Secondary value configuration, must define operation.
    */
@@ -189,7 +231,7 @@ export const metricStateSchema = schema.object({
     ])
   ),
   ...sharedPanelInfoSchema.getPropSchemas(),
-  ...layerSettingsSchema.getPropSchemas()
+  ...layerSettingsSchema.getPropSchemas(),
 });
 
 export type MetricState = typeof metricStateSchema.type;

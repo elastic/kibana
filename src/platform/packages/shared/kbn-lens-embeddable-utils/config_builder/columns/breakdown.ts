@@ -8,12 +8,26 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DateHistogramIndexPatternColumn, FieldBasedIndexPatternColumn, FiltersIndexPatternColumn, GenericIndexPatternColumn, RangeIndexPatternColumn, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type {
+  DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  FiltersIndexPatternColumn,
+  GenericIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
 import { fromHistogramColumn, getHistogramColumn } from './date_histogram';
 import { fromTopValuesColumn, getTopValuesColumn } from './top_values';
 import { fromIntervalsColumn, getIntervalsColumn } from './intervals';
 import { fromFiltersColumn, getFiltersColumn } from './filters';
-import { LensApiBucketOperations, LensApiDateHistogramOperation, LensApiFilterOperation, LensApiHistogramOperation, LensApiRangeOperation, LensApiTermsOperation } from '../schema/bucket_ops';
+import {
+  LensApiBucketOperations,
+  LensApiDateHistogramOperation,
+  LensApiFilterOperation,
+  LensApiHistogramOperation,
+  LensApiRangeOperation,
+  LensApiTermsOperation,
+} from '../schema/bucket_ops';
 
 export const getBreakdownColumn = ({
   options,

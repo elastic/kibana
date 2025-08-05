@@ -10,20 +10,24 @@
 import type { StaticValueIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiStaticValueOperation } from '../schema/metric_ops';
 
-export const getStaticValueColumn = (options: LensApiStaticValueOperation): StaticValueIndexPatternColumn => {
+export const getStaticValueColumn = (
+  options: LensApiStaticValueOperation
+): StaticValueIndexPatternColumn => {
   return {
     dataType: 'number',
     isBucketed: false,
     ...(options.label ? { label: options.label!, customLabel: true } : { label: 'Static Value' }),
     operationType: 'static_value',
     params: {
-        value: options.value.toString(),
+      value: options.value.toString(),
     },
     references: [],
   };
 };
 
-export const getStaticValueColumnReverse = (options: StaticValueIndexPatternColumn): LensApiStaticValueOperation => {
+export const getStaticValueColumnReverse = (
+  options: StaticValueIndexPatternColumn
+): LensApiStaticValueOperation => {
   return {
     operation: 'static_value',
     label: options.label,

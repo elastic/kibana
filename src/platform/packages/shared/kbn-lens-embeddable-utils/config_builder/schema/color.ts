@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { schema } from '@kbn/config-schema';
 
 const colorByValueSchema = schema.object({
@@ -5,19 +14,37 @@ const colorByValueSchema = schema.object({
   /**
    * The minimum value for the color range. Used as the lower bound for value-based color assignment.
    */
-  min: schema.number({ meta: { description: 'The minimum value for the color range. Used as the lower bound for value-based color assignment.' } }),
+  min: schema.number({
+    meta: {
+      description:
+        'The minimum value for the color range. Used as the lower bound for value-based color assignment.',
+    },
+  }),
   /**
    * The maximum value for the color range. Used as the upper bound for value-based color assignment.
    */
-  max: schema.number({ meta: { description: 'The maximum value for the color range. Used as the upper bound for value-based color assignment.' } }),
+  max: schema.number({
+    meta: {
+      description:
+        'The maximum value for the color range. Used as the upper bound for value-based color assignment.',
+    },
+  }),
   /**
    * Determines whether the range is interpreted as absolute or as a percentage of the data.
    * Possible values: 'absolute', 'percentage'
    */
-  range: schema.oneOf([
-    schema.literal('absolute'), // Range is interpreted as absolute values. Possible value: 'absolute'
-    schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
-  ], { meta: { description: "Determines whether the range is interpreted as absolute or as a percentage of the data. Possible values: 'absolute', 'percentage'" } }),
+  range: schema.oneOf(
+    [
+      schema.literal('absolute'), // Range is interpreted as absolute values. Possible value: 'absolute'
+      schema.literal('percentage'), // Range is interpreted as percentage values. Possible value: 'percentage'
+    ],
+    {
+      meta: {
+        description:
+          "Determines whether the range is interpreted as absolute or as a percentage of the data. Possible values: 'absolute', 'percentage'",
+      },
+    }
+  ),
   /**
    * Array of color steps defining the mapping from values to colors.
    * Each step can be:
@@ -36,70 +63,78 @@ const colorByValueSchema = schema.object({
         /**
          * The value from which this color applies (inclusive).
          */
-        from: schema.number({ meta: { description: 'The value from which this color applies (inclusive).' } }),
+        from: schema.number({
+          meta: { description: 'The value from which this color applies (inclusive).' },
+        }),
         /**
          * The color to use for this step.
          */
-        color: schema.string({ meta: { description: 'The color to use for this step.' } })
+        color: schema.string({ meta: { description: 'The color to use for this step.' } }),
       }),
       schema.object({
         /**
          * Step type indicating the color applies up to a specific value.
          * Possible value: 'to'
          */
-        type: schema.literal('to'), 
+        type: schema.literal('to'),
         /**
          * The value up to which this color applies (inclusive).
          */
-        to: schema.number({ meta: { description: 'The value up to which this color applies (inclusive).' } }),
+        to: schema.number({
+          meta: { description: 'The value up to which this color applies (inclusive).' },
+        }),
         /**
          * The color to use for this step.
          */
-        color: schema.string({ meta: { description: 'The color to use for this step.' } })
+        color: schema.string({ meta: { description: 'The color to use for this step.' } }),
       }),
       schema.object({
         type: schema.literal('exact'), // Step type indicating the color applies to an exact value. Possible value: 'exact'
         /**
          * The exact value to which this color applies.
          */
-        value: schema.number({ meta: { description: 'The exact value to which this color applies.' } }),
+        value: schema.number({
+          meta: { description: 'The exact value to which this color applies.' },
+        }),
         /**
          * The color to use for this exact value.
          */
-        color: schema.string({ meta: { description: 'The color to use for this exact value.' } })
-      })
+        color: schema.string({ meta: { description: 'The color to use for this exact value.' } }),
+      }),
     ])
-  )
+  ),
 });
-  
+
 const staticColorSchema = schema.object({
   type: schema.literal('static'), // Specifies that the color assignment is static (single color for all values). Possible value: 'static'
   /**
    * The static color to be used for all values.
    */
-  color: schema.string({ meta: { description: 'The static color to be used for all values.' } })
+  color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
 });
-  
+
 const colorDefinitionSchema = schema.object({
   /**
    * Optional. Defines a categorical color assignment.
    */
-  categorical: schema.maybe(schema.object({
-    /**
-     * The index of the color in the palette.
-     */
-    index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
-    /**
-     * (Optional) The palette name to use for color assignment.
-     */
-    palette: schema.maybe(schema.string()), // The palette name to use for color assignment.
-  })),
+  categorical: schema.maybe(
+    schema.object({
+      /**
+       * The index of the color in the palette.
+       */
+      index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
+      /**
+       * (Optional) The palette name to use for color assignment.
+       */
+      palette: schema.maybe(schema.string()), // The palette name to use for color assignment.
+    })
+  ),
   /**
    * Optional. The static color value to use.
    */
   static: schema.maybe(schema.string()), // The static color value to use.
 });
-  
+
 const colorMappingSchema = schema.oneOf([
   /**
    * Categorical color mapping: assigns colors from a palette to specific values.
@@ -108,23 +143,27 @@ const colorMappingSchema = schema.oneOf([
     /**
      * The palette name to use for color assignment.
      */
-    palette: schema.string({ meta: { description: 'The palette name to use for color assignment.' } }),
+    palette: schema.string({
+      meta: { description: 'The palette name to use for color assignment.' },
+    }),
     /**
      * The color mapping mode.
      * Possible value: 'categorical'
      */
-    mode: schema.literal("categorical"), // The color mapping mode. Possible value: 'categorical'
+    mode: schema.literal('categorical'), // The color mapping mode. Possible value: 'categorical'
     /**
      * Object mapping values to colors.
      * 'values' is an array of string values to which the categorical color applies.
      */
     colorMapping: schema.object({
-      values: schema.arrayOf(schema.string({ meta: { description: 'A value to which the categorical color applies.' } }))
+      values: schema.arrayOf(
+        schema.string({ meta: { description: 'A value to which the categorical color applies.' } })
+      ),
     }),
     /**
      * Color definition for values not explicitly mapped.
      */
-    otherColors: colorDefinitionSchema
+    otherColors: colorDefinitionSchema,
   }),
   /**
    * Gradient color mapping: assigns a gradient of colors to a range of values.
@@ -133,12 +172,14 @@ const colorMappingSchema = schema.oneOf([
     /**
      * The palette name to use for the gradient color assignment.
      */
-    palette: schema.string({ meta: { description: 'The palette name to use for the gradient color assignment.' } }),
+    palette: schema.string({
+      meta: { description: 'The palette name to use for the gradient color assignment.' },
+    }),
     /**
      * The color mapping mode.
      * Possible value: 'gradient'
      */
-    mode: schema.literal("gradient"), // The color mapping mode. Possible value: 'gradient'
+    mode: schema.literal('gradient'), // The color mapping mode. Possible value: 'gradient'
     /**
      * Array of color definitions representing the gradient.
      */
@@ -148,17 +189,20 @@ const colorMappingSchema = schema.oneOf([
      */
     colorMapping: schema.arrayOf(
       schema.object({
-        values: schema.arrayOf(schema.string({ meta: { description: 'A value to which the gradient color applies.' } }))
+        values: schema.arrayOf(
+          schema.string({ meta: { description: 'A value to which the gradient color applies.' } })
+        ),
       })
     ),
     /**
      * Color definition for values not explicitly mapped.
      */
-    otherColors: colorDefinitionSchema
-  })
+    otherColors: colorDefinitionSchema,
+  }),
 ]);
-  
+
 export const coloringTypeSchema = schema.oneOf([
-    colorByValueSchema,
-    staticColorSchema
-])
+  colorByValueSchema,
+  staticColorSchema,
+  colorMappingSchema,
+]);

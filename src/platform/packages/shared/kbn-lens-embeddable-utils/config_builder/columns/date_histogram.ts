@@ -11,7 +11,10 @@ import type { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiDateHistogramOperation } from '../schema/bucket_ops';
 
 export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
-export const getHistogramColumn = (options: LensApiDateHistogramOperation): DateHistogramIndexPatternColumn => {
+export const getHistogramColumn = (
+  options: LensApiDateHistogramOperation
+): DateHistogramIndexPatternColumn => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { suggested_interval = 'auto', field, ...rest } = options;
 
   return {

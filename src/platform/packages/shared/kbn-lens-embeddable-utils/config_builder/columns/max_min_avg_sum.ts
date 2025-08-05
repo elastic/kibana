@@ -7,24 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AvgIndexPatternColumn, MaxIndexPatternColumn, MinIndexPatternColumn, SumIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type {
+  AvgIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MinIndexPatternColumn,
+  SumIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
+import { ValueFormatConfig } from '@kbn/lens-plugin/common';
 import { LensApiMetricOperation } from '../schema/metric_ops';
-import { ValueFormatConfig } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 
 const convertFormat = (format: LensApiMetricOperation['format']) => {
   return {
-    id: 'number'
+    id: 'number',
   };
-}
+};
 
 const convertFormatReverse = (format: ValueFormatConfig) => {
   return {
-    type: 'number' as const
+    type: 'number' as const,
   };
-}
+};
 
 export type MaxMinAvgSumColumnParams = AvgIndexPatternColumn['params'];
-export const getMaxMinAvgSumColumn = (operation: string, options: LensApiMetricOperation): AvgIndexPatternColumn | MaxIndexPatternColumn | MinIndexPatternColumn | SumIndexPatternColumn => {
+export const getMaxMinAvgSumColumn = (
+  operation: string,
+  options: LensApiMetricOperation
+):
+  | AvgIndexPatternColumn
+  | MaxIndexPatternColumn
+  | MinIndexPatternColumn
+  | SumIndexPatternColumn => {
   const { format, field, label } = options ?? {};
 
   return {
@@ -38,18 +50,24 @@ export const getMaxMinAvgSumColumn = (operation: string, options: LensApiMetricO
     // timeScale: options.time_scale,
     reducedTimeRange: options.reduced_time_range,
     timeShift: options.time_shift,
-    params: { 
-        format: convertFormat(format),
-     },
+    params: {
+      format: convertFormat(format),
+    },
   };
 };
 
-export const getMaxMinAvgSumColumnReverse = (options: AvgIndexPatternColumn | MaxIndexPatternColumn | MinIndexPatternColumn | SumIndexPatternColumn): LensApiMetricOperation => {
+export const getMaxMinAvgSumColumnReverse = (
+  options:
+    | AvgIndexPatternColumn
+    | MaxIndexPatternColumn
+    | MinIndexPatternColumn
+    | SumIndexPatternColumn
+): LensApiMetricOperation => {
   return {
     operation: options.operationType as 'min' | 'max' | 'sum' | 'median',
     ...(options.params?.format ? { format: convertFormatReverse(options.params.format) } : {}),
     field: options.sourceField,
-    ...( options.customLabel ? { label: options.label } : {} ),
+    ...(options.customLabel ? { label: options.label } : {}),
     // filter: options.filter,
     time_scale: options.timeScale,
     reduced_time_range: options.reducedTimeRange,

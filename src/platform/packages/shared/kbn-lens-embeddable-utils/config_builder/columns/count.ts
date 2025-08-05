@@ -9,23 +9,15 @@
 
 import type { CountIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiCountMetricOperation } from '../schema/metric_ops';
-import { ValueFormatConfig } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-
-const convertFormat = (format: LensApiCountMetricOperation['format']) => {
-  return {
-    id: 'number'
-  };
-}
-
-const convertFormatReverse = (format: ValueFormatConfig) => {
-  return {
-    type: 'number' as const
-  };
-}
+import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
+import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 
 export type CountColumnParams = CountIndexPatternColumn['params'];
-export const getCountColumn = (options: LensApiCountMetricOperation): CountIndexPatternColumn => {
-  const { empty_as_null, format, field, label } = options ?? {};
+export const fromCountAPItoLensState = (
+  options: LensApiCountMetricOperation
+): CountIndexPatternColumn => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { empty_as_null, format, field, label, filter } = options ?? {};
 
   return {
     dataType: 'number',
@@ -34,27 +26,29 @@ export const getCountColumn = (options: LensApiCountMetricOperation): CountIndex
     customLabel: !!label,
     operationType: 'count',
     sourceField: field || '',
-    // filter: options.filter,
-    // timeScale: options.time_scale,
+    ...(filter ? fromFilterAPIToLensState(filter) : {}),
+    timeScale: options.time_scale,
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
-    params: { 
-        emptyAsNull: empty_as_null || false,
-        ...(format ? { format: convertFormat(format) } : {}),
-     },
+    params: {
+      emptyAsNull: empty_as_null || false,
+      ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
+    },
   };
 };
 
-export const getCountColumnReverse = (options: CountIndexPatternColumn): LensApiCountMetricOperation => {
+export const fromCountLensStateToAPI = (
+  options: CountIndexPatternColumn
+): LensApiCountMetricOperation => {
   return {
     operation: 'count',
-    ...(options.sourceField ? { field: options.sourceField } : {}),
+    field: options.sourceField,
     ...(options.params?.emptyAsNull ? { empty_as_null: options.params?.emptyAsNull } : {}),
-    ...(options.params?.format ? { format: convertFormatReverse(options.params.format) } : {}),
-    ...(options.customLabel ? { label: options.label } : {} ),
+    ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
+    ...(options.customLabel ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
-    // filter: options.filter,
+    ...(options.filter ? { filter: fromFilterLensStateToAPI(options.filter) } : {}),
   };
 };

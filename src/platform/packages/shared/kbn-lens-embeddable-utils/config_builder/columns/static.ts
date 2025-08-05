@@ -27,7 +27,7 @@ export function getStaticColumn(
     columnOrder: [...baseLayer.columnOrder, id],
     columns: {
       [id]: {
-        label: label ?? 'Reference',
+        label: label ?? `Static value: ${params.value}`,
         dataType: 'number',
         operationType: 'static_value',
         isStaticValue: true,
@@ -38,8 +38,6 @@ export function getStaticColumn(
         customLabel: true,
       } as ReferenceBasedIndexPatternColumn,
     },
-    sampling: 1,
-    incompleteColumns: {},
   };
 }
 
@@ -55,7 +53,7 @@ export function fromStaticColumn(
   const { label, params } = column as ReferenceBasedIndexPatternColumn;
 
   return {
-    label,  
+    label,
     format: params?.format,
     value: '',
   };

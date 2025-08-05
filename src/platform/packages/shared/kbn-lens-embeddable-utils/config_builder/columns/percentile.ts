@@ -10,7 +10,9 @@
 import type { PercentileIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiPercentileOperation } from '../schema/metric_ops';
 
-export const getPercentileColumn = (options: LensApiPercentileOperation): PercentileIndexPatternColumn => {
+export const getPercentileColumn = (
+  options: LensApiPercentileOperation
+): PercentileIndexPatternColumn => {
   return {
     dataType: 'number',
     isBucketed: false,
@@ -23,7 +25,9 @@ export const getPercentileColumn = (options: LensApiPercentileOperation): Percen
   };
 };
 
-export const getPercentileColumnReverse = (options: PercentileIndexPatternColumn): LensApiPercentileOperation => {
+export const getPercentileColumnReverse = (
+  options: PercentileIndexPatternColumn
+): LensApiPercentileOperation => {
   // TODO: Implement the actual logic
   return {
     operation: 'percentile',

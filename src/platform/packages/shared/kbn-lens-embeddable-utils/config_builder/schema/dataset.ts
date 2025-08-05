@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import { schema } from '@kbn/config-schema';
 
 export const datasetTypeSchema = schema.oneOf([
@@ -10,8 +19,9 @@ export const datasetTypeSchema = schema.oneOf([
      */
     name: schema.string({
       meta: {
-        description: 'The name of the Kibana data view to use as the data source. Example: "my-data-view".'
-      }
+        description:
+          'The name of the Kibana data view to use as the data source. Example: "my-data-view".',
+      },
     }),
   }),
   // Index dataset type
@@ -23,8 +33,9 @@ export const datasetTypeSchema = schema.oneOf([
      */
     index: schema.string({
       meta: {
-        description: 'The name of the Elasticsearch index to use as the data source. Example: "my-index-*".'
-      }
+        description:
+          'The name of the Elasticsearch index to use as the data source. Example: "my-index-*".',
+      },
     }),
     /**
      * The name of the time field in the index. Used for time-based filtering.
@@ -32,8 +43,9 @@ export const datasetTypeSchema = schema.oneOf([
      */
     time_field: schema.string({
       meta: {
-        description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
-      }
+        description:
+          'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".',
+      },
     }),
     /**
      * Optional array of runtime fields to define on the index. Each runtime field describes a computed field available at query time.
@@ -48,8 +60,8 @@ export const datasetTypeSchema = schema.oneOf([
            */
           type: schema.string({
             meta: {
-              description: 'The type of the runtime field (e.g., "keyword", "long", "date").'
-            }
+              description: 'The type of the runtime field (e.g., "keyword", "long", "date").',
+            },
           }),
           /**
            * The name of the runtime field.
@@ -57,18 +69,21 @@ export const datasetTypeSchema = schema.oneOf([
            */
           name: schema.string({
             meta: {
-              description: 'The name of the runtime field. Example: "my_runtime_field".'
-            }
+              description: 'The name of the runtime field. Example: "my_runtime_field".',
+            },
           }),
           /**
            * Optional format definition for the runtime field. The structure depends on the field type and use case.
            * If not provided, no format is applied.
            */
-          format: schema.maybe(schema.any({
-            meta: {
-              description: 'Optional format definition for the runtime field. Structure depends on field type.'
-            }
-          })),
+          format: schema.maybe(
+            schema.any({
+              meta: {
+                description:
+                  'Optional format definition for the runtime field. Structure depends on field type.',
+              },
+            })
+          ),
         })
       )
     ),
@@ -82,8 +97,9 @@ export const datasetTypeSchema = schema.oneOf([
      */
     query: schema.string({
       meta: {
-        description: 'The ESQL query string to use as the data source. Example: "FROM my-index | LIMIT 100".'
-      }
+        description:
+          'The ESQL query string to use as the data source. Example: "FROM my-index | LIMIT 100".',
+      },
     }),
   }),
   // Table dataset type
@@ -94,8 +110,9 @@ export const datasetTypeSchema = schema.oneOf([
      */
     table: schema.any({
       meta: {
-        description: 'The Kibana datatable object to use as the data source. Structure should match the Kibana Datatable contract.'
-      }
+        description:
+          'The Kibana datatable object to use as the data source. Structure should match the Kibana Datatable contract.',
+      },
     }),
   }),
 ]);

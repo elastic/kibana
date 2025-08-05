@@ -7,24 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CumulativeSumIndexPatternColumn, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import type { LensApiCumulativeSumOperation, LensApiFieldMetricOperations } from '../schema/metric_ops';
+import type {
+  CumulativeSumIndexPatternColumn,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
+import type {
+  LensApiCumulativeSumOperation,
+  LensApiFieldMetricOperations,
+} from '../schema/metric_ops';
 import { getMetricColumn, getMetricColumnReverse } from './metric';
 
-export const getCumulativeSumColumn = (options: LensApiCumulativeSumOperation): [CumulativeSumIndexPatternColumn, GenericIndexPatternColumn] => {
-  return [{
-    dataType: 'number',
-    isBucketed: false,
-    ...(options.label ? { label: options.label, customLabel: true } : { label: 'Advanced Metric' }),
-    operationType: options.operation,
-    references: [],
-    params: {
-      // format:
-    }
-  }, getMetricColumn(options.of) as GenericIndexPatternColumn];
+export const getCumulativeSumColumn = (
+  options: LensApiCumulativeSumOperation
+): [CumulativeSumIndexPatternColumn, GenericIndexPatternColumn] => {
+  return [
+    {
+      dataType: 'number',
+      isBucketed: false,
+      ...(options.label
+        ? { label: options.label, customLabel: true }
+        : { label: 'Advanced Metric' }),
+      operationType: options.operation,
+      references: [],
+      params: {
+        // format:
+      },
+    },
+    getMetricColumn(options.of) as GenericIndexPatternColumn,
+  ];
 };
 
-export const getCumulativeSumColumnReverse = (options: CumulativeSumIndexPatternColumn, columns: Record<string, GenericIndexPatternColumn>): LensApiCumulativeSumOperation => {
+export const getCumulativeSumColumnReverse = (
+  options: CumulativeSumIndexPatternColumn,
+  columns: Record<string, GenericIndexPatternColumn>
+): LensApiCumulativeSumOperation => {
   const referenceColumn = columns[options.references[0]];
   return {
     operation: options.operationType as LensApiCumulativeSumOperation['operation'],

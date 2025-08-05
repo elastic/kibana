@@ -26,12 +26,10 @@ export const getIntervalsColumn = (options: LensApiRangeOperation): RangeIndexPa
   };
 };
 
-export const fromIntervalsColumn = (
-  column: RangeIndexPatternColumn
-): LensApiRangeOperation => {
+export const fromIntervalsColumn = (column: RangeIndexPatternColumn): LensApiRangeOperation => {
   return {
     operation: 'range',
     field: column.sourceField,
     ranges: column.params.ranges,
   };
-}
+};

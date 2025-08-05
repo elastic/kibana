@@ -25,9 +25,7 @@ export const getFiltersColumn = (options: LensApiFilterOperation): FiltersIndexP
   };
 };
 
-export const fromFiltersColumn = (
-  column: FiltersIndexPatternColumn
-): LensApiFilterOperation => {
+export const fromFiltersColumn = (column: FiltersIndexPatternColumn): LensApiFilterOperation => {
   const { params } = column;
   return {
     operation: 'filters',
@@ -39,4 +37,4 @@ export const fromFiltersColumn = (
       label: filter.label,
     })),
   };
-}
+};

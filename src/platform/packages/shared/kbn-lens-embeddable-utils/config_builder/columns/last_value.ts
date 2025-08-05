@@ -8,23 +8,25 @@
  */
 
 import type { LastValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import { ValueFormatConfig } from '@kbn/lens-plugin/common';
 import { LensApiLastValueOperation } from '../schema/metric_ops';
-import { ValueFormatConfig } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 
 const convertFormat = (format: LensApiLastValueOperation['format']) => {
   return {
-    id: 'number'
+    id: 'number',
   };
-}
+};
 
 const convertFormatReverse = (format: ValueFormatConfig) => {
   return {
-    type: 'number' as const
+    type: 'number' as const,
   };
-}
+};
 
 export type LastValueColumnParams = LastValueIndexPatternColumn['params'];
-export const getLastValueColumn = (options: LensApiLastValueOperation): LastValueIndexPatternColumn => {
+export const getLastValueColumn = (
+  options: LensApiLastValueOperation
+): LastValueIndexPatternColumn => {
   const { format, field, label } = options ?? {};
 
   return {
@@ -38,23 +40,25 @@ export const getLastValueColumn = (options: LensApiLastValueOperation): LastValu
     // timeScale: options.time_scale,
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
-    params: { 
+    params: {
       sortField: field,
       showArrayValues: false,
       ...(format ? { format: convertFormat(format) } : {}),
-     },
+    },
   };
 };
 
-export const getLastValueColumnReverse = (options: LastValueIndexPatternColumn): LensApiLastValueOperation => {
+export const getLastValueColumnReverse = (
+  options: LastValueIndexPatternColumn
+): LensApiLastValueOperation => {
   return {
     operation: 'last_value',
     field: options.sourceField,
     ...(options.params?.format ? { format: convertFormatReverse(options.params.format) } : {}),
-    ...(options.customLabel ? { label: options.label } : {} ),
+    ...(options.customLabel ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
-    //...(options.filter ? { filter: options.filter } : {}),
+    // ...(options.filter ? { filter: options.filter } : {}),
   };
 };

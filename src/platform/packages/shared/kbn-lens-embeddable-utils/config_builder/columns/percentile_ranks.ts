@@ -10,11 +10,15 @@
 import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { LensApiPercentileRanksOperation } from '../schema/metric_ops';
 
-export const getPercentileRanksColumn = (options: LensApiPercentileRanksOperation): PercentileRanksIndexPatternColumn => {
+export const getPercentileRanksColumn = (
+  options: LensApiPercentileRanksOperation
+): PercentileRanksIndexPatternColumn => {
   return {
     dataType: 'number',
     isBucketed: false,
-    ...(options.label ? { label: options.label, customLabel: true } : { label: 'Percentile Ranks' }),
+    ...(options.label
+      ? { label: options.label, customLabel: true }
+      : { label: 'Percentile Ranks' }),
     operationType: 'percentile_rank',
     sourceField: options.field,
     params: {
@@ -23,7 +27,9 @@ export const getPercentileRanksColumn = (options: LensApiPercentileRanksOperatio
   };
 };
 
-export const getPercentileRanksColumnReverse = (options: PercentileRanksIndexPatternColumn): LensApiPercentileRanksOperation => {
+export const getPercentileRanksColumnReverse = (
+  options: PercentileRanksIndexPatternColumn
+): LensApiPercentileRanksOperation => {
   return {
     operation: 'percentile_ranks',
     label: options.label,

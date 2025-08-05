@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormulaIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { FormulaValueConfig } from '../types';
 import { LensApiFormulaOperation } from '../schema/metric_ops';
 
-export function getFormulaColumn(
-  config: LensApiFormulaOperation,
-): FormulaIndexPatternColumn {
+export function getFormulaColumn(config: LensApiFormulaOperation): FormulaIndexPatternColumn {
   const { formula } = config;
-  
+
   return {
-    label: `Formula`,
+    label: formula,
     dataType: 'number',
     operationType: 'formula',
     scale: 'ordinal',
@@ -29,9 +27,7 @@ export function getFormulaColumn(
   };
 }
 
-export function fromFormulaColumn(
-  column: FormulaIndexPatternColumn,
-): LensApiFormulaOperation {
+export function fromFormulaColumn(column: FormulaIndexPatternColumn): LensApiFormulaOperation {
   const { label, params } = column;
 
   return {

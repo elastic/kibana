@@ -10,7 +10,8 @@
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { LensApiTermsOperation } from '../schema/bucket_ops';
 
-const DEFAULT_BREAKDOWN_SIZE = 10;
+// @TODO: move it into the shared values/type package
+const DEFAULT_BREAKDOWN_SIZE = 5;
 
 export const getTopValuesColumn = (options: LensApiTermsOperation): TermsIndexPatternColumn => {
   const { fields, size = DEFAULT_BREAKDOWN_SIZE, ...params } = options;
@@ -44,10 +45,7 @@ export const getTopValuesColumn = (options: LensApiTermsOperation): TermsIndexPa
   };
 };
 
-
-export const fromTopValuesColumn = (
-  column: TermsIndexPatternColumn
-): LensApiTermsOperation => {
+export const fromTopValuesColumn = (column: TermsIndexPatternColumn): LensApiTermsOperation => {
   const { params } = column;
   return {
     operation: 'terms',

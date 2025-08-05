@@ -22,10 +22,10 @@ export function getValueColumn(
   };
 }
 
-
-export function fromValueColumn(
-  column: TextBasedLayerColumn
-): { fieldName: string; type?: DatatableColumnType } {
+export function fromValueColumn(column: TextBasedLayerColumn): {
+  fieldName: string;
+  type?: DatatableColumnType;
+} {
   return {
     fieldName: column.fieldName,
     type: column.meta?.type,
