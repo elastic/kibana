@@ -9,20 +9,21 @@ import { basicsQuickstartCommands } from './basics_quickstart';
 
 describe('basics quickstart', () => {
   describe('with index name provided', () => {
-    it('should generate the correct number of steps with an index name', () => {
-      const commands = basicsQuickstartCommands({ indexName: 'test-index' });
+    it('generates correct number of steps when creating an index', () => {
+      const commands = basicsQuickstartCommands({ indexName: 'test-index', createIndex: true });
       // Find the number of steps, search for # Step <number>
+      const steps = commands.match(/# Step \d+/g) || [];
+      expect(steps).toHaveLength(10);
+    });
+    it('generates correct number of steps when index exists', () => {
+      const commands = basicsQuickstartCommands({ indexName: 'test-index', createIndex: false });
       const steps = commands.match(/# Step \d+/g) || [];
       expect(steps).toHaveLength(9);
     });
   });
 
   describe('no index name provided', () => {
-    const commands = basicsQuickstartCommands();
-    it('should generate the correct number of steps', () => {
-      const steps = commands.match(/# Step \d+/g) || [];
-      expect(steps).toHaveLength(10);
-    });
+    const commands = basicsQuickstartCommands({ createIndex: true });
     it('should default to "books" as the index name', () => {
       expect(commands).toContain('PUT /books');
     });
