@@ -12,7 +12,6 @@ import { WorkflowContextManager } from '../workflow_context_manager/workflow_con
 import { StepImplementation } from './step_base';
 // Import schema and inferred types
 import { ConnectorExecutor } from '../connector_executor';
-import { ConnectorStepImpl } from './connector_step';
 import {
   EnterConditionBranchNodeImpl,
   EnterIfNodeImpl,
