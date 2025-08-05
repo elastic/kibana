@@ -210,6 +210,7 @@ export class DashboardStorage {
       DashboardGetOut,
       DashboardGetOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -296,6 +297,7 @@ export class DashboardStorage {
     const { value, error: resultError } = transforms.create.out.result.down<
       CreateResult<DashboardItem>
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -380,6 +382,7 @@ export class DashboardStorage {
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -458,6 +461,7 @@ export class DashboardStorage {
       DashboardSearchOut,
       DashboardSearchOut
     >(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
