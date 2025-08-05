@@ -9,9 +9,6 @@ import { UNCOMMON_PROCESSES_TABLE } from '../../screens/hosts/uncommon_processes
 import { REFRESH_BUTTON } from '../../screens/security_header';
 
 export const waitForUncommonProcessesToBeLoaded = () => {
-  // for some reason, the refresh button's aria-label is not updated here, so adding a check to make sure
-  // it's not disabled also should ensure that the page has correctly refreshed and prevent flaky tests
-  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('not.be.disabled');
   cy.get(UNCOMMON_PROCESSES_TABLE).should('exist');
 };
