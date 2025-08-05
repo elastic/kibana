@@ -11,7 +11,7 @@ import { inject, injectable } from 'inversify';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { Response } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import { EchoService, type Echo } from '@kbn/dependency-injection-example-service/server';
+import { Echo } from './echo';
 
 export type EchoRequest = KibanaRequest<never, never, TypeOf<typeof EchoRoute.validate.body>>;
 
@@ -33,7 +33,7 @@ export class EchoRoute {
   } as const;
 
   constructor(
-    @inject(EchoService) private readonly service: Echo,
+    @inject(Echo) private readonly service: Echo,
     @inject(Response) private readonly response: KibanaResponseFactory
   ) {}
 

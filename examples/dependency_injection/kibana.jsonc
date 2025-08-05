@@ -4,9 +4,9 @@
   "owner": "@elastic/kibana-core",
   "description": "A plugin demonstrating dependency injection in Kibana",
   "plugin": {
-    "id": "dependencyInjectionExamplePlugin",
+    "id": "dependencyInjectionExample",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["developerExamples", "dependencyInjectionExampleService"]
+    "requiredPlugins": ["developerExamples"]
   }
 }

@@ -16,7 +16,7 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
@@ -27,6 +27,11 @@ type ScopeFactory = (id?: PluginOpaqueId) => Container;
  * The `Context` service holds a reference to the child container and is used to resolve global services within the current context, making short-lived services available.
  */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
+
+/**
+ * The service identifier for the global service references.
+ */
+export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
 /**
  * Current plugin scope identifier.

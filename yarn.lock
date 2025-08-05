@@ -5631,11 +5631,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-injection-example-plugin@link:examples/dependency_injection/plugin":
-  version "0.0.0"
-  uid ""
-
-"@kbn/dependency-injection-example-service@link:examples/dependency_injection/service":
+"@kbn/dependency-injection-example-plugin@link:examples/dependency_injection":
   version "0.0.0"
   uid ""
 

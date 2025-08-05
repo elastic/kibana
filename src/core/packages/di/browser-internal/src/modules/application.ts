@@ -11,7 +11,8 @@ import { ContainerModule } from 'inversify';
 import { isPromise } from '@kbn/std';
 import { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
-import { Global, OnSetup } from '@kbn/core-di';
+import { Global } from '@kbn/core-di-internal';
+import { OnSetup } from '@kbn/core-di';
 
 /** @internal */
 export const application = new ContainerModule(({ bind, onActivation }) => {

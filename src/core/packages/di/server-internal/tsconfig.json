@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core-di",
+    "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
     "@kbn/core-di-server",
     "@kbn/core-http-server",

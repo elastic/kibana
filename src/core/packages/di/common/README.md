@@ -64,7 +64,6 @@ To get started, just create an empty plugin and declare a named export called `m
 
 ```ts
 import { ContainerModule, inject, injectable } from 'inversify';
-import { Global } from '@kbn/core-di';
 
 @injectable()
 export class Greeting {
@@ -75,7 +74,6 @@ export class Greeting {
 
 export const module = new ContainerModule(({ bind }) => {
   bind(Greeting).toSelf();
-  bind(Global).toConstantValue(Greeting);
 });
 ```
 

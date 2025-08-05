@@ -9,8 +9,8 @@
 
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
-import { Fork, PluginModule, Scope } from './plugin';
+import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
+import { Fork, Global, PluginModule, Scope } from './plugin';
 
 describe('PluginModule', () => {
   const token1 = Symbol.for('token1');

@@ -10,12 +10,6 @@
 import type { Container, ServiceIdentifier } from 'inversify';
 
 /**
- * The service identifier for the global service references.
- * @public
- */
-export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
-
-/**
  * Plugin's setup contract.
  * @public
  */

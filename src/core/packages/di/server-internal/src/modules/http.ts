@@ -11,7 +11,8 @@ import { Container, ContainerModule } from 'inversify';
 import type { RouteRegistrar } from '@kbn/core-http-server';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { Global, OnSetup } from '@kbn/core-di';
+import { Global } from '@kbn/core-di-internal';
+import { OnSetup } from '@kbn/core-di';
 
 /** @internal */
 export const http = new ContainerModule(({ bind, onActivation }) => {

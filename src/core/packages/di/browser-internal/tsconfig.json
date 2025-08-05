@@ -20,6 +20,7 @@
     "@kbn/core-application-browser",
     "@kbn/core-di",
     "@kbn/core-di-browser",
+    "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
     "@kbn/core-lifecycle-browser",
   ]
