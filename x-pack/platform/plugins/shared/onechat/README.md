@@ -273,10 +273,10 @@ Configure Claude Desktop by adding this to its configuration:
         "mcp-remote",
         "http://localhost:5601/api/mcp",
         "--header",
-        "Authorization: ApiKey ${API_KEY}"
+        "Authorization:${AUTH_HEADER}"
       ],
       "env": {
-        "API_KEY": "..."
+        "AUTH_HEADER": "ApiKey {...}"
       }
     }
   }
@@ -287,59 +287,7 @@ Configure Claude Desktop by adding this to its configuration:
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with onechat agents, enabling agent-to-agent collaboration following the A2A protocol specification.
 
-### Key Features
-
-- **Agent Discovery**: Provides an agent card at `/.well-known/agent.json` for automatic discovery
-- **Task Execution**: Handles A2A task requests via JSON-RPC 2.0 over HTTP
-- **Stateless Operation**: No in-memory state, suitable for auto-scaling environments
-- **Tool Integration**: Exposes onechat agent capabilities and available tools
-- **Security**: Integrates with Kibana's authentication and authorization system
-
-### Endpoints
-
-- **Agent Card**: `GET /.well-known/agent.json` - Returns agent metadata for discovery
-- **Task Submission**: `POST /api/chat/a2a` - Handles A2A task requests
-
-### Example Usage
-
-To enable the A2A server, add the following to your Kibana config:
-
-```yaml
-uiSettings.overrides:
-  onechat:a2a:enabled: true
-```
-
-Example A2A task request:
-
-```json
-POST /api/chat/a2a
-{
-  "id": "task-123",
-  "message": {
-    "kind": "message",
-    "role": "user",
-    "messageId": "msg-456",
-    "parts": [
-      {
-        "kind": "text",
-        "text": "What is the current weather?"
-      }
-    ],
-    "taskId": "task-123",
-    "contextId": "ctx-789"
-  },
-  "contextId": "ctx-789"
-}
-```
-
-### Integration with A2A Clients
-
-The A2A server is compatible with any A2A client library that follows the Agent2Agent protocol specification, including:
-
-- Python A2A SDK
-- JavaScript/TypeScript A2A SDK
-- Java A2A SDK
-- Or any custom A2A client implementation
+Agentcards for onechat agents are exposed on `GET /api/chat/a2a/{agentId}.json`. The protocol endpoint is: `POST /api/chat/a2a/{agentId}`.
 
 ## ES|QL Based Tools
 
