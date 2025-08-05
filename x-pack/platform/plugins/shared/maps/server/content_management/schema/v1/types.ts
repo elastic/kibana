@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Writable } from '@kbn/utility-types';
 import { TypeOf } from '@kbn/config-schema';
 import {
   mapAttributesSchema,
@@ -34,9 +33,9 @@ export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
 export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
 
-export type AbstractESAggSourceDescriptor = Writable<TypeOf<typeof ESAggSourceSchema>>;
-export type AbstractESSourceDescriptor = Writable<TypeOf<typeof ESSourceSchema>>;
-export type EMSFileSourceDescriptor = Writable<TypeOf<typeof EMSFileSourceSchema>>;
-export type EMSTMSSourceDescriptor = Writable<TypeOf<typeof EMSTMSSourceSchema>>;
-export type ESGeoGridSourceDescriptor = Writable<TypeOf<typeof ESGeoGridSourceSchema>>;
-export type ESGeoLineSourceDescriptor = Writable<TypeOf<typeof ESGeoLineSourceSchema>>;
+export type AbstractESAggSourceDescriptor = TypeOf<typeof ESAggSourceSchema>;
+export type AbstractESSourceDescriptor =TypeOf<typeof ESSourceSchema>;
+export type EMSFileSourceDescriptor = TypeOf<typeof EMSFileSourceSchema>;
+export type EMSTMSSourceDescriptor =TypeOf<typeof EMSTMSSourceSchema>;
+export type ESGeoGridSourceDescriptor = TypeOf<typeof ESGeoGridSourceSchema>;
+export type ESGeoLineSourceDescriptor = TypeOf<typeof ESGeoLineSourceSchema>;
