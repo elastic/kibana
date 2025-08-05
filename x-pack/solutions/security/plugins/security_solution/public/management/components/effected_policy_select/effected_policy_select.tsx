@@ -49,7 +49,7 @@ const StyledEuiFlexItemButtonGroup = styled(EuiFlexItem)`
   }
 `;
 
-const StyledButtonGroup = styled(EuiButtonGroup)`
+export const StyledButtonGroup = styled(EuiButtonGroup)`
   display: flex;
   justify-content: right;
   .euiButtonGroupButton {

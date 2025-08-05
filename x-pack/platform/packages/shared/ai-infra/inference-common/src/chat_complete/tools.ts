@@ -28,6 +28,8 @@ type ToolCallbacksOfTools<TTools extends Record<string, ToolDefinition> | undefi
       }
     : never;
 
+export type ToolCallback = (toolCall: ToolCall) => Promise<ToolMessage['response']>;
+
 export type ToolCallbacksOf<TToolOptions extends ToolOptions> = TToolOptions extends {
   tools?: Record<string, ToolDefinition>;
 }

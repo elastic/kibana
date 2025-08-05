@@ -298,5 +298,5 @@ export class PackageInstaller {
 const selectVersion = (currentVersion: string, availableVersions: string[]): string => {
   return availableVersions.includes(currentVersion)
     ? currentVersion
-    : latestVersion(availableVersions);
+    : latestVersion(availableVersions, currentVersion);
 };

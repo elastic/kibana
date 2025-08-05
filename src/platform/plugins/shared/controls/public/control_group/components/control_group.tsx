@@ -28,9 +28,9 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ControlsLabelPosition } from '@kbn/controls-schemas';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type { ControlLabelPosition } from '../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlsInOrder } from '../init_controls_manager';
@@ -47,7 +47,7 @@ interface Props {
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => void;
   };
   hasUnappliedSelections: boolean;
-  labelPosition: ControlLabelPosition;
+  labelPosition: ControlsLabelPosition;
 }
 
 export function ControlGroup({

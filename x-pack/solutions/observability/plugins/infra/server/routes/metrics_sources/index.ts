@@ -9,8 +9,13 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
-import { DATASTREAM_DATASET, EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
+import {
+  DataSchemaFormat,
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  findInventoryModel,
+  METRICSET_MODULE,
+} from '@kbn/metrics-data-access-plugin/common';
 import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
@@ -29,7 +34,6 @@ import {
 import type { InfraSource } from '../../lib/sources';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
-import { integrationNameByEntityType } from '../../lib/sources/constants';
 
 const defaultStatus = {
   metricIndicesExist: false,
@@ -209,7 +213,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (context, request, response) => {
       try {
-        const { entityType: integration } = request.query;
+        const { entityType } = request.query;
 
         const infraMetricsClient = await getInfraMetricsClient({
           request,
@@ -217,7 +221,12 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           context,
         });
 
-        const source = integration ? integrationNameByEntityType[integration] : undefined;
+        const inventoryModel = entityType ? findInventoryModel(entityType) : undefined;
+        const source =
+          typeof inventoryModel?.requiredIntegration !== 'object' ||
+          !('otel' in inventoryModel?.requiredIntegration)
+            ? undefined
+            : inventoryModel.requiredIntegration;
 
         const hasDataResponse = await infraMetricsClient.search({
           track_total_hits: true,
@@ -275,7 +284,18 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           libs,
           context,
         });
-        const source = integrationNameByEntityType[dataSource];
+
+        const inventoryModel = findInventoryModel(dataSource);
+        if (
+          typeof inventoryModel.requiredIntegration !== 'object' ||
+          !('otel' in inventoryModel.requiredIntegration)
+        ) {
+          return response.ok({
+            body: getTimeRangeMetadataResponseRT.encode({
+              schemas: [DataSchemaFormat.SEMCONV],
+            }),
+          });
+        }
 
         const [ecsResponse, otelResponse] = (
           await infraMetricsClient.msearch([
@@ -286,8 +306,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               query: {
                 bool: {
                   should: [
-                    ...termsQuery(EVENT_MODULE, source.beats),
-                    ...termsQuery(METRICSET_MODULE, source.beats),
+                    ...termsQuery(EVENT_MODULE, inventoryModel.requiredIntegration.beats),
+                    ...termsQuery(METRICSET_MODULE, inventoryModel.requiredIntegration.beats),
                   ],
                   minimum_should_match: 1,
                   filter: [...rangeQuery(from, to), ...kqlQuery(kuery)],
@@ -301,7 +321,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
               query: {
                 bool: {
                   filter: [
-                    ...termQuery(DATASTREAM_DATASET, source.otel),
+                    ...termQuery(DATASTREAM_DATASET, inventoryModel.requiredIntegration.otel),
                     ...rangeQuery(from, to),
                     ...kqlQuery(kuery),
                   ],

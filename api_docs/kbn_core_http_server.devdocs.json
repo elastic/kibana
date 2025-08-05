@@ -3261,10 +3261,6 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/dynamic_route/get_metrics_by_type.ts"
               },
@@ -3319,6 +3315,10 @@
               {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_resolve_route.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "alerting",
@@ -3431,6 +3431,10 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_browser_fields_by_rule_type_ids.ts"
+              },
+              {
+                "plugin": "ruleRegistry",
+                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_alert_fields/get_alert_fields_by_rule_type_ids.ts"
               },
               {
                 "plugin": "inference",
@@ -5989,10 +5993,6 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
-                "plugin": "@kbn/content-management-content-insights-server",
-                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/routes/get_oauth_access_token.ts"
               },
@@ -6071,6 +6071,10 @@
               {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/http/short_urls/register_create_route.ts"
+              },
+              {
+                "plugin": "@kbn/content-management-content-insights-server",
+                "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
                 "plugin": "alerting",
@@ -6807,6 +6811,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/xsoar_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -7695,6 +7703,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/clone/clone_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/create/create_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -15121,6 +15133,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/stats.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/get.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory/routes/status.ts"
               },
               {
@@ -15681,6 +15701,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/create.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -16804,6 +16828,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/dashboards/api/dashboards/create.ts"
               },
               {
                 "plugin": "securitySolution",
