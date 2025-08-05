@@ -156,40 +156,13 @@ export function AdvancedConfiguration({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow
-                label={
-                  index === 0
-                    ? i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
-                        defaultMessage: 'value',
-                      })
-                    : undefined
-                }
-                fullWidth
-              >
-                <EuiFieldText
-                  data-test-subj="apmSettingsAdvancedConfigurationValueField"
-                  aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
-                    defaultMessage: 'Advanced configuration value',
-                  })}
-                  fullWidth
-                  value={settingValue}
-                  onChange={(e) => updateValue(settingKey, e.target.value)}
-                  append={
-                    <EuiButtonIcon
-                      data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
-                      aria-label={i18n.translate(
-                        'xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel',
-                        {
-                          defaultMessage: 'Remove advanced configuration',
-                        }
-                      )}
-                      iconType="trash"
-                      color={'danger'}
-                      onClick={() => deleteRow(settingKey)}
-                    />
-                  }
-                />
-              </EuiFormRow>
+              <AdvancedConfigValueInput
+                settingValue={settingValue}
+                settingKey={settingKey}
+                index={index}
+                onUpdate={updateValue}
+                onDelete={deleteRow}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </Fragment>
@@ -286,6 +259,54 @@ function AdvancedConfigKeyInput({
         value={localKey}
         isInvalid={isInvalidInput(localKey)}
         onChange={(e) => handleKeyChange(e.target.value)}
+      />
+    </EuiFormRow>
+  );
+}
+
+function AdvancedConfigValueInput({
+  settingValue,
+  settingKey,
+  index,
+  onUpdate,
+  onDelete,
+}: {
+  settingValue: string;
+  settingKey: string;
+  index: number;
+  onUpdate: (key: string, value: string) => void;
+  onDelete: (key: string) => void;
+}) {
+  return (
+    <EuiFormRow
+      label={
+        index === 0
+          ? i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
+              defaultMessage: 'value',
+            })
+          : undefined
+      }
+      fullWidth
+    >
+      <EuiFieldText
+        data-test-subj="apmSettingsAdvancedConfigurationValueField"
+        aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
+          defaultMessage: 'Advanced configuration value',
+        })}
+        fullWidth
+        value={settingValue}
+        onChange={(e) => onUpdate(settingKey, e.target.value)}
+        append={
+          <EuiButtonIcon
+            data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
+            aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel', {
+              defaultMessage: 'Remove advanced configuration',
+            })}
+            iconType="trash"
+            color={'danger'}
+            onClick={() => onDelete(settingKey)}
+          />
+        }
       />
     </EuiFormRow>
   );
