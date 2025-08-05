@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc/build/src/OTLPMetricExporter';
+import { OTLPMetricExporter as OTLPMetricExporterGrpc } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http';
+import { duration } from 'moment';
 
 jest.mock('@elastic/opentelemetry-node/sdk', () => {
   const actual = jest.requireActual('@elastic/opentelemetry-node/sdk');
@@ -27,9 +29,7 @@ jest.mock('@elastic/opentelemetry-node/sdk', () => {
 });
 
 import { resources } from '@elastic/opentelemetry-node/sdk';
-import { duration } from 'moment';
 import { PrometheusExporter, initMetrics } from '..';
-import { OTLPMetricExporter as OTLPMetricExporterHttp } from '@opentelemetry/exporter-metrics-otlp-http/build/src/platform/node/OTLPMetricExporter';
 
 describe('initMetrics', () => {
   const resource = resources.resourceFromAttributes({});
