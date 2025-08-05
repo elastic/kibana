@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
