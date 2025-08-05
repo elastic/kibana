@@ -4,27 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useMemo } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUiTracker, useUrlState } from '@kbn/observability-shared-plugin/public';
+import createContainer from 'constate';
 import type {
   MutationContext,
   SavedViewResult,
   ServerError,
   UpdateViewParams,
-} from '../../common/saved_views';
-import type { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
+} from '../../../../../common/saved_views';
+import type { MetricsSourceConfigurationResponse } from '../../../../../common/metrics_sources';
 import type {
   CreateInventoryViewAttributesRequestPayload,
   UpdateInventoryViewAttributesRequestPayload,
-} from '../../common/http_api/latest';
-import type { InventoryView } from '../../common/inventory_views';
-import { useKibanaContextForPlugin } from './use_kibana';
-import { useSavedViewsNotifier } from './use_saved_views_notifier';
-import { useSourceContext } from '../containers/metrics_source';
+} from '../../../../../common/http_api/latest';
+import type { InventoryView, InventoryViewAttributes } from '../../../../../common/inventory_views';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { useSavedViewsNotifier } from '../../../../hooks/use_saved_views_notifier';
+import { useSourceContext } from '../../../../containers/metrics_source';
 
 export type UseInventoryViewsResult = SavedViewResult<
   InventoryView,
@@ -33,20 +35,28 @@ export type UseInventoryViewsResult = SavedViewResult<
   MetricsSourceConfigurationResponse
 >;
 
+export type WaffleViewState = Omit<
+  InventoryViewAttributes,
+  'name' | 'isDefault' | 'isStatic' | 'source'
+>;
+
 const queryKeys = {
   find: ['inventory-views-find'] as const,
   get: ['inventory-views-get'] as const,
   getById: (id: string) => ['inventory-views-get', id] as const,
 };
 
-export const useInventoryViews = (): UseInventoryViewsResult => {
+const useInventoryViews = (): UseInventoryViewsResult => {
   const { inventoryViews } = useKibanaContextForPlugin().services;
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
   const { source, persistSourceConfiguration } = useSourceContext();
 
-  const defaultViewId = source?.configuration.inventoryDefaultView ?? '0';
+  const defaultViewId = useMemo(
+    () => source?.configuration.inventoryDefaultView ?? '0',
+    [source?.configuration.inventoryDefaultView]
+  );
 
   const [currentViewId, switchViewById] = useUrlState<InventoryViewId>({
     defaultState: defaultViewId,
@@ -206,6 +216,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     // Values
     views,
     currentView,
+
     // Actions about updating view
     createView,
     deleteViewById,
@@ -246,3 +257,5 @@ const getListWithUpdatedDefault = (id: string, views: InventoryView[] = []) => {
 const getListWithoutDeletedView = (id: string, views: InventoryView[] = []) => {
   return views.filter((view) => view.id !== id);
 };
+export const InventoryViews = createContainer(useInventoryViews);
+export const [InventoryViewsProvider, useInventoryViewsContext] = InventoryViews;
