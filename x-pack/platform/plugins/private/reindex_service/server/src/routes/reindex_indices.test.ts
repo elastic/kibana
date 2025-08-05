@@ -69,7 +69,7 @@ describe('reindex API', () => {
       getSecurityPlugin: () => securityMock.createStart(),
       version: { getMajorVersion: () => 8, getMinorVersion: () => 7 },
     };
-    registerReindexIndicesRoutes(routeDependencies, () => worker);
+    registerReindexIndicesRoutes(routeDependencies);
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
