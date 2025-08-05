@@ -64,7 +64,7 @@ export class AIAssistantManagementSelectionPlugin
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant',
+        defaultMessage: 'AI Assistant settings',
       }),
       order: 8600,
       app: [],
@@ -94,6 +94,7 @@ export class AIAssistantManagementSelectionPlugin
           ui: [],
         },
         read: {
+          disabled: true,
           management: {
             kibana: [
               'aiAssistantManagementSelection',
