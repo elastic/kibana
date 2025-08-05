@@ -29,7 +29,6 @@ export const useBulkFetchFleetIntegrationPolicies = (
     queryKey: ['bulkFetchFleetIntegrationPolicies', ids, ignoreMissing],
     refetchOnWindowFocus: false,
     ...options,
-    // @ts-expect-error upgrade typescript v5.4.5
     queryFn: async () => {
       return http.post(packagePolicyRouteService.getBulkGetPath(), {
         body: JSON.stringify({ ids, ignoreMissing }),
