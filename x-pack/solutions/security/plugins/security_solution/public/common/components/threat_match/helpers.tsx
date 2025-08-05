@@ -79,9 +79,9 @@ export const getFormattedEntries = (
  *
  */
 export const getUpdatedEntriesOnDelete = (
-  item: ThreatMapping['0'],
+  item: ThreatMapping[number],
   entryIndex: number
-): ThreatMapping['0'] => {
+): ThreatMapping[number] => {
   return {
     ...item,
     entries: [...item.entries.slice(0, entryIndex), ...item.entries.slice(entryIndex + 1)],
@@ -162,7 +162,7 @@ export const createAndNewEntryItem = (): ThreatMappingEntry => {
   });
 };
 
-export const createOrNewEntryItem = (): ThreatMapping['0'] => {
+export const createOrNewEntryItem = (): ThreatMapping[number] => {
   return addIdToItem({
     entries: [
       addIdToItem({

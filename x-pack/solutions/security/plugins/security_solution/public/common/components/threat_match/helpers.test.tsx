@@ -306,14 +306,14 @@ describe('Helpers', () => {
 
   describe('#getUpdatedEntriesOnDelete', () => {
     test('it removes entry corresponding to "entryIndex"', () => {
-      const payloadItem: ThreatMapping['0'] = {
+      const payloadItem: ThreatMapping[number] = {
         entries: [
           { field: 'field.one', type: 'mapping', value: 'field.one' },
           { field: 'field.two', type: 'mapping', value: 'field.two' },
         ],
       };
       const output = getUpdatedEntriesOnDelete(payloadItem, 0);
-      const expected: ThreatMapping['0'] = {
+      const expected: ThreatMapping[number] = {
         entries: [
           {
             field: 'field.two',
