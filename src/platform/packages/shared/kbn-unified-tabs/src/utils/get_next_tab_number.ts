@@ -9,19 +9,21 @@
 
 import type { TabItem } from '../types';
 
-export const getNextTabNumber = (
-  allTabs: TabItem[],
-  combinedRegex: RegExp,
-  regexMatchName?: string
-) => {
-  const maxNumber = allTabs.reduce((max, tab) => {
-    const match = tab.label.trim().match(combinedRegex);
-    if (!match) return max;
+export const getNextTabNumber = (allTabs: TabItem[], regex: RegExp) => {
+  const result = allTabs.reduce(
+    (acc, tab) => {
+      const match = tab.label.trim().match(regex);
 
-    const tabNumber = regexMatchName ? match.groups?.[regexMatchName] : match[1];
-    const currentNumber = tabNumber ? Number(tabNumber) : 1;
-    return Math.max(max, currentNumber);
-  }, 0);
+      if (!match) return acc;
 
-  return maxNumber > 0 ? maxNumber + 1 : null;
+      const currentNumber = match[1] ? Number(match[1]) : 1;
+      return {
+        hasMatch: true,
+        maxNumber: Math.max(acc.maxNumber, currentNumber),
+      };
+    },
+    { hasMatch: false, maxNumber: 0 }
+  );
+
+  return result.hasMatch ? result.maxNumber + 1 : null;
 };

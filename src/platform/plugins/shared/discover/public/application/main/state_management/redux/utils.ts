@@ -48,12 +48,12 @@ const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
   defaultMessage: 'Untitled',
 });
 const ESCAPED_DEFAULT_TAB_LABEL = escapeRegExp(DEFAULT_TAB_LABEL);
-const TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (?<tabNumber>\\d+)?$`);
+const TAB_REGEX = new RegExp(`^${ESCAPED_DEFAULT_TAB_LABEL} (\\d+)?$`);
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
 
-  const nextNumber = getNextTabNumber(allTabs, TAB_REGEX, 'tabNumber');
+  const nextNumber = getNextTabNumber(allTabs, TAB_REGEX);
   const label = nextNumber ? `${DEFAULT_TAB_LABEL} ${nextNumber}` : DEFAULT_TAB_LABEL;
 
   return { id, label };

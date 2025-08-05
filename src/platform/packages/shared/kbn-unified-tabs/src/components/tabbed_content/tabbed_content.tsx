@@ -138,10 +138,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
       const baseLabel = item.label.replace(baseRegex, '');
       const escapedBaseLabel = escapeRegExp(baseLabel);
-
-      const tabRegex = new RegExp(
-        `^${escapedBaseLabel}\\s*\\(${escapedCopyLabel}\\)( (?<tabNumber>\\d+))?$`
-      );
+      const tabRegex = new RegExp(`^${escapedBaseLabel}\\s*\\(${escapedCopyLabel}\\)( (\\d+))?$`);
 
       const nextNumber = getNextTabNumber(state.items, tabRegex);
       newItem.label = nextNumber
