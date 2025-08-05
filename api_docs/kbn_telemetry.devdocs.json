@@ -21,7 +21,7 @@
           "\n\nInitializes OpenTelemetry (currently only tracing)\n"
         ],
         "signature": [
-          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void | (() => Promise<void>)"
+          "(argv: string[], rootDir: string, isDistributable: boolean, serviceName: string) => void"
         ],
         "path": "src/platform/packages/shared/kbn-telemetry/src/init_telemetry.ts",
         "deprecated": false,
@@ -107,7 +107,9 @@
         "type": "Function",
         "tags": [],
         "label": "setDiagLogger",
-        "description": [],
+        "description": [
+          "\nHelper to make it easier to configure OTel's {@link DiagLogger}."
+        ],
         "signature": [
           "(logger: ",
           {
@@ -131,7 +133,9 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [],
+            "description": [
+              "{@link Logger }"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/logging",
@@ -152,7 +156,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "logLevel",
-            "description": [],
+            "description": [
+              "The {@link LogLevelId } to set the Diag logger to."
+            ],
             "signature": [
               "LogLevelId",
               " | undefined"
