@@ -11,21 +11,20 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
-import type { TabStateInLocalStorage } from '../tabs_storage_manager';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
+import { DEFAULT_TAB_STATE } from './constants';
 
-export const fromSavedObjectTabToLocalStorageTab = (
-  tab: DiscoverSessionTab
-): TabStateInLocalStorage => ({
+export const fromSavedObjectTabToTabState = (tab: DiscoverSessionTab): TabState => ({
+  ...DEFAULT_TAB_STATE,
   id: tab.id,
   label: tab.label,
-  internalState: {
+  initialInternalState: {
     serializedSearchSource: tab.serializedSearchSource,
   },
-  appState: {
+  initialAppState: {
     columns: tab.columns,
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,
@@ -88,45 +87,6 @@ export const fromSavedObjectTabToSavedSearch = async ({
   visContext: tab.visContext,
 });
 
-export const fromSavedSearchToSavedObjectTab = ({
-  tab,
-  savedSearch,
-  services,
-}: {
-  tab: Pick<TabState, 'id' | 'label'>;
-  savedSearch: SavedSearch;
-  services: DiscoverServices;
-}): DiscoverSessionTab => {
-  const allowedSampleSize = getAllowedSampleSize(savedSearch.sampleSize, services.uiSettings);
-
-  return {
-    id: tab.id,
-    label: tab.label,
-    sort: savedSearch.sort ?? [],
-    columns: savedSearch.columns ?? [],
-    grid: savedSearch.grid ?? {},
-    hideChart: savedSearch.hideChart ?? false,
-    isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
-    usesAdHocDataView: savedSearch.usesAdHocDataView,
-    serializedSearchSource: savedSearch.searchSource.getSerializedFields() ?? {},
-    viewMode: savedSearch.viewMode,
-    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
-    rowHeight: savedSearch.rowHeight,
-    headerRowHeight: savedSearch.headerRowHeight,
-    timeRestore: savedSearch.timeRestore,
-    timeRange: savedSearch.timeRange,
-    refreshInterval: savedSearch.refreshInterval,
-    rowsPerPage: savedSearch.rowsPerPage,
-    sampleSize:
-      savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
-        ? savedSearch.sampleSize
-        : undefined,
-    breakdownField: savedSearch.breakdownField,
-    density: savedSearch.density,
-    visContext: savedSearch.visContext,
-  };
-};
-
 export const fromTabStateToSavedObjectTab = ({
   tab,
   timeRestore,
@@ -166,5 +126,44 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.initialAppState?.breakdownField,
     density: tab.initialAppState?.density,
     visContext: tab.overriddenVisContextAfterInvalidation,
+  };
+};
+
+export const fromSavedSearchToSavedObjectTab = ({
+  tab,
+  savedSearch,
+  services,
+}: {
+  tab: Pick<TabState, 'id' | 'label'>;
+  savedSearch: SavedSearch;
+  services: DiscoverServices;
+}): DiscoverSessionTab => {
+  const allowedSampleSize = getAllowedSampleSize(savedSearch.sampleSize, services.uiSettings);
+
+  return {
+    id: tab.id,
+    label: tab.label,
+    sort: savedSearch.sort ?? [],
+    columns: savedSearch.columns ?? [],
+    grid: savedSearch.grid ?? {},
+    hideChart: savedSearch.hideChart ?? false,
+    isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
+    usesAdHocDataView: savedSearch.usesAdHocDataView,
+    serializedSearchSource: savedSearch.searchSource.getSerializedFields() ?? {},
+    viewMode: savedSearch.viewMode,
+    hideAggregatedPreview: savedSearch.hideAggregatedPreview,
+    rowHeight: savedSearch.rowHeight,
+    headerRowHeight: savedSearch.headerRowHeight,
+    timeRestore: savedSearch.timeRestore,
+    timeRange: savedSearch.timeRange,
+    refreshInterval: savedSearch.refreshInterval,
+    rowsPerPage: savedSearch.rowsPerPage,
+    sampleSize:
+      savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize
+        ? savedSearch.sampleSize
+        : undefined,
+    breakdownField: savedSearch.breakdownField,
+    density: savedSearch.density,
+    visContext: savedSearch.visContext,
   };
 };
