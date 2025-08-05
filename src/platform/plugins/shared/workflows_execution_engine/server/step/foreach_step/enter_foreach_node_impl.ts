@@ -14,17 +14,17 @@ import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/
 export class EnterForeachNodeImpl implements StepImplementation {
   constructor(
     private step: EnterForeachNode,
-    private workflowState: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const foreachState = this.workflowState.getStepState(this.step.id);
+    const foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
       const evaluatedItems = this.getItems();
-      await this.workflowState.startStep(this.step.id);
+      await this.wfExecutionRuntimeManager.startStep(this.step.id);
       // Initialize foreach state
-      this.workflowState.setStepState(this.step.id, {
+      this.wfExecutionRuntimeManager.setStepState(this.step.id, {
         items: evaluatedItems,
         item: evaluatedItems[0],
         index: 0,
@@ -36,7 +36,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
       const index = foreachState.index + 1;
       const item = items[index];
       const total = foreachState.total;
-      this.workflowState.setStepState(this.step.id, {
+      this.wfExecutionRuntimeManager.setStepState(this.step.id, {
         items,
         index,
         item,
@@ -44,7 +44,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
       });
     }
 
-    this.workflowState.goToNextStep();
+    this.wfExecutionRuntimeManager.goToNextStep();
   }
 
   private getItems(): any[] {
