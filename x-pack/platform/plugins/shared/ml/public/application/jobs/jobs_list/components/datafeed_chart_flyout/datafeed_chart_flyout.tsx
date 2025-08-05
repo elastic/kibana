@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiButtonEmpty,
@@ -52,6 +51,7 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { FocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
@@ -89,7 +89,7 @@ interface DatafeedChartFlyoutProps {
   end: number;
   onClose: () => void;
   onModelSnapshotAnnotationClick?: (modelSnapshot: ModelSnapshot) => void;
-  focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
+  focusTrapProps?: FocusTrapProps;
 }
 
 function setLineAnnotationHeader(

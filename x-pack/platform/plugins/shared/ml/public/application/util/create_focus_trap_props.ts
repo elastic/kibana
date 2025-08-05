@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
+
+export type FocusTrapProps = EuiFlyoutProps['focusTrapProps'];
+
 /**
  * Creates focusTrapProps for EuiFlyout components to restore focus to a trigger element.
  * Useful when opening a flyout from a context menu.
  */
-export const createFocusTrapProps = (triggerElement: HTMLElement | null | undefined) => {
+export const createFocusTrapProps = (
+  triggerElement: HTMLElement | null | undefined
+): FocusTrapProps => {
   return {
     returnFocus: () => {
       if (triggerElement) {
