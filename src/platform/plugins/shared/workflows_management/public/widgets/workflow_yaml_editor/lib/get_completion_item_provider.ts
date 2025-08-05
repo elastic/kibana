@@ -14,7 +14,7 @@ import _ from 'lodash';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import { MUSTACHE_REGEX_WITH_KEY } from './mustache';
+import { MUSTACHE_REGEX_GLOBAL, UNFINISHED_MUSTACHE_REGEX_GLOBAL } from './regex';
 
 function getDetail(fullKey: string, insertText: string) {
   if (insertText.endsWith('output')) {
@@ -71,7 +71,7 @@ export function getCompletionItemProvider(
 ): monaco.languages.CompletionItemProvider {
   return {
     triggerCharacters: ['@', '.', '{'],
-    provideCompletionItems: (model, position, completionContext, _token) => {
+    provideCompletionItems: (model, position, completionContext) => {
       const { lineNumber } = position;
       const line = model.getLineContent(lineNumber);
       const wordUntil = model.getWordUntilPosition(position);
@@ -92,15 +92,13 @@ export function getCompletionItemProvider(
       const path = getCurrentPath(yamlDocument, absolutePosition);
       let context = getContextForPath(result.data, workflowGraph, path);
 
-      const match = line.match(/@(?<key>\S+?)\.?(?=\s|$)/) || line.match(MUSTACHE_REGEX_WITH_KEY);
-      const fullKey = match?.[1] ?? '';
+      const lineUpToCursor = line.substring(0, position.column - 1);
+      const lastMatch =
+        [...lineUpToCursor.matchAll(/@(?<key>\S+?)?\.?(?=\s|$)/g)].pop() ||
+        [...lineUpToCursor.matchAll(UNFINISHED_MUSTACHE_REGEX_GLOBAL)].pop() ||
+        [...lineUpToCursor.matchAll(MUSTACHE_REGEX_GLOBAL)].pop();
+      const fullKey = lastMatch?.[1] ?? '';
       let scopedContext = context;
-
-      // if (!match) {
-      //   return {
-      //     suggestions: [],
-      //   };
-      // }
 
       if (fullKey) {
         scopedContext = _.get(context, fullKey);

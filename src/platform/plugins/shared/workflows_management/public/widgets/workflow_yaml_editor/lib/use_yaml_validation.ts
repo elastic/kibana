@@ -14,7 +14,7 @@ import { parseDocument } from 'yaml';
 import _ from 'lodash';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
-import { MUSTACHE_REGEX_GLOBAL } from './mustache';
+import { MUSTACHE_REGEX_GLOBAL } from './regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
