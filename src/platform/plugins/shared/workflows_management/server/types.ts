@@ -16,6 +16,7 @@ import {
 import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPluginSetup {}
@@ -28,6 +29,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   taskManager: TaskManagerStartContract;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
+  security?: SecurityPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {

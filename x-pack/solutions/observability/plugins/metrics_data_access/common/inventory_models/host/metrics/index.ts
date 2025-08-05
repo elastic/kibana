@@ -12,6 +12,8 @@ import type { InventoryMetricsConfig } from '../../shared/metrics/types';
 import { DataSchemaFormat } from '../../shared/metrics/types';
 
 const legacyMetrics: Array<keyof HostAggregations> = ['cpu', 'tx', 'rx'];
+const loadFormulas = () => import('./formulas').then((m) => m.formulas);
+
 export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, HostCharts> = {
   legacyMetrics,
   getAggregations: async (args) => {
@@ -23,13 +25,16 @@ export const metrics: InventoryMetricsConfig<HostAggregations, HostFormulas, Hos
     return catalog;
   },
   getFormulas: async (args) => {
-    const { formulas } = await import('./formulas');
+    const formulas = await loadFormulas();
     const catalog = new MetricsCatalog(formulas, args?.schema);
     return catalog;
   },
-  getCharts: async () => {
-    const { charts } = await import('./charts');
-    return charts;
+  getCharts: async (args) => {
+    const formulas = await loadFormulas();
+    const { initCharts } = await import('./charts');
+    const formulasCatalog = new MetricsCatalog(formulas, args?.schema);
+
+    return initCharts(formulasCatalog);
   },
   getWaffleMapTooltipMetrics: (args) => {
     if (args?.schema === DataSchemaFormat.SEMCONV) {

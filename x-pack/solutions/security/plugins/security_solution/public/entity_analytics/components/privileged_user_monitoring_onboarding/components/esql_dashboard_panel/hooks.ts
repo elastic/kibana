@@ -66,9 +66,7 @@ export const useDashboardTableQuery = <TableItemType extends Record<string, stri
     }
     const index = getIndexPatternFromESQLQuery(tableQuery.right);
     return {
-      dsl: [
-        JSON.stringify({ index: [index], body: prettifyQuery(tableQuery.right, false) }, null, 2),
-      ],
+      dsl: [JSON.stringify({ index: [index], body: prettifyQuery(tableQuery.right) }, null, 2)],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
   }, [tableQuery, response]);

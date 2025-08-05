@@ -34,10 +34,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/users');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/users');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/users')
+        async () =>
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/users')
       );
 
       it('Ensure data is returned from auditbeat', async () => {
