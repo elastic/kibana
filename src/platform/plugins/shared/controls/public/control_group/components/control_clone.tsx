@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import classNames from 'classnames';
-import { DEFAULT_CONTROL_GROW } from '../../../common';
+import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
 import { DefaultControlApi } from '../../controls/types';
 import { controlWidthStyles } from './control_panel.styles';
 

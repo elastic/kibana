@@ -208,7 +208,7 @@ describe('functions arg suggestions', () => {
     expect(nonConstantOnlySuggestions.every((s) => !isColumn(s))).toBe(false);
   });
 
-  describe('license filtering', () => {
+  describe('license-based autocomplete suggestions', () => {
     beforeEach(() => {
       setTestFunctions([
         {
@@ -331,7 +331,7 @@ describe('functions arg suggestions', () => {
       ]);
     });
 
-    it('filters aggregation functions based on basic license', async () => {
+    it('should hide PLATINUM license functions when user has BASIC license', async () => {
       const { suggest } = await setup();
       const callbacks = createCustomCallbackMocks();
 
@@ -355,7 +355,7 @@ describe('functions arg suggestions', () => {
       );
     });
 
-    it('shows all aggregation functions with platinum license', async () => {
+    it('should show all aggregation functions when user has PLATINUM license', async () => {
       const { suggest } = await setup();
       const callbacks = createCustomCallbackMocks();
 
@@ -379,7 +379,7 @@ describe('functions arg suggestions', () => {
       ).toBe(true);
     });
 
-    it('filters scalar functions inside PLATINUM_PARTIAL_FUNCTION_MOCK with basic license', async () => {
+    it('should filter  function arguments inside mixed-signature functions with BASIC license', async () => {
       const { suggest } = await setup();
       const callbacks = createCustomCallbackMocks();
 
@@ -406,7 +406,7 @@ describe('functions arg suggestions', () => {
       );
     });
 
-    it('shows all scalar functions inside PLATINUM_PARTIAL_FUNCTION_MOCK with platinum license', async () => {
+    it('should show all function arguments inside mixed-signature functions with PLATINUM license', async () => {
       const { suggest } = await setup();
       const callbacks = createCustomCallbackMocks();
 
@@ -430,7 +430,7 @@ describe('functions arg suggestions', () => {
         true
       );
       expect(
-        partialPlatinumSuggestions.some((s) => s.text.includes('INNER_PLATINUM_FUNCTION_MOCK'))
+        partialPlatinumSuggestions.some((s) => s.text.includes('PLATINUM_FUNCTION_MOCK'))
       ).toBe(true);
     });
   });

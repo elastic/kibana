@@ -219,6 +219,7 @@ export const setEndpointListApiMockImplementation: (
     const [path] = args;
     if (typeof path === 'string') {
       if (apiHandlers[path]) {
+        // @ts-expect-error upgrade typescript v5.4.5
         return apiHandlers[path]();
       }
     }
@@ -230,6 +231,7 @@ export const setEndpointListApiMockImplementation: (
     const [path] = args;
     if (typeof path === 'string') {
       if (apiHandlers[path]) {
+        // @ts-expect-error upgrade typescript v5.4.5
         return apiHandlers[path]();
       }
     }

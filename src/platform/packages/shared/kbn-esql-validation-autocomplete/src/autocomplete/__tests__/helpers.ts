@@ -273,7 +273,8 @@ export function createCustomCallbackMocks(
     sourceIndices: string[];
     matchField: string;
     enrichFields: string[];
-  }>
+  }>,
+  customLicenseType = 'platinum'
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
@@ -303,7 +304,9 @@ export function createCustomCallbackMocks(
       return { recommendedQueries: [], recommendedFields: [] };
     }),
     getInferenceEndpoints: jest.fn(async () => ({ inferenceEndpoints })),
-    getLicense: jest.fn(),
+    getLicense: jest.fn(async () => ({
+      hasAtLeast: (requiredLevel: string) => customLicenseType === requiredLevel,
+    })),
   };
 }
 

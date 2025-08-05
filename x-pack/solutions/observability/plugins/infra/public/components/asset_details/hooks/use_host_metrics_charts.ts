@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { useMemo } from 'react';
+import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { HostMetricTypes } from '../charts/types';
 import { useChartSeriesColor } from './use_chart_series_color';
@@ -16,13 +15,20 @@ export const useHostCharts = ({
   metric,
   dataViewId,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
   dataViewId?: string;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
   const { value: charts = [], error } = useAsync(async () => {
-    const hostCharts = await getHostsCharts({ metric, overview });
+    const hostCharts = await getHostsCharts({
+      metric,
+      overview,
+      schema: schema ?? DataSchemaFormat.ECS,
+    });
+
     return hostCharts.map((chart) => ({
       ...chart,
       ...(dataViewId && {
@@ -31,7 +37,7 @@ export const useHostCharts = ({
         },
       }),
     }));
-  }, [dataViewId, metric, overview]);
+  }, [dataViewId, metric, overview, schema]);
 
   return { charts, error };
 };
@@ -39,22 +45,30 @@ export const useHostCharts = ({
 export const useKubernetesCharts = ({
   dataViewId,
   overview,
+  schema,
 }: {
   dataViewId?: string;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
-  const model = useMemo(() => findInventoryModel('host'), []);
+  const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kibernetesNode } = await model.metrics.getCharts();
+    const { kubernetesNode } = await model.metrics.getCharts({
+      schema: schema ?? DataSchemaFormat.ECS,
+    });
+
+    if (!kubernetesNode) {
+      return [];
+    }
 
     const items = overview
-      ? [kibernetesNode.xy.nodeCpuCapacity, kibernetesNode.xy.nodeMemoryCapacity]
+      ? [kubernetesNode.xy.nodeCpuCapacity, kubernetesNode.xy.nodeMemoryCapacity]
       : [
-          kibernetesNode.xy.nodeCpuCapacity,
-          kibernetesNode.xy.nodeMemoryCapacity,
-          kibernetesNode.xy.nodeDiskCapacity,
-          kibernetesNode.xy.nodePodCapacity,
+          kubernetesNode.xy.nodeCpuCapacity,
+          kubernetesNode.xy.nodeMemoryCapacity,
+          kubernetesNode.xy.nodeDiskCapacity,
+          kubernetesNode.xy.nodePodCapacity,
         ];
 
     return items.map((chart) => {
@@ -67,7 +81,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [dataViewId, overview, model.metrics]);
+  }, [model.metrics, schema, overview, dataViewId]);
 
   return { charts, error };
 };
@@ -83,16 +97,20 @@ export const useHostKpiCharts = ({
   dataViewId,
   seriesColor,
   getSubtitle,
+  schema,
 }: {
   dataViewId?: string;
   seriesColor?: string;
   getSubtitle?: (formulaValue: string) => string;
+  schema?: DataSchemaFormat | null;
 }) => {
   seriesColor = useChartSeriesColor(seriesColor);
 
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
-    const { cpu, memory, disk } = await model.metrics.getCharts();
+    const { cpu, memory, disk } = await model.metrics.getCharts({
+      schema: schema ?? DataSchemaFormat.ECS,
+    });
 
     return [
       cpu.metric.cpuUsage,
@@ -110,7 +128,7 @@ export const useHostKpiCharts = ({
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle]);
+  }, [dataViewId, seriesColor, getSubtitle, schema]);
 
   return charts;
 };
@@ -118,12 +136,17 @@ export const useHostKpiCharts = ({
 const getHostsCharts = async ({
   metric,
   overview,
+  schema,
 }: {
   metric: HostMetricTypes;
   overview?: boolean;
+  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
-  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts();
+
+  const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
+    schema: schema ?? DataSchemaFormat.ECS,
+  });
 
   switch (metric) {
     case 'cpu':

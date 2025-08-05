@@ -68,7 +68,7 @@ export default async function ({ readConfigFile }) {
 
     // more settings, like timeouts, mochaOpts, etc are
     // defined in the config schema.
-    // https://github.com/elastic/kibana/blob/{{branch}}/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
+    // https://github.com/elastic/kibana/blob/{{version.stack | M.M}}/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/schema.ts
   };
 }
 ```

@@ -461,7 +461,10 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 80,
+              diskSizeGb: 85,
+            },
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
             },
             retry: {
               automatic: [
@@ -481,6 +484,9 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot'),
+            env: {
+              SCOUT_TARGET_TYPE: 'local',
+            },
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -516,6 +522,7 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 90,
                   agents: expandAgentQueue(queue),
                   env: {
+                    SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,

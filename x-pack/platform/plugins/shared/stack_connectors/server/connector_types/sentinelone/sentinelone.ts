@@ -57,7 +57,6 @@ import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
 } from '../../../common/sentinelone/types';
 
-export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
 
 export class SentinelOneConnector extends SubActionConnector<
@@ -441,14 +440,13 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async getRemoteScripts(
-    payload: SentinelOneGetRemoteScriptsParams,
+    payload: Partial<SentinelOneGetRemoteScriptsParams>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<SentinelOneGetRemoteScriptsResponse> {
     return this.sentinelOneApiRequest(
       {
         url: this.urls.remoteScripts,
         params: {
-          limit: API_MAX_RESULTS,
           ...payload,
         },
         responseSchema: SentinelOneGetRemoteScriptsResponseSchema,

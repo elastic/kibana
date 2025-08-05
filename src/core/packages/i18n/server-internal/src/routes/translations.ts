@@ -53,6 +53,7 @@ export const registerTranslationsRoute = ({
             access: 'public',
             httpResource: true,
             authRequired: false,
+            excludeFromRateLimiter: true,
           },
         },
         (ctx, req, res) => {
