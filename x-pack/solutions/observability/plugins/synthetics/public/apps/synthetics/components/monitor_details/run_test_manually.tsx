@@ -35,11 +35,8 @@ export const RunTestManually = () => {
   const { space } = useKibanaSpace();
   const { canSave } = useSyntheticsSettingsContext();
 
-  const content = !canUsePublicLocations
-    ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS
-    : testInProgress
-    ? TEST_SCHEDULED_LABEL
-    : TEST_NOW_ARIA_LABEL;
+  const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
+
 
   return (
     <NoPermissionsTooltip
