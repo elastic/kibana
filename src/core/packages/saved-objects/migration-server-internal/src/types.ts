@@ -17,7 +17,7 @@ export type TransformRawDocs = (
 ) => TaskEither.TaskEither<DocumentsTransformFailed, DocumentsTransformSuccess>;
 
 /** @internal */
-export type MigrationLogLevel = 'error' | 'info' | 'warning';
+export type MigrationLogLevel = 'debug' | 'info' | 'warning' | 'error';
 
 /** @internal */
 export interface MigrationLog {

@@ -40,6 +40,8 @@ export const logStateTransition = (
           return logger.warn(logPrefix + message);
         case 'info':
           return logger.info(logPrefix + message);
+        case 'debug':
+          return logger.debug(logPrefix + message);
         default:
           throw new Error(`unexpected log level ${level}`);
       }
