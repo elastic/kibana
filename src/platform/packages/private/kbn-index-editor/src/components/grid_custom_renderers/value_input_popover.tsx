@@ -9,10 +9,11 @@
 
 import { DataTableRecord } from '@kbn/discover-utils';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useMemo, useState } from 'react';
 import { EuiDataGridCellPopoverElementProps, EuiDataGridRefProps, EuiToolTip } from '@elastic/eui';
 import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
 import { PendingSave } from '../../index_update_service';
 import { isPlaceholderColumn } from '../../utils';
@@ -46,10 +47,6 @@ export const getValueInputPopover =
 
     const [inputValue, setInputValue] = useState(cellValue ?? '');
     const [error, setError] = useState<string | null>(null);
-
-    // A ref is needed to use the input value in the unmount effect
-    const inputValueRef = useRef(inputValue);
-    inputValueRef.current = inputValue;
 
     const columnType = useMemo(() => {
       if (!columns || !columnId) return;
@@ -105,11 +102,9 @@ export const getValueInputPopover =
     );
 
     // Update the value when the user navigates away from the cell
-    useEffect(() => {
-      return () => {
-        saveValue(inputValueRef.current);
-      };
-    }, [saveValue]);
+    useUnmount(() => {
+      saveValue(inputValue);
+    });
 
     if (!isPlaceholder) {
       return (
