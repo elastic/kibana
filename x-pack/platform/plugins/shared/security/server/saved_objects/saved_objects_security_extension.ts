@@ -331,7 +331,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     { authzAction?: string; auditAction?: AuditAction }
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry | undefined;
-  public readonly accessControlService: AccessControlService;
+  private readonly _accessControlService: AccessControlService;
 
   constructor({
     actions,
@@ -346,7 +346,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.accessControlService = new AccessControlService();
+    this._accessControlService = new AccessControlService();
     this.typeRegistry = typeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
@@ -428,6 +428,10 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     ]);
   }
 
+  public get accessControlService() {
+    return this._accessControlService;
+  }
+
   private assertObjectsArrayNotEmpty(objects: AuthorizeObject[], action: SecurityAction) {
     if (objects.length === 0) {
       throw new Error(
@@ -495,17 +499,16 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       )
     );
 
-    const combinedPrivilegeMap = new Map([...privilegeActionsMap]);
     if (typesRequiringAccessControl && typesRequiringAccessControl.size > 0) {
       for (const type of typesRequiringAccessControl) {
-        combinedPrivilegeMap.set(this.actions.savedObject.get(type, 'manage_access_control'), {
+        privilegeActionsMap.set(this.actions.savedObject.get(type, 'manage_access_control'), {
           type,
           action: 'manage_access_control' as A,
         });
       }
     }
 
-    const privilegeActions = [...combinedPrivilegeMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
+    const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
 
     const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
@@ -532,7 +535,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           objTypes = typesArray;
           action = this.actions.login as A;
         } else {
-          const entry = combinedPrivilegeMap.get(privilege)!; // always defined
+          const entry = privilegeActionsMap.get(privilege)!; // always defined
           objTypes = [entry.type];
           action = entry.action;
         }
@@ -729,7 +732,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const typesAndSpaces = params.enforceMap;
 
     if (typesAndSpaces !== undefined && checkResult) {
-      const authorizationPromises = Array.from(params.actions).map((action) =>
+      Array.from(params.actions).forEach((action) =>
         this.enforceAuthorization({
           typesAndSpaces,
           action,
@@ -742,8 +745,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           }),
         })
       );
-
-      await Promise.all(authorizationPromises);
     }
 
     return checkResult;
@@ -1150,6 +1151,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     if (!this.typeRegistry) {
       throw new Error('Type registry is not defined');
     }
+
     this.accessControlService.setUserForOperation(this.getCurrentUserFunc());
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
