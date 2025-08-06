@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_CREDENTIALS_TYPE } from '../constants';
-import { getPosturePolicy } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
@@ -21,7 +21,7 @@ import {
 import { UpdatePolicy } from '../types';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureSetupInfoContent } from './azure_setup_info';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
@@ -53,7 +53,7 @@ export const AzureCredentialsFormAgentless = ({
         fields={fields}
         onChange={(key, value) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+            updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
               [key]: { value },
             }),
           });

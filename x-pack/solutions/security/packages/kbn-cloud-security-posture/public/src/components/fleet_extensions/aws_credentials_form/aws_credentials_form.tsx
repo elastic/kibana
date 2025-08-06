@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { getPosturePolicy } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
@@ -22,7 +22,7 @@ import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AwsSetupFormat, UpdatePolicy } from '../types';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -196,7 +196,7 @@ export const AwsCredentialsForm = ({
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
                   'aws.credentials.type': { value: optionId },
                 }),
               });
@@ -212,7 +212,7 @@ export const AwsCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
                   [key]: { value },
                 }),
               });

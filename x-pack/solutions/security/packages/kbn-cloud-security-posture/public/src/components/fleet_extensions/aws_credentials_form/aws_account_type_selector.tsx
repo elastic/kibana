@@ -13,11 +13,11 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getPosturePolicy } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
   input.streams[0].vars?.['aws.account_type']?.value;
@@ -83,7 +83,7 @@ export const AwsAccountTypeSelect = ({
   useEffect(() => {
     if (!getAwsAccountType(input)) {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(
+        updatedPolicy: updatePolicyWithInputs(
           newPolicy,
           awsPolicyType,
 
@@ -125,7 +125,7 @@ export const AwsAccountTypeSelect = ({
         options={awsAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, awsPolicyType, {
+            updatedPolicy: updatePolicyWithInputs(newPolicy, awsPolicyType, {
               'aws.account_type': {
                 value: accountType,
                 type: 'text',

@@ -16,7 +16,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
-import { getPosturePolicy } from '../utils';
+import { updatePolicyWithInputs } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
@@ -26,7 +26,7 @@ import {
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
@@ -298,7 +298,7 @@ export const AzureCredentialsForm = ({
             type={azureCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
                   'azure.credentials.type': { value: optionId },
                 }),
               });
@@ -310,7 +310,7 @@ export const AzureCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
                   [key]: { value },
                 }),
               });

@@ -18,6 +18,7 @@ import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
+import { i18n } from '@kbn/i18n';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
@@ -26,20 +27,25 @@ import {
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
   GCP_CREDENTIALS_TYPE,
+  AWS_PROVIDER,
+  GCP_PROVIDER,
+  AZURE_PROVIDER,
+  DEFAULT_AWS_CREDENTIALS_TYPE,
+  DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
+  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
+  DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE,
 } from './constants';
 import {
-  AWS_PROVIDER,
-  AZURE_PROVIDER,
+  AwsCredentialsType,
   CloudProviders,
-  GCP_PROVIDER,
+  GcpCredentialsType,
+  GcpFields,
+  GcpInputFields,
   type GetAwsCredentialTypeConfigParams,
   type GetCloudConnectorRemoteRoleTemplateParams,
 } from './types';
-import { getCloudDefaultAwsCredentialConfig } from './aws_credentials_form/aws_utils';
-import { getDefaultAzureCredentialsType } from './azure_credentials_form/azure_utils';
-import { getDefaultGcpHiddenVars } from './gcp_credentials_form/gcp_utils';
 
-const getPostureInput = (
+const buildPolicyInput = (
   input: NewPackagePolicyInput,
   selectedPolicyType: string,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
@@ -69,7 +75,7 @@ const getPostureInput = (
 /**
  * Get a new object with the updated policy input and vars
  */
-export const getPosturePolicy = (
+export const updatePolicyWithInputs = (
   newPolicy: NewPackagePolicy,
   selectedPolicyType?: string,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
@@ -78,7 +84,7 @@ export const getPosturePolicy = (
     return newPolicy;
   }
   const inputs = newPolicy.inputs.map((item) =>
-    getPostureInput(item, selectedPolicyType, inputVars)
+    buildPolicyInput(item, selectedPolicyType, inputVars)
   );
   return {
     ...newPolicy,
@@ -98,6 +104,95 @@ export const hasPolicyTemplateInputs = (
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyTemplateWithInputs => {
   return Object.hasOwn(policyTemplate, 'inputs');
+};
+
+export const getDefaultAwsCredentialsType = (
+  packageInfo: PackageInfo,
+  showCloudConnectors: boolean,
+  templateName: string,
+  setupTechnology?: SetupTechnology
+): AwsCredentialsType => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return showCloudConnectors
+      ? AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS
+      : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+  }
+  const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
+
+  if (hasCloudFormationTemplate) {
+    return AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
+  }
+
+  return DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+};
+
+export const getAwsCredentialsType = (
+  input: NewPackagePolicyInput
+): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
+
+export const getCloudFormationDefaultValue = (
+  packageInfo: PackageInfo,
+  templateName: string
+): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+
+  if (!policyTemplateInputs) return '';
+
+  const cloudFormationTemplate = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'cloud_formation_template')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return cloudFormationTemplate;
+};
+
+const getCloudDefaultAwsCredentialConfig = ({
+  isAgentless,
+  showCloudConnectors,
+  packageInfo,
+  templateName,
+}: {
+  isAgentless: boolean;
+  packageInfo: PackageInfo;
+  showCloudConnectors: boolean;
+  templateName: string;
+}) => {
+  let credentialsType;
+  const hasCloudFormationTemplate = !!getCloudFormationDefaultValue(packageInfo, templateName);
+  if (!showCloudConnectors && isAgentless) {
+    credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+  } else if (showCloudConnectors && isAgentless) {
+    credentialsType = DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE;
+  } else if (hasCloudFormationTemplate && !isAgentless) {
+    credentialsType = DEFAULT_AWS_CREDENTIALS_TYPE;
+  } else {
+    credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+  }
+  const config: {
+    [key: string]: {
+      value: string | boolean;
+      type: 'text' | 'bool';
+    };
+  } = {
+    'aws.credentials.type': {
+      value: credentialsType,
+      type: 'text',
+    },
+    ...(showCloudConnectors && {
+      'aws.supports_cloud_connectors': {
+        value: showCloudConnectors,
+        type: 'bool',
+      },
+    }),
+  };
+
+  return config;
 };
 
 export const getDefaultCloudCredentialsType = (
@@ -143,10 +238,104 @@ export const getDefaultCloudCredentialsType = (
   return credentialsTypes[provider];
 };
 
+export const gcpField: GcpInputFields = {
+  fields: {
+    'gcp.organization_id': {
+      label: i18n.translate('securitySolutionPackages.gcpIntegration.organizationIdFieldLabel', {
+        defaultMessage: 'Organization ID',
+      }),
+      type: 'text',
+    },
+    'gcp.project_id': {
+      label: i18n.translate('securitySolutionPackages.gcpIntegration.projectidFieldLabel', {
+        defaultMessage: 'Project ID',
+      }),
+      type: 'text',
+    },
+    'gcp.credentials.file': {
+      label: i18n.translate(
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialFileText',
+        {
+          defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+        }
+      ),
+      type: 'text',
+    },
+    'gcp.credentials.json': {
+      label: i18n.translate(
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialJSONText',
+        {
+          defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+        }
+      ),
+      type: 'password',
+      isSecret: true,
+    },
+    'gcp.credentials.type': {
+      label: i18n.translate(
+        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        {
+          defaultMessage: 'Credential',
+        }
+      ),
+      type: 'text',
+    },
+  },
+};
+
+export const getGcpInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
+  Object.entries(input.streams[0].vars || {})
+    .filter(([id]) => id in fields)
+    .map(([id, inputVar]) => {
+      const field = fields[id];
+      return {
+        id,
+        label: field.label,
+        type: field.type || 'text',
+        value: inputVar.value,
+      } as const;
+    });
+
+export const getGcpCredentialsType = (
+  input: NewPackagePolicyInput
+): GcpCredentialsType | undefined => input.streams[0].vars?.['gcp.credentials.type'].value;
+
+export const getDefaultGcpHiddenVars = (
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology?: SetupTechnology
+): Record<string, PackagePolicyConfigRecordEntry> => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return {
+      'gcp.credentials.type': {
+        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
+        type: 'text',
+      },
+    };
+  }
+
+  const hasCloudShellUrl = !!getCloudShellDefaultValue(packageInfo, templateName);
+  if (hasCloudShellUrl) {
+    return {
+      'gcp.credentials.type': {
+        value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
+        type: 'text',
+      },
+    };
+  }
+
+  return {
+    'gcp.credentials.type': {
+      value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
+      type: 'text',
+    },
+  };
+};
+
 /**
  * Input vars that are hidden from the user
  */
-export const getPostureInputHiddenVars = (
+export const getInputHiddenVars = (
   provider: CloudProviders,
   packageInfo: PackageInfo,
   templateName: string,
@@ -185,7 +374,6 @@ export const getCloudShellDefaultValue = (
   if (!policyTemplate) return '';
 
   const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-
   if (!policyTemplateInputs) return '';
 
   const cloudShellUrl = policyTemplateInputs.reduce((acc, input): string => {
@@ -195,6 +383,44 @@ export const getCloudShellDefaultValue = (
   }, '');
 
   return cloudShellUrl;
+};
+
+export const getArmTemplateUrlFromCspmPackage = (
+  packageInfo: PackageInfo,
+  templateName: string
+): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === templateName);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+  if (!policyTemplateInputs) return '';
+
+  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return armTemplateUrl;
+};
+
+export const getDefaultAzureCredentialsType = (
+  packageInfo: PackageInfo,
+  templateName: string,
+  setupTechnology?: SetupTechnology
+): string => {
+  if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
+    return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
+  }
+
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
+  if (hasArmTemplateUrl) {
+    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
+  }
+
+  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
 };
 
 export const isBelowMinVersion = (version: string, minVersion: string) => {

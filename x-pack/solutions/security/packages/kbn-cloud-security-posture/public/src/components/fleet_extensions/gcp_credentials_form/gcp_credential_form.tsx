@@ -16,7 +16,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
-import { fieldIsInvalid, getCloudShellDefaultValue, getPosturePolicy } from '../utils';
+import {
+  fieldIsInvalid,
+  getCloudShellDefaultValue,
+  updatePolicyWithInputs,
+  gcpField,
+  getGcpCredentialsType,
+  getGcpInputVarsFields,
+} from '../utils';
 import { GCP_CREDENTIALS_TYPE, GCP_ORGANIZATION_ACCOUNT, GCP_SETUP_ACCESS } from '../constants';
 import { ReadDocumentation } from '../common';
 import {
@@ -24,10 +31,9 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from './gcp_test_subjects';
 import { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
-import { gcpField, getGcpCredentialsType, getInputVarsFields } from './gcp_utils';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
 
@@ -216,6 +222,7 @@ const updateCloudShellUrl = (
   if (!policyType) {
     return;
   }
+
   updatePolicy?.({
     updatedPolicy: {
       ...newPolicy,
@@ -246,7 +253,6 @@ const useCloudShellUrl = ({
   const { gcpPolicyType, templateName } = useCloudSetup();
   useEffect(() => {
     const policyInputCloudShellUrl = getGoogleCloudShellUrl(newPolicy, gcpPolicyType);
-
     if (setupFormat === GCP_SETUP_ACCESS.MANUAL) {
       if (policyInputCloudShellUrl) {
         updateCloudShellUrl(newPolicy, updatePolicy, undefined, gcpPolicyType);
@@ -261,9 +267,9 @@ const useCloudShellUrl = ({
     // If the template is already set, do not update the policy
     if (policyInputCloudShellUrl === templateUrl) return;
 
-    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl);
+    updateCloudShellUrl(newPolicy, updatePolicy, templateUrl, gcpPolicyType);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat]);
+  }, [newPolicy?.vars?.cloud_shell_url, newPolicy, packageInfo, setupFormat, gcpPolicyType]);
 };
 
 export const GcpCredentialsForm = ({
@@ -283,8 +289,8 @@ export const GcpCredentialsForm = ({
     'gcp.credentials.json': json,
   };
 
-  const fieldsToHide = getInputVarsFields(input, subsetOfGcpField);
-  const fields = getInputVarsFields(input, gcpField.fields);
+  const fieldsToHide = getGcpInputVarsFields(input, subsetOfGcpField);
+  const fields = getGcpInputVarsFields(input, gcpField.fields);
   const validSemantic = semverValid(packageInfo.version);
   const integrationVersionNumberOnly = semverCoerce(validSemantic) || '';
   const isInvalid = semverLt(integrationVersionNumberOnly, gcpMinShowVersion || '');
@@ -310,7 +316,7 @@ export const GcpCredentialsForm = ({
       lastCredentialsType.current = getGcpCredentialsType(input);
 
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -322,7 +328,7 @@ export const GcpCredentialsForm = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
@@ -369,7 +375,7 @@ export const GcpCredentialsForm = ({
           fields={fields}
           onChange={(key, value) =>
             updatePolicy({
-              updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+              updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
                 [key]: { value },
               }),
             })
@@ -383,7 +389,7 @@ export const GcpCredentialsForm = ({
           fields={fields}
           onChange={(key, value) =>
             updatePolicy({
-              updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+              updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
                 [key]: { value },
               }),
             })

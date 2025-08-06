@@ -8,6 +8,10 @@
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 export const SINGLE_ACCOUNT = 'single-account';
 
+export const AWS_PROVIDER = 'aws';
+export const GCP_PROVIDER = 'gcp';
+export const AZURE_PROVIDER = 'azure';
+
 export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
 export const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
@@ -23,7 +27,7 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
 };
 
 // Azure constants
-
+export const AZURE_PROVIDER_TEST_ID = 'cloudSetupAzureTestId';
 export const AZURE_SETUP_FORMAT = {
   ARM_TEMPLATE: 'arm_template',
   MANUAL: 'manual',
@@ -44,6 +48,7 @@ export const AZURE_CREDENTIALS_TYPE = {
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
+export const AWS_PROVIDER_TEST_ID = 'cloudSetupAwsTestId';
 export const AWS_SETUP_FORMAT = {
   CLOUD_FORMATION: 'cloud_formation',
   MANUAL: 'manual',
@@ -60,7 +65,15 @@ export const AWS_CREDENTIALS_TYPE = {
   CLOUD_FORMATION: 'cloud_formation',
 } as const;
 
+export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
+export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
+  AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+export const DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE =
+  AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
+
 // GCP constants
+export const GCP_PROVIDER_TEST_ID = 'cloudSetupGcpTestId';
 export const GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',
   MANUAL: 'manual',
