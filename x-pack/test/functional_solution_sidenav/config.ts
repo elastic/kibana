@@ -13,11 +13,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-<<<<<<<< HEAD:x-pack/test/functional_solution_sidenav/config.ts
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
-========
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.ts'));
->>>>>>>> 33e1e2f73f3 ([ska] relocate discover, dashboard, maps, status_page ui tests (#228541)):x-pack/platform/test/functional/apps/discover/group2/config.ts
 
   return {
     ...functionalConfig.getAll(),

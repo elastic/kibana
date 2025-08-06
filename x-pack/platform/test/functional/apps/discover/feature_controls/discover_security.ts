@@ -8,13 +8,8 @@
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
 import { decompressFromBase64 } from 'lz-string';
-<<<<<<<< HEAD:x-pack/platform/test/functional/apps/discover/feature_controls/discover_security.ts
-import { FtrProviderContext } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
-import { getSavedQuerySecurityUtils } from '@kbn/test-suites-xpack-platform/functional/apps/saved_query_management/utils/saved_query_security';
-========
-import { getSavedQuerySecurityUtils } from '../../../saved_query_management/utils/saved_query_security';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
->>>>>>>> 33e1e2f73f3 ([ska] relocate discover, dashboard, maps, status_page ui tests (#228541)):x-pack/platform/test/functional/apps/discover/group2/feature_controls/discover_security.ts
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getSavedQuerySecurityUtils } from '../../saved_query_management/utils/saved_query_security';
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
