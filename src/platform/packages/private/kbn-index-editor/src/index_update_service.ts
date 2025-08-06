@@ -59,6 +59,25 @@ interface DocUpdate {
   value: Record<string, any>;
 }
 
+type BulkUpdateOperations = Array<
+  { type: 'add-doc'; payload: DocUpdate } | { type: 'delete-doc'; payload: { id: string } }
+>;
+
+function isDocUpdate(update: unknown): update is { type: 'add-doc'; payload: DocUpdate } {
+  return (
+    typeof update === 'object' && update !== null && 'type' in update && update.type === 'add-doc'
+  );
+}
+
+function isDocDelete(update: unknown): update is { type: 'delete-doc'; payload: { id: string } } {
+  return (
+    typeof update === 'object' &&
+    update !== null &&
+    'type' in update &&
+    update.type === 'delete-doc'
+  );
+}
+
 interface ColumnAddition {
   name: string;
 }
@@ -69,7 +88,8 @@ interface ColumnUpdate {
 }
 
 type Action =
-  | { type: 'add'; payload: DocUpdate }
+  | { type: 'add-doc'; payload: DocUpdate }
+  | { type: 'delete-doc'; payload: { id: string } }
   | { type: 'undo' }
   | { type: 'saved'; payload: { response: any; updates: DocUpdate[] } }
   | { type: 'add-column' }
@@ -78,6 +98,10 @@ type Action =
   | { type: 'discard-unsaved-columns' }
   | { type: 'discard-unsaved-values' }
   | { type: 'new-row-added'; payload: Record<string, any> };
+
+type ActionMap = {
+  [A in Action as A['type']]: A extends { payload: infer P } ? P : undefined;
+};
 
 export type PendingSave = Map<DocUpdate['id'], DocUpdate['value']>;
 
@@ -107,6 +131,16 @@ export class IndexUpdateService {
   }
 
   private readonly _actions$ = new Subject<Action>();
+  private addAction<T extends keyof ActionMap>(
+    type: T,
+    ...payload: ActionMap[T] extends undefined ? [] : [payload: ActionMap[T]]
+  ): void {
+    const action = payload.length
+      ? ({ type, payload: payload[0] } as Extract<Action, { type: T }>)
+      : ({ type } as Extract<Action, { type: T }>);
+
+    this._actions$.next(action);
+  }
 
   private readonly _isSaving$ = new BehaviorSubject<boolean>(false);
   public readonly isSaving$: Observable<boolean> = this._isSaving$.asObservable();
@@ -169,11 +203,13 @@ export class IndexUpdateService {
   );
 
   // Accumulate updates in buffer with undo
-  private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
-    scan((acc: DocUpdate[], action: Action) => {
+  private bufferState$: Observable<BulkUpdateOperations> = this._actions$.pipe(
+    scan((acc: BulkUpdateOperations, action: Action) => {
       switch (action.type) {
-        case 'add':
-          return [...acc, action.payload];
+        case 'add-doc':
+          return [...acc, action];
+        case 'delete-doc':
+          return [...acc, action];
         case 'undo':
           return acc.slice(0, -1); // remove last
         case 'saved':
@@ -185,40 +221,52 @@ export class IndexUpdateService {
         case 'edit-column':
           // if a column name has changed, we need to update the values added with the previous name.
           return acc.map((docUpdate) => {
-            if (action.payload.previousName && docUpdate.value[action.payload.previousName]) {
+            if (!isDocUpdate(docUpdate)) {
+              return docUpdate;
+            }
+            if (
+              action.payload.previousName &&
+              docUpdate.payload.value[action.payload.previousName]
+            ) {
               const newValue = {
-                ...docUpdate.value,
-                [action.payload.name]: docUpdate.value[action.payload.previousName],
+                ...docUpdate.payload.value,
+                [action.payload.name]: docUpdate.payload.value[action.payload.previousName],
               };
               delete newValue[action.payload.previousName];
-              return { ...docUpdate, value: newValue };
+              return { ...docUpdate, payload: { ...docUpdate.payload, value: newValue } };
             }
             return docUpdate;
           });
         case 'delete-column':
           // if a column has been deleted, we need to delete the values added to it.
           return acc.filter((docUpdate) => {
-            return !docUpdate.value[action.payload.name];
+            return (
+              isDocDelete(docUpdate) ||
+              (isDocUpdate(docUpdate) && !(action.payload.name in docUpdate.payload.value))
+            );
           });
         default:
           return acc;
       }
-    }, []),
+    }, [] as BulkUpdateOperations),
     shareReplay(1) // keep latest buffer for retries
   );
 
   /** Docs that are pending to be saved*/
   public readonly savingDocs$: Observable<PendingSave> = this.bufferState$.pipe(
     map((updates) => {
-      return updates.reduce((acc, update) => {
-        if (update.id) {
-          acc.set(update.id, {
-            ...acc.get(update.id),
-            ...update.value,
-          });
-        }
-        return acc;
-      }, new Map() as PendingSave);
+      return updates
+        .filter(isDocUpdate)
+        .map((v) => v.payload)
+        .reduce((acc, update) => {
+          if (update.id) {
+            acc.set(update.id, {
+              ...acc.get(update.id),
+              ...update.value,
+            });
+          }
+          return acc;
+        }, new Map() as PendingSave);
     }),
     startWith(new Map() as PendingSave),
     shareReplay({ bufferSize: 1, refCount: true })
@@ -353,13 +401,17 @@ export class IndexUpdateService {
           })
         )
         .subscribe({
-          next: ({ updates, response, rows, dataView }) => {
+          next: ({ updates: bulkUpdateOperations, response, rows, dataView }) => {
             // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
 
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
               const updateItem = Object.values(item)[0] as BulkResponseItem;
-              const updateValue = updates[index].value;
+              const bulkUpdateOperation = bulkUpdateOperations[index];
+              if (!isDocUpdate(bulkUpdateOperation)) {
+                return acc;
+              }
+              const updateValue = bulkUpdateOperation.payload.value;
               if (updateItem.status === 200 && updateItem._id) {
                 const docId = updateItem._id;
                 const e = acc.get(docId) ?? {};
@@ -384,7 +436,10 @@ export class IndexUpdateService {
             );
 
             // Clear the buffer after successful update
-            this._actions$.next({ type: 'saved', payload: { response, updates } });
+            this.addAction('saved', {
+              response,
+              updates: bulkUpdateOperations.filter(isDocUpdate).map((update) => update.payload),
+            });
 
             this._isSaving$.next(false);
 
@@ -552,16 +607,16 @@ export class IndexUpdateService {
     return this._indexName$.getValue();
   }
 
-  // Add a new index
+  /** Index a new document */
   public addDoc(doc: Record<string, any>) {
-    this._actions$.next({ type: 'add', payload: { value: doc } });
+    this.addAction('add-doc', { value: doc });
   }
 
   public async addNewRow(newRow: Record<string, any>) {
-    const response = await this.bulkUpdate([{ value: newRow }]);
+    const response = await this.bulkUpdate([{ type: 'add-doc', payload: { value: newRow } }]);
 
     if (!response.errors) {
-      this._actions$.next({ type: 'new-row-added', payload: newRow });
+      this.addAction('new-row-added', newRow);
     }
     return response;
   }
@@ -579,16 +634,26 @@ export class IndexUpdateService {
       },
       {}
     );
-    this._actions$.next({ type: 'add', payload: { id, value: parsedUpdate } });
+    this.addAction('add-doc', { id, value: parsedUpdate });
+  }
+
+  /** Schedules a document for deletion */
+  public deleteDoc(id: string) {
+    this.addAction('delete-doc', { id });
   }
 
   /**
-   * Saves documents immediately to the index.
+   * Sends bulk update request to an index.
    * @param updates
    */
-  public bulkUpdate(updates: DocUpdate[]): Promise<BulkResponse> {
-    const groupedOperations = groupBy(updates, (update) =>
-      update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
+  public bulkUpdate(updates: BulkUpdateOperations): Promise<BulkResponse> {
+    // First split updates into index and delete operations
+    const indexActions = updates.filter(isDocUpdate);
+
+    const groupedOperations = groupBy(
+      indexActions.map((v) => v.payload),
+      (update) =>
+        update.id && !update.id.startsWith(ROW_PLACEHOLDER_PREFIX) ? 'updates' : 'newDocs'
     );
 
     const updateOperations =
@@ -608,7 +673,15 @@ export class IndexUpdateService {
       return [{ index: {} }, doc];
     });
 
-    const operations: BulkRequest['operations'] = [...updateOperations, ...newDocOperations];
+    const deleteOperations = updates.filter(isDocDelete).map((v) => {
+      return [{ delete: { _id: v.payload.id } }];
+    });
+
+    const operations: BulkRequest['operations'] = [
+      ...updateOperations,
+      ...newDocOperations,
+      ...deleteOperations,
+    ];
 
     const body = JSON.stringify({
       operations: operations.flat(),
@@ -622,23 +695,21 @@ export class IndexUpdateService {
     );
   }
 
-  /**
-   * Cancel the latest update operation.
-   */
+  /** Cancel the latest update operation */
   public undo() {
-    this._actions$.next({ type: 'undo' });
+    this.addAction('undo');
   }
 
   public addNewColumn() {
-    this._actions$.next({ type: 'add-column' });
+    this.addAction('add-column');
   }
 
   public editColumn(name: string, previousName: string) {
-    this._actions$.next({ type: 'edit-column', payload: { name, previousName } });
+    this.addAction('edit-column', { name, previousName });
   }
 
   public deleteColumn(name: string) {
-    this._actions$.next({ type: 'delete-column', payload: { name } });
+    this.addAction('delete-column', { name });
   }
 
   public setExitAttemptWithUnsavedFields(value: boolean) {
@@ -646,11 +717,11 @@ export class IndexUpdateService {
   }
 
   public discardUnsavedColumns() {
-    this._actions$.next({ type: 'discard-unsaved-columns' });
+    this.addAction('discard-unsaved-columns');
   }
 
   public discardUnsavedChanges() {
-    this._actions$.next({ type: 'discard-unsaved-values' });
+    this.addAction('discard-unsaved-values');
   }
 
   public destroy() {
@@ -674,7 +745,7 @@ export class IndexUpdateService {
       await this.bulkUpdate(updates);
 
       this.setIndexCreated(true);
-      this._actions$.next({ type: 'discard-unsaved-columns' });
+      this.addAction('discard-unsaved-columns');
     } catch (error) {
       throw error;
     } finally {
