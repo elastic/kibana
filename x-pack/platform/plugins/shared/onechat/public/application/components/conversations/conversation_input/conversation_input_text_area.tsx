@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+import { useConversationId } from '../../../hooks/use_conversation_id';
 
 const inputContainerStyles = css`
   display: flex;
@@ -41,12 +42,15 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   setMessage,
   handleSubmit,
 }) => {
+  const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
+    // Auto focus the text area when the user switches conversations
     setTimeout(() => {
       textAreaRef.current?.focus();
     }, 200);
-  }, []);
+  }, [conversationId]);
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
