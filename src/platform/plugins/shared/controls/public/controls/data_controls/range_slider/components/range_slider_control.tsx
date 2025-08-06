@@ -251,8 +251,8 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string],_,ev) => {
-          const originatingInput = ev?.currentTarget.getAttribute('data-test-subj')
+        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
+          const originatingInput = ev?.currentTarget.getAttribute('data-test-subj');
 
           if (originatingInput === 'rangeSlider__lowerBoundFieldNumber') {
             // preserve original upper bound selection if only lower bound number field changed
