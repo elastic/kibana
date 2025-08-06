@@ -24,15 +24,23 @@ import { convertToWorkflowGraph } from './build_execution_graph';
 import { graphlib } from '@dagrejs/dagre';
 
 describe('convertToWorkflowGraph', () => {
-  describe('atomic step', () => {
+  describe('atomic steps', () => {
     const workflowDefinition = {
       steps: [
         {
-          name: 'testAtomicStep',
+          name: 'testAtomicStep1',
           type: 'slack',
           connectorId: 'slack',
           with: {
-            message: 'Hello from atomic step',
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'openai',
+          connectorId: 'openai',
+          with: {
+            message: 'Hello from atomic step 2',
           },
         } as ConnectorStep,
       ],
@@ -41,27 +49,27 @@ describe('convertToWorkflowGraph', () => {
     it('should return nodes for atomic step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const topSort = graphlib.alg.topsort(executionGraph);
-      expect(topSort).toHaveLength(1);
-      expect(topSort).toEqual(['testAtomicStep']);
+      expect(topSort).toHaveLength(2);
+      expect(topSort).toEqual(['testAtomicStep1', 'testAtomicStep2']);
     });
 
     it('should return correct edges for atomic step graph', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
       const edges = executionGraph.edges();
-      expect(edges).toEqual([]);
+      expect(edges).toEqual([{ v: 'testAtomicStep1', w: 'testAtomicStep2' }]);
     });
 
     it('should configure the atomic step correctly', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
-      const node = executionGraph.node('testAtomicStep');
+      const node = executionGraph.node('testAtomicStep1');
       expect(node).toEqual({
-        id: 'testAtomicStep',
+        id: 'testAtomicStep1',
         type: 'atomic',
         configuration: {
-          name: 'testAtomicStep',
+          name: 'testAtomicStep1',
           type: 'slack',
           connectorId: 'slack',
-          with: { message: 'Hello from atomic step' },
+          with: { message: 'Hello from atomic step 1' },
         },
       } as AtomicGraphNode);
     });
@@ -206,6 +214,41 @@ describe('convertToWorkflowGraph', () => {
         startNodeId: 'testIfStep',
       } as ExitIfNode);
     });
+
+    describe('if step without else branch', () => {
+      const workflowDefinitionWithoutElse = {
+        steps: [
+          {
+            name: 'testIfStepWithoutElse',
+            type: 'if',
+            condition: 'true',
+            steps: [
+              {
+                name: 'thenTestConnectorStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: {
+                  message: 'Hello from then step',
+                },
+              } as ConnectorStep,
+            ],
+          } as IfStep,
+        ],
+      } as Partial<WorkflowSchema>;
+
+      it('should handle if step without else branch correctly', () => {
+        const executionGraph = convertToWorkflowGraph(workflowDefinitionWithoutElse as any);
+        const topSort = graphlib.alg.topsort(executionGraph);
+        expect(topSort).toHaveLength(5);
+        expect(topSort).toEqual([
+          'testIfStepWithoutElse',
+          'enterThen(testIfStepWithoutElse)',
+          'thenTestConnectorStep',
+          'exitThen(testIfStepWithoutElse)',
+          'exitCondition(testIfStepWithoutElse)',
+        ]);
+      });
+    });
   });
 
   describe('foreach step', () => {
@@ -285,6 +328,48 @@ describe('convertToWorkflowGraph', () => {
         id: 'exitForeach(testForeachStep)',
         startNodeId: 'testForeachStep',
       } as ExitForeachNode);
+    });
+
+    describe('nested foreach steps', () => {
+      const nestedWorkflowDefinition = {
+        steps: [
+          {
+            name: 'outerForeachStep',
+            foreach: '["outer1", "outer2"]',
+            type: 'foreach',
+            steps: [
+              {
+                name: 'innerForeachStep',
+                foreach: '["inner1", "inner2"]',
+                type: 'foreach',
+                steps: [
+                  {
+                    name: 'nestedConnectorStep',
+                    type: 'slack',
+                    connectorId: 'slack',
+                    with: {
+                      message: 'Hello from nested step',
+                    },
+                  } as ConnectorStep,
+                ],
+              } as ForEachStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowSchema>;
+
+      it('should handle nested foreach steps correctly', () => {
+        const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
+        const topSort = graphlib.alg.topsort(executionGraph);
+        expect(topSort).toHaveLength(5);
+        expect(topSort).toEqual([
+          'outerForeachStep',
+          'innerForeachStep',
+          'nestedConnectorStep',
+          'exitForeach(innerForeachStep)',
+          'exitForeach(outerForeachStep)',
+        ]);
+      });
     });
   });
 
