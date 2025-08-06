@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/failure-store-modal",
+  "owner": [
+    "@elastic/obs-ux-logs-team",
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

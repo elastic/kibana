@@ -1,0 +1,259 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FunctionComponent, useEffect } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+
+import {
+  useForm,
+  FIELD_TYPES,
+  FormSchema,
+  Form,
+  useFormIsModified,
+  UseField,
+  useFormData,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+
+import {
+  ButtonGroupField,
+  NumericField,
+  SelectField,
+  ToggleField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { timeUnits, failureStorePeriodOptions } from '../constants';
+import { splitSizeAndUnits } from '../utils';
+
+const editFailureStoreFormSchema: FormSchema = {
+  failureStore: {
+    type: FIELD_TYPES.TOGGLE,
+    defaultValue: false,
+  },
+  periodType: {
+    type: FIELD_TYPES.SUPER_SELECT,
+    defaultValue: 'default',
+  },
+  retentionPeriodValue: {
+    type: FIELD_TYPES.NUMBER,
+    defaultValue: 30,
+  },
+  retentionPeriodUnit: {
+    type: FIELD_TYPES.SELECT,
+    defaultValue: 'd',
+  },
+};
+
+export interface FailureStoreFormProps {
+  failureStoreEnabled: boolean;
+  defaultRetentionPeriod: string;
+  customRetentionPeriod?: string;
+}
+
+interface FailureStoreFormData {
+  failureStoreEnabled: boolean;
+  customRetentionPeriod?: string;
+}
+
+interface Props {
+  onCloseModal: () => void;
+  onSaveModal: (data: FailureStoreFormData) => void;
+  failureStoreProps: FailureStoreFormProps;
+}
+
+export const FailureStoreModal: FunctionComponent<Props> = ({
+  onCloseModal,
+  onSaveModal,
+  failureStoreProps,
+}) => {
+  const onSubmitForm = async () => {
+    const { isValid, data } = await form.submit();
+
+    if (!isValid) {
+      return;
+    }
+
+    // The new failure store configuration has to include the enabled state and, if the custom retention type is enabled, the retention period.
+    const newFailureStoreConfig: FailureStoreFormData = { failureStoreEnabled: data.failureStore };
+    if (data.failureStore) {
+      if (data.periodType === 'custom') {
+        newFailureStoreConfig.customRetentionPeriod = `${data.retentionPeriodValue}${data.retentionPeriodUnit}`;
+      }
+    }
+    onSaveModal(newFailureStoreConfig);
+  };
+
+  const modalTitleId = useGeneratedHtmlId();
+
+  const defaultRetentionPeriod = splitSizeAndUnits(failureStoreProps.defaultRetentionPeriod);
+  const customRetentionPeriod = failureStoreProps.customRetentionPeriod
+    ? splitSizeAndUnits(failureStoreProps.customRetentionPeriod)
+    : null;
+
+  const { form } = useForm({
+    defaultValue: {
+      failureStore: failureStoreProps.failureStoreEnabled ?? false,
+      periodType: failureStoreProps.customRetentionPeriod ? 'custom' : 'default',
+      retentionPeriodValue: customRetentionPeriod?.size ?? defaultRetentionPeriod.size,
+      retentionPeriodUnit: customRetentionPeriod?.unit ?? defaultRetentionPeriod.unit,
+    },
+    schema: editFailureStoreFormSchema,
+    id: 'editFailureStoreForm',
+  });
+
+  const [{ failureStore, periodType }] = useFormData({
+    form,
+    watch: ['failureStore', 'periodType'],
+  });
+
+  const isDirty = useFormIsModified({ form });
+
+  const isDefaultPeriod = periodType === 'default';
+
+  // Synchronize form values when period type changes
+  useEffect(() => {
+    form.setFieldValue(
+      'retentionPeriodValue',
+      isDefaultPeriod ? defaultRetentionPeriod.size : customRetentionPeriod?.size ?? 30
+    );
+    form.setFieldValue(
+      'retentionPeriodUnit',
+      isDefaultPeriod ? defaultRetentionPeriod.unit : customRetentionPeriod?.unit ?? 'd'
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodType]);
+
+  const formHasErrors = form.getErrors().length > 0;
+  const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
+
+  return (
+    <EuiModal
+      onClose={() => onCloseModal()}
+      data-test-subj="editFailureStoreModal"
+      aria-labelledby={modalTitleId}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={modalTitleId}>
+          <FormattedMessage
+            id="xpack.failureStoreModal.titleText"
+            defaultMessage="Edit failure store"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <Form form={form} data-test-subj="editFailureStoreForm">
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.failureStoreModal.form.failureStoreLabel"
+                defaultMessage="Failure store"
+              />
+            }
+          >
+            <UseField
+              path="failureStore"
+              component={ToggleField}
+              euiFieldProps={{
+                label: i18n.translate('xpack.failureStoreModal.form.switchLabel', {
+                  defaultMessage: 'Store failed documents in a secondary index',
+                }),
+                'data-test-subj': 'enableFailureStoreToggle',
+              }}
+            />
+          </EuiFormRow>
+          {failureStore && (
+            <>
+              <UseField
+                path="periodType"
+                component={ButtonGroupField}
+                label={i18n.translate('xpack.failureStoreModal.form.failureStoreRetentionLabel', {
+                  defaultMessage: 'Failure store retention',
+                })}
+                euiFieldProps={{
+                  options: failureStorePeriodOptions,
+                  'data-test-subj': 'selectFailureStorePeriodType',
+                }}
+              />
+
+              <EuiFormRow>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem>
+                    <UseField
+                      path={'retentionPeriodValue'}
+                      component={NumericField}
+                      euiFieldProps={{
+                        options: failureStorePeriodOptions,
+                        disabled: isDefaultPeriod,
+                        min: 1,
+                        placeholder: 30,
+                        'data-test-subj': 'selectFailureStorePeriodValue',
+                      }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <UseField
+                      path={'retentionPeriodUnit'}
+                      component={SelectField}
+                      euiFieldProps={{
+                        options: timeUnits,
+                        disabled: isDefaultPeriod,
+                        placeholder: 'd',
+                        'data-test-subj': 'selectFailureStoreRetentionPeriodUnit',
+                      }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.failureStoreModal.form.retentionPeriodInfoText"
+                    defaultMessage="This retention period stores data in the hot tier for best indexing and search performance."
+                  />
+                </EuiText>
+              </EuiFormRow>
+            </>
+          )}
+        </Form>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onCloseModal()}>
+          <FormattedMessage
+            id="xpack.failureStoreModal.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+
+        <EuiButton
+          fill
+          type="submit"
+          isLoading={false}
+          data-test-subj="saveButton"
+          onClick={onSubmitForm}
+          disabled={disableSubmit}
+        >
+          <FormattedMessage id="xpack.failureStoreModal.saveButtonLabel" defaultMessage="Save" />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};
