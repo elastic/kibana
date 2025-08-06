@@ -99,8 +99,7 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       // Wait for any microtasks that might have been scheduled
       await new Promise((resolve) => setImmediate(resolve));
@@ -117,8 +116,7 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       // Wait for any microtasks that might have been scheduled
       await new Promise((resolve) => setImmediate(resolve));
@@ -146,10 +144,7 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
       const loggerWarnSpy = jest.spyOn(context.logger.get(), 'warn');
 
-      const startPromise = plugin.start(coreMock.createStart(), mockPlugins);
-      await startPromise;
-
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
+      await plugin.start(coreMock.createStart(), mockPlugins);
 
       // Fast-forward through all pending timers multiple times to ensure
       // all retry attempts have a chance to execute
@@ -159,7 +154,7 @@ describe('Cloud Security Posture Plugin', () => {
         await Promise.resolve();
       }
 
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();;
 
       jest.useRealTimers();
 
@@ -183,10 +178,7 @@ describe('Cloud Security Posture Plugin', () => {
       const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
       const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
 
-      const startPromise = plugin.start(coreMock.createStart(), mockPlugins);
-      await startPromise;
-
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
+      await plugin.start(coreMock.createStart(), mockPlugins);
 
       // Fast-forward through all pending timers to trigger all retry attempts
       for (let i = 0; i < 10; i++) {
@@ -194,7 +186,7 @@ describe('Cloud Security Posture Plugin', () => {
         await Promise.resolve();
       }
 
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       jest.useRealTimers();
 
@@ -238,8 +230,7 @@ describe('Cloud Security Posture Plugin', () => {
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
 
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       // Allow any microtasks from promise chain to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -307,8 +298,7 @@ describe('Cloud Security Posture Plugin', () => {
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
 
-      const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-      await fleetSetupPromise;
+      await mockPlugins.fleet.fleetSetupCompleted();;
 
       // Allow any microtasks from promise chain to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -381,8 +371,7 @@ describe('Cloud Security Posture Plugin', () => {
         // Act
         await plugin.start(coreStart, mockPlugins);
 
-        const fleetSetupPromise = mockPlugins.fleet.fleetSetupCompleted();
-        await fleetSetupPromise;
+        await mockPlugins.fleet.fleetSetupCompleted();
 
         // Allow any microtasks from promise chain to complete
         await new Promise((resolve) => setTimeout(resolve, 0));
