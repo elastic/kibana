@@ -34,11 +34,10 @@ export interface EsSummaryDocument {
   };
   // SLO definition
   slo: {
-    // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
-    indicator: { type: IndicatorTypes } | Indicator;
+    indicator: { type: IndicatorTypes } | Indicator; // >= 8.14: Add indicator.params on the temporary summary as well as real summary through summary pipeline
     timeWindow: t.OutputOf<typeof timeWindowSchema>;
     groupBy: string | string[];
-    groupings: Record<string, unknown>;
+    groupings: Record<string, unknown>; // not flatten
     instanceId: string;
     name: string;
     description: string;
