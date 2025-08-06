@@ -13,7 +13,7 @@ import {
   getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
-} from '@kbn/streams-ai/shared/processing/templatize/format_root';
+} from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
 import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
 import { get } from 'lodash';
 import { useKibana } from '../../../../../hooks/use_kibana';

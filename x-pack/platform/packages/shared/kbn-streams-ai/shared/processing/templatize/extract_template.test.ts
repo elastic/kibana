@@ -6,7 +6,7 @@
  */
 
 import { extractTemplate } from '.';
-import { getUsefulTokens } from './format_root';
+import { getUsefulTokens } from './get_useful_tokens';
 import { ToolingLog } from '@kbn/tooling-log';
 import { SampleParserClient, StreamLogGenerator } from '@kbn/sample-log-parser';
 

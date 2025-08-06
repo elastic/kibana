@@ -34,9 +34,9 @@ import {
   getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
-  formatRoot,
+  getGrokPattern,
   ReviewFields,
-} from '@kbn/streams-ai/shared/processing/templatize/format_root';
+} from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
 import { syncExtractTemplate } from '@kbn/streams-ai/shared/processing/templatize/extract_template';
 import { getLogGroups } from '../server/routes/internal/streams/processing/get_log_groups';
 
@@ -208,9 +208,9 @@ export async function evaluateGrokSuggestions() {
 
       const { roots, delimiter } = syncExtractTemplate(messages);
       const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
-      const grok = formatRoot(roots, delimiter);
+      const grokPattern = getGrokPattern(usefulTokens);
       const reviewFields = getReviewFields(usefulColumns, 10);
-      console.log(`- ${stream}: ${chalk.dim(grok.formatted.grok)}`);
+      console.log(`- ${stream}: ${chalk.dim(grokPattern)}`);
 
       const suggestion = await getSuggestions(stream, connector, messages, reviewFields);
       const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, suggestion);

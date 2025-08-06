@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
-import type { GrokProcessorResult } from '@kbn/streams-ai/shared/processing/templatize/format_root';
+import type { GrokProcessorResult } from '@kbn/streams-ai/shared/processing/templatize/get_useful_tokens';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
@@ -52,9 +52,9 @@ export const GrokPatternAISuggestions = ({
   const isValidField = useMemo(() => {
     return Boolean(
       fieldValue &&
-        previewDocuments.some(
-          (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
-        )
+      previewDocuments.some(
+        (sample) => sample[fieldValue] && typeof sample[fieldValue] === 'string'
+      )
     );
   }, [previewDocuments, fieldValue]);
 

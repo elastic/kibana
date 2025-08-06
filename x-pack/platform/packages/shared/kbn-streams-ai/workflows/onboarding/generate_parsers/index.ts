@@ -12,7 +12,7 @@ import {
   getReviewFields,
   getGrokPattern,
   getGrokProcessor,
-} from '../../../shared/processing/templatize/format_root';
+} from '../../../shared/processing/templatize/get_useful_tokens';
 import { OnboardingTaskContext, OnboardingTaskState } from '../types';
 import { ReviewFieldsPrompt } from './prompts';
 import { extractTemplate } from '../../../shared/processing/templatize';

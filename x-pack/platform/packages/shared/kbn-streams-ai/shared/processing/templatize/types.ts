@@ -27,21 +27,6 @@ export interface MessageTemplate {
   original: string;
 }
 
-export interface TemplateRoot {
-  delimiter: string;
-  columns: Array<{
-    tokens: Array<{
-      pattern: string;
-      values: string[];
-    }>;
-  }>;
-  values: Record<string, string[]>;
-  formatted: {
-    display: string;
-    grok: string;
-  };
-}
-
 /** Final API return type */
 export interface ExtractTemplateResult {
   /** Root template common to all messages */

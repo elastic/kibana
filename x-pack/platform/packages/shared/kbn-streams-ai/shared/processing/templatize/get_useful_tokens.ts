@@ -7,7 +7,6 @@
 
 import { uniq } from 'lodash';
 import { COLLAPSIBLE_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './pattern_precedence';
-import { TemplateRoot } from './types';
 import type { NormalizedColumn } from './normalize_tokens';
 import { GROK_REGEX_MAP } from './get_pattern_regex_map';
 
@@ -17,126 +16,6 @@ function isCollapsibleToken(token: string) {
 
 function sanitize(value: string) {
   return value.replaceAll(/[\.\[\]\{\}]/g, '\\$&');
-}
-
-function sanitizeWhitespace(str: string) {
-  return str.replaceAll(/[\s]{2,}/g, '\\s+').replaceAll(/\s/g, '\\s');
-}
-
-function getDisplayValue(values: string[], enumThreshold: number): string | null {
-  if (!values.length) return null;
-
-  // helper predicates
-  const all = (re: RegExp) => values.every((v) => re.test(v));
-  const numeric = all(/^\d+$/);
-  const whitespace = all(/^\s{1,}$/);
-  const alpha = all(/^[A-Za-z]+$/);
-  const alnum = all(/^[A-Za-z0-9]+$/);
-
-  const distinct = Array.from(new Set(values));
-
-  if (distinct.length === 1 && !numeric && !alpha) {
-    return distinct[0];
-  }
-
-  if (!alpha && !numeric && !whitespace && !alnum) {
-    return distinct.length === 1 ? distinct[0] : null;
-  }
-
-  const lengths = Array.from(new Set(values.map((v) => v.length)));
-  const fixedLen = lengths.length === 1;
-  const minLength = Math.min(...lengths);
-  const maxLength = Math.max(...lengths);
-  const usefulLength = fixedLen || (minLength >= 1 && maxLength <= 6) || maxLength - minLength <= 2;
-  const len = usefulLength ? `{${uniq([minLength, maxLength]).join(',')}}` : '+';
-
-  if (numeric) {
-    return fixedLen ? '0'.repeat(minLength) : len ? `(\\d${len})` : '<INT>';
-  }
-
-  if (whitespace) {
-    return fixedLen && minLength === 1 ? ' ' : `\\s${len}`;
-  }
-
-  if (distinct.length <= enumThreshold) {
-    return distinct.length === 1 ? distinct[0] : `(${distinct.join('|')})`;
-  }
-
-  if (alpha || alnum) {
-    return fixedLen ? 'a'.repeat(minLength) : '<WORD>';
-  }
-
-  return null; // give up → keep original placeholder
-}
-
-export function formatRoot(roots: NormalizedColumn[], delimiter: string): TemplateRoot {
-  const { columns, usefulColumns, usefulTokens } = getUsefulTokens(roots, delimiter);
-
-  function getDisplayedTokens(
-    tokens: Array<{ id: string | undefined; pattern: string; values: string[] }>
-  ) {
-    const next: Array<{ id: string | undefined; pattern: string; values: string[] }> = [];
-
-    tokens.forEach((token, idx) => {
-      if (
-        tokens[idx - 1] &&
-        isCollapsibleToken(tokens[idx - 1].pattern) &&
-        isCollapsibleToken(token.pattern)
-      ) {
-        next[next.length - 1].values = next[next.length - 1].values.map((val, index) => {
-          return val + token.values[index];
-        });
-        return;
-      }
-      next.push(token);
-    });
-
-    return next;
-  }
-
-  function formatColumns(
-    displayToken: (token: { id: string | undefined; pattern: string; values: string[] }) => string
-  ) {
-    return usefulColumns.reduce((acc, { tokens, whitespace }) => {
-      return (
-        (acc ? acc + (delimiter === '\\s' ? ' ' : delimiter) : '') +
-        ' '.repeat(whitespace.maxLeading) +
-        getDisplayedTokens(tokens)
-          .map((token) => displayToken(token))
-          .join('') +
-        ' '.repeat(whitespace.maxTrailing)
-      );
-    }, '');
-  }
-
-  const displayedTokens = usefulColumns
-    .flatMap((col) => getDisplayedTokens(col.tokens))
-    .filter((token) => !TOKEN_SPLIT_CHARS.includes(token.pattern));
-
-  const fieldValueExamples = Object.fromEntries(
-    displayedTokens.map((token) => {
-      return [token.id, token.values];
-    })
-  );
-
-  return {
-    columns,
-    delimiter,
-    values: fieldValueExamples,
-    formatted: {
-      display: sanitizeWhitespace(
-        formatColumns(({ values, pattern }) => {
-          const uniqueValues = uniq(values);
-          const displayValue = getDisplayValue(uniqueValues, 5);
-          if (displayValue) {
-            return `${displayValue}`;
-          }
-          return `<${pattern}>`;
-        })
-      ),
-      grok: getGrokPattern(usefulTokens),
-    },
-  };
 }
 
 type NamedColumn = ReturnType<typeof getUsefulTokens>['usefulColumns'][number];
