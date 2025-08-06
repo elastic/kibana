@@ -64310,25 +64310,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/Security_Detections_API_ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    Security_Detections_API_ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     Security_Detections_API_ThreatMatchRule:
       allOf:
         - type: object
