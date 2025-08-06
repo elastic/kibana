@@ -15,7 +15,13 @@ import {
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import {
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+  kbnTestConfig,
+} from '@kbn/test';
+import path from 'path';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
@@ -115,7 +121,23 @@ export function createTestConfig(
     const esServer = servers.elasticsearch as UrlObject;
     const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
 
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
     return {
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+        },
+      }),
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
