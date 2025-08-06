@@ -37,7 +37,7 @@ const SPACE_PREFIX = '/s/';
  * @returns string
  */
 function getSpaceAlternatePathHtml(method, path) {
-  return `<div><span class="operation-verb ${method.toLocaleLowerCase()}">${method}</span>&nbsp;<span class="operation-path">/s/{space_id}${path}</span></div>\n\nSee [spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`;
+  return `<div><span class="operation-verb ${method.toLocaleLowerCase()}">${method}</span>&nbsp;<span class="operation-path">/s/{space_id}${path}</span></div>\n\nRefer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.`;
 }
 
 run(
