@@ -80,9 +80,8 @@ export const validateCompleteThreatMatches = (
     );
 
     Object.values(threatQueriesMap).forEach((threatQueriesPerId) => {
-      const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
-
       threatMapping.forEach((andGroup) => {
+        const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
         const hasMatchForAndGroup = andGroup.entries.every((entry) => {
           const filteredThreatQueries = threatQueriesPerId.filter(
             (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
