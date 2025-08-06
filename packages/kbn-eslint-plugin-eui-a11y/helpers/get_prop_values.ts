@@ -20,7 +20,7 @@ export function getPropValues({
   sourceCode: EsLint.SourceCode;
 }): Record<
   (typeof propNames)[number],
-  TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpression
+  TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpressionContainer
 > {
   const scope = sourceCode.getScope(jsxOpeningElement as any);
 
@@ -33,7 +33,9 @@ export function getPropValues({
       if (
         prop.type === TypescriptEsTree.AST_NODE_TYPES.JSXAttribute &&
         propName === prop.name.name &&
-        prop.value
+        prop.value &&
+        (prop.value.type === TypescriptEsTree.AST_NODE_TYPES.Literal ||
+          prop.value.type === TypescriptEsTree.AST_NODE_TYPES.JSXExpressionContainer)
       ) {
         acc[propName] = prop.value; // can be a string or an function
       }
@@ -73,5 +75,5 @@ export function getPropValues({
       }
     }
     return acc;
-  }, {} as Record<(typeof propNames)[number], TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpression>);
+  }, {} as Record<(typeof propNames)[number], TypescriptEsTree.TSESTree.Literal | TypescriptEsTree.TSESTree.JSXExpressionContainer>);
 }
