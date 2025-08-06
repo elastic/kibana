@@ -21,6 +21,7 @@ import { savedObjectSchema, objectTypeToGetResultSchema, createResultSchema } fr
 
 import { coreMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 
 const testAttributesSchema = schema.object(
   {
@@ -110,6 +111,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.get(
         {
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -127,6 +129,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.create(
         {
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -145,6 +148,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.update(
         {
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -169,6 +173,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
 
       return storage!.search(
         {
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
@@ -185,6 +190,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
     mSearch: async (mockSavedObject: SavedObject<{}>) => {
       return storage!.mSearch!.toItemResult(
         {
+          request: mockRouter.createFakeKibanaRequest({}),
           requestHandlerContext,
           version: {
             request: 1,
