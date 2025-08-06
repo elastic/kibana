@@ -329,8 +329,8 @@ export class WorkflowExecutionRuntimeManager {
   private logStepComplete(stepId: string): void {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
-    const workflwoStep = this.stepExecutions.get(stepId);
-    const isSuccess = workflwoStep?.status === ExecutionStatus.COMPLETED;
+    const workflowStep = this.stepExecutions.get(stepId);
+    const isSuccess = workflowStep?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
       event: {
         action: 'step-complete',
