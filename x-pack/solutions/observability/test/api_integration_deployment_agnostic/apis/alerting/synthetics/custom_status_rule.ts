@@ -97,7 +97,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       - locationId
     */
 
-    describe('NumberOfChecks - location threshold = 1 - grouped by location - 1 location down', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/230588
+    describe.skip('NumberOfChecks - location threshold = 1 - grouped by location - 1 location down', () => {
       let ruleId = '';
       let monitor: any;
       let docs: any[] = [];
