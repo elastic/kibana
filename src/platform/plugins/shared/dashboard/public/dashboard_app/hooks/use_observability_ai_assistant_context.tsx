@@ -39,6 +39,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 // import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/public';
+
 import {
   usePostToolClientActions,
   type OneChatToolWithClientCallback,
@@ -46,8 +47,8 @@ import {
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 import { DashboardApi } from '../../dashboard_api/types';
 import { coreServices, inferenceService } from '../../services/kibana_services';
-
 import { convertSchemaToObservabilityParameters } from './schema_adapters';
+
 const chartTypes = [
   'bar',
   'xy',

@@ -77,9 +77,11 @@ export const useStream = ({
 
   useEffect(() => {
     const newSubscription = observer$.subscribe({
-      next: ({ message, loading: isLoading }) => {
+      next: ({ message, loading: isLoading, clientSideToolCalls }) => {
         setLoading(isLoading);
         setPendingMessage(message);
+        //@TODO: remove
+        console.log(`--@@clientSideToolCalls`, clientSideToolCalls);
       },
       complete: () => {
         setComplete({ complete: true, didAbort: false });

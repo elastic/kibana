@@ -18,6 +18,7 @@ import type {
 export type { AIClientToolsBasePluginSetup, AIClientToolsBasePluginStart };
 export { addToDashboardTool } from './nl_to_dashboard/tool';
 export { usePostToolClientActions } from '../common/hooks/use_post_actions';
+export { convertSchemaToObservabilityParameters, convertParametersToSchema } from '../common/schema_adapters';
 export type { OneChatToolWithClientCallback } from '../common/types';
 export const plugin: PluginInitializer<
   AIClientToolsBasePluginSetup,

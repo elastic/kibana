@@ -22,6 +22,8 @@ import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_
 import { addToDashboardTool } from '@kbn/ai-client-tools-plugin/public';
 import { pick } from 'lodash';
 
+//@TODO: remove
+console.log(`--@@addToDashboardTool`,addToDashboardTool );
 // const addToDashboardToolForAssistant = mapToolToSecuritySolutionTool(addToDashboardTool);
 const clientSideTools = [pick(addToDashboardTool, ['id', 'name', 'description', 'parameters', 'screenDescription'])];
 
