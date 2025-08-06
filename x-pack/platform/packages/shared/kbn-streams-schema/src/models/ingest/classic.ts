@@ -79,3 +79,14 @@ export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Mode
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
   });
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+ClassicStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is ClassicStream.Definition =>
+  Boolean(
+    'ingest' in stream &&
+      typeof stream.ingest === 'object' &&
+      stream.ingest &&
+      'classic' in stream.ingest
+  );

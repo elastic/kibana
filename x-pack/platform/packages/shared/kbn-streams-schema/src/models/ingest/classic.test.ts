@@ -39,7 +39,7 @@ describe('ClassicStream', () => {
         },
       },
     ])('is valid', (val) => {
-      expect(ClassicStream.Definition.is(val)).toBe(true);
+      expect(ClassicStream.Definition.asserts(val)).toBe(true);
       expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
     });
 
@@ -75,7 +75,7 @@ describe('ClassicStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(ClassicStream.Definition.is(val as any)).toBe(false);
+      expect(() => ClassicStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
