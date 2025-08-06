@@ -41,6 +41,17 @@ describe('layout manager', () => {
     panelIndex: PANEL_ONE_ID,
   };
 
+  const titleManager = initializeTitleManager(panel1.panelConfig);
+  const panel1Api: DefaultEmbeddableApi = {
+    type: 'testPanelType',
+    uuid: PANEL_ONE_ID,
+    phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
+    ...titleManager.api,
+    serializeState: () => ({
+      rawState: titleManager.getLatestState(),
+    }),
+  };
+
   const section1 = {
     title: 'Section one',
     collapsed: false,
@@ -49,13 +60,6 @@ describe('layout manager', () => {
       i: 'section1',
     },
     panels: [panel1],
-  };
-
-  const panel1Api: DefaultEmbeddableApi = {
-    type: 'testPanelType',
-    uuid: PANEL_ONE_ID,
-    phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
-    serializeState: jest.fn(),
   };
 
   test('can register child APIs', () => {
@@ -105,18 +109,9 @@ describe('layout manager', () => {
   });
 
   describe('duplicatePanel', () => {
-    const titleManager = initializeTitleManager(panel1.panelConfig);
-    const childApiToDuplicate = {
-      ...panel1Api,
-      ...titleManager.api,
-      serializeState: () => ({
-        rawState: titleManager.getLatestState(),
-      }),
-    };
-
     test('should add duplicated panel to layout', async () => {
       const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
-      layoutManager.internalApi.registerChildApi(childApiToDuplicate);
+      layoutManager.internalApi.registerChildApi(panel1Api);
 
       await layoutManager.api.duplicatePanel('panelOne');
 
@@ -142,7 +137,7 @@ describe('layout manager', () => {
     test('should clone by reference embeddable as by value', async () => {
       const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
       layoutManager.internalApi.registerChildApi({
-        ...childApiToDuplicate,
+        ...panel1Api,
         checkForDuplicateTitle: jest.fn(),
         canLinkToLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn(),
@@ -168,7 +163,7 @@ describe('layout manager', () => {
       const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.internalApi.registerChildApi({
-        ...childApiToDuplicate,
+        ...panel1Api,
         ...titleManagerOfClone.api,
         serializeState: () => ({
           rawState: titleManagerOfClone.getLatestState(),
@@ -217,7 +212,7 @@ describe('layout manager', () => {
       const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-        expect(api).toBeDefined();
+        expect(api).toBe(panel1Api);
         done();
       });
 
@@ -238,7 +233,7 @@ describe('layout manager', () => {
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-        expect(api).toBeDefined();
+        expect(api).toBe(panel1Api);
         done();
       });
 
