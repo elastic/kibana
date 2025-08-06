@@ -2287,9 +2287,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
 # Security Solution
-/x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
 /x-pack/test/functional/es_archives/packetbeat @elastic/security-solution
-/x-pack/test/security_solution_ftr @elastic/security-solution
 /x-pack/test/functional/es_archives/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
 /x-pack/solutions/security/test/functional/ @elastic/security-solution
@@ -2301,7 +2299,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/security/test/accessibility/ @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
-/x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
@@ -2333,26 +2330,25 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # GenAI in Security Solution
 /x-pack/solutions/security/plugins/security_solution/public/assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution/public/attack_discovery @elastic/security-generative-ai
-/x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
-/x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
 /x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-investigations
 
 
 # AI4DSOC in Security Solution
-/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
-/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc/privileges @elastic/security-generative-ai
-/x-pack/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/ai4dsoc/privileges @elastic/security-generative-ai
 
 # Security Solution cross teams ownership
-/x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/helpers @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/objects @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/plugins @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
-/x-pack/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/helpers @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/objects @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/plugins @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/common @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/support @elastic/security-detections-response @elastic/security-threat-hunting
+/x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-threat-hunting-investigations @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/common/ecs @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detections-response @elastic/security-threat-hunting
@@ -2382,11 +2378,11 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
-/x-pack/test/security_solution_cypress/* @elastic/security-engineering-productivity
-/x-pack/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
-/x-pack/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
-/x-pack/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
-/x-pack/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/api_calls/common.ts @elastic/security-engineering-productivity
+/x-pack/solutions/security/test/security_solution_cypress/es_archives @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_playwright @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/scripts/run_cypress @MadameSheema @patrykkopycinski @maximpn @banderror
 
@@ -2412,8 +2408,6 @@ x-pack/test_serverless/functional/test_suites/security/config.context_awareness.
 /x-pack/solutions/security/plugins/security_solution/common/types/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
-/x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
-/x-pack/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
 
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
@@ -2450,6 +2444,25 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
+
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/cases @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/filters @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/guided_onboarding @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/inspect @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/navigation @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/overview @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/pagination @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/urls @elastic/security-threat-hunting-investigations
+
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
+
+/x-pack/platform/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
+
+x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
+
 /x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting-investigations
 
 ## Security Solution Threat Hunting areas - Threat Hunting Explore
@@ -2459,11 +2472,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/network @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/common/search_strategy/security_solution/user @elastic/security-entity-analytics
 
-/x-pack/test/security_solution_cypress/cypress/e2e/explore @elastic/security-entity-analytics
-/x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
-/x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
-/x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-entity-analytics
-/x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-entity-analytics
 
 /x-pack/solutions/security/plugins/security_solution/public/app/actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/assets @elastic/security-threat-hunting-investigations
@@ -2567,11 +2575,10 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/common/detection_engine/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/common/detection_engine/rule_management @elastic/security-detection-rule-management
 
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/rule_management @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/docs/rfcs/detection_response @elastic/security-detection-rule-management @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management @elastic/security-detection-rule-management
 
 /x-pack/solutions/security/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
@@ -2630,11 +2637,8 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
 
-/x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
+/x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
-/x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
 /x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
@@ -2659,8 +2663,6 @@ x-pack/solutions/security/plugins/security_solution/server/assistant/tools/defen
 /x-pack/solutions/security/plugins/security_solution/server/lib/license/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/fleet_integration/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/scripts/endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_endpoint/ @elastic/security-defend-workflows
-/x-pack/test/security_solution_api_integration/test_suites/edr_workflows/ @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/sections/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/endpoint_management @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution_serverless/server/endpoint @elastic/security-defend-workflows
@@ -2684,6 +2686,25 @@ x-pack/solutions/security/plugins/security_solution/common/search_strategy/secur
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/risk_score @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-entity-analytics
+
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/users @elastic/security-entity-analytics
+x-pack/platform/test/fixtures/es_archives/auditbeat/hosts @elastic/security-entity-analytics
+x-pack/platform/test/fixtures/es_archives/auditbeat/uncommon_processes @elastic/security-entity-analytics
+x-pack/platform/test/fixtures/es_archives/auditbeat/users @elastic/security-entity-analytics
 x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elastic/security-entity-analytics
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
@@ -2736,9 +2757,9 @@ x-pack/test_serverless/functional/test_suites/security/config.cloud_security_pos
 x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 ## CSP e2e tests
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-investigations

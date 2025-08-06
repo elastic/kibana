@@ -10,8 +10,8 @@ disabled:
   # Cypress configs, for now these are still run manually
   - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/solutions/security/test/osquery_cypress/serverless_cli_config.ts
-  - x-pack/test/security_solution_cypress/serverless_config.ts
-  - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts
+  - x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts
+  - x-pack/solutions/security/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
   # Playwright
   - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
