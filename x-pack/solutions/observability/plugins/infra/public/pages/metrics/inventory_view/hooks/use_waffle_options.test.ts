@@ -6,15 +6,25 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-
 import type { WaffleOptionsState } from './use_waffle_options';
 import { useWaffleOptions } from './use_waffle_options';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
+
+jest.mock('@kbn/observability-shared-plugin/public');
+
+const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     location: '',
     replace: () => {},
+  }),
+}));
+
+jest.mock('./use_inventory_views', () => ({
+  useInventoryViewsContext: () => ({
+    currentView: undefined,
   }),
 }));
 
@@ -56,6 +66,8 @@ describe('useWaffleOptions', () => {
     PREFILL_CUSTOM_METRICS = undefined;
     PREFILL_ACCOUNT_ID = undefined;
     PREFILL_REGION = undefined;
+
+    mockUseUrlState.mockReturnValue([{}, jest.fn()]);
   });
 
   it('should sync the options to the inventory alert preview context', () => {
@@ -76,26 +88,31 @@ describe('useWaffleOptions', () => {
       region: 'us-east-1',
     } as WaffleOptionsState;
     act(() => {
+      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeNodeType(newOptions.nodeType);
     });
     rerender();
     expect(PREFILL_NODETYPE).toEqual(newOptions.nodeType);
     act(() => {
+      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeMetric(newOptions.metric);
     });
     rerender();
     expect(PREFILL_METRIC).toEqual(newOptions.metric);
     act(() => {
+      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeCustomMetrics(newOptions.customMetrics);
     });
     rerender();
     expect(PREFILL_CUSTOM_METRICS).toEqual(newOptions.customMetrics);
     act(() => {
+      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeAccount(newOptions.accountId);
     });
     rerender();
     expect(PREFILL_ACCOUNT_ID).toEqual(newOptions.accountId);
     act(() => {
+      mockUseUrlState.mockReturnValue([newOptions, jest.fn()]);
       result.current.changeRegion(newOptions.region);
     });
     rerender();

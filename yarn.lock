@@ -2135,10 +2135,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@70.1.2":
-  version "70.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.2.tgz#77c9ac3eeec3bf356cdaa93783959b62c4675e86"
-  integrity sha512-+uINyXFqhhAZ5BjBUbkhNeeTXu28sf4wanwZYwVdlrwgtQVTmYY20KAdXUq9E346fNgh6LDkacLZRxS/UoQlgw==
+"@elastic/charts@70.1.3":
+  version "70.1.3"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-70.1.3.tgz#31647f7a4c90a2ef121b89bde04fa548e70fe157"
+  integrity sha512-hFRUc7WlqygkI9NEoc12KTbwFA4Sz1xOpQmz+M4icKvQX9owSO9cqGhFOVYgvcmuckh6y8xrFPUBAb9xFEuWgg==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2291,10 +2291,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@106.1.0":
-  version "106.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.1.0.tgz#e027aefbfb8938a6f5429d81891448c9c45a179d"
-  integrity sha512-2uGrfZ5lul3w9v71lzikMS1keEDZeaLP8zYDGO+yp1DAXuF/8wQ574yvyN0kemV9KsESxr6XSNJ/L+68qAznlw==
+"@elastic/eui@106.2.0":
+  version "106.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-106.2.0.tgz#9513b959681fb471eaf6ba454950cd5b575a1959"
+  integrity sha512-I4JQChwHAZC4W0PDQzfh/26WhdHCzc/7CTFOqp4sgLpX1hoG3jCJDQMDVQy6d7MFWWYg2RWpfk3qTHXapwAlBw==
   dependencies:
     "@elastic/eui-theme-common" "3.1.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -29345,7 +29345,7 @@ reselect@^4.1.8:
   resolved "https://registry.npmjs.org/reselect/-/reselect-4.1.8.tgz"
   integrity sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==
 
-resize-observer-polyfill@1.5.1, resize-observer-polyfill@^1.5.1:
+resize-observer-polyfill@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
   integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
