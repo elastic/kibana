@@ -470,6 +470,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
+
+            // Check if the Kubernetes feedback button is visible
+            await pageObjects.infraHome.ensureKubernetesFeedbackLinkIsVisible();
+
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 
@@ -479,7 +483,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
-            await pageObjects.infraHome.ensureKubernetesFeedbackLinkIsVisible();
 
             await returnTo(INVENTORY_PATH);
           });
