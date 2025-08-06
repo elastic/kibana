@@ -12,6 +12,7 @@ import { Subscription, map, tap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
+import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type { HostsViewQuerySubmittedParams } from '../../../../services/telemetry';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useReloadRequestTimeContext } from '../../../../hooks/use_reload_request_time';
@@ -58,6 +59,7 @@ export const useUnifiedSearch = () => {
   const [searchCriteria, setSearch] = useHostsUrlState();
   const { metricsView } = useMetricsDataViewContext();
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
+  const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const { services } = useKibanaContextForPlugin();
   const kibanaQuerySettings = useKibanaQuerySettings();
 
@@ -111,9 +113,11 @@ export const useUnifiedSearch = () => {
   const onPreferredSchemaChange = useCallback(
     (preferredSchema: HostsState['preferredSchema']) => {
       setSearch({ type: 'SET_PREFERRED_SCHEMA', preferredSchema });
+
+      updateTopbarMenuVisibilityBySchema(preferredSchema);
       updateReloadRequestTime();
     },
-    [setSearch, updateReloadRequestTime]
+    [setSearch, updateReloadRequestTime, updateTopbarMenuVisibilityBySchema]
   );
 
   const onDateRangeChange = useCallback(

@@ -13,6 +13,7 @@ import createContainer from 'constate';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { type InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { useInfraMLCapabilitiesContext } from '../../../../containers/ml/infra_ml_capabilities';
 import type {
   InventoryView,
   InventoryViewOptions,
@@ -101,7 +102,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
 
 export const useWaffleOptions = () => {
   const { currentView } = useInventoryViewsContext();
-
+  const { updateTopbarMenuVisibilityBySchema } = useInfraMLCapabilitiesContext();
   const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
     defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
@@ -193,8 +194,10 @@ export const useWaffleOptions = () => {
         ...previous,
         preferredSchema,
       }));
+
+      updateTopbarMenuVisibilityBySchema(preferredSchema);
     },
-    [setUrlState]
+    [setUrlState, updateTopbarMenuVisibilityBySchema]
   );
 
   const { inventoryPrefill } = useAlertPrefillContext();
