@@ -142,13 +142,16 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const initializeDiscoverSession = useLatest(
     ({ nextDiscoverSessionId }: { nextDiscoverSessionId: string | undefined }) => {
       const persistedDiscoverSessionId = persistedDiscoverSession?.id;
+      const isSwitchingSession = Boolean(
+        persistedDiscoverSessionId && persistedDiscoverSessionId !== nextDiscoverSessionId
+      );
 
-      if (!persistedDiscoverSessionId || persistedDiscoverSessionId !== nextDiscoverSessionId) {
-        initializeTabs({ discoverSessionId: nextDiscoverSessionId });
-      } else if (
-        persistedDiscoverSessionId &&
-        persistedDiscoverSessionId === nextDiscoverSessionId
-      ) {
+      if (!persistedDiscoverSessionId || isSwitchingSession) {
+        initializeTabs({
+          discoverSessionId: nextDiscoverSessionId,
+          shouldClearAllTabs: isSwitchingSession,
+        });
+      } else {
         const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
         const currentTabStateContainer = currentTabRuntimeState.stateContainer$.getValue();
 
