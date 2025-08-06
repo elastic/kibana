@@ -59,7 +59,7 @@ export async function createAgentCard({
         type: 'apiKey',
         name: 'Authorization',
         in: 'header',
-        description: 'Kibana authentication token',
+        description: 'Authentication token',
       },
     },
     defaultInputModes: ['text/plain'],
