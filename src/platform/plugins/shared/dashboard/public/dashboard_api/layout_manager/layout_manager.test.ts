@@ -203,4 +203,102 @@ describe('layout manager', () => {
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });
+
+  describe('getChildApi', () => {
+    const panelsWithSections = [
+      {
+        gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel1' },
+        panelConfig: { title: 'panel One' },
+        panelIndex: 'panel1',
+        type: 'testPanelType',
+      },
+      {
+        title: 'Section closed on page load',
+        collapsed: true,
+        gridData: {
+          y: 6,
+          i: 'section1',
+        },
+        panels: [
+          {
+            gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel2InClosedSection' },
+            panelConfig: { title: 'panel Three' },
+            panelIndex: 'panel2InClosedSection',
+            type: 'testPanelType',
+          },
+        ],
+      },
+      {
+        title: 'Section open on page load',
+        collapsed: false,
+        gridData: {
+          y: 7,
+          i: 'section2',
+        },
+        panels: [
+          {
+            gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel3InOpenSection' },
+            panelConfig: { title: 'panel Four' },
+            panelIndex: 'panel3InOpenSection',
+            type: 'testPanelType',
+          },
+        ],
+      },
+    ];
+
+    test('should return api when api is available', (done) => {
+      const layoutManager = initializeLayoutManager(
+        undefined,
+        panelsWithSections,
+        trackPanelMock,
+        () => []
+      );
+
+      layoutManager.api.getChildApi('panel1').then((api) => {
+        expect(api).toBeDefined();
+        done();
+      });
+
+      layoutManager.internalApi.registerChildApi({
+        ...childApi,
+        uuid: 'panel1',
+      });
+    });
+
+    test('should return api from panel in open section when api is available', (done) => {
+      const layoutManager = initializeLayoutManager(
+        undefined,
+        panelsWithSections,
+        trackPanelMock,
+        () => []
+      );
+
+      layoutManager.api.getChildApi('panel3InOpenSection').then((api) => {
+        expect(api).toBeDefined();
+        done();
+      });
+
+      layoutManager.internalApi.registerChildApi({
+        ...childApi,
+        uuid: 'panel3InOpenSection',
+      });
+    });
+
+    test('should return undefined from panel in closed section', (done) => {
+      const layoutManager = initializeLayoutManager(
+        undefined,
+        panelsWithSections,
+        trackPanelMock,
+        () => []
+      );
+
+      layoutManager.api.getChildApi('panel2InClosedSection').then((api) => {
+        expect(api).toBeUndefined();
+        done();
+      });
+
+      // do not call layoutManager.internalApi.registerChildApi
+      // because api will never become available
+    });
+  });
 });
