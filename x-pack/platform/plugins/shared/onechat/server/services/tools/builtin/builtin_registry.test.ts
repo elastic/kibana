@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { BuiltinToolRegistry, createBuiltinToolRegistry } from './builtin_registry';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('BuiltinToolRegistry', () => {
   let registry: BuiltinToolRegistry;
@@ -22,7 +23,7 @@ describe('BuiltinToolRegistry', () => {
     schema: z.object({}),
     tags: [],
     handler: async () => ({
-      result: 'test',
+      results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
     }),
   };
 
@@ -79,7 +80,7 @@ describe('BuiltinToolRegistry', () => {
         tags: [],
         schema: z.object({}),
         handler: async () => ({
-          result: 'test1',
+          results: [{ type: ToolResultType.other, data: { value: 'test1' } }],
         }),
       };
 
@@ -89,7 +90,7 @@ describe('BuiltinToolRegistry', () => {
         tags: [],
         schema: z.object({}),
         handler: async () => ({
-          result: 'test2',
+          results: [{ type: ToolResultType.other, data: { value: 'test1' } }],
         }),
       };
 
