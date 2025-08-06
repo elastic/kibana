@@ -84,7 +84,7 @@ export type SuggestionType<TPayload = {}> = BaseSuggestionType & {
   children: React.LazyExoticComponent<React.FC<CaseSuggestionChildrenProps<TPayload>>>;
 };
 
-export interface CaseSuggestionChildrenProps<TPayload = {}> {
+export interface CaseSuggestionChildrenProps<TPayload = Record<string, unknown>> {
   caseSuggestion: SuggestionResponse<TPayload>;
 }
 
