@@ -6,7 +6,7 @@
  */
 
 import type { GeneralDatasourceStates } from '../../../../../public/state_management';
-import { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import { PieLayerState, PieVisualizationState } from '../../../../types';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,

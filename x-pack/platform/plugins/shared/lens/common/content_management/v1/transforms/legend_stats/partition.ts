@@ -7,7 +7,7 @@
 
 import { LegendValue } from '@elastic/charts';
 
-import { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import { PieLayerState, PieVisualizationState } from '../../../../types';
 
 /** @deprecated */
 type DeprecatedLegendValueLayer = PieLayerState & {

@@ -6,8 +6,8 @@
  */
 
 import type { XYState } from '../../../../../public';
-import type { PieVisualizationState } from '../../../../../common/types';
-import type { LensAttributes } from '../../types';
+import type { PieVisualizationState } from '../../../../types';
+import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import {
   convertPartitionToLegendStats,
   type DeprecatedLegendValuePieVisualizationState,

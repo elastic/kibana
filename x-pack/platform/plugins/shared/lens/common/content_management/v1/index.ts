@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import { LENS_ITEM_VERSION } from '../constants';
-import { LensAttributes } from '../types';
+export * from './transforms';
 
-export function addVersion(attributes: LensAttributes): LensAttributes {
-  return {
-    ...attributes,
-    version: LENS_ITEM_VERSION,
-  };
-}
+export { LENS_ITEM_VERSION_V1 } from './constants';
+export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

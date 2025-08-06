@@ -7,7 +7,7 @@
 
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 
-import { LensAttributes } from '../types';
+import type { LensAttributes } from '../../../../server/content_management/v1';
 import { DeprecatedLegendValueState } from './legend_stats/types';
 import { DeprecatedColorMappingsState } from './raw_color_mappings/types';
 

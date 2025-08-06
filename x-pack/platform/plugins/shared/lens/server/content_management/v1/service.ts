@@ -8,6 +8,10 @@
 import type { ContentManagementServicesDefinition } from '@kbn/object-versioning';
 
 import {
+  transformToV1LensSavedObject,
+  transformToV1LensItemAttributes,
+} from '../../../common/content_management/v1/transforms';
+import {
   lensCMGetResultSchema,
   lensItemAttributesSchema,
   lensCMCreateOptionsSchema,
@@ -17,7 +21,6 @@ import {
   lensCMSearchResultSchema,
   lensCMUpdateOptionsSchema,
 } from './schema';
-import { transformToV1LensSavedObject, transformToV1LensItemAttributes } from './transforms';
 import { LensAttributes, LensGetOut, LensSavedObject } from './types';
 
 export const serviceDefinition = {

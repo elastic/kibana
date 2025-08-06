@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LensAttributes, LensSavedObject } from '../types';
+import type { LensAttributes, LensSavedObject } from '../../../../server/content_management/v1';
 import { addVersion } from './add_version';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
