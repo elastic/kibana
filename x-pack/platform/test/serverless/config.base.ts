@@ -49,12 +49,9 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../../test/security_api_integration/plugins/saml_provider/metadata.xml'
+    '../security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(
-    __dirname,
-    '../../../test/security_api_integration/plugins/saml_provider'
-  );
+  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
