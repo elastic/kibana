@@ -8,6 +8,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import type { AggregateQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import {
   EuiButtonEmpty,
@@ -400,13 +401,21 @@ function DiscoverDocumentsComponent({
 
   const kqlQuery = query ?? { language: 'kuery', query: '' };
   const esQuery = buildEsQuery(dataView, [kqlQuery], filters ?? []);
+  const esqlQuery = useMemo(() => {
+    if (isEsqlMode && query && 'esql' in query) {
+      return (query as AggregateQuery).esql;
+    }
+    return undefined;
+  }, [isEsqlMode, query]);
 
-  const { count, reset } = useNewEntriesWatcher({
+  const { count, reset, pollingDisabled } = useNewEntriesWatcher({
     lastLoadedTimestamp,
     query: esQuery,
     dataView,
     timeField: '@timestamp',
     timefilter: services.timefilter,
+    isEsqlMode,
+    esqlQuery,
   });
 
   // Help me write a reset function which uses useCallback and resets the count to 0
@@ -427,6 +436,8 @@ function DiscoverDocumentsComponent({
     [count, resetCount]
   );
 
+  const PollingDisabledBadge = () => <EuiNotificationBadge>Polling Disabled</EuiNotificationBadge>;
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
@@ -438,10 +449,16 @@ function DiscoverDocumentsComponent({
           </>
         ),
         gridProps: {
-          additionalControls: count > 0 ? newEntryAvailableControl : null,
+          additionalControls: !pollingDisabled ? (
+            count > 0 ? (
+              newEntryAvailableControl
+            ) : null
+          ) : (
+            <PollingDisabledBadge />
+          ),
         },
       }),
-    [viewModeToggle, callouts, loadingIndicator, newEntryAvailableControl, count]
+    [viewModeToggle, callouts, loadingIndicator, pollingDisabled, count, newEntryAvailableControl]
   );
 
   const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
