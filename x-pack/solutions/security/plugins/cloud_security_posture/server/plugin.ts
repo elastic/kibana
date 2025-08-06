@@ -14,7 +14,7 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type { FailedAttemptError } from 'p-retry';
+import type { FailedAttemptError, Options } from 'p-retry';
 import pRetry from 'p-retry';
 import type { DeepReadonly } from 'utility-types';
 import {
@@ -318,7 +318,7 @@ const isTransformAssetIncluded = (integrationVersion: string): boolean => {
   return majorVersion >= 3;
 };
 
-const getRetryOptions = (logger: Logger, operation: string) => {
+const getRetryOptions = (logger: Logger, operation: string): Options => {
   return {
     retries: 3,
     onFailedAttempt: (err: FailedAttemptError) => {
