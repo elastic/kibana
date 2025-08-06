@@ -52,10 +52,10 @@ export const ProcessTreeAlertsFilter = ({
   };
 
   const onSelectedProcessEventAlertCategory = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      const [_, selectedAlertEvent] = event.currentTarget.textContent?.split(' ') || [];
-      setSelectedProcessEventAlertCategory(selectedAlertEvent as ProcessEventAlertCategory);
-      onAlertEventCategorySelected(selectedAlertEvent as ProcessEventAlertCategory);
+    (event: any) => {
+      const [_, selectedAlertEvent] = event.target.textContent.split(' ');
+      setSelectedProcessEventAlertCategory(selectedAlertEvent);
+      onAlertEventCategorySelected(selectedAlertEvent);
       closePopover();
     },
     [onAlertEventCategorySelected]
