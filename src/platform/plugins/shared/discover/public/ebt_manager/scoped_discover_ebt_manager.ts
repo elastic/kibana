@@ -26,9 +26,9 @@ import type {
   UpdateProfilesContextWith,
 } from './types';
 
-type FilterOperation = '+' | '-' | '_exists_';
+export const NON_ESC_FIELD = '<non-ecs>';
 
-const NON_ESC_FIELD = '<non-ecs>';
+type FilterOperation = '+' | '-' | '_exists_';
 
 enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
