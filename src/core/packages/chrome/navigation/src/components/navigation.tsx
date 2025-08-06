@@ -179,8 +179,7 @@ export const Navigation = ({
                     <NestedSecondaryMenu.Panel id="main" title="More">
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
-                          const isActive =
-                            item.id === activePageId || item.id === activeSubpageId;
+                          const isActive = item.id === activePageId || item.id === activeSubpageId;
                           const hasSubItems = getHasSubmenu(item);
 
                           return (
