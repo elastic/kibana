@@ -28,7 +28,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-In {{stack}} 9.0.0, {{kib}} uses HTTP/2 protocol by default to communicate with {{es}}. If you've set [`server.protocol`](/reference/configuration-reference/general-settings.md) to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
 
 **Action**
 
