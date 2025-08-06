@@ -14,7 +14,7 @@ import { getAllForOwners } from './get';
  * API for interacting with the attachments to a case.
  */
 export interface AttachmentSuggestionsSubClient {
-  getAllForOwners(getAllForOwnersArgs: GetAllForOwnersArgs): Promise<SuggestionResponse[]>;
+  getAllForOwners(getAllForOwnersArgs: GetAllForOwnersArgs): Promise<SuggestionResponse>;
 }
 
 /**

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type { SuggestionOwner, SuggestionContext } from '../../../common/types/domain';
+import { PluginInitializer } from '@kbn/core/server';
 
-export interface GetAllForOwnersArgs {
-  /**
-   * The suggestion owners to retrieve suggestions for
-   */
-  owners: SuggestionOwner[];
-  context: SuggestionContext;
-}
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { CaseSuggestionRegistryExamplePlugin } = await import('./plugin');
+  return new CaseSuggestionRegistryExamplePlugin();
+};

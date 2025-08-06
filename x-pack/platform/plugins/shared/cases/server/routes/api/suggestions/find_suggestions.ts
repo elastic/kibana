@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { suggestionRequestSchema } from '../../../../common/types/domain';
+import type { IKibanaResponse } from '@kbn/core/server';
+import { suggestionRequestSchema, type SuggestionResponse } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -19,13 +20,16 @@ export const findSuggestionsRoute = createCasesRoute({
   routerOptions: {
     access: 'internal',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response }): Promise<IKibanaResponse<SuggestionResponse>> => {
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      console.log('casesClient', casesClient.suggestions);
+      const suggestions = await casesClient.suggestions.getAllForOwners({
+        owners: request.body.owners,
+        context: request.body.context,
+      });
       return response.ok({
-        body: {},
+        body: suggestions,
       });
     } catch (error) {
       throw createCaseError({

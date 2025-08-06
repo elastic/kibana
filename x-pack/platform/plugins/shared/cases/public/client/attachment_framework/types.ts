@@ -11,7 +11,7 @@ import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
   SuggestionOwner,
-  SuggestionResponse,
+  SuggestionItem,
 } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
@@ -81,11 +81,11 @@ interface BaseSuggestionType {
 }
 
 export type SuggestionType<TPayload = {}> = BaseSuggestionType & {
-  children: React.LazyExoticComponent<React.FC<CaseSuggestionChildrenProps<TPayload>>>;
+  children: React.LazyExoticComponent<React.FC<SuggestionChildrenProps<TPayload>>>;
 };
 
-export interface CaseSuggestionChildrenProps<TPayload = {}> {
-  caseSuggestion: SuggestionResponse<TPayload>;
+export interface SuggestionChildrenProps<TPayload = {}> {
+  suggestion: SuggestionItem<TPayload>;
 }
 
 export interface AttachmentFramework {
@@ -95,5 +95,5 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
-  registerSuggestion: (suggestionType: SuggestionType) => void;
+  registerSuggestion: <T = {}>(suggestionType: SuggestionType<T>) => void;
 }

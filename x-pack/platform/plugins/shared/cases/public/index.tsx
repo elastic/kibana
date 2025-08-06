@@ -25,3 +25,5 @@ export type { ICasesDeepLinkId } from './common/navigation';
 export { getCasesDeepLinks, CasesDeepLinkId, generateCaseViewPath } from './common/navigation';
 
 export { AttachmentActionType } from './client/attachment_framework/types';
+
+export type { SuggestionType, SuggestionChildrenProps } from './client/attachment_framework/types';

@@ -10,14 +10,20 @@ import type { SuggestionResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 
 import type { GetAllForOwnersArgs } from './types';
+
 /**
  * Retrieves all the attachments for a case.
  */
 export async function getAllForOwners(
-  { owners }: GetAllForOwnersArgs,
+  { owners, context }: GetAllForOwnersArgs,
   clientArgs: CasesClientArgs
-): Promise<SuggestionResponse[]> {
+): Promise<SuggestionResponse> {
   const { attachmentSuggestionRegistry } = clientArgs;
 
-  console.log('attachmentSuggestionRegistry', attachmentSuggestionRegistry);
+  const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwners(
+    owners,
+    context
+  );
+
+  return suggestions;
 }

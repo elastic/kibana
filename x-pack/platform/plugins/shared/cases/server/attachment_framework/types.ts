@@ -10,7 +10,7 @@ import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-u
 import type {
   PersistableStateAttachmentPayload,
   SuggestionOwner,
-  SuggestionRequest,
+  SuggestionContext,
   SuggestionResponse,
 } from '../../common/types/domain';
 
@@ -52,7 +52,7 @@ export interface SuggestionType<TPayload = Record<string, unknown>> {
 }
 
 export type SuggestionHandler<TPayload = Record<string, unknown>> = (
-  params: SuggestionRequest
+  params: SuggestionContext
 ) => Promise<SuggestionResponse<TPayload>>;
 
 export interface AttachmentFramework {
@@ -62,5 +62,7 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
-  registerSuggestion: (attachmentSuggestion: SuggestionType) => void;
+  registerSuggestion: <TPayload = Record<string, unknown>>(
+    attachmentSuggestion: SuggestionType<TPayload>
+  ) => void;
 }
