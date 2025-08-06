@@ -89,7 +89,6 @@
     "@kbn/test-suites-xpack-platform",
     "@kbn/dev-proc-runner",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-provider-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/core",
     "@kbn/logging",
