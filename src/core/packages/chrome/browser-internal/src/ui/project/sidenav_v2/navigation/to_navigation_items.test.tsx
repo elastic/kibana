@@ -86,7 +86,7 @@ describe('toNavigationItems', () => {
 describe('isActive', () => {
   it('should return null if no active paths', () => {
     const { activeItemId } = toNavigationItems(navigationTree, [], []);
-    expect(activeItemId).toBeNull();
+    expect(activeItemId).toBeUndefined();
   });
 
   it('should return logo node as active item', () => {
