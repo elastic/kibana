@@ -1499,7 +1499,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/data_management @elastic/obs-ux-logs-team
 
 # Infra Monitoring tests
-/x-pack/test/common/services/synthtrace.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/api_integration/services/index.ts @elastic/obs-ux-infra_services-team
@@ -2144,7 +2143,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/page_objects/api_keys_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/page_objects/account_settings_page.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/user_profiles @elastic/kibana-security
-/x-pack/test/common/services/spaces.ts @elastic/kibana-security
 /x-pack/test/api_integration/config_security_*.ts @elastic/kibana-security
 /x-pack/platform/test/functional/apps/api_keys @elastic/kibana-security
 /x-pack/platform/test/ftr_apis/security_and_spaces @elastic/kibana-security
@@ -2278,7 +2276,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # Enterprise Search
 # search
 /x-pack/platform/test/fixtures/es_archives/data/search_sessions @elastic/search-kibana
-/x-pack/test/common/services/search_secure.ts @elastic/search-kibana
 /src/platform/test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
