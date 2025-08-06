@@ -564,7 +564,7 @@
         "label": "initializeUnsavedChanges",
         "description": [],
         "signature": [
-          "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
+          "<StateType extends object = object>({ uuid, onReset, parentApi, getComparators, defaultState, serializeState, anyStateChange$, checkRefEquality, }: { uuid: string; parentApi: unknown; anyStateChange$: ",
           "Observable",
           "<void>; serializeState: () => ",
           {
@@ -598,7 +598,7 @@
             "section": "def-common.MaybePromise",
             "text": "MaybePromise"
           },
-          "<void>; }) => ",
+          "<void>; checkRefEquality?: boolean | undefined; }) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -616,7 +616,7 @@
             "id": "def-public.initializeUnsavedChanges.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n}",
+            "label": "{\n  uuid,\n  onReset,\n  parentApi,\n  getComparators,\n  defaultState,\n  serializeState,\n  anyStateChange$,\n  checkRefEquality,\n}",
             "description": [],
             "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
             "deprecated": false,
@@ -778,6 +778,20 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/presentation-containers",
+                "id": "def-public.initializeUnsavedChanges.$1.checkRefEquality",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "checkRefEquality",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/presentation/presentation_containers/interfaces/unsaved_changes/initialize_unsaved_changes.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
