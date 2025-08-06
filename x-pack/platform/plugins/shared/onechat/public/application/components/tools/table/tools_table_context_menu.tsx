@@ -64,6 +64,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
       icon="eye"
       key="test"
       size="s"
+      disabled // Not implemented
       onClick={() => {
         testTool(tool.id);
         setIsOpen(false);

@@ -21,6 +21,7 @@ export const builtinToolIds = {
 } as const;
 
 export const builtInToolIdPrefix = '.';
+export const reservedKeywords = ['new'];
 
 /**
  * Common set of tags used for platform tools.

@@ -213,10 +213,10 @@ export const useDeleteToolsModal = ({
 
   const confirmDelete = useCallback(async () => {
     if (!deleteToolIds.length) {
-      return;
+      throw new Error('confirmDelete called outside of modal context');
     }
 
-    await deleteToolsMutation({ toolIds: deleteToolIds }, { onSuccess, onError });
+    return await deleteToolsMutation({ toolIds: deleteToolIds }, { onSuccess, onError });
   }, [deleteToolIds, deleteToolsMutation, onSuccess, onError]);
 
   const cancelDelete = useCallback(() => {
