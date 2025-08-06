@@ -52,10 +52,25 @@ describe('WaterfallLegends', () => {
     expect(getByText('http')).toBeInTheDocument();
   });
 
+  it('renders legends based on kind', () => {
+    const legends: IWaterfallLegend[] = [
+      createLegend({ type: WaterfallLegendType.Kind, value: 'kind', color: '#00FF00' }),
+    ];
+
+    const { getByText } = render(
+      <EuiThemeProvider>
+        <WaterfallLegends legends={legends} type={WaterfallLegendType.Kind} />
+      </EuiThemeProvider>
+    );
+
+    expect(getByText('kind')).toBeInTheDocument();
+  });
+
   it('filters legends based on type', () => {
     const legends: IWaterfallLegend[] = [
       createLegend({ type: WaterfallLegendType.ServiceName, value: 'service-a' }),
       createLegend({ type: WaterfallLegendType.SpanType, value: 'http' }),
+      createLegend({ type: WaterfallLegendType.Kind, value: 'kind' }),
     ];
 
     const { queryByText } = render(

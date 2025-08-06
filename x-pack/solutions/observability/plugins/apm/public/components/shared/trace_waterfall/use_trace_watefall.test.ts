@@ -208,6 +208,16 @@ describe('getLegends', () => {
         spanType: 'cache',
         errorCount: 0,
       },
+      {
+        id: '6',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcC',
+        kind: 'Customer',
+        errorCount: 0,
+      },
     ];
 
     const result = getLegends(traceItems);
@@ -215,10 +225,11 @@ describe('getLegends', () => {
       { type: WaterfallLegendType.ServiceName, value: 'svcA', color: 'color0' },
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
       { type: WaterfallLegendType.ServiceName, value: 'svcC', color: 'color2' },
-      { type: WaterfallLegendType.SpanType, value: '', color: 'color3' },
+      { type: WaterfallLegendType.SpanType, value: '', color: 'color3' }, // needed in the legends component to display the service name when colorBy is SpanType
       { type: WaterfallLegendType.SpanType, value: 'db', color: 'color4' },
       { type: WaterfallLegendType.SpanType, value: 'http', color: 'color5' },
       { type: WaterfallLegendType.SpanType, value: 'cache', color: 'color6' },
+      { type: WaterfallLegendType.Kind, value: 'Customer', color: 'color7' },
     ]);
   });
 
@@ -271,6 +282,26 @@ describe('getLegends', () => {
         spanType: 'http',
         errorCount: 0,
       },
+      {
+        id: '7',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        kind: 'kind',
+        errorCount: 0,
+      },
+      {
+        id: '8',
+        timestampUs: 0,
+        name: '',
+        traceId: '',
+        duration: 1,
+        serviceName: 'svcB',
+        kind: 'kind',
+        errorCount: 0,
+      },
     ];
 
     const result = getLegends(traceItems);
@@ -280,6 +311,7 @@ describe('getLegends', () => {
       { type: WaterfallLegendType.ServiceName, value: 'svcB', color: 'color1' },
       { type: WaterfallLegendType.SpanType, value: '', color: 'color2' }, // needed in the legends component to display the service name when colorBy is SpanType
       { type: WaterfallLegendType.SpanType, value: 'http', color: 'color3' },
+      { type: WaterfallLegendType.Kind, value: 'kind', color: 'color4' },
     ]);
   });
 
