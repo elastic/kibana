@@ -48,7 +48,10 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
     );
 
     const fulfilledResponses = allSettledResponses
-      .filter((result): result is PromiseFulfilledResult<SuggestionResponse> => result.status === 'fulfilled')
+      .filter(
+        (result): result is PromiseFulfilledResult<SuggestionResponse> =>
+          result.status === 'fulfilled'
+      )
       .map((result) => result.value);
 
     return fulfilledResponses.reduce<SuggestionResponse>(
