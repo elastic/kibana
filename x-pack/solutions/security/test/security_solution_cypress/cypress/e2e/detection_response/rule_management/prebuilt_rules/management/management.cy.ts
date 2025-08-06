@@ -32,7 +32,7 @@ import {
 } from '../../../../../tasks/rules_bulk_actions';
 import {
   createAndInstallMockedPrebuiltRules,
-  getAvailablePrebuiltRulesCount,
+  getInstalledPrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import {
@@ -71,7 +71,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       getRulesManagementTableRows().should('have.length.gte', 1);
 
       // Check the correct count of prebuilt rules is displayed
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(ELASTIC_RULES_BTN).should(
           'have.text',
           `Elastic rules (${availablePrebuiltRulesCount})`
@@ -118,7 +118,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('Deletes and recovers one rule', () => {
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 1;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;
 
@@ -150,7 +150,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('Deletes and recovers more than one rule', () => {
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
           const rulesToDelete = ['Test rule 1', 'Test rule 2'] as const;
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 2;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;

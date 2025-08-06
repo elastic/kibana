@@ -38,7 +38,7 @@ import { visit } from '../../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
-  getAvailablePrebuiltRulesCount,
+  getInstalledPrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
@@ -118,7 +118,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI']
     selectAllRules();
     bulkExportRules();
 
-    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+    getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
       const totalNumberOfRules =
         expectedNumberCustomRulesToBeExported + availablePrebuiltRulesCount;
       cy.get(TOASTER_BODY).should(
