@@ -128,17 +128,17 @@ export const useDeleteToolModal = ({
     });
   };
 
-  const { deleteToolSync: deleteToolMutation, isLoading } = useDeleteTool({
+  const { deleteTool: deleteToolMutation, isLoading } = useDeleteTool({
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (!deleteToolId) {
       return;
     }
 
-    deleteToolMutation({ toolId: deleteToolId }, { onSuccess, onError });
+    await deleteToolMutation({ toolId: deleteToolId }, { onSuccess, onError });
   }, [deleteToolId, deleteToolMutation, onSuccess, onError]);
 
   const cancelDelete = useCallback(() => {
@@ -173,7 +173,7 @@ export const useDeleteToolsModal = ({
 
   const handleSuccess: DeleteToolsMutationSuccessCallback = (data, { toolIds }) => {
     if (Object.values(data).some((success) => !success)) {
-      const failedTools = toolIds.filter((toolId, index) => !data[toolId]);
+      const failedTools = toolIds.filter((toolId) => !data[toolId]);
       if (failedTools.length === toolIds.length) {
         addErrorToast({
           title: labels.tools.bulkDeleteToolsErrorToast(toolIds.length),
@@ -203,17 +203,17 @@ export const useDeleteToolsModal = ({
     });
   };
 
-  const { deleteToolsSync: deleteToolsMutation, isLoading } = useDeleteTools({
+  const { deleteTools: deleteToolsMutation, isLoading } = useDeleteTools({
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
-  const confirmDelete = useCallback(() => {
+  const confirmDelete = useCallback(async () => {
     if (!deleteToolIds.length) {
       return;
     }
 
-    deleteToolsMutation({ toolIds: deleteToolIds }, { onSuccess, onError });
+    await deleteToolsMutation({ toolIds: deleteToolIds }, { onSuccess, onError });
   }, [deleteToolIds, deleteToolsMutation, onSuccess, onError]);
 
   const cancelDelete = useCallback(() => {

@@ -17,21 +17,15 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
+import { useToolsActions } from '../../../context/tools_provider';
 
-export const ToolContextMenu = ({
-  tool,
-  editTool,
-  deleteTool,
-  testTool,
-  cloneTool,
-}: {
+export interface ToolContextMenuProps {
   tool: ToolDefinitionWithSchema;
-  editTool: (toolId: string) => void;
-  deleteTool: (toolId: string) => void;
-  testTool: (toolId: string) => void;
-  cloneTool: (toolId: string) => void;
-}) => {
+}
+
+export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   const { euiTheme } = useEuiTheme();
+  const { editTool, deleteTool, testTool, cloneTool } = useToolsActions();
   const [isOpen, setIsOpen] = useState(false);
 
   const editMenuItem = (

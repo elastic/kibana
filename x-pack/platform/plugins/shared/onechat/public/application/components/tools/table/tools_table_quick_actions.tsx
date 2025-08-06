@@ -10,16 +10,15 @@ import { css } from '@emotion/react';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React from 'react';
 import { labels } from '../../../utils/i18n';
+import { useToolsActions } from '../../../context/tools_provider';
 
-export const ToolQuickActions = ({
-  tool,
-  editTool,
-  deleteTool,
-}: {
+export interface ToolQuickActionsProps {
   tool: ToolDefinitionWithSchema;
-  editTool: (toolId: string) => void;
-  deleteTool: (toolId: string) => void;
-}) => {
+}
+
+export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
+  const { editTool, deleteTool } = useToolsActions();
+
   return (
     <EuiFlexGroup
       css={css`

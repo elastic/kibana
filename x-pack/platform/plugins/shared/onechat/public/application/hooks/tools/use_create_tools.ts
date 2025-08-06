@@ -96,14 +96,14 @@ export const useCreateToolFlyout = ({
     },
     [addErrorToast]
   );
-  const { createToolSync: createToolMutation, isLoading: isSubmitting } = useCreateTool({
+  const { createTool: createToolMutation, isLoading: isSubmitting } = useCreateTool({
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
   const createTool = useCallback(
-    (tool: CreateToolPayload) => {
-      createToolMutation(tool, { onSuccess, onError });
+    async (tool: CreateToolPayload) => {
+      await createToolMutation(tool, { onSuccess, onError });
     },
     [createToolMutation, onSuccess, onError]
   );

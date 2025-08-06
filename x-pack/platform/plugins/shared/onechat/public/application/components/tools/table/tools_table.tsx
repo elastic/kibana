@@ -14,114 +14,87 @@ import {
 import { css } from '@emotion/react';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
-import React, { memo, useEffect, useMemo, useState } from 'react';
-import { useToolsPreferences } from '../../../context/tools_preferences_provider';
+import React, { memo, useEffect, useState } from 'react';
 import { useOnechatTools } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
-import { getToolsTableColumns } from './tools_table_columns';
+import { useToolsTableColumns } from './tools_table_columns';
 import { ToolsTableHeader } from './tools_table_header';
 import { useToolsTableSearch } from './tools_table_search';
 
-export interface OnechatToolsTableProps {
-  editTool: (toolId: string) => void;
-  deleteTool: (toolId: string) => void;
-  testTool: (toolId: string) => void;
-  cloneTool: (toolId: string) => void;
-  bulkDeleteTools: (toolIds: string[]) => void;
-}
-export const OnechatToolsTable = memo(
-  ({ editTool, deleteTool, testTool, cloneTool, bulkDeleteTools }: OnechatToolsTableProps) => {
-    const { euiTheme } = useEuiTheme();
-    const { includeSystemTools } = useToolsPreferences();
-    const {
-      tools,
-      isLoading: isLoadingTools,
-      error: toolsError,
-    } = useOnechatTools({
-      includeSystemTools,
-    });
-    const [tablePageIndex, setTablePageIndex] = useState(0);
-    const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
-    const { searchConfig, results: tableTools } = useToolsTableSearch();
+export const OnechatToolsTable = memo(() => {
+  const { euiTheme } = useEuiTheme();
+  const { tools, isLoading: isLoadingTools, error: toolsError } = useOnechatTools();
+  const [tablePageIndex, setTablePageIndex] = useState(0);
+  const [selectedTools, setSelectedTools] = useState<ToolDefinitionWithSchema[]>([]);
+  const { searchConfig, results: tableTools } = useToolsTableSearch();
 
-    useEffect(() => {
-      setTablePageIndex(0);
-    }, [tableTools]);
+  useEffect(() => {
+    setTablePageIndex(0);
+  }, [tableTools]);
 
-    const columns = useMemo(
-      () =>
-        getToolsTableColumns({
-          editTool,
-          deleteTool,
-          testTool,
-          cloneTool,
-        }),
-      [editTool, deleteTool, testTool, cloneTool]
-    );
+  const columns = useToolsTableColumns();
 
-    return (
-      <EuiInMemoryTable
-        css={css`
-          border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  return (
+    <EuiInMemoryTable
+      css={css`
+        border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
 
-          table {
-            background-color: transparent;
-          }
-
-          .euiTableRow:hover .tool-quick-actions {
-            visibility: visible;
-          }
-        `}
-        childrenBetween={
-          <ToolsTableHeader
-            isLoading={isLoadingTools}
-            pageIndex={tablePageIndex}
-            tools={tableTools}
-            total={tools.length}
-            selectedTools={selectedTools}
-            setSelectedTools={setSelectedTools}
-            deleteSelectedTools={bulkDeleteTools}
-          />
+        table {
+          background-color: transparent;
         }
-        loading={isLoadingTools}
-        columns={columns}
-        items={tableTools}
-        itemId="id"
-        error={toolsError ? labels.tools.listToolsErrorMessage : undefined}
-        search={searchConfig}
-        onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinitionWithSchema>) => {
-          setTablePageIndex(index);
-        }}
-        pagination={{
-          pageIndex: tablePageIndex,
-          pageSize: 10,
-          showPerPageOptions: false,
-        }}
-        selection={{
-          selectable: isEsqlTool,
-          onSelectionChange: (selectedItems: ToolDefinitionWithSchema[]) => {
-            setSelectedTools(selectedItems);
-          },
-          selected: selectedTools,
-        }}
-        sorting={{
-          sort: {
-            field: 'id',
-            direction: 'asc',
-          },
-        }}
-        noItemsMessage={
-          isLoadingTools ? (
-            <EuiSkeletonText lines={1} />
-          ) : (
-            <EuiText component="p" size="s" textAlign="center" color="subdued">
-              {tools.length > 0 && tableTools.length === 0
-                ? labels.tools.noEsqlToolsMatchMessage
-                : labels.tools.noEsqlToolsMessage}
-            </EuiText>
-          )
+
+        .euiTableRow:hover .tool-quick-actions {
+          visibility: visible;
         }
-      />
-    );
-  }
-);
+      `}
+      childrenBetween={
+        <ToolsTableHeader
+          isLoading={isLoadingTools}
+          pageIndex={tablePageIndex}
+          tools={tableTools}
+          total={tools.length}
+          selectedTools={selectedTools}
+          setSelectedTools={setSelectedTools}
+        />
+      }
+      loading={isLoadingTools}
+      columns={columns}
+      items={tableTools}
+      itemId="id"
+      error={toolsError ? labels.tools.listToolsErrorMessage : undefined}
+      search={searchConfig}
+      onTableChange={({ page: { index } }: CriteriaWithPagination<ToolDefinitionWithSchema>) => {
+        setTablePageIndex(index);
+      }}
+      pagination={{
+        pageIndex: tablePageIndex,
+        pageSize: 10,
+        showPerPageOptions: false,
+      }}
+      selection={{
+        selectable: isEsqlTool,
+        onSelectionChange: (selectedItems: ToolDefinitionWithSchema[]) => {
+          setSelectedTools(selectedItems);
+        },
+        selected: selectedTools,
+      }}
+      sorting={{
+        sort: {
+          field: 'id',
+          direction: 'asc',
+        },
+      }}
+      noItemsMessage={
+        isLoadingTools ? (
+          <EuiSkeletonText lines={1} />
+        ) : (
+          <EuiText component="p" size="s" textAlign="center" color="subdued">
+            {tools.length > 0 && tableTools.length === 0
+              ? labels.tools.noEsqlToolsMatchMessage
+              : labels.tools.noEsqlToolsMessage}
+          </EuiText>
+        )
+      }
+    />
+  );
+});

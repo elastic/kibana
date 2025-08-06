@@ -11,15 +11,15 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
+import { useToolsActions } from '../../../context/tools_provider';
 
-export const ToolIdWithDescription = ({
-  tool,
-  editTool,
-}: {
+export interface ToolIdWithDescriptionProps {
   tool: ToolDefinitionWithSchema;
-  editTool: (toolId: string) => void;
-}) => {
+}
+
+export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {
   const { euiTheme } = useEuiTheme();
+  const { editTool } = useToolsActions();
 
   const toolIdStyle = css`
     font-weight: ${euiTheme.font.weight.semiBold};

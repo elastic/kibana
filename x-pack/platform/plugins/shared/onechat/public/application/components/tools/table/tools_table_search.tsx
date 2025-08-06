@@ -87,7 +87,7 @@ export interface ToolsTableSearch {
 export const useToolsTableSearch = (): ToolsTableSearch => {
   const { addErrorToast } = useToasts();
   const { includeSystemTools } = useToolsPreferences();
-  const { tools } = useOnechatTools({ includeSystemTools });
+  const { tools } = useOnechatTools();
   const { tags } = useToolTags();
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
 

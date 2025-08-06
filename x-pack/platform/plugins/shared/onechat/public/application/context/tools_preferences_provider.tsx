@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { noop } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -16,10 +15,9 @@ export interface ToolsPreferencesContextType {
   setIncludeSystemTools: (includeSystemTools: boolean) => void;
 }
 
-export const ToolsPreferencesContext = createContext<ToolsPreferencesContextType>({
-  includeSystemTools: true,
-  setIncludeSystemTools: noop,
-});
+export const ToolsPreferencesContext = createContext<ToolsPreferencesContextType | undefined>(
+  undefined
+);
 
 export const ToolsPreferencesProvider = ({ children }: { children: React.ReactNode }) => {
   const [includeSystemTools = true, setIncludeSystemTools] = useLocalStorage(
@@ -34,9 +32,9 @@ export const ToolsPreferencesProvider = ({ children }: { children: React.ReactNo
 };
 
 export const useToolsPreferences = () => {
-  const toolsPreferences = useContext(ToolsPreferencesContext);
-  if (!toolsPreferences) {
+  const context = useContext(ToolsPreferencesContext);
+  if (!context) {
     throw new Error('useToolsPreferences must be used within a ToolsPreferencesProvider');
   }
-  return toolsPreferences;
+  return context;
 };

@@ -20,6 +20,7 @@ import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useCallback } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
 import { labels } from '../../../utils/i18n';
+import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolsTableHeaderProps {
   isLoading: boolean;
@@ -28,7 +29,6 @@ export interface ToolsTableHeaderProps {
   total: number;
   selectedTools: ToolDefinitionWithSchema[];
   setSelectedTools: (tools: ToolDefinitionWithSchema[]) => void;
-  deleteSelectedTools: (toolIds: string[]) => void;
 }
 
 export const ToolsTableHeader = ({
@@ -38,10 +38,10 @@ export const ToolsTableHeader = ({
   total,
   selectedTools,
   setSelectedTools,
-  deleteSelectedTools,
 }: ToolsTableHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const { includeSystemTools, setIncludeSystemTools } = useToolsPreferences();
+  const { bulkDeleteTools } = useToolsActions();
 
   const selectAll = useCallback(() => {
     setSelectedTools(tools.filter(isEsqlTool));
@@ -52,8 +52,8 @@ export const ToolsTableHeader = ({
   }, [setSelectedTools]);
 
   const deleteSelection = useCallback(() => {
-    deleteSelectedTools(selectedTools.map((tool) => tool.id));
-  }, [deleteSelectedTools, selectedTools]);
+    bulkDeleteTools(selectedTools.map((tool) => tool.id));
+  }, [bulkDeleteTools, selectedTools]);
 
   return (
     <EuiFlexGroup

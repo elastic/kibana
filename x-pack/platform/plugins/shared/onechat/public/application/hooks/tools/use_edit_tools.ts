@@ -100,15 +100,15 @@ export const useEditToolFlyout = ({
     [addErrorToast]
   );
 
-  const { updateToolSync: updateTool, isLoading: isSubmitting } = useEditTool({
+  const { updateTool, isLoading: isSubmitting } = useEditTool({
     onSuccess: handleSuccess,
     onError: handleError,
   });
 
   const saveTool = useCallback(
-    (toolData: UpdateToolPayload) => {
+    async (toolData: UpdateToolPayload) => {
       if (!editingTool) return;
-      updateTool({ toolId: editingTool.id, tool: toolData }, { onSuccess, onError });
+      await updateTool({ toolId: editingTool.id, tool: toolData }, { onSuccess, onError });
     },
     [updateTool, editingTool, onSuccess, onError]
   );
