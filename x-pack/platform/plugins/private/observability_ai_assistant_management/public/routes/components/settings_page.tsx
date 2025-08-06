@@ -29,12 +29,13 @@ import { useObservabilityAIAssistantManagementRouterParams } from '../../hooks/u
 import { useObservabilityAIAssistantManagementRouter } from '../../hooks/use_observability_management_router';
 import type { TabsRt } from '../config';
 import { useKibana } from '../../hooks/use_kibana';
+import { SearchConnectorTab } from './search_connector_tab';
 
 export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp },
+      application: { navigateToApp, isAppRegistered },
       serverless,
     },
   } = useKibana();
@@ -99,6 +100,17 @@ export function SettingsPage() {
       ),
       content: <KnowledgeBaseTab />,
       disabled: !knowledgeBase.status.value?.enabled,
+    },
+    {
+      id: 'search_connector',
+      name: i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.searchConnector',
+        {
+          defaultMessage: 'Search Connectors',
+        }
+      ),
+      content: <SearchConnectorTab />,
+      disabled: !isAppRegistered('enterpriseSearch'),
     },
   ];
 
