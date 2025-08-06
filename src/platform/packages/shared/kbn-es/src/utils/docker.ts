@@ -704,9 +704,10 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     : {};
 
   // Read roles for the specified projectType
-  const rolesResourcePath = productTier && productTier === 'search_ai_lake'
-    ? resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml')
-    : resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
+  const rolesResourcePath =
+    productTier && productTier === 'search_ai_lake'
+      ? resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml')
+      : resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
 
