@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButtonIcon,
+  EuiLink,
 } from '@elastic/eui';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
@@ -35,6 +36,7 @@ export function AdvancedConfiguration({
   setRemovedConfigCount: React.Dispatch<React.SetStateAction<number>>;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }) {
+  const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
   const predefinedAgentConfigKeys = useMemo(
     () => settingsDefinitionsByAgent.map((setting) => setting.key),
     [settingsDefinitionsByAgent]
@@ -131,6 +133,21 @@ export function AdvancedConfiguration({
               />
             </p>
           </EuiText>
+          {agentLanguage && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiLink
+                data-test-subj="apmAdvancedConfigurationDocumentationLink"
+                href={`https://www.elastic.co/docs/reference/opentelemetry/edot-sdks/${agentLanguage}/configuration`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.apm.agentConfig.settingsPage.advancedConfigurationLearnMore"
+                  defaultMessage="Learn more about configuration options"
+                />
+              </EuiLink>
+            </>
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <div>
