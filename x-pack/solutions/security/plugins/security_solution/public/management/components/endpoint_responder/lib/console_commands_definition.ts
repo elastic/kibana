@@ -614,7 +614,35 @@ const adjustCommandsForSentinelOne = ({
         };
       } else if (command.name === 'runscript') {
         command.helpDisabled = false;
-        command.exampleUsage = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+        command.exampleUsage = (
+          enteredCommand?: Command<
+            CommandDefinition,
+            SentinelOneRunScriptActionParameters,
+            { script: CustomScriptSelectorState<SentinelOneScript> }
+          >
+        ) => {
+          let exampleUsageText = `runscript --script="copy.sh" --inputParams="~/logs/log.txt /tmp/log.backup.txt"`;
+
+          if (enteredCommand) {
+            const scriptArgState = enteredCommand?.argState?.script?.at(0);
+            const selectedScript = scriptArgState?.store?.selectedOption;
+
+            if (selectedScript?.meta?.inputExample) {
+              exampleUsageText = i18n.translate(
+                'xpack.securitySolution.consoleCommandsDefinition.runscript.sentinelOne.scriptInputExample',
+                {
+                  defaultMessage: '{scriptName} script input: {example}',
+                  values: {
+                    scriptName: scriptArgState?.valueText,
+                    example: selectedScript?.meta?.inputExample,
+                  },
+                }
+              );
+            }
+          }
+
+          return exampleUsageText;
+        };
         command.args = {
           script: {
             required: true,
