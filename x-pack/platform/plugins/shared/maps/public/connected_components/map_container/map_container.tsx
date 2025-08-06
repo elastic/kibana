@@ -17,6 +17,7 @@ import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { Provider, ReactReduxContext } from 'react-redux';
+import { OverlayRef } from '@kbn/core/public';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -28,7 +29,6 @@ import { MapSettings } from '../../../common/descriptor_types';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
 import { updateFlyout } from '../../actions';
-import { OverlayRef } from '@kbn/core/public';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -192,7 +192,7 @@ export class MapContainer extends Component<Props, State> {
 
     // Ensure the built-in close buttons from openLazyFlyout correctly update the Redux state
     this._flyoutRef.onClose.then(() => {
-      // If the flyout has closed from something other than a Redux state change
+      // If the flyout has closed because of something other than a Redux state change
       if (this.props.flyoutDisplay === flyoutDisplay)
         this.context.store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
     });

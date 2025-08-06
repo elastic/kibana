@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useRef } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 import { LayerTOC } from './layer_toc';
 import { isScreenshotMode } from '../../../kibana_services';
 import { ILayer } from '../../../classes/layers/layer';
@@ -48,6 +49,20 @@ export function LayerControl({
   showAllLayers,
   zoom,
 }: Props) {
+  // Track if the flyout has just closed. Assuming it closes and doesn't immediately reopen, focus the Add Layer button
+  const addLayerRef = useRef<HTMLButtonElement>(null);
+  const prevIsFlyoutOpen = useRef(isFlyoutOpen);
+  useDebounce(
+    () => {
+      if (!isFlyoutOpen && !!prevIsFlyoutOpen.current) {
+        addLayerRef.current?.focus();
+      }
+      prevIsFlyoutOpen.current = isFlyoutOpen;
+    },
+    250,
+    [isFlyoutOpen]
+  );
+
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
       return null;
@@ -82,6 +97,7 @@ export function LayerControl({
       <Fragment>
         <EuiSpacer size="s" />
         <EuiButton
+          buttonRef={addLayerRef}
           isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
           fill
