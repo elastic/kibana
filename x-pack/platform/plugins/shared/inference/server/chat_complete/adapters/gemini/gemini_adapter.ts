@@ -30,6 +30,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     modelName,
+    stopSequences,
     abortSignal,
     metadata,
   }) => {
@@ -44,7 +45,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           temperature,
           model: modelName,
           signal: abortSignal,
-          stopSequences: ['\n\nHuman:'],
+          stopSequences: ['\n\nHuman:'].concat(stopSequences ?? []),
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),

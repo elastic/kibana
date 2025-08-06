@@ -171,6 +171,7 @@ export class KibanaClient {
           pathname: '/internal/observability_ai_assistant/kb/setup',
           query: {
             inference_id: '.elser-2-elasticsearch',
+            wait_until_complete: true,
           },
         });
         this.log.info('Knowledge base is ready');

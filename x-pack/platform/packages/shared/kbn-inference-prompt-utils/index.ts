@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { executeAsReasoningAgent } from './src/flows/reasoning/execute_as_reasoning_agent';
+export {
+  executeAsReasoningAgent,
+  type ReasoningPromptResponse,
+  type ReasoningPromptResponseOf,
+} from './src/flows/reasoning/execute_as_reasoning_agent';

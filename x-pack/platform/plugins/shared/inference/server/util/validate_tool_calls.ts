@@ -20,7 +20,11 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallsOf<TToolOptions>['toolCalls'] {
+  content,
+}: TToolOptions & {
+  content?: string;
+  toolCalls: UnvalidatedToolCall[];
+}): ToolCallsOf<TToolOptions>['toolCalls'] {
   const validator = new Ajv();
 
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
@@ -28,7 +32,7 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
       `tool_choice was "none" but ${toolCalls
         .map((toolCall) => toolCall.function.name)
         .join(', ')} was/were called`,
-      { toolCalls }
+      { toolCalls, content }
     );
   }
 
@@ -36,7 +40,7 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      throw createToolNotFoundError(toolCall.function.name);
+      throw createToolNotFoundError(toolCall.function.name, { content, toolCalls });
     }
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
@@ -46,11 +50,15 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);
     } catch (error) {
-      throw createToolValidationError(`Failed parsing arguments for ${toolCall.function.name}`, {
-        name: toolCall.function.name,
-        arguments: toolCall.function.arguments,
-        toolCalls: [toolCall],
-      });
+      throw createToolValidationError(
+        `Failed parsing arguments for tool id = ${toolCall.toolCallId}, name = ${toolCall.function.name}`,
+        {
+          name: toolCall.function.name,
+          arguments: toolCall.function.arguments,
+          toolCalls,
+          content,
+        }
+      );
     }
 
     const valid = validator.validate(toolSchema, serializedArguments);
@@ -63,6 +71,7 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
           errorsText: validator.errorsText(),
           arguments: toolCall.function.arguments,
           toolCalls,
+          content,
         }
       );
     }
