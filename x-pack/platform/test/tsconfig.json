@@ -140,6 +140,5 @@
     "@kbn/usage-collection-plugin",
     "@kbn/core-deprecations-common",
     "@kbn/controls-plugin",
-    "@kbn/test-suites-xpack-platform"
   ]
 }
