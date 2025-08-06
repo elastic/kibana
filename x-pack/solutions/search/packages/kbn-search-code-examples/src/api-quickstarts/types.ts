@@ -6,16 +6,7 @@
  */
 
 export interface QuickstartCodeExamples {
-  basics: QuickstartCodeSnippetFunction<BasicsCodeSnippetParameters>;
+  basics: QuickstartCodeSnippetFunction;
 }
 
-export type QuickstartCodeSnippetFunction<T extends QuickstartCodeSnippetParameters> = (
-  params: T
-) => string;
-
-export type QuickstartCodeSnippetParameters = BasicsCodeSnippetParameters;
-
-export interface BasicsCodeSnippetParameters {
-  indexName?: string;
-  createIndex: boolean;
-}
+export type QuickstartCodeSnippetFunction = () => string;
