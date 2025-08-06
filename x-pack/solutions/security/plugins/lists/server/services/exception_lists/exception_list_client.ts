@@ -79,7 +79,6 @@ import { findExceptionList } from './find_exception_list';
 import { findExceptionListsItem } from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
 import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
-import { createEndpointTrustedDevicesList } from './create_endpoint_trusted_devices_list';
 import { PromiseFromStreams, importExceptions } from './import_exception_list_and_items';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
@@ -255,21 +254,6 @@ export class ExceptionListClient {
   public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return createEndpointTrustedAppsList({
-      savedObjectsClient,
-      user,
-      version: 1,
-    });
-  };
-
-  /**
-   * Create the Trusted Devices Agnostic list if it does not yet exist (`null` is returned if it does exist)
-   * @returns The exception list schema or null if it does not exist
-   */
-
-  // TODO: This is a stub for future implementation, it's not being executed in the current codebase.
-  public createTrustedDevicesList = async (): Promise<ExceptionListSchema | null> => {
-    const { savedObjectsClient, user } = this;
-    return createEndpointTrustedDevicesList({
       savedObjectsClient,
       user,
       version: 1,
