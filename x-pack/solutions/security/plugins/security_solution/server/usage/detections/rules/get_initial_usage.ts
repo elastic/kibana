@@ -16,6 +16,7 @@ import type {
   FeatureTypeUsage,
   ResponseActionsUsage,
   UpgradeableRulesSummary,
+  ThreatMatchFeatureTypeUsage,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -61,6 +62,11 @@ export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
   has_exceptions: 0,
 });
 
+export const getInitialThreatMatchFeatureTypeUsage = (): ThreatMatchFeatureTypeUsage => ({
+  ...getInitialFeatureTypeUsage(),
+  has_does_not_match_condition: 0,
+});
+
 /**
  * Default detection rule usage count, split by type + elastic/custom
  */
@@ -73,8 +79,8 @@ export const getInitialRulesUsage = (): RulesTypeUsage => ({
   eql_custom: getInitialFeatureTypeUsage(),
   machine_learning: getInitialFeatureTypeUsage(),
   machine_learning_custom: getInitialFeatureTypeUsage(),
-  threat_match: getInitialFeatureTypeUsage(),
-  threat_match_custom: getInitialFeatureTypeUsage(),
+  threat_match: getInitialThreatMatchFeatureTypeUsage(),
+  threat_match_custom: getInitialThreatMatchFeatureTypeUsage(),
   new_terms: getInitialFeatureTypeUsage(),
   new_terms_custom: getInitialFeatureTypeUsage(),
   esql: getInitialFeatureTypeUsage(),
