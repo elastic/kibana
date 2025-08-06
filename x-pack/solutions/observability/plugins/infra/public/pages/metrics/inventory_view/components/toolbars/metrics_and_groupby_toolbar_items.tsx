@@ -17,36 +17,45 @@ import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
-import { toGroupByOpt } from './toolbar_wrapper';
 import type { ToolbarProps } from './types';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 
 interface Props extends ToolbarProps {
   groupByFields: string[];
+  allowSchemaSelection?: boolean;
 }
 
 export const MetricsAndGroupByToolbarItems = ({
   preferredSchema,
   changePreferredSchema,
+  allowSchemaSelection = false,
   ...props
 }: Props) => {
   const inventoryModel = findInventoryModel(props.nodeType);
   const { featureFlags } = usePluginConfig();
   const { data: timeRangeMetadata, loading } = useTimeRangeMetadataContext();
+
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata]
   );
 
   useEffect(() => {
-    if (!timeRangeMetadata || schemas.length === 0 || !featureFlags.hostOtelEnabled) return;
+    if (
+      !allowSchemaSelection ||
+      !timeRangeMetadata ||
+      schemas.length === 0 ||
+      !featureFlags.hostOtelEnabled
+    ) {
+      return;
+    }
 
     const current = preferredSchema;
     if (current === null) {
-      const next = schemas.includes('semconv') ? 'semconv' : schemas[0];
-      changePreferredSchema(next);
+      changePreferredSchema(timeRangeMetadata.preferredSchema);
     }
   }, [
+    allowSchemaSelection,
     changePreferredSchema,
     featureFlags.hostOtelEnabled,
     preferredSchema,
@@ -68,7 +77,7 @@ export const MetricsAndGroupByToolbarItems = ({
   );
 
   const groupByOptions = useMemo(
-    () => props.groupByFields.map(toGroupByOpt),
+    () => props.groupByFields.map((field) => ({ text: field, field })),
     [props.groupByFields]
   );
 
@@ -100,7 +109,7 @@ export const MetricsAndGroupByToolbarItems = ({
         </EuiFlexItem>
       )}
 
-      {featureFlags.hostOtelEnabled && (
+      {featureFlags.hostOtelEnabled && allowSchemaSelection && (
         <EuiFlexItem>
           <SchemaSelector
             value={preferredSchema ?? 'ecs'}

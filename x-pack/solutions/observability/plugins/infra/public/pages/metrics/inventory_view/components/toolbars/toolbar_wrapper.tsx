@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { fieldToName } from '../../lib/field_to_display_name';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
 import type { ToolbarProps } from './types';
@@ -68,8 +67,3 @@ export const ToolbarWrapper = (props: Props) => {
     </EuiFlexGroup>
   );
 };
-
-export const toGroupByOpt = (field: string) => ({
-  text: fieldToName(field),
-  field,
-});

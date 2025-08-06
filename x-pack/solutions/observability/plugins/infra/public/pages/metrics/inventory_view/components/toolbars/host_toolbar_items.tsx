@@ -16,7 +16,21 @@ export const ecsHostGroupByFields = [
   'service.type',
 ];
 
-const semconvHostGroupByFields = ['cloud.availability_zone', 'host.type', 'cloud.provider'];
+const semconvHostGroupByFields = [
+  'os.name',
+  'os.version',
+  'os.type',
+  'host.type',
+  'host.arch',
+  'host.image.id',
+  'host.image.name',
+  'host.image.version',
+  'cloud.account_id',
+  'cloud.platform',
+  'cloud.provider',
+  'cloud.availability_zone',
+  'cloud.region',
+];
 
 export const HostToolbarItems = (props: ToolbarProps) => {
   return (
@@ -25,6 +39,7 @@ export const HostToolbarItems = (props: ToolbarProps) => {
       groupByFields={
         props.preferredSchema === 'ecs' ? ecsHostGroupByFields : semconvHostGroupByFields
       }
+      allowSchemaSelection
     />
   );
 };
