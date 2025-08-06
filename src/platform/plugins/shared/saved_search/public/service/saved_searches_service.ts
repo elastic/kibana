@@ -12,12 +12,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { SavedSearchType } from '../../../common';
-import type { SavedSearchCrudTypes } from '../../../common/content_management';
-import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';
+import { SavedSearchType } from '../../common';
+import type { SavedSearchCrudTypes } from '../../common/content_management';
+import type { SavedSearch, SerializableSavedSearch } from '../../common/types';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
-import { getDiscoverSession } from '../../../common/service/get_discover_session';
-import { getSavedSearch } from '../../../common/service/get_saved_searches';
+import { getDiscoverSession } from '../../common/service/get_discover_session';
+import { getSavedSearch } from '../../common/service/get_saved_searches';
 import type { SaveSavedSearchOptions } from './save_saved_searches';
 import { saveSavedSearch } from './save_saved_searches';
 import type {
