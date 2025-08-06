@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { HuggingFaceDatasetSpec } from './types';
+import { HuggingFaceDatasetSpec } from '../types';
 
 export async function ensureDatasetIndexExists({
   esClient,
