@@ -30,7 +30,6 @@ export const EmptyPrompt: FC = () => {
     </EuiLink>
   );
 
-  // Bold text for drag and drop instruction
   const dragAndDrop = (
     <strong>
       <FormattedMessage
