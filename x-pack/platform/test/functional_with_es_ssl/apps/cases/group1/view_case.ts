@@ -895,7 +895,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       describe('unknown users', () => {
         beforeEach(async () => {
           await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
           );
 
           await cases.navigation.navigateToApp();
@@ -906,7 +906,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
           );
 
           await cases.api.deleteAllCases();
