@@ -7,27 +7,27 @@
 
 import { getNewRule } from '../../../objects/rule';
 import {
-  ALERT_SUMMARY_CHARTS,
-  SELECT_OVERVIEW_CHARTS,
-  SELECT_HISTOGRAM,
-  SELECT_COUNTS_TABLE,
-  SELECT_TREEMAP,
-  ALERT_SUMMARY_SEVERITY_DONUT_CHART,
-  ALERT_SUMMARY_RULES_TABLE,
-  ALERT_SUMMARY_PROGRESS_BAR_CHARTS,
-  ALERTS_HISTOGRAM,
   ALERT_COUNT_TABLE,
+  ALERT_SUMMARY_CHARTS,
+  ALERT_SUMMARY_CHARTS_COLLAPSED,
+  ALERT_SUMMARY_PROGRESS_BAR_CHARTS,
+  ALERT_SUMMARY_RULES_TABLE,
+  ALERT_SUMMARY_SEVERITY_DONUT_CHART,
   ALERT_TREEMAP,
   ALERTS_COUNT,
-  ALERT_SUMMARY_CHARTS_COLLAPSED,
+  ALERTS_HISTOGRAM,
+  SELECT_COUNTS_TABLE,
+  SELECT_HISTOGRAM,
+  SELECT_OVERVIEW_CHARTS,
+  SELECT_TREEMAP,
 } from '../../../screens/alerts';
 import {
   clickAlertsHistogramLegend,
   clickAlertsHistogramLegendAddToTimeline,
   clickAlertsHistogramLegendFilterFor,
   clickAlertsHistogramLegendFilterOut,
-  selectAlertsHistogram,
   selectAlertsCountTable,
+  selectAlertsHistogram,
   selectAlertsTreemap,
   toggleKPICharts,
 } from '../../../tasks/alerts';
@@ -42,8 +42,7 @@ import {
 } from '../../../screens/search_bar';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-// FLAKY: https://github.com/elastic/kibana/issues/192459
-describe.skip('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
+describe('KPI visualizations in Alerts Page', { tags: ['@ess', '@serverless'] }, () => {
   const ruleConfigs = getNewRule();
   beforeEach(() => {
     deleteAlertsAndRules();
