@@ -7,8 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { installPrebuiltRulesPackage } from './integrations/install_prebuilt_rules_package';
-import { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
-import { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
+import type { IPrebuiltRuleAssetsClient } from './rule_assets/prebuilt_rule_assets_client';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../../types';
 
 export async function ensureLatestRulesPackageInstalled(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
