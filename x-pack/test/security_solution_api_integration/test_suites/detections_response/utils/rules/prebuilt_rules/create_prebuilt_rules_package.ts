@@ -6,6 +6,7 @@
  */
 
 import AdmZip from 'adm-zip';
+import { safeDump } from 'js-yaml';
 import semver from 'semver';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
@@ -49,11 +50,13 @@ function createPackageManifest(packageName: string, packageSemver: string): Buff
   const packageManifest: PackageSpecManifest = {
     name: packageName,
     title: 'Prebuilt Security Detection Rules',
+    description: 'Mock security detection engine package for testing purposes',
     version: packageSemver,
     owner: { github: 'elastic/protections' },
+    format_version: '1.0.0',
   };
 
-  const yamlContent = dump(packageManifest, {
+  const yamlContent = safeDump(packageManifest, {
     noRefs: true,
     skipInvalid: true,
   });
