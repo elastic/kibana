@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
 
@@ -19,16 +19,72 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let readDataClient: jest.Mocked<Pick<IRuleDataReader, 'search'>>;
 
+  // Minimal type for the mock response and hits
+  interface MinimalHit {
+    _id?: string;
+    id?: string;
+    _source?: unknown;
+  }
+  interface MinimalResponse {
+    hits?: {
+      hits?: MinimalHit[];
+      total?: number | { value: number; relation: string };
+    };
+  }
+
+  // Helper to build a valid ESSearchResponse mock from getResponseMock()
+  const buildMockESSearchResponse = (
+    responseData: MinimalResponse
+  ): ESSearchResponse<unknown, ESSearchRequest> => {
+    const totalValue =
+      typeof responseData.hits?.total === 'object' && responseData.hits?.total !== null
+        ? responseData.hits.total.value
+        : typeof responseData.hits?.total === 'number'
+        ? responseData.hits.total
+        : responseData.hits && Array.isArray(responseData.hits.hits)
+        ? responseData.hits.hits.length
+        : 0;
+
+    return {
+      took: 1,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: {
+        hits: (responseData.hits?.hits || []).map((hit: MinimalHit, idx: number) => ({
+          _index: 'test-index',
+          _id: hit._id || hit.id || `id-${idx}`,
+          _score: 1,
+          _source: hit._source || hit,
+          _type: '_doc',
+          sort: [],
+          _ignored: undefined,
+          _version: undefined,
+          fields: undefined,
+          highlight: undefined,
+          inner_hits: undefined,
+          matched_queries: undefined,
+          nested: undefined,
+          explanation: undefined,
+        })),
+        total: { value: totalValue, relation: 'eq' },
+        max_score: 1,
+      },
+      aggregations: undefined,
+      pit_id: undefined,
+      _clusters: undefined,
+      _scroll_id: undefined,
+      suggest: undefined,
+    };
+  };
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     readDataClient = { search: jest.fn() };
   });
 
   it('returns alerts when given valid ids', async () => {
-    const mockResponse = getResponseMock();
-    readDataClient.search.mockResolvedValueOnce(
-      mockResponse as unknown as estypes.SearchResponse<unknown>
-    );
+    const mockResponse = buildMockESSearchResponse(getResponseMock());
+    readDataClient.search.mockResolvedValueOnce(mockResponse);
 
     const result = await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
@@ -216,10 +272,8 @@ describe('getCreatedAttackDiscoveryAlerts', () => {
   });
 
   it('calls search with the expected size', async () => {
-    const mockResponse = getResponseMock();
-    readDataClient.search.mockResolvedValueOnce(
-      mockResponse as unknown as estypes.SearchResponse<unknown>
-    );
+    const mockResponse = buildMockESSearchResponse(getResponseMock());
+    readDataClient.search.mockResolvedValueOnce(mockResponse);
 
     await getCreatedAttackDiscoveryAlerts({
       attackDiscoveryAlertsIndex,
