@@ -10,11 +10,10 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import type { SavedSearch, SavedSearchAttributes } from '..';
-import { extractTabs, fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
+import type { SavedSearch } from '..';
+import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
 import type { SerializableSavedSearch } from '../types';
-
-export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,

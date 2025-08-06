@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
 import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
+import { extractTabs } from './extract_tabs';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
 
@@ -135,17 +136,3 @@ export const getSavedSearch = async <
 
   return savedSearch as ReturnType;
 };
-
-/**
- * Returns a new saved search
- * Used when e.g. Discover is opened without a saved search id
- * @param search
- */
-export const getNewSavedSearch = ({
-  searchSource,
-}: {
-  searchSource: ISearchStartSearchSource;
-}): SavedSearch => ({
-  searchSource: searchSource.createEmpty(),
-  managed: false,
-});
