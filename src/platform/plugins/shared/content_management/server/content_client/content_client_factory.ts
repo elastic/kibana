@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { Version } from '@kbn/object-versioning';
 
 import type { MSearchIn, MSearchOut } from '../../common';
-import type { ContentRegistry } from '../core';
+import type { ContentRegistry, StorageContext } from '../core';
 import { MSearchService } from '../core/msearch';
 import { getServiceObjectTransformFactory, getStorageContext } from '../utils';
 import { ContentClient } from './content_client';
@@ -62,9 +62,11 @@ export const getMSearchClientFactory =
   ({
     contentRegistry,
     mSearchService,
+    logger,
   }: {
     contentRegistry: ContentRegistry;
     mSearchService: MSearchService;
+    logger: Logger;
   }) =>
   ({
     requestHandlerContext,
@@ -74,25 +76,32 @@ export const getMSearchClientFactory =
     request: KibanaRequest;
   }) => {
     const msearch = async ({ contentTypes, query }: MSearchIn): Promise<MSearchOut> => {
-      const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
+      const contentTypesWithStorageContext = contentTypes.reduce<
+        Array<{ contentTypeId: string; ctx: StorageContext }>
+      >((acc, { contentTypeId, version }) => {
         const contentDefinition = contentRegistry.getDefinition(contentTypeId);
 
-        const storageContext = getStorageContext({
+        if (contentDefinition.storage.mSearch) {
+          const storageContext = getStorageContext({
             request,
-          contentTypeId,
-          version: version ?? contentDefinition.version.latest,
-          ctx: {
-            contentRegistry,
-            requestHandlerContext,
-            getTransformsFactory: getServiceObjectTransformFactory,
-          },
-        });
+            contentTypeId,
+            version: version ?? contentDefinition.version.latest,
+            ctx: {
+              contentRegistry,
+              requestHandlerContext,
+              getTransformsFactory: getServiceObjectTransformFactory,
+            },
+          });
+          acc.push({
+            contentTypeId,
+            ctx: storageContext,
+          });
+        } else {
+          logger.warn(`mSearch method missing for content type "${contentTypeId}" v${version}.`);
+        }
 
-        return {
-          contentTypeId,
-          ctx: storageContext,
-        };
-      });
+        return acc;
+      }, []);
 
       const result = await mSearchService.search(contentTypesWithStorageContext, query);
 
