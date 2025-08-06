@@ -15,6 +15,7 @@ import {
   EuiModalHeaderTitle,
   EuiButton,
   EuiSkeletonText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,11 +33,17 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const changelogText = formatChangelog(changelog);
+  const changelogModalTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiModal maxWidth={true} onClose={onClose} data-test-subj="integrations.changelogModal">
+    <EuiModal
+      maxWidth={true}
+      onClose={onClose}
+      data-test-subj="integrations.changelogModal"
+      aria-labelledby={changelogModalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{'Changelog'}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={changelogModalTitleId}>{'Changelog'}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSkeletonText

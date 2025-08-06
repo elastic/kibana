@@ -25,7 +25,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
