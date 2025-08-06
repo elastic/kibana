@@ -11,14 +11,16 @@ import { UserProfile } from '@kbn/core-user-profile-common';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 
 interface Props {
-  onUserSelect: (user: UserProfile) => void;
+  onUsersSelect: (users: UserProfile[]) => void;
   selectedUsers: UserProfile[];
 }
 
-const UserProfilesSearchComponent: React.FC<Props> = ({ onUserSelect, selectedUsers }) => {
+const UserProfilesSearchComponent: React.FC<Props> = ({ onUsersSelect, selectedUsers }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentSelectedUser, setCurrentSelectedUser] = useState<UserProfile | null>(selectedUsers);
   const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
     searchTerm,
+    includeCurrentUser: false,
   });
   console.log('userProfiles', userProfiles);
   return (
@@ -28,10 +30,11 @@ const UserProfilesSearchComponent: React.FC<Props> = ({ onUserSelect, selectedUs
         options: userProfiles,
         selectedOptions: selectedUsers,
         onChange: (nextSelectedOptions) => {
-          const nextFilters = nextSelectedOptions.map((option) => option.user.username);
-          // call on change
-          console.log('nextSelectedOptions', nextSelectedOptions);
-          console.log('nextFilters', nextFilters);
+          const nextUsers: UserProfile[] = nextSelectedOptions.filter(
+            (user): user is UserProfile => user !== null
+          );
+          onUsersSelect(nextUsers);
+          console.log('nextUsers', nextUsers);
         },
       }}
     />

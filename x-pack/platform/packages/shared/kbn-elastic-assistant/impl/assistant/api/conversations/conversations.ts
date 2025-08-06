@@ -13,6 +13,7 @@ import {
   Replacements,
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  User,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, ClientMessage } from '../../../assistant_context/types';
 import { FetchConversationsResponse } from './use_fetch_current_user_conversations';
@@ -196,6 +197,7 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
+  users?: User[];
   messages?: ClientMessage[];
   apiConfig?: ApiConfig;
   replacements?: Replacements;
@@ -221,6 +223,7 @@ export const updateConversation = async ({
   http,
   toasts,
   title,
+  users,
   conversationId,
   messages,
   apiConfig,
@@ -236,6 +239,7 @@ export const updateConversation = async ({
         body: JSON.stringify({
           id: conversationId,
           title,
+          users,
           messages,
           replacements,
           apiConfig,

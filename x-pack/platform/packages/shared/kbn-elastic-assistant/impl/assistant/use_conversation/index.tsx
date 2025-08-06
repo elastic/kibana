@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
+import { ApiConfig, User } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, ClientMessage } from '../../assistant_context/types';
 import { getDefaultSystemPrompt } from './helpers';
@@ -28,6 +28,11 @@ interface UpdateConversationTitleProps {
   updatedTitle: string;
 }
 
+interface UpdateConversationUsersProps {
+  conversationId: string;
+  updatedUsers: User[];
+}
+
 export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   deleteConversation: (conversationId: string) => void;
@@ -42,6 +47,10 @@ export interface UseConversation {
     conversationId,
     updatedTitle,
   }: UpdateConversationTitleProps) => Promise<Conversation>;
+  updateConversationUsers: ({
+    conversationId,
+    updatedUsers,
+  }: UpdateConversationUsersProps) => Promise<Conversation>;
 }
 
 export const useConversation = (): UseConversation => {
@@ -153,6 +162,16 @@ export const useConversation = (): UseConversation => {
     [http]
   );
 
+  const updateConversationUsers = useCallback(
+    ({ conversationId, updatedUsers }: UpdateConversationUsersProps): Promise<Conversation> =>
+      updateConversation({
+        http,
+        conversationId,
+        users: updatedUsers,
+      }),
+    [http]
+  );
+
   return {
     clearConversation,
     deleteConversation,
@@ -161,5 +180,6 @@ export const useConversation = (): UseConversation => {
     updateConversationTitle,
     createConversation,
     getConversation,
+    updateConversationUsers,
   };
 };

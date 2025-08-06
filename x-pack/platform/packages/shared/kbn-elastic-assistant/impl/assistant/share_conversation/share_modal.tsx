@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -18,20 +18,18 @@ import {
   EuiText,
   EuiCopy,
 } from '@elastic/eui';
+import { UserProfile } from '@kbn/core-user-profile-common';
+import { useConversation } from '../use_conversation';
 import { COPY_URL } from '../settings/settings_context_menu/translations';
 import * as i18n from './translations';
-import { Conversation } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
-
-interface SharedUser {
-  name: string;
-  color: string;
-}
 
 interface Props {
   selectedConversation: Conversation | undefined;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
 }
 const shareOptions = [
   {
@@ -47,29 +45,69 @@ const shareOptions = [
 ];
 const ShareModalComponent: React.FC<Props> = ({
   isModalOpen,
+  refetchCurrentConversation,
   setIsModalOpen,
   selectedConversation,
 }) => {
+  const { updateConversationUsers } = useConversation();
   const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>('everyone');
-  const selectedUsers = useMemo(
-    () =>
-      selectedConversation?.users.map(({ name, id }) => ({
-        // id or name will be defined, empty string is fallback for TS
-        uid: id ?? name ?? '',
-        enabled: true,
-        user: { username: name ?? id ?? '' },
-        data: {},
-      })) || [],
-    [selectedConversation]
-  );
+  const { currentUser } = useAssistantContext();
+  const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
+  useEffect(() => {
+    setNextUsers(
+      selectedConversation?.users
+        // do not show current user in UI
+        .filter((user) => user.id !== currentUser?.id && user.name !== currentUser?.name)
+        .map(({ name, id }) => ({
+          // id or name will be defined, empty string is fallback for TS
+          uid: id ?? name ?? '',
+          enabled: true,
+          user: { username: name ?? id ?? '' },
+          data: {},
+        })) || []
+    );
+  }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
 
   const accessText = useMemo(
     () => (sharingOption === 'everyone' ? i18n.EVERYONE : i18n.ONLY_SELECTED),
     [sharingOption]
   );
 
+  const onUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
+    setNextUsers(updatedUsers);
+  }, []);
+
+  const onCancelShare = useCallback(() => {
+    setIsModalOpen(false);
+  }, [setIsModalOpen]);
+
+  const onSaveShare = useCallback(async () => {
+    setIsModalOpen(false);
+    if (selectedConversation && selectedConversation?.id !== '') {
+      await updateConversationUsers({
+        conversationId: selectedConversation.id,
+        updatedUsers: [
+          ...nextUsers.map((user) => ({
+            id: user?.uid ?? '',
+            name: user?.user?.username ?? '',
+          })),
+          // readd current user
+          ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
+        ],
+      });
+      refetchCurrentConversation({});
+    }
+  }, [
+    currentUser,
+    nextUsers,
+    refetchCurrentConversation,
+    selectedConversation,
+    setIsModalOpen,
+    updateConversationUsers,
+  ]);
+
   return isModalOpen ? (
-    <EuiModal onClose={() => setIsModalOpen(false)} maxWidth={600}>
+    <EuiModal onClose={onCancelShare} maxWidth={600}>
       <EuiModalHeader>
         <EuiModalHeaderTitle className="eui-textTruncate">
           {`${i18n.SHARE} `} <strong>{selectedConversation?.title}</strong>
@@ -90,7 +128,7 @@ const ShareModalComponent: React.FC<Props> = ({
 
         {sharingOption === 'selected' && (
           <>
-            <UserProfilesSearch onUserSelect={() => {}} selectedUsers={selectedUsers} />
+            <UserProfilesSearch onUsersSelect={onUsersSelect} selectedUsers={nextUsers} />
             <EuiSpacer size="m" />
           </>
         )}
@@ -112,7 +150,7 @@ const ShareModalComponent: React.FC<Props> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={() => setIsModalOpen(false)} fill>
+        <EuiButton onClick={onSaveShare} fill>
           {i18n.DONE}
         </EuiButton>
       </EuiModalFooter>

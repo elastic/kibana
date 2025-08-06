@@ -24,11 +24,16 @@ import * as i18n from './translations';
 interface Props {
   selectedConversation: Conversation | undefined;
   isConversationOwner: boolean;
+  refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
 }
 interface ShareBadgeOptionData {
   description?: string;
 }
-const ShareBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedConversation }) => {
+const ShareBadgeComponent: React.FC<Props> = ({
+  isConversationOwner,
+  refetchCurrentConversation,
+  selectedConversation,
+}) => {
   const isShared = useMemo(
     () => selectedConversation?.users.length !== 1,
     [selectedConversation?.users]
@@ -167,11 +172,14 @@ const ShareBadgeComponent: React.FC<Props> = ({ isConversationOwner, selectedCon
           )}
         </EuiSelectable>
       </EuiPopover>
-      <ShareModal
-        selectedConversation={selectedConversation}
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
-      />
+      {isModalOpen && (
+        <ShareModal
+          selectedConversation={selectedConversation}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          refetchCurrentConversation={refetchCurrentConversation}
+        />
+      )}
     </>
   );
 };

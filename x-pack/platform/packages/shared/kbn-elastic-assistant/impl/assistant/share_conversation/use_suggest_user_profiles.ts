@@ -17,7 +17,10 @@ import {
 import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../..';
 
-type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
+type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & {
+  onDebounce?: () => void;
+  includeCurrentUser?: boolean;
+};
 
 /**
  * Time in ms until the data become stale.
@@ -29,13 +32,13 @@ const STALE_TIME = 1000 * 60;
 const SEARCH_DEBOUNCE_MS = 250;
 const DEFAULT_USER_SIZE = 10;
 export const useSuggestUserProfiles = ({
+  includeCurrentUser = true,
   searchTerm,
   size = DEFAULT_USER_SIZE,
   onDebounce = noop,
 }: Props) => {
-  const { http, toasts } = useAssistantContext();
+  const { http, toasts, currentUser } = useAssistantContext();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
-
   useDebounce(
     () => {
       setDebouncedSearchTerm(searchTerm);
@@ -58,6 +61,12 @@ export const useSuggestUserProfiles = ({
       retry: false,
       keepPreviousData: true,
       staleTime: STALE_TIME,
+      select: (data) =>
+        includeCurrentUser
+          ? data
+          : data.filter(
+              (user) => user.uid !== currentUser?.id && user.user.username !== currentUser?.name
+            ),
       onError: (error) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(

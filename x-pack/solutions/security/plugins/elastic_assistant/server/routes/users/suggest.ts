@@ -59,21 +59,21 @@ export const suggestUsersRoute = (router: ElasticAssistantPluginRouter, logger: 
           if (!checkResponse.isSuccess) {
             return checkResponse.response;
           }
+          const spaceId = ctx.elasticAssistant.getSpaceId();
 
           const { searchTerm, size } = request.body;
           const result = await ctx.elasticAssistant.userProfiles.suggest({
             name: searchTerm,
             size,
             dataPath: 'avatar',
-            // TODO research requiredPrivileges
-            // requiredPrivileges: {
-            //   spaceId,
-            //   privileges: {
-            //     kibana: UserProfileService.buildRequiredPrivileges(owners, securityPluginStart),
-            //   },
-            // },
+            // ensure that the user has the required assistant privileges
+            requiredPrivileges: {
+              spaceId,
+              privileges: {
+                kibana: ['elasticAssistant'],
+              },
+            },
           });
-          console.log('users search result: ==>', JSON.stringify(result, null, 2));
           return response.ok({
             body: result,
           });
