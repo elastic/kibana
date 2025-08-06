@@ -10,6 +10,7 @@ import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY } from '../constants';
 
 export const conditions = {
   isFullyTranslated(): QueryDslQueryContainer {
@@ -60,7 +61,7 @@ export const conditions = {
   isMissingIndex(): QueryDslQueryContainer {
     return {
       query_string: {
-        query: 'elastic_rule.query:"FROM [indexPattern]"',
+        query: SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY,
       },
     };
   },

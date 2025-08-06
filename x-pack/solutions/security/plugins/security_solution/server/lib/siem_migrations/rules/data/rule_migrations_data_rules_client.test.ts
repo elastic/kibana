@@ -18,6 +18,7 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../types';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY } from '../constants';
 
 describe('RuleMigrationsDataRulesClient', () => {
   let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
@@ -778,13 +779,18 @@ describe('RuleMigrationsDataRulesClient', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'elastic_rule.query:"FROM [indexPattern]"',
+                term: {
+                  migration_id: 'migration1',
                 },
               },
               {
                 terms: {
-                  'elastic_rule.id': ['rule1', 'rule2'],
+                  _id: ['rule1', 'rule2'],
+                },
+              },
+              {
+                query_string: {
+                  query: SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY,
                 },
               },
             ],
@@ -814,13 +820,13 @@ describe('RuleMigrationsDataRulesClient', () => {
           bool: {
             filter: [
               {
-                query_string: {
-                  query: 'elastic_rule.query:"FROM [indexPattern]"',
+                term: {
+                  migration_id: 'migration1',
                 },
               },
               {
-                terms: {
-                  migration_id: ['migration1'],
+                query_string: {
+                  query: SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY,
                 },
               },
             ],
