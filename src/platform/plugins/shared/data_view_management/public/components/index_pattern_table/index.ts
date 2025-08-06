@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
+export { IndexPatternTableContainerRouter } from './index_pattern_table_container';

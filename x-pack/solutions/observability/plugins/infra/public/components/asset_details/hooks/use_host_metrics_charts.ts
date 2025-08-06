@@ -45,18 +45,14 @@ export const useHostCharts = ({
 export const useKubernetesCharts = ({
   dataViewId,
   overview,
-  schema,
 }: {
   dataViewId?: string;
   overview?: boolean;
-  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kubernetesNode } = await model.metrics.getCharts({
-      schema: schema ?? DataSchemaFormat.ECS,
-    });
+    const { kubernetesNode } = await model.metrics.getCharts();
 
     if (!kubernetesNode) {
       return [];
@@ -81,7 +77,7 @@ export const useKubernetesCharts = ({
         }),
       };
     });
-  }, [model.metrics, schema, overview, dataViewId]);
+  }, [model.metrics, overview, dataViewId]);
 
   return { charts, error };
 };

@@ -57,21 +57,21 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
-  const { filterQueryAsJson } = useWaffleFiltersContext();
+  const { filterQuery } = useWaffleFiltersContext();
   const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
-  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
-    filterQueryAsJson,
-    [metric],
+  const { loading, error, startTime, endTime, timeseries, reload } = useTimeline({
+    kuery: filterQuery.expression,
+    metrics: [metric],
     nodeType,
     sourceId,
     currentTime,
     accountId,
     region,
     interval,
-    isVisible
-  );
+    shouldReload: isVisible,
+  });
 
   const anomalyMetricName = useMemo((): Metric | undefined => {
     const metricType = metric.type;
