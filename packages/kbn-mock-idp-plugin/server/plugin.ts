@@ -18,6 +18,7 @@ import {
   SERVERLESS_ROLES_ROOT_PATH,
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
+import type { ServerlessProductTier } from '@kbn/es/src/utils';
 import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
 
 export interface PluginSetupDependencies {
@@ -42,10 +43,7 @@ const projectToAlias = new Map<string, string>([
   // requires update of config/serverless.chat.yml (currently uses projectType 'search')
 ]);
 
-const readServerlessRoles = (
-  projectType: string,
-  productTier?: 'complete' | 'logs_essentials' | 'essentials' | 'search_ai_lake'
-) => {
+const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
     const rolesResourcePath =
