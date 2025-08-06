@@ -9,11 +9,12 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const EmptyPrompt: FC = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
+  const { euiTheme } = useEuiTheme();
 
   const uploading = (
     <EuiLink
@@ -31,12 +32,13 @@ export const EmptyPrompt: FC = () => {
   );
 
   const dragAndDrop = (
-    <strong>
+    <EuiText component="span" size="s" css={{ fontWeight: euiTheme.font.weight.bold }}>
       <FormattedMessage
+        css={{ fontWeight: euiTheme.font.weight.bold }}
         id="indexEditor.emptyPrompt.dragAndDrop"
         defaultMessage="dragging and dropping"
       />
-    </strong>
+    </EuiText>
   );
 
   return (
