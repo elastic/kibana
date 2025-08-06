@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-// this package could now be removed
+export { getDefaultConnector } from './src/connectors';
