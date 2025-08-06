@@ -29,7 +29,7 @@ export const InventoryTimeRangeMetadataProvider = ({ children }: { children: Rea
   return (
     <TimeRangeMetadataProvider
       dataSource={nodeType}
-      kuery={filterQuery.expression}
+      kuery={filterQuery.query}
       start={start}
       end={end}
     >

@@ -107,7 +107,10 @@ const createInfraMetricsRequest = ({
   query: esQuery,
   from: dateRange.from,
   to: dateRange.to,
-  metrics: HOST_TABLE_METRICS,
+  metrics:
+    schema === 'ecs'
+      ? HOST_TABLE_METRICS
+      : HOST_TABLE_METRICS.filter((metric) => !['rxV2', 'txV2'].includes(metric)),
   limit,
   schema,
 });

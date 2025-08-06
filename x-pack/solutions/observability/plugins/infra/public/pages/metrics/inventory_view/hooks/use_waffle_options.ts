@@ -107,6 +107,7 @@ export const useWaffleOptions = () => {
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
+    writeDefaultState: true,
   });
 
   const previousViewId = useRef<string | undefined>(currentView?.id);
@@ -191,8 +192,6 @@ export const useWaffleOptions = () => {
       setUrlState((previous) => ({
         ...previous,
         preferredSchema,
-        metric: DEFAULT_WAFFLE_OPTIONS_STATE.metric,
-        groupBy: DEFAULT_WAFFLE_OPTIONS_STATE.groupBy,
       }));
     },
     [setUrlState]
@@ -242,6 +241,7 @@ export type WaffleOptionsState = InventoryOptionsState;
 const encodeUrlState = (state: InventoryOptionsState) => {
   return inventoryOptionsStateRT.encode(state);
 };
+
 const decodeUrlState = (value: unknown) => {
   const state = pipe(inventoryOptionsStateRT.decode(value), fold(constant(undefined), identity));
   if (state) {

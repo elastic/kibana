@@ -46,7 +46,7 @@ const getTimeLengthFromInterval = (interval: string | undefined) => {
 };
 
 export function useTimeline({
-  kuery: filterQuery,
+  kuery,
   metrics,
   nodeType,
   sourceId,
@@ -83,7 +83,7 @@ export function useTimeline({
       currentTime,
       nodeType,
       timerange,
-      kuery: filterQuery,
+      kuery,
       sourceId,
       accountId,
       region,
