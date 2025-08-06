@@ -20,6 +20,7 @@ import { IndexManagementProvider } from './index_management';
 import { AlertingApiProvider } from './alerting_api';
 import { MachineLearningProvider } from './ml';
 import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
+import { BsearchSecureService } from './bsearch_secure';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -36,4 +37,5 @@ export const services = {
   transform: TransformProvider,
   usageAPI: UsageAPIProvider,
   apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
+  secureBsearch: BsearchSecureService,
 };
