@@ -30,6 +30,9 @@ const LEGEND_LABELS = {
       defaultMessage: 'Type',
     }
   ),
+  [WaterfallLegendType.Kind]: i18n.translate('xpack.apm.transactionDetails.kindLegendTitle', {
+    defaultMessage: 'Kind',
+  }),
 };
 export function WaterfallLegends({ serviceName, legends, type }: Props) {
   const displayedLegends = legends.filter((legend) => legend.type === type);
