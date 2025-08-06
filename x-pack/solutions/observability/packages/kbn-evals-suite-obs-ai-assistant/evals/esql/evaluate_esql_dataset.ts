@@ -90,7 +90,9 @@ export function createEvaluateEsqlDataset({
                   ? [
                       'The query successfully executed without an error, and the agent summarized the results',
                     ]
-                  : ['The query was not executed, it was only explained']),
+                  : [
+                      'The query execution was never attempted (no execution attempt, including failures), only an explanation was provided',
+                    ]),
                 ...[],
               ])
               .evaluate({

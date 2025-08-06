@@ -48,7 +48,9 @@ async function evaluateEsqlQuery({
       : []),
     ...(execute
       ? ['The query successfully executed without an error']
-      : ['The query was not executed, it was only explained']),
+      : [
+          'The query execution was never attempted (no execution attempt, including failures), only an explanation was provided',
+        ]),
     ...criteria,
   ]);
 
