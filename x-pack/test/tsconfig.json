@@ -32,7 +32,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/test",
     "@kbn/tooling-log",
-    "@kbn/dev-utils",
     "@kbn/ftr-common-functional-services",
     "@kbn/expect",
     "@kbn/apm-synthtrace",
