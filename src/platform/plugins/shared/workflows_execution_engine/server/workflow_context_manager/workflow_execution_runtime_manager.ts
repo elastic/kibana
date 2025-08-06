@@ -10,6 +10,7 @@
 import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
 import { withSpan } from '@kbn/apm-utils';
+import agent from 'elastic-apm-node';
 import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -52,6 +53,7 @@ export class WorkflowExecutionRuntimeManager {
   // APM trace properties - consistent traceId for entire workflow execution
   private readonly traceId: string;
   private entryTransactionId?: string;
+  private workflowTransaction?: any; // APM transaction instance
 
   public workflowExecution: EsWorkflowExecution;
   private workflowExecutionRepository: WorkflowExecutionRepository;
@@ -280,86 +282,141 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
-<<<<<<< HEAD
     // eslint-disable-next-line no-console
     console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
-    // eslint-disable-next-line no-console
-    console.log('🚀 Labels that will be set:', {
-      workflow_execution_id: this.workflowExecution.id,
-      workflow_id: this.workflowExecution.workflowId,
-      trace_id: this.traceId,
-      service_name: 'workflow-engine',
-      transaction_type: 'workflow_execution',
-    });
 
-    return withSpan(
-      {
-        name: `workflow.execution.${this.workflowExecution.workflowId}`,
-        type: 'workflow',
-        subtype: 'execution',
-        labels: {
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.traceId,
-          service_name: 'workflow-engine',
-          transaction_type: 'workflow_execution',
-        },
-      },
-      async (span) => {
-        // Store entry transaction ID from APM span (use span ID as fallback)
-        if (span?.ids) {
-          this.entryTransactionId = span.ids['span.id'] || this.workflowExecution.id;
-        }
+    // Reuse the existing Task Manager transaction for workflow execution
+    // This keeps things simple with just one transaction for the entire flow
+    const existingTransaction = agent.currentTransaction;
 
-        // Capture the real APM trace ID
-        let realTraceId: string | undefined;
+    if (existingTransaction) {
+      // Store the task transaction as our workflow transaction
+      this.workflowTransaction = existingTransaction;
+
+      // Add workflow-specific labels to the existing transaction
+      existingTransaction.addLabels({
+        workflow_execution_id: this.workflowExecution.id,
+        workflow_id: this.workflowExecution.workflowId,
+        service_name: 'kibana',
+        transaction_hierarchy: 'task->steps',
+      });
+
+      // Debug: Check if the task transaction has a parent (this might be the issue)
+      // eslint-disable-next-line no-console
+      console.log('🔍 Task transaction parent debug:', {
+        hasParentId: !!(existingTransaction as any).parentId,
+        parentId: (existingTransaction as any).parentId,
+        transactionId: existingTransaction.ids?.['transaction.id'],
+        transactionName: existingTransaction.name,
+        transactionType: existingTransaction.type,
+        traceId: (existingTransaction as any).trace?.id || this.traceId,
+      });
+
+      // Store the task transaction ID in the workflow execution
+      // This will be used as the entryTransactionId for the trace embeddable
+      const taskTransactionId = existingTransaction.ids?.['transaction.id'];
+      if (taskTransactionId) {
         // eslint-disable-next-line no-console
-        console.log('🔍 Available span properties:', span ? Object.keys(span) : 'No span');
-        // eslint-disable-next-line no-console
-        console.log('🔍 Span object:', span);
+        console.log('💾 Storing task transaction ID:', taskTransactionId);
 
-        if ((span as any)?.traceId) {
-          realTraceId = (span as any).traceId;
-          // eslint-disable-next-line no-console
-          console.log('🎯 Captured APM trace ID from span.traceId:', realTraceId);
-        } else if (span?.ids?.['trace.id']) {
-          realTraceId = span.ids['trace.id'];
-          // eslint-disable-next-line no-console
-          console.log('🎯 Captured APM trace ID from span.ids[trace.id]:', realTraceId);
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('⚠️ Could not capture APM trace ID, using workflow execution ID as fallback');
-          realTraceId = this.workflowExecution.id;
-        }
-
-        const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+        // Update the workflow execution with the task transaction ID
+        await this.workflowExecutionRepository.updateWorkflowExecution({
           id: this.workflowExecution.id,
-          status: ExecutionStatus.RUNNING,
-          startedAt: new Date().toISOString(),
-          workflowId: this.workflowExecution.workflowId,
-          triggeredBy: this.workflowExecution.triggeredBy,
-          traceId: realTraceId, // Store the real APM trace ID
-        };
-        await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+          entryTransactionId: taskTransactionId,
+        });
+
+        // Update our local copy
         this.workflowExecution = {
           ...this.workflowExecution,
-          ...updatedWorkflowExecution,
+          entryTransactionId: taskTransactionId,
         };
+
+        // eslint-disable-next-line no-console
+        console.log('✅ Task transaction ID stored in workflow execution');
       }
-    );
-=======
-    const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      id: this.workflowExecution.id,
-      status: ExecutionStatus.RUNNING,
-      startedAt: new Date().toISOString(),
-      workflowId: this.workflowExecution.workflowId,
-    };
-    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
-    this.workflowExecution = {
-      ...this.workflowExecution,
-      ...updatedWorkflowExecution,
-    };
->>>>>>> main
+
+      // Capture the real APM trace ID from the transaction
+      let realTraceId: string | undefined;
+      // eslint-disable-next-line no-console
+      console.log('🔍 Reusing task transaction for workflow execution');
+      // eslint-disable-next-line no-console
+      console.log('🔍 Transaction object keys:', Object.keys(existingTransaction));
+      // eslint-disable-next-line no-console
+      console.log('🔍 Transaction object ids:', existingTransaction.ids);
+      // eslint-disable-next-line no-console
+      console.log('🔍 Transaction object trace info:', {
+        traceId: (existingTransaction as any)?.traceId,
+        trace: (existingTransaction as any)?.trace,
+        ids: existingTransaction.ids,
+      });
+
+      if ((existingTransaction as any)?.traceId) {
+        realTraceId = (existingTransaction as any).traceId;
+        // eslint-disable-next-line no-console
+        console.log('🎯 Captured APM trace ID from existingTransaction.traceId:', realTraceId);
+      } else if (existingTransaction.ids?.['trace.id']) {
+        realTraceId = existingTransaction.ids['trace.id'];
+        // eslint-disable-next-line no-console
+        console.log(
+          '🎯 Captured APM trace ID from existingTransaction.ids[trace.id]:',
+          realTraceId
+        );
+      } else if ((existingTransaction as any)?.trace?.id) {
+        realTraceId = (existingTransaction as any).trace.id;
+        // eslint-disable-next-line no-console
+        console.log('🎯 Captured APM trace ID from existingTransaction.trace.id:', realTraceId);
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('⚠️ Could not capture APM trace ID, using this.traceId as fallback');
+        realTraceId = this.traceId;
+      }
+
+      // eslint-disable-next-line no-console
+      console.log('🚀 Task transaction with workflow labels:', {
+        workflow_execution_id: this.workflowExecution.id,
+        workflow_id: this.workflowExecution.workflowId,
+        trace_id: realTraceId,
+        service_name: 'kibana',
+        transaction_type: 'task-run',
+        workflow_reused: true,
+      });
+
+      const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+        id: this.workflowExecution.id,
+        status: ExecutionStatus.RUNNING,
+        startedAt: new Date().toISOString(),
+        workflowId: this.workflowExecution.workflowId,
+        triggeredBy: this.workflowExecution.triggeredBy,
+        traceId: realTraceId, // Store the real APM trace ID
+      };
+      await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+      this.workflowExecution = {
+        ...this.workflowExecution,
+        ...updatedWorkflowExecution,
+      };
+
+      // Set the transaction outcome to success by default
+      // It will be overridden if the workflow fails
+      existingTransaction.outcome = 'success';
+    } else {
+      // Fallback if no task transaction exists - proceed without tracing
+      // eslint-disable-next-line no-console
+      console.warn('⚠️ No active Task Manager transaction found, proceeding without APM tracing');
+      const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+        id: this.workflowExecution.id,
+        status: ExecutionStatus.RUNNING,
+        startedAt: new Date().toISOString(),
+        workflowId: this.workflowExecution.workflowId,
+        triggeredBy: this.workflowExecution.triggeredBy,
+        traceId: this.workflowExecution.id, // Use workflow execution ID as fallback
+      };
+      await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+      this.workflowExecution = {
+        ...this.workflowExecution,
+        ...updatedWorkflowExecution,
+      };
+    }
+    // Note: Transaction will be ended by Task Manager when the task completes
   }
 
   public async fail(error: any): Promise<void> {
@@ -397,6 +454,15 @@ export class WorkflowExecutionRuntimeManager {
           ...this.workflowExecution,
           ...workflowExecutionUpdate,
         };
+
+        // Update the task transaction outcome on failure
+        // Task Manager will handle ending the transaction
+        if (this.workflowTransaction) {
+          this.workflowTransaction.outcome = 'failure';
+          // eslint-disable-next-line no-console
+          console.log('🏁 Task transaction outcome updated: failure (explicit fail)');
+          // Note: Task Manager will end the transaction when the task completes
+        }
       }
     );
   }
@@ -406,11 +472,8 @@ export class WorkflowExecutionRuntimeManager {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       startedAt: this.workflowExecution.startedAt,
-<<<<<<< HEAD
       triggeredBy: this.workflowExecution.triggeredBy,
       traceId: this.workflowExecution.traceId,
-=======
->>>>>>> main
     };
 
     if (this.isWorkflowFinished()) {
@@ -432,6 +495,16 @@ export class WorkflowExecutionRuntimeManager {
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+
+      // Update the task transaction outcome when workflow completes
+      // Task Manager will handle ending the transaction
+      if (this.workflowTransaction) {
+        const isSuccess = workflowExecutionUpdate.status === ExecutionStatus.COMPLETED;
+        this.workflowTransaction.outcome = isSuccess ? 'success' : 'failure';
+        // eslint-disable-next-line no-console
+        console.log(`🏁 Task transaction outcome updated: ${this.workflowTransaction.outcome}`);
+        // Note: Task Manager will end the transaction when the task completes
+      }
     }
 
     // TODO: Consider saving runtime state to workflow execution document

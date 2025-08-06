@@ -158,13 +158,25 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       ? new Date(workflowExecution.finishedAt)
       : new Date();
 
+    // Expand time range to include task transaction which starts before workflow execution
+    // Task transaction can start up to 1 second before workflow execution begins
+    const expandedStartTime = new Date(startedAt.getTime() - 1000); // 1 second before
+    const expandedEndTime = new Date(finishedAt.getTime() + 1000); // 1 second after
+
     // eslint-disable-next-line no-console
     console.log('🎯 Using STORED trace ID for embeddable:', foundTraceId);
+    // eslint-disable-next-line no-console
+    console.log('🎯 Time range expanded for task transaction:', {
+      originalStart: startedAt.toISOString(),
+      expandedStart: expandedStartTime.toISOString(),
+      originalEnd: finishedAt.toISOString(),
+      expandedEnd: expandedEndTime.toISOString(),
+    });
 
     return {
       traceId: foundTraceId, // 🔥 KEY CHANGE: Use the stored trace ID from workflow execution
-      rangeFrom: startedAt.toISOString(),
-      rangeTo: finishedAt.toISOString(),
+      rangeFrom: expandedStartTime.toISOString(),
+      rangeTo: expandedEndTime.toISOString(),
       serviceName: 'workflow-engine',
       entryTransactionId:
         foundEntryTransactionId ||
@@ -182,7 +194,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           traceId,
           rangeFrom,
           rangeTo,
-          serviceName: 'workflow-engine',
           entryTransactionId,
         },
       }),
@@ -237,6 +248,11 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       />
       <EuiSpacer size="l" />
 
+      <EuiSpacer size="s" />
+      <WorkflowExecutionLogsTable executionId={workflowExecutionId} />
+
+      <EuiSpacer size="l" />
+
       {/* APM Trace Waterfall Embeddable with Search */}
       {workflowExecution?.startedAt && (
         <>
@@ -279,7 +295,18 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
                 Found trace: {traceId}
               </EuiText>
               <EuiSpacer size="s" />
-              <div style={{ height: '400px' }}>
+              <div
+                style={{
+                  minHeight: '300px', // Minimum height but allows growth
+                  maxHeight: '800px', // Maximum height to prevent excessive growth
+                  border: '1px solid #d3dae6',
+                  borderRadius: '6px',
+                  overflow: 'auto', // Allow scrolling if content exceeds max height
+                  backgroundColor: '#fafbfd',
+                  marginBottom: '24px',
+                  direction: 'ltr', // Force left-to-right layout
+                }}
+              >
                 <EmbeddableRenderer
                   type="APM_TRACE_WATERFALL_EMBEDDABLE"
                   maybeId={`workflow-trace-${workflowExecutionId}`}
@@ -287,7 +314,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
                   hidePanelChrome={true}
                 />
               </div>
-              <EuiSpacer size="l" />
             </>
           )}
 
@@ -302,8 +328,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           )}
         </>
       )}
-
-      <WorkflowExecutionLogsTable executionId={workflowExecutionId} />
     </div>
   );
 };

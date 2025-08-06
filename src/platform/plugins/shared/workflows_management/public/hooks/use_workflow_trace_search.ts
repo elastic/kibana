@@ -52,6 +52,23 @@ export function useWorkflowTraceSearch({
       });
       return;
     }
+
+    // Check if we already have the entry transaction ID stored
+    if (workflowExecution.entryTransactionId) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '✅ Using stored entry transaction ID (with expanded time range):',
+        workflowExecution.entryTransactionId
+      );
+      setResult({
+        traceId: workflowExecution.traceId,
+        entryTransactionId: workflowExecution.entryTransactionId,
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
     // eslint-disable-next-line no-console
     console.log('🔍 Workflow execution traceId:', workflowExecution.traceId);
     setResult((prev) => ({ ...prev, loading: true, error: null }));
@@ -62,18 +79,21 @@ export function useWorkflowTraceSearch({
         // eslint-disable-next-line no-console
         console.log('🔍 Fetching root transaction for trace:', workflowExecution.traceId);
 
-        // Calculate time range for the search
+        // Calculate time range for the search (expanded to include task transaction)
         const startedAt = new Date(workflowExecution.startedAt);
         const finishedAt = workflowExecution.finishedAt
           ? new Date(workflowExecution.finishedAt)
           : new Date();
 
+        const expandedStartTime = new Date(startedAt.getTime() - 1000);
+        const expandedEndTime = new Date(finishedAt.getTime() + 1000);
+
         const response = (await services.http?.get(
           `/internal/apm/traces/${workflowExecution.traceId}/root_transaction`,
           {
             query: {
-              start: startedAt.toISOString(),
-              end: finishedAt.toISOString(),
+              start: expandedStartTime.toISOString(),
+              end: expandedEndTime.toISOString(),
             },
           }
         )) as APMRootTransactionResponse;
