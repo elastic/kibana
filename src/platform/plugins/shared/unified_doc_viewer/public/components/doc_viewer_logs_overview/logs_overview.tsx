@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -55,7 +55,6 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     },
     ref
   ) => {
-    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
     const { fieldFormats } = getUnifiedDocViewerServices();
     const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
@@ -63,9 +62,10 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const containerHeight = containerRef
-      ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
+    const containerHeight = containerRef.current
+      ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
       : 0;
 
     useImperativeHandle(
@@ -90,7 +90,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onRemoveColumn={onRemoveColumn}
       >
         <div
-          ref={setContainerRef}
+          ref={containerRef}
           css={
             containerHeight
               ? css`

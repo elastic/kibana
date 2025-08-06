@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
@@ -62,7 +62,7 @@ export function TransactionOverview({
   columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: TransactionOverviewProps) {
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLElement>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
@@ -84,8 +84,8 @@ export function TransactionOverview({
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
-  const containerHeight = containerRef
-    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
+  const containerHeight = containerRef.current
+    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
     : 0;
 
   return (
@@ -100,7 +100,7 @@ export function TransactionOverview({
           <EuiFlexGroup
             direction="column"
             gutterSize="m"
-            ref={setContainerRef}
+            ref={containerRef}
             css={
               containerHeight
                 ? css`
