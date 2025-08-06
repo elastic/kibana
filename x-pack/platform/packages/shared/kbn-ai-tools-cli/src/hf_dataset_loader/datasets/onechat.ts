@@ -76,7 +76,7 @@ function parseOneChatDatasetName(datasetName: string): { directory: string; data
   const parts = withoutPrefix.split('/');
   if (parts.length !== 2) {
     throw new Error(
-      `Invalid OneChat dataset format: '${datasetName}'. Expected format: onechat/<directory>/<dataset>`
+      `Invalid OneChat dataset format: '${datasetName}'. Expected format: onechat/<directory>/<dataset>, got ${datasetName}.`
     );
   }
 
