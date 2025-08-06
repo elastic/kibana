@@ -7,12 +7,12 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiSpacer, OnRefreshProps, EuiSplitPanel } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, OnRefreshProps, EuiSplitPanel } from '@elastic/eui';
 import { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
-import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
@@ -24,19 +24,9 @@ export function Overview() {
     dataStream,
     isNonAggregatable,
     canUserReadFailureStore,
-    hasFailureStore,
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
   } = useDatasetQualityDetailsState();
-
-  const {
-    services: {
-      share: { url: urlService },
-    },
-  } = useKibanaContextForPlugin();
-
-  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
-  const locatorParams = { page: 'data_streams_details', dataStreamName: dataStream } as const;
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
@@ -55,6 +45,13 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
+
+      {!dataStreamSettingsLoading && !canUserReadFailureStore && (
+        <EuiFlexItem>
+          <FailureStoreWarning />
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      )}
 
       {/* This should be hidden in `streams` view */}
       <Summary />
