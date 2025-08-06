@@ -6,5 +6,5 @@
  */
 
 export const KBN_ARCHIVES = {
-  DASHBOARD: 'x-pack/test/functional/fixtures/kbn_archiver/dashboard/simple.json',
+  DASHBOARD: 'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/simple.json',
 };
