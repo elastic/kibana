@@ -94,7 +94,6 @@ export class AIAssistantManagementSelectionPlugin
           ui: [],
         },
         read: {
-          disabled: true,
           management: {
             kibana: [
               'aiAssistantManagementSelection',
