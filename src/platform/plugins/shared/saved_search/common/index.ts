@@ -8,6 +8,7 @@
  */
 
 export { getSavedSearchFullPathUrl } from './saved_searches_url';
+export { fromSavedSearchAttributes } from './saved_searches_utils';
 
 export type {
   DiscoverGridSettings,
