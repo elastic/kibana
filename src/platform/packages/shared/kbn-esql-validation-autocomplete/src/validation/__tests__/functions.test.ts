@@ -152,7 +152,7 @@ describe('function validation', () => {
         });
       });
 
-      describe('special parameter types', () => {
+      describe('special scenarios', () => {
         it('any type', async () => {
           const testFn: FunctionDefinition = {
             name: 'test',
@@ -204,6 +204,91 @@ describe('function validation', () => {
             getExpectedError('in', ['keyword', 'integer']), // @TODO look at reporting array type
           ]);
         });
+
+        it('casts string arguments to dates', async () => {
+          setTestFunctions([
+            {
+              name: 'test',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [
+                    { name: 'arg1', type: 'date' },
+                    { name: 'arg2', type: 'date' },
+                  ],
+                  returnType: 'date',
+                },
+                {
+                  params: [
+                    { name: 'arg1', type: 'integer' },
+                    { name: 'arg2', type: 'integer' },
+                  ],
+                  returnType: 'date',
+                },
+              ],
+            },
+          ]);
+
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
+        });
+
+        it('treats text and keyword as interchangeable', async () => {
+          setTestFunctions([
+            {
+              name: 'accepts_text',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'text' }],
+                  returnType: 'keyword',
+                },
+              ],
+            },
+            {
+              name: 'accepts_keyword',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'keyword' }],
+                  returnType: 'keyword',
+                },
+              ],
+            },
+            {
+              name: 'returns_keyword',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [],
+                  returnType: 'keyword',
+                },
+              ],
+            },
+          ]);
+
+          const { expectErrors } = await setup();
+
+          // literals — all string literals are keywords
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+          // fields
+          await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+
+          // functions
+          // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+          await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
+        });
       });
     });
 
@@ -219,6 +304,33 @@ describe('function validation', () => {
               params: [{ name: 'arg1', type: 'keyword' }],
               returnType: 'keyword',
             },
+            {
+              params: [
+                { name: 'arg1', type: 'integer' },
+                { name: 'arg2', type: 'integer' },
+              ],
+              returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'expects_1_arg_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'integer' }],
+              returnType: 'integer',
+            },
+          ],
+        },
+        {
+          name: 'expects_2_args_fn',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
             {
               params: [
                 { name: 'arg1', type: 'integer' },
@@ -247,17 +359,26 @@ describe('function validation', () => {
 
       const { expectErrors } = await setup();
 
+      // several signatures, different arities
       await expectErrors('FROM a_index | EVAL TEST()', [
-        'Error: [test] function expects at least one argument, got 0.',
+        '[test] expected [1, 2] arguments, but got 0.',
       ]);
       await expectErrors('FROM a_index | EVAL TEST(1, 1, 1)', [
-        'Error: [test] function expects no more than 2 arguments, got 3.',
+        '[test] expected [1, 2] arguments, but got 3.',
       ]);
 
-      // variadic
+      // exact number of arguments
+      await expectErrors('FROM a_index | EVAL EXPECTS_1_ARG_FN(1, 1, 2)', [
+        '[expects_1_arg_fn] expected one argument, but got 3.',
+      ]);
+
+      await expectErrors('FROM a_index | EVAL EXPECTS_2_ARGS_FN(1, 1, 2)', [
+        '[expects_2_args_fn] expected 2 arguments, but got 3.',
+      ]);
+
+      // minimum number of arguments
       await expectErrors(`FROM a_index | EVAL VARIADIC_FN(1)`, [
-        // @TODO this is an incorrect error message
-        'Error: [variadic_fn] function expects one argument, got 1.',
+        '[variadic_fn] expected at least 2 arguments, but got 1.',
       ]);
       await expectErrors(
         `FROM a_index | EVAL VARIADIC_FN(${new Array(100).fill(1).join(', ')})`,
@@ -290,91 +411,6 @@ describe('function validation', () => {
 
       await expectErrors('FROM a_index | EVAL TEST("")', []);
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
-    });
-
-    it('casts string arguments to dates', async () => {
-      setTestFunctions([
-        {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [
-                { name: 'arg1', type: 'date' },
-                { name: 'arg2', type: 'date' },
-              ],
-              returnType: 'date',
-            },
-            {
-              params: [
-                { name: 'arg1', type: 'integer' },
-                { name: 'arg2', type: 'integer' },
-              ],
-              returnType: 'date',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
-    });
-
-    it('treats text and keyword as interchangeable', async () => {
-      setTestFunctions([
-        {
-          name: 'accepts_text',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'text' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'accepts_keyword',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'returns_keyword',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      // literals — all string literals are keywords
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
-
-      // fields
-      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
-
-      // functions
-      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
-      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
     });
 
     it('enforces constant-only parameters', async () => {

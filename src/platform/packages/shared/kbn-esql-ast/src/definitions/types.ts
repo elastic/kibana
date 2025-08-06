@@ -277,8 +277,15 @@ export interface ValidationErrors {
     message: string;
     type: {
       fn: string;
-      expectedMin: number;
-      expectedMax: number;
+      validArgCounts: string;
+      actual: number;
+    };
+  };
+  wrongNumberArgsAtLeast: {
+    message: string;
+    type: {
+      fn: string;
+      minArgs: number;
       actual: number;
     };
   };

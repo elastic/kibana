@@ -51,7 +51,6 @@ import {
 import { getColumnExists, getQuotedColumnName } from '../columns';
 import {
   getExpressionType,
-  getMaxMinNumberOfParams,
   getParamAtPosition,
   getSignaturesWithMatchingArity,
 } from '../expressions';
@@ -274,6 +273,25 @@ function getFunctionLocation(fn: ESQLFunction, parentCommand: ESQLCommand) {
   const location = getLocationFromCommandOrOptionName(displayName);
 
   return { location, displayName };
+}
+
+/**
+ * Returns the maximum and minimum number of parameters allowed by a function
+ *
+ * Used for too-many, too-few arguments validation
+ */
+function getMaxMinNumberOfParams(definition: FunctionDefinition) {
+  if (definition.signatures.length === 0) {
+    return { min: 0, max: 0 };
+  }
+
+  let min = Infinity;
+  let max = 0;
+  definition.signatures.forEach(({ params, minParams }) => {
+    min = Math.min(min, minParams ?? params.filter(({ optional }) => !optional).length);
+    max = Math.max(max, minParams ? Infinity : params.length);
+  });
+  return { min, max };
 }
 
 // #endregion New stuff

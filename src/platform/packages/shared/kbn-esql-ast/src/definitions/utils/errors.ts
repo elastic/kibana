@@ -18,7 +18,6 @@ import type {
   ESQLSource,
 } from '../../types';
 import type { ErrorTypes, ErrorValues, FunctionDefinition } from '../types';
-import { getMaxMinNumberOfParams } from './expressions';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -99,12 +98,10 @@ Expected one of:
     case 'wrongNumberArgsVariadic':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
-          defaultMessage:
-            '[{fn}] expected {expectedMin}-{expectedMax} arguments, but got {actual}.',
+          defaultMessage: '[{fn}] expected [{validArgCounts}] arguments, but got {actual}.',
           values: {
             fn: out.fn,
-            expectedMin: out.expectedMin,
-            expectedMax: out.expectedMax,
+            validArgCounts: out.validArgCounts,
             actual: out.actual,
           },
         }),
@@ -117,6 +114,18 @@ Expected one of:
           values: {
             fn: out.fn,
             expected: out.expected,
+            actual: out.actual,
+          },
+        }),
+      };
+    case 'wrongNumberArgsAtLeast':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsAtLeast', {
+          defaultMessage:
+            '[{fn}] expected at least {minArgs, plural, one {one argument} other {{minArgs} arguments}}, but got {actual}.',
+          values: {
+            fn: out.fn,
+            minArgs: out.minArgs,
             actual: out.actual,
           },
         }),
@@ -543,19 +552,36 @@ export const errors = {
     }),
 
   wrongNumberArgs: (fn: ESQLFunction, definition: FunctionDefinition): ESQLMessage => {
-    const { min, max } = getMaxMinNumberOfParams(definition);
+    const validArgCounts = new Set<number>();
+    let minParams: number | undefined;
+    for (const sig of definition.signatures) {
+      if (sig.minParams) {
+        minParams = sig.minParams;
+        break;
+      }
+
+      validArgCounts.add(sig.params.length);
+      validArgCounts.add(sig.params.filter((p) => !p.optional).length);
+    }
+
     const arity = fn.args.length;
-    if (min === max) {
+    if (minParams !== undefined) {
+      return errors.byId('wrongNumberArgsAtLeast', fn.location, {
+        fn: fn.name,
+        minArgs: minParams,
+        actual: arity,
+      });
+    } else if (validArgCounts.size === 1) {
+      const expected = Array.from(validArgCounts)[0];
       return errors.byId('wrongNumberArgsExact', fn.location, {
         fn: fn.name,
-        expected: min,
+        expected,
         actual: fn.args.length,
       });
     } else {
       return errors.byId('wrongNumberArgsVariadic', fn.location, {
         fn: fn.name,
-        expectedMin: min,
-        expectedMax: max,
+        validArgCounts: Array.from(validArgCounts).join(', '),
         actual: arity,
       });
     }

@@ -22,25 +22,6 @@ import { getFunctionDefinition } from './functions';
 import { getColumnForASTNode, isParamExpressionType } from './shared';
 
 /**
- * Returns the maximum and minimum number of parameters allowed by a function
- *
- * Used for too-many, too-few arguments validation
- */
-export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
-  if (definition.signatures.length === 0) {
-    return { min: 0, max: 0 };
-  }
-
-  let min = Infinity;
-  let max = 0;
-  definition.signatures.forEach(({ params, minParams }) => {
-    min = Math.min(min, params.filter(({ optional }) => !optional).length);
-    max = Math.max(max, minParams ? Infinity : params.length);
-  });
-  return { min, max };
-}
-
-/**
  * Gets the signatures of a function that match the number of arguments
  * provided in the AST.
  */
