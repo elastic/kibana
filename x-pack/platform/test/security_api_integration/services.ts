@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/test/security_api_integration/packages/helpers'],
+import { services as apiIntegrationServices } from '../api_integration/services';
+
+export const services = {
+  ...apiIntegrationServices,
 };
