@@ -17,13 +17,17 @@ import { ConversationInputTextArea } from './conversation_input_text_area';
 
 interface ConversationInputFormProps {
   onSubmit: () => void;
+  onTextAreaHeightChange: (heightDiff: number) => void;
 }
 
 const fullHeightStyles = css`
   height: 100%;
 `;
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
+export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({
+  onSubmit,
+  onTextAreaHeightChange,
+}) => {
   const isSendingMessage = useIsSendingMessage();
   const { input, setInput, sendMessage } = useMessages();
   const { euiTheme } = useEuiTheme();
@@ -71,6 +75,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
           message={input}
           setMessage={setInput}
           handleSubmit={handleSubmit}
+          onHeightChange={onTextAreaHeightChange}
         />
         <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />
       </EuiFlexGroup>
