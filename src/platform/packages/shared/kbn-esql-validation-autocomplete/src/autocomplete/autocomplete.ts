@@ -268,6 +268,7 @@ async function getSuggestionsWithinCommandExpression(
   const context = {
     ...references,
     ...additionalCommandContext,
+    activeProduct: callbacks?.getActiveProduct?.(),
   };
 
   // does it make sense to have a different context per command?
@@ -283,7 +284,6 @@ async function getSuggestionsWithinCommandExpression(
           }
         : undefined,
       hasMinimumLicenseRequired,
-      getActiveProduct: callbacks?.getActiveProduct,
     },
     context,
     offset

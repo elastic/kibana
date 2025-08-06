@@ -10,15 +10,6 @@
 import { setup } from './helpers';
 import { getCallbackMocks } from '../../__tests__/helpers';
 
-export function getPricingMock(productType: string, tier: string) {
-  return {
-    getActiveProduct: () => ({
-      type: productType,
-      tier,
-    }),
-  };
-}
-
 export function getLicenseMock(level: string) {
   return {
     hasAtLeast: (requiredLevel: string) => level === requiredLevel,
@@ -49,7 +40,6 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
-          getActiveProduct: () => ({ type: 'observability', tier: 'logs_essentials' }),
         },
       });
 
@@ -64,11 +54,6 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
-          getActiveProduct: () => ({
-            type: 'security',
-            tier: 'complete',
-            product_lines: ['endpoint'],
-          }),
         },
       });
 
@@ -83,7 +68,6 @@ describe('autocomplete.suggest', () => {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
-          // No getPricing callback provided
         },
       });
 

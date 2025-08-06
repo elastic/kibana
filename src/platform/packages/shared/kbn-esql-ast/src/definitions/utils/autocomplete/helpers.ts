@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -21,7 +22,6 @@ import type {
   GetColumnsByTypeFn,
   ESQLUserDefinedColumn,
   ICommandContext,
-  ICommandCallbacks,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
 import {
@@ -190,7 +190,8 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  callbacks?: ICommandCallbacks
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -244,8 +245,8 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          callbacks?.hasMinimumLicenseRequired,
-          callbacks?.getActiveProduct
+          hasMinimumLicenseRequired,
+          activeProduct
         )
       : [],
     userDefinedColumns
@@ -352,8 +353,9 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
-  callbacks,
   advanceCursorAfterInitialColumn = true,
+  hasMinimumLicenseRequired,
+  activeProduct,
   ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -362,9 +364,10 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
-  callbacks?: ICommandCallbacks;
+  activeProduct?: PricingProduct;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
@@ -391,13 +394,17 @@ export async function suggestForExpression({
       }
 
       suggestions.push(
-        ...getOperatorSuggestions({
-          location,
-          // In case of a param literal, we don't know the type of the left operand
-          // so we can only suggest operators that accept any type as a left operand
-          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
-          ignored: ['='],
-        })
+        ...getOperatorSuggestions(
+          {
+            location,
+            // In case of a param literal, we don't know the type of the left operand
+            // so we can only suggest operators that accept any type as a left operand
+            leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
+            ignored: ['='],
+          },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -418,8 +425,8 @@ export async function suggestForExpression({
         suggestions.push(
           ...getFunctionSuggestions(
             { location, returnTypes: ['boolean'] },
-            callbacks?.hasMinimumLicenseRequired,
-            callbacks?.getActiveProduct
+            hasMinimumLicenseRequired,
+            activeProduct
           ),
           ...(await getColumnsByType('boolean', [], {
             advanceCursor: true,
@@ -471,7 +478,8 @@ export async function suggestForExpression({
           getExpressionType: (expression) =>
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
-          callbacks,
+          hasMinimumLicenseRequired,
+          activeProduct,
         }))
       );
 
@@ -488,11 +496,7 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions(
-          { location },
-          callbacks?.hasMinimumLicenseRequired,
-          callbacks?.getActiveProduct
-        )
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
       );
 
       break;

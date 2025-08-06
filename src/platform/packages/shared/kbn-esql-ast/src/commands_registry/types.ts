@@ -127,7 +127,6 @@ export interface ICommandCallbacks {
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
-  getActiveProduct?: () => PricingProduct | undefined;
 }
 
 export interface ICommandContext {
@@ -142,6 +141,7 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  activeProduct?: PricingProduct | undefined;
 }
 
 /**

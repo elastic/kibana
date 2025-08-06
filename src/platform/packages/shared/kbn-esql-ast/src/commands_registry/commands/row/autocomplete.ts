@@ -31,7 +31,7 @@ export async function autocomplete(
     return getFunctionSuggestions(
       { location: Location.ROW },
       callbacks?.hasMinimumLicenseRequired,
-      callbacks?.getActiveProduct
+      context?.activeProduct
     );
   }
 
@@ -50,7 +50,7 @@ export async function autocomplete(
     ...getFunctionSuggestions(
       { location: Location.ROW },
       callbacks?.hasMinimumLicenseRequired,
-      callbacks?.getActiveProduct
+      context?.activeProduct
     ),
   ];
 }

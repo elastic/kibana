@@ -64,9 +64,10 @@ export async function autocomplete(
         getColumnsByType: callbacks?.getByType,
         expressionRoot: undefined,
         location: Location.SORT,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
         context,
         advanceCursorAfterInitialColumn: false,
-        callbacks,
       });
     }
 
@@ -99,7 +100,8 @@ export async function autocomplete(
           expressionRoot,
           location: Location.SORT,
           context,
-          callbacks,
+          hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+          activeProduct: context?.activeProduct,
         });
         suggestions.push(...expressionSuggestions);
       }

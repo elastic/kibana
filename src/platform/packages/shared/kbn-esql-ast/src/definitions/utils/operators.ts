@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQLLicenseType } from '@kbn/esql-types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
-import type {
-  GetColumnsByTypeFn,
-  ICommandCallbacks,
-  ISuggestionItem,
-  Location,
-} from '../../commands_registry/types';
+import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
 import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
 import {
@@ -60,15 +57,16 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
-  callbacks?: ICommandCallbacks
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined,
+  activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
       ? [...operatorsDefinitions, ...getTestFunctions()]
       : operatorsDefinitions,
     predicates,
-    callbacks?.hasMinimumLicenseRequired,
-    callbacks?.getActiveProduct
+    hasMinimumLicenseRequired,
+    activeProduct
   );
 
   // make sure the operator has at least one signature that matches
@@ -123,7 +121,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
-  callbacks,
+  hasMinimumLicenseRequired,
+  activeProduct,
 }: {
   queryText: string;
   location: Location;
@@ -131,7 +130,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  callbacks?: ICommandCallbacks;
+  hasMinimumLicenseRequired?: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined;
+  activeProduct?: PricingProduct | undefined;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
@@ -197,7 +197,8 @@ export async function getSuggestionsToRightOfOperatorExpression({
               values: Boolean(operator.subtype === 'binary-expression'),
             },
             {},
-            callbacks
+            hasMinimumLicenseRequired,
+            activeProduct
           ))
         );
       }

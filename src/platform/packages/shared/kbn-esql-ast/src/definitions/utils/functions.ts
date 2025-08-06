@@ -104,7 +104,7 @@ export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
   hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined,
-  getActiveProduct?: () => PricingProduct | undefined
+  activeProduct?: PricingProduct | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
     return functions;
@@ -123,17 +123,14 @@ export const filterFunctionDefinitions = (
         }
       }
 
-      if (observabilityTier) {
-        const activeProduct = getActiveProduct?.();
-
-        if (
-          !(
-            activeProduct?.type === 'observability' &&
-            activeProduct.tier === observabilityTier.toLowerCase()
-          )
-        ) {
-          return false;
-        }
+      if (
+        observabilityTier &&
+        !(
+          activeProduct?.type === 'observability' &&
+          activeProduct.tier === observabilityTier.toLowerCase()
+        )
+      ) {
+        return false;
       }
 
       if (ignored.includes(name)) {
@@ -296,13 +293,13 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
 export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates,
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
-  getActiveProduct?: () => PricingProduct | undefined
+  activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   return filterFunctionDefinitions(
     allFunctions(),
     predicates,
     hasMinimumLicenseRequired,
-    getActiveProduct
+    activeProduct
   ).map(getFunctionSuggestion);
 };
 

@@ -169,7 +169,8 @@ export async function autocomplete(
         location: Location.STATS_WHERE,
         preferredExpressionType: 'boolean',
         context,
-        callbacks,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
       });
 
       // Is this a complete boolean expression?
@@ -286,8 +287,9 @@ async function getExpressionSuggestions({
         innerText,
         expressionRoot,
         location,
+        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
         context,
-        callbacks,
         getColumnsByType: suggestColumns ? callbacks?.getByType : undefined,
         advanceCursorAfterInitialColumn,
         ignoredColumnsForEmptyExpression: ignoredColumns,
