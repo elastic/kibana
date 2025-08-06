@@ -12,7 +12,7 @@ import type { CasesClientArgs } from '../types';
 import type { GetAllForOwnersArgs } from './types';
 
 /**
- * Retrieves all the attachments for a case.
+ * Retrieves all the suggestions for the specified owners.
  */
 export async function getAllForOwners(
   { owners, context }: GetAllForOwnersArgs,
