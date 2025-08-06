@@ -10,19 +10,31 @@
 import type { TabItem } from '../types';
 
 export const getNextTabNumber = (allTabs: TabItem[], baseLabel: string) => {
-  // Find all tabs that start with the base label
-  const numbers = allTabs
-    .map((tab) => tab.label.trim())
-    .filter((label) => label === baseLabel || label.startsWith(`${baseLabel} `))
-    .map((label) => {
-      if (label === baseLabel) return 1; // First occurrence has implicit number 1
+  // Find the highest number among tabs with the base label
+  const maxNumber = allTabs.reduce((max, tab) => {
+    const label = tab.label.trim();
 
-      // Extract number from "Base Label X" format
+    // Check if this is the base label without a number (implicit "1")
+    if (label === baseLabel) {
+      return Math.max(max, 1);
+    }
+
+    // Check if this is a numbered variant like "Base Label 2"
+    if (label.startsWith(`${baseLabel} `)) {
+      // Extract the number part after "Base Label "
       const suffix = label.slice(baseLabel.length + 1);
       const num = Number(suffix);
-      return isNaN(num) ? null : num;
-    })
-    .filter((num): num is number => num !== null);
 
-  return numbers.length > 0 ? Math.max(...numbers) + 1 : null;
+      // Only consider valid numbers
+      if (!isNaN(num)) {
+        return Math.max(max, num);
+      }
+    }
+
+    // Tab doesn't match our pattern, keep current max
+    return max;
+  }, 0); // Start with 0 as initial max
+
+  // Return next number if we found any matching tabs, otherwise null
+  return maxNumber > 0 ? maxNumber + 1 : null;
 };
