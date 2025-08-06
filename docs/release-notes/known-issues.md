@@ -8,7 +8,7 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-::::{dropdown} Issues with rules occur when `xpack.alerting.rules.run.alerts.max` is set to a value greater than `5000`
+::::{dropdown} Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000
 
 Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
