@@ -25,7 +25,7 @@ export interface UseSnapshotRequest
 }
 
 export function useSnapshot(
-  { schema = 'ecs', ...props }: UseSnapshotRequest,
+  props: UseSnapshotRequest,
   { sendRequestImmediately = true }: { sendRequestImmediately?: boolean } = {}
 ) {
   const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);

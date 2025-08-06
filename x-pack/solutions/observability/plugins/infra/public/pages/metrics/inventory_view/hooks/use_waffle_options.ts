@@ -218,8 +218,6 @@ export const useWaffleOptions = () => {
 
   return {
     ...urlState,
-    preferredSchema:
-      urlState.preferredSchema === null ? ('ecs' as DataSchemaFormat) : urlState.preferredSchema,
     changeMetric,
     changeGroupBy,
     changeNodeType,
