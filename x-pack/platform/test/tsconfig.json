@@ -158,5 +158,6 @@
     "@kbn/console-plugin",
     "@kbn/serverless-common-settings",
     "@kbn/core-saved-objects-import-export-server-internal",
+    "@kbn/management-settings-ids",
   ]
 }
