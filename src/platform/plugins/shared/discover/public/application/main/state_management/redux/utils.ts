@@ -8,7 +8,6 @@
  */
 
 import { v4 as uuid } from 'uuid';
-import { escapeRegExp } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk } from '@reduxjs/toolkit';
