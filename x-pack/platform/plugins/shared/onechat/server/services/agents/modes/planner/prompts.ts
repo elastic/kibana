@@ -6,6 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 import {
   isPlanningResult,
   isStepExecutionResult,
@@ -15,8 +16,10 @@ import {
 } from './backlog';
 
 export const getPlanningPrompt = ({
+  customInstructions,
   discussion,
 }: {
+  customInstructions?: string;
   discussion: BaseMessageLike[];
 }): BaseMessageLike[] => {
   return [
@@ -72,6 +75,8 @@ export const getPlanningPrompt = ({
           - "Identify the top 3 categories of documents across those sources"
           - "Retrieve documents for those categories"
 
+        ${customInstructionsBlock(customInstructions)}
+
         Based on the following conversation, generate a plan as described.`,
     ],
     ...discussion,
@@ -79,10 +84,12 @@ export const getPlanningPrompt = ({
 };
 
 export const getReplanningPrompt = ({
+  customInstructions,
   plan,
   backlog,
   discussion,
 }: {
+  customInstructions?: string;
   plan: string[];
   backlog: BacklogItem[];
   discussion: BaseMessageLike[];
@@ -149,6 +156,8 @@ export const getReplanningPrompt = ({
           - "Identify indices or document sources likely to contain hr documents"
           - "Identify the top 3 categories of documents across those sources"
           - "Retrieve documents for those categories"
+
+       ${customInstructionsBlock(customInstructions)}
   `,
     ],
     ...discussion,
@@ -177,9 +186,11 @@ export const getReplanningPrompt = ({
 };
 
 export const getAnswerPrompt = ({
+  customInstructions,
   discussion,
   backlog,
 }: {
+  customInstructions?: string;
   discussion: BaseMessageLike[];
   backlog: BacklogItem[];
 }): BaseMessageLike[] => {
@@ -202,10 +213,11 @@ export const getAnswerPrompt = ({
       - Do not repeat the user's question or summarize the JSON input.
       - Do not speculate beyond the gathered information unless logically inferred from it.
 
-      Additional information:
-      - The current date is ${new Date().toISOString()}.
+      ${customInstructionsBlock(customInstructions)}
 
-      `,
+      Additional information:
+      - The current date is ${formatDate()}
+      - You can use markdown format to structure your response`,
     ],
     ...discussion,
     [
@@ -265,9 +277,11 @@ const renderStepExecutionResult = (
 };
 
 export const getExecutionPrompt = ({
+  customInstructions,
   task,
   backlog,
 }: {
+  customInstructions?: string;
   task: string;
   backlog: BacklogItem[];
 }): BaseMessageLike[] => {
@@ -291,8 +305,10 @@ export const getExecutionPrompt = ({
       - Your response will be read by another agent which can understand any format
       - You can either return plain text, json, or any combination of the two, as you see fit depending on your goal.
 
+      ${customInstructionsBlock(customInstructions)}
+
       ### Additional information:
-      - The current date is ${new Date().toISOString()}.
+      - The current date is  ${formatDate()}
       `,
     ],
     [

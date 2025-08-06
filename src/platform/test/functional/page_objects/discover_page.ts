@@ -229,12 +229,27 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
     ).type(field);
 
-    const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
-        value ?? field
-      }"]`
-    );
-    await option.click();
+    const optionValue = value ?? field;
+    let option;
+
+    await this.retry.try(async () => {
+      option = await this.find.byCssSelector(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
+      );
+
+      return Boolean(option);
+    });
+
+    await option!.click();
+    await this.retry.waitFor('the value to be selected', async () => {
+      const breakdownButton = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorButton'
+      );
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
+      );
+    });
   }
 
   public async clearBreakdownField() {
@@ -307,6 +322,16 @@ export class DiscoverPageObject extends FtrService {
   public async closeHistogramPanel() {
     await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async getHistogramHeight() {
+    const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
+    return (await histogram.getSize()).height;
+  }
+
+  public async resizeHistogramBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('unifiedHistogramResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
   }
 
   public async getChartInterval() {

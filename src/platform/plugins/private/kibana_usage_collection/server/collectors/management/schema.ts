@@ -102,6 +102,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enablePrivilegedUserMonitoring': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -472,15 +476,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMapApiV2': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:aiAssistantSimulatedFunctionCalling': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantSearchConnectorIndexPattern': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'ai:anonymizationSettings': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -491,11 +495,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'onechat:mcpServer:enabled': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'onechat:esqlToolApi:enabled': {
+  'onechat:mcp:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -503,7 +503,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'onechat:tools:enabled': {
+  'onechat:api:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -658,12 +658,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
-    },
-  },
-  'cases:incrementalIdDisplay:enabled': {
-    type: 'boolean',
-    _meta: {
-      description: 'Display the incremental id of a case in the relevant pages',
     },
   },
   'observability:enableStreamsUI': {

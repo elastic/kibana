@@ -13,7 +13,6 @@ import type { TaskManagerDoc } from '../../../../common/lib';
 import { getUrlPrefix, getEventLog, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');

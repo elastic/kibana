@@ -62,7 +62,7 @@ describe('WiredStream', () => {
             inherit: {},
           },
           processing: [],
-          unwired: {},
+          classic: {},
           wired: {
             fields: {},
             routing: [],
@@ -70,7 +70,7 @@ describe('WiredStream', () => {
         },
       },
     ])('is not valid %s', (val) => {
-      expect(WiredStream.Definition.is(val as any)).toBe(false);
+      expect(() => WiredStream.Definition.asserts(val as any)).toThrow();
     });
   });
 
@@ -99,7 +99,7 @@ describe('WiredStream', () => {
           text_structure: true,
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},
@@ -127,7 +127,7 @@ describe('WiredStream', () => {
           },
         },
         effective_lifecycle: {
-          inherit: {},
+          dsl: {},
           from: 'logs',
         },
         inherited_fields: {},

@@ -10,7 +10,6 @@
 import type {
   ChromeStart,
   ChromeBreadcrumb,
-  SideNavComponent,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -35,7 +34,9 @@ export interface InternalChromeStart extends ChromeStart {
    *
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
-  getLegacyHeaderComponentForFixedLayout(): JSX.Element;
+  getLegacyHeaderComponentForFixedLayout(opts?: {
+    projectSideNavVersion: 'v1' | 'v2';
+  }): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header UI
@@ -49,6 +50,27 @@ export interface InternalChromeStart extends ChromeStart {
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getClassicHeaderComponentForGridLayout(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the header UI
+   * @internal
+   *
+   * @remarks
+   * Header that is used in the grid layout with the "project" navigation (solution and serverless)
+   * It includes the header.
+   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectHeaderComponentForGridLayout(opts: {
+    includeSideNav: 'v1' | 'v2' | false;
+  }): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the new project side navigation UI
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectSideNavV2ComponentForGridLayout(): JSX.Element;
 
   /**
    * Used only by the rendering service to render the header banner UI
@@ -71,6 +93,14 @@ export interface InternalChromeStart extends ChromeStart {
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getChromelessHeader(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the project app menu UI
+   * @internal
+   *
+   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
+   */
+  getProjectAppMenuComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to retrieve the set of classNames
@@ -110,7 +140,8 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      config?: { dataTestSubj?: string }
     ): void;
 
     getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
@@ -119,16 +150,6 @@ export interface InternalChromeStart extends ChromeStart {
      * Returns an observable of the active nodes in the project navigation.
      */
     getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
-
-    /**
-     * Set custom project sidenav component to be used instead of the default project sidenav.
-     * @param component A getter function returning a CustomNavigationComponent.
-     *
-     * @remarks This component will receive Chrome navigation state as props (not yet implemented)
-     *
-     * Use {@link ServerlessPluginStart.setSideNavComponent} to set custom project navigation.
-     */
-    setSideNavComponent(component: SideNavComponent | null): void;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;

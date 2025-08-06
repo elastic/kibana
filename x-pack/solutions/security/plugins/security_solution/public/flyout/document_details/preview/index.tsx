@@ -60,7 +60,7 @@ export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) =
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
-        style={{ marginTop: '-15px' }}
+        css={{ marginTop: '-15px' }}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
       <PreviewPanelFooter />

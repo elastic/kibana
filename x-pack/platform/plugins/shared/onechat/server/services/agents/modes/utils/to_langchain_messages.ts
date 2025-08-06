@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import {
   ConversationRound,
   RoundInput,
   ToolCallWithResult,
   isToolCallStep,
 } from '@kbn/onechat-common';
-import { BaseMessage, AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 
 /**
  * Converts a conversation to langchain format
@@ -43,7 +44,7 @@ export const roundToLangchain = (
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(createUserMessage({ content: round.userInput.message }));
+  messages.push(createUserMessage({ content: round.input.message }));
 
   // steps
   if (!ignoreSteps) {
@@ -55,7 +56,7 @@ export const roundToLangchain = (
   }
 
   // assistant response
-  messages.push(createAssistantMessage({ content: round.assistantResponse.message }));
+  messages.push(createAssistantMessage({ content: round.response.message }));
 
   return messages;
 };
@@ -69,21 +70,23 @@ const createAssistantMessage = ({ content }: { content: string }): AIMessage => 
 };
 
 export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage, ToolMessage] => {
+  const toolName = sanitizeToolId(toolCall.tool_id);
+
   const toolCallMessage = new AIMessage({
     content: '',
     tool_calls: [
       {
-        id: toolCall.toolCallId,
-        name: toolCall.toolId.toolId,
-        args: toolCall.args,
+        id: toolCall.tool_call_id,
+        name: toolName,
+        args: toolCall.params,
         type: 'tool_call',
       },
     ],
   });
 
   const toolResultMessage = new ToolMessage({
-    tool_call_id: toolCall.toolCallId,
-    content: toolCall.result,
+    tool_call_id: toolCall.tool_call_id,
+    content: toolCall.results,
   });
 
   return [toolCallMessage, toolResultMessage];

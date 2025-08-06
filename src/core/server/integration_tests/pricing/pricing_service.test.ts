@@ -21,7 +21,7 @@ import {
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
-import type { PricingProductFeature, PricingProduct } from '@kbn/core-pricing-common';
+import type { PricingProductFeature, IPricingProduct } from '@kbn/core-pricing-common';
 import { createInternalHttpService } from '../utilities';
 
 const coreId = Symbol('core');
@@ -38,46 +38,82 @@ describe('PricingService', () => {
   let service: PricingService;
   let serviceSetup: Awaited<ReturnType<PricingService['setup']>>;
 
-  beforeEach(async () => {
-    server = createInternalHttpService();
-    httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
-    httpSetup = await server.setup({
-      context: contextServiceMock.createSetupContract(),
-      executionContext: executionContextServiceMock.createInternalSetupContract(),
+  describe('preboot', () => {
+    beforeAll(async () => {
+      server = createInternalHttpService();
+      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      httpSetup = await server.setup({
+        context: contextServiceMock.createSetupContract(),
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
+      });
+      service = new PricingService({
+        coreId,
+        env,
+        logger: loggingSystemMock.create(),
+        configService,
+      });
+      await service.preboot({ http: httpPreboot });
     });
-    service = new PricingService({
-      coreId,
-      env,
-      logger: loggingSystemMock.create(),
-      configService,
+
+    afterAll(async () => {
+      await server.stop();
     });
-    await service.preboot({ http: httpPreboot });
-    serviceSetup = await service.setup({ http: httpSetup });
-    await server.start();
+
+    describe('/internal/core/pricing route', () => {
+      it('is exposed and returns pricing configuration', async () => {
+        const result = await supertest(httpPreboot.server.listener)
+          .get('/internal/core/pricing')
+          .expect(200);
+
+        expect(result.body).toHaveProperty('tiers');
+        expect(result.body).toHaveProperty('product_features');
+        expect(typeof result.body.tiers).toBe('object');
+        expect(typeof result.body.product_features).toBe('object');
+      });
+    });
   });
 
-  afterEach(async () => {
-    await server.stop();
-  });
-
-  describe('/internal/core/pricing route', () => {
-    it('is exposed and returns pricing configuration', async () => {
-      const result = await supertest(httpSetup.server.listener)
-        .get('/internal/core/pricing')
-        .expect(200);
-
-      expect(result.body).toHaveProperty('tiers');
-      expect(result.body).toHaveProperty('product_features');
-      expect(typeof result.body.tiers).toBe('object');
-      expect(typeof result.body.product_features).toBe('object');
+  describe('after preboot', () => {
+    beforeAll(async () => {
+      server = createInternalHttpService();
+      httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
+      httpSetup = await server.setup({
+        context: contextServiceMock.createSetupContract(),
+        executionContext: executionContextServiceMock.createInternalSetupContract(),
+      });
+      service = new PricingService({
+        coreId,
+        env,
+        logger: loggingSystemMock.create(),
+        configService,
+      });
+      await service.preboot({ http: httpPreboot });
+      serviceSetup = await service.setup({ http: httpSetup });
+      await server.start();
     });
 
-    it('returns default pricing configuration when no custom config is provided', async () => {
-      const result = await supertest(httpSetup.server.listener)
-        .get('/internal/core/pricing')
-        .expect(200);
+    afterAll(async () => {
+      await server.stop();
+    });
 
-      expect(result.body).toMatchInlineSnapshot(`
+    describe('/internal/core/pricing route', () => {
+      it('is exposed and returns pricing configuration', async () => {
+        const result = await supertest(httpSetup.server.listener)
+          .get('/internal/core/pricing')
+          .expect(200);
+
+        expect(result.body).toHaveProperty('tiers');
+        expect(result.body).toHaveProperty('product_features');
+        expect(typeof result.body.tiers).toBe('object');
+        expect(typeof result.body.product_features).toBe('object');
+      });
+
+      it('returns default pricing configuration when no custom config is provided', async () => {
+        const result = await supertest(httpSetup.server.listener)
+          .get('/internal/core/pricing')
+          .expect(200);
+
+        expect(result.body).toMatchInlineSnapshot(`
         Object {
           "product_features": Object {},
           "tiers": Object {
@@ -86,60 +122,61 @@ describe('PricingService', () => {
           },
         }
       `);
-    });
+      });
 
-    it('includes registered product features in the response', async () => {
-      // Register a product feature
-      const testFeature: PricingProductFeature = {
-        id: 'test_feature',
-        description: 'A test feature for integration testing',
-        products: [
-          { name: 'observability', tier: 'complete' },
-          { name: 'security', tier: 'essentials' },
-        ] as PricingProduct[],
-      };
+      it('includes registered product features in the response', async () => {
+        // Register a product feature
+        const testFeature: PricingProductFeature = {
+          id: 'test_feature',
+          description: 'A test feature for integration testing',
+          products: [
+            { name: 'observability', tier: 'complete' },
+            { name: 'security', tier: 'essentials' },
+          ] as IPricingProduct[],
+        };
 
-      serviceSetup.registerProductFeatures([testFeature]);
+        serviceSetup.registerProductFeatures([testFeature]);
 
-      const result = await supertest(httpSetup.server.listener)
-        .get('/internal/core/pricing')
-        .expect(200);
+        const result = await supertest(httpSetup.server.listener)
+          .get('/internal/core/pricing')
+          .expect(200);
 
-      expect(result.body.product_features).toHaveProperty('test_feature');
-      expect(result.body.product_features.test_feature).toEqual(testFeature);
-    });
+        expect(result.body.product_features).toHaveProperty('test_feature');
+        expect(result.body.product_features.test_feature).toEqual(testFeature);
+      });
 
-    it('handles multiple registered product features', async () => {
-      const feature1: PricingProductFeature = {
-        id: 'feature_1',
-        description: 'First test feature',
-        products: [
-          { name: 'observability', tier: 'complete' },
-          { name: 'security', tier: 'essentials' },
-        ] as PricingProduct[],
-      };
+      it('handles multiple registered product features', async () => {
+        const feature1: PricingProductFeature = {
+          id: 'feature_1',
+          description: 'First test feature',
+          products: [
+            { name: 'observability', tier: 'complete' },
+            { name: 'security', tier: 'essentials' },
+          ] as IPricingProduct[],
+        };
 
-      const feature2: PricingProductFeature = {
-        id: 'feature_2',
-        description: 'Second test feature',
-        products: [
-          {
-            name: 'security',
-            tier: 'complete',
-          },
-        ] as PricingProduct[],
-      };
+        const feature2: PricingProductFeature = {
+          id: 'feature_2',
+          description: 'Second test feature',
+          products: [
+            {
+              name: 'security',
+              tier: 'complete',
+            },
+          ] as IPricingProduct[],
+        };
 
-      serviceSetup.registerProductFeatures([feature1, feature2]);
+        serviceSetup.registerProductFeatures([feature1, feature2]);
 
-      const result = await supertest(httpSetup.server.listener)
-        .get('/internal/core/pricing')
-        .expect(200);
+        const result = await supertest(httpSetup.server.listener)
+          .get('/internal/core/pricing')
+          .expect(200);
 
-      expect(result.body.product_features).toHaveProperty('feature_1');
-      expect(result.body.product_features).toHaveProperty('feature_2');
-      expect(result.body.product_features.feature_1).toEqual(feature1);
-      expect(result.body.product_features.feature_2).toEqual(feature2);
+        expect(result.body.product_features).toHaveProperty('feature_1');
+        expect(result.body.product_features).toHaveProperty('feature_2');
+        expect(result.body.product_features.feature_1).toEqual(feature1);
+        expect(result.body.product_features.feature_2).toEqual(feature2);
+      });
     });
   });
 });

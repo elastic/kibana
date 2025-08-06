@@ -17,6 +17,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { getTemplateDetailsLink } from '@kbn/index-management-plugin/public';
 import { useKibana } from '../../shared_imports';
@@ -31,6 +32,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
   indexTemplates,
   close,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
   const {
     services: { getUrlForApp },
   } = useKibana();
@@ -40,10 +42,10 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
     });
   };
   return (
-    <EuiFlyout onClose={close}>
+    <EuiFlyout onClose={close} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" data-test-subj="indexTemplatesFlyoutHeader">
-          <h2>
+          <h2 id={modalTitleId}>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.indexTemplatesFlyout.headerText"
               defaultMessage="Index templates that apply {policyName}"

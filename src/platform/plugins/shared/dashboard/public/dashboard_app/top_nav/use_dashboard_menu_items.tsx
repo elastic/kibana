@@ -212,6 +212,7 @@ export const useDashboardMenuItems = ({
         id: 'settings',
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
+        htmlId: 'dashboardSettingsButton',
         run: () => openSettingsFlyout(dashboardApi),
       },
     };

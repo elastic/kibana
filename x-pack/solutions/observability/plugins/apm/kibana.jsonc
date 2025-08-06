@@ -40,6 +40,7 @@
     "optionalPlugins": [
       "actions",
       "alerting",
+      "cases",
       "charts",
       "cloud",
       "discover",
@@ -55,7 +56,6 @@
       "customIntegrations",
       "licenseManagement",
       "profilingDataAccess",
-      "cases",
       "observabilityAIAssistant",
       "share"
     ],

@@ -155,6 +155,8 @@ export const MoreReputationLinksContainer = React.memo<ReputationLinkOverflowPro
         className="eui-yScroll"
         style={{
           maxHeight: moreMaxHeight,
+        }}
+        css={{
           paddingRight: '2px',
         }}
       >

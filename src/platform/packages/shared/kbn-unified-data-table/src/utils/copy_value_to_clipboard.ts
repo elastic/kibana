@@ -94,6 +94,10 @@ export const copyColumnValuesToClipboard = async ({
 
   let copied;
   try {
+    if (!window.navigator?.clipboard) {
+      throw new Error('Clipboard API not available.');
+    }
+
     // try to copy without browser styles
     await window.navigator?.clipboard?.writeText(textToCopy);
     copied = true;
@@ -201,6 +205,10 @@ export const copyRowsAsTextToClipboard = async ({
 
   let copied;
   try {
+    if (!window.navigator?.clipboard) {
+      throw new Error('Clipboard API not available.');
+    }
+
     // try to copy without browser styles
     await window.navigator?.clipboard?.writeText(textToCopy);
     copied = true;
@@ -245,6 +253,10 @@ export const copyRowsAsJsonToClipboard = async ({
 
   let copied;
   try {
+    if (!window.navigator?.clipboard) {
+      throw new Error('Clipboard API not available.');
+    }
+
     // try to copy without browser styles
     await window.navigator?.clipboard?.writeText(textToCopy);
     copied = true;

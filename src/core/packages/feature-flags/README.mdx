@@ -163,3 +163,11 @@ PUT /internal/core/_settings
   }
 }
 ```
+
+> [!NOTE]
+> The `PUT /internal/core/_settings` endpoint is only available in the test environments. To enable it, add the following
+> to your `kibana.yml`:
+>
+> ```yaml
+> coreApp.allowDynamicConfigOverrides: true
+> ```

@@ -93,6 +93,42 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+        "id": "def-common.getTypeHashes",
+        "type": "Function",
+        "tags": [],
+        "label": "getTypeHashes",
+        "description": [],
+        "signature": [
+          "(soType: ",
+          "SavedObjectsType",
+          "<any>) => SavedObjectTypeMigrationHashes"
+        ],
+        "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-so-type-serializer",
+            "id": "def-common.getTypeHashes.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "soType",
+            "description": [],
+            "signature": [
+              "SavedObjectsType",
+              "<any>"
+            ],
+            "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

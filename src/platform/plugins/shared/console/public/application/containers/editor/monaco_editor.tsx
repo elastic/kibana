@@ -14,10 +14,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, ESQLCallbacks, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
-import { isEqual } from 'lodash';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { FieldType } from '@kbn/esql-ast/src/definitions/types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
@@ -68,8 +66,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
-  const [license, setLicense] = useState<ILicense | undefined>(undefined);
-
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
@@ -114,20 +110,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   );
 
   useEffect(() => {
-    async function fetchLicense() {
-      try {
-        const ls = await licensing?.getLicense();
-        if (!isEqual(license, ls)) {
-          setLicense(ls);
-        }
-      } catch (error) {
-        // failed to fetch
-      }
-    }
-    fetchLicense();
-  }, [licensing, license]);
-
-  useEffect(() => {
     if (settings.isKeyboardShortcutsEnabled && editorInstance) {
       registerKeyboardCommands({
         editor: editorInstance,
@@ -159,9 +141,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        const ccrFeature = license?.getFeature('ccr');
-        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
-        return await getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
+        const getLicense = licensing?.getLicense;
+        return await getESQLSources(dataViews, { application, http }, getLicense);
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -188,7 +169,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       },
     };
     return callbacks;
-  }, [license, dataViews, application, http, data.search.search]);
+  }, [licensing, dataViews, application, http, data.search.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),

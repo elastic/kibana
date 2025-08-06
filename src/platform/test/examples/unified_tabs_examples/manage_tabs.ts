@@ -47,7 +47,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

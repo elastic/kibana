@@ -93,6 +93,17 @@ type UseCasesAddToExistingCaseModal = (
   close: () => void;
 };
 
+export interface Ecs {
+  _id: string;
+  _index?: string;
+  signal?: {
+    [x: string]: any;
+  };
+  kibana?: {
+    alert: any;
+  };
+}
+
 /**
  * Minimal cases service interface required by the alerts table
  *
@@ -109,6 +120,7 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
     canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -128,6 +140,12 @@ export interface AlertWithLegacyFormats {
    * @deprecated
    */
   ecsAlert: any;
+}
+
+export interface AlertsTableOnLoadedProps {
+  alerts: Alert[];
+  columns: EuiDataGridColumn[];
+  totalAlertsCount: number;
 }
 
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
@@ -169,7 +187,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * Any runtime mappings to be applied to the alerts search request
    */

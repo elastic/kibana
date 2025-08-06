@@ -133,7 +133,7 @@ export class StreamsClient {
     const rootStreamExists = await this.checkRootLogsStreamExists();
 
     if (!rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'upsert',
@@ -145,10 +145,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
     }
 
     if (!this.dependencies.isServerless) {
@@ -172,7 +168,7 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete unwired streams.
+   * It does NOT delete classic streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
     try {
@@ -191,7 +187,7 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'delete',
@@ -203,10 +199,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
 
       const { assetClient, storageClient } = this.dependencies;
       await Promise.all([assetClient.clean(), storageClient.clean()]);
@@ -268,28 +260,31 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
-    const { dashboards, queries } = request;
-
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      stream.name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
-
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(stream.name, queries);
+    await this.syncAssets(stream.name, request);
 
     return {
       acknowledged: true,
       result: result.changes.created.includes(name) ? 'created' : 'updated',
+    };
+  }
+
+  async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
+    const result = await State.attemptChanges(
+      streams.map(({ name, request }) => ({
+        type: 'upsert',
+        definition: { ...request.stream, name } as Streams.all.Definition,
+      })),
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+
+    await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+
+    return {
+      acknowledged: true,
+      result: { created: result.changes.created, updated: result.changes.updated },
     };
   }
 
@@ -313,7 +308,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -349,10 +344,6 @@ export class StreamsClient {
       ],
       { ...this.dependencies, streamsClient: this }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -533,14 +524,14 @@ export class StreamsClient {
    */
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
-  ): Streams.UnwiredStream.Definition {
-    const definition: Streams.UnwiredStream.Definition = {
+  ): Streams.ClassicStream.Definition {
+    const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        unwired: {},
+        classic: {},
       },
     };
 
@@ -601,10 +592,10 @@ export class StreamsClient {
   }
 
   /**
-   * Lists all unmanaged streams (unwired streams without a
+   * Lists all unmanaged streams (classic streams without a
    * stored definition).
    */
-  private async getUnmanagedDataStreams(): Promise<Streams.UnwiredStream.Definition[]> {
+  private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
     const response = await wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
     );
@@ -615,7 +606,7 @@ export class StreamsClient {
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
-        unwired: {},
+        classic: {},
       },
     }));
   }
@@ -657,7 +648,7 @@ export class StreamsClient {
       // in serverless, Elasticsearch doesn't natively support streams yet
       return false;
     }
-    const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+    const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
     })) as { logs: { enabled: boolean } };
@@ -676,20 +667,7 @@ export class StreamsClient {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    const access =
-      definition && Streams.GroupStream.Definition.is(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
-
-    // Can/should State manage access control as well?
-    if (!access.write) {
-      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
-    }
-
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -701,12 +679,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
-    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -751,5 +723,22 @@ export class StreamsClient {
         },
       },
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
+  }
+
+  private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
+    const { dashboards, queries } = request;
+
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      })),
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(name, queries);
   }
 }

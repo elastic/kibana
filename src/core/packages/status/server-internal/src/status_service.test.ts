@@ -77,6 +77,9 @@ describe('StatusService', () => {
       pluginDependencies: new Map(),
       environment: environmentServiceMock.createSetupContract(),
       http: httpServiceMock.createInternalSetupContract(),
+      httpRateLimiter: {
+        status$: of(undefined),
+      },
       metrics: metricsServiceMock.createInternalSetupContract(),
       coreUsageData: coreUsageDataServiceMock.createSetupContract(),
       ...overrides,
@@ -130,6 +133,9 @@ describe('StatusService', () => {
             elasticsearch: {
               status$: of(available),
             },
+            httpRateLimiter: {
+              status$: of(available),
+            },
             savedObjects: {
               status$: of(degraded),
             },
@@ -137,6 +143,7 @@ describe('StatusService', () => {
         );
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
       });
@@ -145,6 +152,9 @@ describe('StatusService', () => {
         const setup = await service.setup(
           setupDeps({
             elasticsearch: {
+              status$: of(available),
+            },
+            httpRateLimiter: {
               status$: of(available),
             },
             savedObjects: {
@@ -157,14 +167,17 @@ describe('StatusService', () => {
         const subResult3 = await setup.core$.pipe(first()).toPromise();
         expect(subResult1).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
         expect(subResult2).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
         expect(subResult3).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
       });

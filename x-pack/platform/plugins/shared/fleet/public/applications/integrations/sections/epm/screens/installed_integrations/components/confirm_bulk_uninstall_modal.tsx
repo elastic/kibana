@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -20,9 +20,12 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
   const [isLoading, setIsLoading] = useState(false);
 
   const isSingleItem = selectedItems.length === 1;
+  const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       title={
         isSingleItem
           ? i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.singleTitle', {

@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import React from 'react';
+import { useBreadcrumb } from '../hooks/use_breadcrumbs';
+import { appPaths } from '../utils/app_paths';
 import { OnechatConversationsView } from '../components/conversations/conversations_view';
-
-const newConversationId = 'new';
+import { labels } from '../utils/i18n';
 
 export const OnechatConversationsPage: React.FC = () => {
-  const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
-
-  // TODO: Add logic to resume most recent conversation when no conversationId is provided
-  // For now, if no conversationId is provided, we will create a new conversation
-  const conversationId = useMemo(() => {
-    return conversationIdParam === newConversationId ? undefined : conversationIdParam;
-  }, [conversationIdParam]);
-
-  return <OnechatConversationsView conversationId={conversationId} />;
+  useBreadcrumb([
+    {
+      text: labels.conversations.title,
+      path: appPaths.chat.new,
+    },
+  ]);
+  return <OnechatConversationsView />;
 };

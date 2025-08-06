@@ -1211,13 +1211,19 @@
             "label": "msearch",
             "description": [],
             "signature": [
-              "<TDocument = unknown>(operationName: string, parameters: ",
+              "<TDocument = unknown, TSearchRequest extends ",
               "MsearchRequest",
-              ") => Promise<{ responses: ",
-              "SearchResponse",
-              "<TDocument, Record<string, ",
-              "AggregationsAggregate",
-              ">>[]; }>"
+              " = ",
+              "MsearchRequest",
+              ">(operationName: string, parameters: TSearchRequest) => Promise<{ responses: ",
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.InferSearchResponseOf",
+                "text": "InferSearchResponseOf"
+              },
+              "<TDocument, TSearchRequest, { restTotalHitsAsInt: false; }>[]; }>"
             ],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
             "deprecated": false,
@@ -1241,12 +1247,12 @@
               {
                 "parentPluginId": "@kbn/traced-es-client",
                 "id": "def-server.TracedElasticsearchClient.msearch.$2",
-                "type": "Object",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "parameters",
                 "description": [],
                 "signature": [
-                  "MsearchRequest"
+                  "TSearchRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
                 "deprecated": false,

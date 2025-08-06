@@ -31,6 +31,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  EndpointActionData,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -58,6 +59,18 @@ import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/u
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
 };
+
+interface CrowdstrikeResponseOptions {
+  error?:
+    | {
+        code: string;
+        message: string;
+      }
+    | undefined;
+  actionId: string;
+  agentId: string | string[];
+  data: EndpointActionData<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput>;
+}
 
 export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
@@ -301,7 +314,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO:PT support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -324,6 +338,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
     let actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse> | undefined;
@@ -383,6 +398,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 
@@ -505,7 +521,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     const stdout = actionResponse.data?.combined.resources[agentId].stdout || '';
     const stderr = actionResponse.data?.combined.resources[agentId].stderr || '';
     const error = actionResponse.data?.combined.resources[agentId].errors?.[0];
-    const options = {
+    const options: CrowdstrikeResponseOptions = {
       actionId: doc.EndpointActions.action_id,
       agentId,
       data: {
@@ -529,14 +545,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         : {}),
     };
 
-    await this.writeActionResponseToEndpointIndex(options);
+    const responseDoc = await this.writeActionResponseToEndpointIndex(options);
+    // telemetry event for completed action
+    await this.sendActionResponseTelemetry([responseDoc]);
   }
 
   private async completeCrowdstrikeAction(
     actionResponse: ActionTypeExecutorResult<CrowdstrikeBaseApiResponse>,
     doc: LogsEndpointAction
   ): Promise<void> {
-    const options = {
+    const options: CrowdstrikeResponseOptions = {
       actionId: doc.EndpointActions.action_id,
       agentId: doc.agent.id,
       data: doc.EndpointActions.data,
@@ -550,7 +568,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         : {}),
     };
 
-    await this.writeActionResponseToEndpointIndex(options);
+    const responseDoc = await this.writeActionResponseToEndpointIndex(options);
+    // telemetry event for completed action
+    await this.sendActionResponseTelemetry([responseDoc]);
   }
 
   async getCustomScripts(): Promise<CustomScriptsResponse> {

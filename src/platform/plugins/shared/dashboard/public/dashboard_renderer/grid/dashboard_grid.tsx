@@ -16,7 +16,7 @@ import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import { GridData } from '../../../common/content_management/v2/types';
+import type { GridData } from '../../../server/content_management';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -275,6 +275,11 @@ const dashboardGridStyles = {
           position: 'absolute',
           width: '100%',
         },
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
+          minHeight: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
+        },
       },
       // LAYOUT MODES
       // Adjust borders/etc... for non-spaced out and expanded panels
@@ -290,7 +295,7 @@ const dashboardGridStyles = {
       // drag handle visibility when dashboard is in edit mode or a panel is expanded
       '&.dshLayout-withoutMargins:not(.dshLayout--editing), .dshDashboardGrid__item--expanded, .dshDashboardGrid__item--blurred, .dshDashboardGrid__item--focused':
         {
-          '.embPanel--dragHandle': {
+          '.embPanel--dragHandle, ~.kbnGridPanel--resizeHandle': {
             visibility: 'hidden',
           },
         },

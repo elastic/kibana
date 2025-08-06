@@ -310,9 +310,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isEsqlMode]);
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
-
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
@@ -354,7 +351,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onFilter}
           onFieldEdited={onFieldEdited}
-          container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
         />
@@ -369,7 +365,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     viewMode,
     onFilter,
     onFieldEdited,
-    mainContainer,
     onDropFieldToTable,
     panelsToggle,
   ]);
@@ -438,7 +433,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
-        <div ref={setSidebarContainer} css={styles.sidebarContainer}>
+        <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
@@ -450,7 +445,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             history={history}
           />
           <DiscoverResizableLayout
-            container={sidebarContainer}
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
@@ -505,7 +499,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 ) : (
                   <EuiPanel
                     role="main"
-                    panelRef={setMainContainer}
                     paddingSize="none"
                     borderRadius="none"
                     hasShadow={false}

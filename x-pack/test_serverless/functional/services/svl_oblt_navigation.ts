@@ -28,5 +28,15 @@ export function SvlObltNavigationServiceProvider({
         await testSubjects.exists('discoverQueryTotalHits', { timeout: 20_000 });
       });
     },
+
+    async navigateToObsCases() {
+      await PageObjects.common.navigateToUrl('observability', 'cases');
+    },
+
+    async expectNotFoundPage() {
+      await testSubjects.existOrFail('observabilityPageNotFoundBanner', {
+        timeout: 20_000,
+      });
+    },
   };
 }

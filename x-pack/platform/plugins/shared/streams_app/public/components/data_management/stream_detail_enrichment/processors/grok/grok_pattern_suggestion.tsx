@@ -23,7 +23,7 @@ import { ValuesType } from 'utility-types';
 import { GrokCollection, DraftGrokExpression } from '@kbn/grok-ui';
 import { UseFormSetValue, FieldValues, useWatch } from 'react-hook-form';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
-import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
+import { selectPreviewRecords } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { ProcessorFormState } from '../../types';
 import { GeneratePatternButton, AdditionalChargesCallout } from './generate_pattern_button';
@@ -40,13 +40,13 @@ export const GrokPatternAISuggestions = ({
   grokCollection: GrokCollection;
   setValue: UseFormSetValue<FieldValues>;
   onAddPattern: () => void;
-}): React.ReactElement => {
+}) => {
   const {
     definition: { stream },
   } = useStreamDetail();
 
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
+    selectPreviewRecords(snapshot.context)
   );
 
   const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
@@ -72,9 +72,12 @@ export const GrokPatternAISuggestions = ({
               'patterns',
               suggestion.grokProcessor.patterns.map(
                 (value) => new DraftGrokExpression(grokCollection, value)
-              )
+              ),
+              { shouldValidate: true }
             );
-            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions);
+            setValue('pattern_definitions', suggestion.grokProcessor.pattern_definitions, {
+              shouldValidate: true,
+            });
           }
           refreshSuggestions(null);
         }}
@@ -90,14 +93,13 @@ export const GrokPatternAISuggestions = ({
           <EuiFlexItem grow={false}>
             <GeneratePatternButton
               aiFeatures={aiFeatures}
-              onClick={(connectorId) =>
+              onClick={(connectorId) => {
                 refreshSuggestions({
                   connectorId,
                   streamName: stream.name,
-                  samples: previewDocuments,
                   fieldName: fieldValue,
-                })
-              }
+                });
+              }}
               isLoading={suggestionsState.loading}
               isDisabled={!isValidField}
             />
@@ -116,7 +118,6 @@ export const GrokPatternAISuggestions = ({
               { defaultMessage: 'Add pattern' }
             )}
           </EuiButtonEmpty>
-          {/* <AddPatternButton onClick={onAddPattern} isDisabled={suggestionsState.loading} /> */}
         </EuiFlexItem>
       </EuiFlexGroup>
       {aiFeatures &&

@@ -19,6 +19,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const postAttackDiscoveryBulkRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -73,7 +74,7 @@ export const postAttackDiscoveryBulkRoute = (
 
         const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
           ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-          false
+          true
         );
 
         if (!attackDiscoveryAlertsEnabled) {
@@ -81,6 +82,15 @@ export const postAttackDiscoveryBulkRoute = (
             body: `Attack discovery alerts feature is disabled`,
             statusCode: 403,
           });
+        }
+
+        // Perform alerts access check
+        const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
+          context: ctx,
+          response,
+        });
+        if (!privilegesCheckResponse.isSuccess) {
+          return privilegesCheckResponse.response;
         }
 
         try {
@@ -104,8 +114,12 @@ export const postAttackDiscoveryBulkRoute = (
             });
           }
 
+          // get an Elasticsearch client for the authenticated user:
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
           const data = await dataClient.bulkUpdateAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
+            esClient,
             ids,
             kibanaAlertWorkflowStatus,
             logger,

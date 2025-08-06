@@ -186,6 +186,32 @@ describe('binary expressions', () => {
       'FROM a | STATS /* a */ /* a.2 */ 1 /* b */ + /* c */ 2 /* d */ + /* e */ 3 /* f */ + /* g */ 4 /* h */ /* h.2 */'
     );
   });
+
+  describe('grouping', () => {
+    test('AND has higher precedence than OR', () => {
+      assertPrint('FROM a | WHERE /* a */ b /* b */ AND (c /* d */ OR /* e */ d)');
+      assertPrint('FROM a | WHERE (b /* a */ OR /* b */ c) AND /* c */ d');
+    });
+
+    test('addition has higher precedence than AND', () => {
+      assertPrint('FROM a | WHERE b /* a */ + (/* b */ c /* c */ AND /* d */ d /* e */)');
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ AND /* c */ c /* d */) + /* e */ d /* f */');
+    });
+
+    test('multiplication (division) has higher precedence than addition (subtraction)', () => {
+      assertPrint(
+        'FROM a | WHERE /* a */ b /* b */ / (/* c */ c /* d */ - /* e */ d /* f */) /* h */'
+      );
+      assertPrint('FROM a | WHERE (/* a */ b /* b */ - /* c */ c /* d */) / /* e */ d /* f */');
+    });
+
+    test('issue: https://github.com/elastic/kibana/issues/224990', () => {
+      assertPrint('FROM a | WHERE b AND (c OR d)');
+      assertPrint(
+        'FROM kibana_sample_data_logs | WHERE agent.keyword /* a */ == /* b */ "meow" AND (geo.dest == "GR" /* c */ OR geo.dest == "ES")'
+      );
+    });
+  });
 });
 
 describe('unary expressions', () => {

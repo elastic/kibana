@@ -45,7 +45,8 @@ export const useDataStreamStats = ({
 
       return {
         ...dsStats,
-        bytesPerDay: dsStats.sizeBytes ? dsStats.sizeBytes / daysSinceCreation : 0,
+        bytesPerDay:
+          dsStats.sizeBytes && dsStats.totalDocs !== 0 ? dsStats.sizeBytes / daysSinceCreation : 0,
         bytesPerDoc:
           dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
       };

@@ -7,7 +7,6 @@
 
 import {
   EuiButtonGroup,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -16,18 +15,24 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useNavigation } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
-import { usePrivilegedUserActivityParams, useStackByOptions, useToggleOptions } from './hooks';
+import {
+  usePrivilegedUserActivityParams,
+  useStackByOptions,
+  useToggleOptions,
+  useDiscoverPath,
+} from './hooks';
 import type { TableItemType } from './types';
 import { VisualizationToggleOptions } from './types';
+import { useNavigation } from '../../../../../common/lib/kibana';
 
 const PICK_VISUALIZATION_LEGEND = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.pickVisualizationLegend',
@@ -48,13 +53,9 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
     VisualizationToggleOptions.GRANTED_RIGHTS
   );
 
-  const {
-    getLensAttributes,
-    columns,
-    generateVisualizationQuery,
-    generateTableQuery,
-    hasLoadedDependencies,
-  } = usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
+  const { getAppUrl } = useNavigation();
+  const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
+    usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
   const stackByOptions = useStackByOptions(selectedToggleOption);
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -67,7 +68,10 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
   const defaultStackByOption = stackByOptions[0];
   const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
   const toggleOptions = useToggleOptions();
-  const { getAppUrl } = useNavigation();
+
+  const tableQuery = generateTableQuery('@timestamp', 'DESC', 100);
+  const getOrEmptyString = getOrElse(() => '');
+  const discoverPath = useDiscoverPath(getOrEmptyString(tableQuery));
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
@@ -81,11 +85,11 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         outerDirection="column"
         hideSubtitle
       >
-        {generateTableQuery && (
+        {isRight(tableQuery) && (
           <LinkAnchor
             href={getAppUrl({
               appId: 'discover',
-              path: `#/?&_a=(query:(esql:'${generateTableQuery('@timestamp', 'DESC', 100)}'))`,
+              path: discoverPath,
             })}
           >
             <FormattedMessage
@@ -123,38 +127,18 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {generateVisualizationQuery && generateTableQuery ? (
-            <EsqlDashboardPanel<TableItemType>
-              title={TITLE}
-              stackByField={selectedStackByOption.value}
-              timerange={{ from, to }}
-              getLensAttributes={getLensAttributes}
-              generateVisualizationQuery={generateVisualizationQuery}
-              generateTableQuery={generateTableQuery}
-              columns={columns}
-              pageSize={PAGE_SIZE}
-              showInspectTable={true}
-            />
-          ) : (
-            // If dependencies are loaded but the query generation functions are not available, show an error message
-            hasLoadedDependencies && (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorTitle"
-                    defaultMessage="There was a problem rendering the visualization"
-                  />
-                }
-                color="warning"
-                iconType="error"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.missingMappings.errorMessage"
-                  defaultMessage="The required fields are not present in the data view."
-                />
-              </EuiCallOut>
-            )
-          )}
+
+          <EsqlDashboardPanel<TableItemType>
+            title={TITLE}
+            stackByField={selectedStackByOption.value}
+            timerange={{ from, to }}
+            getLensAttributes={getLensAttributes}
+            generateVisualizationQuery={generateVisualizationQuery}
+            generateTableQuery={generateTableQuery}
+            columns={columns}
+            pageSize={PAGE_SIZE}
+            showInspectTable={true}
+          />
         </>
       )}
     </EuiPanel>

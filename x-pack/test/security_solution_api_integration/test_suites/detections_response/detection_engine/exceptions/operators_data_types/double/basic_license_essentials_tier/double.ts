@@ -34,14 +34,20 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type double', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/double_as_string');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/double'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/double_as_string'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/double');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/rule_exceptions/double_as_string'
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/double'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/double_as_string'
       );
     });
 

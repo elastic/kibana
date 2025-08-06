@@ -6,11 +6,14 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 import { AddedMessage, isReasoningStep } from './actions';
 
 export const getReasoningPrompt = ({
+  customInstructions,
   messages,
 }: {
+  customInstructions?: string;
   messages: AddedMessage[];
 }): BaseMessageLike[] => {
   return [
@@ -34,20 +37,24 @@ export const getReasoningPrompt = ({
        You are NOT meant to produce a final answer. If you think the discussion and previous actions contain all the info
          needed to produce a final answer to the user, you can terminate your thinking process **at any time**.
 
-       Additional instructions:
+       ### Additional instructions:
        - You should NOT call any tools, those are exposed only for you to know which tools will be available in the next steps.
        - Do not produce a final answer in your reasoning.
        - Do *not* wrap you answer around <reasoning> tags, those will be added by the system.
-       - It is your internal thought process - speak candidly as if thinking out loud, *not* as if you were talking to the user`,
+       - It is your internal thought process - speak candidly as if thinking out loud, *not* as if you were talking to the user
+
+       ${customInstructionsBlock(customInstructions)}`,
     ],
     ...formatMessages(messages),
   ];
 };
 
 export const getActPrompt = ({
+  customInstructions,
   initialMessages,
   addedMessages,
 }: {
+  customInstructions?: string;
   initialMessages: BaseMessageLike[];
   addedMessages: AddedMessage[];
 }): BaseMessageLike[] => {
@@ -64,8 +71,10 @@ export const getActPrompt = ({
        - Use the reasoning present in the previous messages to help you make a decision on what to do next.
        - You can either call tools or produce a final answer to the user.
 
+       ${customInstructionsBlock(customInstructions)}
+
        ### Additional info
-       - The current date is: ${new Date().toISOString()}
+       - The current date is: ${formatDate()}
        - You can use markdown format to structure your response`,
     ],
     ...initialMessages,

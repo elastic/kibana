@@ -15,9 +15,7 @@
       "observability"
     ],
     "requiredPlugins": [
-      "aiops",
       "alerting",
-      "cases",
       "charts",
       "contentManagement",
       "controls",
@@ -45,9 +43,12 @@
       "licensing",
       "navigation",
       "fieldsMetadata",
-      "esql"
+      "esql",
+      "savedObjectsTagging",
     ],
     "optionalPlugins": [
+      "aiops",
+      "cases",
       "discover",
       "exploratoryView",
       "home",
@@ -55,12 +56,13 @@
       "cloud",
       "spaces",
       "serverless",
-      "guidedOnboarding",
       "observabilityAIAssistant",
       "investigate",
       "streams"
     ],
     "requiredBundles": [
+      "aiops",
+      "cases",
       "data",
       "discover",
       "logsShared",

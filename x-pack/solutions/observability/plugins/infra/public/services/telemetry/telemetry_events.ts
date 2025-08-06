@@ -51,6 +51,13 @@ const hostsViewQuerySubmittedEvent: InfraTelemetryEvent = {
         optional: false,
       },
     },
+    preferred_schema: {
+      type: 'text',
+      _meta: {
+        description: 'Preferred schema for the performed search.',
+        optional: true,
+      },
+    },
   },
 };
 

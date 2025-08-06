@@ -87,6 +87,16 @@ describe('FieldsSelectorTable', () => {
     expect(onRemoveColumn).toHaveBeenCalledWith('field2');
   });
 
+  it('has proper accessibility labels for checkboxes', () => {
+    const { getByTestId } = renderFieldsTable();
+
+    const field1Checkbox = getByTestId('cloud-security-fields-selector-item-field1');
+    expect(field1Checkbox).toHaveAttribute('aria-label', 'Toggle field1 column');
+
+    const field2Checkbox = getByTestId('cloud-security-fields-selector-item-field2');
+    expect(field2Checkbox).toHaveAttribute('aria-label', 'Toggle field2 column');
+  });
+
   describe('View selected', () => {
     it('should show "view all" option by default', () => {
       const { getByTestId } = renderFieldsTable();

@@ -22,8 +22,8 @@ import {
   PresentationContainer,
   PublishesSettings,
   TrackContentfulRender,
-  TracksOverlays,
 } from '@kbn/presentation-containers';
+import { type TracksOverlays } from '@kbn/presentation-util';
 import {
   EmbeddableAppContext,
   HasAppContext,
@@ -40,6 +40,7 @@ import {
   PublishesWritableViewMode,
   PublishingSubject,
   SerializedPanelState,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
@@ -58,7 +59,7 @@ export const DASHBOARD_API_TYPE = 'dashboard';
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardState>;
+  getInitialInput?: () => Partial<DashboardState & { viewMode?: ViewMode }>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 

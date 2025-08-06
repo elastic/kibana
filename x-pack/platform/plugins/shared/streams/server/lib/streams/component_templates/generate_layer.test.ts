@@ -94,10 +94,8 @@ describe('generateLayer', () => {
               "body": Object {
                 "properties": Object {
                   "structured": Object {
-                    "type": "flattened",
-                  },
-                  "text": Object {
-                    "type": "match_only_text",
+                    "subobjects": false,
+                    "type": "object",
                   },
                 },
                 "type": "object",

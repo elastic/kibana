@@ -15,7 +15,6 @@ import type {
 import { InferenceTaskEventType, isInferenceError } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { chatCompleteBodySchema } from './schemas';
 import { getRequestAbortedSignal } from './get_request_aborted_signal';
@@ -36,14 +35,13 @@ export function registerChatCompleteRoute({
     request: KibanaRequest<unknown, unknown, ChatCompleteRequestBody>;
     stream: T;
   }) {
-    const actions = await coreSetup
-      .getStartServices()
-      .then(([coreStart, pluginsStart]) => pluginsStart.actions);
+    const [, pluginsStart, inferenceStart] = await coreSetup.getStartServices();
+    const actions = pluginsStart.actions;
 
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => abortController.abort());
 
-    const client = createInferenceClient({ request, actions, logger });
+    const client = inferenceStart.getClient({ request, actions, logger });
 
     const {
       connectorId,

@@ -649,7 +649,7 @@
                 "label": "visibleInManagement",
                 "description": [],
                 "signature": [
-                  "true"
+                  "false"
                 ],
                 "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
                 "deprecated": false,

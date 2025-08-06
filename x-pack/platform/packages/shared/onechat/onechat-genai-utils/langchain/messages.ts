@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { BaseMessage, MessageContentComplex, isAIMessage } from '@langchain/core/messages';
+import {
+  BaseMessage,
+  ToolMessage,
+  MessageContentComplex,
+  isAIMessage,
+} from '@langchain/core/messages';
+import type { RunToolReturn } from '@kbn/onechat-server';
+import { isArray, isEmpty } from 'lodash';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -49,4 +56,24 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
     );
   }
   return [];
+};
+
+/**
+ * Extract the structured tool return from a given tool message.
+ * Note: this assumes the tool call was performed with the right configuration, so that
+ * it was executed from a onechat agent.
+ */
+export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
+  if (!message.artifact) {
+    throw new Error('No artifact attached to tool message');
+  }
+  if (!isArray(message.artifact.results) || isEmpty(message.artifact.results)) {
+    throw new Error(
+      `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+        message.artifact
+      )}`
+    );
+  }
+
+  return message.artifact as RunToolReturn;
 };

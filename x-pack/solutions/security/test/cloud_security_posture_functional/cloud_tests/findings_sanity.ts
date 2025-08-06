@@ -21,8 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = pageObjects.findings.latestFindingsTable;
+
       await findings.navigateToLatestFindingsPage();
-      await findings.waitForPluginInitialized();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Findings - Querying data', () => {

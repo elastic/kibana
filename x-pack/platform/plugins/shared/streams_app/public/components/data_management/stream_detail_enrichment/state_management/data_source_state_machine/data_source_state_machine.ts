@@ -16,6 +16,7 @@ import {
 import { SampleDocument } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isEqual, omit } from 'lodash';
+import { euiPaletteColorBlindBehindText } from '@elastic/eui';
 import {
   DataSourceInput,
   DataSourceContext,
@@ -31,6 +32,16 @@ import { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export type DataSourceActorRef = ActorRefFrom<typeof dataSourceMachine>;
 export type DataSourceActorSnapshot = SnapshotFrom<typeof dataSourceMachine>;
+
+const dataSourceColors = euiPaletteColorBlindBehindText();
+let colorCounter = 0;
+
+// Retain a global state for assigning unique colors to data sources
+function getNewColor() {
+  const color = dataSourceColors[colorCounter % dataSourceColors.length];
+  colorCounter += 1;
+  return color;
+}
 
 export const dataSourceMachine = setup({
   types: {
@@ -84,6 +95,9 @@ export const dataSourceMachine = setup({
     parentRef: input.parentRef,
     dataSource: input.dataSource,
     streamName: input.streamName,
+    uiAttributes: {
+      color: getNewColor(),
+    },
     data: [],
   }),
   initial: 'determining',

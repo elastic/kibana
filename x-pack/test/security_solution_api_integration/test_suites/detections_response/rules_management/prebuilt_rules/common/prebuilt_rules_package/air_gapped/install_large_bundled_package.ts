@@ -8,25 +8,24 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
+  deletePrebuiltRulesFleetPackage,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import { NUM_OF_RULE_IN_MOCK_LARGE_PKG } from '../../configs/edge_cases/ess_air_gapped_with_bundled_large_package.config';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retryService = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI Install large bundled package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-    });
-
-    afterEach(async () => {
-      await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es, log);
+      await deletePrebuiltRulesFleetPackage({ supertest, retryService, log, es });
     });
 
     it('should install a package containing 15000 prebuilt rules without crashing', async () => {
@@ -52,7 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       expect(statusAfterPackageInstallation).toMatchObject({
-        rules_installed: 750,
+        rules_installed: NUM_OF_RULE_IN_MOCK_LARGE_PKG,
         rules_not_installed: 0,
         rules_not_updated: 0,
       });

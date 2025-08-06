@@ -21,6 +21,7 @@ import {
   EuiSuperSelect,
   EuiText,
   EuiTextArea,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -35,6 +36,8 @@ export interface EditPromptProps {
 }
 
 export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, agentId }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     services: { notifications },
   } = useKibana();
@@ -77,9 +80,9 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
   };
 
   return (
-    <EuiModal onClose={onClose} style={{ width: 800 }}>
+    <EuiModal onClose={onClose} style={{ width: 800 }} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('workchatApp.assistants.editPromptModal.title', {
             defaultMessage: 'Edit prompt',
           })}

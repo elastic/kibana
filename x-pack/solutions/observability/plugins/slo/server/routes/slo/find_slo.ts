@@ -28,7 +28,7 @@ export const findSLORoute = createSloServerRoute({
     });
 
     const summarySearchClient = new DefaultSummarySearchClient(
-      scopedClusterClient.asCurrentUser,
+      scopedClusterClient,
       soClient,
       logger,
       spaceId

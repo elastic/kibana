@@ -14,7 +14,6 @@ produce a Parser tree up to the point of the error, then stops. This is useful
 to perform partial tasks even with broken queries and this means that a partial
 AST can be produced even with an invalid query.
 
-
 ## Folder structure
 
 The parser is structured as follows:
@@ -31,7 +30,6 @@ src/
    |- esql_parser.g4                  Contains the ES|QL ANTLR parser grammar.
 ```
 
-
 ## Usage
 
 ### Get AST from a query string
@@ -40,12 +38,12 @@ The `parse` function returns the AST data structure, unless a syntax error
 happens in which case the `errors` array gets populated with a Syntax errors.
 
 ```js
-import { parse } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 
-const src = "FROM index | STATS 1 + AVG(myColumn) ";
-const { root, errors } = await parse(src);
+const src = 'FROM index | STATS 1 + AVG(myColumn) ';
+const { root, errors } = await Parser.parse(src);
 
-if(errors){
+if (errors) {
   console.log({ syntaxErrors: errors });
 }
 
@@ -56,23 +54,32 @@ The `root` is the root node of the AST. The AST is a tree structure where each
 node represents a part of the query. Each node has a `type` property which
 indicates the type of the node.
 
-
 ### Parse a query and populate the AST with comments
 
 When calling the `parse` method with the `withFormatting` flag set to `true`,
 the AST will be populated with comments.
 
 ```js
-import { parse } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 
-const src = "FROM /* COMMENT */ index";
-const { root } = await parse(src, { withFormatting: true });
+const src = 'FROM /* COMMENT */ index';
+const { root } = await Parser.parse(src, { withFormatting: true });
 ```
 
+### Parse a single command or expression
+
+You can use `Parser.parseCommand()` or `Parser.parseExpression()` to parse a single
+command or expression, respectively. For example:
+
+```js
+import { Parser } from '@kbn/esql-ast';
+
+const { root } = await Parser.parseExpression('count(*) + 1');
+```
 
 ## Comments
 
-By default, when parsing the AST does not include any *formatting* information,
+By default, when parsing the AST does not include any _formatting_ information,
 such as comments or whitespace. This is because the AST is designed to be
 compact and to be used for syntax validation, syntax highlighting, and other
 high-level operations.
@@ -111,9 +118,7 @@ Time interface expressions:
 STATS 1 /* asdf */ DAY
 ```
 
-
 ## Internal Details
-
 
 ### How does it work?
 
@@ -124,9 +129,8 @@ The pipeline is the following:
 3. A query is parsed to a CST by ANTLR.
 4. The `ESQLAstBuilderListener` traverses the CST and builds the AST.
 5. Optionally:
-  1. Comments and whitespace are extracted from the ANTLR lexer's token stream.
-  2. The comments and whitespace are attached to the AST nodes.
-
+6. Comments and whitespace are extracted from the ANTLR lexer's token stream.
+7. The comments and whitespace are attached to the AST nodes.
 
 ### How to add new commands/options?
 
@@ -137,33 +141,36 @@ To update the grammar:
 
 1. Make sure the `lexer` and `parser` files are up to date with their ES
    counterparts.
-  * an existing Kibana CI job is updating them already automatically
+
+- an existing Kibana CI job is updating them already automatically
+
 2. Run the script into the `package.json` to compile the ES|QL grammar.
 3. open the `ast_factory.ts` file and add a new `exit<Command/Option>` method
 4. write some code in the `ast_walker/ts` to translate the Antlr Parser tree
    into the custom AST (there are already few utilites for that, but sometimes
    it is required to write some more code if the `parser` introduced a new flow)
-  * pro tip: use the `http://lab.antlr.org/` to visualize/debug the parser tree
-    for a given statement (copy and paste the grammar files there)
+
+- pro tip: use the `http://lab.antlr.org/` to visualize/debug the parser tree
+  for a given statement (copy and paste the grammar files there)
+
 5. if something goes wrong with new quoted/unquoted identifier token, open
    the `ast_helpers.ts` and check the ids of the new tokens in the `getQuotedText`
    and `getUnquotedText` functions, please make sure to leave a comment on the
    token name
-
 
 #### Debug and fix grammar changes (tokens, etc...)
 
 On token renaming or with subtle `lexer` grammar changes it can happens that
 test breaks, this can be happen for two main issues:
 
-* A token name changed so the `esql_ast_builder_listener.ts` doesn't find it any
+- A token name changed so the `esql_ast_builder_listener.ts` doesn't find it any
   more. Go there and rename the TOKEN name.
-* Token order changed and tests started failing. This probably generated some
+- Token order changed and tests started failing. This probably generated some
   token id reorder and there are two functions in `helpers.ts` who rely on
   hardcoded ids: `getQuotedText` and `getUnquotedText`.
-  * Note that the `getQuotedText` and `getUnquotedText` are automatically
+  - Note that the `getQuotedText` and `getUnquotedText` are automatically
     updated on grammar changes detected by the Kibana CI sync job.
-  * to fix this just look at the commented tokens and update the ids. If a new
+  - to fix this just look at the commented tokens and update the ids. If a new
     token add it and leave a comment to point to the new token name.
-  * This choice was made to reduce the bundle size, as importing the
+  - This choice was made to reduce the bundle size, as importing the
     `esql_parser` adds some hundreds of Kbs to the bundle otherwise.

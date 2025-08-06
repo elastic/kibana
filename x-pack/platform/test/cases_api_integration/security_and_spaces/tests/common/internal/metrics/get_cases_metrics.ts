@@ -27,7 +27,6 @@ import {
 } from '../../../../../common/lib/api';
 import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -84,13 +83,13 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('closed and open cases from kbn archive', () => {
         before(async () => {
           await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json'
           );
         });
 
         after(async () => {
           await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json'
           );
 
           await deleteAllCaseItems(es);
@@ -179,14 +178,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('rbac', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
           { space: 'space1' }
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.3.0/all_cases_metrics.json',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.3.0/all_cases_metrics.json',
           { space: 'space1' }
         );
 

@@ -72,16 +72,16 @@ function getDefaultLensApiMock() {
     supportedTriggers: jest.fn(() => []),
     canLinkToLibrary: jest.fn(async () => false),
     canUnlinkFromLibrary: jest.fn(async () => false),
-    checkForDuplicateTitle: jest.fn(),
+    checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
     /** New embeddable api inherited methods */
     serializeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
+    getEditPanel: jest.fn(async () => <div data-test-subj="editLensFlyout" />),
     isEditingEnabled: jest.fn(() => true),
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
-    mountInlineFlyout: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',

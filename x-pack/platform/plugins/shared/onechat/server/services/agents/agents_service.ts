@@ -9,9 +9,8 @@ import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart, ElasticsearchServiceStart } from '@kbn/core/server';
 import type { Runner } from '@kbn/onechat-server';
 import type { AgentsServiceSetup, AgentsServiceStart } from './types';
-import { createInternalRegistry } from './utils';
-import { createDefaultAgentProvider, creatProfileProvider } from './providers';
-import { createClient, createStorage } from './profiles';
+import type { ToolsServiceStart } from '../tools';
+import { createClient } from './client';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -21,6 +20,7 @@ export interface AgentsServiceStartDeps {
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   getRunner: () => Runner;
+  toolsService: ToolsServiceStart;
 }
 
 export class AgentsService {
@@ -28,7 +28,6 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-
     return {};
   }
 
@@ -38,32 +37,20 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch } = startDeps;
+    const { getRunner, security, elasticsearch, toolsService } = startDeps;
 
-    const getProfileClient: AgentsServiceStart['getProfileClient'] = async (request) => {
-      const authUser = security.authc.getCurrentUser(request);
-      if (!authUser) {
-        throw new Error('No user bound to the provided request');
-      }
-
-      const esClient = elasticsearch.client.asScoped(request).asInternalUser;
-      const storage = createStorage({ logger, esClient });
-      const user = { id: authUser.profile_uid!, username: authUser.username };
-
-      return createClient({ user, storage });
+    const getScopedClient: AgentsServiceStart['getScopedClient'] = ({ request }) => {
+      return createClient({
+        request,
+        toolsService,
+        logger,
+        security,
+        elasticsearch,
+      });
     };
 
-    const defaultAgentProvider = createDefaultAgentProvider();
-    const profileAgentsProvider = creatProfileProvider({ getProfileClient });
-
-    const registry = createInternalRegistry({
-      providers: [defaultAgentProvider, profileAgentsProvider],
-      getRunner,
-    });
-
     return {
-      registry,
-      getProfileClient,
+      getScopedClient,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },

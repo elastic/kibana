@@ -36,7 +36,6 @@ import {
   globalRead,
 } from '../../../../common/lib/authentication/users';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -84,13 +83,13 @@ export default ({ getService }: FtrProviderContext): void => {
          *  b) A user action that removes an assignee that does not exists
          */
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_no_users.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_no_users.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_no_users.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_no_users.json'
         );
       });
 

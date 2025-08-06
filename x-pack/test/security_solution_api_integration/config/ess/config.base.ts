@@ -6,12 +6,13 @@
  */
 
 import path from 'path';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { services as baseServices } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
+import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { services as baseServices } from './services';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -109,6 +110,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
             'bulkEditAlertSuppressionEnabled',
+            'doesNotMatchForIndicatorMatchRuleEnabled',
           ])}`,
           `--plugin-path=${path.resolve(
             __dirname,
@@ -127,6 +129,15 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
       },
       mochaOpts: {
         grep: '/^(?!.*@skipInEss).*@ess.*/',
+        rootHooks: {
+          // Some of the Rule Management API endpoints install prebuilt rules package under the hood.
+          // Prebuilt rules package installation has been known to be flakiness reason since
+          // EPR might be unavailable or the network may have faults.
+          // Real prebuilt rules package installation is prevented by
+          // installing a lightweight mock package.
+          beforeAll: ({ getService }: FtrProviderContext) =>
+            installMockPrebuiltRulesPackage({ getService }),
+        },
       },
     };
   };

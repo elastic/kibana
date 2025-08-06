@@ -14,8 +14,8 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import type { SimpleSavedObject } from '@kbn/core/public';
 import { BaseVisType } from './base_vis_type';
+import { VisualizationSavedObject } from '../../common';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
@@ -84,7 +84,7 @@ export interface VisualizationsAppExtension {
     create?: { [otherOption: string]: unknown };
   };
   client: (contentManagement: ContentManagementPublicStart) => VisualizationClient;
-  toListItem: (savedObject: SimpleSavedObject<any>) => VisualizationListItem;
+  toListItem: (savedObject: VisualizationSavedObject) => VisualizationListItem;
 }
 
 export interface VisTypeAlias {

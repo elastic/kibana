@@ -28,6 +28,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import type { Filter } from '@kbn/es-query';
@@ -168,7 +169,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         title: formData.title,
         duration: endDate.diff(startDate),
         rRule: convertToRRule({
-          startDate,
+          startDate: startDate.toISOString(),
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),
@@ -268,12 +269,16 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     [scopedQueryErrors]
   );
 
+  const modalTitleId = useGeneratedHtmlId();
+
   const modal = useMemo(() => {
     let m;
     if (isModalVisible) {
       m = (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           title={i18n.ARCHIVE_TITLE}
+          titleProps={{ id: modalTitleId }}
           onCancel={closeModal}
           onConfirm={() => {
             closeModal();
@@ -292,7 +297,14 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       );
     }
     return m;
-  }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
+  }, [
+    closeModal,
+    archiveMaintenanceWindow,
+    isModalVisible,
+    maintenanceWindowId,
+    onSuccess,
+    modalTitleId,
+  ]);
 
   const showNoAvailableSolutionsWarning =
     availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode;

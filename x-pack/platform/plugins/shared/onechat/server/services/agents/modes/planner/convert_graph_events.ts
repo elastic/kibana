@@ -17,17 +17,19 @@ import {
   ToolResultEvent,
   isToolCallEvent,
   isToolResultEvent,
-} from '@kbn/onechat-common/agents';
+} from '@kbn/onechat-common';
 import {
   matchGraphName,
   matchEvent,
   matchName,
   hasTag,
+  extractTextContent,
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
   ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import { Logger } from '@kbn/logging';
 import { convertGraphEvents as convertExecutorEvents } from '../chat/convert_graph_events';
 import type { StateType } from './graph';
 import { lastPlanningResult, PlanningResult } from './backlog';
@@ -52,13 +54,14 @@ const formatPlanningResult = (planning: PlanningResult): string => {
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  logger,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  logger: Logger;
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();
-
     const replay$ = streamEvents$.pipe(shareReplay());
 
     return merge(
@@ -67,6 +70,7 @@ export const convertGraphEvents = ({
         convertExecutorEvents({
           graphName: 'executor_agent',
           toolIdMapping,
+          logger,
         }),
         filter((event) => {
           return isToolCallEvent(event) || isToolResultEvent(event);
@@ -100,16 +104,17 @@ export const convertGraphEvents = ({
           // answer step text chunks
           if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'planner:answer')) {
             const chunk: AIMessageChunk = event.data.chunk;
-
-            const messageChunkEvent = createTextChunkEvent(chunk, { defaultMessageId: messageId });
-            return of(messageChunkEvent);
+            const textContent = extractTextContent(chunk);
+            if (textContent) {
+              return of(createTextChunkEvent(textContent, { messageId }));
+            }
           }
 
           // answer step response message
           if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
             const { generatedAnswer } = event.data.output as StateType;
 
-            const messageEvent = createMessageEvent(generatedAnswer);
+            const messageEvent = createMessageEvent(generatedAnswer, { messageId });
             return of(messageEvent);
           }
 

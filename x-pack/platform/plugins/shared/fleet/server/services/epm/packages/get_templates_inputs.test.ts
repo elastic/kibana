@@ -370,4 +370,18 @@ describe('Fleet - getTemplateInputs', () => {
 
     expect(template).toMatchSnapshot();
   });
+
+  it('should filter inputs when provided a filtering condition', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(
+      soMock,
+      'redis',
+      '1.18.0',
+      'json',
+      (input) => input.type !== 'redis/metrics'
+    );
+
+    expect(template).toMatchSnapshot();
+  });
 });

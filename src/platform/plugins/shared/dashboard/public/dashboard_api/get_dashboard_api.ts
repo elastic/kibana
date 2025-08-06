@@ -68,11 +68,7 @@ export function getDashboardApi({
     if (id === CONTROL_GROUP_EMBEDDABLE_ID) {
       return getReferencesForControls(references$.value ?? []);
     }
-
-    const panelReferences = getReferencesForPanelId(id, references$.value ?? []);
-    // references from old installations may not be prefixed with panel id
-    // fall back to passing all references in these cases to preserve backwards compatability
-    return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
+    return getReferencesForPanelId(id, references$.value ?? []);
   };
 
   const layoutManager = initializeLayoutManager(
@@ -113,13 +109,11 @@ export function getDashboardApi({
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
-    const { state: unifiedSearchState, references: searchSourceReferences } =
-      unifiedSearchManager.internalApi.getState();
+    const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
-      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const { controlGroupInput, controlGroupReferences } =
@@ -130,7 +124,6 @@ export function getDashboardApi({
       dashboardState,
       controlGroupReferences,
       panelReferences: panelReferences ?? [],
-      searchSourceReferences,
     };
   }
 
@@ -176,11 +169,13 @@ export function getDashboardApi({
         ...getState(),
       });
 
+      if (!saveResult || saveResult.error) {
+        return;
+      }
+
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(
-          saveResult.savedState,
-          saveResult.references ?? []
-        );
+        references$.next(saveResult.references);
+        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -191,27 +186,24 @@ export function getDashboardApi({
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
-
-        references$.next(saveResult.references);
       }
 
       return saveResult;
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences, searchSourceReferences } =
-        getState();
+      const { controlGroupReferences, dashboardState, panelReferences } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         controlGroupReferences,
         dashboardState,
         panelReferences,
-        searchSourceReferences,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
+      if (saveResult?.error) return;
       references$.next(saveResult.references);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
     },

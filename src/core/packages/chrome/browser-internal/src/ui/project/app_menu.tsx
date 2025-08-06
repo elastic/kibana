@@ -7,41 +7,67 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { Observable } from 'rxjs';
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import React from 'react';
-import { HeaderActionMenu } from '../header/header_action_menu';
+import React, { useMemo } from 'react';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 
 interface AppMenuBarProps {
-  headerActionMenuMounter: { mount: MountPoint<HTMLElement> | undefined };
+  // TODO: get rid of observable
+  appMenuActions$: Observable<MountPoint | undefined>;
+
+  /**
+   * Whether the menu bar should be fixed (sticky) or static.
+   */
+  isFixed?: boolean;
 }
-export const AppMenuBar = ({ headerActionMenuMounter }: AppMenuBarProps) => {
+
+const useAppMenuBarStyles = (euiTheme: UseEuiTheme['euiTheme']) =>
+  useMemo(() => {
+    const zIndex =
+      typeof euiTheme.levels.header === 'number'
+        ? euiTheme.levels.header - 10 // Appear right below the header
+        : euiTheme.levels.header;
+
+    // Root bar styles
+    const root = {
+      display: 'flex',
+      justifyContent: 'end',
+      alignItems: 'center',
+      padding: `0 ${euiTheme.size.s}`,
+      background: euiTheme.colors.body,
+      borderBottom: euiTheme.border.thin,
+      marginBottom: `-${euiTheme.border.width.thin}`,
+    };
+    // Styles for fixed (sticky) mode
+    const fixed = {
+      zIndex,
+      position: 'sticky', // Fixates the element in the viewport
+      top: 'var(--euiFixedHeadersOffset, 0)', // Below primary fixed EuiHeader
+      height: `var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl})`,
+    };
+    // Styles for static mode
+    const staticStyle = {
+      height: '100%',
+    };
+    return { root, fixed, static: staticStyle };
+  }, [euiTheme]);
+
+export const AppMenuBar = ({ appMenuActions$, isFixed = true }: AppMenuBarProps) => {
+  const headerActionMenuMounter = useHeaderActionMenuMounter(appMenuActions$);
   const { euiTheme } = useEuiTheme();
-  const zIndex =
-    typeof euiTheme.levels.header === 'number'
-      ? euiTheme.levels.header - 10 // We want it to appear right below the header
-      : euiTheme.levels.header;
+
+  const styles = useAppMenuBarStyles(euiTheme);
+
+  if (!headerActionMenuMounter.mount) return null;
 
   return (
     <div
       className="header__actionMenu"
       data-test-subj="kibanaProjectHeaderActionMenu"
-      css={css`
-        z-index: ${zIndex};
-        background: ${euiTheme.colors.body};
-        border-bottom: ${euiTheme.border.thin};
-        display: flex;
-        justify-content: end;
-        align-items: center;
-        padding: 0 ${euiTheme.size.s};
-        height: var(--kbnProjectHeaderAppActionMenuHeight, ${euiTheme.size.xxxl});
-        margin-bottom: -${euiTheme.border.width.thin};
-        /* fixates the elements position in the viewport, removes the element from the flow of the page */
-        position: sticky;
-        /* position below the primary fixed EuiHeader in the viewport */
-        top: var(--euiFixedHeadersOffset, 0);
-      `}
+      css={[styles.root, isFixed ? styles.fixed : styles.static]}
     >
       <HeaderActionMenu mounter={headerActionMenuMounter} />
     </div>

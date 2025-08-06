@@ -57,7 +57,7 @@ export const Node = ({
 
   const toggleAssetPopover = () => {
     if (isFlyoutMode) {
-      setFlyoutUrlState({ detailsItemId: node.id, assetType: nodeType });
+      setFlyoutUrlState({ detailsItemId: node.id, entityType: nodeType });
     } else {
       togglePopover();
     }

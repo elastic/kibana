@@ -38,7 +38,6 @@ const scopedQuery = {
   ],
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function updateMaintenanceWindowTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');

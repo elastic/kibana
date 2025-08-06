@@ -9,6 +9,12 @@ import type { Boom } from '@hapi/boom';
 import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from '@kbn/core/server';
+import { isInternalURL } from '@kbn/std';
+import {
+  type PageAttachmentPersistedState,
+  PAGE_ATTACHMENT_TYPE,
+} from '@kbn/page-attachment-schema';
+import type { AttachmentRequestAttributes } from '../../common/types/attachments';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
 
@@ -35,7 +41,45 @@ export function wrapError(
   };
 }
 
-export const escapeHatch = schema.object({}, { unknowns: 'allow' });
+export const escapeHatch = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+  }
+);
+
+export const validAttachment = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+    validate: (value) => {
+      if (
+        isPersistableStatePageAttachment(value) &&
+        value.persistableStateAttachmentTypeId === PAGE_ATTACHMENT_TYPE
+      ) {
+        const persistedState =
+          value.persistableStateAttachmentState as PageAttachmentPersistedState;
+        const url = persistedState?.url?.pathAndQuery;
+        if (url && !isInternalURL(url)) {
+          return `External urls are not supported for page attachments. The provided url is: ${url}`;
+        }
+      }
+    },
+  }
+);
+
+/**
+ * Checks if the given value is a persistable state page attachment type.
+ */
+export const isPersistableStatePageAttachment = (
+  value: unknown
+): value is AttachmentRequestAttributes => {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Boolean((value as AttachmentRequestAttributes).persistableStateAttachmentTypeId)
+  );
+};
 
 /**
  * Creates a warning header with a message formatted according to RFC7234.

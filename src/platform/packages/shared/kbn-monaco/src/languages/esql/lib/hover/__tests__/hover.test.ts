@@ -6,10 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { getFunctionDefinition, getFunctionSignatures } from '@kbn/esql-validation-autocomplete';
-import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
-import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
+import { getFunctionSignatures, getFunctionDefinition } from '@kbn/esql-ast/src/definitions/utils';
+import {
+  modeDescription,
+  ENRICH_MODES,
+} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import { getHoverItem } from '../hover';
 import { policies, setupTestbed } from './fixtures';
 

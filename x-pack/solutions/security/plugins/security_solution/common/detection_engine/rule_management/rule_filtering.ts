@@ -25,7 +25,7 @@ export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
 export const KQL_FILTER_ENABLED_RULES = `${ENABLED_FIELD}: true`;
 export const KQL_FILTER_DISABLED_RULES = `${ENABLED_FIELD}: false`;
 export const KQL_FILTER_CUSTOMIZED_RULES = `${IS_CUSTOMIZED_FIELD}: true`;
-export const KQL_FILTER_NOT_CUSTOMIZED_RULES = `${IS_CUSTOMIZED_FIELD}: false`;
+export const KQL_FILTER_NOT_CUSTOMIZED_RULES = `NOT ${IS_CUSTOMIZED_FIELD}: true`;
 
 interface RulesFilterOptions {
   filter: string;

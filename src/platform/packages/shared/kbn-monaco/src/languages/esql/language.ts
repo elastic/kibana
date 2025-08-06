@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  validateQuery,
-  type ESQLCallbacks,
-  suggest,
-  esqlFunctionNames,
-} from '@kbn/esql-validation-autocomplete';
+import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
+import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import { monaco } from '../../monaco_imports';
@@ -83,12 +79,11 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
-        position: monaco.Position,
-        context: monaco.languages.CompletionContext
+        position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
         const offset = monacoPositionToOffset(fullText, position);
-        const suggestions = await suggest(fullText, offset, context, callbacks);
+        const suggestions = await suggest(fullText, offset, callbacks);
         return {
           // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
           suggestions: wrapAsMonacoSuggestions(suggestions, fullText),

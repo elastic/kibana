@@ -147,8 +147,22 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
-          "StreamsFeatureRenderDeps",
+          ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; renderFlyoutStreamProcessingLink?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
           ") => JSX.Element) | undefined; } & React.RefAttributes<",
           {
             "pluginId": "unifiedDocViewer",
@@ -322,9 +336,9 @@
           ") => [",
           {
             "pluginId": "@kbn/unified-doc-viewer",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnUnifiedDocViewerPluginApi",
-            "section": "def-common.ElasticRequestState",
+            "section": "def-public.ElasticRequestState",
             "text": "ElasticRequestState"
           },
           ", ",
@@ -428,8 +442,22 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
-          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
-          "StreamsFeatureRenderDeps",
+          ") => JSX.Element) | undefined; renderFlyoutStreamField?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
+          ") => JSX.Element) | undefined; renderFlyoutStreamProcessingLink?: ((deps: ",
+          {
+            "pluginId": "discoverShared",
+            "scope": "public",
+            "docId": "kibDiscoverSharedPluginApi",
+            "section": "def-public.ObservabilityStreamsFeatureRenderDeps",
+            "text": "ObservabilityStreamsFeatureRenderDeps"
+          },
           ") => JSX.Element) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",
@@ -460,9 +488,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],
@@ -495,9 +523,9 @@
           "signature": [
             {
               "pluginId": "@kbn/unified-doc-viewer",
-              "scope": "common",
+              "scope": "public",
               "docId": "kibKbnUnifiedDocViewerPluginApi",
-              "section": "def-common.DocViewsRegistry",
+              "section": "def-public.DocViewsRegistry",
               "text": "DocViewsRegistry"
             }
           ],

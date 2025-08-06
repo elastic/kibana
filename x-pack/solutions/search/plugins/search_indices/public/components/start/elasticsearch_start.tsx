@@ -8,7 +8,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { WorkflowId } from '@kbn/search-shared-ui';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { GLOBAL_EMPTY_STATE_SKIP_KEY, WorkflowId } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -95,7 +96,8 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
     [usageTracker, formState, setFormState]
   );
   const onClose = useCallback(() => {
-    application.navigateToApp('elasticsearchIndexManagement');
+    localStorage.setItem(GLOBAL_EMPTY_STATE_SKIP_KEY, 'true');
+    application.navigateToApp(SEARCH_HOMEPAGE);
   }, [application]);
 
   return (

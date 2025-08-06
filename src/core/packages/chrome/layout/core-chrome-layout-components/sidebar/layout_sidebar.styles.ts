@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 
 const root = css`
   position: sticky;
-  overflow: hidden;
   grid-area: sidebar;
   align-self: start;
   display: flex;

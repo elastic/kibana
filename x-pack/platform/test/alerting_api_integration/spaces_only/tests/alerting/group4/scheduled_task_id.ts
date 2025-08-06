@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';
 const MIGRATED_TASK_ID = '329798f0-b0b0-11ea-9510-fdf248d5f2a4';
 
-// eslint-disable-next-line import/no-default-export
 export default function createScheduledTaskIdTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -35,13 +34,21 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
       // Not 100% sure why, seems the rules need to be loaded separately to avoid the task
       // failing to load the rule during execution and deleting itself. Otherwise
       // we have flakiness
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
-      await esArchiver.load('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
+      await esArchiver.load(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/tasks');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rules_scheduled_task_id/rules');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/tasks'
+      );
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id/rules'
+      );
     });
 
     it('cannot create rule with same ID as a scheduled task ID used by another rule', async () => {

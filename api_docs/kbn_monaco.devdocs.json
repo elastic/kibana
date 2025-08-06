@@ -487,13 +487,7 @@
             "description": [],
             "signature": [
               "CallbackFn<{ query: string; }, ",
-              {
-                "pluginId": "@kbn/esql-validation-autocomplete",
-                "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                "section": "def-common.ESQLFieldWithMetadata",
-                "text": "ESQLFieldWithMetadata"
-              },
+              "ESQLFieldWithMetadata",
               "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
@@ -722,6 +716,48 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCallbacks.getLicense",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicense",
+            "description": [],
+            "signature": [
+              "(() => Promise<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLLicenseResult",
+                "text": "ESQLLicenseResult"
+              },
+              " | undefined>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.ESQLCallbacks.getActiveProduct",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveProduct",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "PricingProduct",
+              " | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

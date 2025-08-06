@@ -17,7 +17,6 @@ import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
 const API_URI = 'internal/triggers_actions_ui/data/_indices';
 
-// eslint-disable-next-line import/no-default-export
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

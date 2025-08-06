@@ -18,6 +18,7 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
 import { validatePrebuiltRuleAssets } from './prebuilt_rule_assets_validation';
 import { PREBUILT_RULE_ASSETS_SO_TYPE } from './prebuilt_rule_assets_type';
 import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
+import type { BasicRuleInfo } from '../basic_rule_info';
 
 const RULE_ASSET_ATTRIBUTES = `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes`;
 const MAX_PREBUILT_RULES_COUNT = 10_000;
@@ -27,7 +28,7 @@ const ES_MAX_CONCURRENT_REQUESTS = 2;
 export interface IPrebuiltRuleAssetsClient {
   fetchLatestAssets: () => Promise<PrebuiltRuleAsset[]>;
 
-  fetchLatestVersions(ruleIds?: string[]): Promise<RuleVersionSpecifier[]>;
+  fetchLatestVersions(ruleIds?: string[]): Promise<BasicRuleInfo[]>;
 
   fetchAssetsByVersion(versions: RuleVersionSpecifier[]): Promise<PrebuiltRuleAsset[]>;
 }
@@ -79,7 +80,7 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds?: string[]): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds?: string[]): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
         if (ruleIds && ruleIds.length === 0) {
           return [];
@@ -114,6 +115,7 @@ export const createPrebuiltRuleAssetsClient = (
                       _source: [
                         `${PREBUILT_RULE_ASSETS_SO_TYPE}.rule_id`,
                         `${PREBUILT_RULE_ASSETS_SO_TYPE}.version`,
+                        `${PREBUILT_RULE_ASSETS_SO_TYPE}.type`,
                       ],
                     },
                   },
@@ -141,9 +143,10 @@ export const createPrebuiltRuleAssetsClient = (
         const latestVersions = buckets.map((bucket) => {
           const hit = bucket.latest_version.hits.hits[0];
           const soAttributes = hit._source[PREBUILT_RULE_ASSETS_SO_TYPE];
-          const versionInfo: RuleVersionSpecifier = {
+          const versionInfo: BasicRuleInfo = {
             rule_id: soAttributes.rule_id,
             version: soAttributes.version,
+            type: soAttributes.type,
           };
           return versionInfo;
         });

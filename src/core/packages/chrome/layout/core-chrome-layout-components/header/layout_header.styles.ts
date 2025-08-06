@@ -12,9 +12,9 @@ import { EmotionFn } from '../types';
 
 const root: EmotionFn = ({ euiTheme }) => css`
   position: sticky;
-  overflow: hidden;
   grid-area: header;
   height: var(--kbn-layout--header-height);
+  max-width: var(--kbn-layout--header-width);
   z-index: var(--kbn-layout--aboveFlyoutLevel);
 `;
 

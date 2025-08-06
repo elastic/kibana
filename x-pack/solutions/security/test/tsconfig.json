@@ -16,7 +16,14 @@
     "../../../../typings/**/*",
     "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "plugins/**/*",
+    "security_solution_cypress/cypress/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*",
+  ],
   "kbn_references": [
     "@kbn/test",
     "@kbn/expect",
@@ -35,10 +42,8 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/test-subj-selector",
     "@kbn/std",
-    "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
     "@kbn/alerting-api-integration-helpers",
-    "@kbn/event-log-plugin",
     "@kbn/alerting-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
@@ -47,5 +52,9 @@
     "@kbn/es",
     "@kbn/cypress-test-helper",
     "@kbn/fleet-plugin",
+    "@kbn/core-saved-objects-server",
+    "@kbn/session-view-plugin",
+    "@kbn/repo-info",
+    "@kbn/es-archiver",
   ]
 }

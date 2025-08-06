@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const semanticNameLabel = i18n.translate('kbn.grokUi.semanticNameLabel', {
-  defaultMessage: 'Semantic name:',
+  defaultMessage: 'Field:',
 });
 
 export const patternNameLabel = i18n.translate('kbn.grokUi.patternNameLabel', {

@@ -6,6 +6,8 @@
  */
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -15,7 +17,12 @@ export async function registerDocumentationFunction({
   resources,
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
-  const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient, resources.logger)) ??
+    defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable =
+    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
   if (isProductDocAvailable) {
     functions.registerInstruction(({ availableFunctionNames }) => {
@@ -70,6 +77,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        inferenceId,
       });
 
       return {

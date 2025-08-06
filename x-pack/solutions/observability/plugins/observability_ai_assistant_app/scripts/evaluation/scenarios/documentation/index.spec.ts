@@ -13,6 +13,7 @@ import {
   PerformInstallResponse,
   UninstallResponse,
 } from '@kbn/product-doc-base-plugin/common/http_api/installation';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { RETRIEVE_DOCUMENTATION_NAME } from '../../../../server/functions/documentation';
 import { chatClient, kibanaClient, logger } from '../../services';
 
@@ -20,19 +21,29 @@ const ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/st
 const ELASTIC_DOCS_INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 const ELASTIC_DOCS_UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
 
+const inferenceId = defaultInferenceEndpoints.ELSER;
 describe('Retrieve documentation function', () => {
   before(async () => {
     let statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
       pathname: ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH,
+      query: {
+        inferenceId,
+      },
     });
 
     if (statusResponse.data.overall === 'installed') {
       logger.success('Elastic documentation is already installed');
     } else {
       logger.info('Installing Elastic documentation');
-      const installResponse = await kibanaClient.callKibana<PerformInstallResponse>('post', {
-        pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
-      });
+      const installResponse = await kibanaClient.callKibana<PerformInstallResponse>(
+        'post',
+        {
+          pathname: ELASTIC_DOCS_INSTALL_ALL_API_PATH,
+        },
+        {
+          inferenceId,
+        }
+      );
 
       if (!installResponse.data.installed) {
         logger.error('Could not install Elastic documentation');
@@ -41,6 +52,9 @@ describe('Retrieve documentation function', () => {
 
       statusResponse = await kibanaClient.callKibana<InstallationStatusResponse>('get', {
         pathname: ELASTIC_DOCS_INSTALLATION_STATUS_API_PATH,
+        query: {
+          inferenceId,
+        },
       });
 
       if (statusResponse.data.overall !== 'installed') {
@@ -74,7 +88,6 @@ describe('Retrieve documentation function', () => {
       'Accurately explains what Kibana Lens is and provides doc-based steps for creating a bar chart visualization',
       `Does not invent unsupported instructions, answers should reference what's found in the Kibana docs`,
     ]);
-
     expect(result.passed).to.be(true);
   });
 
@@ -96,9 +109,15 @@ describe('Retrieve documentation function', () => {
   after(async () => {
     // Uninstall all installed documentation
     logger.info('Uninstalling Elastic documentation');
-    const uninstallResponse = await kibanaClient.callKibana<UninstallResponse>('post', {
-      pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
-    });
+    const uninstallResponse = await kibanaClient.callKibana<UninstallResponse>(
+      'post',
+      {
+        pathname: ELASTIC_DOCS_UNINSTALL_ALL_API_PATH,
+      },
+      {
+        inferenceId,
+      }
+    );
 
     if (uninstallResponse.data.success) {
       logger.success('Uninstalled Elastic documentation');

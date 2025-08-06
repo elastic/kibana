@@ -9,8 +9,6 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
-import chai, { expect, assert } from 'chai';
-import snapshots from 'chai-snapshot-tests';
 // @ts-expect-error test utils is defined and exists, see https://github.com/facebook/jscodeshift#applytransform
 import { applyTransform } from 'jscodeshift/dist/testUtils';
 
@@ -59,14 +57,10 @@ const runnerOptions = {
 };
 
 describe('transform_path_file', () => {
-  before(() => {
-    chai.use(snapshots(__filename));
-  });
-
   it('throws an error if options are missing', () => {
     expect(() => {
       applyTransform(pathFileTransform, {}, pathFileContents, runnerOptions);
-    }).to.throw('Expected options to be defined');
+    }).toThrow('Expected options to be defined');
   });
 
   it('throws an error if chromiumVersion is missing', () => {
@@ -79,7 +73,7 @@ describe('transform_path_file', () => {
         { source: pathFileContents },
         runnerOptions
       );
-    }).to.throw('Expected version to be defined');
+    }).toThrow('Expected version to be defined');
   });
 
   it('throws an error if updateConfig is missing', () => {
@@ -92,7 +86,7 @@ describe('transform_path_file', () => {
         { source: pathFileContents },
         runnerOptions
       );
-    }).to.throw('Expected updateConfig to be defined');
+    }).toThrow('Expected updateConfig to be defined');
   });
 
   // This test fails because a change was made to the `kbn-screenshotting-server/src/paths.ts` file that is not reflected
@@ -106,6 +100,6 @@ describe('transform_path_file', () => {
       { source: pathFileContents },
       runnerOptions
     );
-    assert.snapshot('updated_paths_file', output);
+    expect(output).toMatchSnapshot('updated_paths_file');
   });
 });

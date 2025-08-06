@@ -9,7 +9,6 @@
 
 export const LANDING_PAGE_PATH = '/list';
 export const DASHBOARD_APP_ID = 'dashboards';
-export const LEGACY_DASHBOARD_APP_ID = 'dashboard';
 export const SEARCH_SESSION_ID = 'searchSessionId';
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',

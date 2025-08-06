@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { Writable } from 'utility-types';
 import type {
-  DashboardAttributes,
+  DashboardSavedObjectAttributes,
   SavedDashboardPanel,
-} from '@kbn/dashboard-plugin/common/content_management/v2';
+} from '@kbn/dashboard-plugin/server';
 import { cloneDeep, mapValues } from 'lodash';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
@@ -110,7 +111,7 @@ function locateConfiguration(
   }
 
   if (content.type === 'dashboard') {
-    const attributes = content.attributes as DashboardAttributes;
+    const attributes = content.attributes as Writable<DashboardSavedObjectAttributes>;
     const panels = (JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[]).map((panel) =>
       traversePanel(panel, options)
     );
