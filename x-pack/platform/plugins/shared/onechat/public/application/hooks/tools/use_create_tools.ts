@@ -77,6 +77,11 @@ export const useCreateToolFlyout = ({
     [openFlyout]
   );
 
+  const handleCloseFlyout = useCallback(() => {
+    setSourceToolId(undefined);
+    closeFlyout();
+  }, [closeFlyout]);
+
   const handleSuccess = useCallback<CreateToolMutationSuccessCallback>(
     (tool) => {
       closeFlyout();
@@ -113,8 +118,8 @@ export const useCreateToolFlyout = ({
     isSubmitting,
     isLoading: !!sourceToolId && isLoadingSourceTool,
     sourceTool: duplicateTool,
-    openFlyout: handleOpenFlyout,
     submit: createTool,
-    closeFlyout,
+    openFlyout: handleOpenFlyout,
+    closeFlyout: handleCloseFlyout,
   };
 };

@@ -28,4 +28,21 @@ export type CreateToolResponse = ToolDefinitionWithSchema;
 
 export type UpdateToolResponse = ToolDefinitionWithSchema;
 
-export type BulkDeleteToolResponse = Record<string, boolean>;
+interface BulkDeleteToolResultBase {
+  toolId: string;
+}
+
+interface BulkDeleteToolSuccessResult extends BulkDeleteToolResultBase {
+  success: true;
+}
+
+interface BulkDeleteToolFailureResult extends BulkDeleteToolResultBase {
+  success: false;
+  error: Error;
+}
+
+export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolFailureResult;
+
+export interface BulkDeleteToolResponse {
+  results: BulkDeleteToolResult[];
+}

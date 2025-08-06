@@ -8,10 +8,8 @@
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { noop } from 'lodash';
 import React, { createContext, useCallback, useContext } from 'react';
-import {
-  OnechatEsqlToolFlyout,
-  OnechatEsqlToolFlyoutMode,
-} from '../components/tools/esql/esql_tool_flyout';
+import { OnechatEsqlToolFlyout } from '../components/tools/esql/esql_tool_flyout';
+import { OnechatEsqlToolFormMode } from '../components/tools/esql/form/esql_tool_form';
 import { OnechatEsqlToolFormData } from '../components/tools/esql/form/types/esql_tool_form_types';
 import { useCreateToolFlyout } from '../hooks/tools/use_create_tools';
 import { useDeleteToolModal, useDeleteToolsModal } from '../hooks/tools/use_delete_tools';
@@ -87,7 +85,7 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
     ? {
         isOpen: isEditToolFlyoutOpen,
         onClose: closeEditToolFlyout,
-        mode: OnechatEsqlToolFlyoutMode.Edit,
+        mode: OnechatEsqlToolFormMode.Edit,
         tool: editingTool,
         submit: handleUpdateTool,
         isSubmitting: isUpdatingTool,
@@ -96,7 +94,7 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
     : {
         isOpen: isCreateToolFlyoutOpen,
         onClose: closeCreateToolFlyout,
-        mode: OnechatEsqlToolFlyoutMode.Create,
+        mode: OnechatEsqlToolFormMode.Create,
         tool: sourceTool,
         submit: handleCreateTool,
         isSubmitting: isCreatingTool,

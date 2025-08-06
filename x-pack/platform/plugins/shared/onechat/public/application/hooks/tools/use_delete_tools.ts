@@ -171,9 +171,11 @@ export const useDeleteToolsModal = ({
     setDeleteToolIds(toolIds);
   }, []);
 
-  const handleSuccess: DeleteToolsMutationSuccessCallback = (data, { toolIds }) => {
-    if (Object.values(data).some((success) => !success)) {
-      const failedTools = toolIds.filter((toolId) => !data[toolId]);
+  const handleSuccess: DeleteToolsMutationSuccessCallback = ({ results }, { toolIds }) => {
+    if (results.some((result) => !result.success)) {
+      const failedTools = results
+        .filter((result) => !result.success)
+        .map((result) => result.toolId);
       if (failedTools.length === toolIds.length) {
         addErrorToast({
           title: labels.tools.bulkDeleteToolsErrorToast(toolIds.length),
@@ -186,6 +188,7 @@ export const useDeleteToolsModal = ({
             new Error('Delete operation failed for some tools: ' + failedTools.join(', '))
           ),
         });
+        setDeleteToolIds([]);
       }
       return;
     }
