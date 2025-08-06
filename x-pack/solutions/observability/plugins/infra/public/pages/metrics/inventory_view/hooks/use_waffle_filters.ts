@@ -6,94 +6,77 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
-import { useState, useMemo, useCallback, useEffect } from 'react';
-
+import { useCallback, useEffect, useRef } from 'react';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { constant, identity } from 'fp-ts/function';
 import createContainter from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import type { InventoryView } from '../../../../../common/inventory_views';
 import {
   type InventoryFiltersState,
   inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
-import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-
-const validateKuery = (expression: string) => {
-  try {
-    fromKueryExpression(expression);
-  } catch (err) {
-    return false;
-  }
-  return true;
-};
+import { useInventoryViewsContext } from './use_inventory_views';
 
 export const DEFAULT_WAFFLE_FILTERS_STATE: InventoryFiltersState = {
   kind: 'kuery',
   expression: '',
 };
 
-export const useWaffleFilters = () => {
-  const { metricsView } = useMetricsDataViewContext();
+function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersState {
+  return savedView.attributes.filterQuery;
+}
 
+export const useWaffleFilters = () => {
+  const { currentView } = useInventoryViewsContext();
+  const { inventoryPrefill } = useAlertPrefillContext();
   const [urlState, setUrlState] = useUrlState<InventoryFiltersState>({
-    defaultState: DEFAULT_WAFFLE_FILTERS_STATE,
+    defaultState: currentView ? mapInventoryViewToState(currentView) : DEFAULT_WAFFLE_FILTERS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleFilter',
   });
 
-  const [state, setState] = useState<InventoryFiltersState>(urlState);
+  const previousViewId = useRef<string | undefined>(currentView?.id);
+  useEffect(() => {
+    if (currentView && currentView.id !== previousViewId.current) {
+      setUrlState(mapInventoryViewToState(currentView));
+      previousViewId.current = currentView.id;
+    }
+  }, [currentView, setUrlState]);
 
-  useEffect(() => setUrlState(state), [setUrlState, state]);
-
-  const [filterQueryDraft, setFilterQueryDraft] = useState<string>(urlState.expression);
-
-  const filterQueryAsJson = useMemo(
-    () => convertKueryToElasticSearchQuery(urlState.expression, metricsView?.dataViewReference),
-    [metricsView?.dataViewReference, urlState.expression]
-  );
-
-  const applyFilterQueryFromKueryExpression = useCallback(
-    (expression: string) => {
-      setState((previous) => ({
-        ...previous,
-        kind: 'kuery',
-        expression,
-      }));
-    },
-    [setState]
-  );
-
-  const applyFilterQuery = useCallback((filterQuery: InventoryFiltersState) => {
-    setState(filterQuery);
-    setFilterQueryDraft(filterQuery.expression);
+  const isValidKuery = useCallback((expression: string) => {
+    try {
+      fromKueryExpression(expression);
+    } catch (err) {
+      return false;
+    }
+    return true;
   }, []);
 
-  const isFilterQueryDraftValid = useMemo(
-    () => validateKuery(filterQueryDraft),
-    [filterQueryDraft]
+  const applyFilterQuery = useCallback(
+    (query: string) => {
+      if (isValidKuery(query)) {
+        setUrlState({ kind: 'kuery', expression: query });
+      }
+    },
+    [isValidKuery, setUrlState]
   );
 
-  const { inventoryPrefill } = useAlertPrefillContext();
-  const prefillContext = useMemo(() => inventoryPrefill, [inventoryPrefill]); // For Jest compatibility
-  useEffect(() => prefillContext.setFilterQuery(state.expression), [prefillContext, state]);
+  useEffect(() => {
+    inventoryPrefill.setKuery(urlState.expression);
+  }, [inventoryPrefill, urlState.expression]);
 
   return {
     filterQuery: urlState,
-    filterQueryDraft,
-    filterQueryAsJson,
     applyFilterQuery,
-    setFilterQueryDraftFromKueryExpression: setFilterQueryDraft,
-    applyFilterQueryFromKueryExpression,
-    isFilterQueryDraftValid,
+    isValidKuery,
     setWaffleFiltersState: applyFilterQuery,
   };
 };
 
-// temporary
 export type WaffleFiltersState = InventoryFiltersState;
 const encodeUrlState = inventoryFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>
