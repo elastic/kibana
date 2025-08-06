@@ -12,7 +12,7 @@ import type { DataViewBase } from '@kbn/es-query';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
-import type { ThreatMapEntries } from './types';
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
 import { createAndNewEntryItem, createOrNewEntryItem } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
@@ -30,12 +30,12 @@ const MyButtonsContainer = styled(EuiFlexItem)`
 `;
 
 interface ThreatMatchComponentProps {
-  mappingEntries: ThreatMapEntries[];
+  mappingEntries: ThreatMapping;
   indexPatterns: DataViewBase;
   threatIndexPatterns: DataViewBase;
   'id-aria'?: string;
   'data-test-subj'?: string;
-  onMappingEntriesChange: (newValue: ThreatMapEntries[]) => void;
+  onMappingEntriesChange: (newValue: ThreatMapping) => void;
 }
 
 export const ThreatMatchComponent = ({
@@ -47,7 +47,7 @@ export const ThreatMatchComponent = ({
   onMappingEntriesChange,
 }: ThreatMatchComponentProps) => {
   const handleEntryItemChange = useCallback(
-    (item: ThreatMapEntries, index: number): void => {
+    (item: ThreatMapping[number], index: number): void => {
       const updatedEntries = mappingEntries.slice();
 
       updatedEntries.splice(index, 1, item);
@@ -58,7 +58,7 @@ export const ThreatMatchComponent = ({
   );
 
   const handleDeleteEntryItem = useCallback(
-    (item: ThreatMapEntries, index: number): void => {
+    (item: ThreatMapping[number], index: number): void => {
       if (item.entries.length === 0) {
         const updatedEntries = mappingEntries.slice();
 
@@ -88,7 +88,7 @@ export const ThreatMatchComponent = ({
     }
 
     const { entries: innerEntries } = lastEntry;
-    const updatedEntry: ThreatMapEntries = {
+    const updatedEntry: ThreatMapping[number] = {
       ...lastEntry,
       entries: [...innerEntries, createAndNewEntryItem()],
     };

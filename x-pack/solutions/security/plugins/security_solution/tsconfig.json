@@ -78,7 +78,6 @@
     "@kbn/lens-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
