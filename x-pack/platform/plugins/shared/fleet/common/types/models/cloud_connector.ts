@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/public';
-
 import type { PackagePolicyConfigRecordEntry } from './package_policy';
 
 export type CloudProvider = 'aws' | 'azure' | 'gcp';
@@ -47,17 +45,6 @@ export interface CloudConnectorSO {
 export interface CloudConnectorListOptions {
   page?: number;
   perPage?: number;
-}
-
-export interface CloudConnectorServiceInterface {
-  create(
-    soClient: SavedObjectsClientContract,
-    cloudConnector: CreateCloudConnectorRequest
-  ): Promise<CloudConnectorSO>;
-  getList(
-    soClient: SavedObjectsClientContract,
-    options?: CloudConnectorListOptions
-  ): Promise<CloudConnectorSO[]>;
 }
 
 export interface CreateCloudConnectorRequest {

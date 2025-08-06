@@ -14,13 +14,23 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   CloudConnectorSecretVar,
-  CloudConnectorServiceInterface,
 } from '../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 import { appContextService } from './app_context';
+
+export interface CloudConnectorServiceInterface {
+  create(
+    soClient: SavedObjectsClientContract,
+    cloudConnector: CreateCloudConnectorRequest
+  ): Promise<CloudConnectorSO>;
+  getList(
+    soClient: SavedObjectsClientContract,
+    options?: CloudConnectorListOptions
+  ): Promise<CloudConnectorSO[]>;
+}
 
 export class CloudConnectorService implements CloudConnectorServiceInterface {
   private static readonly EXTERNAL_ID_REGEX = /^[a-zA-Z0-9]{20}$/;
