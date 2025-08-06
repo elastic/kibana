@@ -223,6 +223,7 @@ export class WorkflowExecutionRuntimeManager {
       ...this.workflowExecution,
       ...updatedWorkflowExecution,
     };
+    this.logWorkflowStart();
   }
 
   public async fail(error: any): Promise<void> {
@@ -264,6 +265,7 @@ export class WorkflowExecutionRuntimeManager {
       const completeDate = new Date();
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
     }
 
     // TODO: Consider saving runtime state to workflow execution document
@@ -292,6 +294,27 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     return undefined;
+  }
+
+  private logWorkflowStart(): void {
+    this.workflowLogger?.logInfo('Workflow execution started', {
+      event: { action: 'workflow-start', category: ['workflow'] },
+      tags: ['workflow', 'execution', 'start'],
+    });
+  }
+
+  private logWorkflowComplete(success: boolean): void {
+    this.workflowLogger?.logInfo(
+      `Workflow execution ${success ? 'completed successfully' : 'failed'}`,
+      {
+        event: {
+          action: 'workflow-complete',
+          category: ['workflow'],
+          outcome: success ? 'success' : 'failure',
+        },
+        tags: ['workflow', 'execution', 'complete'],
+      }
+    );
   }
 
   private logStepStart(stepId: string): void {

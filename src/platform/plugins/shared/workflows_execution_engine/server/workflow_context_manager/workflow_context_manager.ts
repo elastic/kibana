@@ -11,11 +11,6 @@ import { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/ser
 import { WorkflowSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { graphlib } from '@dagrejs/dagre';
-import {
-  WorkflowEventLogger,
-  IWorkflowEventLogger,
-  WorkflowLogEvent,
-} from '../workflow_event_logger/workflow_event_logger';
 import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
@@ -31,7 +26,6 @@ export interface ContextManagerInit {
   logger?: Logger;
   workflowEventLoggerIndex?: string;
   esClient?: ElasticsearchClient;
-  enableConsoleLogging?: boolean;
   workflowExecutionGraph: graphlib.Graph;
   workflowState: WorkflowExecutionRuntimeManager;
 }
@@ -41,7 +35,6 @@ export class WorkflowContextManager {
   private esClient: IScopedClusterClient;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowState: WorkflowExecutionRuntimeManager;
-  private workflowLogger: IWorkflowEventLogger | null = null;
 
   constructor(init: ContextManagerInit) {
     this.context = {
@@ -56,23 +49,6 @@ export class WorkflowContextManager {
     this.esClient = this.createEsClient(init.esApiKey);
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowState = init.workflowState;
-
-    // Initialize workflow event logger if provided
-    if (init.logger && init.workflowEventLoggerIndex && init.esClient) {
-      this.workflowLogger = new WorkflowEventLogger(
-        init.esClient,
-        init.logger,
-        init.workflowEventLoggerIndex,
-        {
-          workflowId: init.workflowRunId,
-          workflowName: init.workflow.name,
-          executionId: init.workflowRunId,
-        },
-        {
-          enableConsoleLogging: init.enableConsoleLogging || false,
-        }
-      );
-    }
   }
 
   private createEsClient(apiKey: string): IScopedClusterClient {
@@ -129,74 +105,5 @@ export class WorkflowContextManager {
 
   public getStepResults(): { [stepId: string]: RunStepResult } {
     return this.context.stepResults;
-  }
-
-  // ======================
-  // Workflow Event Logging Methods
-  // ======================
-
-  /**
-   * Get the workflow-level logger (execution scoped)
-   */
-  public get logger(): IWorkflowEventLogger | null {
-    return this.workflowLogger;
-  }
-
-  /**
-   * Convenience logging methods that automatically include workflow/execution/step context
-   */
-  public logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logInfo(message, additionalData);
-  }
-
-  public logError(
-    message: string,
-    error?: Error,
-    additionalData?: Partial<WorkflowLogEvent>
-  ): void {
-    this.workflowLogger?.logError(message, error, additionalData);
-  }
-
-  public logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logWarn(message, additionalData);
-  }
-
-  public logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void {
-    this.workflowLogger?.logDebug(message, additionalData);
-  }
-
-  public startTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.startTiming(event);
-  }
-
-  public stopTiming(event: WorkflowLogEvent): void {
-    this.workflowLogger?.stopTiming(event);
-  }
-
-  /**
-   * Log workflow execution start
-   */
-  public logWorkflowStart(): void {
-    this.workflowLogger?.logInfo('Workflow execution started', {
-      event: { action: 'workflow-start', category: ['workflow'] },
-      tags: ['workflow', 'execution', 'start'],
-    });
-  }
-
-  /**
-   * Log workflow execution completion
-   */
-  public logWorkflowComplete(success: boolean = true): void {
-    this.workflowLogger?.logInfo(
-      `Workflow execution ${success ? 'completed successfully' : 'failed'}`,
-      {
-        event: {
-          action: 'workflow-complete',
-          category: ['workflow'],
-          outcome: success ? 'success' : 'failure',
-        },
-        tags: ['workflow', 'execution', 'complete'],
-      }
-    );
   }
 }

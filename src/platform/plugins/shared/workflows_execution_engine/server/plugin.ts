@@ -125,14 +125,11 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
-        enableConsoleLogging: this.config.logging.console,
         workflowExecutionGraph,
         workflowState: workflowRuntime,
       });
 
       // Log workflow execution start
-      await contextManager.logWorkflowStart();
-
       await workflowRuntime.start();
 
       try {
@@ -148,11 +145,8 @@ export class WorkflowsExecutionEnginePlugin
 
           await step.run();
         } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-
-        contextManager.logWorkflowComplete(true);
       } catch (error) {
         await workflowRuntime.fail(error);
-        contextManager.logWorkflowComplete(false);
       }
     };
 
