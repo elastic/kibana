@@ -92,6 +92,5 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
 export type DashboardSearchOut = SearchResult<
-  TypeOf<typeof dashboardAttributesSchemaResponse>,
-  TypeOf<typeof dashboardResponseMetaSchema>
+  TypeOf<typeof dashboardItemSchema>
 >;

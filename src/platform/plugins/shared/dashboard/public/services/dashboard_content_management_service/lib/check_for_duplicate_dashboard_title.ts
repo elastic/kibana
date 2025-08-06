@@ -68,7 +68,7 @@ export async function checkForDuplicateDashboardTitle({
   });
 
   const duplicate = Boolean(
-    hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
+    hits.find((hit) => hit.data.title.toLowerCase() === title.toLowerCase())
   );
 
   if (!duplicate) {
@@ -76,7 +76,7 @@ export async function checkForDuplicateDashboardTitle({
   }
 
   const [largestDuplicationId] = hits
-    .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
+    .map((hit) => extractTitleAndCount(hit.data.title)[1])
     .sort((a, b) => b - a);
 
   const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;
