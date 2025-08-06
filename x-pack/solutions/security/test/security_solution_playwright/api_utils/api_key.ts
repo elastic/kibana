@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import YAML from 'yaml';
 import { ToolingLog } from '@kbn/tooling-log';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
 import { resolve } from 'path';
@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const getYamlData = (filePath: string): any => {
   const fileContents = fs.readFileSync(filePath, 'utf8');
-  return yaml.load(fileContents);
+  return YAML.parse(fileContents);
 };
 
 const getRoleConfiguration = (role: string, filePath: string): any => {

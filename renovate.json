@@ -760,7 +760,6 @@
         "remark-gfm",
         "rehype-raw",
         "rehype-sanitize",
-        "yaml",
         "@types/js-search"
       ],
       "reviewers": [
@@ -3471,7 +3470,6 @@
         "formik",
         "handlebars",
         "js-sha256",
-        "js-yaml",
         "minimist",
         "object-hash",
         "require-in-the-middle",
@@ -3479,8 +3477,8 @@
         "tough-cookie",
         "uuid",
         "xml-crypto",
+        "yaml",
         "@elastic/node-crypto",
-        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",

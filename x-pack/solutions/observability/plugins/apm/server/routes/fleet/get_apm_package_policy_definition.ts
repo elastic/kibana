@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import YAML from 'yaml';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import {
@@ -99,9 +99,9 @@ function ensureValidMultiText(textMultiValue: string[] | undefined) {
 
 function escapeInvalidYamlString(yamlString: string) {
   try {
-    yaml.load(yamlString);
+    YAML.parse(yamlString);
   } catch (error) {
-    if (error instanceof yaml.YAMLException) {
+    if (error instanceof YAML.YAMLException) {
       return `"${yamlString}"`;
     }
   }

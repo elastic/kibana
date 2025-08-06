@@ -10,8 +10,7 @@ require('../../../../../../../src/setup_node_env');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const extract = require('extract-zip');
 const fs = require('fs');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const yaml = require('js-yaml');
+const YAML = require('yaml');
 const https = require('https');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { get, isArray, isEmpty, isNumber, isString, pick } = require('lodash');
@@ -138,7 +137,7 @@ const manageZipFields = async (beat, filePath, beatFields) => {
   try {
     await extract(filePath, { dir: beat.outputDir });
     console.log('building fields', beat.index);
-    const obj = yaml.load(
+    const obj = YAML.parse(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {
         encoding: 'utf-8',
       })
@@ -172,7 +171,7 @@ const manageTarFields = async (beat, filePath, beatFields) =>
           return reject(new Error(err));
         }
         console.log('building fields', beat.index);
-        const obj = yaml.load(
+        const obj = YAML.parse(
           fs.readFileSync(`${beat.outputDir}/fields.yml`, { encoding: 'utf-8' })
         );
         const ebeatFields = convertSchemaToHash(obj, beatFields);

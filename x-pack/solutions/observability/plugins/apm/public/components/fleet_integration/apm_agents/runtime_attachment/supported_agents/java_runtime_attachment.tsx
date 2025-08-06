@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import YAML from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
@@ -206,7 +206,7 @@ function decodeDiscoveryRulesYaml(
   defaultDiscoveryRules: IDiscoveryRule[] = []
 ): IDiscoveryRule[] {
   try {
-    const parsedYaml = (yaml.load(discoveryRulesYaml) as DiscoveryRulesParsedYaml) ?? [];
+    const parsedYaml = (YAML.parse(discoveryRulesYaml) as DiscoveryRulesParsedYaml) ?? [];
 
     if (parsedYaml.length === 0) {
       return defaultDiscoveryRules;
@@ -233,5 +233,5 @@ function encodeDiscoveryRulesYaml(discoveryRules: IDiscoveryRule[]): string {
       [`${operation}-${type}`]: probe,
     })
   );
-  return yaml.dump(mappedDiscoveryRules);
+  return YAML.stringify(mappedDiscoveryRules);
 }

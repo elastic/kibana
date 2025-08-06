@@ -7,7 +7,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import yaml from 'js-yaml';
+import YAML from 'yaml';
 import { identity, pickBy } from 'lodash';
 import { unflattenObject } from '@kbn/observability-utils-common/object/unflatten_object';
 
@@ -18,7 +18,7 @@ export const readKibanaConfig = () => {
   const kibanaDevConfig = path.join(kibanaConfigDir, 'kibana.dev.yml');
   const kibanaConfig = path.join(kibanaConfigDir, 'kibana.yml');
 
-  const loadedKibanaConfig = (yaml.load(
+  const loadedKibanaConfig = (YAML.parse(
     fs.readFileSync(fs.existsSync(kibanaDevConfig) ? kibanaDevConfig : kibanaConfig, 'utf8')
   ) || {}) as {};
 
