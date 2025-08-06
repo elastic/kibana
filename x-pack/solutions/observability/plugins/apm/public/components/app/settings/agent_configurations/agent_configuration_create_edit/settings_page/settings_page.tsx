@@ -66,8 +66,7 @@ export function SettingsPage({
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
-    !newConfig.agent_name ||
-    (newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName));
+    newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
 
   const invalidAdvancedConfig: boolean = useMemo(() => {
     return Object.values(validationErrors).some((error) => error);
