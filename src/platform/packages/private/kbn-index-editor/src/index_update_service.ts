@@ -142,7 +142,17 @@ export class IndexUpdateService {
       // FROM
       const fromCmd = Builder.command({
         name: 'from',
-        args: [Builder.expression.source.node(indexName!)],
+        args: [
+          Builder.expression.source.node(indexName!),
+          Builder.option({
+            name: 'metadata',
+            args: [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: '_id' })],
+              }),
+            ],
+          }),
+        ],
       });
 
       // WHERE qstr("message: …")
@@ -449,7 +459,6 @@ export class IndexUpdateService {
             const { documents_found: total, values, columns } = response.rawResponse;
 
             const columnNames = columns.map(({ name }) => name);
-
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))
               .map((row, idx: number) => {
@@ -550,20 +559,6 @@ export class IndexUpdateService {
 
   public getIndexName(): string | null {
     return this._indexName$.getValue();
-  }
-
-  // Add a new index
-  public addDoc(doc: Record<string, any>) {
-    this._actions$.next({ type: 'add', payload: { value: doc } });
-  }
-
-  public async addNewRow(newRow: Record<string, any>) {
-    const response = await this.bulkUpdate([{ value: newRow }]);
-
-    if (!response.errors) {
-      this._actions$.next({ type: 'new-row-added', payload: newRow });
-    }
-    return response;
   }
 
   public addEmptyRow() {

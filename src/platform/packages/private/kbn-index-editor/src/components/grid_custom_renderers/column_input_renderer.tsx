@@ -10,7 +10,7 @@
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPlaceholderColumn } from '../../utils';
 import { IndexUpdateService } from '../../index_update_service';
@@ -60,15 +60,26 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-
+  const onBlur = useCallback(() => {
     if (columnName && !validationError) {
-      await saveColumn();
-      setIsEditing(false);
+      saveColumn();
+    } else {
+      resetColumnName();
     }
-  };
+    setIsEditing(false);
+  }, [columnName, validationError, saveColumn, resetColumnName]);
+
+  const onSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (columnName && !validationError) {
+        saveColumn();
+        setIsEditing(false);
+      }
+    },
+    [columnName, validationError, saveColumn]
+  );
 
   const columnLabel = isPlaceholderColumn(initialColumnName) ? (
     <FormattedMessage id="indexEditor.flyout.grid.columnHeader.add" defaultMessage="Add a field…" />
@@ -95,10 +106,7 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
             onChange={(e) => {
               setColumnName(e.target.value);
             }}
-            onBlur={() => {
-              setIsEditing(false);
-              resetColumnName();
-            }}
+            onBlur={onBlur}
             onKeyDown={(e: KeyboardEvent) => {
               e.stopPropagation();
               if (e.key === 'Escape') {
