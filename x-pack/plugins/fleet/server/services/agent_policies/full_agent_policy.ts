@@ -485,8 +485,8 @@ export function transformOutputToFullPolicyOutput(
   };
   if (ssl) {
     newOutput.ssl = {
-      ...newOutput.ssl,
-      ...ssl,
+      ...ssl, // ssl coming from preconfig
+      ...newOutput.ssl, // ssl coming from config_yaml
     };
   }
 
