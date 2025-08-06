@@ -23,7 +23,6 @@ export const findSuggestionsRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      console.log('casesClient', casesClient.suggestions);
       return response.ok({
         body: {},
       });
