@@ -26,17 +26,14 @@ import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
 import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
-import type { SavedSearchesServiceDeps } from './services/saved_searches/saved_searches_service';
-import type {
-  SaveSavedSearchOptions,
-  saveSavedSearch,
-} from './services/saved_searches/save_saved_searches';
+import type { SavedSearchesServiceDeps } from './service/saved_searches_service';
+import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
 import type {
   SaveDiscoverSessionOptions,
   SaveDiscoverSessionParams,
   saveDiscoverSession,
-} from './services/saved_searches/save_discover_session';
-import type { SavedSearchUnwrapResult } from './services/saved_searches/to_saved_search';
+} from './service/save_discover_session';
+import type { SavedSearchUnwrapResult } from './service/to_saved_search';
 import { getNewSavedSearch } from '../common/service/get_new_saved_search';
 
 /**
@@ -183,6 +180,6 @@ export class SavedSearchPublicPlugin
 }
 
 const getSavedSearchesService = once(async (deps: SavedSearchesServiceDeps) => {
-  const { SavedSearchesService } = await import('./services/saved_searches/saved_searches_service');
+  const { SavedSearchesService } = await import('./service/saved_searches_service');
   return new SavedSearchesService(deps);
 });
