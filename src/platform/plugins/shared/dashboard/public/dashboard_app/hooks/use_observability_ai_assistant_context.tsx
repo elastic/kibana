@@ -44,9 +44,9 @@ import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/public';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 import { DashboardApi } from '../../dashboard_api/types';
 import { coreServices, inferenceService } from '../../services/kibana_services';
+import {  usePostToolClientActions, type OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/public';
 
 import { convertSchemaToObservabilityParameters } from './schema_adapters';
-import { usePostToolClientActions } from '../poc/hooks';
 const chartTypes = [
   'bar',
   'xy',
@@ -123,14 +123,7 @@ const schema = z.object({
     .optional(),
   title: z.string().describe('An optional title for the visualization.').optional(),
 });
-interface OneChatToolWithClientCallback<Dependencies extends {}> {
-  name: string;
-  description: string;
-  schema: z.ZodSchema;
-  screenDescription: string;
-  getPostToolClientActions: (dependencies: Dependencies) => any[];
-  parameters: z.ZodObject<any, any, any, any, any>;
-}
+
 const NO_ACTIONS = [];
 const executeAddToDashboard =
   (dependencies: { dashboardApi: DashboardApi | undefined }) =>
@@ -360,8 +353,9 @@ const getObservabilityToolDetails = (oneChatTool: OneChatToolWithClientCallback)
   parameters: convertSchemaToObservabilityParameters(oneChatTool.schema),
 });
 
-const getSecurityToolDetails = (oneChatTool: OneChatToolWithClientCallback) =>
-  pick(oneChatTool, ['name', 'description', 'parameters']);
+
+console.log(`--@@tool`, getObservabilityToolDetails(tool));
+console.log(`--@@addToDashboardTool`, getObservabilityToolDetails(addToDashboardTool));
 
 // USING CONNECTOR ID
 

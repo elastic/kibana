@@ -81,17 +81,10 @@ const schema = z.object({
     .optional(),
   title: z.string().describe('An optional title for the visualization.').optional(),
 });
-interface OneChatToolWithClientCallback<Dependencies extends {}> {
-  name: string;
-  description: string;
-  schema: z.ZodSchema;
-  screenDescription: string;
-  getPostToolClientActions: (dependencies: Dependencies) => any[];
-  parameters: z.ZodObject<any, any, any, any, any>;
-}
+
 const NO_ACTIONS = [];
 const executeAddToDashboard =
-  (dependencies: { dashboardApi: DashboardApi }) =>
+  (dependencies: { dashboardApi: DashboardApi | undefined }) =>
   async ({ args, signal }: { args: z.infer<typeof schema>; signal: AbortSignal }) => {
     const { dashboardApi } = dependencies;
     const {
@@ -286,9 +279,8 @@ export const addToDashboardTool: OneChatToolWithClientCallback<AddToDashboardCli
   toolId: '.add_to_dashboard',
   name: 'add_to_dashboard',
   description:
-    'Add an ES|QL Lens visualization to the current dashboard. Pick a single chart type, and based on the chart type, the corresponding key for `layers`. E.g., when you select type:metric, fill in only layers.metric.',
+    'Add an ES|QL visualization to the current dashboard. Pick a single chart type, and based on the chart type, the corresponding key for `layers`. E.g., when you select type:metric, fill in only layers.metric.',
   schema,
-  parameters: convertSchemaToObservabilityParameters(schema),
   screenDescription:
     'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
   handler: async ({ indexPattern }, { modelProvider, esClient }) => {

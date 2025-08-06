@@ -50,7 +50,7 @@
       "presentationPanel",
       "savedObjects",
       "inference",
-
+      "aiClientTools"
     ]
   }
 }
