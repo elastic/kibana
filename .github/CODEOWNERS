@@ -8,6 +8,7 @@
 examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
+examples/dependency_injection @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 examples/embeddable_examples @elastic/kibana-presentation
@@ -145,6 +146,13 @@ src/core/packages/deprecations/common @elastic/kibana-core
 src/core/packages/deprecations/server @elastic/kibana-core
 src/core/packages/deprecations/server-internal @elastic/kibana-core
 src/core/packages/deprecations/server-mocks @elastic/kibana-core
+src/core/packages/di/browser @elastic/kibana-core
+src/core/packages/di/browser-internal @elastic/kibana-core
+src/core/packages/di/common @elastic/kibana-core
+src/core/packages/di/common-internal @elastic/kibana-core
+src/core/packages/di/mocks @elastic/kibana-core
+src/core/packages/di/server @elastic/kibana-core
+src/core/packages/di/server-internal @elastic/kibana-core
 src/core/packages/doc-links/browser @elastic/kibana-core
 src/core/packages/doc-links/browser-internal @elastic/kibana-core
 src/core/packages/doc-links/browser-mocks @elastic/kibana-core
