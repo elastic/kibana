@@ -12,14 +12,17 @@ import {
   PrivMonRolesUtils,
   READ_ALL_INDICES_ROLE,
   READ_NO_INDEX_ROLE,
+  READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
   READ_PRIV_MON_INDICES_ROLE,
   USER_PASSWORD,
 } from './role_utils';
+import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const privMonRoutesNoAuth = privilegeMonitoringRouteHelpersFactoryNoAuth(supertestWithoutAuth);
   const privMonRolesUtils = PrivMonRolesUtils(getService);
+  const privMonUtils = PrivMonUtils(getService);
 
   const getPrivilegesForUsername = async (username: string) =>
     privMonRoutesNoAuth.privilegesForUser({
@@ -107,6 +110,30 @@ export default ({ getService }: FtrProviderContext) => {
           },
           kibana: {},
         });
+      });
+    });
+
+    describe('privilege init engine access', () => {
+      before(async () => {
+        await privMonRolesUtils.createPrivilegeTestUsers();
+      });
+
+      after(async () => {
+        await privMonRolesUtils.deletePrivilegeTestUsers();
+      });
+      it('should allow init for user with full privileges', async () => {
+        const res = await privMonUtils.initPrivMonEngineWithoutAuth({
+          username: READ_ALL_INDICES_ROLE.name,
+          password: USER_PASSWORD,
+        });
+        expect(res.status).to.eql(200);
+      });
+      it('should return forbidden for user without correct kibana privileges ', async () => {
+        const res = await privMonUtils.initPrivMonEngineWithoutAuth({
+          username: READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE.name,
+          password: USER_PASSWORD,
+        });
+        expect(res.status).to.eql(403); // forbidden, should not access SO resources
       });
     });
   });

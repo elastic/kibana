@@ -10,19 +10,12 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
-import {
-  PrivMonRolesUtils,
-  READ_ALL_INDICES_ROLE,
-  USER_PASSWORD,
-  READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE,
-} from './role_utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
-  const privMonUtils = PrivMonUtils(getService);
-  const privMonRolesUtils = PrivMonRolesUtils(getService);
+  const privMonUtils = PrivMonUtils(getService); 
   const log = getService('log');
   const es = getService('es');
   const retry = getService('retry');
@@ -82,29 +75,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('init access', () => {
-      before(async () => {
-        await privMonRolesUtils.createPrivilegeTestUsers();
-      });
-
-      after(async () => {
-        await privMonRolesUtils.deletePrivilegeTestUsers();
-      });
-      it('should allow init for user with full privileges', async () => {
-        const res = await privMonUtils.initPrivMonEngineWithoutAuth({
-          username: READ_ALL_INDICES_ROLE.name,
-          password: USER_PASSWORD,
-        });
-        expect(res.status).to.eql(200);
-      });
-      it('should return forbidden for user without correct kibana privileges ', async () => {
-        const res = await privMonUtils.initPrivMonEngineWithoutAuth({
-          username: READ_NO_INDEX_ROLE_NO_PRIVILEGES_ROLE.name,
-          password: USER_PASSWORD,
-        });
-        expect(res.status).to.eql(403); // forbidden, should not access SO resources
-      });
-    });
     describe('plain index sync', () => {
       log.info(`Syncing plain index`);
       const indexName = 'tatooine-privileged-users';
