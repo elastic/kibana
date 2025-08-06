@@ -15,11 +15,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { withoutControlCharacters } from '../lib/string_utils';
 
 export type ServerLogConnectorType = ConnectorType<{}, {}, ActionParamsType>;
@@ -57,11 +53,7 @@ export function getConnectorType(): ServerLogConnectorType {
     name: i18n.translate('xpack.stackConnectors.serverLog.title', {
       defaultMessage: 'Server log',
     }),
-    supportedFeatureIds: [
-      AlertingConnectorFeatureId,
-      UptimeConnectorFeatureId,
-      SecurityConnectorFeatureId,
-    ],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: { schema: schema.object({}, { defaultValue: {} }) },
       secrets: { schema: schema.object({}, { defaultValue: {} }) },
