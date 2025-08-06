@@ -21,6 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WorkflowYaml } from '@kbn/workflows';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
@@ -28,6 +31,12 @@ import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
+
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../features/workflow_visual_editor/ui').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
@@ -55,6 +64,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
+
+  const workflowYamlObject = useMemo(
+    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
+    [workflowYaml]
+  );
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -135,6 +149,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               onChange={handleChange}
               hasChanges={hasChanges}
             />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {workflowYamlObject?.data && (
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <WorkflowVisualEditor workflow={workflowYamlObject.data as WorkflowYaml} />
+            </React.Suspense>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

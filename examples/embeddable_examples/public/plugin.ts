@@ -28,9 +28,9 @@ import {
   EUI_MARKDOWN_ID,
 } from './react_embeddables/eui_markdown/constants';
 import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
-import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
+import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
+import { ADD_FIELD_LIST_ACTION_ID } from './react_embeddables/field_list/constants';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
-import { registerCreateSavedBookAction } from './react_embeddables/saved_book/create_saved_book_action';
 import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
@@ -98,7 +98,13 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
   public start(core: CoreStart, deps: StartDeps) {
     setKibanaServices(core, deps);
 
-    registerCreateFieldListAction(deps.uiActions);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID, async () => {
+      const { createFieldListAction } = await import(
+        './react_embeddables/field_list/create_field_list_action'
+      );
+      return createFieldListAction;
+    });
+
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
     deps.uiActions.registerActionAsync(ADD_EUI_MARKDOWN_ACTION_ID, async () => {
@@ -123,7 +129,12 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createDataTableAction;
     });
 
-    registerCreateSavedBookAction(deps.uiActions, core);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
+      const { createSavedBookAction } = await import(
+        './react_embeddables/saved_book/create_saved_book_action'
+      );
+      return createSavedBookAction(core);
+    });
   }
 
   public stop() {}
