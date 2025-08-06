@@ -6,6 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from '../../../functional_search/services';
+import { pageObjects } from '../../../functional_search/page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -14,6 +16,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+    services,
+    pageObjects,
     testFiles: [require.resolve('.')],
   };
 }

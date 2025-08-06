@@ -6,6 +6,8 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { services } from './services';
+import { pageObjects } from './page_objects';
 
 /**
  * NOTE: The solution view is currently only available in the cloud environment.
@@ -19,6 +21,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
+    services,
+    pageObjects,
     junit: {
       reportName: 'Search Solution UI Functional Tests',
     },
