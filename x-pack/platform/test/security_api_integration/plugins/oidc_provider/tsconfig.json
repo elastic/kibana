@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,8 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/features-plugin",
-    "@kbn/alerting-plugin",
     "@kbn/config-schema",
+    "@kbn/security-api-integration-helpers",
   ]
 }
