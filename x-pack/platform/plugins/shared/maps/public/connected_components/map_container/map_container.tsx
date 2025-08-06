@@ -7,7 +7,7 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, UseEuiTheme, EuiFocusTrap } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
@@ -248,7 +248,7 @@ const componentStyles = {
       borderLeftColor: euiTheme.colors.borderBaseSubdued,
       borderLeftStyle: 'solid',
       width: 0,
-      '& > *': {
+      '& > * > *': {
         width: `calc(${euiTheme.size.xxl} * 12)`,
       },
     }),
@@ -256,6 +256,12 @@ const componentStyles = {
     css({
       width: `calc(${euiTheme.size.xxl} * 12)`,
       transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+    }),
+  flyoutFocusTrapStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
     }),
 };
 
@@ -275,7 +281,7 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
       css={[styles.flyoutPanelWrapperStyles, isVisible && styles.flyoutVisibleStyles]}
       grow={false}
     >
-      {flyoutPanel}
+      <EuiFocusTrap css={styles.flyoutFocusTrapStyles}>{flyoutPanel}</EuiFocusTrap>
     </EuiFlexItem>
   );
 };
