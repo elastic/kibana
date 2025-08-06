@@ -168,7 +168,7 @@ export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): 
   const graph = new graphlib.Graph({ directed: true });
   let previousStep: BaseStep | null = null;
 
-  workflow.definition.workflow.steps.forEach((currentStep, index) => {
+  workflow.definition.steps.forEach((currentStep, index) => {
     previousStep = visitAbstractStep(graph, previousStep, currentStep);
   });
 

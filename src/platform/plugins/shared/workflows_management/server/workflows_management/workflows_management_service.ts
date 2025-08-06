@@ -248,8 +248,8 @@ export class WorkflowsService {
     );
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.workflow.triggers) {
-      for (const trigger of workflowToCreate.definition.workflow.triggers) {
+    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+      for (const trigger of workflowToCreate.definition.triggers) {
         if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }

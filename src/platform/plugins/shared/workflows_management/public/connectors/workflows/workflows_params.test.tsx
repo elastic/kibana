@@ -36,7 +36,6 @@ describe('WorkflowsParamsFields', () => {
     errors: {},
     messageVariables: [],
     defaultMessage: '',
-    executionMode: 'default' as const,
     actionConnector: {} as any,
     isEdit: false,
   };
@@ -65,20 +64,24 @@ describe('WorkflowsParamsFields', () => {
     } as any);
   });
 
-  test('should initialize action parameters on mount', () => {
+  test('should initialize action parameters on mount', async () => {
     const props = {
       ...defaultProps,
       actionParams: {} as any,
     };
 
-    render(<WorkflowsParamsFields {...props} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...props} />);
+    });
 
     expect(mockEditAction).toHaveBeenCalledWith('subAction', 'run', 0);
     expect(mockEditAction).toHaveBeenCalledWith('subActionParams', { workflowId: '' }, 0);
   });
 
   test('should render workflow selection dropdown', async () => {
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Workflow ID')).toBeInTheDocument();
@@ -87,23 +90,29 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render create new workflow link', async () => {
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Create new')).toBeInTheDocument();
     });
   });
 
-  test('should show loading spinner while fetching workflows', () => {
+  test('should show loading spinner while fetching workflows', async () => {
     mockHttpPost.mockReturnValue(new Promise(() => {})); // Never resolves
 
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('should populate workflow options when fetch succeeds', async () => {
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search');
@@ -148,7 +157,9 @@ describe('WorkflowsParamsFields', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     mockHttpPost.mockRejectedValue(new Error('Failed to fetch'));
 
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       expect(
@@ -162,7 +173,9 @@ describe('WorkflowsParamsFields', () => {
   test('should show no workflows message when no workflows are returned', async () => {
     mockHttpPost.mockResolvedValue({ results: [] });
 
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('No workflows available')).toBeInTheDocument();
@@ -180,7 +193,9 @@ describe('WorkflowsParamsFields', () => {
       },
     };
 
-    render(<WorkflowsParamsFields {...propsWithError} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...propsWithError} />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Workflow ID is required.')).toBeInTheDocument();
@@ -213,24 +228,42 @@ describe('WorkflowsParamsFields', () => {
     const originalOpen = window.open;
     window.open = jest.fn();
 
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    // Mock the application service
+    const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {
+          post: mockHttpPost,
+        },
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    } as any);
+
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     await waitFor(() => {
       const createLink = screen.getByText('Create new');
       fireEvent.click(createLink);
     });
 
-    expect(window.open).toHaveBeenCalledWith('/rzm/app/workflows', '_blank');
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
+    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
 
     window.open = originalOpen;
   });
 
-  test('should handle missing HTTP service gracefully', () => {
+  test('should handle missing HTTP service gracefully', async () => {
     mockUseKibana.mockReturnValue({
       services: {},
     } as any);
 
-    render(<WorkflowsParamsFields {...defaultProps} />);
+    await act(async () => {
+      render(<WorkflowsParamsFields {...defaultProps} />);
+    });
 
     // Should not crash and should show no workflows available
     expect(screen.getByText('No workflows available')).toBeInTheDocument();

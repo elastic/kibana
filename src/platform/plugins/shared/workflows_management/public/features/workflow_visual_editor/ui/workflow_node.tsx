@@ -94,7 +94,7 @@ function NodeIcon({ nodeType }: { nodeType: NodeType }) {
 interface WorkflowNodeData {
   stepType: NodeType;
   label: string;
-  step: WorkflowYaml['workflow']['steps'][number];
+  step: WorkflowYaml['steps'][number];
   stepExecution?: EsWorkflowStepExecution;
 }
 

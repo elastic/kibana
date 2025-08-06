@@ -73,7 +73,9 @@ describe('Workflows Connector', () => {
 
       const result = await connectorTypeModel.validateParams(actionParams);
 
-      expect(result.errors['subActionParams.workflowId']).toContain('Workflow ID is required.');
+      expect((result.errors as any)['subActionParams.workflowId']).toContain(
+        'Workflow ID is required.'
+      );
     });
 
     test('should return error when workflowId is undefined', async () => {
@@ -86,7 +88,9 @@ describe('Workflows Connector', () => {
 
       const result = await connectorTypeModel.validateParams(actionParams);
 
-      expect(result.errors['subActionParams.workflowId']).toContain('Workflow ID is required.');
+      expect((result.errors as any)['subActionParams.workflowId']).toContain(
+        'Workflow ID is required.'
+      );
     });
 
     test('should return error when workflowId is null', async () => {
@@ -99,7 +103,9 @@ describe('Workflows Connector', () => {
 
       const result = await connectorTypeModel.validateParams(actionParams);
 
-      expect(result.errors['subActionParams.workflowId']).toContain('Workflow ID is required.');
+      expect((result.errors as any)['subActionParams.workflowId']).toContain(
+        'Workflow ID is required.'
+      );
     });
 
     test('should handle missing subActionParams', async () => {
@@ -109,7 +115,9 @@ describe('Workflows Connector', () => {
 
       const result = await connectorTypeModel.validateParams(actionParams);
 
-      expect(result.errors['subActionParams.workflowId']).toContain('Workflow ID is required.');
+      expect((result.errors as any)['subActionParams.workflowId']).toContain(
+        'Workflow ID is required.'
+      );
     });
 
     test('should validate successfully with valid UUID workflowId', async () => {
@@ -156,7 +164,9 @@ describe('Workflows Connector', () => {
 
       const result = await connectorTypeModel.validateParams(actionParams);
 
-      expect(result.errors['subActionParams.workflowId']).toContain('Workflow ID is required.');
+      expect((result.errors as any)['subActionParams.workflowId']).toContain(
+        'Workflow ID is required.'
+      );
     });
   });
 });
