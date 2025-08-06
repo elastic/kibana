@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiCheckbox, EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiCheckbox, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
 
 import { PolicyFromES } from '../../../../../common/types';
 import { toasts } from '../../../services/notification';
@@ -63,10 +63,13 @@ export class ConfirmDelete extends Component<Props> {
       defaultMessage: 'Delete policy "{name}"',
       values: { name: policyToDelete.name },
     });
+    const modalTitleId = htmlIdGenerator()('confirmModalTitle');
     return (
       <EuiConfirmModal
         data-test-subj="deletePolicyModal"
         title={title}
+        aria-labelledby={modalTitleId}
+        titleProps={{ id: modalTitleId }}
         onCancel={onCancel}
         onConfirm={this.deletePolicy}
         cancelButtonText={

@@ -24,19 +24,14 @@ export class ConnectorExecutor {
       throw new Error('Connector type is required');
     }
 
-    if (connectorType.endsWith('connector')) {
-      await this.runConnector(connectorName, inputs);
-      return;
-    }
-
-    return;
+    await this.runConnector(connectorName, inputs);
   }
 
   private async runConnector(
     connectorName: string,
     connectorParams: Record<string, any>
   ): Promise<void> {
-    const connectorCredentials = this.connectorCredentials['connector.' + connectorName];
+    const connectorCredentials = this.connectorCredentials[connectorName];
 
     if (!connectorCredentials) {
       throw new Error(`Connector credentials for "${connectorName}" not found`);
@@ -47,7 +42,7 @@ export class ConnectorExecutor {
     await this.actionsClient.execute({
       id: connectorId,
       params: connectorParams,
-      spaceId: 'default',
+      spaceId: 'default', // Should be space aware
       requesterId: 'background_task', // This is a custom ID for testing purposes
     });
   }

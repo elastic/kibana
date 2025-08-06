@@ -11,7 +11,7 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from './legend';
 import { legendColors } from './models';
@@ -85,16 +85,18 @@ const uiState = {
 const getWrapper = async (props?: Partial<VisLegendProps>) => {
   const wrapper = mount(
     <I18nProvider>
-      <VisLegend
-        addLegend
-        position="top"
-        fireEvent={fireEvent}
-        hasCompatibleActions={hasCompatibleActions}
-        vislibVis={vislibVis}
-        visData={visData}
-        uiState={uiState}
-        {...props}
-      />
+      <EuiThemeProvider>
+        <VisLegend
+          addLegend
+          position="top"
+          fireEvent={fireEvent}
+          hasCompatibleActions={hasCompatibleActions}
+          vislibVis={vislibVis}
+          visData={visData}
+          uiState={uiState}
+          {...props}
+        />
+      </EuiThemeProvider>
     </I18nProvider>
   );
 

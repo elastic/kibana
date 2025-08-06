@@ -25,7 +25,7 @@ import {
   checkLoadQueryDynamically,
   uncheckLoadQueryDynamically,
 } from '../../../../tasks/create_new_rule';
-import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
+import { saveEditedRule, visitRuleEditPage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
@@ -44,7 +44,7 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
 
   it('Allows to update query rule as saved_query rule type', () => {
     createSavedQuery(savedQueryName, savedQueryQuery);
-    createRule(getNewRule()).then((rule) => visitEditRulePage(rule.body.id));
+    createRule(getNewRule()).then((rule) => visitRuleEditPage(rule.body.id));
 
     selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
     checkLoadQueryDynamically();
@@ -68,7 +68,7 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
     createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
       cy.log(JSON.stringify(response.body, null, 2));
       createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then((rule) =>
-        visitEditRulePage(rule.body.id)
+        visitRuleEditPage(rule.body.id)
       );
     });
 
@@ -93,7 +93,7 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
   it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
     const expectedCustomTestQuery = 'random test query';
     createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-      visitEditRulePage(rule.body.id)
+      visitRuleEditPage(rule.body.id)
     );
 
     uncheckLoadQueryDynamically();
@@ -116,7 +116,7 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
   it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
     createSavedQuery(savedQueryName, savedQueryQuery);
     createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
-      visitEditRulePage(rule.body.id)
+      visitRuleEditPage(rule.body.id)
     );
 
     visit(RULES_MANAGEMENT_URL);
@@ -154,7 +154,7 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
           saved_id: 'non-existent',
           query: undefined,
         })
-      ).then((rule) => visitEditRulePage(rule.body.id));
+      ).then((rule) => visitRuleEditPage(rule.body.id));
     });
 
     it('Shows validation error on rule edit when saved query can not be loaded', function () {

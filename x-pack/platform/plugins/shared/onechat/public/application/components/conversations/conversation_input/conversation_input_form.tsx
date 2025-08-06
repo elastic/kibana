@@ -8,8 +8,9 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
-import { useChat } from '../../../hooks/use_chat';
+import React from 'react';
+import { useMessages } from '../../../context/messages_context';
+import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
@@ -23,20 +24,19 @@ const fullHeightStyles = css`
 `;
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
-  const [message, setMessage] = useState<string>('');
+  const isSendingMessage = useIsSendingMessage();
+  const { input, setInput, sendMessage } = useMessages();
   const { euiTheme } = useEuiTheme();
-  const { status, sendMessage } = useChat();
-  const disabled = !message.trim() || status === 'loading';
+  const disabled = !input.trim() || isSendingMessage;
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (disabled) {
       return;
     }
-
-    sendMessage(message);
+    sendMessage({ message: input });
+    setInput('');
     onSubmit();
-    setMessage('');
-  }, [message, onSubmit, sendMessage, disabled]);
+  };
 
   const contentStyles = css`
     ${fullHeightStyles}
@@ -47,7 +47,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.border.color};
+    border-color: ${euiTheme.colors.borderBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
     &:focus-within {
       border-bottom-color: ${euiTheme.colors.primary};
@@ -68,8 +68,8 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
         })}
       >
         <ConversationInputTextArea
-          message={message}
-          setMessage={setMessage}
+          message={input}
+          setMessage={setInput}
           handleSubmit={handleSubmit}
         />
         <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />

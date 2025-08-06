@@ -34,13 +34,21 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@serverless @serverlessQA @ess Rule exception operators for data type float', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/float');
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_exceptions/float_as_string');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/float'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/float_as_string'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/float');
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_exceptions/float_as_string');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/float'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions/float_as_string'
+      );
     });
 
     beforeEach(async () => {

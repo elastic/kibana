@@ -211,7 +211,13 @@ const convertTaskStatus = (taskStatus: TaskStatus): InstallationStatus | 'unknow
 };
 
 const getOverallStatus = (statuses: InstallationStatus[]): InstallationStatus => {
-  const statusOrder: InstallationStatus[] = ['error', 'installing', 'uninstalled', 'installed'];
+  const statusOrder: InstallationStatus[] = [
+    'error',
+    'installing',
+    'uninstalling',
+    'uninstalled',
+    'installed',
+  ];
   for (const status of statusOrder) {
     if (statuses.includes(status)) {
       return status;

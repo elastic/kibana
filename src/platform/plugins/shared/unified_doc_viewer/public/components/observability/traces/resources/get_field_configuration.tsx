@@ -24,7 +24,7 @@ import { Timestamp, HttpStatusCode } from '@kbn/apm-ui-shared';
 import { ServiceNameLink } from '../components/service_name_link';
 import { TraceIdLink } from '../components/trace_id_link';
 import { TransactionNameLink } from '../components/transaction_name_link';
-import { HighlightField } from '../components/highlight_field.tsx';
+import { HighlightField } from '../components/highlight_field';
 
 export type FieldConfigValue = string | number | undefined;
 

@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/onechat-server",
+    "@kbn/onechat-browser",
     "@kbn/core-http-server",
     "@kbn/onechat-common",
     "@kbn/core-elasticsearch-server",

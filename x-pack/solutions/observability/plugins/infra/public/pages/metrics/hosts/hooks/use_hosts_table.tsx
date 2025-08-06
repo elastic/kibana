@@ -17,7 +17,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import type { CloudProvider } from '@kbn/custom-icons';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -42,6 +42,7 @@ import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { AddDataTroubleshootingPopover } from '../components/table/add_data_troubleshooting_popover';
+import { useUnifiedSearchContext } from './use_unified_search';
 
 /**
  * Columns and items types
@@ -153,11 +154,19 @@ export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
+  const schema = searchCriteria.preferredSchema ?? DataSchemaFormat.ECS;
 
-  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
+  const { value: formulas } = useAsync(
+    () =>
+      inventoryModel.metrics.getFormulas({
+        schema,
+      }),
+    [inventoryModel.metrics, schema]
+  );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
@@ -370,7 +379,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={formulas?.cpuUsage.value}
+            formula={formulas?.get('cpuUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -386,7 +395,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={formulas?.normalizedLoad1m.value}
+            formula={formulas?.get('normalizedLoad1m').value}
           />
         ),
         width: metricColumnsWidth,
@@ -402,7 +411,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={formulas?.memoryUsage.value}
+            formula={formulas?.get('memoryUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -418,7 +427,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={formulas?.memoryFree.value}
+            formula={formulas?.get('memoryFree').value}
           />
         ),
         width: metricColumnsWidth,
@@ -434,7 +443,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskUsage}
-            formula={formulas?.diskUsage.value}
+            formula={formulas?.get('diskUsage').value}
           />
         ),
         width: metricColumnsWidth,
@@ -458,7 +467,7 @@ export const useHostsTable = () => {
             <ColumnHeader
               label={TABLE_COLUMN_LABEL.rx}
               toolTip={METRICS_TOOLTIP.rx}
-              formula={formulas?.rx.value}
+              formula={formulas?.get('rx').value}
             />
           </>
         ),
@@ -483,7 +492,7 @@ export const useHostsTable = () => {
             <ColumnHeader
               label={TABLE_COLUMN_LABEL.tx}
               toolTip={METRICS_TOOLTIP.tx}
-              formula={formulas?.tx.value}
+              formula={formulas?.get('tx').value}
             />
           </>
         ),
@@ -496,16 +505,11 @@ export const useHostsTable = () => {
         align: 'right',
       },
     ],
+
     [
       displayAlerts,
       showApmHostTroubleshooting,
-      formulas?.cpuUsage.value,
-      formulas?.normalizedLoad1m.value,
-      formulas?.memoryUsage.value,
-      formulas?.memoryFree.value,
-      formulas?.diskUsage.value,
-      formulas?.rx.value,
-      formulas?.tx.value,
+      formulas,
       metricColumnsWidth,
       detailsItemId,
       setProperties,

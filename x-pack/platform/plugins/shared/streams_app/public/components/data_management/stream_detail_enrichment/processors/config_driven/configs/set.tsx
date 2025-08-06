@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { SetProcessorConfig, SetProcessorDefinition } from '@kbn/streams-schema';
+import { DocLinksStart } from '@kbn/core/public';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
 import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
@@ -113,7 +114,7 @@ export const setProcessorConfig: ConfigDrivenProcessorConfiguration<
       defaultMessage: 'Set',
     }
   ),
-  getDocUrl: (esDocUrl: string) => {
+  getDocUrl: (docLinks: DocLinksStart) => {
     return (
       <FormattedMessage
         id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
@@ -124,7 +125,7 @@ export const setProcessorConfig: ConfigDrivenProcessorConfiguration<
               data-test-subj="streamsAppAvailableProcessorsSetLink"
               external
               target="_blank"
-              href={esDocUrl + 'set-processor.html'}
+              href={docLinks.links.ingest.set}
             >
               {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
                 defaultMessage: 'Sets one field and associates it with the specified value.',

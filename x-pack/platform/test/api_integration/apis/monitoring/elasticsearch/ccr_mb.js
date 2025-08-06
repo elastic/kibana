@@ -15,7 +15,7 @@ export default function ({ getService }) {
   describe('ccr - metricbeat and package', () => {
     ['mb', 'package'].forEach((source) => {
       describe(`ccr ${source}`, () => {
-        const archive = `x-pack/test/functional/es_archives/monitoring/ccr_${source}`;
+        const archive = `x-pack/platform/test/fixtures/es_archives/monitoring/ccr_${source}`;
         const { setup, tearDown } = getLifecycleMethods(getService);
         const timeRange = {
           min: '2018-09-19T00:00:00.000Z',

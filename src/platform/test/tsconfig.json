@@ -18,7 +18,7 @@
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
-    , "../../../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
+    , "../../../x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform copy.ts"  ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -48,8 +48,6 @@
     "@kbn/axe-config",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/guided-onboarding-plugin",
-    "@kbn/guided-onboarding",
     "@kbn/config-schema",
     "@kbn/analytics",
     "@kbn/field-types",
@@ -79,5 +77,7 @@
     "@kbn/esql-utils",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas",
   ]
 }

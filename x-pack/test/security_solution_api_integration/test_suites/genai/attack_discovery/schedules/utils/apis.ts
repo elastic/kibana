@@ -23,9 +23,27 @@ import {
   FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 
+import type { User } from '../../../utils/auth/types';
 import { routeWithNamespace } from '../../../../../../common/utils/security_solution';
 
-export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: SuperTest.Agent }) => {
+const configureTest = (test: SuperTest.Test, user: User | undefined) => {
+  const configuredTest = test
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  if (user) {
+    configuredTest.auth(user.username, user.password);
+  }
+  return configuredTest;
+};
+
+export const getAttackDiscoverySchedulesApis = ({
+  user,
+  supertest,
+}: {
+  supertest: SuperTest.Agent;
+  user?: User;
+}) => {
   return {
     /**
      * Creates an Attack Discovery Schedule
@@ -42,13 +60,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES, kibanaSpace);
-      const response = await supertest
-        .post(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(schedule)
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send(schedule).expect(expectedHttpCode);
 
       return response.body;
     },
@@ -68,13 +81,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
       expectedHttpCode?: number;
     }) => {
       const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_FIND, kibanaSpace);
-      const response = await supertest
-        .get(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(query)
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.get(route), user);
+      const response = await configuredTest.query(query).expect(expectedHttpCode);
 
       return response.body;
     },
@@ -95,12 +103,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
         replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
-      const response = await supertest
-        .get(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.get(route), user);
+      const response = await configuredTest.expect(expectedHttpCode);
 
       return response.body;
     },
@@ -123,13 +127,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
         replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
-      const response = await supertest
-        .put(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(schedule)
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.put(route), user);
+      const response = await configuredTest.send(schedule).expect(expectedHttpCode);
 
       return response.body;
     },
@@ -150,12 +149,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
         replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
         kibanaSpace
       );
-      const response = await supertest
-        .delete(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.delete(route), user);
+      const response = await configuredTest.expect(expectedHttpCode);
 
       return response.body;
     },
@@ -176,12 +171,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
         replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
         kibanaSpace
       );
-      const response = await supertest
-        .post(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.expect(expectedHttpCode);
 
       return response.body;
     },
@@ -202,12 +193,8 @@ export const getAttackDiscoverySchedulesApis = ({ supertest }: { supertest: Supe
         replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
         kibanaSpace
       );
-      const response = await supertest
-        .post(route)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .expect(expectedHttpCode);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.expect(expectedHttpCode);
 
       return response.body;
     },

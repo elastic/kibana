@@ -6,7 +6,7 @@
  */
 
 import React, { ElementType, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
@@ -53,7 +53,7 @@ const MyAndBadge = styled(AndOrBadge)`
 `;
 
 const MyButtonsContainer = styled(EuiFlexItem)`
-  margin: 16px 0;
+  margin: 8px 0;
 `;
 
 const initialState: State = {
@@ -474,8 +474,6 @@ export const ExceptionBuilderComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}
-
-      <EuiSpacer size="m" />
 
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">

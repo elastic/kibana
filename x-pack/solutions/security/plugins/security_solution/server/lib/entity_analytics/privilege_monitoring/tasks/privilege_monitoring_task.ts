@@ -14,6 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 
 import moment from 'moment';
+import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
@@ -232,6 +233,26 @@ export const removePrivilegeMonitoringTask = async ({
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error removing task, received ${e.message}`
     );
+    throw e;
+  }
+};
+
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}): Promise<RunSoonResult> => {
+  const taskId = getTaskId(namespace);
+
+  logger.info('[Privilege Monitoring] Attempting to schedule task to run now');
+  try {
+    return taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };

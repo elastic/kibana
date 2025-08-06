@@ -33,9 +33,9 @@ export async function readStream({
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, dashboardsAndQueries] = await Promise.all([
+  const [streamDefinition, { [name]: dashboardsAndQueries }] = await Promise.all([
     streamsClient.getStream(name),
-    await assetClient.getAssetLinks(name, ['dashboard', 'query']),
+    assetClient.getAssetLinks([name], ['dashboard', 'query']),
   ]);
 
   const [dashboardLinks, queryLinks] = partition(
@@ -68,7 +68,7 @@ export async function readStream({
     streamsClient.getPrivileges(name),
   ]);
 
-  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
+  if (Streams.ClassicStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       privileges,
@@ -83,7 +83,7 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-    } satisfies Streams.UnwiredStream.GetResponse;
+    } satisfies Streams.ClassicStream.GetResponse;
   }
 
   const inheritedFields = addAliasesForNamespacedFields(
