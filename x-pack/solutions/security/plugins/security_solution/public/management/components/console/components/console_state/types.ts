@@ -98,6 +98,9 @@ export interface ArgSelectorState<TState = any> {
   store?: TState;
 }
 
+/**
+ * Manages internal state for Argument Value Selectors
+ */
 export interface EnteredCommand {
   commandDefinition: CommandDefinition;
 

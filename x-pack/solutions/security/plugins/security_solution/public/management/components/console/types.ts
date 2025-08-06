@@ -141,7 +141,16 @@ export interface CommandDefinition<TMeta = any> {
    * from the Command Definition. It's value displayed in `--help` would be overridden by
    * `helpUsage` if defined.
    */
-  exampleUsage?: string;
+  exampleUsage?:
+    | string
+    | ((
+        /**
+         * The command that the user has entered (so far) into the input area. Will be `undefined`
+         * for instances where `exampleUsage` is called outside the user's entering it in the
+         * input area (example: to display it on the help panel or `--help` output)
+         */
+        enteredCommand?: Command
+      ) => string);
 
   /**
    * Displayed in the output of this command's `--help`.
@@ -178,7 +187,26 @@ export interface SupportedArguments {
  */
 export interface Command<
   TDefinition extends CommandDefinition = CommandDefinition,
-  TArgs extends SupportedArguments = any
+  TArgs extends SupportedArguments = any,
+  /**
+   * The `state` that is stored for Argument Selectors. It's a record where the key is
+   * the argument name (from the command definition) and the value is the state that the
+   * argument selector stores. This will then provide proper typings to `command.argState`
+   *
+   * @example
+   * const enteredCommand = Command<
+   *    CommandDef,
+   *    { script: string },
+   *    {
+   *      script: {
+   *        isPopupOpen: boolean;
+   *        selection: ResponseActionScript
+   *      }
+   *    }
+   * >;
+   * const script = enteredCommand.argSate.script[0].store.selection; // type === `ResponseActionScript`
+   */
+  TSelectorArgsState extends object = any
 > {
   /** The raw input entered by the user */
   input: string;
@@ -191,7 +219,10 @@ export interface Command<
   args: ParsedCommandInterface<TArgs>;
 
   /** Object containing state for any argument that is using a Value Selector component */
-  argState?: Record<string, ArgSelectorState[]>;
+  argState?: Record<
+    keyof TSelectorArgsState,
+    ArgSelectorState<TSelectorArgsState[keyof TSelectorArgsState]>[]
+  >;
 
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;

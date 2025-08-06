@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useInputCommand } from '../hooks/state_selectors/use_input_command';
 import { ConsoleCodeBlock } from './console_code_block';
 import { getArgumentsForCommand } from '../service/parsed_command_input';
 import type { CommandDefinition } from '../types';
@@ -22,6 +23,7 @@ const additionalProps = {
 };
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
+  const inputCommand = useInputCommand();
   const usageHelp = useMemo(() => {
     return getArgumentsForCommand(commandDef).map((usage, index) => {
       return (
@@ -37,8 +39,11 @@ export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ 
     if (commandDef.helpUsage) {
       return commandDef.helpUsage;
     }
-    return commandDef.exampleUsage;
-  }, [commandDef]);
+
+    return typeof commandDef.exampleUsage === 'function'
+      ? commandDef.exampleUsage(inputCommand)
+      : commandDef.exampleUsage;
+  }, [commandDef, inputCommand]);
 
   return (
     <>
