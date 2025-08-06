@@ -796,3 +796,27 @@ export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
 }
+
+// Experimental support for Otel integrations
+export interface OTelCollectorConfig {
+  extensions?: Record<OTelCollectorComponentID, any>;
+  receivers?: Record<OTelCollectorComponentID, any>;
+  processors?: Record<OTelCollectorComponentID, any>;
+  connectors?: Record<OTelCollectorComponentID, any>;
+  exporters?: Record<OTelCollectorComponentID, any>;
+  service?: {
+    extensions?: OTelCollectorComponentID[];
+    pipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>;
+  };
+}
+
+export interface OTelCollectorPipeline {
+  receivers?: OTelCollectorComponentID[];
+  processors?: OTelCollectorComponentID[];
+  exporters?: OTelCollectorComponentID[];
+}
+
+export type OTelCollectorComponentID = string;
+
+export type OTelCollectorPipelineGroup = 'logs' | 'metrics' | 'traces';
+export type OTelCollectorPipelineID = OTelCollectorPipelineGroup | string;

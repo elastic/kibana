@@ -17,6 +17,5 @@
     "@kbn/inference-tracing",
     "@kbn/std",
     "@kbn/tracing-config",
-    "@kbn/opentelemetry-attributes",
   ]
 }
