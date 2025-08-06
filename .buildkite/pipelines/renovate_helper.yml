@@ -1,7 +1,7 @@
 agents:
   provider: gcp
   image: family/kibana-ubuntu-2404
-  imageProject: elastic-images-qa
+  imageProject: elastic-images-prod
   machineType: n2-standard-2
 steps:
   - group: 'Renovate PR opened or comment'

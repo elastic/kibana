@@ -4,7 +4,7 @@ env:
   USE_CHROME_BETA: 'true'
 agents:
   image: family/kibana-ubuntu-2404
-  imageProject: elastic-images-qa
+  imageProject: elastic-images-prod
   provider: gcp
 
 steps:

@@ -17,7 +17,7 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
 
@@ -31,7 +31,7 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
         retry:
           automatic:
@@ -47,7 +47,7 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
 
@@ -58,7 +58,7 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-8
           preemptible: true
           diskSizeGb: 125
@@ -75,7 +75,7 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
           preemptible: true
         timeout_in_minutes: 30
@@ -96,6 +96,6 @@ steps:
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5

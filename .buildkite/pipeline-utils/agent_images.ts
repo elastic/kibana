@@ -10,8 +10,8 @@
 import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteAgentTargetingRule } from './buildkite';
 
-const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
-const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-qa';
+const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-prod';
+const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {

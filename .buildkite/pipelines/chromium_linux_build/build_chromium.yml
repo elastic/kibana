@@ -14,7 +14,7 @@ steps:
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       machineType: n2-standard-2
     timeout_in_minutes: 5
 
@@ -25,7 +25,7 @@ steps:
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       machineType: n2-standard-2
     timeout_in_minutes: 5
 
@@ -37,7 +37,7 @@ steps:
       DEBIAN_FRONTEND: noninteractive
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: c2d-highcpu-112
       diskSizeGb: 275
@@ -54,6 +54,6 @@ steps:
     agents:
       provider: gcp
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       machineType: n2-standard-2
     timeout_in_minutes: 30

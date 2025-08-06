@@ -3,7 +3,7 @@ steps:
     label: Build Kibana Artifacts
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
       diskSizeGb: 150
@@ -19,7 +19,7 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -33,7 +33,7 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -47,7 +47,7 @@ steps:
     label: Artifact Testing
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
@@ -61,7 +61,7 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
@@ -74,7 +74,7 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
@@ -87,7 +87,7 @@ steps:
     label: 'Docker Context Verification'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
@@ -103,7 +103,7 @@ steps:
       - exit_status: -1
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 60
@@ -128,7 +128,7 @@ steps:
     label: 'Publish Kibana Artifacts'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30

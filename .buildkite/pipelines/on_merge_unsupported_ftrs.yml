@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     retry:
@@ -16,7 +16,7 @@ steps:
     label: Build Kibana Distribution
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
@@ -32,7 +32,7 @@ steps:
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -53,7 +53,7 @@ steps:
     label: 'Scout Test Run Builder'
     agents:
       image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
       preemptible: true

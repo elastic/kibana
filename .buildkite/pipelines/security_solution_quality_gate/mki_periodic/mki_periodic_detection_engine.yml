@@ -9,7 +9,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -23,7 +23,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -37,7 +37,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -51,7 +51,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -65,7 +65,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -79,7 +79,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -93,7 +93,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -107,7 +107,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -121,7 +121,7 @@ steps:
           BK_TEST_SUITE_KEY: 'serverless-cypress-detection-engine'
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
@@ -136,7 +136,7 @@ steps:
         key: exception_lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -150,7 +150,7 @@ steps:
         key: exception_lists:auth:lists:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -164,7 +164,7 @@ steps:
         key: exception_lists:auth:common:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -178,7 +178,7 @@ steps:
         key: exception_lists:auth:items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -192,7 +192,7 @@ steps:
         key: lists_items:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -206,7 +206,7 @@ steps:
         key: user_roles:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -220,7 +220,7 @@ steps:
         key: telemetry:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -234,7 +234,7 @@ steps:
         key: exception_workflows:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -248,7 +248,7 @@ steps:
         key: exception_operators_date_types:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -262,7 +262,7 @@ steps:
         key: exception_operators_double:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -276,7 +276,7 @@ steps:
         key: exception_operators_float:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -290,7 +290,7 @@ steps:
         key: exception_operators_integer:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -304,7 +304,7 @@ steps:
         key: exception_operators_keyword:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -318,7 +318,7 @@ steps:
         key: exception_operators_ips:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -332,7 +332,7 @@ steps:
         key: exception_operators_long:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -346,7 +346,7 @@ steps:
         key: exception_operators_text:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -360,7 +360,7 @@ steps:
         key: actions:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -374,7 +374,7 @@ steps:
         key: alerts:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -388,7 +388,7 @@ steps:
         key: alerts:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -402,7 +402,7 @@ steps:
         key: rule_execution_logic:eql:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -416,7 +416,7 @@ steps:
         key: rule_execution_logic:esql:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -430,7 +430,7 @@ steps:
         key: rule_execution_logic:general_logic:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -444,7 +444,7 @@ steps:
         key: rule_execution_logic:general_logic:essentials:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -458,7 +458,7 @@ steps:
         key: rule_execution_logic:indicator_match:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -472,7 +472,7 @@ steps:
         key: rule_execution_logic:machine_learning:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -486,7 +486,7 @@ steps:
         key: rule_execution_logic:new_terms:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -500,7 +500,7 @@ steps:
         key: rule_execution_logic:query:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
@@ -514,7 +514,7 @@ steps:
         key: rule_execution_logic:threshold:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-qa
+          imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-4
         timeout_in_minutes: 120
