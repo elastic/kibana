@@ -7,7 +7,7 @@
 import React, { useRef, memo, useEffect } from 'react';
 
 import type { EuiDataGridSetCellProps, EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { EventsTrSupplement } from '../../styles';
 import { StatefulRowRenderer } from '../../body/events/stateful_row_renderer';
@@ -47,8 +47,6 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
     timelineId,
     enabledRowRenderers,
   }) {
-    const { euiTheme } = useEuiTheme();
-    const { highlight: highlightColor } = euiTheme.colors;
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     /*
@@ -66,10 +64,9 @@ export const TimelineEventDetailRow: React.FC<TimelineEventDetailRowProps> = mem
           width: '100%',
           height: undefined,
           overflowX: 'auto',
-          backgroundColor: highlightColor,
         },
       });
-    }, [ctx.expanded?.id, setCellProps, rowIndex, event._id, highlightColor]);
+    }, [ctx.expanded?.id, setCellProps, rowIndex, event._id]);
 
     if (!enabledRowRenderers || enabledRowRenderers.length === 0) return null;
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useEuiTheme, type EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
@@ -36,8 +36,6 @@ export const useTimelineControlColumn = ({
   eventIdToNoteIds,
   onToggleShowNotes,
 }: UseTimelineControlColumnArgs) => {
-  const { euiTheme } = useEuiTheme();
-  const { highlight: highlightColor } = euiTheme.colors;
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = useMemo(() => (isEnterprisePlus ? 5 : 4), [isEnterprisePlus]);
   const {
@@ -58,7 +56,6 @@ export const useTimelineControlColumn = ({
               ctx.expanded?.id === events[props.rowIndex]?._id
                 ? 'unifiedDataTable__cell--expanded'
                 : '',
-            css: { backgroundColor: highlightColor },
           });
         });
 
@@ -106,7 +103,6 @@ export const useTimelineControlColumn = ({
       onToggleShowNotes,
       canReadNotes,
       canWriteTimelines,
-      highlightColor,
     ]
   );
 

@@ -1385,6 +1385,12 @@ const componentStyles = {
       flexDirection: 'column',
       flexWrap: 'nowrap',
       height: '100%',
+      '.unifiedDataTable__cell--highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      },
+      '.unifiedDataTable__cell--expanded': {
+        backgroundColor: euiTheme.colors.highlight,
+      },
       '.euiDataGrid__content': {
         background: 'transparent',
       },
@@ -1438,3 +1444,13 @@ const componentStyles = {
     minHeight: 0,
   }),
 };
+
+/*
+.unifiedDataTable__cell--expanded {
+  background-color: $euiColorHighlight;
+}
+
+.unifiedDataTable__cell--selected {
+  background-color: $euiColorHighlight;
+}
+*/

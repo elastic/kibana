@@ -8,7 +8,7 @@
  */
 
 import { useContext, useEffect, useMemo } from 'react';
-import { EuiDataGridCellValueElementProps, useEuiTheme } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -21,26 +21,22 @@ export const useControlColumn = ({
 } => {
   const { expanded, getRowByIndex } = useContext(UnifiedDataTableContext);
   const record = useMemo(() => getRowByIndex(rowIndex), [getRowByIndex, rowIndex]);
-  const { euiTheme } = useEuiTheme();
-  const { backgroundBaseWarning: anchorColor, highlight: highlightColor } = euiTheme.colors;
 
   useEffect(() => {
     if (record?.isAnchor) {
       setCellProps({
         className: 'unifiedDataTable__cell--highlight',
-        css: { backgroundColor: anchorColor },
       });
     } else if (expanded && record && expanded.id === record.id) {
       setCellProps({
         className: 'unifiedDataTable__cell--expanded',
-        css: { backgroundColor: highlightColor },
       });
     } else {
       setCellProps({
         className: '',
       });
     }
-  }, [expanded, record, setCellProps, anchorColor, highlightColor]);
+  }, [expanded, record, setCellProps]);
 
   return useMemo(() => ({ record, rowIndex }), [record, rowIndex]);
 };

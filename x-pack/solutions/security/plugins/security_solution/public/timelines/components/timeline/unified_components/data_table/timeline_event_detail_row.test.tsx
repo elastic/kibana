@@ -67,7 +67,7 @@ describe('TimelineEventDetailRow', () => {
 
     expect(setCellPropsMock).toHaveBeenCalledWith({
       className: '',
-      style: { width: '100%', height: undefined, overflowX: 'auto', backgroundColor: '#E8F1FF' },
+      style: { width: '100%', height: undefined, overflowX: 'auto' },
     });
 
     expect(getByText('Test Row Renderer')).toBeVisible();
@@ -89,7 +89,7 @@ describe('TimelineEventDetailRow', () => {
 
     expect(setCellPropsMock).toHaveBeenCalledWith({
       className: 'unifiedDataTable__cell--expanded',
-      style: { width: '100%', height: undefined, overflowX: 'auto', backgroundColor: '#E8F1FF' },
+      style: { width: '100%', height: undefined, overflowX: 'auto' },
     });
   });
 });
