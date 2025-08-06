@@ -1217,7 +1217,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 # Global Experience
 
 ### Reporting
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
+/x-pack/platform/test/functional/apps/dashboard/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting/ @elastic/response-ops
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
@@ -1525,7 +1525,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1860319853
 /x-pack/platform/test/upgrade/screenshots @elastic/kibana-presentation
 /x-pack/test/functional/screenshots @elastic/kibana-presentation
-^/src/platform/test/functional/fixtures/kbn_archiver/legacy.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/200934#discussion_r1856407606
+/src/platform/test/functional/fixtures/kbn_archiver/legacy.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/200934#discussion_r1856407606
 /x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
 /x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/dashboard/async_search @elastic/kibana-presentation
@@ -1550,7 +1550,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/fixtures/es_archiver/dashboard @elastic/kibana-presentation # Assigned per: https://github.com/elastic/kibana/issues/15023
 /src/platform/test/accessibility/apps/dashboard.ts @elastic/kibana-presentation
 /src/platform/test/accessibility/apps/filter_panel.ts @elastic/kibana-presentation
-/x-pack/test/functional/apps/dashboard @elastic/kibana-presentation
+/x-pack/platform/test/functional/apps/dashboard @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group3/maps.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_panel_options.ts  @elastic/kibana-presentation
 /x-pack/test/accessibility/apps/group1/dashboard_links.ts  @elastic/kibana-presentation
@@ -1565,11 +1565,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/services/maps_upgrade_services.ts @elastic/kibana-presentation
 /x-pack/test/stack_functional_integration/apps/maps @elastic/kibana-presentation
-/x-pack/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
+/x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
 /x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
-/x-pack/test/functional/apps/maps/ @elastic/kibana-presentation
+/x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
@@ -1866,8 +1866,8 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/navigational_search.ts @elastic/kibana-core
 /x-pack/test/stack_functional_integration/apps/savedobjects_upgrade_testing @elastic/kibana-core
-/x-pack/test/functional/page_objects/status_page.ts @elastic/kibana-core
-/x-pack/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
+/x-pack/platform/test/functional/page_objects/status_page.ts @elastic/kibana-core
+/x-pack/platform/test/functional/page_objects/share_saved_objects_to_space_page.ts @elastic/kibana-core
 /x-pack/platform/test/functional/page_objects/banners_page.ts @elastic/kibana-core
 /x-pack/platform/test/common/lib/test_data_loader.ts @elastic/kibana-core
 /x-pack/test/api_integration/services/usage_api.ts @elastic/kibana-core
@@ -1876,14 +1876,14 @@ x-pack/test/functional/services/index.ts @elastic/appex-qa
 /x-pack/platform/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /x-pack/test/plugin_api_integration @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
 /x-pack/platform/test/localization/ @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/146704
-^/src/platform/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
-^/src/platform/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
-^/src/platform/test/server_integration/http @elastic/kibana-core
-^/src/platform/test/scripts/run_multiple_kibana_nodes.sh @elastic/kibana-core
-^/src/platform/test/functional/services/usage_collection.ts @elastic/kibana-core
-^/src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
-^/src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
-/x-pack/test/functional/apps/status_page @elastic/kibana-core
+/src/platform/test/ui_capabilities/newsfeed_err @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/66562
+/src/platform/test/server_integration/services/types.d.ts @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/81140
+/src/platform/test/server_integration/http @elastic/kibana-core
+/src/platform/test/scripts/run_multiple_kibana_nodes.sh @elastic/kibana-core
+/src/platform/test/functional/services/usage_collection.ts @elastic/kibana-core
+/src/platform/test/api_integration/fixtures/import_managed.ndjson @elastic/kibana-core
+/src/platform/test/functional/services/apps_menu.ts @elastic/kibana-core
+/x-pack/platform/test/functional/apps/status_page @elastic/kibana-core
 /x-pack/platform/test/cloud_integration @elastic/kibana-core
 /x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 /src/platform/test/server_integration @elastic/kibana-core
