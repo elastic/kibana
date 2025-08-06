@@ -224,8 +224,18 @@ const allFunctions = memoize(
 
 export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   let detail = fn.description;
+  const labels = [];
+
   if (fn.preview) {
-    detail = `[${techPreviewLabel}] ${detail}`;
+    labels.push(techPreviewLabel);
+  }
+
+  if (fn.license) {
+    labels.push(fn.license);
+  }
+
+  if (labels.length > 0) {
+    detail = `[${labels.join('] [')}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
 
@@ -244,7 +254,16 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     kind: 'Function',
     detail,
     documentation: {
-      value: buildFunctionDocumentation(fullSignatures, fn.examples),
+      value: buildFunctionDocumentation(
+        fullSignatures.map((sig, index) => ({
+          declaration: sig.declaration,
+          license:
+            !!fn.license || !fn.signatures[index]?.license
+              ? ''
+              : `[${[fn.signatures[index]?.license]}]`,
+        })),
+        fn.examples
+      ),
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
