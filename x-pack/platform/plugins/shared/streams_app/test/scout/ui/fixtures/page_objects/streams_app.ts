@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { ScoutPage, expect } from '@kbn/scout';
+import { ProcessorType } from '@kbn/streams-schema';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}
@@ -247,6 +248,11 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
+  async selectProcessorType(value: ProcessorType) {
+    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
+    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  }
+
   async fillFieldInput(value: string) {
     await this.page.getByTestId('streamsAppProcessorFieldSelectorFieldText').fill(value);
   }
@@ -323,7 +329,7 @@ export class StreamsApp {
     return this.page.locator('[class="euiDataGridRow"]').all();
   }
 
-  async expectCellValue({
+  async expectCellValueContains({
     columnName,
     rowIndex,
     value,

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect */
+
 /* eslint-disable playwright/no-nth-methods */
 
 import { expect } from '@kbn/scout';
@@ -58,7 +60,7 @@ test.describe(
       await pageObjects.streams.closeFlyout();
       const rows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-        await pageObjects.streams.expectCellValue({
+        await pageObjects.streams.expectCellValueContains({
           columnName: 'log.level',
           rowIndex,
           value: 'warn',
@@ -81,6 +83,25 @@ test.describe(
       await pageObjects.streams.closeFlyout();
       await expect(await pageObjects.streams.getDataSourcesListItems()).toHaveCount(2);
       expect(await pageObjects.streams.getPreviewTableRows()).toHaveLength(1);
+    });
+
+    test('should persist existing data sources on page reload, except for custom samples', async ({
+      page,
+      pageObjects,
+    }) => {
+      // Create a new data source
+      await pageObjects.streams.clickManageDataSourcesButton();
+      await pageObjects.streams.addDataSource('kql');
+      await page.getByRole('textbox', { name: 'Name' }).fill('Kql Samples');
+
+      page.reload();
+
+      // Assert that the data sources are still present
+      await expect(await pageObjects.streams.getDataSourcesListItems()).toHaveCount(2);
+      await expect(
+        pageObjects.streams.getDataSourcesList().getByText('Random samples')
+      ).toBeVisible();
+      await expect(pageObjects.streams.getDataSourcesList().getByText('Kql Samples')).toBeVisible();
     });
   }
 );

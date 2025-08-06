@@ -59,7 +59,7 @@ test.describe(
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);
     });
 
-    test('should recover from API errors during rule updates', async ({
+    test('should recover from API errors during a processor updates', async ({
       context,
       page,
       pageObjects,

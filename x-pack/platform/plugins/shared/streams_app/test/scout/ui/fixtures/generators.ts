@@ -8,12 +8,12 @@ import { SynthtraceFixture } from '@kbn/scout';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
 export const DATE_RANGE = {
-  from: 'Jan 1, 2024 @ 00:00:00.000',
-  to: 'Jan 1, 2024 @ 01:00:00.000',
+  from: 'Jan 1, 2025 @ 00:00:00.000',
+  to: 'Jan 1, 2025 @ 01:00:00.000',
 };
 
-const TEST_START_TIME = '2024-01-01T00:00:00.000Z';
-const TEST_END_TIME = '2024-01-01T01:00:00.000Z';
+const TEST_START_TIME = '2025-01-01T00:00:00.000Z';
+const TEST_END_TIME = '2025-01-01T01:00:00.000Z';
 let logLevelToggle = true; // Toggle to switch between 'info' and 'warn' log levels
 const getLogLevel = () => {
   logLevelToggle = !logLevelToggle;
@@ -33,7 +33,7 @@ export function generateLogsData(
       .generator((timestamp) =>
         log
           .createForIndex(index)
-          .message('Test log message')
+          .message(`${new Date(timestamp).toISOString()} main Test log message`)
           .timestamp(timestamp)
           .logLevel(getLogLevel())
           .defaults({

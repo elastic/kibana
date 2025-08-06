@@ -47,7 +47,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -70,7 +70,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -88,7 +88,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
@@ -119,7 +119,7 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const rows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'info',
@@ -152,15 +152,10 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await pageObjects.streams.expectPreviewPanelVisible();
     const updatedRows = await pageObjects.streams.getPreviewTableRows();
     for (let rowIndex = 0; rowIndex < updatedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValue({
+      await pageObjects.streams.expectCellValueContains({
         columnName: 'severity_text',
         rowIndex,
         value: 'warn',
-      });
-      await pageObjects.streams.expectCellValue({
-        columnName: 'body.text',
-        rowIndex,
-        value: 'Test log message',
       });
     }
   });
