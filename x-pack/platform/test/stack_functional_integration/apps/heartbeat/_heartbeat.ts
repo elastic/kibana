@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'uptime', 'timePicker']);
   const testSubjects = getService('testSubjects');
 
   describe('check heartbeat overview page', function () {
@@ -22,22 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async function () {
-        const upCount = parseInt(
-          await testSubjects.getVisibleText('xpack.synthetics.snapshot.donutChart.up'),
-          10
-        );
+        const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up, 10);
         expect(upCount).to.eql(1);
       });
     });
     it('Uptime app should show Kibana QA Monitor present', async function () {
-      const monitorIdsToCheck = ['kibana-qa-monitor'];
-      await retry.tryForTime(15000, async () => {
-        await Promise.all(
-          monitorIdsToCheck.map((monitorId) =>
-            testSubjects.existOrFail(`monitor-page-link-${monitorId}`)
-          )
-        );
-      });
+      await PageObjects.uptime.pageHasExpectedIds(['kibana-qa-monitor']);
     });
   });
 }
