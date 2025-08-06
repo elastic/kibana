@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { get, isEqual, omit } from 'lodash';
 import moment from 'moment';
-import expect from '@kbn/expect';
-import jestExpect from 'expect';
+import expect from 'expect';
 
 import {
   ALERT_REASON,
@@ -67,7 +66,7 @@ const format = (value: unknown): string => JSON.stringify(value, null, 2);
 // ordering. Uses _.isEqual for value comparison.
 const assertContains = (subject: unknown[], expected: unknown[]) =>
   expected.forEach((expectedValue) =>
-    expect(subject.some((value) => isEqual(value, expectedValue))).to.eql(
+    expect(subject.some((value) => isEqual(value, expectedValue))).toEqual(
       true,
       `expected ${format(subject)} to contain ${format(expectedValue)}`
     )
@@ -166,7 +165,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
   const sort = (alerts: any[]) =>
     alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
 
-  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
+  expect(sort(alertsA.map(mapAlert))).toEqual(sort(alertsB.map(mapAlert)));
 }
 
 const eventDoc = (id: string, timestamp: string) => ({
@@ -236,15 +235,15 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      expect(alerts.hits.hits.length).equal(88);
+      expect(alerts.hits.hits).toHaveLength(88);
       const fullSource = alerts.hits.hits.find(
         (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
       const fullAlert = fullSource?._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
@@ -418,15 +417,15 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      expect(alerts.hits.hits.length).equal(88);
+      expect(alerts.hits.hits).toHaveLength(88);
       const fullSource = alerts.hits.hits.find(
         (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
       const fullAlert = fullSource?._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
@@ -571,7 +570,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates max alerts warning when circuit breaker is hit', async () => {
       const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
     it('terms and match should have the same alerts with pagination', async () => {
@@ -650,7 +649,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     it('should return 0 alerts when using an AND and one of the clauses does not have data', async () => {
@@ -675,7 +674,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     it('should return 0 alerts when using an AND and one of the clauses has a made up value that does not exist', async () => {
@@ -700,7 +699,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     describe('timeout behavior', () => {
@@ -715,7 +714,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const { logs } = await previewRule({ supertest, rule });
-        expect(logs[0].errors[0]).to.contain('execution has exceeded its allotted interval');
+        expect(logs[0].errors[0]).toContain('execution has exceeded its allotted interval');
       });
     });
 
@@ -747,10 +746,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat);
-        expect(threats).to.eql([
+        expect(threats).toEqual([
           {
             enrichments: [
               {
@@ -821,7 +820,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(1);
+        expect(previewAlerts).toHaveLength(1);
 
         const [threat] = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -894,7 +893,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(1);
+        expect(previewAlerts).toHaveLength(1);
 
         const [threat] = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -993,7 +992,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -1103,7 +1102,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
       });
     });
 
@@ -1159,10 +1158,10 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(2);
+        expect(termPreviewAlerts).toHaveLength(2);
 
         const threats = termPreviewAlerts.map((hit) => hit._source?.threat);
-        expect(threats).to.eql([
+        expect(threats).toEqual([
           {
             enrichments: [
               {
@@ -1258,7 +1257,7 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(1);
+        expect(termPreviewAlerts).toHaveLength(1);
 
         const [threat] = termPreviewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -1369,7 +1368,7 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(1);
+        expect(termPreviewAlerts).toHaveLength(1);
 
         const [threatTerm] = termPreviewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -1445,7 +1444,7 @@ export default ({ getService }: FtrProviderContext) => {
           return atomicA > atomicB ? 1 : -1;
         };
 
-        expect(threatTerm.enrichments.sort(sortEnrichments)).to.be.eql(
+        expect(threatTerm.enrichments.sort(sortEnrichments)).toEqual(
           threatMatch.enrichments.sort(sortEnrichments)
         );
       });
@@ -1484,7 +1483,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -1608,7 +1607,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
       });
     });
 
@@ -1702,18 +1701,18 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
 
             // threat enriched only for MATCHED condition
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments', [
+            expect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments', [
               {
                 matched: {
                   atomic: 'user-1',
                   field: 'user.name',
-                  id: jestExpect.any(String),
+                  id: expect.any(String),
                   index: 'ecs_compliant',
                   type: 'indicator_match_rule',
                 },
@@ -1801,7 +1800,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
           });
 
           it('should create alerts for not matching fields in OR condition', async () => {
@@ -1900,13 +1899,13 @@ export default ({ getService }: FtrProviderContext) => {
               sort: ['user.name'],
             });
 
-            jestExpect(previewAlerts).toHaveLength(2);
+            expect(previewAlerts).toHaveLength(2);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
 
-            jestExpect(previewAlerts[1]).toHaveProperty('_source.host.name', 'host-1');
-            jestExpect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
+            expect(previewAlerts[1]).toHaveProperty('_source.host.name', 'host-1');
+            expect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
           });
 
           it('should not create alerts when does not match condition is not met', async () => {
@@ -1969,7 +1968,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(0);
+            expect(previewAlerts).toHaveLength(0);
           });
 
           it('should create multiple alerts when conditions are met', async () => {
@@ -2044,7 +2043,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(3);
+            expect(previewAlerts).toHaveLength(3);
           });
 
           it('should create alert when source event not matching field is undefined', async () => {
@@ -2090,10 +2089,10 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).not.toHaveProperty('_source.geo.country_name');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).not.toHaveProperty('_source.geo.country_name');
           });
 
           it('should create alert when threat not matching field is undefined', async () => {
@@ -2139,10 +2138,10 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'UK');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'UK');
           });
 
           it('should not create alert not matching field is undefined in both source and threat', async () => {
@@ -2187,7 +2186,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(0);
+            expect(previewAlerts).toHaveLength(0);
           });
         });
       });
@@ -2293,17 +2292,17 @@ export default ({ getService }: FtrProviderContext) => {
               sort: ['user.name'],
             });
 
-            jestExpect(previewAlerts).toHaveLength(2);
+            expect(previewAlerts).toHaveLength(2);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments.length', 2);
-            jestExpect(previewAlerts[0]).toHaveProperty(
+            expect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments.length', 2);
+            expect(previewAlerts[0]).toHaveProperty(
               '_source.threat.enrichments',
-              jestExpect.arrayContaining([
+              expect.arrayContaining([
                 {
                   matched: {
                     atomic: 'bob-1',
                     field: 'user.name',
-                    id: jestExpect.any(String),
+                    id: expect.any(String),
                     index: 'ecs_compliant',
                     type: 'indicator_match_rule',
                   },
@@ -2312,7 +2311,7 @@ export default ({ getService }: FtrProviderContext) => {
                   matched: {
                     atomic: 'host-1',
                     field: 'host.name',
-                    id: jestExpect.any(String),
+                    id: expect.any(String),
                     index: 'ecs_compliant',
                     type: 'indicator_match_rule',
                   },
@@ -2353,18 +2352,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
-        expect(previewAlerts.length).equal(88);
+        expect(previewAlerts).toHaveLength(88);
         const fullSource = previewAlerts.find(
           (alert) =>
             (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullAlert = fullSource?._source;
         if (!fullAlert) {
-          return expect(fullAlert).to.be.ok();
+          return expect(fullAlert).toBeTruthy();
         }
 
-        expect(fullAlert?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(70);
+        expect(fullAlert?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(fullAlert?.host?.risk?.calculated_score_norm).toEqual(70);
       });
     });
 
@@ -2401,18 +2400,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
-        expect(previewAlerts.length).equal(88);
+        expect(previewAlerts).toHaveLength(88);
         const fullSource = previewAlerts.find(
           (alert) =>
             (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullAlert = fullSource?._source;
         if (!fullAlert) {
-          return expect(fullAlert).to.be.ok();
+          return expect(fullAlert).toBeTruthy();
         }
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('low_impact');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
+        expect(fullAlert?.['host.asset.criticality']).toEqual('low_impact');
+        expect(fullAlert?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
@@ -2442,8 +2441,8 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
 
-        expect(previewAlerts.length).to.eql(2);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(2);
+        expect(logs[0].errors).toHaveLength(0);
       });
 
       it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
@@ -2468,8 +2467,8 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
 
-        expect(previewAlerts.length).to.eql(1);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(1);
+        expect(logs[0].errors).toHaveLength(0);
       });
     });
 
@@ -2505,8 +2504,8 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
-        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('scheduled');
+        expect(alerts.hits.hits).toHaveLength(1);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toBe('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2515,8 +2514,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(2);
-        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('manual');
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toBe('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2525,7 +2524,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).equal(2);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(2);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
@@ -2542,7 +2541,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2551,7 +2550,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('should not generate alerts if threat query not in manual rule interval', async () => {
@@ -2573,7 +2572,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2582,7 +2581,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -2605,7 +2604,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2614,9 +2613,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
-        expect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(2);
+        expect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toBe(2);
       });
 
       it('supression with time window should work for manual rule runs and update alert', async () => {
@@ -2642,7 +2641,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         // generate alert in the past
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -2652,7 +2651,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
         // now we will ingest new event, and manual rule run should update original alert
 
@@ -2665,10 +2664,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(updatedAlerts.hits.hits.length).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
 
-        expect(updatedAlerts.hits.hits.length).equal(1);
-        expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+        expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toBe(1);
       });
     });
 
@@ -2763,13 +2762,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // Should only generate 1 alert for the event that matches completely
-        expect(previewAlerts.length).to.eql(1);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(1);
+        expect(logs[0].errors).toHaveLength(0);
 
         // Verify the alert is for the correct event (user1)
         const alert = previewAlerts[0]._source;
-        expect(alert?.user?.name).to.eql('user1');
-        expect(alert?.host?.name).to.eql('server');
+        expect(alert?.user?.name).toEqual('user1');
+        expect(alert?.host?.name).toEqual('server');
       });
     });
   });
