@@ -22,7 +22,7 @@ import { focusMainContent } from '../utils/focus_main_content';
 import { MAX_FOOTER_ITEMS } from '../constants';
 import { getInitialActiveItems } from '../utils/get_initial_active_items';
 
-interface NavigationProps {
+export interface NavigationProps {
   /**
    * The active path for the navigation, used for highlighting the current item.
    */
