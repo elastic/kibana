@@ -123,12 +123,6 @@ export function makeFtrConfigProvider(
         ],
 
         env: {
-          ELASTIC_APM_ACTIVE: JOURNEY_APM_CONFIG.active,
-          ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: JOURNEY_APM_CONFIG.contextPropagationOnly,
-          ELASTIC_APM_ENVIRONMENT: JOURNEY_APM_CONFIG.environment,
-          ELASTIC_APM_TRANSACTION_SAMPLE_RATE: JOURNEY_APM_CONFIG.transactionSampleRate,
-          ELASTIC_APM_SERVER_URL: JOURNEY_APM_CONFIG.serverUrl,
-          ELASTIC_APM_SECRET_TOKEN: JOURNEY_APM_CONFIG.secretToken,
           ELASTIC_APM_CAPTURE_BODY: JOURNEY_APM_CONFIG.captureBody,
           ELASTIC_APM_CAPTURE_HEADERS: JOURNEY_APM_CONFIG.captureRequestHeaders,
           ELASTIC_APM_LONG_FIELD_MAX_LENGTH: JOURNEY_APM_CONFIG.longFieldMaxLength,
