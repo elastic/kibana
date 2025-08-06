@@ -141,7 +141,7 @@ export function createTestConfig(
                 Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
               )
             : []),
-          ...(isFipsMode ? ['xpack.security.fipsMode.enabled=true'] : []),
+          ...(isFipsMode ? ['--xpack.security.fipsMode.enabled=true'] : []),
         ],
       },
     };
