@@ -41,15 +41,14 @@ describe('initTelemetry', () => {
 
   describe('resource attributes', () => {
     test('ensure naming consistency', () => {
-      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
-      loadConfiguration.mockImplementation(
-        () =>
-          new ApmConfiguration(
-            REPO_ROOT,
-            { elastic: { apm: { environment: 'test-environment' } } },
-            false
-          )
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        { elastic: { apm: { environment: 'test-environment' } } },
+        false
       );
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
 
       const resourceFromAttributesSpy = jest.spyOn(resources, 'resourceFromAttributes');
 
@@ -61,7 +60,7 @@ describe('initTelemetry', () => {
           'service.name': 'test-service',
           'service.version': PKG_JSON.version,
           'service.instance.id': undefined,
-          'deployment.environment.name': 'test-environment',
+          'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
           kibana_uuid: expect.any(String),
           git_rev: expect.any(String),
         })
@@ -92,7 +91,7 @@ describe('initTelemetry', () => {
       ],
     ])('validate registered instrumentations when %s', (_, config, expected) => {
       const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
-      loadConfiguration.mockImplementation(
+      loadConfiguration.mockImplementationOnce(
         () => new ApmConfiguration(REPO_ROOT, { telemetry: config as TelemetryConfig }, false)
       );
 
