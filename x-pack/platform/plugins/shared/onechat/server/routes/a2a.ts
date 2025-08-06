@@ -26,8 +26,10 @@ export function registerA2ARoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getBaseUrl = () => {
-    return getKibanaUrl(coreSetup);
+  const getBaseUrl = async () => {
+    const [, { cloud }] = await coreSetup.getStartServices();
+
+    return getKibanaUrl(coreSetup, cloud);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
