@@ -227,10 +227,10 @@ export class MapContainer extends Component<Props, State> {
               showTimesliderButton={this.state.showTimesliderButton}
             />
           )}
-          <RightSideControls />
           {this.props.isTimesliderOpen && (
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}
+          <RightSideControls />
         </EuiFlexItem>
         <FlyoutPanelWrapper flyoutDisplay={flyoutDisplay} />
         {exitFullScreenButton}
