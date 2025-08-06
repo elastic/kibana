@@ -15,7 +15,6 @@ import {
 import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
 import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 const getSetupFormatFromInput = (
   input: NewPackagePolicyInput,
