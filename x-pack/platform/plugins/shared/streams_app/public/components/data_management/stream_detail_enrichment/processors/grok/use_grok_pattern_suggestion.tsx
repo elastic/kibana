@@ -17,7 +17,6 @@ import {
 } from '../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { simulateProcessing } from '../../state_management/simulation_state_machine/simulation_runner_actor';
-import { SimulationContext } from '../../state_management/simulation_state_machine';
 
 export interface GrokPatternSuggestionParams {
   streamName: string;
@@ -73,7 +72,7 @@ export function useGrokPatternSuggestion() {
           samples: originalSamples,
           previewDocsFilter,
           simulation,
-        } as SimulationContext);
+        });
       }
 
       const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
