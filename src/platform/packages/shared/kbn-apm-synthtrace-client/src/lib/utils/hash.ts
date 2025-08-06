@@ -19,7 +19,7 @@ export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
 }
 
 // this hashing function is the same as fnv-plus
-function fnv1a32(str: string): number {
+export function fnv1a32(str: string): number {
   /* eslint-disable no-bitwise */
   let i;
   const l = str.length - 3;
