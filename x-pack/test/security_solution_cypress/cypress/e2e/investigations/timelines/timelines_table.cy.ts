@@ -26,8 +26,7 @@ import { clearSearchBar, searchForTimeline, toggleFavoriteFilter } from '../../.
 const mockTimeline = getTimeline();
 const mockFavoritedTimeline = getFavoritedTimeline();
 
-// Failing: See https://github.com/elastic/kibana/issues/181466
-describe.skip('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
+describe('timeline overview search', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     // create timeline which is not favorited
