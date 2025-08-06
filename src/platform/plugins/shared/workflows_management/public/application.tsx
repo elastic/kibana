@@ -24,8 +24,17 @@ export const renderApp = (
   { navigation }: AppPluginStartDependencies,
   { history, element }: AppMountParameters
 ) => {
-  const { notifications, http, chrome, application, analytics, i18n: i18nService, theme, executionContext } = coreStart;
-  
+  const {
+    notifications,
+    http,
+    chrome,
+    application,
+    analytics,
+    i18n: i18nService,
+    theme,
+    executionContext,
+  } = coreStart;
+
   chrome.setBreadcrumbs([
     {
       text: i18n.translate('workflows.breadcrumbs.title', { defaultMessage: 'Workflows' }),
@@ -33,16 +42,16 @@ export const renderApp = (
   ]);
 
   ReactDOM.render(
-    <KibanaRenderContextProvider 
+    <KibanaRenderContextProvider
       analytics={analytics}
       i18n={i18nService}
       theme={theme}
       executionContext={executionContext}
     >
-    <KibanaContextProvider services={{ notifications, http, chrome, application }}>
-      <QueryClientProvider client={queryClient}>
-        <WorkflowsRoutes history={history} />
-      </QueryClientProvider>
+      <KibanaContextProvider services={{ notifications, http, chrome, application }}>
+        <QueryClientProvider client={queryClient}>
+          <WorkflowsRoutes history={history} />
+        </QueryClientProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     element

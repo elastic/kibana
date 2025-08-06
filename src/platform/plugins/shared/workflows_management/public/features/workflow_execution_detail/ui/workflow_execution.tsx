@@ -132,11 +132,11 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   }, [workflowExecution]);
 
   // Search for actual APM traces using stored trace ID
-  const { 
-    traceId: foundTraceId, 
-    entryTransactionId: foundEntryTransactionId, 
+  const {
+    traceId: foundTraceId,
+    entryTransactionId: foundEntryTransactionId,
     loading: traceSearchLoading,
-    error: traceSearchError
+    error: traceSearchError,
   } = useWorkflowTraceSearch({
     workflowExecution,
   });
@@ -144,14 +144,21 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   // APM Trace Waterfall properties - NOW USES STORED TRACE ID
   const { traceId, rangeFrom, rangeTo, entryTransactionId, hasApmTrace } = useMemo(() => {
     if (!workflowExecution?.startedAt || !foundTraceId) {
-      return { traceId: null, rangeFrom: null, rangeTo: null, entryTransactionId: null, hasApmTrace: false };
+      return {
+        traceId: null,
+        rangeFrom: null,
+        rangeTo: null,
+        entryTransactionId: null,
+        hasApmTrace: false,
+      };
     }
 
     const startedAt = new Date(workflowExecution.startedAt);
-    const finishedAt = workflowExecution.finishedAt 
-      ? new Date(workflowExecution.finishedAt) 
+    const finishedAt = workflowExecution.finishedAt
+      ? new Date(workflowExecution.finishedAt)
       : new Date();
 
+    // eslint-disable-next-line no-console
     console.log('🎯 Using STORED trace ID for embeddable:', foundTraceId);
 
     return {
@@ -159,7 +166,10 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       rangeFrom: startedAt.toISOString(),
       rangeTo: finishedAt.toISOString(),
       serviceName: 'workflow-engine',
-      entryTransactionId: foundEntryTransactionId || workflowExecution.stepExecutions?.[0]?.id || workflowExecution.id,
+      entryTransactionId:
+        foundEntryTransactionId ||
+        workflowExecution.stepExecutions?.[0]?.id ||
+        workflowExecution.id,
       hasApmTrace: true,
     };
   }, [workflowExecution, foundTraceId, foundEntryTransactionId]);
@@ -226,7 +236,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         responsiveBreakpoint={false}
       />
       <EuiSpacer size="l" />
-      
+
       {/* APM Trace Waterfall Embeddable with Search */}
       {workflowExecution?.startedAt && (
         <>
@@ -234,7 +244,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
             <h3>Execution Trace</h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          
+
           {/* Show loading state while searching for traces */}
           {traceSearchLoading && (
             <>
@@ -292,7 +302,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           )}
         </>
       )}
-      
+
       <WorkflowExecutionLogsTable executionId={workflowExecutionId} />
     </div>
   );

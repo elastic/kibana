@@ -48,7 +48,7 @@ export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
   private contextManager?: IWorkflowContextLogger;
-  
+
   // APM trace properties - consistent traceId for entire workflow execution
   private readonly traceId: string;
   private entryTransactionId?: string;
@@ -65,7 +65,7 @@ export class WorkflowExecutionRuntimeManager {
     this.stepExecutionRepository = workflowExecutionRuntimeManagerInit.stepExecutionRepository;
     this.workflowExecutionGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
-    
+
     // Use workflow execution ID as traceId for APM compatibility
     this.traceId = this.workflowExecution.id;
   }
@@ -151,11 +151,11 @@ export class WorkflowExecutionRuntimeManager {
         type: 'workflow',
         subtype: 'step',
         labels: {
-          'workflow_step_id': stepId,
-          'workflow_execution_id': this.workflowExecution.id,
-          'workflow_id': this.workflowExecution.workflowId,
-          'trace_id': this.traceId, // Ensure consistent traceId
-          'service_name': 'workflow-engine',
+          workflow_step_id: stepId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          trace_id: this.traceId, // Ensure consistent traceId
+          service_name: 'workflow-engine',
         },
       },
       async () => {
@@ -195,11 +195,11 @@ export class WorkflowExecutionRuntimeManager {
         type: 'workflow',
         subtype: 'step_completion',
         labels: {
-          'workflow_step_id': stepId,
-          'workflow_execution_id': this.workflowExecution.id,
-          'workflow_id': this.workflowExecution.workflowId,
-          'trace_id': this.traceId,
-          'service_name': 'workflow-engine',
+          workflow_step_id: stepId,
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          trace_id: this.traceId,
+          service_name: 'workflow-engine',
         },
       },
       async () => {
@@ -270,29 +270,31 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
+    // eslint-disable-next-line no-console
     console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
+    // eslint-disable-next-line no-console
     console.log('🚀 Labels that will be set:', {
-      'workflow_execution_id': this.workflowExecution.id,
-      'workflow_id': this.workflowExecution.workflowId,
-      'trace_id': this.traceId,
-      'service_name': 'workflow-engine',
-      'transaction_type': 'workflow_execution',
+      workflow_execution_id: this.workflowExecution.id,
+      workflow_id: this.workflowExecution.workflowId,
+      trace_id: this.traceId,
+      service_name: 'workflow-engine',
+      transaction_type: 'workflow_execution',
     });
-    
+
     return withSpan(
       {
         name: `workflow.execution.${this.workflowExecution.workflowId}`,
         type: 'workflow',
         subtype: 'execution',
         labels: {
-          'workflow_execution_id': this.workflowExecution.id,
-          'workflow_id': this.workflowExecution.workflowId,
-          'trace_id': this.traceId,
-          'service_name': 'workflow-engine',
-          'transaction_type': 'workflow_execution',
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          trace_id: this.traceId,
+          service_name: 'workflow-engine',
+          transaction_type: 'workflow_execution',
         },
       },
-             async (span) => {
+      async (span) => {
         // Store entry transaction ID from APM span (use span ID as fallback)
         if (span?.ids) {
           this.entryTransactionId = span.ids['span.id'] || this.workflowExecution.id;
@@ -300,16 +302,21 @@ export class WorkflowExecutionRuntimeManager {
 
         // Capture the real APM trace ID
         let realTraceId: string | undefined;
+        // eslint-disable-next-line no-console
         console.log('🔍 Available span properties:', span ? Object.keys(span) : 'No span');
+        // eslint-disable-next-line no-console
         console.log('🔍 Span object:', span);
-        
+
         if ((span as any)?.traceId) {
           realTraceId = (span as any).traceId;
+          // eslint-disable-next-line no-console
           console.log('🎯 Captured APM trace ID from span.traceId:', realTraceId);
         } else if (span?.ids?.['trace.id']) {
           realTraceId = span.ids['trace.id'];
+          // eslint-disable-next-line no-console
           console.log('🎯 Captured APM trace ID from span.ids[trace.id]:', realTraceId);
         } else {
+          // eslint-disable-next-line no-console
           console.log('⚠️ Could not capture APM trace ID, using workflow execution ID as fallback');
           realTraceId = this.workflowExecution.id;
         }
@@ -338,11 +345,11 @@ export class WorkflowExecutionRuntimeManager {
         type: 'workflow',
         subtype: 'execution_failure',
         labels: {
-          'workflow_execution_id': this.workflowExecution.id,
-          'workflow_id': this.workflowExecution.workflowId,
-          'trace_id': this.traceId,
-          'service_name': 'workflow-engine',
-          'error_message': String(error),
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          trace_id: this.traceId,
+          service_name: 'workflow-engine',
+          error_message: String(error),
         },
       },
       async () => {

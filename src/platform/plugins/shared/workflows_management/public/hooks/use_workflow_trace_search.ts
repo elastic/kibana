@@ -42,6 +42,7 @@ export function useWorkflowTraceSearch({
 
   useEffect(() => {
     if (!workflowExecution?.traceId) {
+      // eslint-disable-next-line no-console
       console.log('❌ No trace ID found in workflow execution');
       setResult({
         traceId: null,
@@ -51,29 +52,34 @@ export function useWorkflowTraceSearch({
       });
       return;
     }
-
+    // eslint-disable-next-line no-console
     console.log('🔍 Workflow execution traceId:', workflowExecution.traceId);
-    setResult(prev => ({ ...prev, loading: true, error: null }));
+    setResult((prev) => ({ ...prev, loading: true, error: null }));
 
     // Find the root transaction for this trace
     const fetchRootTransaction = async () => {
       try {
+        // eslint-disable-next-line no-console
         console.log('🔍 Fetching root transaction for trace:', workflowExecution.traceId);
-        
+
         // Calculate time range for the search
         const startedAt = new Date(workflowExecution.startedAt);
-        const finishedAt = workflowExecution.finishedAt 
-          ? new Date(workflowExecution.finishedAt) 
+        const finishedAt = workflowExecution.finishedAt
+          ? new Date(workflowExecution.finishedAt)
           : new Date();
 
-        const response = await services.http?.get(`/internal/apm/traces/${workflowExecution.traceId}/root_transaction`, {
-          query: {
-            start: startedAt.toISOString(),
-            end: finishedAt.toISOString(),
-          },
-        }) as APMRootTransactionResponse;
+        const response = (await services.http?.get(
+          `/internal/apm/traces/${workflowExecution.traceId}/root_transaction`,
+          {
+            query: {
+              start: startedAt.toISOString(),
+              end: finishedAt.toISOString(),
+            },
+          }
+        )) as APMRootTransactionResponse;
 
         if (response?.transaction?.id) {
+          // eslint-disable-next-line no-console
           console.log('🎯 Found root transaction ID:', response.transaction.id);
           setResult({
             traceId: workflowExecution.traceId,
@@ -82,6 +88,7 @@ export function useWorkflowTraceSearch({
             error: null,
           });
         } else {
+          // eslint-disable-next-line no-console
           console.log('⚠️ No root transaction found, using trace ID only');
           setResult({
             traceId: workflowExecution.traceId,
@@ -91,6 +98,7 @@ export function useWorkflowTraceSearch({
           });
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('❌ Error fetching root transaction:', error);
         // Fallback: use the stored trace ID without entry transaction
         setResult({
@@ -106,4 +114,4 @@ export function useWorkflowTraceSearch({
   }, [workflowExecution, services.http]);
 
   return result;
-} 
+}
