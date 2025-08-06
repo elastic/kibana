@@ -483,7 +483,7 @@ export function transformOutputToFullPolicyOutput(
     ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
-  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+  if (ssl) {
     newOutput.ssl = {
       ...newOutput.ssl,
       ...ssl,

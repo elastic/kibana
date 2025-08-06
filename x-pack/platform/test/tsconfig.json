@@ -143,5 +143,6 @@
     "@kbn/sse-utils-server",
     "@kbn/inference-common",
     "@kbn/rule-registry-plugin"
+    "@kbn/controls-plugin",
   ]
 }

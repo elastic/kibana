@@ -35,7 +35,6 @@ import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/fun
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
-import { GeoFileUploadPageObject } from './geo_file_upload';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
@@ -46,8 +45,6 @@ import { ObservabilityLogsExplorerPageObject } from './observability_logs_explor
 import { DatasetQualityPageObject } from './dataset_quality';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { RollupPageObject } from './rollup_page';
-import { ShareSavedObjectsToSpacePageProvider } from './share_saved_objects_to_space_page';
-import { StatusPageObject } from './status_page';
 import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
@@ -65,7 +62,6 @@ export const pageObjects = {
   crossClusterReplication: CrossClusterReplicationPageProvider,
   detections: DetectionsPageObject,
   embeddedConsole: EmbeddedConsoleProvider,
-  geoFileUpload: GeoFileUploadPageObject,
   graph: GraphPageObject,
   grokDebugger: GrokDebuggerPageObject,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
@@ -93,10 +89,8 @@ export const pageObjects = {
   searchQueryRules: SearchQueryRulesPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   security: SecurityPageObject,
-  shareSavedObjectsToSpace: ShareSavedObjectsToSpacePageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   spaceSelector: SpaceSelectorPageObject,
-  statusPage: StatusPageObject,
   tagManagement: TagManagementPageObject,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
   uptime: UptimePageObject,
