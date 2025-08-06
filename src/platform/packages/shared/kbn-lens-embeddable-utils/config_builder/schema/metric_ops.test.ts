@@ -21,7 +21,6 @@ import {
   movingAverageOperationSchema,
   cumulativeSumOperationSchema,
   counterRateOperationSchema,
-  valueOperationSchema,
 } from './metric_ops';
 
 describe('Metric Operations Schemas', () => {
@@ -166,10 +165,7 @@ describe('Metric Operations Schemas', () => {
     it('validates cumulative sum operation', () => {
       const input = {
         operation: 'cumulative_sum' as const,
-        of: {
-          operation: 'sum' as const,
-          field: 'value',
-        },
+        field: 'value'
       };
 
       const validated = cumulativeSumOperationSchema.validate(input);
@@ -179,10 +175,7 @@ describe('Metric Operations Schemas', () => {
     it('validates counter rate operation', () => {
       const input = {
         operation: 'counter_rate' as const,
-        of: {
-          operation: 'sum' as const,
-          field: 'value',
-        },
+        field: 'value',
       };
 
       const validated = counterRateOperationSchema.validate(input);
@@ -197,26 +190,6 @@ describe('Metric Operations Schemas', () => {
 
       const validated = lastValueOperationSchema.validate(input);
       expect(validated).toEqual(input);
-    });
-  });
-
-  describe('value operation', () => {
-    it('validates value operation', () => {
-      const input = {
-        operation: 'value' as const,
-        column: 'price',
-      };
-
-      const validated = valueOperationSchema.validate(input);
-      expect(validated).toEqual(input);
-    });
-
-    it('throws on missing column', () => {
-      const input = {
-        operation: 'value' as const,
-      };
-
-      expect(() => valueOperationSchema.validate(input)).toThrow();
     });
   });
 

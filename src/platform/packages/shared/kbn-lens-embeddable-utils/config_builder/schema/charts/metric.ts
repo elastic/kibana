@@ -22,7 +22,6 @@ import {
   percentileRanksOperationSchema,
   staticOperationDefinitionSchema,
   uniqueCountMetricOperationSchema,
-  valueOperationSchema,
 } from '../metric_ops';
 import { coloringTypeSchema } from '../color';
 import { datasetSchema } from '../dataset';
@@ -198,7 +197,6 @@ export const metricStateSchema = schema.allOf([
         schema.allOf([metricStatePrimaryMetricOptionsSchema, staticOperationDefinitionSchema]),
         schema.allOf([metricStatePrimaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
       ]),
-      schema.allOf([metricStatePrimaryMetricOptionsSchema, valueOperationSchema]),
     ]),
     /**
      * Secondary value configuration, must define operation.
@@ -219,7 +217,6 @@ export const metricStateSchema = schema.allOf([
           schema.allOf([metricStateSecondaryMetricOptionsSchema, formulaOperationDefinitionSchema]),
           schema.allOf([metricStateSecondaryMetricOptionsSchema, countMetricOperationSchema]),
         ]),
-        schema.allOf([metricStateSecondaryMetricOptionsSchema, valueOperationSchema]),
       ])
     ),
     /**
@@ -232,7 +229,6 @@ export const metricStateSchema = schema.allOf([
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketHistogramOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketRangesOperationSchema]),
         schema.allOf([metricStateBreakdownByOptionsSchema, bucketFilterOperationSchema]),
-        schema.allOf([metricStateBreakdownByOptionsSchema, valueOperationSchema]),
       ])
     ),
   }),

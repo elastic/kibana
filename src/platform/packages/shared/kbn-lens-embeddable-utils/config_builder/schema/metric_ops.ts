@@ -142,12 +142,12 @@ export const fieldMetricOperationsSchema = schema.oneOf([
   percentileRanksOperationSchema,
 ]);
 
-export const differencesOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const differencesOperationSchema = metricOperationSharedSchema.extends({
   operation: schema.literal('differences'),
   of: fieldMetricOperationsSchema,
 });
 
-export const movingAverageOperationSchema = fieldBasedOperationSharedSchema.extends({
+export const movingAverageOperationSchema = metricOperationSharedSchema.extends({
   operation: schema.literal('moving_average'),
   of: fieldMetricOperationsSchema,
   window: schema.number({ meta: { description: 'Window' } }),
@@ -155,18 +155,12 @@ export const movingAverageOperationSchema = fieldBasedOperationSharedSchema.exte
 
 export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('cumulative_sum'),
-  of: fieldMetricOperationsSchema,
 });
 
 export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('counter_rate'),
-  of: fieldMetricOperationsSchema,
 });
 
-export const valueOperationSchema = fieldBasedOperationSharedSchema.extends({
-  operation: schema.literal('value'),
-  column: schema.string({ meta: { description: 'Value' } }),
-});
 
 export const metricOperationDefinitionSchema = schema.oneOf([
   formulaOperationDefinitionSchema,
@@ -198,4 +192,3 @@ export type LensApiCumulativeSumOperation = typeof cumulativeSumOperationSchema.
 export type LensApiCounterRateOperation = typeof counterRateOperationSchema.type;
 export type LensApiFormulaOperation = typeof formulaOperationDefinitionSchema.type;
 export type LensApiStaticValueOperation = typeof staticOperationDefinitionSchema.type;
-export type LensApiValueOperation = typeof valueOperationSchema.type;
