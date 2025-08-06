@@ -16,16 +16,16 @@ interface UseNavigationProps {
 }
 
 interface NavigationState {
-  currentPage: string | undefined;
-  currentSubpage: string | null;
+  currentPageId: string | undefined;
+  currentSubpageId: string | undefined;
   sidePanelContent: MenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
 
 export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationProps) => {
-  const [currentPage, setCurrentPage] = useState(initialMenuItem?.href);
-  const [currentSubpage, setCurrentSubpage] = useState<string | null>(null);
+  const [currentPageId, setCurrentPageId] = useState<string | undefined>(initialMenuItem?.id);
+  const [currentSubpageId, setCurrentSubpageId] = useState<string | undefined>();
   const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(initialMenuItem);
 
   // Determine if side panel should be open based on simple logic
@@ -34,27 +34,27 @@ export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationPro
   // Check if a menu item is currently active
   const isMenuItemActive = useCallback(
     (item: MenuItem | SecondaryMenuItem): boolean => {
-      if ('href' in item && item.href) {
-        return item.href === currentPage || item.href === currentSubpage;
+      if ('id' in item) {
+        return item.id === currentPageId || item.id === currentSubpageId;
       }
       return false;
     },
-    [currentPage, currentSubpage]
+    [currentPageId, currentSubpageId]
   );
 
   // Navigate to a menu item
   const navigateTo = useCallback(
     (primaryMenuItem: MenuItem, secondaryMenuItem?: SecondaryMenuItem) => {
-      setCurrentPage(primaryMenuItem.href);
-      setCurrentSubpage(secondaryMenuItem?.href || null);
+      setCurrentPageId(primaryMenuItem.id);
+      setCurrentSubpageId(secondaryMenuItem?.id || undefined);
       setSidePanelContent(primaryMenuItem);
     },
     []
   );
 
   const state: NavigationState = {
-    currentPage,
-    currentSubpage,
+    currentPageId,
+    currentSubpageId,
     sidePanelContent,
     isCollapsed,
     isSidePanelOpen,

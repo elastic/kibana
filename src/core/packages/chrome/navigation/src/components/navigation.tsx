@@ -67,7 +67,7 @@ export const Navigation = ({
 
   const initialMenuItem = getInitialMenuItem(items, activeItemId);
 
-  const { currentPage, currentSubpage, isSidePanelOpen, navigateTo, sidePanelContent } =
+  const { currentPageId, currentSubpageId, isSidePanelOpen, navigateTo, sidePanelContent } =
     useNavigation({
       initialMenuItem,
       isCollapsed,
@@ -85,6 +85,7 @@ export const Navigation = ({
     focusMainContent();
   };
 
+  // TODO: think about this parent / child comparison
   const handleSubMenuItemClick = (item: MenuItem, subItem: SecondaryMenuItem) => {
     if (item.href && subItem.href === item.href) {
       navigateTo(item);
@@ -109,7 +110,8 @@ export const Navigation = ({
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
           href={logoHref}
-          isActive={currentPage === logoHref}
+          // TODO: think about logo active state
+          isActive={false}
           isCollapsed={isCollapsed}
           label={logoLabel}
           logoType={logoType}
@@ -143,8 +145,8 @@ export const Navigation = ({
                         <SecondaryMenu.Item
                           key={subItem.id}
                           isActive={
-                            (subItem.href && currentSubpage === subItem.href) ||
-                            (!currentSubpage && subItem.href === currentPage)
+                            subItem.id === currentSubpageId ||
+                            (subItem.id === currentPageId && !currentSubpageId)
                           }
                           onClick={() => {
                             if (subItem.href) {
@@ -196,7 +198,7 @@ export const Navigation = ({
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
                           const isActive =
-                            item.href === currentPage || item.href === currentSubpage;
+                            item.id === currentPageId || item.id === currentSubpageId;
                           const hasSubItems = getHasSubmenu(item);
 
                           return (
@@ -237,8 +239,8 @@ export const Navigation = ({
                               <NestedSecondaryMenu.Item
                                 key={subItem.id}
                                 isActive={
-                                  (subItem.href && currentSubpage === subItem.href) ||
-                                  (!currentSubpage && subItem.href === currentPage)
+                                  subItem.id === currentSubpageId ||
+                                  (subItem.id === currentPageId && !currentSubpageId)
                                 }
                                 onClick={() => {
                                   navigateTo(item, subItem);
@@ -259,7 +261,7 @@ export const Navigation = ({
                   <SecondaryMenu title="More">
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => {
-                        const isActive = item.href === currentPage || item.href === currentSubpage;
+                        const isActive = item.id === currentPageId || item.id === currentSubpageId;
 
                         return (
                           <SideNav.PrimaryMenuItem
@@ -314,8 +316,8 @@ export const Navigation = ({
                         <SecondaryMenu.Item
                           key={subItem.id}
                           isActive={
-                            (subItem.href && currentSubpage === subItem.href) ||
-                            (!currentSubpage && subItem.href === currentPage)
+                            subItem.id === currentSubpageId ||
+                            (subItem.id === currentPageId && !currentSubpageId)
                           }
                           onClick={() => {
                             if (subItem.href) {
@@ -347,8 +349,8 @@ export const Navigation = ({
                   <SecondaryMenu.Item
                     key={subItem.id}
                     isActive={
-                      (subItem.href && currentSubpage === subItem.href) ||
-                      (!currentSubpage && subItem.href === currentPage)
+                      subItem.id === currentSubpageId ||
+                      (subItem.id === currentPageId && !currentSubpageId)
                     }
                     onClick={() => {
                       if (subItem.href) {
