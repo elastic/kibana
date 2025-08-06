@@ -28,6 +28,7 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
  */
 export const SecondaryMenuItemComponent = ({
   children,
+  isExternal,
   iconType,
   id,
   isActive,
@@ -40,7 +41,9 @@ export const SecondaryMenuItemComponent = ({
 
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
-    iconType,
+    iconType: isExternal ? 'popout' : iconType,
+    // Ensure external links open in a new tab
+    ...(isExternal && { target: '_blank' }),
   };
 
   const styles = css`
@@ -50,6 +53,10 @@ export const SecondaryMenuItemComponent = ({
 
     > span {
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
+    }
+
+    svg {
+      color: ${euiTheme.colors.textDisabled};
     }
   `;
 

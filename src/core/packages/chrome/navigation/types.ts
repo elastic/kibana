@@ -11,7 +11,7 @@ import { IconType } from '@elastic/eui';
 
 export interface SecondaryMenuItem {
   'data-test-subj'?: string;
-  external?: boolean;
+  isExternal?: boolean;
   href: string;
   id: string;
   label: string;
