@@ -90,7 +90,7 @@ export class ScopedDiscoverEBTManager {
         fieldNames: [fieldName],
       });
 
-      // excludes non ECS fields
+      // tracks ECS compliant fields with a field name and non-ECS compliant fields with a "<non-ecs>" label
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
       } else {
