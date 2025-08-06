@@ -9,6 +9,7 @@ import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { getFips } from 'crypto';
 import { ProfilingFtrConfigName } from '../configs';
 import { createProfilingApiClient } from './api_supertest';
 import { createProfilingUsers } from './create_profiling_users';
@@ -22,7 +23,6 @@ import {
   InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
-import { getFips } from 'crypto';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
