@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { get, isEqual, omit } from 'lodash';
+import { get, omit } from 'lodash';
 import moment from 'moment';
 import expect from 'expect';
 
@@ -59,18 +59,6 @@ import {
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-
-const format = (value: unknown): string => JSON.stringify(value, null, 2);
-
-// Asserts that each expected value is included in the subject, independent of
-// ordering. Uses _.isEqual for value comparison.
-const assertContains = (subject: unknown[], expected: unknown[]) =>
-  expected.forEach((expectedValue) =>
-    expect(subject.some((value) => isEqual(value, expectedValue))).toEqual(
-      true,
-      `expected ${format(subject)} to contain ${format(expectedValue)}`
-    )
-  );
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -826,42 +814,44 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
-            },
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
 
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-        ]);
+          ])
+        );
       });
 
       it('adds a single indicator that matched multiple fields', async () => {
@@ -899,64 +889,66 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          // We do not merge matched indicators during enrichment, so in
-          // certain circumstances a given indicator document could appear
-          // multiple times in an enriched alert (albeit with different
-          // threat.indicator.matched data). That's the case with the
-          // first and third indicators matched, here.
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
 
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       it('generates multiple alerts with multiple matches', async () => {
@@ -998,85 +990,89 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[0].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
 
-        assertContains(threats[1].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[1].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       // https://github.com/elastic/kibana/issues/149920
@@ -1263,42 +1259,44 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
-            },
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
 
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-        ]);
+          ])
+        );
         alertsAreTheSame(termPreviewAlerts, matchPrevieAlerts);
       });
 
@@ -1377,64 +1375,66 @@ export default ({ getService }: FtrProviderContext) => {
         const [threatMatch] = matchPrevieAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
-        assertContains(threatTerm.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threatTerm.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          // We do not merge matched indicators during enrichment, so in
-          // certain circumstances a given indicator document could appear
-          // multiple times in an enriched alert (albeit with different
-          // threat.indicator.matched data). That's the case with the
-          // first and third indicators matched, here.
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
 
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
         const sortEnrichments = (a: any, b: any) => {
           const atomicA = a.matched.atomic.toString();
           const atomicB = b.matched.atomic.toString();
@@ -1489,85 +1489,89 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[0].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
 
-        assertContains(threats[1].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[1].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       // https://github.com/elastic/kibana/issues/149920
