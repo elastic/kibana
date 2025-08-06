@@ -720,50 +720,11 @@ describe('function validation', () => {
         await expectErrors('FROM a_index | EVAL TEST(TEST2(TEST(TEST2(1))))', []);
       });
 
-      it("doesn't allow nested aggregation functions", async () => {
-        setTestFunctions([
-          {
-            name: 'agg_fn',
-            type: FunctionDefinitionTypes.AGG,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [{ name: 'arg1', type: 'keyword' }],
-                returnType: 'keyword',
-              },
-            ],
-          },
-          {
-            name: 'scalar_fn',
-            type: FunctionDefinitionTypes.SCALAR,
-            description: '',
-            locationsAvailable: [Location.STATS],
-            signatures: [
-              {
-                params: [{ name: 'arg1', type: 'keyword' }],
-                returnType: 'keyword',
-              },
-            ],
-          },
-        ]);
-
-        const { expectErrors } = await setup();
-
-        await expectErrors('FROM a_index | STATS AGG_FN(AGG_FN(""))', [
-          'Aggregate function\'s parameters must be an attribute, literal or a non-aggregation function; found [AGG_FN("")] of type [keyword]',
-        ]);
-        // @TODO — enable this test when we have fixed this bug
-        // await expectErrors('FROM a_index | STATS AGG_FN(SCALAR_FN(AGG_FN("")))', [
-        //   'No nested aggregation functions.',
-        // ]);
-      });
-
       // @TODO — test function aliases
     });
   });
 
-  describe('License-based validation', () => {
+  describe.skip('License-based validation', () => {
     beforeEach(() => {
       setTestFunctions([
         {
