@@ -19,5 +19,4 @@ export async function getAllForOwners(
 ): Promise<SuggestionResponse[]> {
   const { attachmentSuggestionRegistry } = clientArgs;
 
-  console.log('attachmentSuggestionRegistry', attachmentSuggestionRegistry);
 }
