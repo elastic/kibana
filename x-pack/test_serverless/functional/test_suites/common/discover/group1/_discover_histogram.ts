@@ -302,10 +302,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should reset all histogram state when resetting the saved search', async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       const savedSearch = 'histogram state';
       await PageObjects.discover.saveSearch(savedSearch);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.chooseBreakdownField('extension.keyword');
       await PageObjects.discover.setChartInterval('Second');
       await retry.try(async () => {
@@ -319,8 +324,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       await PageObjects.discover.toggleChartVisibility();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.revertUnsavedChanges();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await retry.try(async () => {
         const requestData =

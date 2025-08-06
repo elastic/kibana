@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AGENTLESS_DISABLED_INPUTS } from '../constants';
+import {
+  AGENTLESS_DISABLED_INPUTS,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+} from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
 
@@ -99,3 +104,44 @@ function throwIfInputNotAllowed(
     );
   }
 }
+
+/**
+ * Derive global data tags for agentless agent policies from package agentless info.
+ */
+export const getAgentlessGlobalDataTags = (packageInfo?: PackageInfo) => {
+  if (
+    !packageInfo?.policy_templates &&
+    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
+  ) {
+    return undefined;
+  }
+  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
+    (policy) => policy.deployment_modes
+  );
+
+  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
+  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
+  if (
+    agentlessInfo === undefined ||
+    !agentlessInfo.organization ||
+    !agentlessInfo.division ||
+    !agentlessInfo.team
+  ) {
+    return undefined;
+  }
+
+  return [
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+      value: agentlessInfo.organization,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+      value: agentlessInfo.division,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+      value: agentlessInfo.team,
+    },
+  ];
+};
