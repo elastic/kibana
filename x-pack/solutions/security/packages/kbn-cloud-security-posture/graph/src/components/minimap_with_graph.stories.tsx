@@ -74,6 +74,7 @@ export default {
     edges,
     interactive,
     isLocked,
+    showMinimap,
   }: RequiredProps<Partial<GraphPropsAndCustomArgs>, 'nodes' | 'edges'>) {
     return (
       <Graph
@@ -81,7 +82,7 @@ export default {
           height: 100%;
           width: 100%;
         `}
-        showMinimapControl
+        showMinimap={showMinimap}
         nodes={nodes}
         edges={edges}
         interactive={interactive ?? false}
@@ -107,6 +108,7 @@ export const NoInteractiveGraph: StoryObj = {
     nodes: baseNodes,
     edges: baseEdges,
     interactive: false,
+    showMinimap: true,
   },
 };
 
@@ -116,6 +118,7 @@ export const LockedGraph: StoryObj = {
     edges: baseEdges,
     interactive: true,
     isLocked: true,
+    showMinimap: true,
   },
 };
 
@@ -124,6 +127,7 @@ export const SimpleGraph: StoryObj = {
     nodes: baseNodes,
     edges: baseEdges,
     interactive: true,
+    showMinimap: true,
   },
 };
 
@@ -400,5 +404,6 @@ export const LargeGraph: StoryObj = {
       },
     ]),
     interactive: true,
+    showMinimap: true,
   },
 };

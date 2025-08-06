@@ -16,7 +16,6 @@ const defaultProps: ControlsProps = {
   showZoom: true,
   showFitView: true,
   showCenter: true,
-  showMinimap: true,
 };
 
 jest.mock('@xyflow/react', () => ({
@@ -62,16 +61,6 @@ describe('Controls', () => {
     expect(getByLabelText('Center')).toBeInTheDocument();
   });
 
-  it('renders minimap button', () => {
-    const { getByLabelText } = renderWithProviders();
-    expect(getByLabelText('Toggle minimap')).toBeInTheDocument();
-  });
-
-  it('hides minimap button', () => {
-    const { queryByLabelText } = renderWithProviders({ ...defaultProps, showMinimap: false });
-    expect(queryByLabelText('Toggle minimap')).not.toBeInTheDocument();
-  });
-
   it('calls onZoomIn when zoom in button is clicked', () => {
     const onZoomIn = jest.fn();
     const { getByLabelText } = renderWithProviders({ ...defaultProps, onZoomIn });
@@ -109,15 +98,6 @@ describe('Controls', () => {
     fireEvent.click(getByLabelText('Center'));
 
     expect(onCenter).toHaveBeenCalled();
-  });
-
-  it('calls onToggleMinimap when minimap button is clicked', () => {
-    const onToggleMinimap = jest.fn();
-    const { getByLabelText } = renderWithProviders({ ...defaultProps, onToggleMinimap });
-
-    fireEvent.click(getByLabelText('Toggle minimap'));
-
-    expect(onToggleMinimap).toHaveBeenCalled();
   });
 
   it('disables zoom in button when max zoom is reached', () => {

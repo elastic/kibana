@@ -58,9 +58,9 @@ export interface GraphProps extends CommonProps {
    */
   isLocked?: boolean;
   /**
-   * Determines whether the control to toggle the graph minimap is visible or not
+   * Determines whether the minimap is visible or not in interactive graphs
    */
-  showMinimapControl?: boolean;
+  showMinimap?: boolean;
   /**
    * Additional children to be rendered inside the graph component.
    */
@@ -105,7 +105,7 @@ export const Graph = memo<GraphProps>(
     edges,
     interactive,
     isLocked = false,
-    showMinimapControl,
+    showMinimap = false,
     children,
     ...rest
   }: GraphProps) => {
@@ -114,7 +114,6 @@ export const Graph = memo<GraphProps>(
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
-    const [isMinimapVisible, setIsMinimapVisible] = useState(false);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
 
@@ -154,10 +153,6 @@ export const Graph = memo<GraphProps>(
       [interactive]
     );
 
-    const handleToggleMinimap = useCallback(() => {
-      setIsMinimapVisible((prev) => !prev);
-    }, []);
-
     return (
       <div {...rest}>
         <SvgDefsMarker />
@@ -188,17 +183,12 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls
-                fitViewOptions={fitViewOptions}
-                showCenter={false}
-                showMinimap={showMinimapControl}
-                onToggleMinimap={handleToggleMinimap}
-              />
+              <Controls fitViewOptions={fitViewOptions} showCenter={false} />
             </Panel>
           )}
           {children}
           <Background id={backgroundId} />
-          {interactive && isMinimapVisible ? (
+          {interactive && showMinimap ? (
             <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
           ) : null}
         </ReactFlow>
