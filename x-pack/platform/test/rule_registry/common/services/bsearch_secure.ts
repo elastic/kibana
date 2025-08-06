@@ -55,7 +55,7 @@ export function BsearchSecureServiceProvider({ getService }: FtrProviderContext)
       const spaceUrl = getSpaceUrlPrefix(space);
       const statusesWithoutRetry = [200, 400, 403, 500];
 
-      const { body } = await this.retry.try(async () => {
+      const { body } = await retry.try(async () => {
         let result;
         const url = `${spaceUrl}/internal/search/${strategy}`;
 
@@ -112,7 +112,7 @@ export function BsearchSecureServiceProvider({ getService }: FtrProviderContext)
         return body as T;
       }
 
-      const result = await this.retry.try(async () => {
+      const result = await retry.try(async () => {
         const resp = await supertestWithoutAuth
           .post(`${spaceUrl}/internal/bsearch`)
           .auth(auth.username, auth.password)
