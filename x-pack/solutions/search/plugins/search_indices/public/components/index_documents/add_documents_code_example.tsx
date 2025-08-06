@@ -11,8 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { quickstartExamples } from '@kbn/code-examples';
-
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { WorkflowId } from '@kbn/search-shared-ui';
 import { useKibana } from '../../hooks/use_kibana';
@@ -135,14 +133,11 @@ export const AddDocumentsCodeExample = ({
             <EuiFlexItem grow={false}>
               <TryInConsoleButton
                 request={
-                  // TODO: Feature flag to enable/disable the Try in Console button with
-                  // the quickstart example
-                  quickstartExamples.basics({ indexName: codeParams.indexName, createIndex: false })
-                  // !indexHasMappings
-                  //   ? `${ingestExamples.sense.updateMappingsCommand(
-                  //       codeParams
-                  //     )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                  //   : ingestExamples.sense.ingestCommand(codeParams)
+                  !indexHasMappings
+                    ? `${ingestExamples.sense.updateMappingsCommand(
+                        codeParams
+                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                    : ingestExamples.sense.ingestCommand(codeParams)
                 }
                 application={application}
                 sharePlugin={share}
