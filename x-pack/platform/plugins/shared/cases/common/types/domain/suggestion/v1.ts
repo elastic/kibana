@@ -29,7 +29,9 @@ export type SuggestionRequest = z.infer<typeof suggestionRequestSchema>;
 
 export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];
-export interface AttachmentItem<TPayload = Record<string, unknown>> {
+export interface AttachmentItem<
+  TPayload extends Record<string, unknown> = Record<string, unknown>
+> {
   /* The payload associated with the attachment. Used primarily to support
    * custom UI rendering */
   payload: TPayload;
@@ -44,7 +46,7 @@ export interface AttachmentItem<TPayload = Record<string, unknown>> {
  * For every suggestion code authors want to include as a completely separate suggestion box,
  * they should return a separate SuggestionItem. */
 export interface SuggestionItem<
-  TPayload = Record<string, unknown> // Generic type for the payload, defaults to a record of unknown key-value pairs
+  TPayload extends Record<string, unknown> = Record<string, unknown> // Generic type for the payload, defaults to a record of unknown key-value pairs
 > {
   id: string; // Unique identifier for suggestion
   /* Optional plaintext description of the entire suggestion payload.
@@ -54,6 +56,8 @@ export interface SuggestionItem<
   data: Array<AttachmentItem<TPayload>>; // The main data of the context, containing 1 or more context items
 }
 
-export interface SuggestionResponse<TPayload = Record<string, unknown>> {
+export interface SuggestionResponse<
+  TPayload extends Record<string, unknown> = Record<string, unknown>
+> {
   suggestions: SuggestionItem<TPayload>[]; // Array of suggestions
 }

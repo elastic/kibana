@@ -35,6 +35,7 @@ import type { ConfigureSubClient, InternalConfigureSubClient } from './configure
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
+import type { AttachmentSuggestionsSubClient } from './suggestions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
@@ -152,6 +153,7 @@ export const createCasesClientMock = (): CasesClientMock => {
   const client: PublicContract<CasesClient> = {
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
+    suggestions: createAttachmentSuggestionsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
@@ -192,6 +194,14 @@ export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock =
   );
 
   return serializer;
+};
+
+type AttachmentSuggestionsSubClientMock = jest.Mocked<AttachmentSuggestionsSubClient>;
+
+export const createAttachmentSuggestionsSubClientMock = (): AttachmentSuggestionsSubClientMock => {
+  return {
+    getAllForOwners: jest.fn(),
+  };
 };
 
 export const createCasesClientMockArgs = () => {
@@ -255,6 +265,7 @@ export const createCasesClientFactoryMockArgs = () => {
     ),
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    attachmentSuggestionRegistry: createAttachmentSuggestionRegistryMock(),
   };
 };
 

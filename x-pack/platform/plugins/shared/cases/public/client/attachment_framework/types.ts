@@ -80,11 +80,14 @@ interface BaseSuggestionType {
   owner: SuggestionOwner;
 }
 
-export type SuggestionType<TPayload = {}> = BaseSuggestionType & {
-  children: React.LazyExoticComponent<React.FC<SuggestionChildrenProps<TPayload>>>;
-};
+export type SuggestionType<TPayload extends Record<string, unknown> = Record<string, unknown>> =
+  BaseSuggestionType & {
+    children: React.LazyExoticComponent<React.FC<SuggestionChildrenProps<TPayload>>>;
+  };
 
-export interface SuggestionChildrenProps<TPayload = {}> {
+export interface SuggestionChildrenProps<
+  TPayload extends Record<string, unknown> = Record<string, unknown>
+> {
   suggestion: SuggestionItem<TPayload>;
 }
 
@@ -95,5 +98,7 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
-  registerSuggestion: <T = {}>(suggestionType: SuggestionType<T>) => void;
+  registerSuggestion: <TPayload extends Record<string, unknown> = Record<string, unknown>>(
+    suggestionType: SuggestionType<TPayload>
+  ) => void;
 }

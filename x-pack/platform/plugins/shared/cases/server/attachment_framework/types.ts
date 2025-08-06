@@ -38,7 +38,9 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
-export interface SuggestionType<TPayload = Record<string, unknown>> {
+export interface SuggestionType<
+  TPayload extends Record<string, unknown> = Record<string, unknown>
+> {
   /* Unique identifier for the suggestion type */
   id: string;
   /* Unique identifier for the type of attachment the suggestion is for */
@@ -51,9 +53,8 @@ export interface SuggestionType<TPayload = Record<string, unknown>> {
   handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
-export type SuggestionHandler<TPayload = Record<string, unknown>> = (
-  params: SuggestionContext
-) => Promise<SuggestionResponse<TPayload>>;
+export type SuggestionHandler<TPayload extends Record<string, unknown> = Record<string, unknown>> =
+  (params: SuggestionContext) => Promise<SuggestionResponse<TPayload>>;
 
 export interface AttachmentFramework {
   registerExternalReference: (
@@ -62,7 +63,7 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
-  registerSuggestion: <TPayload = Record<string, unknown>>(
+  registerSuggestion: <TPayload extends Record<string, unknown> = Record<string, unknown>>(
     attachmentSuggestion: SuggestionType<TPayload>
   ) => void;
 }

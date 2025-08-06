@@ -12,6 +12,7 @@ import { createBrowserHistory } from 'history';
 
 import { KibanaServices } from './common/lib/kibana';
 import type { CasesUiConfigType } from '../common/ui/types';
+import type { SuggestionType } from './client/attachment_framework/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -132,7 +133,7 @@ export class CasesUiPlugin
           this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
         },
         registerSuggestion: (suggestionType) => {
-          this.attachmentSuggestionRegistry.register(suggestionType);
+          this.attachmentSuggestionRegistry.register(suggestionType as SuggestionType);
         },
       },
     };
