@@ -4330,10 +4330,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/code-examples@link:x-pack/solutions/search/packages/kbn-code-examples":
-  version "0.0.0"
-  uid ""
-
 "@kbn/code-owners@link:src/platform/packages/private/kbn-code-owners":
   version "0.0.0"
   uid ""
@@ -7331,6 +7327,10 @@
   uid ""
 
 "@kbn/search-assistant@link:x-pack/solutions/search/plugins/search_assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-code-examples@link:x-pack/solutions/search/packages/kbn-search-code-examples":
   version "0.0.0"
   uid ""
 

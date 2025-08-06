@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/code-examples",
+  "id": "@kbn/search-code-examples",
   "owner": [
     "@elastic/search-kibana"
   ],
