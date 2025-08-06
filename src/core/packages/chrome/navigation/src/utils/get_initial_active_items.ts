@@ -56,5 +56,17 @@ export const getInitialActiveItems = (
     }
   }
 
+  // Fifth, search the secondary items of footer items
+  for (const footer of items.footerItems) {
+    if (!footer.sections) continue;
+
+    for (const section of footer.sections) {
+      const secondaryItem = section.items.find((item) => item.id === activeItemId);
+      if (secondaryItem) {
+        return { primaryItem: footer, secondaryItem, isLogoActive: false };
+      }
+    }
+  }
+
   return { primaryItem: null, secondaryItem: null, isLogoActive: false };
 };
