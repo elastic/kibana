@@ -10,6 +10,8 @@ import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from 
 import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 export class ReferencedPanelManager {
+  // The panelIndex refers to the ID of the saved object reference, while the panelId refers to the ID of the saved object itself (the panel).
+  // So, if the same saved object panel is referenced in two different dashboards, it will have different panelIndex values in each dashboard, but the same panelId, since they're both referencing the same panel.
   private panelsById = new Map<string, ReferencedPanelAttributesWithReferences>();
   private panelIndexToId = new Map<string, string>();
 
