@@ -12,10 +12,10 @@ import { z } from '@kbn/zod';
 import { RuleMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
-import { createTracersCallbacks } from '../util/tracing';
+import { createTracersCallbacks } from '../../../common/api/util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/utils/authz';
-import { withLicense } from '../../../common/utils/with_license';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 import type { MigrateRuleGraphConfig } from '../../task/agent/types';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes

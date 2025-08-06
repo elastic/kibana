@@ -12,12 +12,6 @@ import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
-import type { SiemMigrationsCommonCreateClientParams } from '../common/types';
-import type { RuleMigrationsClientDependencies } from './types';
-
-export interface RuleMigrationsCreateClientParams extends SiemMigrationsCommonCreateClientParams {
-  dependencies: RuleMigrationsClientDependencies;
-}
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;

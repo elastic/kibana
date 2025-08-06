@@ -179,7 +179,7 @@ export const installTranslated = async ({
   const installationErrors: Error[] = [];
 
   // Install rules that matched Elastic prebuilt rules
-  const prebuiltRuleBatches = ruleMigrationsClient.data.rules.searchBatches(migrationId, {
+  const prebuiltRuleBatches = ruleMigrationsClient.data.items.searchBatches(migrationId, {
     filters: { ids, installable: true, prebuilt: true },
   });
   let prebuiltRulesToInstall = await prebuiltRuleBatches.next();
@@ -194,7 +194,7 @@ export const installTranslated = async ({
     );
     installedCount += rulesToUpdate.length;
     installationErrors.push(...errors);
-    await ruleMigrationsClient.data.rules.update(rulesToUpdate);
+    await ruleMigrationsClient.data.items.update(rulesToUpdate);
     prebuiltRulesToInstall = await prebuiltRuleBatches.next();
   }
 
@@ -205,7 +205,7 @@ export const installTranslated = async ({
   }
 
   // Install rules with custom translation
-  const customRuleBatches = ruleMigrationsClient.data.rules.searchBatches(migrationId, {
+  const customRuleBatches = ruleMigrationsClient.data.items.searchBatches(migrationId, {
     filters: { ids, installable: true, prebuilt: false },
   });
   let customRulesToInstall = await customRuleBatches.next();
@@ -217,7 +217,7 @@ export const installTranslated = async ({
     );
     installedCount += rulesToUpdate.length;
     installationErrors.push(...errors);
-    await ruleMigrationsClient.data.rules.update(rulesToUpdate);
+    await ruleMigrationsClient.data.items.update(rulesToUpdate);
     customRulesToInstall = await customRuleBatches.next();
   }
 

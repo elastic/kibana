@@ -55,7 +55,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
     await this.setup(connectorId);
 
     // create the migration task after setup
-    const migrateRuleTask = this.createMigrateRuleTask(invocationConfig);
+    const migrateRuleTask = this.createMigrateItemTask(invocationConfig);
     const evaluators = this.getEvaluators();
 
     evaluate(migrateRuleTask, {

@@ -13,8 +13,8 @@ import {
   LOOKUPS_INDEX_PREFIX,
 } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/utils/authz';
-import { withLicense } from '../../../common/utils/with_license';
+import { authz } from '../../../common/api/util/authz';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsGetMissingPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,

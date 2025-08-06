@@ -11,25 +11,28 @@ import type {
   Duration,
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+// TODO: Use a common schema to define the common types
 import type {
-  RuleMigrationResource,
-  RuleMigrationResourceType,
+  RuleMigrationResource as SiemMigrationResource,
+  RuleMigrationResourceType as SiemMigrationResourceType,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { StoredRuleMigrationResource } from '../types';
-import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import type { Stored } from '../types';
+import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
+import { MAX_ES_SEARCH_SIZE } from './constants';
 
-export type CreateRuleMigrationResourceInput = Pick<
-  RuleMigrationResource,
+export type StoredSiemMigrationResource = Stored<SiemMigrationResource>;
+
+export type CreateSiemMigrationResourceInput = Pick<
+  SiemMigrationResource,
   'migration_id' | 'type' | 'name' | 'content' | 'metadata'
 >;
-export interface RuleMigrationResourceFilters {
-  type?: RuleMigrationResourceType;
+export interface SiemMigrationResourceFilters {
+  type?: SiemMigrationResourceType;
   names?: string[];
   hasContent?: boolean;
 }
-export interface RuleMigrationResourceGetOptions {
-  filters?: RuleMigrationResourceFilters;
+export interface SiemMigrationResourceGetOptions {
+  filters?: SiemMigrationResourceFilters;
   size?: number;
   from?: number;
 }
@@ -42,12 +45,12 @@ const BULK_MAX_SIZE = 500 as const;
  * when retrieving search results in batches. */
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
-export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseClient {
-  public async upsert(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
+export class SiemMigrationsDataResourcesClient extends SiemMigrationsDataBaseClient {
+  public async upsert(resources: CreateSiemMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let resourcesSlice: CreateRuleMigrationResourceInput[];
+    let resourcesSlice: CreateSiemMigrationResourceInput[];
 
     const createdAt = new Date().toISOString();
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
@@ -75,11 +78,11 @@ export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
   }
 
   /** Creates the resources in the index only if they do not exist */
-  public async create(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
+  public async create(resources: CreateSiemMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let resourcesSlice: CreateRuleMigrationResourceInput[];
+    let resourcesSlice: CreateSiemMigrationResourceInput[];
     const createdAt = new Date().toISOString();
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
       await this.esClient
@@ -104,14 +107,14 @@ export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
 
   public async get(
     migrationId: string,
-    options: RuleMigrationResourceGetOptions = {}
-  ): Promise<StoredRuleMigrationResource[]> {
+    options: SiemMigrationResourceGetOptions = {}
+  ): Promise<StoredSiemMigrationResource[]> {
     const { filters, size, from } = options;
     const index = await this.getIndexName();
     const query = this.getFilterQuery(migrationId, filters);
 
     return this.esClient
-      .search<RuleMigrationResource>({ index, query, size, from })
+      .search<SiemMigrationResource>({ index, query, size, from })
       .then(this.processResponseHits.bind(this))
       .catch((error) => {
         this.logger.error(`Error searching resources: ${error.message}`);
@@ -120,9 +123,9 @@ export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
   }
 
   /** Returns batching functions to traverse all the migration resources search results */
-  searchBatches<T extends RuleMigrationResource = RuleMigrationResource>(
+  public searchBatches<T extends SiemMigrationResource = SiemMigrationResource>(
     migrationId: string,
-    options: { scroll?: Duration; size?: number; filters?: RuleMigrationResourceFilters } = {}
+    options: { scroll?: Duration; size?: number; filters?: SiemMigrationResourceFilters } = {}
   ) {
     const { size = DEFAULT_SEARCH_BATCH_SIZE, filters = {}, scroll } = options;
     const query = this.getFilterQuery(migrationId, filters);
@@ -135,14 +138,24 @@ export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
     }
   }
 
-  private createId(resource: CreateRuleMigrationResourceInput): string {
+  /** Prepares bulk ES delete operations for the resources of a given migrationId. */
+  public async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
+    const index = await this.getIndexName();
+    const resourcesToBeDeleted = await this.get(migrationId, { size: MAX_ES_SEARCH_SIZE });
+    const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
+    return resourcesToBeDeletedDocIds.map((docId) => ({
+      delete: { _id: docId, _index: index },
+    }));
+  }
+
+  private createId(resource: CreateSiemMigrationResourceInput): string {
     const key = `${resource.migration_id}-${resource.type}-${resource.name}`;
     return sha256.create().update(key).hex();
   }
 
   private getFilterQuery(
     migrationId: string,
-    filters: RuleMigrationResourceFilters = {}
+    filters: SiemMigrationResourceFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
     if (filters.type) {
@@ -160,22 +173,5 @@ export class RuleMigrationsDataResourcesClient extends SiemMigrationsDataBaseCli
       }
     }
     return { bool: { filter } };
-  }
-
-  /**
-   *
-   * Prepares bulk ES delete operations for the resources of a given migrationId.
-   *
-   */
-  async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
-    const index = await this.getIndexName();
-    const resourcesToBeDeleted = await this.get(migrationId, { size: MAX_ES_SEARCH_SIZE });
-    const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
-    return resourcesToBeDeletedDocIds.map((docId) => ({
-      delete: {
-        _id: docId,
-        _index: index,
-      },
-    }));
   }
 }
