@@ -17,7 +17,7 @@ export const useExpandableFlyoutCsp = (
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const setFlyoutCloseCallback = useCallback(
-    (onChange: any) => {
+    (onChange: (value: DataTableRecord | undefined) => void) => {
       // Check if the context and required methods exist
       if (securitySolutionContext && securitySolutionContext.useOnExpandableFlyoutClose) {
         securitySolutionContext.useOnExpandableFlyoutClose({

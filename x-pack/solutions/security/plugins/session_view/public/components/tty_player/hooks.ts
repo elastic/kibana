@@ -340,7 +340,7 @@ export const useXtermPlayer = ({
   }, [lines, isPlaying, playSpeed, render, hasNextPage, fetchNextPage, setIsPlaying]);
 
   const seekToLine = useCallback(
-    (index: any) => {
+    (index: number) => {
       setCurrentLine(index);
 
       render(index, true);
