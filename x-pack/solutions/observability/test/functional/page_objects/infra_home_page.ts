@@ -486,6 +486,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
     },
 
+    async ensureKubernetesFeedbackLinkIsVisible() {
+      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
+    },
+
     async clickDismissKubernetesTourButton() {
       return testSubjects.click('infra-kubernetesTour-dismiss');
     },
