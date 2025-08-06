@@ -41,7 +41,8 @@ export function getConnectorType(): ConnectorTypeModel<
         'subActionParams.workflowId': new Array<string>(),
       };
       const validationResult = { errors };
-      if (actionParams.subActionParams && !actionParams.subActionParams.workflowId?.length) {
+      const workflowId = actionParams.subActionParams?.workflowId?.trim();
+      if (!workflowId || workflowId.length === 0) {
         errors['subActionParams.workflowId'].push(translations.WORKFLOW_ID_REQUIRED);
       }
       return validationResult;
