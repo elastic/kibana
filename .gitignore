@@ -163,3 +163,5 @@ x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+.moon/cache
