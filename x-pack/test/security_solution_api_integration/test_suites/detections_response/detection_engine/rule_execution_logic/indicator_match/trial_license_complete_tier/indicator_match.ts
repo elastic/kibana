@@ -2192,7 +2192,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('enrichemnt from partial matches', () => {
+    describe('enrichment from partial matches', () => {
       // cases to cover 2 execution paths of IM
       const cases = [
         {
