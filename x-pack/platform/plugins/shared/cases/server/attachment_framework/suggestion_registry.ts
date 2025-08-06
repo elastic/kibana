@@ -41,13 +41,17 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
         return Object.values(suggestion.handlers);
       })
     );
-    const allResponses = await Promise.all(
+    const allSettledResponses = await Promise.allSettled(
       allSuggestionHandlers.map((handler) => {
         return handler(context);
       })
     );
 
-    return allResponses.reduce<SuggestionResponse>(
+    const fulfilledResponses = allSettledResponses
+      .filter((result): result is PromiseFulfilledResult<SuggestionResponse> => result.status === 'fulfilled')
+      .map((result) => result.value);
+
+    return fulfilledResponses.reduce<SuggestionResponse>(
       (acc, response) => {
         return {
           ...acc,

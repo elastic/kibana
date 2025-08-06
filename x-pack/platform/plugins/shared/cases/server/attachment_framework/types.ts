@@ -43,7 +43,7 @@ export interface SuggestionType<TPayload = Record<string, unknown>> {
   id: string;
   /* Unique identifier for the type of attachment the suggestion is for */
   attachmentId: string;
-  /* The owner of the suggestion. Dicates which solutions can use this suggestion */
+  /* The owner of the suggestion. Dictates which solutions can use this suggestion */
   owner: SuggestionOwner;
   // Tools available for fetching, keyed by tool name
   tools: Record<string, ToolDefinition>;

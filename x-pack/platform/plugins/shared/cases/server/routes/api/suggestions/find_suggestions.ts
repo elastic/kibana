@@ -33,7 +33,7 @@ export const findSuggestionsRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to find cases in route: ${error}`,
+        message: `Failed to find suggestions in route: ${error}`,
         error,
       });
     }
