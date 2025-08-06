@@ -9,7 +9,7 @@ import { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/serve
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { VersionedRouter } from '@kbn/core-http-server';
 
-export * from './routes/types';
+export type * from './routes/types';
 
 export interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;

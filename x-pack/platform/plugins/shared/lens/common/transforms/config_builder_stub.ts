@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { LensAPIConfig, LensItem } from '../content_management';
+import type { LensAPIConfig, LensItem } from '../../server/content_management';
+
+export function isNewApiFormat(config: unknown): config is LensAPIConfig {
+  return (config as LensAPIConfig)?.state?.isNewApiFormat;
+}
 
 export const ConfigBuilderStub = {
   /**

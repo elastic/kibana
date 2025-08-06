@@ -40,51 +40,9 @@ export function DocumentsColumn({
   indexPattern: string;
   numDataPoints: number;
 }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
-
-  const LoadingPlaceholder: React.FC = React.useCallback(
-    () => (
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="flexEnd"
-        gutterSize="m"
-        className={css`
-          height: ${euiTheme.size.xl};
-          white-space: nowrap;
-          padding-right: ${euiTheme.size.xl};
-        `}
-      >
-        <EuiFlexGroup>
-          <EuiFlexItem
-            className={css`
-              text-align: center;
-            `}
-          >
-            -
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            className={css`
-              display: flex;
-              padding-right: ${euiTheme.size.xl};
-              justify-content: center;
-            `}
-          >
-            <EuiLoadingChart size="m" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexGroup>
-    ),
-    [euiTheme]
-  );
 
   const { timeState } = useTimefilter();
 
@@ -211,3 +169,39 @@ export function DocumentsColumn({
     </EuiFlexGroup>
   );
 }
+
+const LoadingPlaceholder = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexEnd"
+      gutterSize="m"
+      className={css`
+        height: ${euiTheme.size.xl};
+        white-space: nowrap;
+        padding-right: ${euiTheme.size.xl};
+      `}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem
+          className={css`
+            text-align: center;
+          `}
+        >
+          -
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          className={css`
+            display: flex;
+            padding-right: ${euiTheme.size.xl};
+            justify-content: center;
+          `}
+        >
+          <EuiLoadingChart size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexGroup>
+  );
+};

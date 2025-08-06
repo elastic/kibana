@@ -14,7 +14,7 @@ import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
 import { VisualizationState, DatasourceStates } from '.';
 import { LensDocument } from '../persistence';
 import { DatasourceMap, VisualizationMap, Datasource } from '../types';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(

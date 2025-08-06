@@ -10,16 +10,18 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import { TypeOf } from '@kbn/config-schema';
 
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
 import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
   LENS_CONTENT_TYPE,
-  LensCreateIn,
-  type LensSavedObject,
-} from '../../../../common/content_management';
+} from '../../../../common/constants';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management';
 import { RegisterAPIRouteFn } from '../../types';
 import { ConfigBuilderStub } from '../../../../common/transforms';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';
+import { isNewApiFormat } from '../../../../common/transforms/config_builder_stub';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -78,14 +80,15 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      // TODO: Find a better way to conditionally omit id
-      const { references, ...lensItem } = omit(
-        ConfigBuilderStub.in({
-          id: '',
-          ...req.body.data,
-        }),
-        'id'
-      );
+      const { references, ...lensItem } = isNewApiFormat(req.body.data)
+        ? // TODO: Find a better way to conditionally omit id
+          omit(ConfigBuilderStub.in(req.body.data), 'id')
+        : // For now we need to be able to create old SO, this may be moved to the config builder
+          ({
+            ...req.body.data,
+            description: req.body.data.description ?? undefined,
+            visualizationType: req.body.data.visualizationType ?? null,
+          } satisfies LensCreateIn['data']);
 
       try {
         // Note: these types are to enforce loose param typings of client methods

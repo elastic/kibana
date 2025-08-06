@@ -30,7 +30,7 @@ import { DatasourceStates, GeneralDatasourceStates } from '../state_management';
 import { FormBasedPersistedState } from '../datasources/form_based/types';
 import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/content_management';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,

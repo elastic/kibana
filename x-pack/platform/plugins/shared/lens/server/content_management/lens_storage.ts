@@ -17,7 +17,7 @@ import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { SOContentStorage, SOWithMetadata, tagsToFindOptions } from '@kbn/content-management-utils';
 
 import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
-import { LENS_CONTENT_TYPE, servicesDefinitions } from '../../common/content_management';
+import { LENS_CONTENT_TYPE } from '../../common/constants';
 import type {
   LensAttributes,
   LensGetOut,
@@ -29,7 +29,8 @@ import type {
   LensSearchOut,
   LensSavedObject,
   LensCreateIn,
-} from '../../common/content_management';
+} from './latest';
+import { servicesDefinitions } from './services';
 
 const searchArgsToSOFindOptions = (args: LensSearchIn): SavedObjectsFindOptions => {
   const { query, contentTypeId, options } = args;

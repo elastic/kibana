@@ -10,7 +10,7 @@ import type { Reference } from '@kbn/content-management-utils';
 
 import { omit } from 'lodash';
 import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../common/constants';
-import type { LensAttributes, LensItem } from '../../common/content_management';
+import type { LensAttributes, LensItem } from '../../server/content_management';
 import { ConfigBuilderStub } from '../../common/transforms';
 import {
   type LensGetResponseBody,

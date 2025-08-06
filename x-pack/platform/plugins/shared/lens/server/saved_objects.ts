@@ -12,10 +12,11 @@ import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getEditPath } from '../common/constants';
 import { getAllMigrations } from './migrations/saved_object_migrations';
 import { CustomVisualizationMigrations } from './migrations/types';
+import { lensItemAttributesSchemaV0 } from './content_management/v0';
 import {
   LENS_ITEM_VERSION as LENS_ITEM_VERSION_V1,
   lensItemAttributesSchema as lensItemAttributesSchemaV1,
-} from '../common/content_management/v1';
+} from './content_management/v1';
 
 export function setupSavedObjects(
   core: CoreSetup,
@@ -57,8 +58,8 @@ export function setupSavedObjects(
           },
         ],
         schemas: {
-          forwardCompatibility: lensItemAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
-          create: lensItemAttributesSchemaV1,
+          forwardCompatibility: lensItemAttributesSchemaV1.extendsDeep({ unknowns: 'ignore' }),
+          create: lensItemAttributesSchemaV0,
         },
       },
     },

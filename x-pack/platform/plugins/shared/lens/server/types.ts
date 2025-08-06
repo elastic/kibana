@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './api/types';
+export type * from './api/types';

@@ -43,16 +43,16 @@ export class LensDocumentService implements ILensDocumentService {
 
     if (savedObjectId) {
       const {
-        item: { id },
+        item: { id, ...newVis },
       } = await this.client.update(savedObjectId, attributes, references);
-      return { ...vis, savedObjectId: id };
+      return { ...newVis, savedObjectId: id };
     }
 
     const {
-      item: { id: newId },
+      item: { id: newId, ...newVis },
     } = await this.client.create(attributes, references);
 
-    return { ...vis, savedObjectId: newId };
+    return { ...newVis, savedObjectId: newId };
   };
 
   async load(savedObjectId: string) {

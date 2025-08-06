@@ -13,19 +13,23 @@ import {
   lensAPIConfigSchema,
   lensAPIAttributesSchema,
   lensCMCreateOptionsSchema,
-} from '../../../../../common/content_management';
+} from '../../../../content_management';
+import { lensCreateRequestBodyDataSchemaV0 } from '../../../../content_management/v0';
+
+const apiConfigData = schema.object(
+  {
+    ...lensAPIAttributesSchema.getPropSchemas(),
+    // omit id on create options
+    ...pickFromObjectSchema(lensAPIConfigSchema.getPropSchemas(), ['references']),
+  },
+  { unknowns: 'forbid' }
+);
 
 export const lensCreateRequestBodySchema = schema.object(
   {
-    data: schema.object(
-      {
-        ...lensAPIAttributesSchema.getPropSchemas(),
-        // omit id on create options
-        ...pickFromObjectSchema(lensAPIConfigSchema.getPropSchemas(), ['references']),
-      },
-      { unknowns: 'forbid' }
-    ),
-    // TODO should these options be here?
+    // Permit passing old v0 SO attributes on create
+    data: schema.oneOf([apiConfigData, lensCreateRequestBodyDataSchemaV0]),
+    // TODO should these options be here or in params?
     options: schema.object(
       {
         ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),
