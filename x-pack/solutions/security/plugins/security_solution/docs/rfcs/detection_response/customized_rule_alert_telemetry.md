@@ -1,9 +1,9 @@
 # RFC: Alert telemetry to track customized rule fields
 
 **Author(s)**: @dplumlee
-**Status**: In progress
+**Status**: Awaiting comments
 **Created**: August 4 2025
-**Reviewers**: @security-detection-rule-management, @marshallmain
+**Reviewers**: @security-detection-rule-management, @security-detection-engine, @marshallmain
 
 ---
 
