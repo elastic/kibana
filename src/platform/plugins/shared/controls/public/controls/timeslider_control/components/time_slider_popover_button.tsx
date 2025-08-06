@@ -48,6 +48,10 @@ const timeSliderStyles = {
       text-decoration: line-through;
       color: ${euiTheme.colors.mediumShade};
     }
+
+    &:focus {
+      outline-offset: -3px;
+    }
   `,
 };
 
