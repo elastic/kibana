@@ -31,11 +31,11 @@ import { ApiKeysPageProvider } from '@kbn/test-suites-xpack-platform/functional/
 import { CrossClusterReplicationPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/cross_cluster_replication_page';
 import { GrokDebuggerPageObject } from '@kbn/test-suites-xpack-platform/functional/page_objects/grok_debugger_page';
 import { LicenseManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/license_management_page';
+import { IndexManagementPageProvider } from '@kbn/test-suites-xpack-platform/functional/page_objects/index_management_page';
 import { AssetDetailsProvider } from './asset_details';
 import { DetectionsPageObject } from '../../security_solution_ftr/page_objects/detections';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
-import { IndexManagementPageProvider } from './index_management_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraHostsViewProvider } from './infra_hosts_view';
 import { InfraLogsPageProvider } from './infra_logs_page';
