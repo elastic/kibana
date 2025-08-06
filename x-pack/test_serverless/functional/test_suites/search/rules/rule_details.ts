@@ -137,8 +137,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('should disable the rule', async () => {
         const actionsDropdown = await testSubjects.find('ruleStatusDropdownBadge');
-
-        expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+        await retry.try(async () => {
+          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+        });
 
         await actionsDropdown.click();
         const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
