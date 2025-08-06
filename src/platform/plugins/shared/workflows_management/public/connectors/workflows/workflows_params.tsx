@@ -39,7 +39,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const { http } = useKibana().services;
+  const { http, application } = useKibana().services;
 
   // Ensure proper initialization of action parameters
   useEffect(() => {
@@ -68,8 +68,11 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   );
 
   const handleCreateNewWorkflow = useCallback(() => {
-    window.open(`/rzm/app/workflows`, '_blank');
-  }, []);
+    const url = application?.getUrlForApp
+      ? application.getUrlForApp('workflows')
+      : '/app/workflows';
+    window.open(url, '_blank');
+  }, [application]);
 
   // Fetch workflows from internal Kibana API
   useEffect(() => {
@@ -101,8 +104,6 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
         setWorkflows(workflowOptions);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch workflows:', error);
         setLoadError(i18n.FAILED_TO_LOAD_WORKFLOWS);
       } finally {
         setIsLoading(false);

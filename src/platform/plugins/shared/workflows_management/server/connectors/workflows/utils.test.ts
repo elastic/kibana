@@ -8,7 +8,7 @@
  */
 
 import { AxiosError } from 'axios';
-import { createServiceError, removeSlash } from './utils';
+import { createServiceError } from './utils';
 
 describe('Workflows Utils', () => {
   describe('createServiceError', () => {
@@ -67,38 +67,6 @@ describe('Workflows Utils', () => {
       const result = createServiceError(errorWithoutMessage, 'Operation failed');
 
       expect(result.message).toBe('Operation failed. Error: undefined');
-    });
-  });
-
-  describe('removeSlash', () => {
-    it('should remove trailing slash from URL', () => {
-      expect(removeSlash('https://example.com/')).toBe('https://example.com');
-    });
-
-    it('should not modify URL without trailing slash', () => {
-      expect(removeSlash('https://example.com')).toBe('https://example.com');
-    });
-
-    it('should handle empty string', () => {
-      expect(removeSlash('')).toBe('');
-    });
-
-    it('should handle URL with multiple trailing slashes', () => {
-      expect(removeSlash('https://example.com///')).toBe('https://example.com//');
-    });
-
-    it('should handle root path with slash', () => {
-      expect(removeSlash('/')).toBe('');
-    });
-
-    it('should handle path with trailing slash', () => {
-      expect(removeSlash('/api/v1/')).toBe('/api/v1');
-    });
-
-    it('should handle complex URL with trailing slash', () => {
-      expect(removeSlash('https://example.com:8080/api/v1/workflows/')).toBe(
-        'https://example.com:8080/api/v1/workflows'
-      );
     });
   });
 });

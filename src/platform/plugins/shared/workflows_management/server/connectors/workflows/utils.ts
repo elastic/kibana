@@ -18,5 +18,3 @@ export const createServiceError = (error: Error, message: string) => {
 
   return new Error(`${message}. Error: ${error.message}`);
 };
-
-export const removeSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
