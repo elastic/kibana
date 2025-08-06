@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { QuickstartCodeSnippetFunction } from './types';
+export const basicsQuickstartCommands: string = `# Welcome to the Elasticsearch Basics Quickstart!
+# This quickstart will guide you through the fundamental operations in Elasticsearch
+# using API calls from within the Kibana Dev console.
 
-export const basicsQuickstartCommands: QuickstartCodeSnippetFunction = () => `
+# After selecting a command, execute it by clicking the "Send Request" button or
+# pressing Ctrl+Enter or Cmd+Enter.
+
 # --------------------------------------------------------------------
 # Step 1: Create a new index named 'books'
 # --------------------------------------------------------------------

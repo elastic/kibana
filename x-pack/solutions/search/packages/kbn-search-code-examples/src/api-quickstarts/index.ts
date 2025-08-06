@@ -13,4 +13,10 @@ import { QuickstartCodeExamples } from './types';
 
 export const quickstartExamples: QuickstartCodeExamples = {
   basics: basicsQuickstartCommands,
+  queryDSL: `# Query DSL Quickstart`,
+  esql: `# ESQL Quickstart`,
+  aggregations: `# Aggregations Quickstart`,
+  semanticSearch: `# Semantic Search Quickstart`,
+  hybridSearch: `# Hybrid Search Quickstart`,
+  vectorSearch: `# Vector Search Quickstart`,
 };

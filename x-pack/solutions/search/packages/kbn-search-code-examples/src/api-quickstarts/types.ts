@@ -6,7 +6,11 @@
  */
 
 export interface QuickstartCodeExamples {
-  basics: QuickstartCodeSnippetFunction;
+  basics: string;
+  queryDSL: string;
+  esql: string;
+  aggregations: string;
+  semanticSearch: string;
+  hybridSearch: string;
+  vectorSearch: string;
 }
-
-export type QuickstartCodeSnippetFunction = () => string;

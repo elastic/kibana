@@ -7,3 +7,4 @@
 
 export const WORKFLOW_LOCALSTORAGE_KEY = 'search_onboarding_workflow';
 export const GLOBAL_EMPTY_STATE_SKIP_KEY = 'search_onboarding_global_empty_state_skip';
+export const SEARCH_QUICKSTARTS_FEATURE_FLAG_ID = 'search_onboarding:searchQuickstartsEnabled';

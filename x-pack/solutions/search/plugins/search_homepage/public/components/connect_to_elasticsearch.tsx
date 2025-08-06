@@ -17,13 +17,17 @@ import {
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+
 import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
+import { QuickstartsGroup } from './quickstarts_group';
+import { useSearchQuickstartsFeatureFlag } from '../hooks/use_search_quickstarts';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
+  const isQuickstartEnabled = useSearchQuickstartsFeatureFlag();
 
   return (
     <EuiFlexGroup gutterSize="xl">
@@ -118,6 +122,16 @@ export const ConnectToElasticsearch = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          {isQuickstartEnabled && (
+            <EuiFlexItem grow={false}>
+              <EuiHorizontalRule />
+            </EuiFlexItem>
+          )}
+          {isQuickstartEnabled && (
+            <EuiFlexItem grow={false}>
+              <QuickstartsGroup />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule />
           </EuiFlexItem>
