@@ -43,7 +43,7 @@ describe('GroupStream', () => {
         },
       },
     ])('is not valid', (val) => {
-      expect(GroupStream.Definition.is(val as any)).toBe(false);
+      expect(() => GroupStream.Definition.asserts(val as any)).toThrow();
     });
   });
 

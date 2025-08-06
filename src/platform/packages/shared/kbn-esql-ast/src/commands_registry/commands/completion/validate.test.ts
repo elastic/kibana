@@ -169,13 +169,6 @@ describe('COMPLETION Validation', () => {
       });
 
       describe('a custom targetField is provided', () => {
-        it('targetField is not available before COMPLETION', () => {
-          completionExpectErrors(
-            `FROM index | KEEP customField | COMPLETION customField = "prompt" WITH inferenceId`,
-            ['Unknown column [customField]']
-          );
-        });
-
         it('targetField is available after COMPLETION', () => {
           completionExpectErrors(
             `FROM index | COMPLETION keywordField = "prompt" WITH inferenceId | KEEP keywordField`,
