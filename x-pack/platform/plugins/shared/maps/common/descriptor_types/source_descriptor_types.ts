@@ -7,7 +7,6 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { FeatureCollection } from 'geojson';
 import type { ESQLColumn } from '@kbn/es-types';
 import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
 
@@ -114,15 +113,6 @@ export type InlineFieldDescriptor = {
   name: string;
   label?: string;
   type: 'string' | 'number';
-};
-
-export type GeojsonFileSourceDescriptor = {
-  __fields?: InlineFieldDescriptor[];
-  __featureCollection: FeatureCollection;
-  areResultsTrimmed: boolean;
-  tooltipContent: string | null;
-  name: string;
-  type: string;
 };
 
 export type TableSourceDescriptor = {
