@@ -41,3 +41,22 @@ export interface MenuCalculations {
   itemGap: number;
   maxVisibleItems: number;
 }
+
+export interface SideNavLogo {
+  /**
+   * The route ID for the logo, used for the active state.
+   */
+  id: string;
+  /**
+   * The href for the logo link, typically the home page.
+   */
+  href: string;
+  /**
+   * The label for the logo, typically the product name.
+   */
+  label: string;
+  /**
+   * The logo type, e.g. `appObservability`, `appSecurity`, etc.
+   */
+  iconType: string;
+}

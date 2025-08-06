@@ -10,7 +10,7 @@
 import React, { KeyboardEvent } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import { MenuItem, NavigationStructure, SecondaryMenuItem, SideNavLogo } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -36,17 +36,9 @@ interface NavigationProps {
    */
   items: NavigationStructure;
   /**
-   * The href for the logo link, typically the home page.
+   * The logo object containing the route ID, href, label, and type.
    */
-  logoHref: string;
-  /**
-   * The label for the logo, typically the product name.
-   */
-  logoLabel: string;
-  /**
-   * The logo type, e.g. `appObservability`, `appSecurity`, etc.
-   */
-  logoType: string;
+  logo: SideNavLogo;
   /**
    * Required by the grid layout to set the width of the navigation slot.
    */
@@ -57,18 +49,17 @@ export const Navigation = ({
   activeItemId,
   isCollapsed: isCollapsedProp,
   items,
-  logoHref,
-  logoLabel,
-  logoType,
+  logo,
   setWidth,
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
 
-  const initialActiveItems = getInitialActiveItems(items, activeItemId);
+  const initialActiveItems = getInitialActiveItems(items, activeItemId, logo.id);
 
   const { currentPageId, currentSubpageId, isSidePanelOpen, navigateTo, sidePanelContent } =
     useNavigation({
+      logoId: logo.id,
       initialActiveItems,
       isCollapsed,
     });
@@ -85,13 +76,8 @@ export const Navigation = ({
     focusMainContent();
   };
 
-  // TODO: think about this parent / child comparison
   const handleSubMenuItemClick = (item: MenuItem, subItem: SecondaryMenuItem) => {
-    if (item.href && subItem.href === item.href) {
-      navigateTo(item);
-    } else {
-      navigateTo(item, subItem);
-    }
+    navigateTo(item, subItem);
     focusMainContent();
   };
 
@@ -105,16 +91,19 @@ export const Navigation = ({
     }
   };
 
+  const handleLogoClick = () => {
+    navigateTo(logo);
+    focusMainContent();
+  };
+
   return (
     <>
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
-          href={logoHref}
-          // TODO: think about logo active state
-          isActive={false}
+          isActive={currentPageId === logo.id}
           isCollapsed={isCollapsed}
-          label={logoLabel}
-          logoType={logoType}
+          onClick={handleLogoClick}
+          {...logo}
         />
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>

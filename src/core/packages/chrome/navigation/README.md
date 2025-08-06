@@ -71,11 +71,15 @@ function App() {
     <div className="app">
       <TopBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <Navigation
+        activeItemId={activeItemId}
         isCollapsed={isCollapsed}
         items={navigationItems}
-        logoLabel="Observability"
-        logoType="observabilityApp"
-        logoHref="/observability"
+        logo={{
+          label: 'Observability',
+          id: 'observability',
+          iconType: 'observabilityApp',
+          href: '/observability',
+        }}
         setWidth={setNavigationWidth}
       />
       <main className="app-content">{/* Your application content */}</main>
@@ -110,7 +114,7 @@ export const navigationItems = {
           label: 'Reports', // or null for unlabeled sections
           items: [
             {
-              id: 'overview',
+              id: 'analytics', // has the same `id` as the parent item
               label: 'Overview',
               href: '/analytics/reports', // has the same `href` as the parent item
             },

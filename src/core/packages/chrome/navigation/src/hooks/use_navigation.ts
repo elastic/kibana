@@ -13,6 +13,7 @@ import { MenuItem, SecondaryMenuItem } from '../../types';
 import { InitialMenuState } from '../utils/get_initial_active_items';
 
 interface UseNavigationProps {
+  logoId: string;
   initialActiveItems: InitialMenuState;
   isCollapsed: boolean;
 }
@@ -26,26 +27,18 @@ interface NavigationState {
 }
 
 export const useNavigation = ({
-  initialActiveItems: { primaryItem, secondaryItem },
+  logoId,
+  initialActiveItems: { primaryItem, secondaryItem, isLogoActive },
   isCollapsed,
 }: UseNavigationProps) => {
-  const [currentPageId, setCurrentPageId] = useState<string | undefined>(primaryItem?.id);
+  const [currentPageId, setCurrentPageId] = useState<string | undefined>(
+    isLogoActive ? logoId : primaryItem?.id
+  );
   const [currentSubpageId, setCurrentSubpageId] = useState<string | undefined>(secondaryItem?.id);
   const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(primaryItem);
 
   // Determine if side panel should be open based on simple logic
   const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
-
-  // Check if a menu item is currently active
-  const isMenuItemActive = useCallback(
-    (item: MenuItem | SecondaryMenuItem): boolean => {
-      if ('id' in item) {
-        return item.id === currentPageId || item.id === currentSubpageId;
-      }
-      return false;
-    },
-    [currentPageId, currentSubpageId]
-  );
 
   // Navigate to a menu item
   const navigateTo = useCallback(
@@ -68,6 +61,5 @@ export const useNavigation = ({
   return {
     ...state,
     navigateTo,
-    isMenuItemActive,
   };
 };

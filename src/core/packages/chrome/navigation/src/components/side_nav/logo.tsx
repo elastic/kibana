@@ -7,29 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { MenuItem } from '../menu_item';
+import { SideNavLogo } from '../../../types';
 
-export interface SideNavLogoProps {
-  href: string;
+export interface SideNavLogoProps extends HTMLAttributes<HTMLAnchorElement>, SideNavLogo {
+  id: string;
   isActive: boolean;
   isCollapsed: boolean;
-  label: string;
-  logoType: string;
 }
 
 /**
  * It's used to communicate what solution the user is currently in.
  */
-export const SideNavLogo = ({
-  href,
+export const SideNavLogoComponent = ({
   isActive,
   isCollapsed,
   label,
-  logoType,
+  ...props
 }: SideNavLogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
@@ -57,11 +55,10 @@ export const SideNavLogo = ({
       <MenuItem
         aria-label={`${label} homepage`}
         data-test-subj="sideNavLogo"
-        href={href}
-        iconType={logoType}
         isActive={isActive}
         isLabelVisible={!isCollapsed}
         isTruncated={false}
+        {...props}
       >
         {label}
       </MenuItem>

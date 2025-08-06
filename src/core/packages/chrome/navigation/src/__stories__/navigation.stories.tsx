@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { ComponentProps, useEffect, useState } from 'react';
 import { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme, UseEuiTheme } from '@elastic/eui';
@@ -17,7 +17,6 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants'
 
 import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_ITEMS, PRIMARY_MENU_FOOTER_ITEMS } from '../mocks/observability';
-import { NavigationStructure } from '../../types';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
@@ -34,16 +33,7 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-interface StoryArgs {
-  activeItemId: string;
-  isCollapsed: boolean;
-  items: NavigationStructure;
-  logoHref: string;
-  logoLabel: string;
-  logoType: string;
-}
-
-type PropsAndArgs = React.ComponentProps<typeof Navigation> & StoryArgs;
+type PropsAndArgs = ComponentProps<typeof Navigation>;
 
 const PreventLinkNavigation = (Story: StoryFn) => {
   useEffect(() => {
@@ -77,24 +67,13 @@ export default {
       primaryItems: PRIMARY_MENU_ITEMS,
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
-    logoHref: LOGO.href,
-    logoLabel: LOGO.label,
-    logoType: LOGO.type,
+    logo: {
+      id: 'observability',
+      href: LOGO.href,
+      label: LOGO.label,
+      iconType: LOGO.type,
+    },
     setWidth: () => {},
-  },
-  argTypes: {
-    isCollapsed: {
-      control: 'boolean',
-      description: 'Whether the navigation is collapsed',
-    },
-    logoLabel: {
-      control: 'text',
-      description: 'Logo label text',
-    },
-    logoType: {
-      control: 'text',
-      description: 'Logo type for EUI icon',
-    },
   },
 } as Meta<PropsAndArgs>;
 
@@ -237,9 +216,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
               activeItemId={props.activeItemId}
               isCollapsed={props.isCollapsed}
               items={props.items}
-              logoLabel={props.logoLabel}
-              logoType={props.logoType}
-              logoHref={props.logoHref}
+              logo={props.logo}
               setWidth={setNavigationWidth}
             />
           }

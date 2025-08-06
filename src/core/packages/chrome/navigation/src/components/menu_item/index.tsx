@@ -21,7 +21,6 @@ export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLBu
   isHorizontal?: boolean;
   isLabelVisible?: boolean;
   isTruncated?: boolean;
-  onClick?: () => void;
 }
 
 export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuItemProps>(
