@@ -11,14 +11,13 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient as createPrebuiltRuleObjectsClientMock } from '../../../../prebuilt_rules/logic/rule_objects/__mocks__/prebuilt_rule_objects_client';
-import { createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
+import { requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
 import { createRuleSourceImporter } from './rule_source_importer';
 
 describe('ruleSourceImporter', () => {
   let ruleAssetsClientMock: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
   let ruleObjectsClientMock: ReturnType<typeof createPrebuiltRuleObjectsClientMock>;
-  let config: ReturnType<typeof createMockConfig>;
   let context: ReturnType<typeof requestContextMock.create>['securitySolution'];
   let { clients } = requestContextMock.createTools();
   let ruleToImport: RuleToImport;
@@ -26,7 +25,6 @@ describe('ruleSourceImporter', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    config = createMockConfig();
     context = requestContextMock.create().securitySolution;
     clients = requestContextMock.createTools().clients;
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
@@ -39,7 +37,6 @@ describe('ruleSourceImporter', () => {
 
     subject = createRuleSourceImporter({
       context,
-      config,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
       prebuiltRuleObjectsClient: ruleObjectsClientMock,
       logger: clients.logger,

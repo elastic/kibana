@@ -11,7 +11,6 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { InstallPrebuiltRulesAndTimelinesResponse } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
-import { ensureLatestRulesPackageInstalled } from '../../logic/integrations/ensure_latest_rules_package_installed';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
@@ -19,6 +18,7 @@ import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt
 import { createPrebuiltRules } from '../../logic/rule_objects/create_prebuilt_rules';
 import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_rules';
 import { rulesToMap } from '../../logic/utils';
+import { ensureLatestRulesPackageInstalled } from '../../logic/ensure_latest_rules_package_installed';
 
 export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
