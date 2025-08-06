@@ -28,9 +28,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { z } from '@kbn/zod';
 import { pick } from 'lodash';
 import {
-  useEuiTheme,
   EuiFlyoutHeader,
-  EuiFieldText,
   EuiTextArea,
   EuiTitle,
   EuiFlyoutBody,
@@ -41,10 +39,13 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 // import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/public';
+import {
+  usePostToolClientActions,
+  type OneChatToolWithClientCallback,
+} from '@kbn/ai-client-tools-plugin/public';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 import { DashboardApi } from '../../dashboard_api/types';
 import { coreServices, inferenceService } from '../../services/kibana_services';
-import {  usePostToolClientActions, type OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/public';
 
 import { convertSchemaToObservabilityParameters } from './schema_adapters';
 const chartTypes = [
@@ -353,10 +354,6 @@ const getObservabilityToolDetails = (oneChatTool: OneChatToolWithClientCallback)
   parameters: convertSchemaToObservabilityParameters(oneChatTool.schema),
 });
 
-
-console.log(`--@@tool`, getObservabilityToolDetails(tool));
-console.log(`--@@addToDashboardTool`, getObservabilityToolDetails(addToDashboardTool));
-
 // USING CONNECTOR ID
 
 const PLACEHOLDER_USER_PROMPT =
@@ -412,21 +409,12 @@ export const CreateWithAIFlyout = ({
       });
       const args = resp.output;
       const correctedQuery = correctCommonEsqlMistakes(args.esql.query);
-
-      // @TODO: remove
-      console.log(`--@@args`, args);
-      // @TODO: remove
-      console.log(`--@@correctedQuery`, correctedQuery);
       args.esql.query = correctedQuery.output;
 
       const controller = new AbortController();
       for (const action of actions) {
         await action({ args, signal: controller.signal });
       }
-      // @TODO: remove
-      console.log(`--@@resp`, resp, actions);
-
-      // console.log(`--@@resp`, resp);
 
       // // Parse content that starts wiht ```json and ends with ```
       // let jsonContent = resp.content.match(/```json\n(.*)\n```/s);
@@ -449,6 +437,7 @@ export const CreateWithAIFlyout = ({
       // }
       // Handle chatResponse if needed
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(`--@@e`, e);
       // Handle error if needed
     } finally {
