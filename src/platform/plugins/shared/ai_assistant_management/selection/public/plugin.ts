@@ -84,7 +84,7 @@ export class AIAssistantManagementPlugin
       keywords: ['ai'],
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section/mount_section');
-        const securityAIAssistantEnabled = !!management?.sections.section.kibana
+        const securityAIAssistantEnabled = !!management?.sections.section.ai
           .getAppsEnabled()
           .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
 

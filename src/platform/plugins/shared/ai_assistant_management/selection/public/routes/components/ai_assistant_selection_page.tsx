@@ -35,9 +35,14 @@ export function AiAssistantSelectionPage() {
     kibanaBranch,
     securityAIAssistantEnabled,
   } = useAppContext();
+  const aiAssistantManagementSelection = capabilities.management.ai.aiAssistantManagementSelection;
 
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant?.show;
-  const isSecurityAIAssistantEnabled = securityAIAssistantEnabled;
+  const securityAIAssistantVisibility = Boolean(
+    capabilities.securitySolutionAssistant['ai-assistant']
+  );
+  const isSecurityAIAssistantEnabled =
+    securityAIAssistantEnabled && aiAssistantManagementSelection && securityAIAssistantVisibility;
 
   const observabilityDoc = getDocLinks({ buildFlavor, kibanaBranch }).observability.aiAssistant;
   const securityDoc = getDocLinks({ buildFlavor, kibanaBranch }).securitySolution.aiAssistant;
