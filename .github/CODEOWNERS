@@ -523,7 +523,7 @@ src/platform/packages/private/kbn-get-repo-files @elastic/kibana-operations
 x-pack/platform/plugins/private/global_search_bar @elastic/appex-sharedux
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
-x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
+x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
@@ -776,7 +776,7 @@ src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
-x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
