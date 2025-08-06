@@ -16,7 +16,7 @@ import type {
 import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { isObject } from 'lodash';
+import { cloneDeep, isObject } from 'lodash';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -27,7 +27,7 @@ import {
   fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
-import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
+import { appendAdHocDataViews, replaceAdHocDataViewWithId, setDataView } from './data_views';
 import { setTabs } from './tabs';
 
 type AdHocDataViewAction = 'copy' | 'replace';
@@ -74,7 +74,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         let updatedTab: DiscoverSessionTab;
 
         if (tabStateContainer) {
-          updatedTab = {
+          updatedTab = cloneDeep({
             ...fromSavedSearchToSavedObjectTab({
               tab,
               savedSearch: tabStateContainer.savedSearchState.getState(),
@@ -83,13 +83,15 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             timeRestore: newTimeRestore,
             timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
             refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
-          };
-        } else {
-          updatedTab = fromTabStateToSavedObjectTab({
-            tab,
-            timeRestore: newTimeRestore,
-            services,
           });
+        } else {
+          updatedTab = cloneDeep(
+            fromTabStateToSavedObjectTab({
+              tab,
+              timeRestore: newTimeRestore,
+              services,
+            })
+          );
         }
 
         if (overriddenVisContextAfterInvalidation) {
@@ -149,8 +151,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
           }),
         };
 
-        // Skip field list fetching since the existing data view already has the fields
-        const dataView = await services.dataViews.create(newDataViewSpec, true);
+        const dataView = await services.dataViews.create(newDataViewSpec);
 
         // Make sure our state is aware of the copy so it appears in the UI
         dispatch(appendAdHocDataViews(dataView));
@@ -163,8 +164,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         // Clear out the old data view since it's no longer needed
         services.dataViews.clearInstanceCache(dataViewSpec.id);
 
-        // Skip field list fetching since the existing data view already has the fields
-        const dataView = await services.dataViews.create(newDataViewSpec, true);
+        const dataView = await services.dataViews.create(newDataViewSpec);
 
         // Make sure our state is aware of the new data view
         dispatch(replaceAdHocDataViewWithId(dataViewSpec.id, dataView));
@@ -218,6 +218,11 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             discoverSession,
             services,
           });
+          const dataView = savedSearch.searchSource.getField('index');
+
+          if (dataView) {
+            dispatch(setDataView({ tabId: tab.id, dataView }));
+          }
 
           tabStateContainer.savedSearchState.set(savedSearch);
           tabStateContainer.actions.undoSavedSearchChanges();
