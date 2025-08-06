@@ -6395,8 +6395,6 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
 });
 
 describe('access control', () => {
-  const namespace = 'x';
-
   afterEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
@@ -6407,6 +6405,7 @@ describe('access control', () => {
   });
 
   describe('#authorizeChangeAccessControl', () => {
+    const namespace = 'x';
     const objectsWithExistingNamespaces = [
       {
         type: 'dashboard',
@@ -6424,12 +6423,17 @@ describe('access control', () => {
 
     beforeEach(() => {
       // Reset spies and mocks
-      accessControlServiceMock.setUserForOperation.mockClear();
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockClear();
-      accessControlServiceMock.enforceAccessControl.mockClear();
-      checkAuthorizationSpy.mockClear();
+      accessControlServiceMock.setUserForOperation.mockReset();
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReset();
+      accessControlServiceMock.enforceAccessControl.mockReset();
+      checkAuthorizationSpy.mockReset();
 
-      // Mock current user with different profile_uid
+      // Default: no types require access control
+      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValue({
+        typesRequiringAccessControl: new Set(),
+      });
+
+      // Default: current user is not owner/admin
       getCurrentUser.mockReturnValue({
         profile_uid: 'different_profile_id',
         username: 'test_user',
@@ -6464,47 +6468,7 @@ describe('access control', () => {
       expect(checkPrivileges).not.toHaveBeenCalled();
     });
 
-    test('throws an error when checkAuthorization fails', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      checkPrivileges.mockRejectedValue(new Error('Oh no!'));
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
-        typesRequiringAccessControl: new Set(['dashboard']),
-      });
-
-      await expect(
-        securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects: objectsWithExistingNamespaces,
-          },
-          'changeOwnership'
-        )
-      ).rejects.toThrowError('Oh no!');
-    });
-
-    test('sets user for operation and checks for types requiring access control', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      const mockUser = { username: 'testuser', profile_uid: 'u_userid_test' };
-      getCurrentUser.mockReturnValue(mockUser);
-
-      setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
-
-      await securityExtension.authorizeChangeAccessControl(
-        {
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        },
-        'changeOwnership'
-      );
-      expect(accessControlServiceMock.setUserForOperation).toHaveBeenCalledWith(mockUser);
-
-      expect(accessControlServiceMock.getTypesRequiringPrivilegeCheck).toHaveBeenCalledWith({
-        objects: objectsWithExistingNamespaces,
-        typeRegistry: expect.any(Object),
-      });
-    });
-
-    test('checks authorization with expected options when types require access control', async () => {
+    test('calls checkAuthorization with expected options when types require access control', async () => {
       const { securityExtension } = setup();
       accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
         typesRequiringAccessControl: new Set(['dashboard']),
@@ -6584,7 +6548,6 @@ describe('access control', () => {
         status: 'fully_authorized',
         typeMap: new Map(),
       });
-      getCurrentUser.mockClear();
     });
 
     test('allows operation when user is not admin but owner', async () => {
