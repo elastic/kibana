@@ -180,3 +180,13 @@ export interface WorkflowExecutionEngineModel
   /** Serialized graphlib.Graph */
   executionGraph?: any;
 }
+
+export interface WorkflowListItemAction {
+  isPrimary?: boolean;
+  type: string;
+  color: string;
+  name: string;
+  icon: string;
+  description: string;
+  onClick: (item: WorkflowListItemDto) => void;
+}

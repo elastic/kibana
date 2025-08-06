@@ -30,8 +30,6 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open file upload UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
-      // TODO consider async imports
-
       const { coreStart, data, fileUpload } = dependencies;
 
       const indexUpdateService = new IndexUpdateService(coreStart.http, data);

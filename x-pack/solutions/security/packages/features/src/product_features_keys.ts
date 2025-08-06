@@ -30,6 +30,11 @@ export enum ProductFeatureSecurityKey {
    * running endpoint security
    */
   endpointHostManagement = 'endpoint_host_management',
+
+  /**
+   * Enables access to the Trusted Devices
+   */
+  endpointTrustedDevices = 'endpoint_trusted_devices',
   /**
    * Enables access to Endpoint host isolation and release actions
    */
@@ -179,6 +184,7 @@ export enum SecuritySubFeatureId {
   endpointList = 'endpointListSubFeature',
   endpointExceptions = 'endpointExceptionsSubFeature',
   trustedApplications = 'trustedApplicationsSubFeature',
+  trustedDevices = 'trustedDevicesSubFeature',
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',

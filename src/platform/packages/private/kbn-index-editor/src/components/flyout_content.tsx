@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,7 +27,7 @@ import { css } from '@emotion/react';
 import { isPlaceholderColumn } from '../utils';
 import { UnsavedChangesModal } from './modals/unsaved_changes_modal';
 import type { EditLookupIndexContentContext, FlyoutDeps } from '../types';
-import { CustomPanel } from './custom_panel';
+import { QueryBar } from './query_bar';
 import { FileDropzone } from './file_drop_zone';
 import { FlyoutFooter } from './flyout_footer';
 import { IndexName } from './index_name';
@@ -82,7 +89,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         <FileUploadContext.Provider value={fileUploadContextValue}>
           <EuiFlyoutHeader hasBorder>
             <IndexName />
-
+            <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="indexEditor.flyout.headerDescription"
@@ -103,7 +110,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             <FileDropzone noResults={noResults}>
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <CustomPanel />
+                  <QueryBar />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={true} css={{ minHeight: 0 }}>

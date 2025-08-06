@@ -13,12 +13,11 @@ import type {
   BulkResponseItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart } from '@kbn/core/public';
-import { DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
-import type { Filter } from '@kbn/es-query';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { groupBy, times } from 'lodash';
+import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
   Observable,
@@ -35,14 +34,16 @@ import {
   skipWhile,
   startWith,
   switchMap,
-  take,
   takeWhile,
   tap,
   timer,
   withLatestFrom,
   firstValueFrom,
+  catchError,
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
+import { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { parsePrimitive, isPlaceholderColumn } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
@@ -88,6 +89,12 @@ export class IndexUpdateService {
   private _indexName$ = new BehaviorSubject<string | null>(null);
   public readonly indexName$: Observable<string | null> = this._indexName$.asObservable();
 
+  private readonly _qstr$ = new BehaviorSubject<string>('');
+  public readonly qstr$: Observable<string> = this._qstr$.asObservable();
+  public setQstr(queryString: string) {
+    this._qstr$.next(queryString);
+  }
+
   // Indicated if the index exists (has been created) in Elasticsearch.
   private _indexCrated$ = new BehaviorSubject<boolean>(false);
   public readonly indexCreated$: Observable<boolean> = this._indexCrated$.asObservable();
@@ -124,6 +131,52 @@ export class IndexUpdateService {
   private readonly _refreshSubject$ = new BehaviorSubject<number>(0);
 
   private readonly _subscription = new Subscription();
+
+  public readonly esqlQuery$: Observable<string> = combineLatest([
+    this._indexCrated$,
+    this._indexName$,
+    this._qstr$,
+  ]).pipe(
+    skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
+    map(([indexCreated, indexName, qstr]) => {
+      // FROM
+      const fromCmd = Builder.command({
+        name: 'from',
+        args: [
+          Builder.expression.source.node(indexName!),
+          Builder.option({
+            name: 'metadata',
+            args: [
+              Builder.expression.column({
+                args: [Builder.identifier({ name: '_id' })],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      // WHERE qstr("message: …")
+      const whereCmd = Builder.command({
+        name: 'where',
+        args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr)])],
+      });
+
+      // LIMIT 10
+      const limitCmd = Builder.command({
+        name: 'limit',
+        args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
+      });
+      // Combine the commands into a query node
+      const queryExpression = Builder.expression.query([
+        fromCmd,
+        ...(qstr ? [whereCmd] : []),
+        limitCmd,
+      ]);
+      const queryText: string = BasicPrettyPrinter.print(queryExpression);
+
+      return queryText;
+    })
+  );
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
@@ -350,10 +403,15 @@ export class IndexUpdateService {
     // Fetch ES docs
     this._subscription.add(
       combineLatest([
-        // Only when the dataview is set for the first time
-        this.dataView$.pipe(take(1)),
         // Time range updates
-        this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(startWith(null)),
+        this.data.query.timefilter.timefilter.getTimeUpdate$().pipe(
+          startWith(null),
+          map(() => {
+            return this.data.query.timefilter.timefilter.getTime();
+          })
+        ),
+        // Query updates
+        this.esqlQuery$,
         this._refreshSubject$,
       ])
         .pipe(
@@ -361,43 +419,50 @@ export class IndexUpdateService {
           tap(() => {
             this._isFetching$.next(true);
           }),
-          switchMap(([dataView, timeRangeEmit]) => {
-            return from(
-              this.data.search.searchSource.create({
-                index: dataView.toSpec(),
-                size: DOCS_PER_FETCH,
-              })
-            ).pipe(
-              tap((searchSource) => {
-                const timeRangeFilter = this.data.query.timefilter.timefilter.createFilter(
-                  dataView,
-                  this.data.query.timefilter.timefilter.getTime()
-                ) as Filter;
-                searchSource.setField('filter', [timeRangeFilter]);
-              })
-            );
-          }),
-          switchMap((searchSource) => {
-            // Set the query to match all documents
-            return searchSource.fetch$({
-              disableWarningToasts: true,
-            });
-          }),
-          withLatestFrom(this.dataView$)
+          switchMap(([timeRange, esqlQuery]) => {
+            return this.data.search
+              .search<{ params: ESQLSearchParams }, { rawResponse: ESQLSearchResponse }>(
+                {
+                  params: {
+                    query: esqlQuery,
+                  },
+                },
+                {
+                  strategy: 'esql_async',
+                  retrieveResults: true,
+                }
+              )
+              .pipe(
+                catchError((e) => {
+                  // query might be invalid, so we return an empty response
+                  return of({
+                    rawResponse: {
+                      columns: [],
+                      values: [],
+                      documents_found: 0,
+                    } satisfies ESQLSearchResponse,
+                  });
+                })
+              );
+          })
         )
         .subscribe({
-          next: ([response, dataView]) => {
-            const { hits, total } = response.rawResponse.hits;
+          next: (response) => {
+            const { documents_found: total, values, columns } = response.rawResponse;
 
-            const resultRows: DataTableRecord[] = hits.map((hit) => {
-              return buildDataTableRecord(hit, dataView);
-            });
+            const columnNames = columns.map(({ name }) => name);
+            const resultRows: DataTableRecord[] = values
+              .map((row) => zipObject(columnNames, row))
+              .map((row, idx: number) => {
+                return {
+                  id: String(idx),
+                  raw: row,
+                  flattened: row,
+                } as unknown as DataTableRecord;
+              });
 
             this._rows$.next(resultRows);
-            // `total` can be either a number or an object of type `SearchTotalHits`.
-            // We need to explicitly narrow the type before accessing `.value`.
-            const totalHitsCount = typeof total === 'number' ? total : total?.value ?? 0;
-            this._totalHits$.next(totalHitsCount);
+            this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
           },
           error: (error) => {
@@ -486,20 +551,6 @@ export class IndexUpdateService {
 
   public getIndexName(): string | null {
     return this._indexName$.getValue();
-  }
-
-  // Add a new index
-  public addDoc(doc: Record<string, any>) {
-    this._actions$.next({ type: 'add', payload: { value: doc } });
-  }
-
-  public async addNewRow(newRow: Record<string, any>) {
-    const response = await this.bulkUpdate([{ value: newRow }]);
-
-    if (!response.errors) {
-      this._actions$.next({ type: 'new-row-added', payload: newRow });
-    }
-    return response;
   }
 
   public addEmptyRow() {
