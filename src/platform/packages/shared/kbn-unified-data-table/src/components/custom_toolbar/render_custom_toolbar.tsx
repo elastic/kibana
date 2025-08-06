@@ -49,6 +49,7 @@ export const internalRenderCustomToolbar = (
     },
     gridProps: { additionalControls, inTableSearchControl },
   } = props;
+
   const buttons = hasRoomForGridControls ? (
     <>
       {leftSide && additionalControls && (

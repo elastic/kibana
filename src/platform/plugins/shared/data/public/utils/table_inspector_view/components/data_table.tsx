@@ -204,7 +204,7 @@ class DataTableFormatClass extends Component<
     return (
       <EuiInMemoryTable
         tableLayout="auto"
-        className="eui-xScroll"
+        className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}

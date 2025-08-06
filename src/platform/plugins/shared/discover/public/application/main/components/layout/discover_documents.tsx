@@ -523,6 +523,14 @@ const componentStyles = {
       height: '100%',
       overflow: 'hidden',
 
+      '.unifiedDataTable__cell--highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      },
+
+      '.unifiedDataTable__cell--expanded': {
+        backgroundColor: euiTheme.colors.highlight,
+      },
+
       '.unifiedDataTable__cellValue': {
         fontFamily: euiTheme.font.familyCode,
       },

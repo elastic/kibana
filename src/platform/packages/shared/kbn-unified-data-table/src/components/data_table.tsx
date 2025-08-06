@@ -1444,13 +1444,3 @@ const componentStyles = {
     minHeight: 0,
   }),
 };
-
-/*
-.unifiedDataTable__cell--expanded {
-  background-color: $euiColorHighlight;
-}
-
-.unifiedDataTable__cell--selected {
-  background-color: $euiColorHighlight;
-}
-*/
