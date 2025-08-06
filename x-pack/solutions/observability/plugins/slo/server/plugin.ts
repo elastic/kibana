@@ -249,7 +249,7 @@ export class SLOPlugin
     });
 
     core.getStartServices().then(([coreStart, pluginsStart]) => {
-      plugins.cases.attachmentFramework.registerSuggestion(
+      plugins.cases?.attachmentFramework.registerSuggestion(
         getSLOByServiceName(coreStart, this.initContext.logger.get('cases-suggestion'))
       );
     });
