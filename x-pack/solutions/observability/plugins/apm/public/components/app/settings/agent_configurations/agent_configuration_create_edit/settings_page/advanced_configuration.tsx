@@ -150,17 +150,19 @@ export function AdvancedConfiguration({
           )}
         </EuiFlexItem>
         <EuiFlexItem>
-          <div>
-            <EuiButton
-              data-test-subj="apmSettingsAddAdvancedConfigurationButton"
-              iconType="plusInCircle"
-              onClick={addNewRow}
-            >
-              {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
-                defaultMessage: 'Add configuration',
-              })}
-            </EuiButton>
-          </div>
+          <EuiFlexGroup direction="rowReverse" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="apmSettingsAddAdvancedConfigurationButton"
+                iconType="plusInCircle"
+                onClick={addNewRow}
+              >
+                {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
+                  defaultMessage: 'Add configuration',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
