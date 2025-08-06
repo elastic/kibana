@@ -145,7 +145,7 @@ export const streamGraph = async ({
               push({ payload: msg.content as string, type: 'content' });
             }
             if (!didEnd && msg.tool_calls) {
-              push({ tool_calls: msg.tool_calls, type: 'tool_calls' });
+              push({ toolCalls: msg.tool_calls, type: 'tool_calls' });
             }
           }
           if (

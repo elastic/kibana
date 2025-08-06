@@ -10,4 +10,5 @@ export interface PromptObservableState {
   message?: string;
   error?: string;
   loading: boolean;
+  clientSideToolCalls?: any[];
 }

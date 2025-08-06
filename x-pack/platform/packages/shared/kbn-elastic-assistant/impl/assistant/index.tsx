@@ -389,6 +389,8 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
+            http,
+            connectorId: currentConversation?.apiConfig?.connectorId,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -417,6 +419,8 @@ const AssistantComponent: React.FC<Props> = ({
       currentUserAvatar,
       currentSystemPrompt?.content,
       contentReferencesVisible,
+      http,
+      currentConversation?.apiConfig?.connectorId,
       euiTheme.size.l,
       selectedPromptContextsCount,
     ]

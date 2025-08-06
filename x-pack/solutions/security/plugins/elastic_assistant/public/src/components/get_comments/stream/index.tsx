@@ -15,6 +15,7 @@ import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import type { HttpSetup } from '@kbn/core/public';
 
 interface Props {
   abortStream: () => void;
@@ -31,6 +32,8 @@ interface Props {
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
   messageRole: MessageRole;
+  http?: HttpSetup;
+  connectorId?: string;
 }
 
 export const StreamComment = ({
@@ -48,12 +51,16 @@ export const StreamComment = ({
   setIsStreaming,
   transformMessage,
   messageRole,
+  http,
+  connectorId,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
     content,
     reader,
     isError,
+    http,
+    connectorId,
   });
   useEffect(() => {
     setIsStreaming(isStreaming);

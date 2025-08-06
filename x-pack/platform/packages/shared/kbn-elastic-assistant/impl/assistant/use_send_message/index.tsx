@@ -38,6 +38,21 @@ interface UseSendMessage {
   }: SendMessageProps) => Promise<FetchConnectorExecuteResponse>;
 }
 
+// const fetchMetadataForToolId = async (toolId: string) => {
+//   const response = await http.fetch(`/internal/elastic_assistant/actions/connector/${toolId}/metadata`, {
+//     method: 'GET',
+//     version: '1',
+//   });
+//   return response.data;
+// };
+// export const useGetMetadata = () => {
+//   const { http } = useAssistantContext();
+//   const [isLoading, setIsLoading] = useState(false);
+//   const abortController = useRef(new AbortController());
+//   const getMetadata = useCallback(async () => {
+//     setIsLoading(true);
+//   }, []);
+
 export const useSendMessage = (): UseSendMessage => {
   const { alertsIndexPattern, assistantStreamingEnabled, knowledgeBase, traceOptions } =
     useAssistantContext();

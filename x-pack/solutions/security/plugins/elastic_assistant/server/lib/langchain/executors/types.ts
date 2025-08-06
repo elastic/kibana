@@ -31,6 +31,7 @@ import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '..
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
+import { ToolExecutionMetadataStore } from '../../tool_execution_metadata_store';
 
 export type OnLlmResponse = (
   content: string,
@@ -78,6 +79,7 @@ export interface AgentExecutorParams<T extends boolean> {
   traceOptions?: TraceOptions;
   responseLanguage?: string;
   timeout?: number;
+  metadataStore?: ToolExecutionMetadataStore;
 }
 
 export interface StaticReturnType {

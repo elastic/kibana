@@ -20,6 +20,7 @@ import {
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  POST_ACTIONS_CONNECTOR_EXECUTE_METADATA,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -37,6 +38,10 @@ import {
 import { isOpenSourceModel } from './utils';
 import { ConfigSchema } from '../config_schema';
 import { mapToolToServerSideSecuritySolutionTool } from '@kbn/ai-client-tools-plugin/server';
+import { ToolExecutionMetadataStore } from '../lib/tool_execution_metadata_store';
+
+// Create a metadata store instance
+const metadataStore = new ToolExecutionMetadataStore();
 
 
 export const postActionsConnectorExecuteRoute = (
@@ -226,7 +231,8 @@ export const postActionsConnectorExecuteRoute = (
               screenContext,
               systemPrompt,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-              clientSideTools: mappedClientSideTools
+              clientSideTools: mappedClientSideTools,
+              metadataStore: metadataStore
             }),
             timeout,
           ]);
@@ -256,4 +262,88 @@ export const postActionsConnectorExecuteRoute = (
         }
       }
     );
-};
+  };
+
+export const getActionsConnectorExecuteMetadataRoute = (
+      router: IRouter<ElasticAssistantRequestHandlerContext>,
+      config: ConfigSchema
+    ) => {
+
+      //@TODO: remove
+      console.log(`--@@`, 'getActionsConnectorExecuteMetadataRoute registered');
+      const RESPONSE_TIMEOUT = config?.responseTimeout;
+        router.versioned.get({
+          access: 'internal',
+          path: POST_ACTIONS_CONNECTOR_EXECUTE_METADATA,
+          security: {
+            authz: {
+              enabled: false,
+              reason:
+                '@todo POC',
+            },
+            },
+          options: {
+            timeout: {
+              // Add extra time to the timeout to account for the time it takes to process the request
+              idleSocket: RESPONSE_TIMEOUT + 30 * 1000,
+            },
+          },
+        })
+        .addVersion(
+          {
+            version: API_VERSIONS.internal.v1,
+            validate: {
+              request: {
+                params: schema.object({
+                  connectorId: schema.string(),
+                }),
+                query: schema.object({
+                  toolExecutionId: schema.string(),
+                }),
+              },
+            },
+          },
+            async (context, request, response) => {
+              //@TODO: remove
+            console.log(`--@@`, 'getActionsConnectorExecuteMetadataRoute', request.query);
+            const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+            const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+            const assistantContext = ctx.elasticAssistant;
+
+            try {
+              const toolExecutionId = request.query.toolExecutionId;
+
+
+              // Retrieve the metadata for the given toolExecutionId
+              const metadata = metadataStore.getMetadata(toolExecutionId);
+              //@TODO: remove
+              console.log(`--@@metadata`, metadata);
+
+              if (!metadata) {
+                return response.notFound({
+                  body: `Tool execution metadata not found for ID: ${toolExecutionId}`,
+                });
+              }
+
+              return response.ok({
+                body: {
+                  toolExecutionId: metadata.toolExecutionId,
+                  toolId: metadata.toolId,
+                  toolName: metadata.toolName,
+                  arguments: metadata.arguments,
+                  result: metadata.result,
+                  timestamp: metadata.timestamp,
+                  conversationId: metadata.conversationId,
+                  connectorId: metadata.connectorId,
+                },
+              });
+
+            } catch (err) {
+              const error = transformError(err);
+              return response.customError({
+                statusCode: error.statusCode,
+                body: error.message,
+              });
+            }
+          }
+        );};

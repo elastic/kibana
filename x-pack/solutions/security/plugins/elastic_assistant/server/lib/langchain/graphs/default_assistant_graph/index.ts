@@ -62,6 +62,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   traceOptions,
   responseLanguage = 'English',
   timeout,
+  metadataStore,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai' && !isOssModel;
@@ -269,6 +270,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     telemetry,
     telemetryParams,
     contentReferencesStore,
+    metadataStore,
   });
   const inputs: GraphInputs = {
     responseLanguage,

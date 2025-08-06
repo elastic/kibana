@@ -49,11 +49,13 @@ import {
   AssistantDataClients,
   StaticReturnType,
 } from '../lib/langchain/executors/types';
+import type { AssistantTool } from '../types';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
+import { ToolExecutionMetadataStore } from '../lib/tool_execution_metadata_store';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -257,6 +259,7 @@ export interface LangChainExecuteParams {
   systemPrompt?: string;
   timeout?: number;
   clientSideTools: object[];
+  metadataStore?: ToolExecutionMetadataStore;
 }
 export const langChainExecute = async ({
   messages,
@@ -285,6 +288,7 @@ export const langChainExecute = async ({
   systemPrompt,
   timeout,
   clientSideTools,
+  metadataStore,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -300,7 +304,7 @@ export const langChainExecute = async ({
   const assistantTools = assistantContext
     .getRegisteredTools(pluginNames)
     .filter((tool) => !unsupportedTools.has(tool.id))
-    .concat(clientSideTools);
+    .concat(clientSideTools as AssistantTool[]);
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
@@ -370,6 +374,7 @@ export const langChainExecute = async ({
         logger,
       }),
     },
+    metadataStore,
   };
 
   const result: StreamResponseWithHeaders | StaticReturnType = await callAssistantGraph(
