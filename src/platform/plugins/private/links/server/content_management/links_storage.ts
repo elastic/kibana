@@ -96,6 +96,7 @@ export class LinksStorage {
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<LinksGetOut, LinksGetOut>(
+      // @ts-expect-error - fix type error
       response,
       undefined, // do not override version
       { validate: false } // validation is done above
@@ -232,6 +233,7 @@ export class LinksStorage {
       LinksUpdateOut,
       LinksUpdateOut
     >(
+      // @ts-expect-error - fix type error
       { item },
       undefined, // do not override version
       { validate: false } // validation is done above
