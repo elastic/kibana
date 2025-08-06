@@ -607,6 +607,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           let sharedCookie;
 
+          // Start multiple login attempts
           for (let i = 0; i < 10; i++) {
             const samlHandshakeResponse: Response = await supertest
               .post('/internal/security/login')
@@ -671,35 +672,59 @@ export default function ({ getService }: FtrProviderContext) {
 
           const preparedCallbacks = [];
 
+          let newCookie;
+          let firstResponse;
+
           for (const requestId of Object.keys(samlResponseMapByRequestId)) {
+            const index = Object.keys(samlResponseMapByRequestId).indexOf(requestId);
             const samlValues = samlResponseMapByRequestId[requestId];
 
-            const callbackFunc = () => {
-              // Add a random delay of up to 3 seconds to simulate real-world network conditions
-              const delay = Math.floor(Math.random() * 30000);
-              return new Promise<Response>((resolve) => {
-                setTimeout(() => {
+            // For the first request, we perform the callback immediately to obtain the authenticated cookie.
+            // This is to mock real world scenario where some callbacks may happen after the cookie has been updated to reference
+            // the authenticated session.
+            if (!newCookie) {
+              firstResponse = await supertest
+                .post('/api/security/saml/callback')
+                .ca(CA_CERT)
+                .set('Cookie', samlValues.cookie.cookieString())
+                .send({
+                  SAMLResponse: samlValues.samlResponse,
+                });
+
+              newCookie = parseCookie(firstResponse.headers['set-cookie'][0])!;
+            } else {
+              const callbackFunc = () => {
+                return new Promise<Response>((resolve) => {
                   resolve(
                     supertest
                       .post('/api/security/saml/callback')
                       .ca(CA_CERT)
-                      .set('Cookie', samlValues.cookie.cookieString())
+                      .set(
+                        'Cookie',
+                        index % 2 === 0 // We are going to alternate between authenticated cookie and cookies that corresponded to the initial login attempts
+                          ? newCookie.cookieString()
+                          : samlValues.cookie.cookieString()
+                      )
                       .send({
                         SAMLResponse: samlValues.samlResponse,
                       })
                   );
-                }, 0);
-              });
-            };
+                });
+              };
 
-            preparedCallbacks.push(callbackFunc);
+              preparedCallbacks.push(callbackFunc);
+            }
           }
 
+          // Execute all callbacks in parallel to simulate real world scenario
+          // Some callbacks are using the authenticated cookie, some are using the intermediate cookies
           const responses = await Promise.all(
             preparedCallbacks.map((func) => {
               return func();
             })
           );
+
+          responses.unshift(firstResponse);
 
           const locations = [];
           const statusCodes = [];
@@ -754,7 +779,11 @@ export default function ({ getService }: FtrProviderContext) {
             };
           });
 
-          expect(finalSources).to.have.length(11); // 10 sessions + 1 intermediate session
+          // There should be:
+          // - 1 authenticated session that 5 of the callbacks used from the first callback that was "successful"
+          // - 5 authenticated sessions created by the other 5 callbacks that used intermediate cookies
+          // - 1 intermediate session
+          expect(finalSources).to.have.length(7);
 
           const intermediateSession = finalSources.filter((session) => {
             return session.id === intermediateSessionId;
