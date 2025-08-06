@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { AgentName } from '@kbn/elastic-agent-utils';
+import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
@@ -65,6 +65,9 @@ export function SettingsPage({
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isAdvancedConfigSupported =
+    !newConfig.agent_name ||
+    (newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName));
 
   const invalidAdvancedConfig: boolean = useMemo(() => {
     return Object.values(validationErrors).some((error) => error);
@@ -209,14 +212,18 @@ export function SettingsPage({
                 setNewConfig,
                 settingsDefinitionsByAgent,
               })}
-              <EuiHorizontalRule />
-              <AdvancedConfiguration
-                newConfig={newConfig}
-                setNewConfig={setNewConfig}
-                setValidationErrors={setValidationErrors}
-                settingsDefinitionsByAgent={settingsDefinitionsByAgent}
-                setRemovedConfigCount={setRemovedConfigCount}
-              />
+              {isAdvancedConfigSupported && (
+                <>
+                  <EuiHorizontalRule />
+                  <AdvancedConfiguration
+                    newConfig={newConfig}
+                    setNewConfig={setNewConfig}
+                    setValidationErrors={setValidationErrors}
+                    settingsDefinitionsByAgent={settingsDefinitionsByAgent}
+                    setRemovedConfigCount={setRemovedConfigCount}
+                  />
+                </>
+              )}
             </>
           )}
         </form>
