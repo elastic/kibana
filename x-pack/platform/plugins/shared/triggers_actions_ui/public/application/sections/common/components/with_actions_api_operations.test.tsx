@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
 
@@ -33,13 +34,15 @@ describe('with_action_api_operations', () => {
 
   it('loadActionTypes calls the loadActionTypes api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ loadActionTypes }: ComponentOpts) => {
       return <button onClick={() => loadActionTypes()}>{'call api'}</button>;
     };
 
     const ExtendedComponent = withActionOperations(ComponentToExtend);
     render(<ExtendedComponent />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(actionApis.loadActionTypes).toHaveBeenCalledTimes(1);
     expect(actionApis.loadActionTypes).toHaveBeenCalledWith({ http, includeSystemActions: true });

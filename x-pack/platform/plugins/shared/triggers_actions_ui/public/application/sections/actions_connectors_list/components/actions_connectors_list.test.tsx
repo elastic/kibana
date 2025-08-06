@@ -75,6 +75,7 @@ describe('actions_connectors_list', () => {
 
     it('if click create button should render CreateConnectorFlyout', async () => {
       const setAddFlyoutVisibility = jest.fn();
+      const user = userEvent.setup();
 
       render(
         <IntlProvider>
@@ -90,7 +91,7 @@ describe('actions_connectors_list', () => {
       );
 
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
-      await userEvent.click(createFirstActionButton);
+      await user.click(createFirstActionButton);
       await waitFor(() => {
         expect(setAddFlyoutVisibility).toBeCalled();
       });
@@ -283,6 +284,8 @@ describe('actions_connectors_list', () => {
     });
 
     it('supports pagination', async () => {
+      const user = userEvent.setup();
+
       const pagedActions = times(15, (index) => ({
         id: `connector${index}`,
         actionTypeId: 'test',
@@ -310,12 +313,14 @@ describe('actions_connectors_list', () => {
 
       // Find and click the next page button
       const nextPageButton = await screen.findByTestId('pagination-button-1');
-      await userEvent.click(nextPageButton);
+      await user.click(nextPageButton);
       // Check that the table is still present (pagination state is internal)
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
     });
 
     it('if delete item that is used in a rule should show a warning in the popup', async () => {
+      const user = userEvent.setup();
+
       render(
         <IntlProvider>
           <ActionsConnectorsList
@@ -334,7 +339,7 @@ describe('actions_connectors_list', () => {
 
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
       // Click the first delete button (all mocked actions have referencedByCount: 1)
-      await userEvent.click(deleteButtons[0]);
+      await user.click(deleteButtons[0]);
 
       // Wait for the confirmation dialog to appear
       await waitFor(() => {

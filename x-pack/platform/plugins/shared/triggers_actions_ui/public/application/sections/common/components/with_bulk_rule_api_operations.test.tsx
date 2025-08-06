@@ -95,6 +95,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('muteRule calls the muteRule api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ muteRule, rule }: ComponentOpts & { rule: Rule }) => {
       return <button onClick={() => muteRule(rule)}>{'call api'}</button>;
     };
@@ -102,7 +104,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule();
     render(<ExtendedComponent rule={rule} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(muteRule).toHaveBeenCalledTimes(1);
     expect(muteRule).toHaveBeenCalledWith({ id: rule.id, http });
@@ -110,6 +112,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('unmuteRule calls the unmuteRule api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ unmuteRule, rule }: ComponentOpts & { rule: Rule }) => {
       return <button onClick={() => unmuteRule(rule)}>{'call api'}</button>;
     };
@@ -117,7 +121,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule({ muteAll: true });
     render(<ExtendedComponent rule={rule} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(unmuteRule).toHaveBeenCalledTimes(1);
     expect(unmuteRule).toHaveBeenCalledWith({ id: rule.id, http });
@@ -125,6 +129,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('enableRule calls the bulkEnableRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ bulkEnableRules, rule }: ComponentOpts & { rule: Rule }) => {
       return <button onClick={() => bulkEnableRules({ ids: [rule.id] })}>{'call api'}</button>;
     };
@@ -132,7 +138,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule({ enabled: false });
     render(<ExtendedComponent rule={rule} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(bulkEnableRules).toHaveBeenCalledTimes(1);
     expect(bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id], http });
@@ -150,8 +156,10 @@ describe('with_bulk_rule_api_operations', () => {
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule();
+    const user = userEvent.setup();
+
     render(<ExtendedComponent rule={rule} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(bulkDisableRules).toHaveBeenCalledTimes(1);
     expect(bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], http, untrack: true });
@@ -159,6 +167,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('muteRules calls the muteRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ muteRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return <button onClick={() => muteRules(rules)}>{'call api'}</button>;
     };
@@ -166,7 +176,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
     render(<ExtendedComponent rules={rules} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(muteRules).toHaveBeenCalledTimes(1);
     expect(muteRules).toHaveBeenCalledWith({ ids: [rules[0].id, rules[1].id], http });
@@ -174,6 +184,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('unmuteRules calls the unmuteRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ unmuteRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return <button onClick={() => unmuteRules(rules)}>{'call api'}</button>;
     };
@@ -181,7 +193,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule({ muteAll: true }), mockRule({ muteAll: true })];
     render(<ExtendedComponent rules={rules} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(unmuteRules).toHaveBeenCalledTimes(1);
     expect(unmuteRules).toHaveBeenCalledWith({ ids: [rules[0].id, rules[1].id], http });
@@ -189,6 +201,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('enableRules calls the bulkEnableRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ bulkEnableRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
         <button onClick={() => bulkEnableRules({ ids: rules.map((rule) => rule.id) })}>
@@ -204,7 +218,7 @@ describe('with_bulk_rule_api_operations', () => {
       mockRule({ enabled: false }),
     ];
     render(<ExtendedComponent rules={rules} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(bulkEnableRules).toHaveBeenCalledTimes(1);
     expect(bulkEnableRules).toHaveBeenCalledWith({
@@ -215,6 +229,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('disableRules calls the bulkDisableRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+    
     const ComponentToExtend = ({ bulkDisableRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
         <button
@@ -228,7 +244,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
     render(<ExtendedComponent rules={rules} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(bulkDisableRules).toHaveBeenCalledTimes(1);
     expect(bulkDisableRules).toHaveBeenCalledWith({
@@ -240,6 +256,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('bulkDeleteRules calls the bulkDeleteRules api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ bulkDeleteRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
         <button onClick={() => bulkDeleteRules({ ids: [rules[0].id, rules[1].id] })}>
@@ -251,7 +269,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
     render(<ExtendedComponent rules={rules} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(bulkDeleteRules).toHaveBeenCalledTimes(1);
     expect(bulkDeleteRules).toHaveBeenCalledWith({ ids: [rules[0].id, rules[1].id], http });
@@ -259,6 +277,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('loadRule calls the loadRule api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ loadRule, ruleId }: ComponentOpts & { ruleId: Rule['id'] }) => {
       return <button onClick={() => loadRule(ruleId)}>{'call api'}</button>;
     };
@@ -266,7 +286,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const ruleId = uuidv4();
     render(<ExtendedComponent ruleId={ruleId} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(loadRule).toHaveBeenCalledTimes(1);
     expect(loadRule).toHaveBeenCalledWith({ ruleId, http });
@@ -274,6 +294,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('resolveRule calls the resolveRule api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ resolveRule, ruleId }: ComponentOpts & { ruleId: Rule['id'] }) => {
       return <button onClick={() => resolveRule(ruleId)}>{'call api'}</button>;
     };
@@ -281,7 +303,7 @@ describe('with_bulk_rule_api_operations', () => {
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const ruleId = uuidv4();
     render(<ExtendedComponent ruleId={ruleId} />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(resolveRule).toHaveBeenCalledTimes(1);
     expect(resolveRule).toHaveBeenCalledWith({ id: ruleId, http });
@@ -289,13 +311,15 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('loadRuleTypes calls the loadRuleTypes api', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const ComponentToExtend = ({ loadRuleTypes }: ComponentOpts) => {
       return <button onClick={() => loadRuleTypes()}>{'call api'}</button>;
     };
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(getRuleTypes).toHaveBeenCalledTimes(1);
     expect(getRuleTypes).toHaveBeenCalledWith({ http });
@@ -303,6 +327,7 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('loadExecutionLogAggregations calls the loadExecutionLogAggregations API', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
 
     const sortTimestamp = {
       timestamp: {
@@ -326,7 +351,7 @@ describe('with_bulk_rule_api_operations', () => {
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(loadExecutionLogAggregations).toHaveBeenCalledTimes(1);
     expect(loadExecutionLogAggregations).toHaveBeenCalledWith({
@@ -337,6 +362,8 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('loadActionErrorLog calls the loadActionErrorLog API', async () => {
     const { http } = useKibanaMock().services;
+    const user = userEvent.setup();
+
     const callProps = {
       id: 'test-id',
       dateStart: '2022-03-23T16:17:53.482Z',
@@ -359,7 +386,7 @@ describe('with_bulk_rule_api_operations', () => {
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);
-    await userEvent.click(screen.getByRole('button', { name: /call api/i }));
+    await user.click(screen.getByRole('button', { name: /call api/i }));
 
     expect(loadActionErrorLog).toHaveBeenCalledTimes(1);
     expect(loadActionErrorLog).toHaveBeenCalledWith({
