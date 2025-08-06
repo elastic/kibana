@@ -58,7 +58,7 @@ export const DiscoverTopNav = ({
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
-  const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
+  const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useInternalStateSelector((state) => state.esqlVariables);
@@ -88,7 +88,7 @@ export const DiscoverTopNav = ({
     isEsqlMode,
     stateContainer,
     currentEsqlVariables: esqlVariables,
-    controlGroupAPI,
+    controlGroupApi,
     onTextLangQueryChange: stateContainer.actions.updateESQLQuery,
   });
 
@@ -307,7 +307,7 @@ export const DiscoverTopNav = ({
                 onSaveControl,
                 controlsWrapper: (
                   <ControlGroupRenderer
-                    onApiAvailable={setControlGroupAPI}
+                    onApiAvailable={setControlGroupApi}
                     timeRange={timeRange}
                     getCreationOptions={async (initialState) => {
                       const initialChildControlState =

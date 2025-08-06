@@ -54,7 +54,7 @@ const getEsqlVariablesFromState = (
  *
  * @param options - Configuration options for the hook.
  * @param options.isEsqlMode - Indicates if the current application mode is ESQL.
- * @param options.controlGroupAPI - The ControlGroupRendererApi instance for interacting with control panels.
+ * @param options.controlGroupApi - The ControlGroupRendererApi instance for interacting with control panels.
  * @param options.currentEsqlVariables - The currently active ESQL variables from the application state.
  * @param options.stateContainer - The DiscoverStateContainer instance for data fetching.
  * @param options.onTextLangQueryChange - Callback function to update the ESQL query.
@@ -65,13 +65,13 @@ const getEsqlVariablesFromState = (
 
 export const useESQLVariables = ({
   isEsqlMode,
-  controlGroupAPI,
+  controlGroupApi,
   currentEsqlVariables,
   stateContainer,
   onTextLangQueryChange,
 }: {
   isEsqlMode: boolean;
-  controlGroupAPI?: ControlGroupRendererApi;
+  controlGroupApi?: ControlGroupRendererApi;
   currentEsqlVariables?: ESQLControlVariable[];
   stateContainer: DiscoverStateContainer;
   onTextLangQueryChange: (query: string) => void;
@@ -86,11 +86,11 @@ export const useESQLVariables = ({
   const savedSearchState = useSavedSearch();
 
   useEffect(() => {
-    // Only proceed if in ESQL mode and controlGroupAPI is available
-    if (!controlGroupAPI || !isEsqlMode) {
+    // Only proceed if in ESQL mode and controlGroupApi is available
+    if (!controlGroupApi || !isEsqlMode) {
       return;
     }
-    const inputSubscription = controlGroupAPI.getInput$().subscribe((input) => {
+    const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
         const currentTabControlState =
           input.initialChildControlState as ControlPanelsState<ESQLControlState>;
@@ -116,7 +116,7 @@ export const useESQLVariables = ({
       inputSubscription.unsubscribe();
     };
   }, [
-    controlGroupAPI,
+    controlGroupApi,
     setControlGroupState,
     currentEsqlVariables,
     dispatch,
@@ -126,13 +126,13 @@ export const useESQLVariables = ({
 
   const onSaveControl = useCallback(
     async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!controlGroupAPI) {
+      if (!controlGroupApi) {
         // eslint-disable-next-line no-console
-        console.error('ControlGroupAPI is not available when attempting to save control.');
+        console.error('controlGroupApi is not available when attempting to save control.');
         return;
       }
       // add a new control
-      controlGroupAPI.addNewPanel?.({
+      controlGroupApi.addNewPanel?.({
         panelType: 'esqlControl',
         serializedState: {
           rawState: {
@@ -146,7 +146,7 @@ export const useESQLVariables = ({
         onTextLangQueryChange(updatedQuery);
       }
     },
-    [controlGroupAPI, onTextLangQueryChange]
+    [controlGroupApi, onTextLangQueryChange]
   );
 
   // Getter function to retrieve the currently active control panels state for the current tab
