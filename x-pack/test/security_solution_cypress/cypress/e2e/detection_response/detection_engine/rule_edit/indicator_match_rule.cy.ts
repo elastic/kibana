@@ -12,6 +12,7 @@ import {
   SUPPRESS_BY_DETAILS,
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
+  INDICATOR_MAPPING,
 } from '../../../../screens/rule_details';
 
 import {
@@ -37,6 +38,9 @@ import {
   selectAlertSuppressionPerRuleExecution,
   selectAlertSuppressionPerInterval,
   setAlertSuppressionDuration,
+  fillIndicatorMatchRow,
+  getIndicatorAndButton,
+  getIndicatorDeleteButton,
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -134,6 +138,59 @@ describe(
         cy.get(DEFINITION_DETAILS).within(() => {
           getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
         });
+      });
+    });
+
+    describe('DOES NOT MATCH', () => {
+      beforeEach(() => {
+        createRule(rule);
+        visit(RULES_MANAGEMENT_URL);
+        editFirstRule();
+      });
+
+      it('applies does not match settings', () => {
+        getIndicatorAndButton().click();
+        fillIndicatorMatchRow({
+          rowNumber: 2,
+          indexField: 'source.ip',
+          indicatorIndexField: 'threat.indicator.ip',
+          doesNotMatch: true,
+        });
+
+        saveEditedRule();
+
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(INDICATOR_MAPPING).contains(
+            'AND (source.ip DOES NOT MATCH threat.indicator.ip)'
+          );
+        });
+      });
+
+      it('shows error if single DOES NOT MATCH entry configured', () => {
+        getIndicatorAndButton().click();
+        fillIndicatorMatchRow({
+          rowNumber: 2,
+          indexField: 'source.ip',
+          indicatorIndexField: 'threat.indicator.ip',
+          doesNotMatch: true,
+        });
+        getIndicatorDeleteButton(1).click();
+
+        cy.contains('Conditions with AND clauses must have at least one MATCHES entry.');
+      });
+
+      it('shows error when 2 identical entries with different match operator configured', () => {
+        getIndicatorAndButton().click();
+        fillIndicatorMatchRow({
+          rowNumber: 2,
+          indexField: rule.threat_mapping[0].entries[0].field,
+          indicatorIndexField: rule.threat_mapping[0].entries[0].value,
+          doesNotMatch: true,
+        });
+
+        cy.contains(
+          'When forming an AND statement with MATCHES and DOES NOT MATCH entries, avoid selecting identical field values for comparison from the source and indicator indices.'
+        );
       });
     });
   }
