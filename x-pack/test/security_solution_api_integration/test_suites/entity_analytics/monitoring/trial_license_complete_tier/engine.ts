@@ -102,13 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
       });
       beforeEach(async () => {
-        log.info(`Cleaning up before test`);
-        try {
-          await es.indices.delete({ index: indexName }, { ignore: [404] });
-          await api.deleteMonitoringEngine({ query: { data: true } });
-        } catch (err) {
-          log.warning(`Failed to clean up in beforeEach: ${err.message}`);
-        }
         // create the tatooine index
         await es.indices.create({
           index: indexName,
