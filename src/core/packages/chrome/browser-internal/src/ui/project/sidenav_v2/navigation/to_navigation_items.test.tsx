@@ -30,9 +30,9 @@ describe('toNavigationItems', () => {
   it('should return logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
-        "href": "/tzo/s/sec/app/security",
+        "href": "/missing-href-😭",
         "iconType": "logoSecurity",
-        "id": "security",
+        "id": "security_solution_nav",
         "label": "Security",
       }
     `);
@@ -54,6 +54,7 @@ describe('toNavigationItems', () => {
     expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "
       === Navigation Warnings ===
+      • Navigation item \\"security_solution_nav\\" is missing a \\"href\\". Using fallback value: \\"/missing-href-😭\\".
       • Navigation item \\"discover\\" is missing a \\"icon\\". Using fallback value: \\"discoverApp\\".
       • Navigation item \\"dashboards\\" is missing a \\"icon\\". Using fallback value: \\"dashboardApp\\".
       • Navigation node \\"node-2\\" is missing href and is not a panel opener. This node was likely used as a sub-section. Ignoring this node and flattening its children: securityGroup:rules, alerts, attack_discovery, cloud_security_posture-findings, cases.

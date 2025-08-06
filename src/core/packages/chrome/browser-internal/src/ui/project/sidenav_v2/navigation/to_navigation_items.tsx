@@ -85,11 +85,17 @@ export const toNavigationItems = (
     );
   }
 
+  if (!logoNode) {
+    warnOnce(
+      'Navigation tree is missing a logo node. The first level should contain a logo node with solution logo, name and home page href.'
+    );
+  }
+
   const logoItem: SideNavLogo = {
-    href: warnIfMissing(logoNode, 'href', '/') as string,
+    href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
     iconType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
-    id: warnIfMissing(logoNode, 'id', 'kibana') as string,
-    label: warnIfMissing(logoNode, 'title', 'Kibana') as string,
+    id: warnIfMissing(logoNode, 'id', 'kibana'),
+    label: warnIfMissing(logoNode, 'title', 'Kibana'),
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {
