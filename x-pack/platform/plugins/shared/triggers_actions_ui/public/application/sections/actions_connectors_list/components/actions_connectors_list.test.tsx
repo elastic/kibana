@@ -627,10 +627,9 @@ describe('actions_connectors_list', () => {
       expect(screen.getByTestId('edit2')).toBeInTheDocument();
 
       const warningIcons = screen
-          .getByTestId('actionsTable')
-          .querySelectorAll('[data-euiicon-type="warning"]');
+        .getByTestId('actionsTable')
+        .querySelectorAll('[data-euiicon-type="warning"]');
       expect(warningIcons.length).toBeGreaterThan(0);
-
     });
   });
 });
