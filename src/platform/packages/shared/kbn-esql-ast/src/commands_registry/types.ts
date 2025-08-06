@@ -126,7 +126,7 @@ export interface ICommandCallbacks {
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
-  getJoinIndices?: () => Promise<ESQLSourceResult[]>;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getCurrentAppId?: () => Promise<string | undefined>;
 }
 
