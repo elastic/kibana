@@ -28,6 +28,8 @@ import type {
 
 type FilterOperation = '+' | '-' | '_exists_';
 
+const NON_ESC_FIELD = '<non-ecs>';
+
 enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
@@ -91,6 +93,8 @@ export class ScopedDiscoverEBTManager {
       // excludes non ECS fields
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
+      } else {
+        eventData[FIELD_USAGE_FIELD_NAME] = NON_ESC_FIELD;
       }
     }
 
