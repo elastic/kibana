@@ -75,6 +75,90 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
     });
 
+    describe('User has access to dataset quality with limited privileges', () => {
+      before(async () => {
+        await createDatasetQualityUserWithRole(security, 'fullAccess', []);
+
+        await PageObjects.security.login('fullAccess', 'fullAccess-password', {
+          expectSpaceSelector: false,
+        });
+      });
+
+      after(async () => {
+        // Cleanup the user and role
+        await PageObjects.security.forceLogout();
+        await deleteDatasetQualityUserWithRole(security, 'fullAccess');
+      });
+
+      describe('User cannot monitor any data stream', () => {
+        before(async () => {
+          await PageObjects.datasetQuality.navigateTo();
+        });
+        after(async () => {
+          // Cleanup the user and role
+          await PageObjects.security.forceLogout();
+          await deleteDatasetQualityUserWithRole(security, 'fullAccess');
+        });
+
+        it('user has access to dataset quality app but cannot read any dataset', async () => {
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoPrivilegesEmptyState
+          );
+        });
+      });
+
+      describe('User has access to a single data stream', () => {
+        before(async () => {
+          await createDatasetQualityUserWithRole(security, 'fullAccess', [
+            { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
+          ]);
+
+          await PageObjects.security.login('fullAccess', 'fullAccess-password', {
+            expectSpaceSelector: false,
+          });
+          await PageObjects.datasetQuality.navigateTo();
+        });
+
+        after(async () => {
+          // Cleanup the user and role
+          await PageObjects.security.forceLogout();
+          await deleteDatasetQualityUserWithRole(security, 'fullAccess');
+        });
+
+        it('should still be able to navigate and use the dataset quality app', async () => {
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoPrivilegesEmptyState
+          );
+        });
+
+        it('types filter should not be rendered', async () => {
+          await testSubjects.missingOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTypesSelectableButton
+          );
+        });
+      });
+
+      describe('User has access to a multipl data streams', () => {
+        before(async () => {
+          await createDatasetQualityUserWithRole(security, 'fullAccess', [
+            { names: ['logs-*'], privileges: ['read', 'view_index_metadata'] },
+            { names: ['metrics-*'], privileges: ['read', 'view_index_metadata'] },
+          ]);
+
+          await PageObjects.security.login('fullAccess', 'fullAccess-password', {
+            expectSpaceSelector: false,
+          });
+          await PageObjects.datasetQuality.navigateTo();
+        });
+
+        it('types filter should be rendered', async () => {
+          await testSubjects.existOrFail(
+            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTypesSelectableButton
+          );
+        });
+      });
+    });
+
     describe('User can read logs-*', () => {
       before(async () => {
         await createDatasetQualityUserWithRole(security, 'fullAccess', [

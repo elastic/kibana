@@ -50,30 +50,36 @@ class DatasetQualityPrivileges {
 
   public async getDatasetPrivileges(
     esClient: ElasticsearchClient,
-    dataset: string,
+    dataset: string[],
     space = '*'
   ): Promise<{
-    canRead: boolean;
-    canMonitor: boolean;
+    datasetsPrivilages: Record<
+      string,
+      { canRead: boolean; canMonitor: boolean; canReadFailureStore: boolean }
+    >;
     canViewIntegrations: boolean;
-    canReadFailureStore: boolean;
   }> {
-    const indexPrivileges = await esClient.security.hasPrivileges({
-      index: [
-        {
-          names: dataset,
-          privileges: ['read', 'monitor', 'view_index_metadata', FAILURE_STORE_PRIVILEGE],
-        },
-      ],
-    });
+    const indexPrivileges = await this.getHasIndexPrivileges(esClient, dataset, [
+      'read',
+      'monitor',
+      'view_index_metadata',
+      FAILURE_STORE_PRIVILEGE,
+    ]);
 
-    const canRead = indexPrivileges.index[dataset]?.read ?? false;
-    const canViewIndexMetadata = indexPrivileges.index[dataset]?.view_index_metadata ?? false;
-    const canReadFailureStore = indexPrivileges.index[dataset]?.[FAILURE_STORE_PRIVILEGE] ?? false;
+    const datasetsPrivilages = Object.fromEntries(
+      Object.entries(indexPrivileges).map(([index, privileges]) => [
+        index,
+        {
+          canRead: privileges.read,
+          canMonitor: privileges.view_index_metadata,
+          canReadFailureStore: privileges[FAILURE_STORE_PRIVILEGE],
+        },
+      ])
+    );
 
     const canViewIntegrations = await this.getCanViewIntegrations(esClient, space);
 
-    return { canRead, canMonitor: canViewIndexMetadata, canViewIntegrations, canReadFailureStore };
+    return { datasetsPrivilages, canViewIntegrations };
   }
 
   public async canReadDataset(
@@ -89,11 +95,11 @@ class DatasetQualityPrivileges {
 
     const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
       esClient,
-      datasetName,
+      [datasetName],
       space
     );
 
-    return datasetUserPrivileges.canRead;
+    return datasetUserPrivileges.datasetsPrivilages[datasetName].canRead;
   }
 
   public async throwIfCannotReadDataset(
