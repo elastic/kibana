@@ -7,7 +7,7 @@
 
 import type { AuditLogger, EcsEvent } from '@kbn/core/server';
 import type { ArrayElement } from '@kbn/utility-types';
-import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
+import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 
 export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_CREATED = 'siem_migration_created',

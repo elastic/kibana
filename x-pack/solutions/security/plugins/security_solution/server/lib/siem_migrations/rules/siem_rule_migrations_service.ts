@@ -11,8 +11,8 @@ import type { LoggerFactory, IClusterClient, Logger } from '@kbn/core/server';
 import { RuleMigrationsDataService } from './data/rule_migrations_data_service';
 import type { RuleMigrationsDataClient } from './data/rule_migrations_data_client';
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
-import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
 import type { SiemMigrationsCreateClientParams } from '../common/types';
+import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;

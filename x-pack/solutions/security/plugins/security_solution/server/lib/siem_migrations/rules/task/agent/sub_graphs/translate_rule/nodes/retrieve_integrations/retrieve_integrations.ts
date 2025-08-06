@@ -7,7 +7,7 @@
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { RuleMigrationsRetriever } from '../../../../../retrievers';
-import type { SiemMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
+import type { RuleMigrationTelemetryClient } from '../../../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 import type { GraphNode } from '../../types';
@@ -15,7 +15,7 @@ import { MATCH_INTEGRATION_PROMPT } from './prompts';
 
 interface GetRetrieveIntegrationsNodeParams {
   model: ChatModel;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 

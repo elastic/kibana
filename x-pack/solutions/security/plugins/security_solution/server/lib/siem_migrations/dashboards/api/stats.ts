@@ -11,10 +11,10 @@ import type { GetDashboardMigrationStatsResponse } from '../../../../../common/s
 import { GetDashboardMigrationStatsRequestParams } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_STATS_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { withLicense } from '../../common/utils/with_license';
-import { authz } from '../../common/utils/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { authz } from '../../common/api/util/authz';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
-import { withExistingDashboardMigration } from './utils/use_existing_dashboard_migration';
+import { withExistingDashboardMigration } from './util/with_existing_dashboard_migration';
 
 export const registerSiemDashboardMigrationsStatsRoute = (
   router: SecuritySolutionPluginRouter,

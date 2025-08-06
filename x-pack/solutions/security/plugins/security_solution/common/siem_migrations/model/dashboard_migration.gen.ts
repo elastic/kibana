@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { MigrationLastExecution, MigrationStatus, MigrationTaskStatus } from './common.gen';
+import { MigrationLastExecution, MigrationStatus, MigrationTaskStats } from './migration.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -147,52 +147,4 @@ export const DashboardMigrationDashboard = z
  * The dashboard migration task stats object.
  */
 export type DashboardMigrationTaskStats = z.infer<typeof DashboardMigrationTaskStats>;
-export const DashboardMigrationTaskStats = z.object({
-  /**
-   * The migration id
-   */
-  id: NonEmptyString,
-  /**
-   * The migration name
-   */
-  name: NonEmptyString,
-  /**
-   * Indicates if the migration task status.
-   */
-  status: MigrationTaskStatus,
-  /**
-   * The dashboards migration stats.
-   */
-  dashboards: z
-    .object({
-      /**
-       * The total number of dashboards to migrate.
-       */
-      total: z.number().int(),
-      /**
-       * The number of dashboards that are pending migration.
-       */
-      pending: z.number().int(),
-      /**
-       * The number of dashboards that are being migrated.
-       */
-      processing: z.number().int(),
-      /**
-       * The number of dashboards that have been migrated successfully.
-       */
-      completed: z.number().int(),
-      /**
-       * The number of dashboards that have failed migration.
-       */
-      failed: z.number().int(),
-    })
-    .optional(),
-  /**
-   * The moment the migration was created.
-   */
-  created_at: z.string(),
-  /**
-   * The moment of the last update.
-   */
-  last_updated_at: z.string(),
-});
+export const DashboardMigrationTaskStats = MigrationTaskStats;

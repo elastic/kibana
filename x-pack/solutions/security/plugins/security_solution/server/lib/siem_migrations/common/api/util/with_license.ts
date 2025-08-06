@@ -7,7 +7,7 @@
 
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
+import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 
 const LICENSE_ERROR_MESSAGE = i18n.translate('xpack.securitySolution.api.licenseError', {
   defaultMessage: 'Your license does not support this feature.',

@@ -20,7 +20,7 @@ import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assis
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
-import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 
 interface Drawable {
@@ -40,7 +40,7 @@ const createLlmInstance = () => {
 
 async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
-  const telemetryClient = {} as SiemMigrationTelemetryClient;
+  const telemetryClient = {} as RuleMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
     model,
     esqlKnowledgeBase,
