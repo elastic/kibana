@@ -75,6 +75,47 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_lucene',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: '',
+              language: 'lucene',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrase',
+                  key: 'airline',
+                  value: 'ASA',
+                  params: {
+                    query: 'ASA',
+                    type: 'phrase',
+                  },
+                },
+                query: {
+                  match: {
+                    airline: {
+                      query: 'ASA',
+                      type: 'phrase',
+                    },
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
@@ -112,6 +153,20 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_kuery',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'airline: A* and responsetime > 5',
+              language: 'kuery',
+            },
+            filter: [],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
@@ -149,6 +204,47 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_filter_and_lucene',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime:>50',
+              language: 'lucene',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrase',
+                  key: 'airline',
+                  value: 'ASA',
+                  params: {
+                    query: 'ASA',
+                    type: 'phrase',
+                  },
+                },
+                query: {
+                  match: {
+                    airline: {
+                      query: 'ASA',
+                      type: 'phrase',
+                    },
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
@@ -213,6 +309,47 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_filter_and_kuery',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime > 49',
+              language: 'kuery',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrase',
+                  key: 'airline',
+                  value: 'ASA',
+                  params: {
+                    query: 'ASA',
+                    type: 'phrase',
+                  },
+                },
+                query: {
+                  match: {
+                    airline: {
+                      query: 'ASA',
+                      type: 'phrase',
+                    },
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
@@ -277,6 +414,52 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_filter_two_and_lucene',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime:>50',
+              language: 'lucene',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrases',
+                  key: 'airline',
+                  params: ['ASA', 'AAL'],
+                },
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          airline: 'ASA',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          airline: 'AAL',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
@@ -346,6 +529,52 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_filter_two_and_kuery',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime > 49',
+              language: 'kuery',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrases',
+                  key: 'airline',
+                  params: ['ASA', 'FFT'],
+                },
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          airline: 'ASA',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          airline: 'FFT',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
