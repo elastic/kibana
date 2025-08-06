@@ -22,5 +22,6 @@
     "@kbn/telemetry-config",
     "@kbn/repo-info",
     "@kbn/utility-types",
+    "@kbn/metrics-config",
   ]
 }
