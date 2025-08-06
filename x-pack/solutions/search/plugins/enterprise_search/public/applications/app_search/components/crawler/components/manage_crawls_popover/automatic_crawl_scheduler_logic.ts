@@ -69,7 +69,6 @@ export const AutomaticCrawlSchedulerLogic = kea<
       {
         clearCrawlSchedule: () => false,
         setCrawlSchedule: () => true,
-        // @ts-expect-error upgrade typescript v5.1.6
         toggleCrawlAutomatically: (crawlAutomatically) => !crawlAutomatically,
       },
     ],
@@ -77,9 +76,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
       DEFAULT_VALUES.crawlFrequency,
       {
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlFrequency,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlSchedule: (_, { crawlSchedule: { frequency } }) => frequency,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlFrequency: (_, { crawlFrequency }) => crawlFrequency,
       },
     ],
@@ -87,9 +84,7 @@ export const AutomaticCrawlSchedulerLogic = kea<
       DEFAULT_VALUES.crawlUnit,
       {
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlUnit,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlSchedule: (_, { crawlSchedule: { unit } }) => unit,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlUnit: (_, { crawlUnit }) => crawlUnit,
       },
     ],

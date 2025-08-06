@@ -26,11 +26,12 @@ import { buildFleetAgentBulkCreateOperations, deleteIndexedFleetAgents } from '.
 import type {
   DeleteIndexedEndpointFleetActionsResponse,
   IndexedEndpointAndFleetActionsForHostResponse,
+  IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
+
 import {
   buildIEndpointAndFleetActionsBulkOperations,
   deleteIndexedEndpointAndFleetActions,
-  type IndexEndpointAndFleetActionsForHostOptions,
 } from './index_endpoint_fleet_actions';
 
 import type {
