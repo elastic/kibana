@@ -548,7 +548,7 @@ include::CHANGELOG.asciidoc[tag=known-issue-1508]
 include::CHANGELOG.asciidoc[tag=known-issue-2088]
 
 // tag::known-issue-230275[]
-.Issues with rules occur when `xpack.alerting.rules.run.alerts.max` is set to a value greater than 5000.
+.Issues with rules occur when xpack.alerting.rules.run.alerts.max is set to a value greater than 5000.
 [%collapsible]
 ====
 *Details* +
