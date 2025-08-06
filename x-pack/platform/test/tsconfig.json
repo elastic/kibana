@@ -138,6 +138,7 @@
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/ci-stats-reporter",
     "@kbn/usage-collection-plugin",
-    "@kbn/core-deprecations-common"
+    "@kbn/core-deprecations-common",
+    "@kbn/controls-plugin",
   ]
 }
