@@ -74,6 +74,10 @@ describe('of expression', () => {
     );
 
     // Check that the button shows the correct value
+    waitFor(() => {
+      expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
+    });
+    
     expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test2');
 
     // Open the popover to access the form elements

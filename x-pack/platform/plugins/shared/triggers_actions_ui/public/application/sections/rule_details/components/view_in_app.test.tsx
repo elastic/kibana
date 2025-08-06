@@ -49,7 +49,7 @@ describe('view in app', () => {
           getNavigation: jest.fn(),
         },
       },
-    } as any);
+    } as unknown as ReturnType<typeof useKibana>);
   });
 
   describe('link to the app that created the rule', () => {
