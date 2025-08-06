@@ -39,6 +39,7 @@ import type {
 import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { RequestHandlerContext } from '@kbn/core/server';
+import { createMockedMSearchStorage } from './mocks/in_memory_storage';
 
 const spyMsearch = jest.fn();
 const getmSearchSpy = () => spyMsearch;
@@ -957,18 +958,20 @@ describe('Content Core', () => {
               storage,
             });
 
+            const request = mockRouter.createFakeKibanaRequest({});
             const requestHandlerContext = {} as any;
             const client = coreSetup.api.contentClient
               .getForRequest({
+                request,
                 requestHandlerContext,
-                request: {} as any,
               })
               .for(FOO_CONTENT_ID);
 
             const options = { foo: 'bar' };
             await client.get('1234', options);
 
-            const storageContext = {
+            const storageContext: StorageContext = {
+              request,
               requestHandlerContext,
               utils: { getTransforms: expect.any(Function) },
               version: {
@@ -993,18 +996,20 @@ describe('Content Core', () => {
               storage,
             });
 
+            const request = mockRouter.createFakeKibanaRequest({});
             const requestHandlerContext = {} as any;
 
             const client = coreSetup.api.contentClient
               .getForRequest({
+                request,
                 requestHandlerContext,
-                request: {} as any,
               })
               .for(FOO_CONTENT_ID, requestVersion);
 
             await client.get('1234');
 
             const storageContext = {
+              request,
               requestHandlerContext,
               utils: { getTransforms: expect.any(Function) },
               version: {
@@ -1039,8 +1044,6 @@ describe('Content Core', () => {
         });
 
         describe('multiple content types', () => {
-          const storage = createMockedStorage();
-
           beforeEach(() => {
             spyMsearch.mockReset();
           });
@@ -1050,7 +1053,7 @@ describe('Content Core', () => {
 
             coreSetup.api.register({
               id: 'foo',
-              storage,
+              storage: createMockedMSearchStorage('foo'),
               version: {
                 latest: 9, // Needs to be automatically passed to the mSearch service
               },
@@ -1058,7 +1061,7 @@ describe('Content Core', () => {
 
             coreSetup.api.register({
               id: 'bar',
-              storage,
+              storage: createMockedMSearchStorage('bar'),
               version: {
                 latest: 11, // Needs to be automatically passed to the mSearch service
               },
@@ -1090,7 +1093,7 @@ describe('Content Core', () => {
 
             coreSetup.api.register({
               id: 'foo',
-              storage,
+              storage: createMockedMSearchStorage('foo'),
               version: {
                 latest: 9, // Needs to be automatically passed to the mSearch service
               },
@@ -1098,7 +1101,7 @@ describe('Content Core', () => {
 
             coreSetup.api.register({
               id: 'bar',
-              storage,
+              storage: createMockedMSearchStorage('bar'),
               version: {
                 latest: 11, // Needs to be automatically passed to the mSearch service
               },
@@ -1121,6 +1124,47 @@ describe('Content Core', () => {
             const [contentTypes] = spyMsearch.mock.calls[0];
             expect(contentTypes[0].ctx.version).toEqual({ latest: 9, request: 2 });
             expect(contentTypes[1].ctx.version).toEqual({ latest: 11, request: 3 });
+
+            cleanUp();
+          });
+
+          test('should ignore content types if mSearch not provided', async () => {
+            const { coreSetup, cleanUp } = setup();
+
+            coreSetup.api.register({
+              id: 'foo',
+              // without mSearch
+              storage: createMockedStorage(),
+              version: {
+                latest: 1,
+              },
+            });
+
+            coreSetup.api.register({
+              id: 'bar',
+              // with mSearch
+              storage: createMockedMSearchStorage('bar'),
+              version: {
+                latest: 1,
+              },
+            });
+
+            const client = coreSetup.api.contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+            });
+
+            await client.msearch({
+              // We don't pass the version here
+              contentTypes: [{ contentTypeId: 'foo' }, { contentTypeId: 'bar' }],
+              query: { text: 'Hello' },
+            });
+
+            const [contentTypes] = spyMsearch.mock.calls[0];
+            expect(contentTypes.length).toBe(1);
+
+            expect(contentTypes[0].contentTypeId).toBe('bar');
+            expect(contentTypes[0].ctx.version).toEqual({ latest: 1, request: 1 });
 
             cleanUp();
           });
