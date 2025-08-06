@@ -19,6 +19,10 @@ telemetry.metrics:
           authorization: "ApiKey [REDACTED]"
 ```
 
+#### Special case: Monitoring Collection
+
+This package also takes care of initializing the metric exporters defined in the Monitoring Collection plugin. Refer to the [plugin's docs](../../../../../../x-pack/platform/plugins/private/monitoring_collection/README.md) for more info about those exporters.
+
 ### Instrument your code with metrics
 
 Whenever you want to instrument your code with any metric, you can do this with these 4 simple steps:
