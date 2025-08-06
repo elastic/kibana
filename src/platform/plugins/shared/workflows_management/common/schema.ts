@@ -52,6 +52,15 @@ const connectors = [
     ],
   },
   {
+    type: 'inference.completion',
+    params: [
+      {
+        name: 'input',
+        type: 'string' as const,
+      },
+    ],
+  },
+  {
     type: 'delay',
     params: [
       {

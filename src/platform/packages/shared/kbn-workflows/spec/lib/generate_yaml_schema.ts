@@ -16,7 +16,6 @@ import {
   getMergeStepSchema,
   getParallelStepSchema,
   WorkflowSchema,
-  WorkflowYamlSchema,
 } from '../schema';
 
 export interface ConnectorContract {
@@ -85,18 +84,15 @@ export function generateYamlSchemaFromConnectors(
 
   if (loose) {
     return z.object({
-      version: WorkflowYamlSchema.shape.version,
+      version: z.literal('1').default('1').describe('The version of the workflow schema'),
       workflow: WorkflowSchema.partial().extend({
         steps: z.array(recursiveStepSchema).optional(),
       }),
     });
   }
 
-  return z.object({
-    version: WorkflowYamlSchema.shape.version,
-    workflow: WorkflowSchema.extend({
-      steps: z.array(recursiveStepSchema),
-    }),
+  return WorkflowSchema.extend({
+    steps: z.array(recursiveStepSchema),
   });
 }
 
