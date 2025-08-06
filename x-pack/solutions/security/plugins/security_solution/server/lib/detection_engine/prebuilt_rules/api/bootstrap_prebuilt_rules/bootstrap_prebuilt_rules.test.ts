@@ -44,7 +44,7 @@ describe('bootstrap_prebuilt_rules_route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    bootstrapPrebuiltRulesRoute(server.router);
+    bootstrapPrebuiltRulesRoute(server.router, clients.logger);
   });
 
   it('returns information about installed packages', async () => {
