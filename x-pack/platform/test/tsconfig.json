@@ -132,7 +132,6 @@
     "@kbn/apm-synthtrace",
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
-    "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/utility-types",
     "@kbn/server-route-repository-utils",
