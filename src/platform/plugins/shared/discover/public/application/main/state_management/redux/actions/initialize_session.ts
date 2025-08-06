@@ -67,7 +67,7 @@ export const initializeSession: InternalStateThunkActionCreator<
   async (
     dispatch,
     getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
+    { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));

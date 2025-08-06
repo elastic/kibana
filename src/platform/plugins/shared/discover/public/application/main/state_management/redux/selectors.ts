@@ -30,3 +30,9 @@ export const selectRecentlyClosedTabs = createSelector(
       .map((id) => byId[id])
       .filter((tab) => tab && 'closedAt' in tab) as RecentlyClosedTabState[]
 );
+
+export const selectIsTabsBarHidden = createSelector(
+  (state: DiscoverInternalState) => state.initializationState,
+  (initializationState) =>
+    !initializationState.hasUserDataView && !initializationState.hasEnteredViaESQL
+);

@@ -73,7 +73,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
 };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  initializationState: { hasESData: false, hasUserDataView: false, hasEnteredViaESQL: undefined },
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,

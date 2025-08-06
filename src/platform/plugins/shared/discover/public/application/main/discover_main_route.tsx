@@ -91,6 +91,7 @@ export const DiscoverMainRoute = ({
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
+        hasEnteredViaESQL: undefined,
       };
 
       internalState.dispatch(internalStateActions.setInitializationState(initializationState));

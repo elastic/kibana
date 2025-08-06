@@ -92,7 +92,11 @@ export interface RecentlyClosedTabState extends TabState {
 }
 
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  initializationState: {
+    hasESData: boolean;
+    hasUserDataView: boolean;
+    hasEnteredViaESQL: boolean | undefined;
+  };
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;

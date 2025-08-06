@@ -202,6 +202,7 @@ export const DiscoverSessionView = ({
             internalStateActions.setInitializationState({
               hasESData: true,
               hasUserDataView: true,
+              hasEnteredViaESQL: false,
             })
           );
           const dataView = dataViewUnknown as DataView;
@@ -212,6 +213,13 @@ export const DiscoverSessionView = ({
           });
         }}
         onESQLNavigationComplete={() => {
+          dispatch(
+            internalStateActions.setInitializationState({
+              hasESData: true,
+              hasUserDataView: false,
+              hasEnteredViaESQL: true,
+            })
+          );
           initializeSession();
         }}
       />
