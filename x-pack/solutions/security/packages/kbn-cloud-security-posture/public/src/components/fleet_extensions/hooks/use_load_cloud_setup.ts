@@ -114,7 +114,6 @@ export const useLoadCloudSetup = ({
         setupTechnology,
         showCloudConnectors
       );
-
       const policy = updatePolicyWithInputs(newPolicy, inputType, inputVars);
       updatePolicy({ updatedPolicy: policy });
     },

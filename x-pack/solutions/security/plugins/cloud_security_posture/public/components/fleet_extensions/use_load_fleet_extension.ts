@@ -37,7 +37,6 @@ import {
   getVulnMgmtCloudFormationDefaultValue,
   hasErrors,
   isPostureInput,
-  getDeploymentType,
 } from './utils';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 

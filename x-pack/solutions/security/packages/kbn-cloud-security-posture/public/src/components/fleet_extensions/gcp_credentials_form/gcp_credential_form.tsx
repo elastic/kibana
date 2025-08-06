@@ -220,6 +220,7 @@ const updateCloudShellUrl = (
   if (!policyType) {
     return;
   }
+
   updatePolicy?.({
     updatedPolicy: {
       ...newPolicy,
