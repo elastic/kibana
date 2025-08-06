@@ -197,6 +197,5 @@
     "@kbn/streams-plugin",
     "@kbn/response-ops-rule-params",
     "@kbn/aiops-change-point-detection",
-    "@kbn/scout-info",
   ]
 }
