@@ -6,7 +6,7 @@
  */
 
 import os from 'os';
-import { v4 as uuidv4 } from 'uuid';
+import { rmSync } from 'fs';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrConfigProviderContext } from '@kbn/test';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { createPrebuiltRulesPackage } from '../../../../../utils';
 
-const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_fleet_packages/${uuidv4()}`;
+const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_fleet_packages`;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -48,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.getAll().mochaOpts,
       rootHooks: {
         beforeAll: setUpBundledPackages,
+        afterAll: cleanUpBundledPackagesFolder,
       },
     },
   };
@@ -90,7 +91,13 @@ export const PREBUILT_RULE_ASSET_B: PrebuiltRuleAsset = {
   language: 'eql',
 };
 
+function cleanUpBundledPackagesFolder(): void {
+  rmSync(BUNDLED_PACKAGE_DIR, { recursive: true, force: true });
+}
+
 function setUpBundledPackages(): void {
+  cleanUpBundledPackagesFolder();
+
   const MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES = createPrebuiltRulesPackage({
     packageName: PREBUILT_RULES_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,

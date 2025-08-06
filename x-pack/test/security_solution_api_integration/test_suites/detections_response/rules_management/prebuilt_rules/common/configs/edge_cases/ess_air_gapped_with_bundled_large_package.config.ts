@@ -6,13 +6,13 @@
  */
 
 import os from 'os';
-import { v4 as uuidv4 } from 'uuid';
+import { rmSync } from 'fs';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { createPrebuiltRulesPackage } from '../../../../../utils';
 
-const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_large_fleet_prebuilt_rules_package/${uuidv4()}`;
+const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_large_fleet_prebuilt_rules_package`;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -46,6 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.getAll().mochaOpts,
       rootHooks: {
         beforeAll: setUpLargePrebuiltRulesBundledPackage,
+        afterAll: cleanUpBundledPackagesFolder,
       },
     },
   };
@@ -54,7 +55,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 export const MOCK_PKG_VERSION = '99.0.0';
 export const NUM_OF_RULE_IN_MOCK_LARGE_PKG = 750;
 
+function cleanUpBundledPackagesFolder(): void {
+  rmSync(BUNDLED_PACKAGE_DIR, { recursive: true, force: true });
+}
+
 function setUpLargePrebuiltRulesBundledPackage(): void {
+  cleanUpBundledPackagesFolder();
+
   const createPrebuiltRuleAsset = (index: number, version: number): PrebuiltRuleAsset => ({
     rule_id: `test-prebuilt-rule-${index}`,
     version,
