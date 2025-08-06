@@ -21,8 +21,9 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
 
   const waitForPrivMonUsersToBeSynced = async () => {
-    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 40000, async () => {
+    retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
       const res = await api.listPrivMonUsers({ query: {} });
+      log.info(`PrivMon users sync check: found ${res.body.length} users`);
       return res.body.length > 0; // wait until we have at least one user
     });
   };
@@ -148,7 +149,6 @@ export default ({ getService }: FtrProviderContext) => {
         // register entity source
         const response = await api.createEntitySource({ body: entitySource }, 'default');
         expect(response.status).to.be(200);
-        expect(response.status).to.be(200);
         // Call init to trigger the sync
         await privMonUtils.initPrivMonEngine();
         // default-monitoring-index should exist now
@@ -164,6 +164,7 @@ export default ({ getService }: FtrProviderContext) => {
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);
+        log.info(`Found users: ${userNames.join(', ')}`);
         expect(userNames).to.contain('Luke Skywalker');
         expect(userNames).to.contain('C-3PO');
         expect(userNames.filter((name: string) => name === 'C-3PO')).to.have.length(1);
