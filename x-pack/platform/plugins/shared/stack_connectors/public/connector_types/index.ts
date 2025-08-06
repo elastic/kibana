@@ -32,6 +32,7 @@ import { getTorqConnectorType } from './torq';
 import { getWebhookConnectorType } from './webhook';
 import { getXmattersConnectorType } from './xmatters';
 import { getD3SecurityConnectorType } from './d3security';
+import { getHelloWorldConnectorType } from './hello_world';
 import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getTheHiveConnectorType } from './thehive';
@@ -75,6 +76,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getTorqConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
+  connectorTypeRegistry.register(getHelloWorldConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
   connectorTypeRegistry.register(getXSOARConnectorType());
 

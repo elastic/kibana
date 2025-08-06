@@ -27,3 +27,5 @@ export {
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
 } from './esql';
+
+export { type ConnectorToolConfig } from './connector';

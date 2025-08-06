@@ -44,6 +44,7 @@ export {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  FederatedConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
   GenerativeAIForObservabilityConnectorFeatureId,
   GenerativeAIForSearchPlaygroundConnectorFeatureId,

@@ -52,7 +52,10 @@ export const createEsqlToolClient = ({
   return {
     async has(toolId: string) {
       try {
-        await toolClient.get(toolId);
+        const tool = await toolClient.get(toolId);
+        if (tool.type !== ToolType.esql) {
+          return false;
+        }
         return true;
       } catch (e) {
         if (isToolNotFoundError(e)) {
@@ -69,7 +72,9 @@ export const createEsqlToolClient = ({
 
     async list() {
       const tools = await toolClient.list();
-      return tools.map((tool) => toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>));
+      return tools
+        .filter((tool) => tool.type === ToolType.esql)
+        .map((tool) => toToolDefinition(tool as ToolPersistedDefinition<EsqlToolConfig>));
     },
 
     async create(createRequest) {

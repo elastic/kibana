@@ -35,6 +35,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
   private createRunnerDeps(): CreateRunnerDeps {
     const { inference, actions, ...otherDeps } = this.deps;
     return {
+      actions,
       ...otherDeps,
       modelProviderFactory: createModelProviderFactory({ inference, actions }),
     };

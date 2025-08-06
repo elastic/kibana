@@ -19,6 +19,7 @@ import type {
   RunToolReturn,
   RunAgentReturn,
 } from '@kbn/onechat-server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import { ModelProviderFactoryFn } from './model_provider';
@@ -37,6 +38,7 @@ export interface CreateScopedRunnerDeps {
   // other deps
   logger: Logger;
   request: KibanaRequest;
+  actions: ActionsPluginStart;
   defaultConnectorId?: string;
 }
 

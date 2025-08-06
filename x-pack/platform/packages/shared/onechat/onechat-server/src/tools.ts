@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -123,6 +124,10 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Actions client scoped to Kibana request
+   */
+  actions: ActionsClient;
 }
 
 /**

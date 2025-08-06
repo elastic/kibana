@@ -24,6 +24,11 @@ import {
   configurationSchema as esqlConfigSchema,
   configurationUpdateSchema as esqlConfigUpdateSchema,
 } from '../services/tools/esql/schemas';
+
+import {
+  configurationSchema as connectorConfigSchema,
+  configurationUpdateSchema as connectorConfigUpdateSchema,
+} from '../services/tools/connector/schemas';
 import { getTechnicalPreviewWarning } from './utils';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Tool API');
@@ -129,6 +134,52 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
               description: schema.string({ defaultValue: '' }),
               tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
               configuration: esqlConfigSchema,
+            }),
+          },
+        },
+      },
+      wrapHandler(async (ctx, request, response) => {
+        const { tools: toolService } = getInternalServices();
+        const createRequest: CreateToolPayload = request.body;
+        const registry = await toolService.getRegistry({ request });
+        const tool = await registry.create(createRequest);
+        return response.ok<CreateToolResponse>({
+          body: toDescriptorWithSchema(tool),
+        });
+      })
+    );
+
+  // create tool
+  router.versioned
+    .post({
+      path: '/api/chat/tools/connector',
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
+      },
+      access: 'public',
+      summary: 'Create a tool',
+      description: TECHNICAL_PREVIEW_WARNING,
+      options: {
+        tags: ['tools'],
+        availability: {
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            body: schema.object({
+              id: schema.string(),
+              type: schema.oneOf([schema.literal(ToolType.connector)]),
+              description: schema.string({ defaultValue: '' }),
+              tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
+              configuration: schema.object({
+                connector_id: schema.string(),
+                sub_action: schema.string(),
+              }),
             }),
           },
         },
