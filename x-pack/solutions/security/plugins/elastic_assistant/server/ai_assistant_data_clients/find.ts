@@ -14,7 +14,7 @@ import {
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import { EsQueryConfig, Query, buildEsQuery, Filter } from '@kbn/es-query';
 
 interface FindOptions {
   filter?: string;
@@ -24,6 +24,7 @@ interface FindOptions {
   sortField?: string;
   sortOrder?: estypes.SortOrder;
   esClient: ElasticsearchClient;
+  esFilter?: Filter | Filter[];
   index: string;
   runtimeMappings?: MappingRuntimeFields | undefined;
   logger: Logger;
@@ -44,6 +45,7 @@ export interface FindResponse<T> {
 
 export const findDocuments = async <TSearchSchema>({
   esClient,
+  esFilter,
   filter,
   page,
   perPage,
@@ -55,7 +57,7 @@ export const findDocuments = async <TSearchSchema>({
   aggs,
   mSearch,
 }: FindOptions): Promise<FindResponse<TSearchSchema>> => {
-  const query = getQueryFilter({ filter });
+  let query = getQueryFilter({ filter, esFilter });
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
@@ -69,6 +71,27 @@ export const findDocuments = async <TSearchSchema>({
   }
   try {
     if (mSearch == null) {
+      if (index.includes('.kibana-elastic-ai-assistant-conversations')) {
+        // buildEsQuery returns filters as a flat list under `bool.filter`, but we need to group them
+        // in a `bool.should` clause with `minimum_should_match: 1` to support logic like:
+        // "users.name is 'elastic' OR there are no users at all".
+        // This manual wrapping is necessary to match the intended query semantics for nested fields.
+        query = {
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [...(query.bool.filter ?? [])],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        };
+      }
       const response = await esClient.search<TSearchSchema>({
         query,
         track_total_hits: true,
@@ -159,9 +182,10 @@ export const findDocuments = async <TSearchSchema>({
 
 export interface GetQueryFilterOptions {
   filter?: string;
+  esFilter?: Filter | Filter[];
 }
 
-export const getQueryFilter = ({ filter }: GetQueryFilterOptions) => {
+export const getQueryFilter = ({ filter, esFilter }: GetQueryFilterOptions) => {
   const kqlQuery: Query | Query[] = filter
     ? {
         language: 'kuery',
@@ -175,5 +199,5 @@ export const getQueryFilter = ({ filter }: GetQueryFilterOptions) => {
     queryStringOptions: { analyze_wildcard: true },
   };
 
-  return buildEsQuery(undefined, kqlQuery, [], config);
+  return buildEsQuery(undefined, kqlQuery, esFilter ?? [], config);
 };

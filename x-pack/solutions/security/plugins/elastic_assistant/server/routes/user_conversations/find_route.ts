@@ -75,6 +75,30 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: `users:{ ${userFilter} }${additionalFilter}`,
+            // filters that cannot be written in KQL
+            esFilter: [
+              {
+                meta: {
+                  alias: '',
+                  negate: false,
+                  disabled: false,
+                },
+                query: {
+                  bool: {
+                    must_not: [
+                      {
+                        nested: {
+                          path: 'users',
+                          query: {
+                            match_all: {},
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
             fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
           });
 

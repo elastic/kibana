@@ -61,7 +61,31 @@ export const getConversation = async ({
                 ],
               },
             },
-            ...filterByUser,
+          ],
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...filterByUser,
+                  // global users
+                  {
+                    bool: {
+                      must_not: [
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              match_all: {},
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
           ],
         },
       },
