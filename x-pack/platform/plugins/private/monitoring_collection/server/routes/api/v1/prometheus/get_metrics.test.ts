@@ -7,8 +7,8 @@
 
 import { RequestHandlerContext } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
+import type { PrometheusExporter } from '@kbn/metrics';
 import { registerV1PrometheusRoute } from '.';
-import { PrometheusExporter } from '../../../../lib';
 
 describe('Prometheus route', () => {
   it('forwards the request to the prometheus exporter', async () => {

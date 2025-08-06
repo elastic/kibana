@@ -290,6 +290,7 @@ export interface DocLinks {
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
+    readonly automaticImport: string;
   };
   readonly server: {
     readonly protocol: string;
