@@ -18,7 +18,6 @@ import {
   tap,
 } from 'rxjs';
 import { v4 } from 'uuid';
-
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
 import {

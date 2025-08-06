@@ -34,16 +34,24 @@ describe('layout manager', () => {
 
   const PANEL_ONE_ID = 'panelOne';
 
-  const panels = [
-    {
-      gridData: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
-      type: 'testPanelType',
-      panelConfig: { title: 'Panel One' },
-      panelIndex: PANEL_ONE_ID,
-    },
-  ];
+  const panel1 = {
+    gridData: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
+    type: 'testPanelType',
+    panelConfig: { title: 'Panel One' },
+    panelIndex: PANEL_ONE_ID,
+  };
 
-  const childApi: DefaultEmbeddableApi = {
+  const section1 = {
+    title: 'Section open on page load',
+    collapsed: false,
+    gridData: {
+      y: 1,
+      i: 'section1',
+    },
+    panels: [panel1],
+  };
+
+  const panel1Api: DefaultEmbeddableApi = {
     type: 'testPanelType',
     uuid: PANEL_ONE_ID,
     phase$: {} as unknown as PublishingSubject<PhaseEvent | undefined>,
@@ -51,9 +59,9 @@ describe('layout manager', () => {
   };
 
   test('can register child APIs', () => {
-    const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
-    layoutManager.internalApi.registerChildApi(childApi);
-    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(childApi);
+    const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
+    layoutManager.internalApi.registerChildApi(panel1Api);
+    expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
   });
 
   test('should append incoming embeddable to existing panels', () => {
@@ -72,13 +80,13 @@ describe('layout manager', () => {
     };
     const layoutManager = initializeLayoutManager(
       incomingEmbeddable,
-      panels,
+      [panel1],
       trackPanelMock,
       () => []
     );
 
     const layout = layoutManager.internalApi.layout$.value;
-    expect(Object.keys(layout.panels).length).toBe(Object.keys(panels).length + 1);
+    expect(Object.keys(layout.panels).length).toBe(2);
     expect(layout.panels.panelTwo).toEqual({
       gridData: {
         h: 1,
@@ -97,9 +105,9 @@ describe('layout manager', () => {
   });
 
   describe('duplicatePanel', () => {
-    const titleManager = initializeTitleManager(panels[0].panelConfig);
+    const titleManager = initializeTitleManager(panel1.panelConfig);
     const childApiToDuplicate = {
-      ...childApi,
+      ...panel1Api,
       ...titleManager.api,
       serializeState: () => ({
         rawState: titleManager.getLatestState(),
@@ -107,13 +115,13 @@ describe('layout manager', () => {
     };
 
     test('should add duplicated panel to layout', async () => {
-      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
       layoutManager.internalApi.registerChildApi(childApiToDuplicate);
 
       await layoutManager.api.duplicatePanel('panelOne');
 
       const layout = layoutManager.internalApi.layout$.value;
-      expect(Object.keys(layout.panels).length).toBe(Object.keys(panels).length + 1);
+      expect(Object.keys(layout.panels).length).toBe(2);
       expect(layout.panels['54321']).toEqual({
         gridData: {
           h: 1,
@@ -132,7 +140,7 @@ describe('layout manager', () => {
     });
 
     test('should clone by reference embeddable as by value', async () => {
-      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
       layoutManager.internalApi.registerChildApi({
         ...childApiToDuplicate,
         checkForDuplicateTitle: jest.fn(),
@@ -157,7 +165,7 @@ describe('layout manager', () => {
     });
 
     test('should give a correct title to the clone of a clone', async () => {
-      const layoutManager = initializeLayoutManager(undefined, panels, trackPanelMock, () => []);
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.internalApi.registerChildApi({
         ...childApiToDuplicate,
@@ -180,7 +188,7 @@ describe('layout manager', () => {
     test('allows removing panels when there is no expanded panel', () => {
       const layoutManager = initializeLayoutManager(
         undefined,
-        panels,
+        [panel1],
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
@@ -193,7 +201,7 @@ describe('layout manager', () => {
     test('does not allow removing panels when there is an expanded panel', () => {
       const layoutManager = initializeLayoutManager(
         undefined,
-        panels,
+        [panel1],
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
@@ -205,94 +213,52 @@ describe('layout manager', () => {
   });
 
   describe('getChildApi', () => {
-    const panelsWithSections = [
-      {
-        gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel1' },
-        panelConfig: { title: 'panel One' },
-        panelIndex: 'panel1',
-        type: 'testPanelType',
-      },
-      {
-        title: 'Section closed on page load',
-        collapsed: true,
-        gridData: {
-          y: 6,
-          i: 'section1',
-        },
-        panels: [
-          {
-            gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel2InClosedSection' },
-            panelConfig: { title: 'panel Three' },
-            panelIndex: 'panel2InClosedSection',
-            type: 'testPanelType',
-          },
-        ],
-      },
-      {
-        title: 'Section open on page load',
-        collapsed: false,
-        gridData: {
-          y: 7,
-          i: 'section2',
-        },
-        panels: [
-          {
-            gridData: { x: 0, y: 0, w: 6, h: 6, i: 'panel3InOpenSection' },
-            panelConfig: { title: 'panel Four' },
-            panelIndex: 'panel3InOpenSection',
-            type: 'testPanelType',
-          },
-        ],
-      },
-    ];
-
     test('should return api when api is available', (done) => {
-      const layoutManager = initializeLayoutManager(
-        undefined,
-        panelsWithSections,
-        trackPanelMock,
-        () => []
-      );
+      const layoutManager = initializeLayoutManager(undefined, [panel1], trackPanelMock, () => []);
 
-      layoutManager.api.getChildApi('panel1').then((api) => {
+      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
         expect(api).toBeDefined();
         done();
       });
 
-      layoutManager.internalApi.registerChildApi({
-        ...childApi,
-        uuid: 'panel1',
-      });
+      layoutManager.internalApi.registerChildApi(panel1Api);
     });
 
     test('should return api from panel in open section when api is available', (done) => {
       const layoutManager = initializeLayoutManager(
         undefined,
-        panelsWithSections,
+        [
+          {
+            ...section1,
+            collapsed: false,
+          },
+        ],
         trackPanelMock,
         () => []
       );
 
-      layoutManager.api.getChildApi('panel3InOpenSection').then((api) => {
+      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
         expect(api).toBeDefined();
         done();
       });
 
-      layoutManager.internalApi.registerChildApi({
-        ...childApi,
-        uuid: 'panel3InOpenSection',
-      });
+      layoutManager.internalApi.registerChildApi(panel1Api);
     });
 
     test('should return undefined from panel in closed section', (done) => {
       const layoutManager = initializeLayoutManager(
         undefined,
-        panelsWithSections,
+        [
+          {
+            ...section1,
+            collapsed: true,
+          },
+        ],
         trackPanelMock,
         () => []
       );
 
-      layoutManager.api.getChildApi('panel2InClosedSection').then((api) => {
+      layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
         expect(api).toBeUndefined();
         done();
       });
