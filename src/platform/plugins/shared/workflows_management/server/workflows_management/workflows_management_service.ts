@@ -19,8 +19,8 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import {
   WORKFLOW_SAVED_OBJECT_TYPE,
   WorkflowSavedObjectAttributes,
@@ -429,7 +429,7 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
@@ -445,12 +445,12 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
           {
-            term: {
+            match: {
               'workflow.step_id': stepId,
             },
           },
