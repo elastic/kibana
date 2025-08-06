@@ -28,8 +28,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/spaces-plugin",
     "@kbn/test",
-    "@kbn/dev-utils",
-    "@kbn/tooling-log",
     "@kbn/ftr-common-functional-services",
     "@kbn/expect",
     "@kbn/rule-data-utils",
