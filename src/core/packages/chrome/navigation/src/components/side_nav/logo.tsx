@@ -8,10 +8,14 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, useEuiFocusRing, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+
+import { MenuItem } from '../menu_item';
+
 export interface SideNavLogoProps {
   href: string;
+  isActive: boolean;
   isCollapsed: boolean;
   label: string;
   logoType: string;
@@ -22,65 +26,45 @@ export interface SideNavLogoProps {
  */
 export const SideNavLogo = ({
   href,
+  isActive,
   isCollapsed,
   label,
   logoType,
 }: SideNavLogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
 
+  /**
+   * In Figma, the logo icon is 20x20.
+   * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   */
+  const wrapperStyles = css`
+    border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+
+    .euiText {
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  `;
+
   return (
-    <a
-      // TODO: translate
-      aria-label={`${label} homepage`}
-      href={href}
-      css={css`
-        ${useEuiFocusRing()}
-        align-items: center;
-        border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        // 3px is from Figma; there is no token
-        gap: 3px;
-        justify-content: center;
-        padding: ${euiTheme.size.s} ${euiTheme.size.s}
-          ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-      `}
-    >
-      <div
-        css={css`
-          align-items: center;
-          display: flex;
-          height: ${euiTheme.size.xl};
-          justify-content: center;
-          width: ${euiTheme.size.xl};
-        `}
+    <div css={wrapperStyles}>
+      <MenuItem
+        aria-label={`${label} homepage`}
+        data-test-subj="sideNavLogo"
+        href={href}
+        iconType={logoType}
+        isActive={isActive}
+        isLabelVisible={!isCollapsed}
+        isTruncated={false}
       >
-        {/**
-         * In Figma, the icon is 20x20
-         * `EuiIcon` supports `l` which is 24x24
-         * and `m` which is 16x16;
-         * Hence style override
-         */}
-        <EuiIcon
-          css={css`
-            height: 20px;
-            width: 20px;
-          `}
-          type={logoType}
-        />
-      </div>
-      {!isCollapsed && (
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            font-size: 11px;
-            color: ${euiTheme.colors.textParagraph};
-          `}
-          size="xs"
-        >
-          {label}
-        </EuiText>
-      )}
-    </a>
+        {label}
+      </MenuItem>
+    </div>
   );
 };

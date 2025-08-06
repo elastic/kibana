@@ -11,7 +11,7 @@ import { useState, useCallback } from 'react';
 import { MenuItem, SecondaryMenuItem } from '../../types';
 
 interface UseNavigationProps {
-  initialMenuItem: MenuItem;
+  initialMenuItem: MenuItem | null;
   isCollapsed: boolean;
 }
 
@@ -24,7 +24,7 @@ interface NavigationState {
 }
 
 export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationProps) => {
-  const [currentPage, setCurrentPage] = useState(initialMenuItem.href);
+  const [currentPage, setCurrentPage] = useState(initialMenuItem?.href);
   const [currentSubpage, setCurrentSubpage] = useState<string | null>(null);
   const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(initialMenuItem);
 

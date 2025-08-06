@@ -10,7 +10,7 @@
 import React, { KeyboardEvent } from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 
-import { MenuItem, NavigationStructure } from '../../types';
+import { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
 import { NestedSecondaryMenu } from './nested_secondary_menu';
 import { SecondaryMenu } from './secondary_menu';
 import { SideNav } from './side_nav';
@@ -19,10 +19,14 @@ import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { focusMainContent } from '../utils/focus_main_content';
-
-const FOOTER_ITEM_LIMIT = 5;
+import { MAX_FOOTER_ITEMS } from '../constants';
+import { getInitialMenuItem } from '../utils/get_initial_menu_item';
 
 interface NavigationProps {
+  /**
+   * The active path for the navigation, used for highlighting the current item.
+   */
+  activeItemId: string;
   /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
@@ -32,6 +36,10 @@ interface NavigationProps {
    */
   items: NavigationStructure;
   /**
+   * The href for the logo link, typically the home page.
+   */
+  logoHref: string;
+  /**
    * The label for the logo, typically the product name.
    */
   logoLabel: string;
@@ -40,29 +48,28 @@ interface NavigationProps {
    */
   logoType: string;
   /**
-   * The href for the logo link, typically the home page.
-   */
-  logoHref: string;
-  /**
    * Required by the grid layout to set the width of the navigation slot.
    */
   setWidth: (width: number) => void;
 }
 
 export const Navigation = ({
+  activeItemId,
   isCollapsed: isCollapsedProp,
   items,
+  logoHref,
   logoLabel,
   logoType,
-  logoHref,
   setWidth,
 }: NavigationProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
 
+  const initialMenuItem = getInitialMenuItem(items, activeItemId);
+
   const { currentPage, currentSubpage, isSidePanelOpen, navigateTo, sidePanelContent } =
     useNavigation({
-      initialMenuItem: items.primaryItems[0],
+      initialMenuItem,
       isCollapsed,
     });
 
@@ -78,7 +85,7 @@ export const Navigation = ({
     focusMainContent();
   };
 
-  const handleSubMenuItemClick = (item: MenuItem, subItem: MenuItem) => {
+  const handleSubMenuItemClick = (item: MenuItem, subItem: SecondaryMenuItem) => {
     if (item.href && subItem.href === item.href) {
       navigateTo(item);
     } else {
@@ -101,10 +108,11 @@ export const Navigation = ({
     <>
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
+          href={logoHref}
+          isActive={currentPage === logoHref}
           isCollapsed={isCollapsed}
           label={logoLabel}
           logoType={logoType}
-          href={logoHref}
         />
 
         <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
@@ -117,9 +125,8 @@ export const Navigation = ({
               label={item.label}
               trigger={
                 <SideNav.PrimaryMenuItem
-                  iconType={item.iconType}
                   isCollapsed={isCollapsed}
-                  isCurrent={item.id === sidePanelContent?.id}
+                  isActive={item.id === sidePanelContent?.id}
                   hasContent={getHasSubmenu(item)}
                   onClick={() => handleMainItemClick(item)}
                   {...item}
@@ -135,7 +142,7 @@ export const Navigation = ({
                       {section.items.map((subItem) => (
                         <SecondaryMenu.Item
                           key={subItem.id}
-                          isCurrent={
+                          isActive={
                             (subItem.href && currentSubpage === subItem.href) ||
                             (!currentSubpage && subItem.href === currentPage)
                           }
@@ -167,8 +174,9 @@ export const Navigation = ({
               persistent
               trigger={
                 <SideNav.PrimaryMenuItem
+                  as="button"
                   data-test-subj="sideNavMoreMenuItem"
-                  isCurrent={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
+                  isActive={overflowMenuItems.some((item) => item.id === sidePanelContent?.id)}
                   isCollapsed={isCollapsed}
                   iconType="boxesHorizontal"
                   hasContent
@@ -187,14 +195,14 @@ export const Navigation = ({
                     <NestedSecondaryMenu.Panel id="main" title="More">
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
-                          const isCurrent =
+                          const isActive =
                             item.href === currentPage || item.href === currentSubpage;
                           const hasSubItems = getHasSubmenu(item);
 
                           return (
                             <NestedSecondaryMenu.PrimaryMenuItem
                               key={item.id}
-                              isCurrent={isCurrent}
+                              isActive={isActive}
                               isCollapsed={isCollapsed}
                               hasSubmenu={hasSubItems}
                               submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
@@ -228,7 +236,7 @@ export const Navigation = ({
                             {section.items.map((subItem) => (
                               <NestedSecondaryMenu.Item
                                 key={subItem.id}
-                                isCurrent={
+                                isActive={
                                   (subItem.href && currentSubpage === subItem.href) ||
                                   (!currentSubpage && subItem.href === currentPage)
                                 }
@@ -251,12 +259,12 @@ export const Navigation = ({
                   <SecondaryMenu title="More">
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => {
-                        const isCurrent = item.href === currentPage || item.href === currentSubpage;
+                        const isActive = item.href === currentPage || item.href === currentSubpage;
 
                         return (
                           <SideNav.PrimaryMenuItem
                             key={item.id}
-                            isCurrent={isCurrent}
+                            isActive={isActive}
                             isCollapsed={isCollapsed}
                             hasContent
                             onClick={() => {
@@ -264,7 +272,7 @@ export const Navigation = ({
                               closePopover();
                               focusMainContent();
                             }}
-                            horizontal
+                            isHorizontal
                             {...item}
                           >
                             {item.label}
@@ -280,7 +288,7 @@ export const Navigation = ({
         </SideNav.PrimaryMenu>
 
         <SideNav.Footer isCollapsed={isCollapsed}>
-          {items.footerItems.slice(0, FOOTER_ITEM_LIMIT).map((item) => (
+          {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => (
             <SideNav.Popover
               key={item.id}
               hasContent={getHasSubmenu(item)}
@@ -290,7 +298,7 @@ export const Navigation = ({
               container={document.documentElement}
               trigger={
                 <SideNav.FooterItem
-                  isCurrent={item.id === sidePanelContent?.id}
+                  isActive={item.id === sidePanelContent?.id}
                   onClick={() => navigateTo(item)}
                   hasContent={getHasSubmenu(item)}
                   onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
@@ -305,7 +313,7 @@ export const Navigation = ({
                       {section.items.map((subItem) => (
                         <SecondaryMenu.Item
                           key={subItem.id}
-                          isCurrent={
+                          isActive={
                             (subItem.href && currentSubpage === subItem.href) ||
                             (!currentSubpage && subItem.href === currentPage)
                           }
@@ -338,7 +346,7 @@ export const Navigation = ({
                 {section.items.map((subItem) => (
                   <SecondaryMenu.Item
                     key={subItem.id}
-                    isCurrent={
+                    isActive={
                       (subItem.href && currentSubpage === subItem.href) ||
                       (!currentSubpage && subItem.href === currentPage)
                     }

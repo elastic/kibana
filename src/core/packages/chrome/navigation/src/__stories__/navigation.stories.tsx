@@ -35,11 +35,12 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 interface StoryArgs {
+  activeItemId: string;
   isCollapsed: boolean;
+  items: NavigationStructure;
+  logoHref: string;
   logoLabel: string;
   logoType: string;
-  logoHref: string;
-  items: NavigationStructure;
 }
 
 type PropsAndArgs = React.ComponentProps<typeof Navigation> & StoryArgs;
@@ -51,14 +52,15 @@ export default {
     layout: 'fullscreen',
   },
   args: {
+    activeItemId: PRIMARY_MENU_ITEMS[0].id,
     isCollapsed: false,
-    logoLabel: LOGO.label,
-    logoType: LOGO.type,
-    logoHref: LOGO.href,
     items: {
       primaryItems: PRIMARY_MENU_ITEMS,
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
+    logoHref: LOGO.href,
+    logoLabel: LOGO.label,
+    logoType: LOGO.type,
     setWidth: () => {},
   },
   argTypes: {
@@ -213,6 +215,7 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           }
           navigation={
             <Navigation
+              activeItemId={props.activeItemId}
               isCollapsed={props.isCollapsed}
               items={props.items}
               logoLabel={props.logoLabel}

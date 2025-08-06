@@ -26,7 +26,7 @@ export interface SecondaryMenuSection {
 export interface MenuItem {
   'data-test-subj'?: string;
   href: string;
-  iconType?: IconType;
+  iconType: IconType;
   id: string;
   label: string;
   sections?: SecondaryMenuSection[];
