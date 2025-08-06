@@ -52,9 +52,13 @@ export interface SuggestionType<TPayload extends {} = {}> {
   handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
-export type SuggestionHandler<TPayload extends {} = {}> = (
-  params: SuggestionHandlerParams
-) => Promise<SuggestionResponse<TPayload>>;
+export type SuggestionHandler<TPayload = Record<string, unknown>> = ({
+  context,
+  request,
+}: {
+  context: SuggestionContext;
+  request: KibanaRequest;
+}) => Promise<SuggestionResponse<TPayload>>;
 
 export interface SuggestionHandlerParams {
   request: KibanaRequest;
