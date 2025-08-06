@@ -93,7 +93,7 @@ export function createEvaluateEsqlDataset({
                   : [
                       'The query execution was never attempted (no execution attempt, including failures), only an explanation was provided',
                     ]),
-                ...[],
+                ...(expected.criteria ?? []),
               ])
               .evaluate({
                 input,
