@@ -117,7 +117,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
 
   const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
     EntityType.generic,
-    getGenericEntity.data?._source?.entity.id || '',
+    genericInsightsValue || '',
     { onSuccess: refetchRiskScore }
   );
 
@@ -130,7 +130,11 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
-        <EuiLoadingSpinner size="xxl" css={{ position: 'absolute', inset: '50%' }} />
+        <EuiLoadingSpinner
+          size="xxl"
+          css={{ position: 'absolute', inset: '50%' }}
+          data-test-subj="generic-flyout-loading"
+        />
       </>
     );
   }
@@ -141,6 +145,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
+          data-test-subj="generic-right-flyout-error-prompt"
           title={
             <h2>
               <FormattedMessage
