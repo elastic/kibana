@@ -76,7 +76,7 @@ export class DescendantsQuery extends BaseResolverQuery {
               },
             },
             {
-              terms: { 'event.category': ['process', 'host'] },
+              terms: { 'event.category': ['process'] },
             },
             {
               terms: { 'event.kind': ['event', 'alert', 'signal'] },
@@ -168,7 +168,7 @@ export class DescendantsQuery extends BaseResolverQuery {
               },
             },
             {
-              terms: { 'event.category': ['process', 'host'] },
+              term: { 'event.category': 'process' },
             },
             {
               terms: { 'event.kind': ['event', 'alert', 'signal'] },

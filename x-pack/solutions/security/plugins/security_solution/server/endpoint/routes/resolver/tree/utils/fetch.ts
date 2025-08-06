@@ -340,7 +340,7 @@ export function getNameField(obj: FieldsObject, schema: ResolverSchema): string 
     return String(firstNonNullValue(name));
   }
 
-  // Fallback: try process.executable 
+  // Fallback: try process.executable
   name = obj['process.executable'];
   if (name && firstNonNullValue(name) !== undefined) {
     const executable = String(firstNonNullValue(name));

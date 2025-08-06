@@ -46,12 +46,7 @@ export function resolverFields(schema: ResolverSchema): Array<{ field: string }>
   if (schema.agentId) {
     filter.push({ field: schema.agentId });
   }
-  
-  // Always include fallback fields for process name resolution
-  filter.push(
-    { field: 'process.executable' },
-    { field: 'process.command_line' }
-  );
-  
+  filter.push({ field: 'process.command_line' });
+
   return filter;
 }
