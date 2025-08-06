@@ -19,12 +19,13 @@ import { DEFAULT_TAB_STATE } from './constants';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
-  fallbackGlobalState,
+  existingTab,
 }: {
   tab: DiscoverSessionTab;
-  fallbackGlobalState?: TabState['globalState'];
+  existingTab?: TabState;
 }): TabState => ({
   ...DEFAULT_TAB_STATE,
+  ...existingTab,
   id: tab.id,
   label: tab.label,
   initialInternalState: {
@@ -51,8 +52,8 @@ export const fromSavedObjectTabToTabState = ({
     density: tab.density,
   },
   globalState: {
-    timeRange: tab.timeRestore ? tab.timeRange : fallbackGlobalState?.timeRange,
-    refreshInterval: tab.timeRange ? tab.refreshInterval : fallbackGlobalState?.refreshInterval,
+    timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+    refreshInterval: tab.timeRange ? tab.refreshInterval : existingTab?.globalState.refreshInterval,
   },
 });
 
