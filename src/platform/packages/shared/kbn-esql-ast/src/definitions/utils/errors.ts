@@ -545,6 +545,21 @@ export const errors = {
       requiredLicense: license,
     }),
 
+  licenseRequiredForSignature: (
+    fn: ESQLFunction,
+    signature: FunctionDefinition['signatures'][number]
+  ): ESQLMessage => {
+    const signatureDescription = signature.params
+      .map((param) => `'${param.name}' of type '${param.type}'`) // TODO this isn't well i18n'd
+      .join(', ');
+
+    return errors.byId('licenseRequiredForSignature', fn.location, {
+      name: fn.name,
+      signatureDescription,
+      requiredLicense: signature.license!,
+    });
+  },
+
   functionNotAllowedHere: (fn: ESQLFunction, locationName: string): ESQLMessage =>
     errors.byId('functionNotAllowedHere', fn.location, {
       name: fn.name,

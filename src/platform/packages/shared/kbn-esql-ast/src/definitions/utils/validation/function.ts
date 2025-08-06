@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLLicenseType, ESQLSignatureLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { errors, getColumnForASTNode, getFunctionDefinition, getMessageFromId } from '..';
 import { within } from '../../../..';
@@ -21,6 +21,7 @@ import {
   isOptionNode,
   isParamLiteral,
   isParametrized,
+  isStringLiteral,
   isTimeInterval,
 } from '../../../ast/is';
 import {
@@ -114,7 +115,7 @@ class FunctionValidator {
       return [errors.unknownFunction(this.fn)];
     }
 
-    if (!this.validForLicense) {
+    if (!this.licenseOk(this.definition.license)) {
       return [errors.licenseRequired(this.fn, this.definition.license!)]; // TODO - maybe don't end validation here
     }
 
@@ -133,10 +134,10 @@ class FunctionValidator {
   /**
    * Checks if the function is valid for the current license
    */
-  private get validForLicense(): boolean {
+  private licenseOk(license: ESQLSignatureLicenseType | undefined): boolean {
     const hasMinimumLicenseRequired = this.callbacks.hasMinimumLicenseRequired;
-    if (hasMinimumLicenseRequired && this.definition?.license) {
-      return hasMinimumLicenseRequired(this.definition.license as ESQLLicenseType);
+    if (hasMinimumLicenseRequired && license) {
+      return hasMinimumLicenseRequired(license as ESQLLicenseType);
     }
     return true;
   }
@@ -177,6 +178,10 @@ class FunctionValidator {
 
     if (!S) {
       return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+    }
+
+    if (!this.licenseOk(S.license)) {
+      return [errors.licenseRequiredForSignature(this.fn, S)];
     }
 
     return [];

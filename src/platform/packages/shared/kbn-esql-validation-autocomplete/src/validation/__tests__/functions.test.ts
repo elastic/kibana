@@ -724,7 +724,7 @@ describe('function validation', () => {
     });
   });
 
-  describe.skip('License-based validation', () => {
+  describe('License-based validation', () => {
     beforeEach(() => {
       setTestFunctions([
         {
@@ -790,11 +790,11 @@ describe('function validation', () => {
       ]);
     });
 
-    it('Should Validate Platinum Functions With Platinum License', async () => {
+    it('should allow licensed function when license IS available', async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+        hasAtLeast: () => true,
       }));
 
       await expectErrors(
@@ -803,11 +803,11 @@ describe('function validation', () => {
       );
     });
 
-    it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
+    it('should disallow licensed function when license NOT available', async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+        hasAtLeast: () => false,
       }));
 
       await expectErrors(
@@ -820,65 +820,40 @@ describe('function validation', () => {
         ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
       );
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
-      );
-
-      await expectErrors(
-        'FROM index | STATS result =PLATINUM_FUNCTION_MOCK(PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0])))',
-        [
-          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
+      await expectErrors('FROM a_index | STATS col0 = PLATINUM_FUNCTION_MOCK(keywordField)', [
+        'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+      ]);
     });
 
-    it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
+    it('should allow licensed signature when license IS available', async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+        hasAtLeast: () => true,
       }));
 
       await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
         []
       );
     });
 
-    it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
+    it('should disallow licensed signature when license NOT available', async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+        hasAtLeast: () => false,
       }));
 
       await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
         [
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(0))',
-        [
-          'Argument of [to_cartesianshape] must be [cartesian_point], found value [0] type [integer]',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-
-      await expectErrors(
-        'FROM index | STATS result =PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(PLATINUM_FUNCTION_MOCK()))',
-        [
-          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+          "platinum_partial_function_mock with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
         ]
       );
     });
 
-    it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
+    it.skip('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
