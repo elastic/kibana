@@ -154,7 +154,6 @@ import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operati
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
 
-
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
