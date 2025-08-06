@@ -55,14 +55,17 @@ describe('initTelemetry', () => {
 
       initTelemetry([], REPO_ROOT, false, 'test-service');
 
-      expect(resourceFromAttributesSpy).toHaveBeenCalledWith({
-        'service.name': 'test-service',
-        'service.version': PKG_JSON.version,
-        'service.instance.id': undefined,
-        'deployment.environment.name': 'test-environment',
-        kibana_uuid: expect.any(String),
-        git_rev: expect.any(String),
-      });
+      expect(resourceFromAttributesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // Using expect.objectContaining to ignore other attributes introduced by CI adding apmConfig.globalLabels
+          'service.name': 'test-service',
+          'service.version': PKG_JSON.version,
+          'service.instance.id': undefined,
+          'deployment.environment.name': 'test-environment',
+          kibana_uuid: expect.any(String),
+          git_rev: expect.any(String),
+        })
+      );
     });
   });
 
