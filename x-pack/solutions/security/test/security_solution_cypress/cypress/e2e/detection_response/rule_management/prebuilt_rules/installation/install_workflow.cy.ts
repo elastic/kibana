@@ -15,10 +15,9 @@ import {
   NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE,
   RULE_CHECKBOX,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-  TOASTER,
+  SUCCESS_TOASTER_HEADER,
 } from '../../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../../tasks/alerts_detection_rules';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 import {
   installMockPrebuiltRulesPackage,
   installPrebuiltRuleAssets,
@@ -35,6 +34,7 @@ import {
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
 import { visitAddRulesPage } from '../../../../../tasks/rules_management';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../../screens/breadcrumbs';
 
 describe(
   'Detection rules, Prebuilt Rules Installation Workflow',
@@ -111,7 +111,9 @@ describe(
 
     it('displays an empty screen when all available prebuilt rules have been installed', () => {
       cy.get(INSTALL_ALL_RULES_BUTTON).click();
-      cy.get(TOASTER).should('be.visible').should('have.text', `2 rules installed successfully.`);
+      cy.get(SUCCESS_TOASTER_HEADER)
+        .should('be.visible')
+        .should('have.text', `2 rules installed successfully`);
       cy.get(RULE_CHECKBOX).should('not.exist');
       cy.get(NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE).should('exist');
       cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).should('exist');
