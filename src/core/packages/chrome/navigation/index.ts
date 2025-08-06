@@ -9,3 +9,9 @@
 
 export { Navigation } from './src/components/navigation';
 export { useNavigation } from './src/hooks/use_navigation';
+export type {
+  MenuItem,
+  SecondaryMenuItem,
+  SecondaryMenuSection,
+  NavigationStructure,
+} from './types';
