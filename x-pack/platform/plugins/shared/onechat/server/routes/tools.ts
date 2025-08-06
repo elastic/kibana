@@ -268,7 +268,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
             return {
               toolId: ids[index],
               success: false,
-              error: result.reason,
+              reason: result.reason.toJSON(),
             };
           }
 

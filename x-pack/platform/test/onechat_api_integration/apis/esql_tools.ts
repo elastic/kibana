@@ -385,8 +385,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(failureResult).to.not.be(undefined);
         expect(failureResult.toolId).to.be(nonExistentToolId);
-        expect(failureResult.error).to.have.property('message');
-        expect(failureResult.error.message).to.contain('not found');
+        expect(failureResult.reason.error).to.have.property('message');
+        expect(failureResult.reason.error.message).to.contain('not found');
       });
 
       it('should handle an empty list of IDs', async () => {
