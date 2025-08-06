@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { OnechatTools } from '../components/tools/tools';
+import { ToolsPreferencesProvider } from '../context/tools_preferences_provider';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
-import { labels } from '../utils/i18n';
 import { appPaths } from '../utils/app_paths';
+import { labels } from '../utils/i18n';
 
 export const OnechatToolsPage = () => {
   useBreadcrumb([{ text: labels.tools.title, path: appPaths.tools.list }]);
-  return <OnechatTools />;
+  return (
+    <ToolsPreferencesProvider>
+      <OnechatTools />
+    </ToolsPreferencesProvider>
+  );
 };

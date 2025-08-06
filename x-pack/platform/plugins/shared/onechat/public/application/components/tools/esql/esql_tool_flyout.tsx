@@ -75,7 +75,7 @@ export interface OnechatEsqlToolFlyoutProps {
   isLoading?: boolean;
   tool?: EsqlToolDefinitionWithSchema;
   onClose: () => void;
-  submit: (data: OnechatEsqlToolFormData) => Promise<void>;
+  submit: (data: OnechatEsqlToolFormData) => void | Promise<void>;
 }
 
 const getDefaultValues = (): OnechatEsqlToolFormData => ({
