@@ -11225,11 +11225,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -24055,6 +24051,16 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            datasets:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                             fields:
                               items:
                                 additionalProperties: true
@@ -25224,6 +25230,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -25855,6 +25871,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -52298,23 +52324,47 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            streams:
-                              items:
-                                type: string
-                              type: array
+                            all:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
                           required:
-                            - streams
+                            - all
                       required:
                         - objects
                     - additionalProperties: false
                       type: object
                       properties:
-                        all:
+                        objects:
                           additionalProperties: false
                           type: object
-                          properties: {}
+                          properties:
+                            queries:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                required:
+                                  - id
+                              type: array
+                            routing:
+                              items:
+                                allOf:
+                                  - {}
+                                  - type: object
+                                    properties:
+                                      destination:
+                                        type: string
+                                    required:
+                                      - destination
+                              type: array
+                          required:
+                            - queries
+                            - routing
                       required:
-                        - all
+                        - objects
                 name:
                   type: string
                 version:
@@ -52757,6 +52807,53 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_generate:
+    get:
+      description: 'Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-significant-events-generate
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: connectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: currentDate
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: shortLookback
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: longLookback
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Generate significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -67685,12 +67782,10 @@ components:
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object
