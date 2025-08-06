@@ -23,7 +23,7 @@ export const labels = {
     }),
 
     // Table columns and labels
-    toolIdLabel: i18n.translate('xpack.onechat.tools.toolIdLabel', { defaultMessage: 'ID' }),
+    toolIdLabel: i18n.translate('xpack.onechat.tools.idLabel', { defaultMessage: 'ID' }),
     typeLabel: i18n.translate('xpack.onechat.tools.typeLabel', { defaultMessage: 'Type' }),
     tagsLabel: i18n.translate('xpack.onechat.tools.tagsLabel', { defaultMessage: 'Labels' }),
     toolsLabel: i18n.translate('xpack.onechat.tools.toolsLabel', { defaultMessage: 'Tools' }),
