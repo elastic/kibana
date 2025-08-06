@@ -90,7 +90,7 @@ export default {
       />
     );
   },
-  title: 'Components/Graph Components/Minimap with Graph',
+  title: 'Components/Graph Components/Minimap',
   argTypes: {},
   parameters: {
     docs: {
@@ -102,6 +102,15 @@ export default {
   },
   decorators: [GlobalStylesStorybookDecorator],
 } satisfies Meta<typeof Graph>;
+
+export const WithoutMinimap: StoryObj = {
+  args: {
+    nodes: baseNodes,
+    edges: baseEdges,
+    interactive: true,
+    showMinimap: false,
+  },
+};
 
 export const NoInteractiveGraph: StoryObj = {
   args: {

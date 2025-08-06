@@ -8,7 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
-import { ReactFlowProvider, ReactFlow, type Node } from '@xyflow/react';
+import { ReactFlowProvider, ReactFlow, type Node, Edge } from '@xyflow/react';
 import { Minimap as MinimapComp, type MinimapProps } from './minimap';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
@@ -18,7 +18,7 @@ import type {
   NodeViewModel,
 } from './types';
 
-const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = [
+const baseNodes: Array<EntityNodeViewModel | LabelNodeViewModel> = [
   {
     id: 'admin@example.com',
     label: 'admin@example.com',
@@ -43,7 +43,7 @@ const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = [
   },
 ];
 
-const edges: EdgeViewModel[] = [
+const baseEdges: EdgeViewModel[] = [
   {
     id: 'a(admin@example.com)-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
     source: 'admin@example.com',
@@ -68,18 +68,22 @@ const WrappedMinimap = (props: MinimapProps) => {
   // TODO Convert nodes into nodesState
 
   // eslint-disable-next-line no-console
-  console.log(nodes);
+  console.log(baseNodes);
+  // eslint-disable-next-line no-console
+  console.log(baseEdges);
 
   const nodesState: Node<NodeViewModel>[] = [];
+  const edgesState: Edge<EdgeViewModel>[] = [];
+
   return (
-    <ReactFlow nodes={nodesState} edges={edges} fitView>
+    <ReactFlow nodes={nodesState} edges={edgesState} fitView>
       <MinimapComp {...props} nodesState={nodesState} />
     </ReactFlow>
   );
 };
 
 export default {
-  title: 'Components/Graph Components/Additional Components/Minimap',
+  title: 'Components/Graph Components/Minimap',
   component: WrappedMinimap,
   parameters: {
     docs: {
@@ -101,7 +105,7 @@ export default {
       defaultValue: true,
     },
     zoomStep: {
-      control: { type: 'number', min: 0.1, max: 5, step: 0.1 },
+      control: { type: 'number' },
       description: 'The zoom speed for the minimap',
       defaultValue: 2,
     },
