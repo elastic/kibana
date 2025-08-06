@@ -84,12 +84,9 @@ export const QueryBar = () => {
         <EuiButton
           size={'m'}
           color={'text'}
-          disabled={isDiscoverButtonDisabled}
-          onClick={() => {
-            if (discoverLink) {
-              window.open(discoverLink, '_blank');
-            }
-          }}
+          isDisabled={isDiscoverButtonDisabled}
+          href={discoverLink ?? undefined}
+          target="_blank"
           iconType={'discoverApp'}
         >
           <EuiText size="xs">
