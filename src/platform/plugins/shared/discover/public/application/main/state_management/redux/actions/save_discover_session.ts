@@ -230,13 +230,12 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         })
       );
 
-      const allTabs = discoverSession.tabs.map((tab) => {
-        const existingTab = selectTab(state, tab.id);
-        return fromSavedObjectTabToTabState({
+      const allTabs = discoverSession.tabs.map((tab) =>
+        fromSavedObjectTabToTabState({
           tab,
-          fallbackGlobalState: existingTab.globalState,
-        });
-      });
+          existingTab: selectTab(state, tab.id),
+        })
+      );
 
       dispatch(
         setTabs({
