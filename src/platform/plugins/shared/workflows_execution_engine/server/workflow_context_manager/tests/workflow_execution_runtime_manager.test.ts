@@ -75,7 +75,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       workflowExecutionRepository,
       stepExecutionRepository,
       workflowExecutionGraph,
-      workflowLogger
+      workflowLogger,
     });
   });
 
@@ -118,7 +118,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('step result management', () => {
     it('should update the step execution with the result and be able to retrieve it', async () => {
       const fakeResult = { success: true, data: {} };
-      void underTest.setStepResult('node1', {
+      await underTest.setStepResult('node1', {
         output: fakeResult,
         error: null,
       });
@@ -260,7 +260,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           error: null,
         };
 
-        underTest.setStepResult('node1', runStepResult);
+        await underTest.setStepResult('node1', runStepResult);
       });
 
       it('should finish a step execution with "COMPLETED" status', async () => {
@@ -295,7 +295,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           error: new Error('Step execution failed'),
         };
 
-        underTest.setStepResult('node1', runStepResult);
+        await underTest.setStepResult('node1', runStepResult);
       });
 
       it('should finish a step execution with "FAILED" status', async () => {
@@ -350,7 +350,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           output: { success: true, data: {} },
           error: null,
         };
-        underTest.setStepResult('node3', runStepResult);
+        await underTest.setStepResult('node3', runStepResult);
         await underTest.finishStep('node3');
 
         expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -367,7 +367,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           output: { success: true, data: {} },
           error: null,
         };
-        underTest.setStepResult('node3', runStepResult);
+        await underTest.setStepResult('node3', runStepResult);
         await underTest.finishStep('node3');
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(
           `Workflow execution completed successfully`,
@@ -389,7 +389,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           output: null,
           error: new Error('Second step failed'),
         };
-        underTest.setStepResult('node2', runStepResult);
+        await underTest.setStepResult('node2', runStepResult);
         await underTest.finishStep('node2');
 
         expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -409,7 +409,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
           output: null,
           error: new Error('Second step failed'),
         };
-        underTest.setStepResult('node2', runStepResult);
+        await underTest.setStepResult('node2', runStepResult);
         await underTest.finishStep('node2');
 
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Workflow execution failed`, {
@@ -425,9 +425,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('skipSteps', () => {
-    it('should mark passed steps as skipped', () => {
+    it('should mark passed steps as skipped', async () => {
       const stepIds = ['node1', 'node2'];
-      underTest.skipSteps(stepIds);
+      await underTest.skipSteps(stepIds);
 
       expect(stepExecutionRepository.updateStepExecutions).toHaveBeenCalledWith(
         expect.arrayContaining([
