@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import React, { useEffect, useState } from 'react';
+import { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme, UseEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
@@ -45,12 +45,31 @@ interface StoryArgs {
 
 type PropsAndArgs = React.ComponentProps<typeof Navigation> & StoryArgs;
 
+const PreventLinkNavigation = (Story: StoryFn) => {
+  useEffect(() => {
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+
+      if (anchor && anchor.getAttribute('href')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, []);
+
+  return <Story />;
+};
+
 export default {
   title: 'Chrome/Navigation',
   component: Navigation,
   parameters: {
     layout: 'fullscreen',
   },
+  decorators: [PreventLinkNavigation],
   args: {
     activeItemId: PRIMARY_MENU_ITEMS[0].id,
     isCollapsed: false,
