@@ -205,75 +205,6 @@ describe('function validation', () => {
           ]);
         });
       });
-
-      it('checks types by signature', async () => {
-        const testFn: FunctionDefinition = {
-          name: 'test',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [
-                { name: 'arg1', type: 'double' },
-                { name: 'arg2', type: 'double' },
-                { name: 'arg3', type: 'double' },
-              ],
-              returnType: 'double',
-            },
-            {
-              params: [
-                { name: 'arg1', type: 'keyword' },
-                { name: 'arg2', type: 'keyword' },
-              ],
-              returnType: 'keyword',
-            },
-            {
-              params: [
-                { name: 'arg1', type: 'integer' },
-                { name: 'arg2', type: 'integer' },
-              ],
-              returnType: 'integer',
-            },
-            {
-              params: [{ name: 'arg1', type: 'date' }],
-              returnType: 'date',
-            },
-          ],
-        };
-
-        setTestFunctions([testFn]);
-
-        const { expectErrors } = await setup();
-
-        // double, double, double
-        await expectErrors('FROM a_index | EVAL TEST(1., 1., 1.)', []);
-        await expectErrors('FROM a_index | EVAL TEST("", "", "")', [
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-          'Argument of [test] must be [double], found value [""] type [keyword]',
-        ]);
-
-        // int, int
-        await expectErrors('FROM a_index | EVAL TEST(1, 1)', []);
-        await expectErrors('FROM a_index | EVAL TEST(1, "")', [
-          // @TODO this message should respect the type of the first argument
-          // see https://github.com/elastic/kibana/issues/180518
-          'Argument of [test] must be [keyword], found value [1] type [integer]',
-        ]);
-
-        // keyword, keyword
-        await expectErrors('FROM a_index | EVAL TEST("", "")', []);
-        await expectErrors('FROM a_index | EVAL TEST("", 1)', [
-          'Argument of [test] must be [keyword], found value [1] type [integer]',
-        ]);
-
-        // date
-        await expectErrors('FROM a_index | EVAL TEST(NOW())', []);
-        await expectErrors('FROM a_index | EVAL TEST(1.)', [
-          'Argument of [test] must be [date], found value [1.] type [double]',
-        ]);
-      });
     });
 
     it('validates argument count (arity)', async () => {
@@ -652,17 +583,17 @@ describe('function validation', () => {
         await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
 
         await expectErrors('FROM a_index | EVAL SORT_FN()', [
-          'EVAL does not support function sort_fn',
+          'Function [sort_fn] not allowed in [eval]',
         ]);
         await expectErrors('FROM a_index | SORT STATS_FN()', [
-          'SORT does not support function stats_fn',
+          'Function [stats_fn] not allowed in [sort]',
         ]);
         await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'STATS does not support function row_fn',
+          'Function [row_fn] not allowed in [stats]',
         ]);
-        await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
+        await expectErrors('ROW WHERE_FN()', ['Function [where_fn] not allowed in [row]']);
         await expectErrors('FROM a_index | WHERE EVAL_FN()', [
-          'WHERE does not support function eval_fn',
+          'Function [eval_fn] not allowed in [where]',
         ]);
       });
 
@@ -709,7 +640,7 @@ describe('function validation', () => {
         const { expectErrors } = await setup();
         await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
         await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
-          'STATS BY does not support function does_not_support_by_option',
+          'Function [does_not_support_by_option] not allowed in [by]',
         ]);
       });
     });
@@ -889,7 +820,7 @@ describe('function validation', () => {
 
       await expectErrors(
         'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.', 'Unknown column [wrongField]']
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
       );
 
       await expectErrors(

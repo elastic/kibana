@@ -206,8 +206,8 @@ Expected one of:
         message: i18n.translate('kbn-esql-ast.esql.validation.functionNotAvailableInLocation', {
           defaultMessage: 'Function [{name}] not allowed in [{locationName}]',
           values: {
-            locationName: out.locationName.toUpperCase(),
-            name: out.name.toUpperCase(),
+            locationName: out.locationName,
+            name: out.name,
           },
         }),
       };
