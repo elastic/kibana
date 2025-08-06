@@ -32,7 +32,13 @@ describe('IndicatorBarchartLegendAction', () => {
       label: '@timestamp',
       value: 'date',
     };
-    render(<IndicatorBarchartLegendAction data={mockDate} field={mockField}  announceIndicatorActionChange={announceFn} />);
+    render(
+      <IndicatorBarchartLegendAction
+        data={mockDate}
+        field={mockField}
+        announceIndicatorActionChange={announceFn}
+      />
+    );
     expect(mockToIsoString).toHaveBeenCalled();
   });
 
@@ -41,7 +47,13 @@ describe('IndicatorBarchartLegendAction', () => {
       label: 'host.name',
       value: 'string',
     };
-    render(<IndicatorBarchartLegendAction data={mockDate} field={mockField}  announceIndicatorActionChange={announceFn} />);
+    render(
+      <IndicatorBarchartLegendAction
+        data={mockDate}
+        field={mockField}
+        announceIndicatorActionChange={announceFn}
+      />
+    );
     expect(mockToIsoString).not.toHaveBeenCalled();
   });
 });

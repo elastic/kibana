@@ -13,9 +13,9 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
+import { Indicator } from '../../../../common/types/indicator';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterIn } from '../utils/filter';
-import { Indicator } from '@kbn/threat-intelligence-plugin/common/types/indicator';
 import { FILTER_IN_TITLE } from './translations';
 
 const ICON_TYPE = 'plusInCircle';
