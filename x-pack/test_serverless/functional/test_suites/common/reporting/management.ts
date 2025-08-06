@@ -23,8 +23,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
-      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
-      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+      data: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce',
     },
   };
 

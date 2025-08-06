@@ -11,7 +11,7 @@ import {
   type MetricsAPITimerange,
   isBasicMetricAgg,
 } from '@kbn/metrics-data-access-plugin/common';
-import type { ESSearchClient } from '../../../lib/metrics/types';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import type { InfraSnapshotRequestOptions } from './get_metrics_aggregations';
 import { getMetricsAggregations } from './get_metrics_aggregations';

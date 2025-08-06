@@ -6,10 +6,17 @@
  */
 
 import type { IClusterClient } from '@kbn/core/server';
+import type { SiemRuleMigrationsClient } from './rules/siem_rule_migrations_service';
+import type { SiemDashboardMigrationsClient } from './dashboards/siem_dashboard_migration_service';
 
 export interface SiemMigrationsSetupParams {
   esClusterClient: IClusterClient;
   tasksTimeoutMs?: number;
+}
+
+export interface SiemMigrationClients {
+  getRulesClient: () => SiemRuleMigrationsClient;
+  getDashboardsClient: () => SiemDashboardMigrationsClient;
 }
 
 export type Stored<T extends object> = T & { id: string };

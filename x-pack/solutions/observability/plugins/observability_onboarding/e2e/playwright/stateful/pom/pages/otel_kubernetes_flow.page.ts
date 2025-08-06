@@ -74,7 +74,7 @@ export class OtelKubernetesFlowPage {
 
       return newPage;
     } else {
-      throw new Error('Service Inventory URL not found');
+      throw new Error('Service inventory URL not found');
     }
   }
 }

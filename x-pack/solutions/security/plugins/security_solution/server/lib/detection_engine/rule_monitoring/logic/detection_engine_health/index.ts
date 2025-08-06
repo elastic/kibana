@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './detection_engine_health_client_interface';
+export type * from './detection_engine_health_client_interface';
 export * from './detection_engine_health_client';
