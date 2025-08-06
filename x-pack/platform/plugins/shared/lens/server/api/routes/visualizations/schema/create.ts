@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  pickFromObjectSchema,
   lensResponseItemSchema,
   lensAPIConfigSchema,
   lensAPIAttributesSchema,
   lensCMCreateOptionsSchema,
 } from '../../../../content_management';
-import { lensCreateRequestBodyDataSchemaV0 } from '../../../../content_management/v0';
+import { lensItemSchemaV0 } from '../../../../content_management/v0';
+import { pickFromObjectSchema } from '../../../../utils';
 
 const apiConfigData = schema.object(
   {
@@ -25,10 +25,16 @@ const apiConfigData = schema.object(
   { unknowns: 'forbid' }
 );
 
+const v0ConfigData = lensItemSchemaV0.extends({
+  id: undefined,
+});
+
 export const lensCreateRequestBodySchema = schema.object(
   {
-    // Permit passing old v0 SO attributes on create
-    data: schema.oneOf([apiConfigData, lensCreateRequestBodyDataSchemaV0]),
+    data: schema.oneOf([
+      apiConfigData,
+      v0ConfigData, // Temporarily permit passing old v0 SO attributes on create
+    ]),
     // TODO should these options be here or in params?
     options: schema.object(
       {

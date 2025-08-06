@@ -7,8 +7,10 @@
 
 import type { ContentManagementServicesDefinition, Version } from '@kbn/object-versioning';
 
+import { serviceDefinition as v0 } from './v0/service';
 import { serviceDefinition as v1 } from './v1/service';
 
 export const servicesDefinitions: { [version: Version]: ContentManagementServicesDefinition } = {
+  0: v0,
   1: v1,
 };

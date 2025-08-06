@@ -11,10 +11,10 @@ import { omit } from 'lodash';
 import {
   lensResponseItemSchema,
   lensAPIAttributesSchema,
-  pickFromObjectSchema,
   lensAPIConfigSchema,
   lensCMUpdateOptionsSchema,
 } from '../../../../content_management';
+import { pickFromObjectSchema } from '../../../../utils';
 
 export const lensUpdateRequestParamsSchema = schema.object(
   {

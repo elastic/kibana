@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { savedObjectSchema } from '@kbn/content-management-utils';
 
-import { pickFromObjectSchema } from './utils';
+import { pickFromObjectSchema } from '../../../utils';
 import { LENS_ITEM_VERSION } from '../constants';
 
 export const lensItemAttributesSchema = schema.object(

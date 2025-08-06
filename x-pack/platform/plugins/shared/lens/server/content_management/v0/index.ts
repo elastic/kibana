@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { lensItemAttributesSchemaV0, lensCreateRequestBodyDataSchemaV0 } from './schema';
+export * from './schema';

@@ -129,7 +129,7 @@ export class LensStorage extends SOContentStorage<LensCrud> {
     const { value, error: resultError } = transforms.get.out.result.down<LensGetOut, LensGetOut>(
       response,
       itemVersion,
-      { validate: false } // validation is done after transform below
+      { validate: true } // validate initial SO Item
     );
 
     if (resultError) {

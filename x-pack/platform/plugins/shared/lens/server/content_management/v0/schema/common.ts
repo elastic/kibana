@@ -6,13 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { referencesSchema } from '@kbn/content-management-utils';
+import { savedObjectSchema } from '@kbn/content-management-utils';
+import { pickFromObjectSchema } from '../../../utils';
 
 /**
  * Pre-existing Lens SO attributes (aka `v0`).
  *
  * We could still require handling see these attributes and should allow
  * saving them as is with unknown version. The CM will eventually apply the transforms.
+ *
+ * @deprecated - use `v1` schemas
  */
 export const lensItemAttributesSchemaV0 = schema.object(
   {
@@ -28,10 +31,24 @@ export const lensItemAttributesSchemaV0 = schema.object(
 );
 
 /**
- * Pre-existing Lens SO create body data (aka `v0`).
+ * The underlying SO type used to store Lens state in Content Management.
  *
- * We may require the ability to create a Lens SO with and old state.
+ * Only used in lens server-side Content Management.
+ *
+ * @deprecated - use `v1` schemas
  */
-export const lensCreateRequestBodyDataSchemaV0 = lensItemAttributesSchemaV0.extends({
-  references: referencesSchema,
-});
+export const lensSavedObjectSchemaV0 = savedObjectSchema(lensItemAttributesSchemaV0);
+
+/**
+ * The Lens item data returned from the server
+ *
+ * @deprecated - use `v1` schemas
+ */
+export const lensItemSchemaV0 = schema.object(
+  {
+    ...pickFromObjectSchema(lensSavedObjectSchemaV0.getPropSchemas(), ['id', 'references']),
+    // Spread attributes at root
+    ...lensSavedObjectSchemaV0.getPropSchemas().attributes.getPropSchemas(),
+  },
+  { unknowns: 'forbid' }
+);

@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas, createResultSchema } from '@kbn/content-management-utils';
 
-import { lensItemAttributesSchemaV0 as lensItemAttributesSchemaV0 } from '../../v0/schema';
+import { lensItemAttributesSchemaV0 } from '../../v0';
 import { lensItemAttributesSchema, lensSavedObjectSchema } from './common';
-import { pickFromObjectSchema } from './utils';
+import { pickFromObjectSchema } from '../../../utils';
 
 export const lensCMCreateOptionsSchema = schema.object(
   {
@@ -22,8 +22,10 @@ export const lensCMCreateOptionsSchema = schema.object(
 export const lensCMCreateBodySchema = schema.object(
   {
     options: lensCMCreateOptionsSchema,
-    // Permit passing old SO attributes on create
-    data: schema.oneOf([lensItemAttributesSchema, lensItemAttributesSchemaV0]),
+    data: schema.oneOf([
+      lensItemAttributesSchema,
+      lensItemAttributesSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+    ]),
   },
   {
     unknowns: 'forbid',

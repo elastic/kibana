@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { searchOptionsSchemas, searchResultSchema } from '@kbn/content-management-utils';
 
 import { lensSavedObjectSchema } from './common';
-import { pickFromObjectSchema } from './utils';
+import { pickFromObjectSchema } from '../../../utils';
 
 export const lensCMSearchOptionsSchema = schema.object(
   {

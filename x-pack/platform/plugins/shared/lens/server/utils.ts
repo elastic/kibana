@@ -13,7 +13,7 @@ import { Assign } from 'utility-types';
 /**
  * Picks a subset of props from base schema definition
  *
- * TODO: move this to `@kbn/config-schema`
+ * TODO: move this to shared package, maybe `@kbn/config-schema`
  */
 export function pickFromObjectSchema<T extends Props, K extends keyof T>(
   schema: T,

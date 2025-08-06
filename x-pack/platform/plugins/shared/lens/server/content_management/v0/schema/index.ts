@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export { LensStorage } from './lens_storage';
-export { servicesDefinitions } from './services';
-
-export * from './latest';
-
-export type * as LensV1 from './v1';
+export * from './common';
+export * from './get';
