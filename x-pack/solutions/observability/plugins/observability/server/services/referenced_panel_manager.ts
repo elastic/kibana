@@ -14,47 +14,29 @@ export class ReferencedPanelManager {
   // So, if the same saved object panel is referenced in two different dashboards, it will have different panelIndex values in each dashboard, but the same panelId, since they're both referencing the same panel.
   private panelsById = new Map<string, ReferencedPanelAttributesWithReferences>();
   private panelIndexToId = new Map<string, string>();
+  private panelsTypeById = new Map<string, string>();
 
   constructor(private logger: Logger, private soClient: SavedObjectsClientContract) {}
 
-  async fetchReferencedPanel({
-    dashboard,
-    panel,
-  }: {
-    dashboard: SavedObjectsFindResult<DashboardAttributes>;
-    panel: DashboardPanel;
-  }): Promise<void> {
-    const { panelIndex, type } = panel;
-    if (!panelIndex) return;
-
-    const panelReference = dashboard.references.find(
-      (r) => r.name.includes(panelIndex) && r.type === type
-    );
-
-    // A reference of the panel was not found
-    if (!panelReference) {
-      this.logger.error(
-        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
-      );
+  async fetchReferencedPanels(): Promise<void> {
+    if (this.panelsTypeById.size === 0) {
       return;
     }
 
-    if (this.panelsById.has(panelReference.id)) {
-      this.connectPanelIndex(panelIndex, panelReference.id);
-    } else {
-      try {
-        const so = await this.soClient.get<ReferencedPanelAttributes>(type, panelReference.id);
-        const referencedPanelWithReferences = {
+    const panelsToFetch = [...this.panelsTypeById.entries()].map(([id, type]) => ({ id, type }));
+
+    try {
+      const { saved_objects: savedObjects } =
+        await this.soClient.bulkGet<ReferencedPanelAttributes>(panelsToFetch);
+
+      savedObjects.forEach((so) => {
+        this.panelsById.set(so.id, {
           ...so.attributes,
           references: so.references,
-        };
-        this.set(panelReference.id, panelIndex, referencedPanelWithReferences);
-      } catch (error) {
-        // There was an error fetching the referenced saved object
-        this.logger.error(
-          `Error fetching panel with type ${type} and id ${panelReference.id}: ${error.message}`
-        );
-      }
+        });
+      });
+    } catch (error) {
+      this.logger.error(`Error fetching ${panelsToFetch.length} panels : ${error.message}`);
     }
   }
 
@@ -63,14 +45,34 @@ export class ReferencedPanelManager {
     return panelId ? this.panelsById.get(panelId) : undefined;
   }
 
-  private set(panelId: string, panelIndex: string, panel: ReferencedPanelAttributesWithReferences) {
-    this.panelsById.set(panelId, panel);
-    this.panelIndexToId.set(panelIndex, panelId);
-  }
+  // This method adds the panel type to the map, so that we can fetch the panel later and it links the panelIndex to the panelId.
+  addReferencedPanel({
+    dashboard,
+    panel,
+  }: {
+    dashboard: SavedObjectsFindResult<DashboardAttributes>;
+    panel: DashboardPanel;
+  }) {
+    const { panelIndex, type } = panel;
+    if (!panelIndex) return;
 
-  private connectPanelIndex(panelIndex: string, panelId: string) {
-    if (this.panelsById.has(panelId)) {
-      this.panelIndexToId.set(panelIndex, panelId);
+    const panelReference = dashboard.references.find(
+      (r) => r.name.includes(panelIndex) && r.type === type
+    );
+    // A reference of the panel was not found
+    if (!panelReference) {
+      this.logger.error(
+        `Reference for panel of type ${type} and panelIndex ${panelIndex} was not found in dashboard with id ${dashboard.id}`
+      );
+      return;
+    }
+
+    const panelId = panelReference.id;
+
+    this.panelIndexToId.set(panelIndex, panelId);
+
+    if (!this.panelsTypeById.has(panelId)) {
+      this.panelsTypeById.set(panelId, panel.type);
     }
   }
 }

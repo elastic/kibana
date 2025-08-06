@@ -183,11 +183,13 @@ export class RelatedDashboardsClient {
           isSuggestedDashboardsValidPanelType(panel.type) &&
           (isEmpty(panel.panelConfig) || !panel.panelConfig.attributes)
         ) {
-          await this.referencedPanelManager.fetchReferencedPanel({ dashboard, panel });
+          this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
         }
       }
       this.dashboardsById.set(dashboard.id, dashboard);
     }
+
+    await this.referencedPanelManager.fetchReferencedPanels();
 
     const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
 

@@ -357,16 +357,15 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      soClientMock.get.mockResolvedValueOnce({
-        attributes: PANEL_SO_ATTRIBUTES,
-        type: PANEL_TYPE,
-        id: PANEL_SO_ID,
-        references: [],
+      soClientMock.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+        ],
       });
 
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1 });
-      expect(soClientMock.get).toHaveBeenCalledWith(PANEL_TYPE, PANEL_SO_ID);
+      expect(soClientMock.bulkGet).toHaveBeenCalledWith([{ id: PANEL_SO_ID, type: PANEL_TYPE }]);
       // @ts-ignore next-line
       expect(client.referencedPanelManager.getByIndex(PANEL_INDEX)).toStrictEqual({
         ...PANEL_SO_ATTRIBUTES,
@@ -403,16 +402,15 @@ describe('RelatedDashboardsClient', () => {
         },
       });
 
-      soClientMock.get.mockResolvedValueOnce({
-        attributes: PANEL_SO_ATTRIBUTES,
-        type: PANEL_TYPE,
-        id: PANEL_SO_ID,
-        references: [],
+      soClientMock.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          { attributes: PANEL_SO_ATTRIBUTES, type: PANEL_TYPE, id: PANEL_SO_ID, references: [] },
+        ],
       });
 
       // @ts-ignore next-line
       await client.fetchDashboards({ page: 1 });
-      expect(soClientMock.get).toHaveBeenCalledTimes(1);
+      expect(soClientMock.bulkGet).toHaveBeenCalledTimes(1);
       // @ts-ignore next-line
       expect(client.referencedPanelManager.panelIndexToId.get(OTHER_PANEL_INDEX)).toBe(PANEL_SO_ID);
       // @ts-ignore next-line
@@ -498,8 +496,9 @@ describe('RelatedDashboardsClient', () => {
 
       // populate fallback map with references for the panelIndex
       // @ts-ignore private field access for testing only
-      client.referencedPanelManager.set(INDEX_ID, PANEL_INDEX, {
-        // minimal shape needed for getPanelIndicesMap logic
+      client.referencedPanelManager.panelIndexToId.set(PANEL_INDEX, INDEX_ID);
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelsById.set(INDEX_ID, {
         references: [{ name: 'indexpattern', id: INDEX_ID, type: 'type' }],
       });
 
@@ -551,9 +550,10 @@ describe('RelatedDashboardsClient', () => {
         },
       } as any);
 
-      // populate fallback state for the panel index
-      // @ts-ignore testing private field
-      client.referencedPanelManager.set('id', PANEL_INDEX, {
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelIndexToId.set(PANEL_INDEX, 'id');
+      // @ts-ignore private field access for testing only
+      client.referencedPanelManager.panelsById.set('id', {
         state: {
           datasourceStates: {
             formBased: {
