@@ -8,6 +8,24 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Issues with rules occur when `xpack.alerting.rules.run.alerts.max` is set to a value greater than `5000`
+
+Applies to: {{stack}} 9.0.3 and 9.1.0
+
+**Details**
+
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+
+**Action**
+
+To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.4.
+
+::::
+
 ::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
 
 Applies to: {{stack}} 9.0.3
