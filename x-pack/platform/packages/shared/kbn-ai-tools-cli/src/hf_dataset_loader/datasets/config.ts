@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { HuggingFaceDatasetSpec } from './types';
+import { Logger } from '@kbn/core/server';
+import type { HuggingFaceDatasetSpec } from '../types';
+import { createOneChatDatasetSpec, isOneChatDataset } from './onechat';
 
 const BEIR_NAMES = [
   'trec-covid',
@@ -81,7 +83,34 @@ const EXTRA_DATASETS: HuggingFaceDatasetSpec[] = [
   },
 ];
 
-export const ALL_HUGGING_FACE_DATASETS: HuggingFaceDatasetSpec[] = [
+export const PREDEFINED_HUGGING_FACE_DATASETS: HuggingFaceDatasetSpec[] = [
   ...BEIR_DATASETS,
   ...EXTRA_DATASETS,
 ];
+
+/**
+ * Get dataset specifications, including dynamically generated OneChat datasets
+ */
+export async function getDatasetSpecs(
+  accessToken: string,
+  logger: Logger,
+  datasetNames: string[]
+): Promise<HuggingFaceDatasetSpec[]> {
+  const specs: HuggingFaceDatasetSpec[] = [];
+  for (const name of datasetNames) {
+    if (isOneChatDataset(name)) {
+      const spec = await createOneChatDatasetSpec(name, accessToken, logger);
+      specs.push(spec);
+    } else {
+      // Look for static datasets
+      const staticSpec = PREDEFINED_HUGGING_FACE_DATASETS.find((spec) => spec.name === name);
+      if (staticSpec) {
+        specs.push(staticSpec);
+      } else {
+        throw new Error(`Dataset '${name}' not found`);
+      }
+    }
+  }
+
+  return specs;
+}
