@@ -39,12 +39,14 @@ import {
 } from '../../../types';
 import { Walker } from '../../../walker';
 import {
+  FieldType,
   FunctionDefinition,
   FunctionDefinitionTypes,
   FunctionParameter,
   FunctionParameterType,
   ReasonTypes,
   SupportedDataType,
+  isFieldType,
 } from '../../types';
 import { getColumnExists, getQuotedColumnName } from '../columns';
 import {
@@ -83,7 +85,8 @@ export function validateFunctionNew({
 
 class FunctionValidator {
   private definition: FunctionDefinition | undefined;
-  private argTypes: (SupportedDataType | 'unknown')[];
+  private argTypes: (SupportedDataType | 'unknown')[] = [];
+  private argLiteralsMask: boolean[] = [];
 
   constructor(
     private fn: ESQLFunction,
@@ -92,9 +95,12 @@ class FunctionValidator {
     private callbacks: ICommandCallbacks
   ) {
     this.definition = getFunctionDefinition(fn.name);
-    this.argTypes = this.fn.args.map((node) =>
-      getExpressionType(node, this.context.fields, this.context.userDefinedColumns)
-    );
+    for (const arg of this.fn.args) {
+      this.argTypes.push(
+        getExpressionType(arg, this.context.fields, this.context.userDefinedColumns)
+      );
+      this.argLiteralsMask.push(isLiteral(arg));
+    }
   }
 
   validate(): ESQLMessage[] {
@@ -168,7 +174,7 @@ class FunctionValidator {
       return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
     }
 
-    const S = getSignatureWithMatchingTypes(this.definition, this.argTypes);
+    const S = getSignatureWithMatchingTypes(this.definition, this.argTypes, this.argLiteralsMask);
 
     if (!S) {
       return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
@@ -197,35 +203,64 @@ class FunctionValidator {
   }
 }
 
+const FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FieldType[] = ['date', 'date_nanos'];
+
 /**
  * Returns a signature matching the given types if it exists
  * @param definition
  * @param types
  *
- * @TODO handle variadic, implicit casting, etc.
+ * @TODO handle variadic etc.
  */
 function getSignatureWithMatchingTypes(
   definition: FunctionDefinition,
-  types: Array<SupportedDataType | 'unknown'>
+  givenTypes: Array<SupportedDataType | 'unknown'>,
+  // a boolean array indicating if the argument is a literal
+  literalMask: boolean[]
 ): FunctionDefinition['signatures'][number] | undefined {
   return definition.signatures.find((sig) => {
     // TODO check this - it may not be correct
-    if (types.length < sig.params.filter(({ optional }) => !optional).length) {
+    if (givenTypes.length < sig.params.filter(({ optional }) => !optional).length) {
       return false;
     }
 
-    return types.every((type, index) => {
-      const paramType = getParamAtPosition(sig, index)!.type;
-      const singularType = unwrapArrayOneLevel(paramType);
-      return (
-        singularType === 'any' ||
-        type === 'param' ||
-        type === 'null' ||
-        // safe to assume the param is there, because we checked the length above
-        type === singularType
-      );
+    return givenTypes.every((givenType, index) => {
+      // safe to assume the param is there, because we checked the length above
+      const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
+
+      if (givenType === expectedType) return true;
+
+      if (expectedType === 'any') return true;
+
+      if (givenType === 'param') return true;
+
+      if (givenType === 'null') return true;
+
+      if (bothStringTypes(givenType, expectedType)) return true;
+
+      if (
+        literalMask[index] &&
+        givenType === 'keyword' &&
+        isFieldType(expectedType) &&
+        FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
+      )
+        return true;
+
+      return false;
     });
   });
+}
+
+/**
+ * Checks if both types are string types.
+ *
+ * Functions in ES|QL accept `text` and `keyword` types interchangeably.
+ * @param type1
+ * @param type2
+ * @returns
+ */
+function bothStringTypes(type1: string, type2: string): boolean {
+  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
 }
 
 /**
@@ -309,18 +344,6 @@ const isParam = (x: unknown): x is ESQLParamLiteral =>
   typeof x === 'object' &&
   (x as ESQLParamLiteral).type === 'literal' &&
   (x as ESQLParamLiteral).literalType === 'param';
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
 
 /**
  * Checks if an AST function argument is of the correct type

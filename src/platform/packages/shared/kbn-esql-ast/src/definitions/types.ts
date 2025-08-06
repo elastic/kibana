@@ -38,6 +38,7 @@ export const fieldTypes = [
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
+
 /**
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
@@ -134,6 +135,9 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
  * This is the type of a parameter in a function definition.
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
+
+export const isFieldType = (str: string | undefined): str is FieldType =>
+  typeof str !== undefined && ([...fieldTypes] as string[]).includes(str as string);
 
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
   typeof str !== undefined &&
