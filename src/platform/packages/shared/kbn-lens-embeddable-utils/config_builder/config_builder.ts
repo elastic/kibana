@@ -20,7 +20,10 @@ import {
   buildTable,
   buildXY,
   buildPartitionChart,
+  fromMetricLegacyToAPI,
 } from './charts';
+import { LensApiState } from './schema';
+import { isLensAPIFormat } from './utils';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -38,6 +41,10 @@ export class LensConfigBuilder {
     xy: buildXY,
     table: buildTable,
   };
+
+  private apiConvertersByChart = {
+    metric: fromMetricLegacyToAPI,
+  };
   private formulaAPI: FormulaPublicApi | undefined;
   private dataViewsAPI: DataViewsCommon;
 
@@ -47,11 +54,17 @@ export class LensConfigBuilder {
     this.dataViewsAPI = dataViewsAPI;
   }
 
+  /**
+   * Build a Lens configuration based on the provided API configuration
+   * @param config ConfigBuilder API configuration
+   * @param options
+   * @returns Lens internal configuration
+   */
   async build(
-    config: LensConfig,
+    config: LensConfig | LensApiState,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
-    const { chartType } = config;
+    const chartType = isLensAPIFormat(config) ? config.type : config.chartType;
     const chartConfig = await this.charts[chartType](config as any, {
       formulaAPI: this.formulaAPI,
       dataViewsAPI: this.dataViewsAPI,
@@ -76,5 +89,17 @@ export class LensConfigBuilder {
     }
 
     return chartState as LensAttributes;
+  }
+
+  async toAPIFormat(config: LensAttributes): Promise<LensApiState> {
+    const chartType = config.visualizationType;
+    if (chartType === 'metric') {
+      const converter = this.apiConvertersByChart[chartType];
+      return converter(config, {
+        formulaAPI: this.formulaAPI,
+        dataViewsAPI: this.dataViewsAPI,
+      });
+    }
+    throw new Error(`No API converter found for chart type: ${chartType}`);
   }
 }
