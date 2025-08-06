@@ -6,25 +6,25 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import {
+import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import {
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SloClient } from './client';
-
 export type { SLOConfig } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -46,6 +46,7 @@ export interface SLOPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
+  cases: CasesServerSetup;
 }
 
 export interface SLOPluginStartDependencies {
@@ -55,4 +56,5 @@ export interface SLOPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;
+  cases: CasesServerStart;
 }

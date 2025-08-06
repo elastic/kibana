@@ -7,6 +7,7 @@
 
 import type { ToolDefinition } from '@kbn/inference-common';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   PersistableStateAttachmentPayload,
   SuggestionOwner,
@@ -51,9 +52,13 @@ export interface SuggestionType<TPayload = Record<string, unknown>> {
   handlers: Record<string, SuggestionHandler<TPayload>>;
 }
 
-export type SuggestionHandler<TPayload = Record<string, unknown>> = (
-  params: SuggestionContext
-) => Promise<SuggestionResponse<TPayload>>;
+export type SuggestionHandler<TPayload = Record<string, unknown>> = ({
+  context,
+  request,
+}: {
+  context: SuggestionContext;
+  request: KibanaRequest;
+}) => Promise<SuggestionResponse<TPayload>>;
 
 export interface AttachmentFramework {
   registerExternalReference: (

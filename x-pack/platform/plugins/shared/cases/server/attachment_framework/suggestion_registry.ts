@@ -6,6 +6,7 @@
  */
 
 import { flatten } from 'lodash';
+import type { KibanaRequest } from '@kbn/core/server';
 import { Registry } from '../../common/registry';
 import type {
   SuggestionContext,
@@ -33,7 +34,8 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
 
   public async getAllSuggestionsForOwners(
     owners: SuggestionOwner[],
-    context: SuggestionContext
+    context: SuggestionContext,
+    request: KibanaRequest
   ): Promise<SuggestionResponse> {
     const allSuggestionDefinitions = this.getAllForOwners(owners);
     const allSuggestionHandlers = flatten(
@@ -43,12 +45,15 @@ export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
     );
     const allSettledResponses = await Promise.allSettled(
       allSuggestionHandlers.map((handler) => {
-        return handler(context);
+        return handler({ context, request });
       })
     );
 
     const fulfilledResponses = allSettledResponses
-      .filter((result): result is PromiseFulfilledResult<SuggestionResponse> => result.status === 'fulfilled')
+      .filter(
+        (result): result is PromiseFulfilledResult<SuggestionResponse> =>
+          result.status === 'fulfilled'
+      )
       .map((result) => result.value);
 
     return fulfilledResponses.reduce<SuggestionResponse>(

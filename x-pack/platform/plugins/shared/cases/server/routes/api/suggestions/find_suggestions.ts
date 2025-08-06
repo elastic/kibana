@@ -25,6 +25,7 @@ export const findSuggestionsRoute = createCasesRoute({
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
       const suggestions = await casesClient.suggestions.getAllForOwners({
+        request,
         owners: request.body.owners,
         context: request.body.context,
       });

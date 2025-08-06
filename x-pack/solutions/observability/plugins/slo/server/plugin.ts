@@ -49,6 +49,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
+import { getSLOByServiceName } from './lib/cases/suggestion';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -136,7 +137,6 @@ export class SLOPlugin
     });
 
     const { ruleDataService } = plugins.ruleRegistry;
-
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
 
@@ -247,6 +247,12 @@ export class SLOPlugin
       core,
       plugins: mappedPlugins,
       logFactory: this.initContext.logger,
+    });
+
+    core.getStartServices().then(([coreStart, pluginsStart]) => {
+      plugins.cases.attachmentFramework.registerSuggestion(
+        getSLOByServiceName(coreStart, this.initContext.logger.get('cases-suggestion'))
+      );
     });
 
     return {};

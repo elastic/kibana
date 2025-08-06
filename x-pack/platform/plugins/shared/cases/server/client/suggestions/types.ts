@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SuggestionOwner, SuggestionContext } from '../../../common/types/domain';
 
 export interface GetAllForOwnersArgs {
@@ -13,4 +14,5 @@ export interface GetAllForOwnersArgs {
    */
   owners: SuggestionOwner[];
   context: SuggestionContext;
+  request: KibanaRequest;
 }
