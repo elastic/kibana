@@ -9,7 +9,7 @@
 
 import chalk from 'chalk';
 import execa from 'execa';
-import fs from 'fs';
+import fs, { existsSync } from 'fs';
 import Fsp from 'fs/promises';
 import pRetry from 'p-retry';
 import { resolve, basename, join } from 'path';
@@ -703,10 +703,20 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
+  const tierSpecificRolesFileExists = (filePath: string): boolean => {
+    try {
+      return existsSync(filePath);
+    } catch (e) {
+      return false;
+    }
+  };
+
   // Read roles for the specified projectType
+  const tierSpecificRolesResourcePath =
+    productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml');
   const rolesResourcePath =
-    productTier && productTier === 'search_ai_lake'
-      ? resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, productTier, 'roles.yml')
+    tierSpecificRolesResourcePath && tierSpecificRolesFileExists(tierSpecificRolesResourcePath)
+      ? tierSpecificRolesResourcePath
       : resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];

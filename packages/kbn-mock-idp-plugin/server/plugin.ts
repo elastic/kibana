@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { existsSync } from 'fs';
 import { resolve } from 'path';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -43,12 +44,23 @@ const projectToAlias = new Map<string, string>([
   // requires update of config/serverless.chat.yml (currently uses projectType 'search')
 ]);
 
+const tierSpecificRolesFileExists = (filePath: string): boolean => {
+  try {
+    return existsSync(filePath);
+  } catch (e) {
+    return false;
+  }
+};
+
 const readServerlessRoles = (projectType: string, productTier?: ServerlessProductTier) => {
   if (projectToAlias.has(projectType)) {
     const alias = projectToAlias.get(projectType)!;
+
+    const tierSpecificRolesResourcePath =
+      productTier && resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml');
     const rolesResourcePath =
-      productTier && productTier === 'search_ai_lake'
-        ? resolve(SERVERLESS_ROLES_ROOT_PATH, alias, productTier, 'roles.yml')
+      tierSpecificRolesResourcePath && tierSpecificRolesFileExists(tierSpecificRolesResourcePath)
+        ? tierSpecificRolesResourcePath
         : resolve(SERVERLESS_ROLES_ROOT_PATH, alias, 'roles.yml');
 
     return readRolesFromResource(rolesResourcePath);
