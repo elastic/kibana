@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { FileUploadContext, useFileUpload } from '@kbn/file-upload';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -82,7 +89,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
         <FileUploadContext.Provider value={fileUploadContextValue}>
           <EuiFlyoutHeader hasBorder>
             <IndexName />
-
+            <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="indexEditor.flyout.headerDescription"

@@ -18,7 +18,6 @@ interface ValueInputProps {
   columnName?: string;
   columns?: DatatableColumn[];
   onBlur?: (event?: React.FocusEvent<HTMLInputElement>) => void;
-  onEnter?: (value: string) => void;
   onChange?: (value: string) => void;
   autoFocus?: boolean;
   className?: string;
@@ -30,7 +29,6 @@ export const ValueInput: React.FC<ValueInputProps> = ({
   columnName = '',
   columns,
   onBlur,
-  onEnter,
   onChange,
   autoFocus = false,
   className = '',
@@ -48,15 +46,14 @@ export const ValueInput: React.FC<ValueInputProps> = ({
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       if (error) {
+        event.preventDefault();
         return;
       }
-
-      onEnter?.(editValue);
     }
     if (event.key === 'Escape') {
       setEditValue(value);
+      onChange?.(value);
       setError(null);
-      onBlur?.();
     }
   };
 
