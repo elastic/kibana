@@ -2364,17 +2364,12 @@ export class CstToAstConverter {
 
   private fromQualifiedIntegerLiteral(
     ctx: cst.QualifiedIntegerLiteralContext
-  ): ast.ESQLTimeInterval {
+  ): ast.ESQLTimeDurationLiteral | ast.ESQLDatePeriodLiteral {
     const value = ctx.integerValue().INTEGER_LITERAL().getText();
     const unit = ctx.UNQUOTED_IDENTIFIER().symbol.text;
     const parserFields = this.createParserFields(ctx);
-    const qualifiedInteger = Builder.expression.literal.qualifiedInteger(
-      Number(value),
-      unit,
-      parserFields
-    );
 
-    return qualifiedInteger;
+    return Builder.expression.literal.timespan(Number(value), unit, parserFields);
   }
 
   // ---------------------------------------- constant expression: "identifier"

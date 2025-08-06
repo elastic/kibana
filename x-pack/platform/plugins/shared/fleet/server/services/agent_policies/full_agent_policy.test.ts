@@ -1360,6 +1360,39 @@ ssl.test: 123
     `);
   });
 
+  it('should keep ssl fields for es output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['http://host.fr'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'elasticsearch',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "http://host.fr",
+        ],
+        "preset": "balanced",
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+        },
+        "type": "elasticsearch",
+      }
+    `);
+  });
+
   it('should works with proxy', () => {
     const policyOutput = transformOutputToFullPolicyOutput(
       {
