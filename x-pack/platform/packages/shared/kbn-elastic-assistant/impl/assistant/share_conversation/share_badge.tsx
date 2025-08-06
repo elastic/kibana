@@ -90,6 +90,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         aria-label={i18n.VISIBILITY}
         color="hollow"
         data-test-subj="shareBadgeButton"
+        isDisabled={!isConversationOwner}
         iconType="arrowDown"
         iconSide="right"
         onClick={togglePopover}
@@ -105,7 +106,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         {selectedLabel}
       </EuiBadge>
     ),
-    [isShared, togglePopover, selectedLabel]
+    [isConversationOwner, togglePopover, isShared, selectedLabel]
   );
 
   const renderOption = useCallback(
