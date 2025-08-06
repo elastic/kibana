@@ -37,7 +37,7 @@ export const HostToolbarItems = (props: ToolbarProps) => {
     <MetricsAndGroupByToolbarItems
       {...props}
       groupByFields={
-        props.preferredSchema === 'ecs' ? ecsHostGroupByFields : semconvHostGroupByFields
+        props.preferredSchema === 'semconv' ? semconvHostGroupByFields : ecsHostGroupByFields
       }
       allowSchemaSelection
     />

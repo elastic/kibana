@@ -22,6 +22,7 @@ import {
   type InventoryOptionsState,
   type InventorySortOption,
   inventoryOptionsStateRT,
+  staticInventoryViewId,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import type {
@@ -70,8 +71,15 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
-    preferredSchema = 'ecs',
+    preferredSchema,
   } = savedView.attributes;
+
+  // forces the default view to be set with what the time range metadata endpoint returns
+  const preferredSchemaValue =
+    savedView.id === staticInventoryViewId
+      ? preferredSchema ?? null
+      : // otherwise, use the preferred schema from the saved view
+        preferredSchema;
 
   return {
     metric,
@@ -87,7 +95,7 @@ function mapInventoryViewToState(savedView: InventoryView): WaffleOptionsState {
     legend,
     sort,
     timelineOpen,
-    preferredSchema,
+    preferredSchema: preferredSchemaValue,
   };
 }
 
@@ -209,8 +217,6 @@ export const useWaffleOptions = () => {
 
   return {
     ...urlState,
-    preferredSchema:
-      urlState.preferredSchema === null ? ('ecs' as DataSchemaFormat) : urlState.preferredSchema,
     changeMetric,
     changeGroupBy,
     changeNodeType,

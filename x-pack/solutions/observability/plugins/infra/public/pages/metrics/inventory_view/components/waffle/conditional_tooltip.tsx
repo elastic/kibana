@@ -38,7 +38,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
 
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: preferredSchema,
+      schema: preferredSchema ?? 'ecs',
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
