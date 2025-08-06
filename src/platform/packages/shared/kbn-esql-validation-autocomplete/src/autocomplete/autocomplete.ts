@@ -69,6 +69,7 @@ export async function suggest(
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
 
+  const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
   const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
 
@@ -80,9 +81,19 @@ export async function suggest(
       .getAllCommands()
       .filter((command) => {
         const license = command.metadata?.license;
-        return (
-          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType)
-        );
+        const observabilityTier = command.metadata?.observabilityTier;
+
+        // Check license requirements
+        const hasLicenseAccess =
+          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType);
+
+        // Check observability tier requirements
+        const hasObservabilityAccess =
+          !observabilityTier ||
+          (activeProduct?.type === 'observability' &&
+            activeProduct?.tier === observabilityTier.toLocaleLowerCase());
+
+        return hasLicenseAccess && hasObservabilityAccess;
       })
       .map((command) => command.name);
 
