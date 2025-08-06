@@ -197,7 +197,10 @@ describe('CustomScriptSelector', () => {
       expect.objectContaining({
         value: 'Script 1',
         valueText: 'Script 1',
-        store: { isPopoverOpen: false },
+        store: {
+          isPopoverOpen: false,
+          selectedOption: { description: 'Test script 1', id: 'script1', name: 'Script 1' },
+        },
       })
     );
   });
@@ -222,7 +225,10 @@ describe('CustomScriptSelector', () => {
     // Check that onChange was called with isPopoverOpen set to false
     expect(mockOnChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        store: { isPopoverOpen: false },
+        store: {
+          isPopoverOpen: false,
+          selectedOption: { description: 'Test script 1', id: 'script1', name: 'Script 1' },
+        },
       })
     );
   });
@@ -246,7 +252,7 @@ describe('CustomScriptSelector', () => {
       <CustomScriptSelector {...defaultProps} command={crowdstrikeCommand} />
     );
 
-    expect(mockUseGetCustomScripts).toHaveBeenCalledWith('crowdstrike');
+    expect(mockUseGetCustomScripts).toHaveBeenCalledWith('crowdstrike', {});
   });
 
   test('displays script description in dropdown', async () => {
