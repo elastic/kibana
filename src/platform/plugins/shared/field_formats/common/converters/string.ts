@@ -111,7 +111,7 @@ export class StringFormat extends FieldFormat {
     if (val === '') {
       return EMPTY_LABEL;
     }
-    if (val === null || val === '__missing__') {
+    if (val == null || val === '__missing__') {
       return NULL_LABEL;
     }
     switch (this.param('transform')) {
