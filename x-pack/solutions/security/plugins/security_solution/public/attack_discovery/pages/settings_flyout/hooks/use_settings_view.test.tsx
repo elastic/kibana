@@ -85,9 +85,7 @@ jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   }),
 }));
 jest.mock('../../use_kibana_feature_flags', () => ({
-  useKibanaFeatureFlags: jest.fn().mockReturnValue({
-    attackDiscoveryAlertsEnabled: true,
-  }),
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
 }));
 jest.mock('../../../../common/lib/kuery', () => ({
   convertToBuildEsQuery: jest
@@ -110,6 +108,15 @@ jest.mock('@kbn/data-plugin/public', () => ({
   FilterManager: jest.fn().mockImplementation(() => mockFilterManager),
 }));
 
+// Mock FilterManager so useRef in the hook uses our mock instance
+jest.mock('@kbn/data-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/data-plugin/public');
+  return {
+    ...actual,
+    FilterManager: jest.fn().mockImplementation(() => mockFilterManager),
+  };
+});
+
 const defaultProps = {
   connectorId: undefined,
   onConnectorIdSelected: jest.fn(),
@@ -131,6 +138,9 @@ const defaultProps = {
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView: jest.MockedFunction<typeof useSourcererDataView> =
   useSourcererDataView as jest.MockedFunction<typeof useSourcererDataView>;
+const mockUseKibanaFeatureFlags = jest.fn().mockReturnValue({
+  attackDiscoveryAlertsEnabled: true,
+});
 
 describe('useSettingsView', () => {
   beforeEach(() => {
@@ -407,6 +417,49 @@ describe('useSettingsView', () => {
         ...props.settings,
         start: 'now-1h',
         end: 'now',
+      });
+    });
+
+    describe('when localConnectorId changes and save is clicked', () => {
+      interface LocalConnectorIdProps {
+        connectorId: string | undefined;
+        onSettingsSave: jest.Mock;
+        onConnectorIdSelected: jest.Mock;
+        onSettingsChanged?: typeof defaultProps.onSettingsChanged;
+        onSettingsReset?: typeof defaultProps.onSettingsReset;
+        settings: typeof defaultProps.settings;
+        showConnectorSelector: boolean;
+        stats: null;
+      }
+      let props: LocalConnectorIdProps;
+
+      beforeEach(() => {
+        props = {
+          connectorId: 'old-connector',
+          onSettingsSave: jest.fn(),
+          onConnectorIdSelected: jest.fn(),
+          onSettingsChanged: defaultProps.onSettingsChanged,
+          onSettingsReset: defaultProps.onSettingsReset,
+          settings: defaultProps.settings,
+          showConnectorSelector: defaultProps.showConnectorSelector,
+          stats: defaultProps.stats,
+        };
+      });
+
+      it('calls onConnectorIdSelected', () => {
+        const { result } = renderHook(() => useSettingsView(props));
+
+        simulateConnectorChangeAndSave(result as { current: UseSettingsView }, 'new-connector');
+
+        expect(props.onConnectorIdSelected).toHaveBeenCalledWith('new-connector');
+      });
+
+      it('calls onSettingsSave', () => {
+        const { result } = renderHook(() => useSettingsView(props));
+
+        simulateConnectorChangeAndSave(result as { current: UseSettingsView }, 'new-connector');
+
+        expect(props.onSettingsSave).toHaveBeenCalled();
       });
     });
   });
