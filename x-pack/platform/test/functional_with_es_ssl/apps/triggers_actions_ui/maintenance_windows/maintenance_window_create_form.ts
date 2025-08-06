@@ -96,7 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('should show a callout warning when filters toggle is on', async () => {
+    it('should show a callout warning when filters toggle is on and scope query is set', async () => {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('mw-create-button');
@@ -120,12 +120,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('maintenanceWindowScopeQuery');
       });
 
-      await testSubjects.existOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
+      await testSubjects.missingOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
 
       const filtersInput = await testSubjects.find('queryInput');
       await filtersInput.click();
       await filtersInput.type('_id: "*"');
       await filtersInput.pressKeys(ENTER_KEY);
+
+      await testSubjects.existOrFail('maintenanceWindowMultipleSolutionsRemovedWarning');
 
       await (await testSubjects.find('create-submit')).click();
 

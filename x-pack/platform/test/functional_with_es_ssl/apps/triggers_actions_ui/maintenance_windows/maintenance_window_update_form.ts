@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const pageObjects = getPageObjects(['common', 'maintenanceWindows', 'header']);
   const retry = getService('retry');
+  const find = getService('find');
   const toasts = getService('toasts');
   const objectRemover = new ObjectRemover(supertest);
   const browser = getService('browser');

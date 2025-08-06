@@ -168,7 +168,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           recurringSchedule: formData.recurringSchedule,
         }),
         scopedQuery: scopedQueryPayload ?? null,
-        ...(showMultipleSolutionsWarning || formData.solutionId ? { categoryIds: null } : {}),
+        ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
       if (isEditMode) {
@@ -414,7 +414,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             </UseField>
           </EuiFlexItem>
         </>
-        {isScopedQueryEnabled || showMultipleSolutionsWarning ? (
+        {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
           <>
             <EuiFlexItem>
               <EuiHorizontalRule margin="xl" />

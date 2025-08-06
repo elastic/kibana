@@ -192,7 +192,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(await screen.findByTestId('maintenanceWindowScopedQuerySwitch')).toBeInTheDocument();
   });
 
-  it('should show warning correctly when scoped query filter is on', async () => {
+  it('should show warning correctly when scoped query filter is on and scope query is set', async () => {
     appMockRenderer.render(<CreateMaintenanceWindowForm {...formPropsForEditMode} />);
 
     expect(

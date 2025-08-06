@@ -22,7 +22,6 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringSchedule;
-  solutionId?: string;
   scopedQuery?: ScopedQueryAttributes | null;
 }
 

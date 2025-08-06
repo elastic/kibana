@@ -299,7 +299,7 @@ describe('AlertsSearchBar', () => {
     });
   });
 
-  describe('With useAlertsNewApiDataView', () => {
+  describe('With enableNewAPIForFields', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockUseAlertsDataView.mockReturnValue({
@@ -335,6 +335,37 @@ describe('AlertsSearchBar', () => {
           ],
         },
       });
+    });
+
+    it('calls mockUseFetchAlertsFieldsWithNewApi correctly with enabled true', async () => {
+      render(
+        <AlertsSearchBar
+          rangeFrom="now/d"
+          rangeTo="now/d"
+          query=""
+          onQuerySubmit={jest.fn()}
+          onFiltersUpdated={onFiltersUpdatedMock}
+          unifiedSearchBar={newUnifiedSearchBarMock}
+          toasts={toastsMock}
+          http={httpMock}
+          dataService={mockDataPlugin}
+          appName={'test'}
+          enableNewAPIForFields={true}
+        />
+      );
+
+      expect(mockUseAlertsDataView).toHaveBeenCalledWith({
+        http: httpMock,
+        ruleTypeIds: [],
+        toasts: toastsMock,
+        enableNewAPIForFields: true,
+        dataViewsService: mockDataPlugin.dataViews,
+      });
+
+      expect(mockUseFetchAlertsFieldsWithNewApi).toHaveBeenCalledWith(
+        { http: httpMock, ruleTypeIds: [], toasts: toastsMock },
+        { enabled: true }
+      );
     });
 
     it('calls onFiltersUpdated correctly', async () => {
