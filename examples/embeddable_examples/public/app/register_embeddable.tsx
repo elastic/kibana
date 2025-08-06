@@ -12,7 +12,10 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
 import registerSearchEmbeddableSource from '../react_embeddables/search/register_search_embeddable?raw';
 // @ts-ignore
-import registerAttachActionSource from '../react_embeddables/search/register_create_search_panel_action?raw';
+// import registerAttachActionSource from '../react_embeddables/search/register_search_panel_action?raw';
+import registerSearchPanelAction from '../react_embeddables/search/register_search_panel_action?raw';
+// @ts-ignore
+import registerCreatePanelAction from '../react_embeddables/search/create_search_panel_action?raw';
 // @ts-ignore
 import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
 // @ts-ignore
@@ -50,14 +53,20 @@ export const RegisterEmbeddable = () => {
         <h2>Show embeddables in the Add panel menu</h2>
         <p>
           Add your own embeddables to <em>Add panel</em> menu by attaching an action to the{' '}
-          <strong>ADD_PANEL_TRIGGER</strong> trigger. Notice usage of <strong>grouping</strong> to
-          nest related panel types and avoid bloating <em>Add panel</em> menu. Please reach out to
+          <strong>ADD_PANEL_TRIGGER</strong> trigger. Register the action asynchronously to reduce
+          initial plugin bundle size. The example below uses <strong>addTriggerActionAsync </strong>
+          to register the action lazily. Notice usage of <strong>grouping</strong> to nest related
+          panel types and avoid bloating <em>Add panel</em> menu. Please reach out to
           @elastic/kibana-presentation team to coordinate menu updates.
         </p>
       </EuiText>
       <EuiSpacer size="s" />
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {registerAttachActionSource}
+        {registerSearchPanelAction}
+      </EuiCodeBlock>
+      <EuiSpacer size="s" />
+      <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
+        {registerCreatePanelAction}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />

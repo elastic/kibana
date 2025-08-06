@@ -34,7 +34,7 @@ import { registerFieldListPanelPlacementSetting } from './react_embeddables/fiel
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
-import { registerCreateSearchPanelAction } from './react_embeddables/search/register_create_search_panel_action';
+import { registerSearchPanelAction } from './react_embeddables/search/register_search_panel_action';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -101,7 +101,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     registerCreateFieldListAction(deps.uiActions);
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
-    registerCreateSearchPanelAction(deps.uiActions);
+    registerSearchPanelAction(deps.uiActions);
 
     deps.uiActions.registerActionAsync(ADD_EUI_MARKDOWN_ACTION_ID, async () => {
       const { createEuiMarkdownAction } = await import(

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UiActionsStart, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -15,7 +14,7 @@ import { SearchSerializedState } from './types';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 
-const createSearchPanelAction = {
+export const createSearchPanelAction = {
   id: ADD_SEARCH_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
   getDisplayName: () => 'Search example',
@@ -32,10 +31,4 @@ const createSearchPanelAction = {
       true
     );
   },
-};
-
-export const registerCreateSearchPanelAction = (uiActions: UiActionsStart) => {
-  uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID, async () => {
-    return createSearchPanelAction;
-  });
 };
