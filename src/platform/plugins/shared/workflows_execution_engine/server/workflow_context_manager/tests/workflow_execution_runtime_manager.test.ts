@@ -140,8 +140,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('start', () => {
-    it('should start the workflow execution and update workflow status in runtime', async () => {
+    beforeEach(() => {
       mockDateNow = new Date('2025-08-05T20:00:00.000Z');
+    });
+
+    it('should start the workflow execution and update workflow status in runtime', async () => {
       await underTest.start();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -153,6 +156,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
         })
       );
       expect(underTest.getWorkflowExecutionStatus()).toBe(ExecutionStatus.RUNNING);
+    });
+
+    it('should log workflow start', async () => {
+      await underTest.start();
+
+      expect(workflowLogger.logInfo).toHaveBeenCalledWith('Workflow execution started', {
+        event: { action: 'workflow-start', category: ['workflow'] },
+        tags: ['workflow', 'execution', 'start'],
+      });
     });
   });
 
@@ -350,6 +362,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
         );
       });
 
+      it('should log workflow completion', async () => {
+        const runStepResult: RunStepResult = {
+          output: { success: true, data: {} },
+          error: null,
+        };
+        underTest.setStepResult('node3', runStepResult);
+        await underTest.finishStep('node3');
+        expect(workflowLogger.logInfo).toHaveBeenCalledWith(
+          `Workflow execution completed successfully`,
+          {
+            event: {
+              action: 'workflow-complete',
+              category: ['workflow'],
+              outcome: 'success',
+            },
+            tags: ['workflow', 'execution', 'complete'],
+          }
+        );
+      });
+
       it('should fail workflow execution if its current step failed', async () => {
         underTest.goToStep('node2');
         await underTest.startStep('node2');
@@ -368,6 +400,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
             duration: 14404000,
           })
         );
+      });
+
+      it('should log workflow failure', async () => {
+        underTest.goToStep('node2');
+        await underTest.startStep('node2');
+        const runStepResult: RunStepResult = {
+          output: null,
+          error: new Error('Second step failed'),
+        };
+        underTest.setStepResult('node2', runStepResult);
+        await underTest.finishStep('node2');
+
+        expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Workflow execution failed`, {
+          event: {
+            action: 'workflow-complete',
+            category: ['workflow'],
+            outcome: 'failure',
+          },
+          tags: ['workflow', 'execution', 'complete'],
+        });
       });
     });
   });
