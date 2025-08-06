@@ -12,6 +12,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as capabilities from '../../../lib/capabilities';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -212,8 +213,7 @@ describe('Rule Definition', () => {
   });
 
   it('hide edit button when user DOES NOT have permissions', async () => {
-    const capabilities = require('../../../lib/capabilities');
-    capabilities.hasAllPrivilege.mockReturnValue(false);
+    (capabilities.hasAllPrivilege as jest.Mock).mockReturnValue(false);
 
     await setup();
     const editButton = screen.queryByTestId('ruleDetailsEditButton');
