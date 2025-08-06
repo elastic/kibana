@@ -10,7 +10,7 @@ For Elastic Security known issues, refer to [Elastic Security known issues](docs
 
 ::::{dropdown} Issues with rules occur when `xpack.alerting.rules.run.alerts.max` is set to a value greater than `5000`
 
-Applies to: {{stack}} 9.0.3 and 9.1.0
+Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
 **Details**
 
