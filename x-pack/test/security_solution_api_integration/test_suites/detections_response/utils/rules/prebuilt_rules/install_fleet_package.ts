@@ -53,7 +53,7 @@ export const installFleetPackage = async ({
     installMockPrebuiltRulesPackage.name,
     async () => {
       const response = await supertest
-        .post(epmRouteService.getInstallPath(packageName, packageVersion))
+        .post(epmRouteService.getInstallPath(packageName, packageVersion ?? ''))
         .set('kbn-xsrf', 'xxxx')
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
