@@ -20,17 +20,14 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
+  SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
+
 import { AppDeepLinkIdToIcon } from './hack_icons_mappings';
 
 export interface NavigationItems {
-  logoItem: LogoItem;
+  logoItem: SideNavLogo;
   navItems: NavigationStructure;
-}
-
-export interface LogoItem {
-  logoType: string;
-  label: string;
 }
 
 /**
@@ -88,9 +85,11 @@ export const toNavigationItems = (
     );
   }
 
-  const logoItem: LogoItem = {
-    logoType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
-    label: warnIfMissing(logoNode, 'title', 'Kibana'),
+  const logoItem: SideNavLogo = {
+    href: warnIfMissing(logoNode, 'href', '/') as string,
+    iconType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+    id: warnIfMissing(logoNode, 'id', 'kibana') as string,
+    label: warnIfMissing(logoNode, 'title', 'Kibana') as string,
   };
 
   const toMenuItem = (navNode: ChromeProjectNavigationNode): MenuItem[] | MenuItem | null => {

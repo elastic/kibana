@@ -30,8 +30,10 @@ describe('toNavigationItems', () => {
   it('should return logo from navigation tree', () => {
     expect(logoItem).toMatchInlineSnapshot(`
       Object {
+        "href": "/tzo/s/sec/app/security",
+        "iconType": "logoSecurity",
+        "id": "security",
         "label": "Security",
-        "logoType": "logoSecurity",
       }
     `);
   });

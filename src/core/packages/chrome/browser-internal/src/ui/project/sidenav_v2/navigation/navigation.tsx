@@ -57,8 +57,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
     <RedirectNavigationAppLinks application={props.application}>
       <NavigationComponent
         items={navItems}
-        logoLabel={logoItem.label}
-        logoType={logoItem.logoType}
+        logo={logoItem}
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
       />
