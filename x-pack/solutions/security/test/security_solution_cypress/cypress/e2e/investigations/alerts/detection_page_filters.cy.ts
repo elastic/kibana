@@ -11,15 +11,15 @@ import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/commo
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { getNewRule } from '../../../objects/rule';
 import {
-  CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
+  CONTROL_FRAMES,
   CONTROL_POPOVER,
   FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
   OPTION_SELECTABLE_COUNT,
-  FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';
@@ -42,9 +42,9 @@ import {
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
-  switchFilterGroupControlsToEditMode,
   editSingleFilterControl,
   saveFilterGroupControls,
+  switchFilterGroupControlsToEditMode,
 } from '../../../tasks/common/filter_group';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
@@ -69,8 +69,8 @@ const customFilters = [
     title: 'ProcessName',
   },
   {
-    fieldName: 'event.module',
-    title: 'EventModule',
+    fieldName: '@timestamp',
+    title: '@timestamp',
   },
   {
     fieldName: 'agent.type',
@@ -104,8 +104,7 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/181977
-describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
@@ -119,10 +118,8 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
   });
 
   context('Alert Page Filters Customization ', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/167914
-    it.skip('should be able to customize Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
+    it('should be able to customize Controls', () => {
+      const fieldName = '@timestamp';
       switchFilterGroupControlsToEditMode();
       cy.log('should be able delete an existing control');
       deleteFilterGroupControl(3);
@@ -134,30 +131,27 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       cy.log('should be able to add a new control');
       // ================================================
 
-      addNewFilterGroupControlValues({
-        fieldName,
-        label,
-      });
-      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      addNewFilterGroupControlValues(fieldName);
+
       discardFilterGroupControls();
-      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', fieldName);
 
       // ================================================
       cy.log('should be able to edit an existing control');
       // ================================================
 
       switchFilterGroupControlsToEditMode();
-      editFilterGroupControl({ idx: 3, fieldName, label });
-      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      editFilterGroupControl({ idx: 3, fieldName });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', fieldName);
       discardFilterGroupControls();
-      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', fieldName);
     });
 
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
         switchFilterGroupControlsToEditMode();
         deleteFilterGroupControl(3);
-        addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
+        addNewFilterGroupControlValues('@timestamp');
         cy.url().should('eq', urlString);
         saveFilterGroupControls();
         cy.url().should('not.eq', urlString);
