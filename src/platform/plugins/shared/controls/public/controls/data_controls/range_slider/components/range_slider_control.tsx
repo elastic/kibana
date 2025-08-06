@@ -151,7 +151,7 @@ export const RangeSliderControl: FC<Props> = ({
       placeholder: string;
       ariaLabel: string;
       id: string;
-    }) => {
+    }): Partial<EuiDualRangeProps['minInputProps']> => {
       return {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
@@ -161,7 +161,7 @@ export const RangeSliderControl: FC<Props> = ({
           isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
         ],
         className: 'rangeSliderAnchor__fieldNumber',
-        value: inputValue === placeholder ? '' : inputValue,
+        value: inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
@@ -251,7 +251,16 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+        onChange={([minSelection, maxSelection]: [number | string, number | string],_,ev) => {
+          const originatingInput = ev?.currentTarget.getAttribute('data-test-subj')
+
+          if (originatingInput === 'rangeSlider__lowerBoundFieldNumber') {
+            // preserve original upper bound selection if only lower bound number field changed
+            maxSelection = displayedValue[1];
+          } else if (originatingInput === 'rangeSlider__upperBoundFieldNumber') {
+            // preserve original lower bound selection if only upper bound number field changed
+            minSelection = displayedValue[0];
+          }
           setDisplayedValue([String(minSelection), String(maxSelection)]);
           debouncedOnChange([String(minSelection), String(maxSelection)]);
         }}
