@@ -495,7 +495,12 @@ Search::
 [[release-notes-8.18.4]]
 == {kib} 8.18.4
 
-The 8.18.4 release includes the following fixes.
+The 8.18.4 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.18.4]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag::known-issue-230275]
 
 [float]
 [[fixes-v8.18.4]]
