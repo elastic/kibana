@@ -211,7 +211,7 @@ export class WorkflowsService {
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
         lastUpdatedBy: response.attributes.lastUpdatedBy,
-        definition: response.attributes.definition as any,
+        definition: response.attributes.definition,
         yaml: response.attributes.yaml,
       };
     } catch (error: any) {
