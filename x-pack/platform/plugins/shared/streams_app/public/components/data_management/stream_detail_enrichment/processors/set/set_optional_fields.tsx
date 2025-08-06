@@ -24,7 +24,7 @@ export const OverrideField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setOverrideHelpText"
-          defaultMessage="If true processor will update fields with pre-existing non-null-valued field. When set to false, such fields will not be touched."
+          defaultMessage="If true, the processor will update fields with pre-existing non-null field values. If false, non-null fields are not updated."
         />
       }
     />
@@ -42,7 +42,7 @@ export const IgnoreEmptyValueField = () => {
       helpText={
         <FormattedMessage
           id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setIgnoreEmptyValueHelpText"
-          defaultMessage="If true and used in combination with {value} which is a template snippet that evaluates to null or an empty string, the processor quietly exits without modifying the document."
+          defaultMessage="If true and {value} is a template snippet that evaluates to null or an empty string, the processor quietly exits without modifying the document."
           values={{ value: <EuiCode>value</EuiCode> }}
         />
       }
