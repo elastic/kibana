@@ -14,11 +14,12 @@ import {
 import { css } from '@emotion/react';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { useOnechatTools } from '../../../hooks/tools/use_tools';
 import { labels } from '../../../utils/i18n';
-import { useToolsTableColumns } from './tools_table_columns';
+import { getToolsTableColumns } from './tools_table_columns';
 import { ToolsTableHeader } from './tools_table_header';
+import { toolQuickActionsHoverStyles } from './tools_table_quick_actions';
 import { useToolsTableSearch } from './tools_table_search';
 
 export const OnechatToolsTable = memo(() => {
@@ -32,20 +33,16 @@ export const OnechatToolsTable = memo(() => {
     setTablePageIndex(0);
   }, [tableTools]);
 
-  const columns = useToolsTableColumns();
+  const columns = useMemo(() => getToolsTableColumns(), []);
 
   return (
     <EuiInMemoryTable
       css={css`
         border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
-
         table {
-          background-color: transparent;
+          background-color: transparent; /* Ensure top border visibility */
         }
-
-        .euiTableRow:hover .tool-quick-actions {
-          visibility: visible;
-        }
+        ${toolQuickActionsHoverStyles}
       `}
       childrenBetween={
         <ToolsTableHeader

@@ -93,12 +93,12 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
 
   return (
     <EuiPopover
-      id={`${tool}_context-menu`}
+      id={`${tool.id}_context-menu`}
       panelPaddingSize="s"
       button={
         <EuiButtonIcon
           iconType="boxesHorizontal"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((openState) => !openState)}
           aria-label={labels.tools.toolContextMenuButtonLabel}
         />
       }

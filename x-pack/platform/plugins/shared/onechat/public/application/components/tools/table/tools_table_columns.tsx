@@ -7,49 +7,46 @@
 
 import { EuiBasicTableColumn, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { ToolDefinitionWithSchema, ToolType, isEsqlTool } from '@kbn/onechat-common/tools';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { labels } from '../../../utils/i18n';
 import { OnechatToolTags } from '../tags/tool_tags';
 import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
 
-export const useToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
-  return useMemo(
-    () => [
-      {
-        name: labels.tools.toolIdLabel,
-        sortable: ({ id }: ToolDefinitionWithSchema) => id,
-        width: '60%',
-        render: (tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
-      },
-      {
-        field: 'type',
-        name: labels.tools.typeLabel,
-        width: '80px',
-        render: (type: string) =>
-          type === ToolType.esql ? (
-            <EuiText size="s">{labels.tools.esqlLabel}</EuiText>
-          ) : type === ToolType.builtin ? (
-            <EuiText size="s">{labels.tools.builtinLabel}</EuiText>
-          ) : null,
-      },
-      {
-        field: 'tags',
-        name: labels.tools.tagsLabel,
-        render: (tags: string[]) => <OnechatToolTags tags={tags} />,
-      },
-      {
-        width: '100px',
-        align: 'right',
-        render: (tool: ToolDefinitionWithSchema) => (
-          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-            {isEsqlTool(tool) && <ToolQuickActions tool={tool} />}
-            <ToolContextMenu tool={tool} />
-          </EuiFlexGroup>
-        ),
-      },
-    ],
-    []
-  );
+export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
+  return [
+    {
+      name: labels.tools.toolIdLabel,
+      sortable: ({ id }: ToolDefinitionWithSchema) => id,
+      width: '60%',
+      render: (tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
+    },
+    {
+      field: 'type',
+      name: labels.tools.typeLabel,
+      width: '80px',
+      render: (type: string) =>
+        type === ToolType.esql ? (
+          <EuiText size="s">{labels.tools.esqlLabel}</EuiText>
+        ) : type === ToolType.builtin ? (
+          <EuiText size="s">{labels.tools.builtinLabel}</EuiText>
+        ) : null,
+    },
+    {
+      field: 'tags',
+      name: labels.tools.tagsLabel,
+      render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+    },
+    {
+      width: '100px',
+      align: 'right',
+      render: (tool: ToolDefinitionWithSchema) => (
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
+          {isEsqlTool(tool) && <ToolQuickActions tool={tool} />}
+          <ToolContextMenu tool={tool} />
+        </EuiFlexGroup>
+      ),
+    },
+  ];
 };

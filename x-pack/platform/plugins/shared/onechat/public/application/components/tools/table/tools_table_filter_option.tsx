@@ -26,9 +26,7 @@ export const ToolFilterOption = ({ name, matches }: ToolFilterOptionProps) => {
         width: 100%;
       `}
     >
-      <EuiText className="tool-filter-option-name" size="s">
-        {name}
-      </EuiText>
+      <EuiText size="s">{name}</EuiText>
       <EuiFlexItem
         grow={false}
         css={css`

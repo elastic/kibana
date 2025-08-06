@@ -9,12 +9,18 @@ import { EuiButtonIcon, EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React from 'react';
-import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
+import { labels } from '../../../utils/i18n';
 
 export interface ToolQuickActionsProps {
   tool: ToolDefinitionWithSchema;
 }
+
+export const toolQuickActionsHoverStyles = css`
+  .euiTableRow:hover .tool-quick-actions {
+    visibility: visible;
+  }
+`;
 
 export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
   const { editTool, deleteTool } = useToolsActions();
