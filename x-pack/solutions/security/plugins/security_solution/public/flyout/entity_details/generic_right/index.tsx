@@ -100,7 +100,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: EntityType.user,
+    riskEntity: EntityType.generic,
     filterQuery: genericNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
