@@ -68,7 +68,7 @@ describe('getExpressionType', () => {
       },
       {
         expression: '1 day',
-        expectedType: 'time_duration',
+        expectedType: 'date_period',
       },
       {
         expression: '?value',
