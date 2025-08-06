@@ -70,11 +70,11 @@ function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
-  // hide token count events from functions to prevent them from
-  // having to deal with it as well
+  return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
+    // hide token count events from functions to prevent them from
+    // having to deal with it as well
 
-  const executeFunctionResponse$ = from(
-    withExecuteToolSpan({ name, input: args }, () =>
+    const executeFunctionResponse$ = from(
       functionClient.executeFunction({
         name,
         chat: (operationName, params) => {
@@ -90,47 +90,49 @@ function executeFunctionAndCatchError({
         connectorId,
         simulateFunctionCalling,
       })
-    )
-  );
+    );
 
-  return executeFunctionResponse$.pipe(
-    catchError((error) => {
-      logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
-      // We want to catch the error only when a promise occurs
-      // if it occurs in the Observable, we cannot easily recover
-      // from it because the function may have already emitted
-      // values which could lead to an invalid conversation state,
-      // so in that case we let the stream fail.
-      return of(createServerSideFunctionResponseError({ name, error }));
-    }),
-    switchMap((response) => {
-      if (isObservable(response)) {
-        return response;
-      }
+    return executeFunctionResponse$.pipe(
+      catchError((error) => {
+        span?.recordException(error);
+        logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
+        // We want to catch the error only when a promise occurs
+        // if it occurs in the Observable, we cannot easily recover
+        // from it because the function may have already emitted
+        // values which could lead to an invalid conversation state,
+        // so in that case we let the stream fail.
+        return of(createServerSideFunctionResponseError({ name, error }));
+      }),
+      switchMap((response) => {
+        if (isObservable(response)) {
+          return response;
+        }
 
-      // is messageAdd event
-      if ('type' in response) {
-        return of(response);
-      }
+        // is messageAdd event
+        if ('type' in response) {
+          return of(response);
+        }
 
-      const encoded = encode(JSON.stringify(response.content || {}));
+        const encoded = encode(JSON.stringify(response.content || {}));
 
-      const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
+        const exceededTokenLimit = encoded.length >= MAX_FUNCTION_RESPONSE_TOKEN_COUNT;
 
-      return of(
-        createFunctionResponseMessage({
-          name,
-          content: exceededTokenLimit
-            ? {
-                message: 'Function response exceeded the maximum length allowed and was truncated',
-                truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-              }
-            : response.content,
-          data: response.data,
-        })
-      );
-    })
-  );
+        return of(
+          createFunctionResponseMessage({
+            name,
+            content: exceededTokenLimit
+              ? {
+                  message:
+                    'Function response exceeded the maximum length allowed and was truncated',
+                  truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                }
+              : response.content,
+            data: response.data,
+          })
+        );
+      })
+    );
+  });
 }
 
 function getFunctionOptions({
