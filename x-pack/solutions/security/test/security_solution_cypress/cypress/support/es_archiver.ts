@@ -72,10 +72,10 @@ export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfi
     });
   const cypressEsArchiverInstance = esArchiverFactory('../es_archives');
   const ftrEsArchiverInstance = esArchiverFactory(
-    '../../../solutions/security/test/fixtures/es_archives/security_solution'
+    '../../../../../solutions/security/test/fixtures/es_archives/security_solution'
   );
   const platformEsArchiverInstance = esArchiverFactory(
-    '../../../platform/test/fixtures/es_archives'
+    '../../../../../platform/test/fixtures/es_archives'
   );
 
   on('task', {
