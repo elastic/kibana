@@ -17,14 +17,8 @@ import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/service
 import { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
-import {
-  AWS_PROVIDER,
-  AZURE_PROVIDER,
-  CloudSetupConfig,
-  GCP_PROVIDER,
-  type UpdatePolicy,
-} from './types';
-import { getPosturePolicy, getDefaultCloudCredentialsType } from './utils';
+import { CloudSetupConfig, type UpdatePolicy } from './types';
+import { updatePolicyWithInputs, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
 import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_selector';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_selector';
@@ -37,7 +31,9 @@ import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
-import { CloudSetupProvider, useCloudSetup } from './cloud_setup_context';
+import { CloudSetupProvider } from './cloud_setup_context';
+import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from './constants';
+import { useCloudSetup } from './hooks/use_cloud_setup_context';
 
 const EditScreenStepTitle = () => (
   <>
@@ -69,7 +65,9 @@ interface CloudIntegrationSetupProps {
   validationResults?: PackagePolicyValidationResults;
   uiSettings: IUiSettingsClient;
 }
+
 const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
+  // eslint-disable-next-line complexity
   ({
     cloud,
     defaultSetupTechnology,
@@ -83,6 +81,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
     validationResults,
     uiSettings,
   }: CloudIntegrationSetupProps) => {
+    const { templateName, config, defaultProviderType, getCloudSetupProviderByInputType } =
+      useCloudSetup();
     const {
       input,
       setEnabledPolicyInput,
@@ -104,9 +104,11 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       defaultSetupTechnology,
       cloud,
       uiSettings,
+      templateName,
+      defaultProviderType,
+      config,
+      getCloudSetupProviderByInputType,
     });
-
-    const { templateName, config } = useCloudSetup();
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;
 
@@ -222,7 +224,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
               onSetupTechnologyChange={(value) => {
                 updateSetupTechnology(value);
                 updatePolicy({
-                  updatedPolicy: getPosturePolicy(
+                  updatedPolicy: updatePolicyWithInputs(
                     newPolicy,
                     config.providers[selectedProvider].type,
                     getDefaultCloudCredentialsType(
@@ -311,6 +313,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
   }
 );
 
+CloudIntegrationSetup.displayName = 'CloudIntegrationSetup';
+
 export const CloudSetup = memo<CloudSetupProps>(
   ({
     configuration,
@@ -346,7 +350,4 @@ export const CloudSetup = memo<CloudSetupProps>(
   }
 );
 
-CloudIntegrationSetup.displayName = 'CloudSetup';
-
-// eslint-disable-next-line import/no-default-export
-export { CloudIntegrationSetup as default };
+CloudSetup.displayName = 'CloudSetup';

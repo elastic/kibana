@@ -10,7 +10,7 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getPosturePolicy, isBelowMinVersion } from '../utils';
+import { updatePolicyWithInputs, isBelowMinVersion } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { AzureAccountType, UpdatePolicy } from '../types';
 import {
@@ -18,7 +18,7 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SINGLE_ACCOUNT,
 } from '../constants';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean
@@ -82,7 +82,7 @@ export const AzureAccountTypeSelect = ({
 
   if (!getAzureAccountType(input)) {
     updatePolicy({
-      updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+      updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
         'azure.account_type': {
           value: isAzureOrganizationDisabled ? AZURE_SINGLE_ACCOUNT : AZURE_ORGANIZATION_ACCOUNT,
           type: 'text',
@@ -112,7 +112,7 @@ export const AzureAccountTypeSelect = ({
         options={azureAccountTypeOptions}
         onChange={(accountType) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+            updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
               'azure.account_type': {
                 value: accountType,
                 type: 'text',

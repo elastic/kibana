@@ -14,13 +14,12 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   getCloudConnectorRemoteRoleTemplate,
-  getPostureInputHiddenVars,
-  getPosturePolicy,
+  getInputHiddenVars,
+  updatePolicyWithInputs,
   hasErrors,
 } from '../utils';
 import { useSetupTechnology } from './use_setup_technology';
-import { CloudProviders, UpdatePolicy } from '../types';
-import { useCloudSetup } from '../cloud_setup_context';
+import { CloudProviders, CloudSetupConfig, UpdatePolicy } from '../types';
 
 const getSelectedInput = (options: NewPackagePolicyInput[], defaultProviderType: string) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
@@ -45,6 +44,10 @@ interface UseLoadCloudSetupProps {
   handleSetupTechnologyChange?: (setupTechnology: SetupTechnology) => void;
   uiSettings: IUiSettingsClient;
   cloud: CloudSetup;
+  defaultProviderType: string;
+  templateName: string;
+  config: CloudSetupConfig;
+  getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
 }
 
 export const useLoadCloudSetup = ({
@@ -58,9 +61,11 @@ export const useLoadCloudSetup = ({
   handleSetupTechnologyChange,
   uiSettings,
   cloud,
+  defaultProviderType,
+  templateName,
+  config,
+  getCloudSetupProviderByInputType,
 }: UseLoadCloudSetupProps) => {
-  const { getCloudSetupProviderByInputType, config, defaultProviderType, templateName } =
-    useCloudSetup();
   const isServerless = !!cloud.serverless.projectType;
   const input = getSelectedInput(newPolicy.inputs, defaultProviderType);
   const selectedProvider = getCloudSetupProviderByInputType(input.type);
@@ -76,6 +81,7 @@ export const useLoadCloudSetup = ({
     handleSetupTechnologyChange,
     isEditPage,
     defaultSetupTechnology,
+    selectedProvider,
   });
 
   const shouldRenderAgentlessSelector =
@@ -96,17 +102,25 @@ export const useLoadCloudSetup = ({
   const setEnabledPolicyInput = useCallback(
     (provider: CloudProviders) => {
       const inputType = config.providers[provider].type;
-      const inputVars = getPostureInputHiddenVars(
+      const inputVars = getInputHiddenVars(
         provider,
         packageInfo,
         templateName,
         setupTechnology,
         showCloudConnectors
       );
-      const policy = getPosturePolicy(newPolicy, inputType, inputVars);
+      const policy = updatePolicyWithInputs(newPolicy, inputType, inputVars);
       updatePolicy({ updatedPolicy: policy });
     },
-    [newPolicy, updatePolicy, packageInfo, setupTechnology, showCloudConnectors]
+    [
+      config.providers,
+      packageInfo,
+      templateName,
+      setupTechnology,
+      showCloudConnectors,
+      newPolicy,
+      updatePolicy,
+    ]
   );
 
   return {

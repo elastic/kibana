@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-// x-pack/solutions/security/plugins/cloud_security_posture/public/components/fleet_extensions/aws_credentials_form/aws_credentials_form_agentless.tsx
-
 import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,6 +18,7 @@ import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   AWS_CREDENTIALS_TYPE,
+  AWS_PROVIDER,
 } from '../constants';
 import {
   getAgentlessCredentialsType,
@@ -34,7 +32,8 @@ import {
   getTemplateUrlFromPackageInfo,
   getCloudConnectorRemoteRoleTemplate,
   getCloudCredentialVarsConfig,
-  getPosturePolicy,
+  updatePolicyWithInputs,
+  getAwsCredentialsType,
 } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
@@ -43,9 +42,8 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
-import { getAwsCredentialsType } from './aws_utils';
-import { AWS_PROVIDER, UpdatePolicy } from '../types';
-import { useCloudSetup } from '../cloud_setup_context';
+import { UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface AwsAgentlessFormProps {
   input: NewPackagePolicyInput;
@@ -80,7 +78,7 @@ export const AwsCredentialsFormAgentless = ({
   if (!getAwsCredentialsType(input)) {
     updatePolicy({
       updatedPolicy: {
-        ...getPosturePolicy(newPolicy, awsPolicyType, {
+        ...updatePolicyWithInputs(newPolicy, awsPolicyType, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -212,7 +210,7 @@ export const AwsCredentialsFormAgentless = ({
         disabled={!!disabled}
         onChange={(optionId) => {
           updatePolicy({
-            updatedPolicy: getPosturePolicy(
+            updatedPolicy: updatePolicyWithInputs(
               newPolicy,
               awsPolicyType,
               getCloudCredentialVarsConfig({
@@ -271,7 +269,7 @@ export const AwsCredentialsFormAgentless = ({
         fields={fields}
         packageInfo={packageInfo}
         onChange={(key, value) => {
-          const updatedPolicy = getPosturePolicy(newPolicy, awsPolicyType, {
+          const updatedPolicy = updatePolicyWithInputs(newPolicy, awsPolicyType, {
             [key]: { value },
           });
           updatePolicy({

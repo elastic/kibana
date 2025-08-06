@@ -15,25 +15,22 @@ import {
   AZURE_ORGANIZATION_ACCOUNT,
   AZURE_SETUP_FORMAT,
   AZURE_SINGLE_ACCOUNT,
+  AWS_PROVIDER,
+  GCP_PROVIDER,
+  AZURE_PROVIDER,
 } from './constants';
-
-// Cloud Provider Types
-export const AWS_PROVIDER = 'aws';
-export const GCP_PROVIDER = 'gcp';
-export const AZURE_PROVIDER = 'azure';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
 
-export type CloudProviderConfig = {
+export interface CloudProviderConfig {
   type: string;
   showCloudConnectors: boolean;
   showCloudTemplate: boolean;
   organizationMinimumVersion?: string;
   getStartedPath: string;
   minShowVersion?: string;
-  testId: string;
-};
-export type CloudSetupConfig = {
+}
+export interface CloudSetupConfig {
   policyTemplate: string;
   name: string;
   shortName: string;
@@ -42,7 +39,7 @@ export type CloudSetupConfig = {
   overviewPath: string;
   getStartedPath: string;
   providers: Record<CloudProviders, CloudProviderConfig>;
-};
+}
 
 export type UpdatePolicy = ({
   updatedPolicy,

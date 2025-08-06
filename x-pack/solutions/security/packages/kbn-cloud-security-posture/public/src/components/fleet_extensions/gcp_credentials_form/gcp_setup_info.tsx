@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiHorizontalRule, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) => {
   const { gcpOverviewPath } = useCloudSetup();

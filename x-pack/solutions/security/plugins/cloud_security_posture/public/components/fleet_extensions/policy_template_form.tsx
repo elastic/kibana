@@ -92,7 +92,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.5.0-preview20',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
-          testId: 'cisAwsTestId',
         },
         gcp: {
           type: CLOUDBEAT_GCP,
@@ -101,7 +100,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           organizationMinimumVersion: '1.6.0',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
           minShowVersion: '1.5.2',
-          testId: 'cisGcpTestId',
         },
         azure: {
           type: CLOUDBEAT_AZURE,
@@ -109,7 +107,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.7.0',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
-          testId: 'cisAzureTestId',
         },
       },
     };

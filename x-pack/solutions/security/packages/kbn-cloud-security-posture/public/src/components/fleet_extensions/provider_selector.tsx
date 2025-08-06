@@ -7,7 +7,7 @@
 import React from 'react';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { CloudProviders } from './types';
-import { useCloudSetup } from './cloud_setup_context';
+import { useCloudSetup } from './hooks/use_cloud_setup_context';
 
 interface ProviderSelectorProps {
   disabled: boolean;

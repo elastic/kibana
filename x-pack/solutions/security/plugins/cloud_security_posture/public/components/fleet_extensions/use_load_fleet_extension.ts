@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { merge } from 'lodash';
 import {
   NewPackagePolicy,
   NewPackagePolicyInput,
@@ -13,7 +14,6 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { merge } from 'lodash';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../../../common/types_old';
@@ -25,6 +25,7 @@ import {
 } from '../../../common/constants';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
+  getDeploymentType,
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
@@ -32,7 +33,6 @@ import {
   getVulnMgmtCloudFormationDefaultValue,
   hasErrors,
   isPostureInput,
-  getDeploymentType,
 } from './utils';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 
@@ -175,7 +175,6 @@ const getFormState = (
   if (policyTemplate === 'cspm' && !hasErrors(validationResults)) {
     return true; // CSPM is valid if formState is INVALID but no required vars are invalid
   }
-
   return false; // Default to false for other cases
 };
 
@@ -220,20 +219,24 @@ export const useLoadFleetExtension = ({
       isExtensionLoaded?: boolean;
       isValid?: boolean;
     }) => {
+      const selectedInput = getSelectedOption(updatedPolicy.inputs, input.policy_template);
+
+      // This is unique to the CSPM policy template, where we need to set the deployment and posture vars
       const newUpdatedPolicy = {
         ...updatedPolicy,
         vars: merge({}, updatedPolicy.vars, {
-          deployment: { value: getDeploymentType(input.type) },
-          posture: { value: getPostureType(input.type) },
+          deployment: { value: getDeploymentType(selectedInput.type) },
+          posture: { value: getPostureType(selectedInput.type) },
         }),
       };
+      // Update the policy with the new
       onChange({
         isValid: isValid !== undefined ? isValid : isValidFormState,
         updatedPolicy: newUpdatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [input.type, isLoading, isValidFormState, onChange]
+    [isValidFormState, input.policy_template, onChange, isLoading]
   );
 
   const setEnabledPolicyInput = useCallback(

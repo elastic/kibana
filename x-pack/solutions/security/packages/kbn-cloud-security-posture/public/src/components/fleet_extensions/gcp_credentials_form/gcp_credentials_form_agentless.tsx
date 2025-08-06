@@ -9,7 +9,12 @@ import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { getTemplateUrlFromPackageInfo, getPosturePolicy } from '../utils';
+import {
+  getTemplateUrlFromPackageInfo,
+  updatePolicyWithInputs,
+  gcpField,
+  getGcpInputVarsFields,
+} from '../utils';
 import {
   ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
@@ -19,9 +24,8 @@ import { GCPSetupInfoContent } from './gcp_setup_info';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { ReadDocumentation } from '../common';
 import { GoogleCloudShellCredentialsGuide } from './gcp_credentials_guide';
-import { getInputVarsFields, gcpField } from './gcp_utils';
 import { UpdatePolicy } from '../types';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface GcpFormAgentlessProps {
   input: NewPackagePolicyInput;
@@ -50,7 +54,7 @@ export const GcpCredentialsFormAgentless = ({
     For Agentless only JSON credentials type is supported.
     Also in case of organisation setup, project_id is not required in contrast to Agent-based.
    */
-  const fields = getInputVarsFields(input, gcpField.fields).filter((field) => {
+  const fields = getGcpInputVarsFields(input, gcpField.fields).filter((field) => {
     if (isOrganization) {
       return organizationFields.includes(field.id);
     } else {
@@ -118,7 +122,7 @@ export const GcpCredentialsFormAgentless = ({
         fields={fields}
         onChange={(key, value) =>
           updatePolicy({
-            updatedPolicy: getPosturePolicy(newPolicy, gcpPolicyType, {
+            updatedPolicy: updatePolicyWithInputs(newPolicy, gcpPolicyType, {
               [key]: { value },
             }),
           })

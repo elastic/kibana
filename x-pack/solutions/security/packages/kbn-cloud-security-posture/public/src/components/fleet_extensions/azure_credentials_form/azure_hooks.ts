@@ -7,15 +7,15 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { getPosturePolicy } from '../utils';
+import { updatePolicyWithInputs, getArmTemplateUrlFromCspmPackage } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
 import { AZURE_SETUP_FORMAT, AZURE_CREDENTIALS_TYPE } from '../constants';
 import { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
-import { getArmTemplateUrlFromCspmPackage } from './azure_utils';
-import { useCloudSetup } from '../cloud_setup_context';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 
 const getSetupFormatFromInput = (
   input: NewPackagePolicyInput,
@@ -51,14 +51,6 @@ const updateAzureArmTemplateUrlInPolicy = (
   templateUrl: string | undefined,
   policyType?: string
 ) => {
-  if (
-    !policyType ||
-    newPolicy.inputs.find((input) => input.type === policyType)?.config?.arm_template_url ===
-      templateUrl
-  ) {
-    return;
-  }
-
   updatePolicy?.({
     updatedPolicy: {
       ...newPolicy,
@@ -87,29 +79,21 @@ const useUpdateAzureArmTemplate = ({
   setupFormat: AzureSetupFormat;
 }) => {
   const { azurePolicyType, templateName } = useCloudSetup();
-  useEffect(() => {
-    const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy, azurePolicyType);
+  const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy, azurePolicyType);
 
-    if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
-      if (azureArmTemplateUrl) {
-        updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined, azurePolicyType);
-      }
-      return;
+  if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
+    if (azureArmTemplateUrl) {
+      updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined, azurePolicyType);
     }
-    const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
+    return;
+  }
+  const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
 
-    if (templateUrl === '') return;
+  if (templateUrl === '') return;
 
-    if (azureArmTemplateUrl === templateUrl) return;
+  if (azureArmTemplateUrl === templateUrl) return;
 
-    if (
-      templateUrl !==
-      newPolicy?.inputs.find((input) => input.type === azurePolicyType)?.config?.arm_template_url
-    ) {
-      updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newPolicy?.vars?.arm_template_url, newPolicy, packageInfo, setupFormat]);
+  updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, templateUrl, azurePolicyType);
 };
 
 export const useAzureCredentialsForm = ({
@@ -169,7 +153,7 @@ export const useAzureCredentialsForm = ({
       lastManualCredentialsType.current = getAzureCredentialsType(input);
 
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
           'azure.credentials.type': {
             value: AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
             type: 'text',
@@ -179,7 +163,7 @@ export const useAzureCredentialsForm = ({
       });
     } else {
       updatePolicy({
-        updatedPolicy: getPosturePolicy(newPolicy, azurePolicyType, {
+        updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
           'azure.credentials.type': {
             value: lastManualCredentialsType.current || defaultAzureManualCredentialType,
             type: 'text',
