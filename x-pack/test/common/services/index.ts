@@ -10,7 +10,6 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';
 import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
-import { InfraSynthtraceKibanaClientProvider } from './infra_synthtrace_kibana_client';
 
 export const services = {
   ...commonFunctionalServices,
@@ -18,5 +17,4 @@ export const services = {
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
   apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
-  infraSynthtraceKibanaClient: InfraSynthtraceKibanaClientProvider,
 };

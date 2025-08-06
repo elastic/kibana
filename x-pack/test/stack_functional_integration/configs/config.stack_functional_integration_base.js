@@ -32,7 +32,7 @@ export default async ({ readConfigFile }) => {
     require.resolve('../../functional/config.ccs.ts')
   );
   const fleetFunctionalConfig = await readConfigFile(
-    require.resolve('../../fleet_functional/config.ts')
+    require.resolve('@kbn/test-suites-xpack-platform/fleet_functional/config')
   );
   process.env.stack_functional_integration = true;
   logAll(log);
