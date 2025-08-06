@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { ESDistanceSourceDescriptor, ESTermSourceDescriptor } from '../../server';
-import type { TableSourceDescriptor } from './source_descriptor_types';
-
 export type * from './data_request_descriptor_types';
 export type * from './source_descriptor_types';
 export type * from './layer_descriptor_types';
@@ -28,8 +25,3 @@ export type {
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
 } from '../../server';
-
-export type JoinSourceDescriptor =
-  | ESDistanceSourceDescriptor
-  | ESTermSourceDescriptor
-  | TableSourceDescriptor;

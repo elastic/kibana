@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ESQLColumn } from '@kbn/es-types';
-import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE, SOURCE_TYPES } from '../constants';
+import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE } from '../constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -108,17 +108,3 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
   TiledSingleLayerVectorSourceSettings & {
     tooltipProperties: string[];
   };
-
-export type InlineFieldDescriptor = {
-  name: string;
-  label?: string;
-  type: 'string' | 'number';
-};
-
-export type TableSourceDescriptor = {
-  id: string;
-  type: SOURCE_TYPES.TABLE_SOURCE;
-  __rows: Array<{ [key: string]: string | number }>;
-  __columns: InlineFieldDescriptor[];
-  term: string;
-};

@@ -83,12 +83,20 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
 
       const legacyJoinFields = new Map<string, Partial<JoinDescriptor>>();
       vectorLayerDescriptor.joins.forEach((joinDescriptor: Partial<JoinDescriptor>) => {
-        _.get(joinDescriptor, 'right.metrics', []).forEach((aggDescriptor: AggDescriptor) => {
+        const rightSourceDescriptor = joinDescriptor?.right as
+          | {
+              indexPatternTitle?: string;
+              metrics?: AggDescriptor[];
+              term?: string;
+            }
+          | undefined;
+        const metrics = rightSourceDescriptor?.metrics ?? [];
+        metrics.forEach((aggDescriptor: AggDescriptor) => {
           const legacyAggKey = getLegacyAggKey({
             aggType: aggDescriptor.type,
             aggFieldName: 'field' in aggDescriptor ? aggDescriptor.field : undefined,
-            indexPatternTitle: _.get(joinDescriptor, 'right.indexPatternTitle', ''),
-            termFieldName: _.get(joinDescriptor, 'right.term', ''),
+            indexPatternTitle: rightSourceDescriptor?.indexPatternTitle ?? '',
+            termFieldName: rightSourceDescriptor?.term ?? '',
           });
           // The legacy getAggKey implemenation has a naming collision bug where
           // aggType, aggFieldName, indexPatternTitle, and termFieldName would result in the identical aggKey.
@@ -110,7 +118,7 @@ export function migrateJoinAggKey({ attributes }: { attributes: MapAttributes })
             style.options.field.name = getJoinAggKey({
               aggType,
               aggFieldName,
-              rightSourceId: joinDescriptor.right.id,
+              rightSourceId: (joinDescriptor?.right as { id: string }).id,
             });
           }
         }

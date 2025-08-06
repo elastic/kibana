@@ -14,13 +14,7 @@ import {
   META_DATA_REQUEST_ID_SUFFIX,
   SOURCE_TYPES,
 } from '../../../common/constants';
-import {
-  ESDistanceSourceDescriptor,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
-  JoinSourceDescriptor,
-  TableSourceDescriptor,
-} from '../../../common/descriptor_types';
+import { JoinDescriptor } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
 import { PropertiesMap } from '../../../common/elasticsearch_util';
@@ -34,22 +28,22 @@ import {
 } from '../sources/join_sources';
 
 export function createJoinSource(
-  descriptor: Partial<JoinSourceDescriptor> | undefined
+  descriptor: JoinDescriptor['right'] | undefined
 ): IJoinSource | undefined {
   if (!descriptor) {
     return;
   }
 
   if (descriptor.type === SOURCE_TYPES.ES_DISTANCE_SOURCE && isSpatialSourceComplete(descriptor)) {
-    return new ESDistanceSource(descriptor as ESDistanceSourceDescriptor);
+    return new ESDistanceSource(descriptor);
   }
 
   if (descriptor.type === SOURCE_TYPES.ES_TERM_SOURCE && isTermSourceComplete(descriptor)) {
-    return new ESTermSource(descriptor as ESTermSourceDescriptor);
+    return new ESTermSource(descriptor);
   }
 
   if (descriptor.type === SOURCE_TYPES.TABLE_SOURCE) {
-    return new TableSource(descriptor as TableSourceDescriptor);
+    return new TableSource(descriptor);
   }
 }
 

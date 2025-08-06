@@ -17,7 +17,7 @@ import {
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, JoinSourceDescriptor } from '.';
+import { AbstractSourceDescriptor } from '.';
 import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
@@ -27,7 +27,7 @@ export type Attribution = {
 
 export type JoinDescriptor = {
   leftField?: string;
-  right: Partial<JoinSourceDescriptor>;
+  right: { [key: string]: unknown };
   error?: string;
 };
 
