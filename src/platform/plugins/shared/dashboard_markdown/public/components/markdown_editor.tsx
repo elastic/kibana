@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiMarkdownEditor, EuiMarkdownFormatProps, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiMarkdownEditor,
+  EuiMarkdownEditorHelpButton,
+  EuiMarkdownEditorProps,
+  EuiMarkdownFormatProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { PublishingSubject, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -33,20 +39,13 @@ const componentStyles = {
   }),
   editorStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
+      blockSize: `calc(100% - ${euiTheme.size.xxl})`,
+      width: '100%',
       '.euiMarkdownEditorDropZone': {
         minBlockSize: 'initial',
       },
       textarea: {
         minBlockSize: 'initial',
-      },
-      width: '100%',
-      blockSize: `calc(100% - ${euiTheme.size.xxl})`,
-      '.euiMarkdownEditorFooter': {
-        // todo: remove this https://github.com/elastic/eui/pull/8889
-        display: 'none',
-      },
-      '[data-test-subj="markdown_editor_preview_button"]': {
-        display: 'none',
       },
     }),
 };
@@ -65,6 +64,7 @@ export interface MarkdownEditorProps {
   onCancel: () => void;
   onSave: (value: string) => void;
   isPreview$: PublishingSubject<boolean>;
+  uiPlugins?: EuiMarkdownEditorProps['uiPlugins'];
 }
 
 export const MarkdownEditor = ({
@@ -73,6 +73,7 @@ export const MarkdownEditor = ({
   onCancel,
   onSave,
   isPreview$,
+  uiPlugins = [],
 }: MarkdownEditorProps) => {
   const styles = useMemoCss(componentStyles);
   const isPreview = useStateFromPublishingSubject(isPreview$);
@@ -104,6 +105,10 @@ export const MarkdownEditor = ({
           ref={editorRef}
           css={styles.editorStyles}
           aria-describedby={FOOTER_HELP_TEXT}
+          showFooter={false}
+          toolbarProps={{
+            right: <EuiMarkdownEditorHelpButton uiPlugins={uiPlugins} />,
+          }}
         />
       </div>
       {isPreview && (

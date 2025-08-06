@@ -127,7 +127,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
           getViewModeSubject(api) ?? new BehaviorSubject('view')
         );
 
-        const { processingPlugins: processingPluginList } = getDefaultEuiMarkdownPlugins();
+        const { processingPlugins: processingPluginList, uiPlugins } =
+          getDefaultEuiMarkdownPlugins();
 
         // openLinksInNewTab functionality from src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx
         if (processingPluginList[1]?.[1]?.components?.a) {
@@ -142,6 +143,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
 
         return (
           <MarkdownEditor
+            uiPlugins={uiPlugins}
             processingPluginList={processingPluginList}
             content={content}
             onCancel={() => {
