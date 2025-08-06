@@ -138,7 +138,14 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: false,
           authType: AuthType.SSL,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -150,7 +157,14 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: AuthType.Basic,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -162,7 +176,14 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: undefined,
-          secrets: { user: 'foo', password: 'bar', crt: null, key: null, pfx: null },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: null,
+            key: null,
+            pfx: null,
+            secretHeaders: null,
+          },
           verificationMode: undefined,
           ca: undefined,
         })
@@ -174,7 +195,14 @@ describe('utils', () => {
         buildConnectorAuth({
           hasAuth: true,
           authType: AuthType.SSL,
-          secrets: { user: 'foo', password: 'bar', crt: 'null', key: 'null', pfx: 'null' },
+          secrets: {
+            user: 'foo',
+            password: 'bar',
+            crt: 'null',
+            key: 'null',
+            pfx: 'null',
+            secretHeaders: null,
+          },
           verificationMode: 'certificate',
           ca: 'foobar?',
         })

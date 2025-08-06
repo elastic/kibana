@@ -104,8 +104,8 @@ describe('secrets validation', () => {
       crt: CRT_FILE,
       key: KEY_FILE,
       pfx: null,
-      secretHeaders: null,
       user: null,
+      secretHeaders: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -863,7 +863,14 @@ describe('execute()', () => {
       actionId: 'some-id',
       services,
       config,
-      secrets: { user: 'abc', password: '123', key: null, crt: null, pfx: null },
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        secretHeaders: null,
+      },
       params: { body: 'some data' },
       configurationUtilities,
       logger: mockedLogger,
