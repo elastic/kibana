@@ -7,6 +7,7 @@
 
 import type { AgentCard, AgentSkill } from '@a2a-js/sdk';
 import type { AgentDefinition } from '@kbn/onechat-common';
+import { filterToolsBySelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolsServiceStart } from '../../services/tools';
 
@@ -26,26 +27,17 @@ export async function createAgentCard({
   const registry = await toolsService.getRegistry({ request });
   const availableTools = await registry.list({});
 
-  // Create skills based on agent's tools
-  const skills: AgentSkill[] = [];
+  const selectedTools = filterToolsBySelection(availableTools, agent.configuration.tools);
 
-  const agentToolIds = new Set(
-    agent.configuration.tools.flatMap((selection) => selection.tool_ids || [])
-  );
-
-  for (const tool of availableTools) {
-    if (agentToolIds.has(tool.id) || agentToolIds.has('*')) {
-      skills.push({
-        id: tool.id,
-        name: tool.id,
-        description: tool.description,
-        tags: ['tool'],
-        examples: [],
-        inputModes: ['text/plain', 'application/json'],
-        outputModes: ['text/plain', 'application/json'],
-      });
-    }
-  }
+  const skills: AgentSkill[] = selectedTools.map((tool) => ({
+    id: tool.id,
+    name: tool.id,
+    description: tool.description,
+    tags: ['tool'],
+    examples: [],
+    inputModes: ['text/plain', 'application/json'],
+    outputModes: ['text/plain', 'application/json'],
+  }));
 
   return {
     name: agent.name,
