@@ -886,6 +886,7 @@
         "fetch-mock",
         "fp-ts",
         "getos",
+        "inversify",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
         "@fast-check/jest",
