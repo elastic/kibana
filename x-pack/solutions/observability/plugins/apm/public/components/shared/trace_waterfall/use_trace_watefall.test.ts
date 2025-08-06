@@ -84,12 +84,13 @@ describe('getFlattenedTraceWaterfall', () => {
   ]);
 
   it('returns a flattened waterfall with correct depth, offset, skew, and color', () => {
-    const result = getTraceWaterfall(
-      root,
+    const result = getTraceWaterfall({
+      rootItem: root,
       parentChildMap,
-      serviceColorsMap,
-      WaterfallLegendType.ServiceName
-    );
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
 
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
 
@@ -125,7 +126,13 @@ describe('getFlattenedTraceWaterfall', () => {
   });
 
   it('returns only the root if there are no children', () => {
-    const result = getTraceWaterfall(root, {}, serviceColorsMap, WaterfallLegendType.ServiceName);
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
     expect(result[0].depth).toBe(0);
@@ -137,13 +144,30 @@ describe('getFlattenedTraceWaterfall', () => {
       '1': [child2, child1], // child2 timestamp is after child1
       '2': [grandchild],
     };
-    const result = getTraceWaterfall(
-      root,
-      unorderedMap,
-      serviceColorsMap,
-      WaterfallLegendType.ServiceName
-    );
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: unorderedMap,
+      orphans: [],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
     expect(result.map((i) => i.id)).toEqual(['1', '2', '4', '3']);
+  });
+
+  it('reparents orphan spans', () => {
+    const result = getTraceWaterfall({
+      rootItem: root,
+      parentChildMap: {},
+      orphans: [grandchild],
+      colorMap: serviceColorsMap,
+      colorBy: WaterfallLegendType.ServiceName,
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('1');
+    expect(result[0].depth).toBe(0);
+    expect(result[1].id).toBe('4');
+    expect(result[1].depth).toBe(1);
   });
 });
 
@@ -498,6 +522,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 0,
         color: 'red',
         errorCount: 0,
+        isOrphan: false,
       },
       {
         id: '2',
@@ -511,6 +536,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 10,
         color: 'blue',
         errorCount: 0,
+        isOrphan: false,
       },
       {
         id: '3',
@@ -524,6 +550,7 @@ describe('getTraceWaterfallDuration', () => {
         skew: 5,
         color: 'green',
         errorCount: 0,
+        isOrphan: false,
       },
     ];
     expect(getTraceWaterfallDuration(items)).toBe(155);

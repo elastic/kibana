@@ -16,6 +16,7 @@ export interface TraceWaterfallItem extends TraceItem {
   offset: number;
   skew: number;
   color: string;
+  isOrphan?: boolean;
 }
 
 export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
@@ -27,9 +28,18 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
         : WaterfallLegendType.SpanType;
     const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
-    const { rootItem, traceState } = getRootItemOrFallback(traceParentChildrenMap, traceItems);
+    const { rootItem, traceState, orphans } = getRootItemOrFallback(
+      traceParentChildrenMap,
+      traceItems
+    );
     const traceWaterfall = rootItem
-      ? getTraceWaterfall(rootItem, traceParentChildrenMap, colorMap, colorBy)
+      ? getTraceWaterfall({
+          rootItem,
+          parentChildMap: traceParentChildrenMap,
+          orphans,
+          colorMap,
+          colorBy,
+        })
       : [];
 
     return {
@@ -134,13 +144,35 @@ export function getRootItemOrFallback(
   };
 }
 
-export function getTraceWaterfall(
+function reparentOrphansToRoot(
   rootItem: TraceItem,
   parentChildMap: Record<string, TraceItem[]>,
-  colorMap: Map<string, string>,
-  colorBy: WaterfallLegendType
-): TraceWaterfallItem[] {
+  orphans: TraceItem[]
+) {
+  // Some cases with orphans, the root item has no direct link or children, so this
+  // might be not initialised. This assigns the array in case of undefined/null to the
+  // map.
+  const children = (parentChildMap[rootItem.id] ??= []);
+
+  children.push(...orphans.map((orphan) => ({ ...orphan, parentId: rootItem.id, isOrphan: true })));
+}
+
+export function getTraceWaterfall({
+  rootItem,
+  parentChildMap,
+  orphans,
+  colorMap,
+  colorBy,
+}: {
+  rootItem: TraceItem;
+  parentChildMap: Record<string, TraceItem[]>;
+  orphans: TraceItem[];
+  colorMap: Map<string, string>;
+  colorBy: WaterfallLegendType;
+}): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
+
+  reparentOrphansToRoot(rootItem, parentChildMap, orphans);
 
   function getTraceWaterfallItem(
     item: TraceItem,
