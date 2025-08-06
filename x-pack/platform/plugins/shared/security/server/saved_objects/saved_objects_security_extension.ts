@@ -331,7 +331,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     { authzAction?: string; auditAction?: AuditAction }
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry | undefined;
-  private readonly _accessControlService: AccessControlService;
+  public readonly accessControlService: AccessControlService;
 
   constructor({
     actions,
@@ -346,7 +346,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this._accessControlService = new AccessControlService();
+    this.accessControlService = new AccessControlService();
     this.typeRegistry = typeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
@@ -428,10 +428,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     ]);
   }
 
-  public get accessControlService() {
-    return this._accessControlService;
-  }
-
   private assertObjectsArrayNotEmpty(objects: AuthorizeObject[], action: SecurityAction) {
     if (objects.length === 0) {
       throw new Error(
@@ -448,8 +444,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const authzActions = new Set<A>();
     const auditActions = new Set<AuditAction>();
     for (const secAction of securityActions) {
-      // CHANGE_OWNERSHIP is handled separately from normal RBAC checks
-      if (secAction !== SecurityAction.CHANGE_OWNERSHIP) {
+      // CHANGE_OWNERSHIP and CHANGE_ACCESS_MODE are handled separately from normal RBAC checks
+      if (
+        secAction !== SecurityAction.CHANGE_OWNERSHIP &&
+        secAction !== SecurityAction.CHANGE_ACCESS_MODE
+      ) {
         const { authzAction, auditAction } = this.decodeSecurityAction(secAction);
         if (authzAction) authzActions.add(authzAction as A);
         if (auditAction) auditActions.add(auditAction as AuditAction);
@@ -616,9 +615,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
    * within the type map. If unauthorized for any type this method will throw.
    */
-  private async enforceAuthorization<A extends string>(
-    params: EnforceAuthorizationParams<A>
-  ): Promise<void> {
+  private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>) {
     const { typesAndSpaces, action, typeMap, auditOptions, enforceAccessControl } = params;
     const {
       objects: auditObjects,

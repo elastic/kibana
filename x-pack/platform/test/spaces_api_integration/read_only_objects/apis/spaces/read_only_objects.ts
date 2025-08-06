@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('kbn-xsrf', 'xxx')
       .send({
         providerType: 'basic',
-        providerName: 'basic1',
+        providerName: 'basic',
         currentURL: '/',
         params: { username, password },
       })

@@ -46,8 +46,9 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
 } from '@kbn/core-saved-objects-api-server';
 
 /**
@@ -228,7 +229,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.changeOwnership} */
   changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions
+    options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeOwnership(objects, options);
   }
@@ -236,7 +237,7 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.changeAccessMode} */
   changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions
+    options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse> {
     return this._repository.changeAccessMode(objects, options);
   }

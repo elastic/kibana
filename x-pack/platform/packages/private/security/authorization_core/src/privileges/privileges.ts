@@ -47,14 +47,14 @@ function getFeaturePrivileges({
   respectLicenseLevel,
   featurePrivilegeBuilder,
   actions,
-  typesSupportingAccessControl = [],
+  savedObjectTypesSupportingAccessControl = [],
 }: {
   featuresService: FeaturesPluginSetup;
   licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>;
   featurePrivilegeBuilder: FeaturePrivilegeBuilder;
   actions: Actions;
   respectLicenseLevel: boolean;
-  typesSupportingAccessControl?: string[];
+  savedObjectTypesSupportingAccessControl?: string[];
 }) {
   const features = featuresService.getKibanaFeatures();
   const { allowSubFeaturePrivileges } = licenseService.getFeatures();
@@ -220,8 +220,8 @@ function getFeaturePrivileges({
 
   const allActions = [...allActionsSet];
   const readActions = [...readActionsSet];
-  const allSavedObjectsManageOwnershipActions = typesSupportingAccessControl.map((type) =>
-    actions.savedObject.get(type, 'manage_access_control')
+  const allSavedObjectsManageOwnershipActions = savedObjectTypesSupportingAccessControl.map(
+    (type) => actions.savedObject.get(type, 'manage_access_control')
   );
   return {
     features: featurePrivileges,
@@ -270,7 +270,7 @@ export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
   licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>,
-  getTypeRegistry?: () => Promise<ISavedObjectTypeRegistry>
+  getTypeRegistry: () => Promise<ISavedObjectTypeRegistry>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
@@ -289,7 +289,7 @@ export function privilegesFactory(
         throw new Error('getTypeRegistry is required for getWithActions');
       }
       const typeRegistry = await getTypeRegistry();
-      const typesSupportingAccessControl = typeRegistry
+      const savedObjectTypesSupportingAccessControl = typeRegistry
         .getAllTypes()
         .filter((type) => typeRegistry.supportsAccessControl(type.name))
         .map((type) => type.name);
@@ -299,7 +299,7 @@ export function privilegesFactory(
         respectLicenseLevel,
         featurePrivilegeBuilder,
         actions,
-        typesSupportingAccessControl,
+        savedObjectTypesSupportingAccessControl,
       });
 
       // Remember privilege as composable to update it later, once actions for all referenced privileges are also

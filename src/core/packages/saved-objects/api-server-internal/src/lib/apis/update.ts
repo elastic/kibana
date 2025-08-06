@@ -191,6 +191,9 @@ export const executeUpdate = async <T>(
       created_at: time,
       updated_at: time,
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
+      ...(accessControl && {
+        accessControl,
+      }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);

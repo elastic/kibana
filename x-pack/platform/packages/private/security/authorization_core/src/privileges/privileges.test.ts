@@ -6,6 +6,7 @@
  */
 
 import { ApiOperation } from '@kbn/core-security-server';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
@@ -14,6 +15,8 @@ import { licenseMock } from '../__fixtures__/licensing.mock';
 import { Actions } from '../actions';
 
 const actions = new Actions();
+
+const typeRegistryMocked = () => Promise.resolve(typeRegistryMock.create());
 
 const mockLicenseServiceBasic = licenseMock.create({ allowSubFeaturePrivileges: false }, 'basic');
 const mockLicenseServiceGold = licenseMock.create({ allowSubFeaturePrivileges: true }, 'gold');
@@ -76,7 +79,12 @@ describe('features', () => {
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
 
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
@@ -115,7 +123,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const expectedAllPrivileges = [
       actions.login,
@@ -198,7 +211,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const expectedAllPrivileges = [
       actions.login,
@@ -282,7 +300,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const expectedAllPrivileges = [
       actions.login,
@@ -371,7 +394,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const expectedAllPrivilegesFeatureA = [
       actions.login,
@@ -485,7 +513,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     expect(() => privileges.get()).toThrowErrorMatchingInlineSnapshot(
       `"Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: [\\"feature-a.all\\",\\"feature-a.read\\",\\"feature-a.minimal_all\\",\\"feature-a.minimal_read\\",\\"feature-b.all\\",\\"feature-b.read\\",\\"feature-b.minimal_all\\",\\"feature-b.minimal_read\\",\\"feature-c.all\\",\\"feature-c.read\\",\\"feature-c.minimal_all\\",\\"feature-c.minimal_read\\"]"`
@@ -560,7 +593,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const alertingOperations = [
       ...[
@@ -737,7 +775,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const alertingOperations = [
       ...[
@@ -921,7 +964,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     expect(() => privileges.get()).toThrowErrorMatchingInlineSnapshot(
       `"Topological ordering of privileges did not complete, these feature privileges have cyclic dependencies: [\\"alpha.all\\",\\"alpha.read\\",\\"alpha.minimal_all\\",\\"alpha.minimal_read\\",\\"beta.all\\",\\"beta.read\\",\\"beta.minimal_all\\",\\"beta.minimal_read\\",\\"gamma.all\\",\\"gamma.read\\",\\"gamma.minimal_all\\",\\"gamma.minimal_read\\"]"`
@@ -1006,7 +1054,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     // The feature A is being replaced and therefore only "inherits" UI capabilities from the dependency chain.
     const expectedAllPrivilegesFeatureA = [
@@ -1162,7 +1215,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
@@ -1205,7 +1263,12 @@ describe('features', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
@@ -1287,7 +1350,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -1451,14 +1519,24 @@ describe('features', () => {
           getFeatures({ excludeFromBasePrivileges: false })
         );
         expect(
-          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+          privilegesFactory(
+            actions,
+            mockFeaturesPlugin,
+            mockLicenseServiceBasic,
+            typeRegistryMocked
+          ).get()
         ).toHaveProperty(`${group}.all`, expectedActions);
 
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
           getFeatures({ excludeFromBasePrivileges: true })
         );
         expect(
-          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+          privilegesFactory(
+            actions,
+            mockFeaturesPlugin,
+            mockLicenseServiceBasic,
+            typeRegistryMocked
+          ).get()
         ).toHaveProperty(`${group}.all`, expectedActions);
       });
 
@@ -1502,7 +1580,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.read`, [
@@ -1620,14 +1703,24 @@ describe('features', () => {
           getFeatures({ excludeFromBasePrivileges: false })
         );
         expect(
-          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+          privilegesFactory(
+            actions,
+            mockFeaturesPlugin,
+            mockLicenseServiceBasic,
+            typeRegistryMocked
+          ).get()
         ).toHaveProperty(`${group}.read`, expectedActions);
 
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
           getFeatures({ excludeFromBasePrivileges: true })
         );
         expect(
-          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+          privilegesFactory(
+            actions,
+            mockFeaturesPlugin,
+            mockLicenseServiceBasic,
+            typeRegistryMocked
+          ).get()
         ).toHaveProperty(`${group}.read`, expectedActions);
       });
 
@@ -1663,7 +1756,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -1736,7 +1834,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -1838,7 +1941,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -1912,7 +2020,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -2015,7 +2128,12 @@ describe('features', () => {
 
         const mockFeaturesPlugin = featuresPluginMock.createSetup();
         mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+        const privileges = privilegesFactory(
+          actions,
+          mockFeaturesPlugin,
+          mockLicenseServiceBasic,
+          typeRegistryMocked
+        );
 
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
@@ -2083,7 +2201,12 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo');
@@ -2117,7 +2240,12 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
@@ -2158,7 +2286,12 @@ describe('reserved', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      typeRegistryMocked
+    );
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('reserved.foo');
@@ -2217,7 +2350,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -2323,7 +2461,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -2454,7 +2597,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -2566,7 +2714,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -2685,7 +2838,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
@@ -2794,7 +2952,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceBasic,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).not.toHaveProperty(`foo.subFeaturePriv1`);
@@ -2919,7 +3082,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceBasic,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get(false);
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
@@ -3062,7 +3230,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServiceGold,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
@@ -3206,7 +3379,12 @@ describe('subFeatures', () => {
 
       const mockFeaturesPlugin = featuresPluginMock.createSetup();
       mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-      const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServicePlatinum);
+      const privileges = privilegesFactory(
+        actions,
+        mockFeaturesPlugin,
+        mockLicenseServicePlatinum,
+        typeRegistryMocked
+      );
 
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`);
@@ -3417,7 +3595,12 @@ describe('subFeatures', () => {
 
     const mockFeaturesPlugin = featuresPluginMock.createSetup();
     mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
-    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceGold);
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceGold,
+      typeRegistryMocked
+    );
 
     const expectedAllPrivileges = [
       actions.login,
