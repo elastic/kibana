@@ -19,7 +19,7 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import {
   WORKFLOW_SAVED_OBJECT_TYPE,

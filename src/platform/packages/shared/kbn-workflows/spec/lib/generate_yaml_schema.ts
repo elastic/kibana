@@ -83,11 +83,8 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors);
 
   if (loose) {
-    return z.object({
-      version: z.literal('1').default('1').describe('The version of the workflow schema'),
-      workflow: WorkflowSchema.partial().extend({
-        steps: z.array(recursiveStepSchema).optional(),
-      }),
+    return WorkflowSchema.partial().extend({
+      steps: z.array(recursiveStepSchema).optional(),
     });
   }
 

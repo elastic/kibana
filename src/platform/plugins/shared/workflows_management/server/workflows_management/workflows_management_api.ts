@@ -19,7 +19,7 @@ import {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { SchedulerService } from '../scheduler/scheduler_service';
 import { WorkflowsService } from './workflows_management_service';
