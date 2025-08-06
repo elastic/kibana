@@ -36,7 +36,8 @@
     "@kbn/search-types",
     "@kbn/response-ops-alerts-fields-browser",
     "@kbn/charts-theme",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/threat-intelligence-plugin"
   ],
   "exclude": ["target/**/*"]
 }
