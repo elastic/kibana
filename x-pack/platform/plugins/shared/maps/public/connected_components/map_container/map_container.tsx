@@ -28,6 +28,7 @@ import { MapSettings } from '../../../common/descriptor_types';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
 import { updateFlyout } from '../../actions';
+import { OverlayRef } from '@kbn/core/public';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -75,7 +76,7 @@ export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
 
-  private _closeFlyout: () => void = () => {};
+  private _flyoutRef: OverlayRef | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -156,14 +157,16 @@ export class MapContainer extends Component<Props, State> {
   }
 
   _updateFlyout = async (flyoutDisplay: FLYOUT_STATE) => {
-    this._closeFlyout();
-    if (flyoutDisplay === FLYOUT_STATE.NONE) return;
+    await this._flyoutRef?.close();
+
+    if (flyoutDisplay === FLYOUT_STATE.NONE) {
+      return;
+    }
 
     await untilPluginStartServicesReady();
-    const flyoutRef = openLazyFlyout({
+    this._flyoutRef = openLazyFlyout({
       core: coreStart,
-      loadContent: async ({ closeFlyout }) => {
-        this._closeFlyout = closeFlyout;
+      loadContent: async () => {
         let flyoutPanel = null;
         switch (flyoutDisplay) {
           case FLYOUT_STATE.ADD_LAYER_WIZARD:
@@ -188,7 +191,11 @@ export class MapContainer extends Component<Props, State> {
     });
 
     // Ensure the built-in close buttons from openLazyFlyout correctly update the Redux state
-    flyoutRef.onClose.then(() => this.context.store.dispatch(updateFlyout(FLYOUT_STATE.NONE)));
+    this._flyoutRef.onClose.then(() => {
+      // If the flyout has closed from something other than a Redux state change
+      if (this.props.flyoutDisplay === flyoutDisplay)
+        this.context.store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    });
   };
 
   _startInitialLoadRenderTimer = () => {
