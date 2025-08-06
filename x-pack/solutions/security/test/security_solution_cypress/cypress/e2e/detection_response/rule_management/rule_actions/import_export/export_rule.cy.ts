@@ -39,6 +39,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
   getInstalledPrebuiltRulesCount,
+  installMockPrebuiltRulesPackage,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
@@ -54,6 +55,10 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
 });
 
 describe('Export rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   const downloadsFolder = Cypress.config('downloadsFolder');
   const RULE_NAME = 'Rule to export';
 

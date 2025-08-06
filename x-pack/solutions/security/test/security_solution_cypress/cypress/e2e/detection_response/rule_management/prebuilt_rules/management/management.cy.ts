@@ -6,6 +6,7 @@
  */
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -22,7 +23,6 @@ import {
   getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
-  waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
@@ -31,37 +31,39 @@ import {
   enableSelectedRules,
 } from '../../../../../tasks/rules_bulk_actions';
 import {
-  createAndInstallMockedPrebuiltRules,
   getInstalledPrebuiltRulesCount,
-  preventPrebuiltRulesPackageInstallation,
+  installMockPrebuiltRulesPackage,
+  installPrebuiltRuleAssets,
+  installSpecificPrebuiltRulesRequest,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 
-const rules = Array.from(Array(5)).map((_, i) => {
-  return createRuleAssetSavedObject({
+const PREBUILT_RULE_ASSETS = Array.from(Array(5)).map((_, i) =>
+  createRuleAssetSavedObject({
     name: `Test rule ${i + 1}`,
     rule_id: `rule_${i + 1}`,
-  });
-});
+  })
+);
 
 // https://github.com/elastic/kibana/issues/179973
-// Failing: See https://github.com/elastic/kibana/issues/182442
-describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
-    login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
-    preventPrebuiltRulesPackageInstallation();
-    visit(RULES_MANAGEMENT_URL);
-    createAndInstallMockedPrebuiltRules(rules);
-    cy.reload();
-    waitForPrebuiltDetectionRulesToBeLoaded();
+    installPrebuiltRuleAssets(PREBUILT_RULE_ASSETS);
+    installSpecificPrebuiltRulesRequest(PREBUILT_RULE_ASSETS);
+
+    login();
+
+    visitRulesManagementTable();
     disableAutoRefresh();
   });
 

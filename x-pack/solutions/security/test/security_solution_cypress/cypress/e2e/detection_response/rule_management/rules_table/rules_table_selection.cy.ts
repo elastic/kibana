@@ -20,6 +20,7 @@ import {
 import {
   getInstalledPrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
+  installMockPrebuiltRulesPackage,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -39,6 +40,10 @@ describe(
   'Rules table: selection',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
