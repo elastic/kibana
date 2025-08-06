@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
@@ -48,10 +48,7 @@ export const UnifiedSearchBar = () => {
     const current = searchCriteria.preferredSchema;
 
     if (current === null) {
-      const next = schemas.includes(DataSchemaFormat.SEMCONV)
-        ? DataSchemaFormat.SEMCONV
-        : schemas[0];
-      onPreferredSchemaChange(next);
+      onPreferredSchemaChange(timeRangeMetadata.preferredSchema);
     }
   }, [
     timeRangeMetadata,

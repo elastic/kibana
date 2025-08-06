@@ -32,10 +32,10 @@ const baseLinkSchema = {
   }),
 };
 
-const dashboardLinkSchema = schema.object({
+export const dashboardLinkSchema = schema.object({
   ...baseLinkSchema,
-  destinationRefName: schema.string({
-    meta: { description: 'The name of the SavedObject reference to the linked dashboard' },
+  destination: schema.string({
+    meta: { description: 'Linked dashboard saved object id' },
   }),
   type: schema.literal(DASHBOARD_LINK_TYPE),
   options: schema.maybe(
@@ -62,7 +62,7 @@ const dashboardLinkSchema = schema.object({
   ),
 });
 
-const externalLinkSchema = schema.object({
+export const externalLinkSchema = schema.object({
   ...baseLinkSchema,
   type: schema.literal(EXTERNAL_LINK_TYPE),
   destination: schema.string({ meta: { description: 'The external URL to link to' } }),
@@ -85,9 +85,9 @@ const externalLinkSchema = schema.object({
   ),
 });
 
-export const linksAttributesSchema = schema.object(
+export const linksSchema = schema.object(
   {
-    title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+    title: schema.string({ meta: { description: 'A human-readable title' } }),
     description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
     links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema]), {
       meta: { description: 'The list of links to display' },
@@ -106,7 +106,7 @@ export const linksAttributesSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
+const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
 export const linksSearchOptionsSchema = schema.maybe(
   schema.object(
@@ -118,10 +118,12 @@ export const linksSearchOptionsSchema = schema.maybe(
 );
 
 export const linksCreateOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
   overwrite: createOptionsSchemas.overwrite,
 });
 
+// update references needed because visualize listing table uses content management
+// to update title/description/tags and tags passes references in this use case
+// TODO remove linksUpdateOptionsSchema once visualize listing table updated to pass in tags without references
 export const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
@@ -145,7 +147,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
     out: {
@@ -157,10 +159,10 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: linksUpdateOptionsSchema, // same schema as "create"
+        schema: linksUpdateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: linksSchema,
       },
     },
   },
