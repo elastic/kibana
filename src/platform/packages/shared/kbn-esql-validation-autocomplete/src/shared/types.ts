@@ -11,6 +11,7 @@ import {
   ESQLSourceResult,
   ESQLFieldWithMetadata,
 } from '@kbn/esql-ast/src/commands_registry/types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,
@@ -60,6 +61,7 @@ export interface ESQLCallbacks {
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
   getLicense?: () => Promise<ESQLLicenseResult | undefined>;
+  getActiveProduct?: () => PricingProduct | undefined;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

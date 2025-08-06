@@ -420,6 +420,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       gettingStarted: `${ELASTIC_DOCS}solutions/security`,
       privileges: `${ELASTIC_DOCS}solutions/security/get-started/elastic-security-requirements`,
       ingestDataToSecurity: `${ELASTIC_DOCS}solutions/security/get-started/ingest-data-to-elastic-security`,
+      automaticImport: `${ELASTIC_DOCS}solutions/security/get-started/automatic-import`,
       ml: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/anomaly-detection`,
       ruleChangeLog: `https://www.elastic.co/guide/en/security/current/prebuilt-rules-downloadable-updates.html`,
       detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-requirements`,

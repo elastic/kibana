@@ -558,6 +558,7 @@ const ESQLEditorInternal = function ESQLEditor({
           hasAtLeast: ls.hasAtLeast.bind(ls), // keep the original context this
         };
       },
+      getActiveProduct: () => core.pricing.getActiveProduct(),
     };
     return callbacks;
   }, [

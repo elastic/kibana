@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-// import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isAssignment, isColumn } from '../../../ast/is';

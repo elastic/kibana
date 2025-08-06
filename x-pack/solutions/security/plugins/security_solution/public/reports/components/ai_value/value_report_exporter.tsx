@@ -50,8 +50,9 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
     adjustUI();
 
     try {
-      const scale = 2; // 2x resolution
-      const dataUrl = await domtoimage.toPng(exportRef.current, {
+      const scale = 2;
+
+      const blob = await domtoimage.toBlob(exportRef.current, {
         quality: 1,
         bgcolor: '#ffffff',
         cacheBust: true,
@@ -63,17 +64,24 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
           width: `${exportRef.current.offsetWidth}px`,
           height: `${exportRef.current.offsetHeight}px`,
         },
+        styleFilter: (style: CSSStyleSheet) => {
+          try {
+            void style.cssRules;
+            return true;
+          } catch {
+            return false;
+          }
+        },
       });
 
+      const imageBytes = await blob.arrayBuffer();
       const pdfDoc = await PDFDocument.create();
       const pageWidth = 595.28; // A4 width
       const pageHeight = 841.89; // A4 height
       const padding = 20;
 
       const page = pdfDoc.addPage([pageWidth, pageHeight]);
-
-      const pngImageBytes = await fetch(dataUrl).then((res) => res.arrayBuffer());
-      const pngImage = await pdfDoc.embedPng(pngImageBytes);
+      const pngImage = await pdfDoc.embedPng(imageBytes);
 
       const originalWidth = pngImage.width;
       const originalHeight = pngImage.height;
@@ -99,8 +107,8 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
       });
 
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
+      const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(pdfBlob);
 
       const a = document.createElement('a');
       a.href = url;

@@ -515,7 +515,7 @@
             "label": "siem",
             "description": [],
             "signature": [
-              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; readonly ingestDataToSecurity: string; }"
+              "{ readonly privileges: string; readonly guide: string; readonly gettingStarted: string; readonly ml: string; readonly ruleChangeLog: string; readonly detectionsReq: string; readonly networkMap: string; readonly troubleshootGaps: string; readonly gapsTable: string; readonly ruleApiOverview: string; readonly configureAlertSuppression: string; readonly ingestDataToSecurity: string; readonly automaticImport: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

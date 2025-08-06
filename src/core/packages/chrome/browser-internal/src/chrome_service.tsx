@@ -72,6 +72,7 @@ import { ProjectSideNavV1 } from './ui/project/sidenav_v1/sidenav';
 import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_sidenav';
 import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
 import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
+import { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -483,6 +484,21 @@ export class ChromeService {
     const recentlyAccessed$ = recentlyAccessed.get$();
     const activeDataTestSubj$ = projectNavigation.getActiveDataTestSubj$();
 
+    const navProps: SideNavV2NavigationProps = {
+      basePath: http.basePath,
+      application,
+      reportEvent: analytics.reportEvent,
+
+      navigationTree$: navigationTreeUi$,
+      activeNodes$,
+      navLinks$,
+
+      recentlyAccessed$,
+      loadingCount$,
+      dataTestSubj$: activeDataTestSubj$,
+      isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
+    };
+
     const getProjectHeader = ({
       includeSideNav,
       isFixed,
@@ -501,7 +517,7 @@ export class ChromeService {
       /**
        * Whether the header should include a side navigation and which version of it.
        */
-      includeSideNav: false | 'v1' | 'v2';
+      includeSideNav: false | 'v1' | 'v2' | 'both';
 
       /**
        * Whether the header should include the application subheader
@@ -532,7 +548,7 @@ export class ChromeService {
       >
         <Router history={application.history}>
           <>
-            {includeSideNav === 'v1' && (
+            {(includeSideNav === 'v1' || includeSideNav === 'both') && (
               <ProjectSideNavV1
                 isCollapsed$={this.isSideNavCollapsed$}
                 toggle={setIsSideNavCollapsed}
@@ -551,10 +567,12 @@ export class ChromeService {
               />
             )}
 
-            {includeSideNav === 'v2' && (
+            {(includeSideNav === 'v2' || includeSideNav === 'both') && (
               <FixedLayoutProjectSideNavV2
                 isCollapsed$={this.isSideNavCollapsed$}
                 toggle={setIsSideNavCollapsed}
+                navProps={navProps}
+                side={includeSideNav === 'both' ? 'right' : 'left'}
               />
             )}
           </>
@@ -632,7 +650,9 @@ export class ChromeService {
     };
 
     const getProjectSideNavV2ComponentForGridLayout = () => {
-      return <GridLayoutProjectSideNavV2 isCollapsed$={this.isSideNavCollapsed$} />;
+      return (
+        <GridLayoutProjectSideNavV2 isCollapsed$={this.isSideNavCollapsed$} navProps={navProps} />
+      );
     };
 
     return {

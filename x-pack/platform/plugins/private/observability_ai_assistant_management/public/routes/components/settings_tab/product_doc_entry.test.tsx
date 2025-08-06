@@ -15,19 +15,8 @@ import {
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { useGetProductDoc } from '../../../hooks/use_get_product_doc';
-
-jest.mock('../../../hooks/use_get_product_doc', () => ({
-  useGetProductDoc: jest.fn(),
-}));
-
-jest.mock('../../../hooks/use_install_product_doc', () => ({
-  useInstallProductDoc: () => ({ mutateAsync: jest.fn() }),
-}));
-
-jest.mock('../../../hooks/use_uninstall_product_doc', () => ({
-  useUninstallProductDoc: () => ({ mutateAsync: jest.fn() }),
-}));
+import { UseProductDoc } from '../../../hooks/use_product_doc';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 
 const createMockStatus = (
   overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>
@@ -62,12 +51,16 @@ const createMockKnowledgeBase = (
   ...overrides,
 });
 
-describe('ProductDocEntry', () => {
-  it('calls useGetProductDocStatus with ELSER_ON_ML_NODE_INFERENCE_ID when inference ID is LEGACY_CUSTOM_INFERENCE_ID', async () => {
-    (useGetProductDoc as jest.Mock).mockReturnValue({
-      status: 'installed',
-    });
+const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
+  status: 'uninstalled' as InstallationStatus,
+  isLoading: false,
+  installProductDoc: jest.fn().mockResolvedValue({} as any),
+  uninstallProductDoc: jest.fn().mockResolvedValue({} as any),
+  ...overrides,
+});
 
+describe('ProductDocEntry', () => {
+  it('should render the installed state correctly', async () => {
     const mockKnowledgeBase = createMockKnowledgeBase({
       status: createMockStatus({
         currentInferenceId: LEGACY_CUSTOM_INFERENCE_ID,
@@ -80,28 +73,37 @@ describe('ProductDocEntry', () => {
       }),
     });
 
-    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Installed')).toBeInTheDocument();
-    });
-
-    expect(useGetProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
-  });
-
-  it('calls useGetProductDocStatus with the current inference ID when inference ID is not LEGACY_CUSTOM_INFERENCE_ID"', async () => {
-    const mockKnowledgeBase = createMockKnowledgeBase();
-
-    (useGetProductDoc as jest.Mock).mockReturnValue({
+    const productDoc = createProductDoc({
       status: 'installed',
     });
 
-    render(<ProductDocEntry knowledgeBase={mockKnowledgeBase} />);
+    render(
+      <ProductDocEntry
+        knowledgeBase={mockKnowledgeBase}
+        productDoc={productDoc}
+        currentlyDeployedInferenceId={undefined}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByText('Installed')).toBeInTheDocument();
     });
+  });
 
-    expect(useGetProductDoc).toHaveBeenCalledWith(ELSER_ON_ML_NODE_INFERENCE_ID);
+  it('should render the uninstalled state correctly', async () => {
+    const mockKnowledgeBase = createMockKnowledgeBase();
+    const productDoc = createProductDoc();
+
+    render(
+      <ProductDocEntry
+        knowledgeBase={mockKnowledgeBase}
+        productDoc={productDoc}
+        currentlyDeployedInferenceId={undefined}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Install')).toBeInTheDocument();
+    });
   });
 });

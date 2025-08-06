@@ -43,8 +43,6 @@ export const validate = (
     });
   }
 
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
-
   const targetName = targetField?.name || 'completion';
 
   // Sets the target field so the column is recognized after the command is applied
@@ -55,6 +53,8 @@ export const validate = (
       type: 'keyword',
     },
   ]);
+
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

@@ -76,7 +76,7 @@ specific test directory and not to `common` with three skips.
 Note, that `common` tests are invoked up to four times in a full test run: once per project to make
 sure the covered shared functionality works correctly in every project. So when writing tests there, be mindful about the test run time.
 
-See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/serverless/api_integration/test_suites/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/functional/test_suites/common/README.md).
+See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/serverless/api_integration/test_suites/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/platform/test/serverless/functional/test_suites/README.md).
 
 ### Shared services and page objects
 

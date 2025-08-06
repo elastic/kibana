@@ -28,7 +28,6 @@ import {
   getCompatibleLiterals,
   buildConstantsDefinitions,
   isLiteralDateItem,
-  compareTypesWithLiterals,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
 import {
@@ -49,13 +48,7 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import {
-  isColumn,
-  isFunctionExpression,
-  isIdentifier,
-  isLiteral,
-  isTimeInterval,
-} from '../../../ast/is';
+import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
 
 export const within = (position: number, location: ESQLLocation | undefined) =>
@@ -333,7 +326,7 @@ export const getExpressionPosition = (
       return 'after_operator';
     }
 
-    if (isLiteral(expressionRoot) || isTimeInterval(expressionRoot)) {
+    if (isLiteral(expressionRoot)) {
       return 'after_literal';
     }
   }
@@ -592,7 +585,6 @@ export function extractTypeFromASTArg(
   | ESQLLiteral['literalType']
   | SupportedDataType
   | FunctionReturnType
-  | 'timeInterval'
   | string // @TODO remove this
   | undefined {
   if (Array.isArray(arg)) {
@@ -606,9 +598,6 @@ export function extractTypeFromASTArg(
     if (hit) {
       return hit.type;
     }
-  }
-  if (isTimeInterval(arg)) {
-    return arg.type;
   }
   if (isFunctionExpression(arg)) {
     const fnDef = getFunctionDefinition(arg.name);
@@ -636,10 +625,7 @@ function getValidFunctionSignaturesForPreviousArgs(
     (s) =>
       s.params?.length >= argIndex &&
       s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return (
-          dataType === enrichedArgs[idx].dataType ||
-          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
-        );
+        return dataType === enrichedArgs[idx].dataType;
       })
   );
   return relevantFuncSignatures;

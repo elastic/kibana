@@ -11,6 +11,11 @@ import type { WaffleFiltersState } from './use_waffle_filters';
 import { useWaffleFilters } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import type { ResolvedDataView } from '../../../../utils/data_view';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
+
+jest.mock('@kbn/observability-shared-plugin/public');
+
+const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
@@ -42,12 +47,18 @@ jest.mock('../../../../containers/metrics_source', () => ({
   }),
 }));
 
+jest.mock('./use_inventory_views', () => ({
+  useInventoryViewsContext: () => ({
+    currentView: undefined,
+  }),
+}));
+
 let PREFILL: Record<string, any> = {};
 jest.mock('../../../../alerting/use_alert_prefill', () => ({
   useAlertPrefillContext: () => ({
     inventoryPrefill: {
-      setFilterQuery(filterQuery: string) {
-        PREFILL = { filterQuery };
+      setKuery(kuery: string) {
+        PREFILL = { kuery };
       },
     },
   }),
@@ -58,19 +69,25 @@ const renderUseWaffleFiltersHook = () => renderHook(() => useWaffleFilters());
 describe('useWaffleFilters', () => {
   beforeEach(() => {
     PREFILL = {};
+    mockUseUrlState.mockReturnValue([
+      { kind: 'kuery', expression: '' } as WaffleFiltersState,
+      jest.fn(),
+    ]);
   });
 
   it('should sync the options to the inventory alert preview context', () => {
     const { result, rerender } = renderUseWaffleFiltersHook();
 
     const newQuery = {
-      expression: 'foo',
+      expression: 'foo: *',
       kind: 'kuery',
     } as WaffleFiltersState;
+
     act(() => {
-      result.current.applyFilterQuery(newQuery);
+      mockUseUrlState.mockReturnValue([newQuery, jest.fn()]);
+      result.current.applyFilterQuery(newQuery.expression);
     });
     rerender();
-    expect(PREFILL.filterQuery).toEqual(newQuery.expression);
+    expect(PREFILL).toEqual({ kuery: newQuery.expression });
   });
 });
