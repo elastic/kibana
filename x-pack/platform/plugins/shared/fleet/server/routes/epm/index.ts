@@ -65,6 +65,8 @@ import {
   DeletePackageDatastreamAssetsResponseSchema,
   RollbackPackageRequestSchema,
   RollbackPackageResponseSchema,
+  GetKnowledgeBaseRequestSchema,
+  GetKnowledgeBaseResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -378,10 +380,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: GetInfoRequestSchema,
+          request: GetKnowledgeBaseRequestSchema,
           response: {
             200: {
-              body: () => GetInfoResponseSchema,
+              body: () => GetKnowledgeBaseResponseSchema,
             },
             400: {
               body: genericErrorResponse,

@@ -324,6 +324,17 @@ export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
 });
+export const GetKnowledgeBaseResponseSchema = schema.object({
+  package_name: schema.string(),
+  version: schema.string(),
+  installed_at: schema.string(),
+  knowledge_base_content: schema.arrayOf(
+    schema.object({
+      filename: schema.string(),
+      content: schema.string(),
+    })
+  ),
+});
 
 export const UpdatePackageResponseSchema = schema.object({
   item: GetPackageInfoSchema,
@@ -500,6 +511,11 @@ export const GetInfoRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     full: schema.maybe(schema.boolean()),
     withMetadata: schema.boolean({ defaultValue: false }),
+  }),
+};
+export const GetKnowledgeBaseRequestSchema = {
+  query: schema.object({
+    pkgName: schema.string(),
   }),
 };
 
