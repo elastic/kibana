@@ -87,11 +87,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
   }
 
   async get() {
-    const id = this.getSavedObjectId();
-    const so = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
-      privilegeMonitoringTypeName,
-      id
-    );
+    const so = await this.maybeGet();
 
     if (!so) {
       return {
@@ -101,6 +97,20 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     }
 
     return so.attributes;
+  }
+
+  async maybeGet() {
+    try {
+      return this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
+        privilegeMonitoringTypeName,
+        this.getSavedObjectId()
+      );
+    } catch (e) {
+      if (e.output && e.output.statusCode === 404) {
+        return undefined;
+      }
+      throw e;
+    }
   }
 
   async getStatus() {
