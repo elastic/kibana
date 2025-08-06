@@ -25,7 +25,6 @@
     "@kbn/onechat-common",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-security-server",
-    "@kbn/inference-common",
     "@kbn/logging-mocks",
     "@kbn/zod",
     "@kbn/inference-langchain",
