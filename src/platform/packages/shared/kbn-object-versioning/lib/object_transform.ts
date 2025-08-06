@@ -57,7 +57,7 @@ const getTransformFns = <I = unknown, O = unknown>(
   let fn: ObjectTransform<I, O> | undefined;
   if (to > from) {
     while (i <= to) {
-      fn = migrationDefinition[i]?.up;
+      fn = migrationDefinition[i].up;
       if (fn) {
         fns.push(fn);
       }
@@ -65,7 +65,7 @@ const getTransformFns = <I = unknown, O = unknown>(
     }
   } else if (to < from) {
     while (i >= to) {
-      fn = migrationDefinition[i]?.down;
+      fn = migrationDefinition[i].down;
       if (fn) {
         fns.push(fn);
       }
@@ -140,7 +140,7 @@ export const initTransform =
 
           const targetVersion = getVersion(to);
 
-          if (!migrationDefinition[targetVersion]) {
+          if (!migrationDefinition[targetVersion] || requestVersion < 1) {
             return {
               error: new Error(`Invalid version to up transform to [${to}].`),
               value: null,
@@ -168,7 +168,7 @@ export const initTransform =
         { validate = true }: { validate?: boolean } = {}
       ) => {
         try {
-          if (!migrationDefinition[requestVersion]) {
+          if (!migrationDefinition[requestVersion] || requestVersion < 1) {
             return {
               error: new Error(`Invalid version to down transform to [${requestVersion}].`),
               value: null,
@@ -178,14 +178,14 @@ export const initTransform =
           const fromVersion = getVersion(from);
 
           // Only allow missing from definition for initial versioning (i.e. v0 → v1)
-          if (!migrationDefinition[fromVersion] && fromVersion !== 0) {
+          if (!migrationDefinition[fromVersion]) {
             return {
               error: new Error(`Invalid version to down transform from [${from}].`),
               value: null,
             };
           }
 
-          if (validate && fromVersion !== 0) {
+          if (validate) {
             const error = validateFn(obj, fromVersion);
             if (error) {
               return { error, value: null };
