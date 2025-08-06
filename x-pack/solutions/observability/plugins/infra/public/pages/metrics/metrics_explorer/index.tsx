@@ -109,6 +109,10 @@ const MetricsExplorerContent = () => {
     }
   }, [isLoading, data, timeRange.from, timeRange.to, onPageReady]);
 
+  const onFilter = (query: string) => {
+    handleFilterQuerySubmit({ query: { query, language: 'kuery' } });
+  };
+
   return (
     <InfraPageTemplate
       onboardingFlow={OnboardingFlow.Infra}
@@ -156,7 +160,7 @@ const MetricsExplorerContent = () => {
           options={options}
           chartOptions={chartOptions}
           onLoadMore={handleLoadMore}
-          onFilter={handleFilterQuerySubmit}
+          onFilter={onFilter}
           onRefetch={refresh}
           onTimeChange={handleTimeChange}
         />

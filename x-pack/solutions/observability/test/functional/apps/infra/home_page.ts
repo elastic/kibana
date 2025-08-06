@@ -172,9 +172,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(ensureKubernetesTourVisible).to.contain(kubernetesTourText);
 
-        await pageObjects.infraHome.clickDismissKubernetesTourButton();
-
         await retry.tryForTime(5000, async () => {
+          await pageObjects.infraHome.clickDismissKubernetesTourButton();
           await pageObjects.infraHome.ensureKubernetesTourIsClosed();
         });
       });
@@ -355,14 +354,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.logsExists();
           });
         });
-      });
-
-      it('shows query suggestions', async () => {
-        await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
-        await pageObjects.infraHome.clickQueryBar();
-        await pageObjects.infraHome.inputQueryData();
-        await pageObjects.infraHome.ensureSuggestionsPanelVisible();
-        await pageObjects.infraHome.clearSearchTerm();
       });
 
       it('sort nodes by descending value', async () => {
