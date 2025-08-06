@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getConnectorList } from '@kbn/wc-genai-utils';
 import type { ListConnectorsResponse } from '../../common/http_api/connectors';
 import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
@@ -25,13 +24,8 @@ export const registerConnectorRoutes = ({ logger, router, core }: RouteDependenc
       validate: false,
     },
     wrapHandler(async (ctx, request, res) => {
-      const [, startDeps] = await core.getStartServices();
-      const { actions } = startDeps;
-
-      const connectors = await getConnectorList({
-        request,
-        actions,
-      });
+      const [, { inference }] = await core.getStartServices();
+      const connectors = await inference.getConnectorList(request);
 
       return res.ok<ListConnectorsResponse>({
         body: { connectors },

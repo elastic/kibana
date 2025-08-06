@@ -6,7 +6,6 @@
  */
 
 import type { ModelProvider } from '@kbn/wc-framework-types-server';
-import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -32,8 +31,7 @@ export const createModelProviderFactory =
   async ({ request, defaultConnectorId }) => {
     let connectorId = defaultConnectorId;
     if (!connectorId) {
-      const connectors = await getConnectorList({ actions, request });
-      const defaultConnector = getDefaultConnector({ connectors });
+      const defaultConnector = await inference.getDefaultConnector(request);
       connectorId = defaultConnector.connectorId;
     }
 

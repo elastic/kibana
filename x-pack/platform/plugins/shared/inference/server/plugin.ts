@@ -12,7 +12,6 @@ import {
   InferenceClient,
   aiAnonymizationSettings,
   AnonymizationSettings,
-  getConnectorList,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
@@ -28,6 +27,8 @@ import {
   InferenceStartDependencies,
 } from './types';
 import { uiSettings } from '../common/ui_settings';
+import { getConnectorList } from './util/get_connector_list';
+import { getDefaultConnector } from './util/get_default_connector';
 
 export class InferencePlugin
   implements
@@ -113,6 +114,9 @@ export class InferencePlugin
 
       getConnectorList: async (request: KibanaRequest) => {
         return getConnectorList({ actions: pluginsStart.actions, request });
+      },
+      getDefaultConnector: async (request: KibanaRequest) => {
+        return getDefaultConnector({ actions: pluginsStart.actions, request });
       },
     };
   }

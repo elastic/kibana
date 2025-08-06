@@ -4,6 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { getConnectorList } from './get_connector_list';
-export { getDefaultConnector } from './get_default_connector';

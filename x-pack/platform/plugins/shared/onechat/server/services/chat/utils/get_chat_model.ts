@@ -11,7 +11,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { getConnectorList, getDefaultConnector } from '../../runner/utils';
 
 export const getChatModel$ = ({
   connectorId,
@@ -29,8 +28,7 @@ export const getChatModel$ = ({
   return defer(async () => {
     let selectedConnectorId = connectorId;
     if (!selectedConnectorId) {
-      const connectors = await getConnectorList({ actions, request });
-      const defaultConnector = getDefaultConnector({ connectors });
+      const defaultConnector = await inference.getDefaultConnector(request);
       selectedConnectorId = defaultConnector.connectorId;
     }
     span?.setAttribute('elastic.connector.id', selectedConnectorId);
