@@ -99,7 +99,13 @@ function CreateAnnotation({
   let flyout;
   if (isCreateAnnotationsOpen) {
     flyout = (
-      <EuiFlyoutResizable onClose={onCancel} type="push" size="s" maxWidth={700} aria-labelledby={flyoutTitleId}>
+      <EuiFlyoutResizable
+        onClose={onCancel}
+        type="push"
+        size="s"
+        maxWidth={700}
+        aria-labelledby={flyoutTitleId}
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle>
             <h2 id={flyoutTitleId}>
