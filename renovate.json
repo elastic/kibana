@@ -4514,25 +4514,6 @@
       "enabled": true
     },
     {
-      "groupName": "set-value",
-      "matchDepNames": [
-        "set-value",
-        "@types/set-value"
-      ],
-      "reviewers": [
-        "team:visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
-      ],
-      "enabled": true
-    },
-    {
       "groupName": "Serve swagger docs",
       "matchDepNames": [
         "@types/express",
