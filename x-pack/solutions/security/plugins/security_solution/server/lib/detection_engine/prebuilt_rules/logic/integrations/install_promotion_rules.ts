@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { IPrebuiltRuleAssetsClient } from '../rule_assets/prebuilt_rule_assets_client';
@@ -19,6 +20,7 @@ import { getErrorMessage } from '../../../../../utils/error_helpers';
 import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
 import { AI_FOR_SOC_INTEGRATIONS, PROMOTION_RULE_TAGS } from '../../../../../../common/constants';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
+import { getFleetPackageInstallation } from './get_fleet_package_installation';
 
 interface InstallPromotionRulesParams {
   rulesClient: RulesClient;
@@ -26,6 +28,7 @@ interface InstallPromotionRulesParams {
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
   ruleObjectsClient: IPrebuiltRuleObjectsClient;
   fleetServices: EndpointInternalFleetServicesInterface;
+  logger: Logger;
 }
 
 /**
@@ -48,6 +51,7 @@ export async function installPromotionRules({
   ruleAssetsClient,
   ruleObjectsClient,
   fleetServices,
+  logger,
 }: InstallPromotionRulesParams): Promise<RuleBootstrapResults> {
   // Get the list of installed integrations
   const installedIntegrations = new Set(
@@ -58,7 +62,11 @@ export async function installPromotionRules({
           // IA4SOC integrations are agentless (don't require setting up an
           // integration policy). So the fact that the corresponding package is
           // installed is enough.
-          const installation = await fleetServices.packages.getInstallation(integration);
+          const installation = await getFleetPackageInstallation(
+            fleetServices,
+            integration,
+            logger
+          );
           return installation ? integration : [];
         })
       )
