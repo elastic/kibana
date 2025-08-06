@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { Fields } from '@elastic/elasticsearch/lib/api/types';
+import { Fields, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { type ElasticsearchClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { parse } from '@kbn/datemath';
+import { dateRangeQuery } from '@kbn/es-query';
 
 interface RetrieveFieldCapsProps {
   esClient: ElasticsearchClient;
@@ -24,16 +27,13 @@ export async function retrieveFieldCaps({
   from,
 }: RetrieveFieldCapsProps) {
   // Build index_filter for time range if provided
-  let indexFilter: any;
+  let indexFilter: QueryDslQueryContainer | undefined;
   if (from && to) {
-    indexFilter = {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-        },
-      },
-    };
+    const start = parse(from);
+    const end = parse(to, { roundUp: true });
+    if (start && end) {
+      indexFilter = dateRangeQuery(start.valueOf(), end.valueOf(), '@timestamp')[0];
+    }
   }
   // First, resolve the index pattern to get data streams
   const resolveResponse = await esClient.indices.resolveIndex({
@@ -58,18 +58,18 @@ export async function retrieveFieldCaps({
         index_filter: indexFilter,
         types: [
           // Numeric types for metrics
-          'long',
-          'integer',
-          'short',
-          'byte',
-          'double',
-          'float',
-          'half_float',
-          'scaled_float',
-          'unsigned_long',
-          'histogram',
+          ES_FIELD_TYPES.LONG,
+          ES_FIELD_TYPES.INTEGER,
+          ES_FIELD_TYPES.SHORT,
+          ES_FIELD_TYPES.BYTE,
+          ES_FIELD_TYPES.DOUBLE,
+          ES_FIELD_TYPES.FLOAT,
+          ES_FIELD_TYPES.HALF_FLOAT,
+          ES_FIELD_TYPES.SCALED_FLOAT,
+          ES_FIELD_TYPES.UNSIGNED_LONG,
+          ES_FIELD_TYPES.HISTOGRAM,
           // String types for dimensions
-          'keyword',
+          ES_FIELD_TYPES.KEYWORD,
         ],
       });
 
@@ -79,10 +79,7 @@ export async function retrieveFieldCaps({
       };
     } catch {
       // Error handling for field caps fetch
-      return {
-        dataStreamName: dataStream.name,
-        fieldCaps: {},
-      };
+      return undefined;
     }
   });
 

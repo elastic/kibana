@@ -10,7 +10,7 @@ import { getMetricFields } from '../../lib/get_metric_fields';
 import { createRoute } from '../create_route';
 
 export const fieldsApi = createRoute({
-  endpoint: 'GET /internal/metricsExperience/fields',
+  endpoint: 'GET /internal/metrics_experience/fields',
   security: { authz: { requiredPrivileges: ['read'] } },
   params: z.object({
     query: z.object({

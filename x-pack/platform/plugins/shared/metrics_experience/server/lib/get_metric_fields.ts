@@ -11,7 +11,10 @@ import { type MetricField } from '../types';
 import { deduplicateFields } from './deduplicate_fields';
 import { getEcsFieldDescriptions } from './get_ecs_field_descriptions';
 import { extractTimeSeriesFields } from './extract_time_series_fields';
-import { batchedSampleMetricDocuments } from './sample_metric_documents';
+import {
+  batchedSampleMetricDocuments,
+  SampleMetricDocumentsResults,
+} from './sample_metric_documents';
 import { extractDimensions } from './extract_dimensions';
 import { buildMetricField } from './build_data_stream_field';
 import { retrieveFieldCaps } from './retrieve_fieldcaps';
@@ -45,9 +48,11 @@ export async function getMetricFields({
 
     // Process results from each data stream
     const allFields: MetricField[] = [];
-    const allSamplingPromises: Promise<Map<string, string[]>>[] = [];
+    const allSamplingPromises: SampleMetricDocumentsResults[] = [];
 
-    for (const { dataStreamName, fieldCaps } of fieldCapsResults) {
+    for (const fieldCapResult of fieldCapsResults) {
+      if (!fieldCapResult) continue;
+      const { dataStreamName, fieldCaps } = fieldCapResult;
       if (Object.keys(fieldCaps).length === 0) continue;
 
       const timeSeriesFields = extractTimeSeriesFields(fieldCaps);
@@ -81,7 +86,14 @@ export async function getMetricFields({
       if (metricNames.length > 0) {
         // Add sampling promise for this data stream
         allSamplingPromises.push(
-          batchedSampleMetricDocuments(esClient, dataStreamName, metricNames, 500, logger)
+          batchedSampleMetricDocuments({
+            esClient,
+            indexPattern: dataStreamName,
+            metricNames,
+            batchSize: 500,
+            logger,
+            dimensionFields: allDimensions.map((field) => field.name),
+          })
         );
 
         // Store the fields with their field caps for later processing
@@ -99,13 +111,13 @@ export async function getMetricFields({
     // Merge sampling results
     const allSampledDocs = new Map<string, string[]>();
 
-    samplingResults.forEach((samplingMap) => {
-      samplingMap.forEach((value, key) => {
+    for (const samplingMap of samplingResults) {
+      for (const [key, value] of samplingMap) {
         if (!allSampledDocs.has(key)) {
           allSampledDocs.set(key, value);
         }
-      });
-    });
+      }
+    }
 
     // Pre-compute all unique dimension field combinations to avoid repeated extraction
     const uniqueDimensionSets = new Map<string, Array<{ name: string; type: string }>>();

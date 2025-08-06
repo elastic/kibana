@@ -6,21 +6,23 @@
  */
 
 import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import { FILTER_OUT_EXACT_FIELDS_FOR_CONTENT } from '@kbn/discover-utils';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 export function extractTimeSeriesFields(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>
 ) {
   const numericTypes = [
-    'long',
-    'integer',
-    'short',
-    'byte',
-    'double',
-    'float',
-    'half_float',
-    'scaled_float',
-    'unsigned_long',
-    'histogram',
+    ES_FIELD_TYPES.LONG,
+    ES_FIELD_TYPES.INTEGER,
+    ES_FIELD_TYPES.SHORT,
+    ES_FIELD_TYPES.BYTE,
+    ES_FIELD_TYPES.DOUBLE,
+    ES_FIELD_TYPES.FLOAT,
+    ES_FIELD_TYPES.HALF_FLOAT,
+    ES_FIELD_TYPES.SCALED_FLOAT,
+    ES_FIELD_TYPES.UNSIGNED_LONG,
+    ES_FIELD_TYPES.HISTOGRAM,
   ];
 
   const timeSeriesFields: Array<{
@@ -31,7 +33,7 @@ export function extractTimeSeriesFields(
   }> = [];
 
   for (const [fieldName, fieldInfo] of Object.entries(fields)) {
-    if (fieldName === '_doc_count' || fieldName.startsWith('_')) continue;
+    if (FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(fieldName)) continue;
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
       // Check for time series metrics (numeric fields with time_series_metric)
