@@ -94,6 +94,6 @@ export function useJobSelectionFlyout() {
         }
       });
     },
-    [services, overlays, applyTimeRangeConfig, setApplyTimeRangeConfig]
+    [services, overlays, applyTimeRangeConfig, setApplyTimeRangeConfig, flyoutTitleId]
   );
 }
