@@ -46,7 +46,7 @@ export interface SLOPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
-  cases: CasesServerSetup;
+  cases?: CasesServerSetup;
 }
 
 export interface SLOPluginStartDependencies {
@@ -56,5 +56,5 @@ export interface SLOPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;
-  cases: CasesServerStart;
+  cases?: CasesServerStart;
 }

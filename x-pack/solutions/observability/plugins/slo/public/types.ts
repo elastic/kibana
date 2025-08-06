@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { CasesPublicStart, type CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -18,6 +19,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -34,6 +36,7 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { DefaultClientOptions, RouteRepositoryClient } from '@kbn/server-route-repository-client';
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -48,9 +51,6 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
 
@@ -70,6 +70,7 @@ export interface SLOPublicPluginsSetup {
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  cases?: CasesPublicSetup;
 }
 
 export interface SLOPublicPluginsStart {
