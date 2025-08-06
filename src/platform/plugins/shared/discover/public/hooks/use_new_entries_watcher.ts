@@ -10,6 +10,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { useIsEsqlMode } from '../application/main/hooks/use_is_esql_mode';
 import { useDiscoverServices } from './use_discover_services';
 
 const POLL_INTERVAL = 10000; // every 10 seconds
@@ -33,9 +34,10 @@ export function useNewEntriesWatcher({
   const interval = useRef<NodeJS.Timeout>();
   const services = useDiscoverServices();
   const { data } = services;
+  const isEsqlMode = useIsEsqlMode();
 
   useEffect(() => {
-    if (!timefilter.getTime().to.endsWith('now') || lastLoadedTimestamp === 0) return;
+    if (!timefilter.getTime().to.endsWith('now') || lastLoadedTimestamp === 0 || isEsqlMode) return;
 
     async function checkForUpdates() {
       // Query for latest timestamp
@@ -80,7 +82,6 @@ export function useNewEntriesWatcher({
           .toPromise();
         // Fix: Check if hits.total is a number or object
         const totalHits = countResp?.rawResponse.hits.total;
-        console.log('Total hits:', totalHits);
         const totalHitsValue = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
         setCount(totalHitsValue);
       } else {
@@ -90,7 +91,7 @@ export function useNewEntriesWatcher({
 
     interval.current = setInterval(checkForUpdates, POLL_INTERVAL);
     return () => clearInterval(interval.current!);
-  }, [lastLoadedTimestamp, query, dataView, timeField, timefilter, data.search]);
+  }, [lastLoadedTimestamp, query, dataView, timeField, timefilter, data.search, isEsqlMode]);
 
   // Optionally reset
   function reset() {
