@@ -18,17 +18,64 @@ export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
   return hashed;
 }
 
-// this hashing function has same output as fnv-plus
+// this hashing function is the same as fnv-plus
 function fnv1a32(str: string): number {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < str.length; i++) {
-    // eslint-disable-next-line no-bitwise
-    hash ^= str.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-    // eslint-disable-next-line no-bitwise
-    hash >>>= 0; // Convert to unsigned 32-bit integer
+  /* eslint-disable no-bitwise */
+  let i;
+  const l = str.length - 3;
+  let t0 = 0;
+  let v0 = 0x9dc5;
+  let t1 = 0;
+  let v1 = 0x811c;
+
+  for (i = 0; i < l; ) {
+    v0 ^= str.charCodeAt(i++);
+    t0 = v0 * 403;
+    t1 = v1 * 403;
+
+    t1 += v0 << 8;
+
+    v1 = (t1 + (t0 >>> 16)) & 65535;
+
+    v0 = t0 & 65535;
+
+    v0 ^= str.charCodeAt(i++);
+    t0 = v0 * 403;
+    t1 = v1 * 403;
+
+    t1 += v0 << 8;
+
+    v1 = (t1 + (t0 >>> 16)) & 65535;
+
+    v0 = t0 & 65535;
+
+    v0 ^= str.charCodeAt(i++);
+    t0 = v0 * 403;
+    t1 = v1 * 403;
+
+    t1 += v0 << 8;
+
+    v1 = (t1 + (t0 >>> 16)) & 65535;
+
+    v0 = t0 & 65535;
+    v0 ^= str.charCodeAt(i++);
+    t0 = v0 * 403;
+    t1 = v1 * 403;
+    t1 += v0 << 8;
+    v1 = (t1 + (t0 >>> 16)) & 65535;
+    v0 = t0 & 65535;
   }
-  return hash;
+
+  while (i < l + 3) {
+    v0 ^= str.charCodeAt(i++);
+    t0 = v0 * 403;
+    t1 = v1 * 403;
+    t1 += v0 << 8;
+    v1 = (t1 + (t0 >>> 16)) & 65535;
+    v0 = t0 & 65535;
+  }
+
+  return ((v1 << 16) >>> 0) + v0;
 }
 
 export function appendHash(hash: string, value: string) {
