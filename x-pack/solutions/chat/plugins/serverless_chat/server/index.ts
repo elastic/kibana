@@ -17,3 +17,6 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ServerlessChatPluginSetup, ServerlessChatPluginStart } from './types';
+
+// test
+// commit
