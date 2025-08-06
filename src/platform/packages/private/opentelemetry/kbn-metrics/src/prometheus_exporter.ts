@@ -14,9 +14,23 @@ import {
 } from '@opentelemetry/exporter-prometheus';
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 
+/**
+ * Prometheus exporter for OpenTelemetry with a custom extension to collect the metrics whenever
+ * the Prometheus HTTP endpoint is called.
+ *
+ * The Prometheus HTTP endpoint is registered in the plugin monitoringCollection.
+ * @privateRemarks x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts
+ */
 export class PrometheusExporter extends metrics.MetricReader {
+  /**
+   * The singleton PrometheusExporter instance.
+   * @private
+   */
   static #instance?: PrometheusExporter;
 
+  /**
+   * Gets the singleton PrometheusExporter instance.
+   */
   static get() {
     if (!this.#instance) {
       this.#instance = new PrometheusExporter();
@@ -24,6 +38,10 @@ export class PrometheusExporter extends metrics.MetricReader {
     return this.#instance;
   }
 
+  /**
+   * Destroys the singleton PrometheusExporter instance.
+   * @privateRemarks Mostly used for testing purposes because the same exporter cannot be reassigned to new MetricsProvider.
+   */
   static destroy() {
     this.#instance?.shutdown();
     this.#instance = undefined;
@@ -41,20 +59,32 @@ export class PrometheusExporter extends metrics.MetricReader {
     this.serializer = new PrometheusSerializer(this.prefix, this.appendTimestamp);
   }
 
+  /**
+   * Forces the AggregationTemporality to be CUMULATIVE (as required by the Prometheus format).
+   */
   selectAggregationTemporality(): metrics.AggregationTemporality {
     return metrics.AggregationTemporality.CUMULATIVE;
   }
 
+  /**
+   * Implementation of the MetricReader interface onForceFlush (noop).
+   * @protected
+   */
   protected onForceFlush(): Promise<void> {
     return Promise.resolve(undefined);
   }
 
+  /**
+   * Implementation of the MetricReader interface onShutdown (noop).
+   * @protected
+   */
   protected onShutdown(): Promise<void> {
     return Promise.resolve(undefined);
   }
 
   /**
    * Responds to incoming message with current state of all metrics.
+   * @param res {@link KibanaResponseFactory}
    */
   public async exportMetrics(res: KibanaResponseFactory) {
     try {
