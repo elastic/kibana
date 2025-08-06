@@ -52,4 +52,5 @@ export type {
   ExitConditionBranchNodeSchema,
   EnterForeachNode,
   ExitForeachNode,
+  AtomicGraphNode,
 } from './execution';
