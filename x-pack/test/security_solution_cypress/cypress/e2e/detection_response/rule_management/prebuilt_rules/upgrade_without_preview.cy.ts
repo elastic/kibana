@@ -566,8 +566,7 @@ describe(
           rulePatches: [],
           newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
         });
-        const isServerless = Cypress.env(IS_SERVERLESS);
-        login(isServerless ? ROLES.t1_analyst : ROLES.reader);
+        login(ROLES.reader);
         visitRulesUpgradeTable();
         waitForPageTitleToBeShown();
 
