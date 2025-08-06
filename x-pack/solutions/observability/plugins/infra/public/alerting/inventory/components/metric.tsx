@@ -26,6 +26,7 @@ import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 import { HOST_METRICS_DOC_HREF } from '../../../common/visualizations';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -89,6 +90,13 @@ const aggregationOptions = SNAPSHOT_CUSTOM_AGGREGATIONS.map((k) => ({
   value: k,
 }));
 
+const firstFieldOption = {
+  text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.metric.selectFieldLabel', {
+    defaultMessage: 'Select a metric',
+  }),
+  value: '',
+};
+
 export const MetricExpression = ({
   metric,
   metrics,
@@ -99,19 +107,11 @@ export const MetricExpression = ({
   popupPosition,
   nodeType,
 }: Props) => {
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [popoverOpen, { toggle: togglePopover }] = useBoolean(false);
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
   const { metricsView } = useMetricsDataViewContext();
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const firstFieldOption = {
-    text: i18n.translate('xpack.infra.metrics.alertFlyout.expression.metric.selectFieldLabel', {
-      defaultMessage: 'Select a metric',
-    }),
-    value: '',
-  };
 
   const fieldOptions = useMemo(
     () =>
@@ -125,7 +125,7 @@ export const MetricExpression = ({
     return customMetricTabOpen
       ? customMetric?.field && getCustomMetricLabel(customMetric)
       : metric?.text || firstFieldOption.text;
-  }, [customMetricTabOpen, metric, customMetric, firstFieldOption]);
+  }, [customMetricTabOpen, metric, customMetric]);
 
   const onChangeTab = useCallback(
     (id: string) => {
@@ -213,21 +213,17 @@ export const MetricExpression = ({
           value={expressionDisplayValue}
           // @ts-expect-error upgrade typescript v5.1.6
           isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
-          onClick={() => {
-            setPopoverOpen(true);
-          }}
+          onClick={togglePopover}
           color={errors.metric?.length ? 'danger' : 'success'}
         />
       }
       isOpen={popoverOpen}
-      closePopover={() => {
-        setPopoverOpen(false);
-      }}
+      closePopover={togglePopover}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
-      <div style={{ width: 620 }}>
-        <ClosablePopoverTitle onClose={() => setPopoverOpen(false)}>
+      <div style={{ width: 620 }} onBlur={togglePopover}>
+        <ClosablePopoverTitle onClose={togglePopover}>
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.expression.metric.popoverTitle"
             defaultMessage="Metric"
@@ -257,6 +253,9 @@ export const MetricExpression = ({
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    aria-label={i18n.translate('xpack.infra.metricExpression.select.ariaLabel', {
+                      defaultMessage: 'Select a field',
+                    })}
                     data-test-subj="infraMetricExpressionSelect"
                     onChange={onAggregationChange}
                     value={customMetric?.aggregation || 'avg'}
@@ -275,6 +274,10 @@ export const MetricExpression = ({
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiComboBox
+                    aria-label={i18n.translate(
+                      'xpack.infra.metricExpression.selectafieldComboBox.ariaLabel',
+                      { defaultMessage: 'Select a field' }
+                    )}
                     fullWidth
                     placeholder={i18n.translate(
                       'xpack.infra.waffle.customMetrics.fieldPlaceholder',
@@ -338,6 +341,9 @@ export const MetricExpression = ({
               )}
               <EuiFlexItem className="actOf__metricContainer">
                 <EuiComboBox
+                  aria-label={i18n.translate('xpack.infra.metricExpression.comboBox.ariaLabel', {
+                    defaultMessage: 'Select a metric',
+                  })}
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   data-test-subj="availableFieldsOptionsComboBox"

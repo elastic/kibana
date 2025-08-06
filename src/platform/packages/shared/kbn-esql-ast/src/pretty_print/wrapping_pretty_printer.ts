@@ -506,13 +506,6 @@ export class WrappingPrettyPrinter {
       return { txt, indented };
     })
 
-    .on('visitTimeIntervalLiteralExpression', (ctx, inp: Input): Output => {
-      const formatted = LeafPrinter.timeInterval(ctx.node);
-      const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
-
-      return { txt, indented };
-    })
-
     .on('visitInlineCastExpression', (ctx, inp: Input): Output => {
       const value = ctx.value();
       const wrapInBrackets =

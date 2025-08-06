@@ -565,6 +565,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/chrome_service.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/root/browser-internal/src/core_system.ts"
               },
               {
@@ -628,10 +632,6 @@
                 "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
@@ -670,6 +670,10 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -758,6 +762,10 @@
               {
                 "plugin": "datasetQuality",
                 "path": "x-pack/platform/plugins/shared/dataset_quality/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_report_error.ts"
               },
               {
                 "plugin": "osquery",
@@ -2122,12 +2130,12 @@
                 "path": "x-pack/platform/plugins/shared/licensing/common/register_analytics_context_provider.ts"
               },
               {
-                "plugin": "spaces",
-                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/register_analytics_context.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/plugin.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/analytics/register_analytics_context.ts"
               },
               {
                 "plugin": "security",

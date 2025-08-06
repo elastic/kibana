@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { BehaviorSubject } from 'rxjs';
@@ -45,7 +44,6 @@ import {
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
 }
@@ -94,13 +92,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-            share: shareStart,
-            cloud: cloudStart,
-          },
+          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart },
         ] = await core.getStartServices();
 
         setServices({
@@ -124,7 +116,6 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
           cloudStart,
           overlays: coreStart.overlays,

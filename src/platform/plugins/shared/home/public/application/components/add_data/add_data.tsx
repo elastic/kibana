@@ -40,7 +40,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, guidedOnboardingService } = getServices();
+  const { trackUiMetric } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -99,9 +99,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    // when guided onboarding is disabled, this button is primary
-                    // otherwise it's secondary, because there is a "guided onboarding" button
-                    fill={!guidedOnboardingService?.isEnabled}
+                    fill={true}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {
