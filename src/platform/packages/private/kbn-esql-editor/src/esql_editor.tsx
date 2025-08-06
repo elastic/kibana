@@ -137,7 +137,6 @@ const ESQLEditorInternal = function ESQLEditor({
     uiSettings,
     uiActions,
     data,
-    config: { isDevMode },
   } = kibana.services;
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
@@ -873,7 +872,6 @@ const ESQLEditorInternal = function ESQLEditor({
                   options={codeEditorOptions}
                   width="100%"
                   suggestionProvider={suggestionProvider}
-                  isDevMode={isDevMode}
                   hoverProvider={{
                     provideHover: (model, position, token) => {
                       if (!hoverProvider?.provideHover) {

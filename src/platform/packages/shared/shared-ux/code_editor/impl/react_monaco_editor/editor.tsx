@@ -102,11 +102,6 @@ export interface MonacoEditorProps {
   options?: monacoEditor.editor.IStandaloneEditorConstructionOptions;
 
   /**
-   * Whether the editor is running in development mode. Defaults to false.
-   */
-  isDevMode?: boolean;
-
-  /**
    * An event emitted before the editor mounted (similar to componentWillMount of React).
    */
   editorWillMount?: EditorWillMount;
@@ -138,7 +133,6 @@ export function MonacoEditor({
   language = 'javascript',
   theme,
   options,
-  isDevMode = false,
   editorWillMount,
   editorDidMount,
   editorWillUnmount,
@@ -168,6 +162,8 @@ export function MonacoEditor({
     }),
     [fixedWidth, fixedHeight]
   );
+
+  const isDevMode = process.env.NODE_ENV !== 'production';
 
   const handleEditorWillMount = () => {
     const finalOptions = editorWillMount?.(monaco);

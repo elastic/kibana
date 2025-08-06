@@ -32,9 +32,6 @@ interface ServiceDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql: EsqlPluginStart;
-  config: {
-    isDevMode: boolean;
-  };
 }
 
 const servicesReady$ = new BehaviorSubject<ServiceDeps | undefined>(undefined);
@@ -58,7 +55,6 @@ export const setKibanaServices = (
   expressions: ExpressionsStart,
   storage: Storage,
   uiActions: UiActionsStart,
-  isDevMode: boolean,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
   usageCollection?: UsageCollectionStart
@@ -75,8 +71,5 @@ export const setKibanaServices = (
     fieldsMetadata,
     usageCollection,
     esql,
-    config: {
-      isDevMode,
-    },
   });
 };

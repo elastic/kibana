@@ -55,7 +55,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       application,
     },
     docLinkVersion,
-    config: { isDevMode },
   } = context;
   const { toasts } = notifications;
   const {
@@ -271,7 +270,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
-        isDevMode={isDevMode}
       />
     </div>
   );

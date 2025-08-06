@@ -110,11 +110,6 @@ export interface CodeEditorProps {
   codeActions?: monaco.languages.CodeActionProvider;
 
   /**
-   * Whether the editor is running in development mode. Defaults to false.
-   */
-  isDevMode?: boolean;
-
-  /**
    * Function called before the editor is mounted in the view
    */
   editorWillMount?: () => void;
@@ -226,7 +221,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   placeholder,
   languageConfiguration,
   codeActions,
-  isDevMode = false,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
@@ -625,7 +619,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               onChange={onChange}
               width={isFullScreen ? '100vw' : width}
               height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
-              isDevMode={isDevMode}
               editorWillMount={_editorWillMount}
               editorDidMount={_editorDidMount}
               editorWillUnmount={_editorWillUnmount}

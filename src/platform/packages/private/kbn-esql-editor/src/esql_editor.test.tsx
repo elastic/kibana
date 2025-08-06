@@ -51,7 +51,6 @@ describe('ESQLEditor', () => {
     },
     core: corePluginMock,
     data: dataPluginMock.createStartContract(),
-    config: { isDevMode: false },
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
