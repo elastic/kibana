@@ -27,6 +27,7 @@ import {
   FetchAnonymizationFields,
   useFetchAnonymizationFields,
 } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { welcomeConvo } from '../mock/conversation';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -40,15 +41,12 @@ jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 jest.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
 const fullWelcomeConversation = {
+  ...welcomeConvo,
   id: 'welcome_id',
-  title: 'Welcome',
-  category: 'assistant',
-  messages: [],
   apiConfig,
-  replacements: {},
-  updatedAt: '2024-09-10T22:07:44.915Z',
 };
 const fullSheepConversation = {
+  ...welcomeConvo,
   id: 'electric_sheep_id',
   title: 'electric sheep',
   category: 'assistant',
@@ -196,8 +194,13 @@ describe('Assistant', () => {
       });
     });
     it('should refetchCurrentUserConversations after clear chat history button click', async () => {
+      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
+      (useConversation as jest.Mock).mockReturnValue({
+        ...mockUseConversation,
+        getConversation,
+      });
       await renderAssistant();
-      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('conversation-settings-menu'));
       fireEvent.click(screen.getByTestId('clear-chat'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
       await waitFor(() => {

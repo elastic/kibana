@@ -114,6 +114,11 @@ export const AssistantHeader: React.FC<Props> = ({
     [onConversationSelected]
   );
 
+  const isNewConversation = useMemo(
+    () => !selectedConversation || selectedConversation.id === '',
+    [selectedConversation]
+  );
+
   return (
     <>
       <FlyoutNavigation
@@ -166,7 +171,7 @@ export const AssistantHeader: React.FC<Props> = ({
           <EuiFlexItem
             css={css`
               overflow: hidden;
-              min-width: 200px;
+              min-width: 160px;
             `}
           >
             <EuiFlexGroup alignItems={'center'} justifyContent="flexStart" gutterSize="s">
@@ -190,13 +195,15 @@ export const AssistantHeader: React.FC<Props> = ({
                 )}
               </EuiFlexItem>
 
-              <EuiFlexItem grow={false}>
-                <ShareBadge
-                  isConversationOwner={isConversationOwner}
-                  selectedConversation={selectedConversation}
-                  refetchCurrentConversation={refetchCurrentConversation}
-                />
-              </EuiFlexItem>
+              {!isNewConversation && (
+                <EuiFlexItem grow={false}>
+                  <ShareBadge
+                    isConversationOwner={isConversationOwner}
+                    selectedConversation={selectedConversation}
+                    refetchCurrentConversation={refetchCurrentConversation}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -217,16 +224,18 @@ export const AssistantHeader: React.FC<Props> = ({
                   />
                 </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
-              <EuiFlexItem data-test-subj="heyhey2">
-                <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
-                  <ConversationSettingsMenu
-                    isConversationOwner={isConversationOwner}
-                    isDisabled={isDisabled}
-                    onChatCleared={onChatCleared}
-                    selectedConversation={selectedConversation}
-                  />
-                </div>
-              </EuiFlexItem>
+              {!isNewConversation && (
+                <EuiFlexItem data-test-subj="heyhey2">
+                  <div id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
+                    <ConversationSettingsMenu
+                      isConversationOwner={isConversationOwner}
+                      isDisabled={isDisabled}
+                      onChatCleared={onChatCleared}
+                      selectedConversation={selectedConversation}
+                    />
+                  </div>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem data-test-subj="heyhey3">
                 <AssistantSettingsContextMenu isDisabled={isDisabled} />
               </EuiFlexItem>

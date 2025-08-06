@@ -64,7 +64,6 @@ const ShareBadgeComponent: React.FC<Props> = ({
     [isConversationOwner, isShared]
   );
   const onSharedChange = () => {
-    console.log('change');
     setIsModalOpen(true);
     setIsPopoverOpen(false);
   };

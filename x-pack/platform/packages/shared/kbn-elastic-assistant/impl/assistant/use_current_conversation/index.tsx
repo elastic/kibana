@@ -12,7 +12,7 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import { User, ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
@@ -26,6 +26,7 @@ export interface Props {
   allSystemPrompts: PromptResponse[];
   connectors?: AIConnector[];
   currentAppId?: string;
+  currentUser?: User;
   lastConversation: LastConversation;
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
@@ -68,6 +69,7 @@ export const useCurrentConversation = ({
   currentAppId,
   lastConversation,
   conversations,
+  currentUser,
   spaceId,
   defaultConnector,
   mayUpdateConversations,
@@ -193,13 +195,22 @@ export const useCurrentConversation = ({
             }
           : {}),
         id: '',
+        users: [currentUser ?? {}],
+        createdBy: currentUser ?? {},
+        createdAt: new Date().toISOString(),
         messages: [],
         replacements: {},
         category: 'assistant',
         title: cTitle ?? '',
       });
     },
-    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
+    [
+      allSystemPrompts,
+      currentConversation?.apiConfig,
+      currentUser,
+      defaultConnector,
+      setLastConversation,
+    ]
   );
   useEffect(() => {
     if (defaultConnector && !currentConversation?.apiConfig && currentConversation?.id === '') {

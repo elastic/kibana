@@ -157,6 +157,7 @@ const AssistantComponent: React.FC<Props> = ({
     currentAppId,
     connectors,
     conversations,
+    currentUser,
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,

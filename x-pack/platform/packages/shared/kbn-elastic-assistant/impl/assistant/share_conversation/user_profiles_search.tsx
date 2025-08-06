@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { UserProfilesSelectable } from '@kbn/user-profile-components';
+import React, { useCallback, useState } from 'react';
+import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfile } from '@kbn/core-user-profile-common';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 
@@ -17,25 +17,29 @@ interface Props {
 
 const UserProfilesSearchComponent: React.FC<Props> = ({ onUsersSelect, selectedUsers }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentSelectedUser, setCurrentSelectedUser] = useState<UserProfile | null>(selectedUsers);
-  const { data: userProfiles, isLoading: isLoadingSuggest } = useSuggestUserProfiles({
+  const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     searchTerm,
     includeCurrentUser: false,
   });
-  console.log('userProfiles', userProfiles);
+
+  const onChange = useCallback(
+    () => (nextSelectedOptions: UserProfileWithAvatar[]) => {
+      const nextUsers: UserProfile[] = nextSelectedOptions.filter(
+        (user): user is UserProfile => user !== null
+      );
+      onUsersSelect(nextUsers);
+    },
+    [onUsersSelect]
+  );
+
   return (
     <UserProfilesSelectable
       {...{
+        isLoading,
+        onChange,
         onSearchChange: setSearchTerm,
         options: userProfiles,
         selectedOptions: selectedUsers,
-        onChange: (nextSelectedOptions) => {
-          const nextUsers: UserProfile[] = nextSelectedOptions.filter(
-            (user): user is UserProfile => user !== null
-          );
-          onUsersSelect(nextUsers);
-          console.log('nextUsers', nextUsers);
-        },
       }}
     />
   );

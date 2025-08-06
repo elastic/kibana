@@ -6,6 +6,7 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { MOCK_CURRENT_USER } from '../assistant/use_conversation/sample_conversations';
 import { ClientMessage, Conversation } from '../..';
 
 export const alertConvo: Conversation = {
@@ -30,6 +31,9 @@ export const alertConvo: Conversation = {
     '67bf8338-261a-4de6-b43e-d30b59e884a7': '192.168.0.1',
     '0b2e352b-35fc-47bd-a8d4-43019ed38a25': 'Stephs-MacBook-Pro.local',
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };
 
 export const messageWithContentReferences: ClientMessage = {
@@ -57,6 +61,9 @@ export const emptyWelcomeConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };
 
 export const conversationWithContentReferences: Conversation = {
@@ -94,4 +101,7 @@ export const customConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
+  createdBy: MOCK_CURRENT_USER,
+  users: [MOCK_CURRENT_USER],
+  createdAt: '2025-08-06T17:33:12.110Z',
 };
