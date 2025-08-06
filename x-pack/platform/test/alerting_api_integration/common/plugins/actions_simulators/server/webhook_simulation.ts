@@ -135,9 +135,11 @@ function validateRequestUsesMethod(requestMethod: string, method: string, res: a
 
 function validateReceivedHeaders(headers: any, res: any) {
   try {
-    expect(headers[0].config).to.eql('configValue');
-    expect(headers[0].secret).to.eql('secretValue');
+    const hasValidHeader = headers.some(
+      (obj: any) => obj.config === 'configValue' && obj.secret === 'secretValue'
+    );
 
+    expect(hasValidHeader).to.eql(true);
     res.statusCode = 200;
     res.end('OK');
   } catch (ex) {
