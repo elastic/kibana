@@ -13,6 +13,8 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+} from '@kbn/controls-constants';
+import {
   type ControlGroupRuntimeState,
   type ControlPanelsState,
   type DefaultDataControlState,

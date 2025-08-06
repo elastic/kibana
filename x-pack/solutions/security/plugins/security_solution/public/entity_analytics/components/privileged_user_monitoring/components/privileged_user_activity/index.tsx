@@ -17,7 +17,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { isRight } from 'fp-ts/Either';
+import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { LinkAnchor } from '../../../../../common/components/links';
@@ -69,8 +69,9 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
   const [selectedStackByOption, setSelectedStackByOption] = useState(defaultStackByOption);
   const toggleOptions = useToggleOptions();
 
-  const tableQuery = generateTableQuery && generateTableQuery('@timestamp', 'DESC', 100);
-  const discoverPath = useDiscoverPath(tableQuery && isRight(tableQuery) ? tableQuery.right : '');
+  const tableQuery = generateTableQuery('@timestamp', 'DESC', 100);
+  const getOrEmptyString = getOrElse(() => '');
+  const discoverPath = useDiscoverPath(getOrEmptyString(tableQuery));
 
   return (
     <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
@@ -84,7 +85,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
         outerDirection="column"
         hideSubtitle
       >
-        {tableQuery && isRight(tableQuery) && (
+        {isRight(tableQuery) && (
           <LinkAnchor
             href={getAppUrl({
               appId: 'discover',
@@ -126,19 +127,18 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          {generateVisualizationQuery && generateTableQuery && (
-            <EsqlDashboardPanel<TableItemType>
-              title={TITLE}
-              stackByField={selectedStackByOption.value}
-              timerange={{ from, to }}
-              getLensAttributes={getLensAttributes}
-              generateVisualizationQuery={generateVisualizationQuery}
-              generateTableQuery={generateTableQuery}
-              columns={columns}
-              pageSize={PAGE_SIZE}
-              showInspectTable={true}
-            />
-          )}
+
+          <EsqlDashboardPanel<TableItemType>
+            title={TITLE}
+            stackByField={selectedStackByOption.value}
+            timerange={{ from, to }}
+            getLensAttributes={getLensAttributes}
+            generateVisualizationQuery={generateVisualizationQuery}
+            generateTableQuery={generateTableQuery}
+            columns={columns}
+            pageSize={PAGE_SIZE}
+            showInspectTable={true}
+          />
         </>
       )}
     </EuiPanel>

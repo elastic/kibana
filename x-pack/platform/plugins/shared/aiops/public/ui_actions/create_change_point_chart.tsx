@@ -80,8 +80,9 @@ export function createAddChangePointChartAction(
                     rawState: initialState,
                   },
                 });
+                closeFlyout();
               }}
-              closeFlyout={closeFlyout}
+              onCancel={closeFlyout}
             />
           );
         },

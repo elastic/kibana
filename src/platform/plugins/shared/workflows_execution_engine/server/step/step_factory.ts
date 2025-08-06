@@ -13,7 +13,12 @@ import { StepImplementation } from './step_base';
 // Import schema and inferred types
 import { ConnectorExecutor } from '../connector_executor';
 import { ConnectorStepImpl } from './connector_step';
-import { EnterIfNodeImpl, ExitIfNodeImpl } from './if_step';
+import {
+  EnterConditionBranchNodeImpl,
+  EnterIfNodeImpl,
+  ExitIfNodeImpl,
+  ExitConditionBranchNodeImpl,
+} from './if_step';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 // Import specific step implementations
@@ -43,6 +48,10 @@ export class StepFactory {
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
         return new EnterIfNodeImpl(step as any, workflowState);
+      case 'enter-condition-branch':
+        return new EnterConditionBranchNodeImpl(workflowState);
+      case 'exit-condition-branch':
+        return new ExitConditionBranchNodeImpl(step as any, workflowState);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
