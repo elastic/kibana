@@ -42,8 +42,7 @@ import { DATAGRID_HEADER } from '../../../screens/timeline';
  *
  * */
 
-// FLAKY: https://github.com/elastic/kibana/issues/207117
-describe.skip(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`Alert Table Controls`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
