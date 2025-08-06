@@ -16,7 +16,7 @@ import type {
   ContentManagementServicesDefinition as ServicesDefinition,
   Version,
 } from '@kbn/object-versioning';
-import { getContentManagmentServicesTransforms } from '@kbn/object-versioning';
+import { getContentManagementServicesTransforms } from '@kbn/object-versioning';
 import { savedObjectSchema, objectTypeToGetResultSchema, createResultSchema } from './schema';
 
 import { coreMock } from '@kbn/core/server/mocks';
@@ -74,7 +74,7 @@ export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = 
   1: serviceDefinition,
 };
 
-const transforms = getContentManagmentServicesTransforms(cmServicesDefinition, 1);
+const transforms = getContentManagementServicesTransforms(cmServicesDefinition, 1);
 
 class TestSOContentStorage extends SOContentStorage<CMCrudTypes> {
   constructor({
