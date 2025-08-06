@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const names = result.saved_objects.map((so) => so.attributes.name);
-        expect(names).to.contain('default-monitoring-index-default');
+        expect(names).to.contain('entity_analytics.monitoring.users-default');
         expect(names).to.contain('StarWars');
         await waitForPrivMonUsersToBeSynced();
         // Check if the users are indexed
