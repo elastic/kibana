@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLLicenseType } from '@kbn/esql-types';
+
 import { uniq } from 'lodash';
 import {
   isAssignment,
@@ -140,7 +140,7 @@ export async function getFunctionArgsSuggestions(
   fullText: string,
   offset: number,
   context?: ICommandContext,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  callbacks?: ICommandCallbacks
 ): Promise<ISuggestionItem[]> {
   const astContext = findAstPosition(commands, offset);
   const node = astContext.node;
@@ -167,7 +167,10 @@ export async function getFunctionArgsSuggestions(
 
   const filteredFnDefinition = {
     ...fnDefinition,
-    signatures: filterFunctionSignatures(fnDefinition.signatures, hasMinimumLicenseRequired),
+    signatures: filterFunctionSignatures(
+      fnDefinition.signatures,
+      callbacks?.hasMinimumLicenseRequired
+    ),
   };
 
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = context?.fields || new Map();
@@ -369,7 +372,8 @@ export async function getFunctionArgsSuggestions(
                 ) as FunctionParameterType[]),
             ignored: fnToIgnore,
           },
-          hasMinimumLicenseRequired
+          callbacks?.hasMinimumLicenseRequired,
+          callbacks?.getActiveProduct
         ).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
@@ -441,7 +445,7 @@ async function getListArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
   offset: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  callbacks?: ICommandCallbacks
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -490,7 +494,7 @@ async function getListArgsSuggestions(
               userDefinedColumns: anyUserDefinedColumns,
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
-            hasMinimumLicenseRequired
+            callbacks
           ))
         );
       }
@@ -539,7 +543,7 @@ export const getInsideFunctionsSuggestions = async (
         getExpressionType: (expression) =>
           getExpressionType(expression, context?.fields, context?.userDefinedColumns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
-        hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        callbacks,
       });
     }
     if (['in', 'not in'].includes(node.name)) {
@@ -551,7 +555,7 @@ export const getInsideFunctionsSuggestions = async (
         callbacks?.getByType ?? (() => Promise.resolve([])),
         context?.fields ?? new Map(),
         cursorPosition ?? 0,
-        callbacks?.hasMinimumLicenseRequired
+        callbacks
       );
     }
     if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
@@ -563,7 +567,7 @@ export const getInsideFunctionsSuggestions = async (
         query,
         cursorPosition ?? 0,
         context,
-        callbacks?.hasMinimumLicenseRequired
+        callbacks
       );
     }
   }

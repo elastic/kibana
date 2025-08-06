@@ -283,6 +283,7 @@ async function getSuggestionsWithinCommandExpression(
           }
         : undefined,
       hasMinimumLicenseRequired,
+      getActiveProduct: callbacks?.getActiveProduct,
     },
     context,
     offset

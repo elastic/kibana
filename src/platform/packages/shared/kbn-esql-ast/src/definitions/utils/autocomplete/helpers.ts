@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type {
   ESQLSingleAstItem,
@@ -21,6 +21,7 @@ import type {
   GetColumnsByTypeFn,
   ESQLUserDefinedColumn,
   ICommandContext,
+  ICommandCallbacks,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
 import {
@@ -189,7 +190,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  callbacks?: ICommandCallbacks
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -243,7 +244,8 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          hasMinimumLicenseRequired
+          callbacks?.hasMinimumLicenseRequired,
+          callbacks?.getActiveProduct
         )
       : [],
     userDefinedColumns
@@ -350,8 +352,8 @@ export async function suggestForExpression({
   location,
   preferredExpressionType,
   context,
+  callbacks,
   advanceCursorAfterInitialColumn = true,
-  hasMinimumLicenseRequired,
   ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -360,9 +362,9 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
@@ -416,7 +418,8 @@ export async function suggestForExpression({
         suggestions.push(
           ...getFunctionSuggestions(
             { location, returnTypes: ['boolean'] },
-            hasMinimumLicenseRequired
+            callbacks?.hasMinimumLicenseRequired,
+            callbacks?.getActiveProduct
           ),
           ...(await getColumnsByType('boolean', [], {
             advanceCursor: true,
@@ -468,7 +471,7 @@ export async function suggestForExpression({
           getExpressionType: (expression) =>
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
-          hasMinimumLicenseRequired,
+          callbacks,
         }))
       );
 
@@ -485,7 +488,11 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
+        ...getFunctionSuggestions(
+          { location },
+          callbacks?.hasMinimumLicenseRequired,
+          callbacks?.getActiveProduct
+        )
       );
 
       break;

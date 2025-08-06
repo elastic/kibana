@@ -214,5 +214,7 @@ export const getMockCallbacks = (): ICommandCallbacks => {
       .mockResolvedValue(expectedFields.map((name) => ({ label: name, text: name }))),
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
+    hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
+    getActiveProduct: jest.fn(() => ({ type: 'observability', tier: 'complete' })),
   };
 };
