@@ -9,34 +9,33 @@ import { getTimeline } from '../../../objects/timeline';
 import {
   LOCKED_ICON,
   PIN_EVENT,
+  TIMELINE_DATE_PICKER_CONTAINER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
-  TIMELINE_DATE_PICKER_CONTAINER,
   TIMELINE_TITLE_BY_ID,
 } from '../../../screens/timeline';
 import { TIMELINES_DESCRIPTION, TIMELINES_USERNAME } from '../../../screens/timelines';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
   addFilter,
+  addNameAndDescriptionToTimeline,
   addNameToTimelineAndSave,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createTimelineTemplateFromBottomBar,
+  executeTimelineKQL,
   expandEventAction,
   openTimelineTemplate,
-  populateTimeline,
-  addNameAndDescriptionToTimeline,
   openTimelineTemplatesTab,
 } from '../../../tasks/timeline';
 import {
-  updateTimelineDates,
-  showStartEndDate,
-  setStartDate,
   setEndDateNow,
+  setStartDate,
+  showStartEndDate,
+  updateTimelineDates,
 } from '../../../tasks/date_picker';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 import { TIMELINES_URL } from '../../../urls/navigation';
@@ -48,8 +47,7 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM_AT } from '../../../screens/search_bar';
 
 const mockTimeline = getTimeline();
 
-// FLAKY: https://github.com/elastic/kibana/issues/183579
-describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -60,7 +58,7 @@ describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     visit(TIMELINES_URL);
     createTimelineTemplateFromBottomBar();
 
-    populateTimeline();
+    executeTimelineKQL('host.name: *');
     addFilter(mockTimeline.filter);
     showStartEndDate(TIMELINE_DATE_PICKER_CONTAINER);
     setEndDateNow(TIMELINE_DATE_PICKER_CONTAINER);
