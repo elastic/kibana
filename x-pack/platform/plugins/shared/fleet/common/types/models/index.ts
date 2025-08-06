@@ -22,4 +22,4 @@ export type * from './secret';
 export * from './setup_technology';
 export type * from './fleet_setup_lock';
 export * from './remote_synced_integrations';
-export * from './cloud_connector';
+export type * from './cloud_connector';
