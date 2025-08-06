@@ -50,6 +50,8 @@ import type {
   SavedObjectsChangeAccessControlResponse,
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
 } from './apis';
 
 /**
@@ -440,26 +442,23 @@ export interface SavedObjectsClientContract {
   /**
    * Changes the ownership of one or more SavedObjects to a new owner passed in the options.
    *
-   * @param type - The type of SavedObject to update
-   * @param id - The ID of the SavedObject to update
-   * @param attributes - Attributes to update
-   * @param options {@link SavedObjectsChangeOwnershipOptions} - options for the update operation
-   * @returns the {@link SavedObjectChangeOwnershipResponse}
+   * @param objects - The objects to change ownership for
+   * @param options {@link SavedObjectsChangeAccessControlOptions} - options for the change ownership operation
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
    */
   changeOwnership(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions
+    options: SavedObjectsChangeOwnershipOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 
   /**
-   * Changes the access control of one or more SavedObjects. If no option is passed or if `accessMode`
-   * is undefined, the object will be treated as editable.
-   * @param objects - The objects to change access control for
-   * @param options {@link SavedObjectsChangeAccessControlOptions} - options for the change access control operation
-   * @returns the {@link SavedObjectsChangeAccessControlResponse}
+   * Changes the access mode of one or more SavedObjects.
+   * @param objects - The objects to change access mode for
+   * @param options {@link SavedObjectsChangeAccessModeOptions} - options for the change access mode operation
+   * @returns the {@link SavedObjectsChangeAccessModeResponse}
    */
   changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],
-    options: SavedObjectsChangeAccessControlOptions
+    options: SavedObjectsChangeAccessModeOptions
   ): Promise<SavedObjectsChangeAccessControlResponse>;
 }

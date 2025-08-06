@@ -15,8 +15,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 export class AccessControlService {
   private userForOperation: AuthenticatedUser | null = null;
 
-  constructor() {}
-
   setUserForOperation(user: AuthenticatedUser | null) {
     this.userForOperation = user;
   }
@@ -65,13 +63,10 @@ export class AccessControlService {
 
     for (const type of typesRequiringAccessControl) {
       const typeAuth = typeMap.get(type);
-
-      // If no authorization entry exists for this type, or no 'manage_access_control' privilege
-      if (!typeAuth || !typeAuth['manage_access_control' as A]) {
+      const accessControlAuth = typeAuth?.['manage_access_control' as A];
+      if (!accessControlAuth) {
         unauthorizedTypes.add(type);
       } else {
-        const accessControlAuth = typeAuth['manage_access_control' as A];
-
         // Check if user has global authorization or authorization in at least one space
         if (
           !accessControlAuth.isGloballyAuthorized &&

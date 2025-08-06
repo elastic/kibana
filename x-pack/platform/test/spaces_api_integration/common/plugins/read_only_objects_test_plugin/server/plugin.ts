@@ -7,17 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const READ_ONLY_TYPE = 'read_only_type';
 const NON_READ_ONLY_TYPE = 'non_read_only_type';
 
-interface SetupDeps {
-  features: FeaturesPluginSetup;
-}
-
-export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
-  public setup(core: CoreSetup, { features }: SetupDeps) {
+export class ReadOnlyObjectsPlugin implements Plugin {
+  public setup(core: CoreSetup) {
     core.savedObjects.registerType({
       name: READ_ONLY_TYPE,
       hidden: false,
@@ -91,7 +86,7 @@ export class ReadOnlyObjectsPlugin implements Plugin<void, void, SetupDeps> {
     );
     router.get(
       {
-        path: '/read_only_objects/get',
+        path: '/read_only_objects/_find',
         security: {
           authz: {
             enabled: false,

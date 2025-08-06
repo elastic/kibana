@@ -31,12 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: xPackAPITestsConfig.get('servers'),
     esTestCluster: {
       ...xPackAPITestsConfig.get('esTestCluster'),
-      serverArgs: [
-        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.enabled=true',
-        'xpack.security.authc.api_key.enabled=true',
-        'xpack.security.authc.token.enabled=true',
-      ],
+      serverArgs: [...xPackAPITestsConfig.get('esTestCluster.serverArgs')],
     },
 
     kbnTestServer: {
@@ -44,9 +39,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         `--plugin-path=${readOnlyObjectsPlugin}`,
-        `--xpack.security.authc.providers=${JSON.stringify({
-          basic: { basic1: { order: 0 } },
-        })}`,
       ],
     },
     security: {
@@ -58,22 +50,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             {
               base: [],
               feature: {
-                savedObjects: ['all'],
                 dev_tools: ['all'],
                 savedObjectsManagement: ['all'],
               },
               spaces: ['*'],
             },
           ],
-          elasticsearch: {
-            cluster: ['monitor'],
-            indices: [
-              {
-                names: ['.kibana*'],
-                privileges: ['read', 'write', 'create', 'delete', 'view_index_metadata'],
-              },
-            ],
-          },
         },
       },
     },
