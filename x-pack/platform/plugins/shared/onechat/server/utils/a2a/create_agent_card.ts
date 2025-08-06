@@ -56,6 +56,7 @@ export async function createAgentCard({
       url: 'https://elastic.co',
     },
     version: '0.1.0',
+    protocolVersion: '0.3.0',
     capabilities: {
       streaming: false,
       pushNotifications: false,
