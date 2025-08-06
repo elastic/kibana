@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType } from '@elastic/eui';
 
 import { MenuItem } from '../../../types';
+import { useTooltip } from '../../hooks/use_tooltip';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
@@ -26,7 +27,12 @@ export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconTy
  * Toggle button pattern: https://eui.elastic.co/docs/components/navigation/buttons/button/#toggle-button
  */
 export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemProps>(
-  ({ hasContent, iconType, id, isActive, label, ...props }, ref: ForwardedRef<HTMLDivElement>) => {
+  (
+    { hasContent, iconType, id, isActive, label, isBeta, ...props },
+    ref: ForwardedRef<HTMLDivElement>
+  ) => {
+    const { tooltipRef, handleMouseOut } = useTooltip();
+
     const wrapperStyles = css`
       display: flex;
       justify-content: center;
@@ -48,11 +54,13 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
     if (!hasContent)
       return (
         <EuiToolTip
+          ref={tooltipRef}
           anchorProps={{
             css: wrapperStyles,
           }}
-          disableScreenReaderOutput
           content={label}
+          disableScreenReaderOutput
+          onMouseOut={handleMouseOut}
           position="right"
         >
           {menuItem}

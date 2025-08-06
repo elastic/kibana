@@ -12,6 +12,7 @@ import { IconType } from '@elastic/eui';
 export interface SecondaryMenuItem {
   'data-test-subj'?: string;
   isExternal?: boolean;
+  isBeta?: boolean;
   href: string;
   id: string;
   label: string;
@@ -28,6 +29,7 @@ export interface MenuItem {
   href: string;
   iconType: IconType;
   id: string;
+  isBeta?: boolean;
   label: string;
   sections?: SecondaryMenuSection[];
 }

@@ -120,7 +120,7 @@ export const Navigation = ({
               }
             >
               {(closePopover) => (
-                <SecondaryMenu title={item.label}>
+                <SecondaryMenu title={item.label} isBeta={item.isBeta}>
                   {item.sections?.map((section) => (
                     <SecondaryMenu.Section key={section.id} label={section.label}>
                       {section.items.map((subItem) => (
@@ -260,58 +260,59 @@ export const Navigation = ({
         </SideNav.PrimaryMenu>
 
         <SideNav.Footer isCollapsed={isCollapsed}>
-          {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => {
-            return (
-              <SideNav.Popover
-                key={item.id}
-                hasContent={getHasSubmenu(item)}
-                isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
-                label={item.label}
-                persistent={false}
-                container={document.documentElement}
-                trigger={
-                  <SideNav.FooterItem
-                    isActive={item.id === activePageId}
-                    onClick={() => navigateTo(item)}
-                    hasContent={getHasSubmenu(item)}
-                    onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
-                    {...item}
-                  />
-                }
-              >
-                {(closePopover) => (
-                  <SecondaryMenu title={item.label}>
-                    {item.sections?.map((section) => (
-                      <SecondaryMenu.Section key={section.id} label={section.label}>
-                        {section.items.map((subItem) => (
-                          <SecondaryMenu.Item
-                            key={subItem.id}
-                            isActive={subItem.id === activeSubpageId}
-                            onClick={() => {
-                              if (subItem.href) {
-                                handleSubMenuItemClick(item, subItem);
-                                closePopover();
-                              }
-                            }}
-                            {...subItem}
-                            testSubjPrefix="popoverFooterItem"
-                          >
-                            {subItem.label}
-                          </SecondaryMenu.Item>
-                        ))}
-                      </SecondaryMenu.Section>
-                    ))}
-                  </SecondaryMenu>
-                )}
-              </SideNav.Popover>
-            );
-          })}
+          {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item) => (
+            <SideNav.Popover
+              key={item.id}
+              hasContent={getHasSubmenu(item)}
+              isSidePanelOpen={!isCollapsed && item.id === sidePanelContent?.id}
+              label={item.label}
+              persistent={false}
+              container={document.documentElement}
+              trigger={
+                <SideNav.FooterItem
+                  isActive={item.id === sidePanelContent?.id}
+                  onClick={() => navigateTo(item)}
+                  hasContent={getHasSubmenu(item)}
+                  onKeyDown={(e) => handleFooterItemKeyDown(item, e)}
+                  {...item}
+                />
+              }
+            >
+              {(closePopover) => (
+                <SecondaryMenu title={item.label} isBeta={item.isBeta}>
+                  {item.sections?.map((section) => (
+                    <SecondaryMenu.Section key={section.id} label={section.label}>
+                      {section.items.map((subItem) => (
+                        <SecondaryMenu.Item
+                          key={subItem.id}
+                          isActive={
+                            subItem.id === activeSubpageId ||
+                            (subItem.id === activePageId && !activeSubpageId)
+                          }
+                          onClick={() => {
+                            if (subItem.href) {
+                              handleSubMenuItemClick(item, subItem);
+                              closePopover();
+                            }
+                          }}
+                          {...subItem}
+                          testSubjPrefix="popoverFooterItem"
+                        >
+                          {subItem.label}
+                        </SecondaryMenu.Item>
+                      ))}
+                    </SecondaryMenu.Section>
+                  ))}
+                </SecondaryMenu>
+              )}
+            </SideNav.Popover>
+          ))}
         </SideNav.Footer>
       </SideNav>
 
       {isSidePanelOpen && sidePanelContent && (
         <SideNav.Panel>
-          <SecondaryMenu title={sidePanelContent.label} isPanel>
+          <SecondaryMenu title={sidePanelContent.label} isPanel isBeta={sidePanelContent.isBeta}>
             {sidePanelContent.sections?.map((section) => (
               <SecondaryMenu.Section key={section.id} label={section.label}>
                 {section.items.map((subItem) => (

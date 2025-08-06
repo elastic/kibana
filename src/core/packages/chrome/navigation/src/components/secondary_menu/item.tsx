@@ -10,7 +10,9 @@
 import { EuiButton, EuiButtonEmpty, IconType, useEuiTheme } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
+
 import { SecondaryMenuItem } from '../../../types';
+import { BetaBadge } from '../beta_badge';
 
 export interface SecondaryMenuItemProps extends SecondaryMenuItem {
   children: ReactNode;
@@ -28,10 +30,11 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
  */
 export const SecondaryMenuItemComponent = ({
   children,
-  isExternal,
   iconType,
   id,
   isActive,
+  isBeta,
+  isExternal,
   testSubjPrefix = 'secondaryMenuItem',
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
@@ -55,10 +58,23 @@ export const SecondaryMenuItemComponent = ({
       justify-content: ${iconSide === 'left' ? 'flex-start' : 'space-between'};
     }
 
-    svg {
+    svg:not(.euiBetaBadge__icon) {
       color: ${euiTheme.colors.textDisabled};
     }
   `;
+
+  const labelAndBadgeStyles = css`
+    align-items: center;
+    display: flex;
+    gap: ${euiTheme.size.xs};
+  `;
+
+  const content = (
+    <div css={labelAndBadgeStyles}>
+      {children}
+      {isBeta && <BetaBadge />}
+    </div>
+  );
 
   return (
     <li>
@@ -73,7 +89,7 @@ export const SecondaryMenuItemComponent = ({
           {...iconProps}
           {...props}
         >
-          {children}
+          {content}
         </EuiButton>
       ) : (
         <EuiButtonEmpty
@@ -86,7 +102,7 @@ export const SecondaryMenuItemComponent = ({
           {...iconProps}
           {...props}
         >
-          {children}
+          {content}
         </EuiButtonEmpty>
       )}
     </li>

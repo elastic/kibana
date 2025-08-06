@@ -28,6 +28,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Dashboards',
     iconType: 'dashboardApp',
     href: '/dashboards',
+    isBeta: true,
   },
   {
     id: 'overview',
@@ -123,6 +124,7 @@ export const PRIMARY_MENU_ITEMS: MenuItem[] = [
     label: 'Machine learning',
     iconType: 'machineLearningApp',
     href: '/ml/overview',
+    isBeta: true,
     sections: [
       {
         id: 'ml-section-1',
@@ -205,12 +207,14 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
     label: 'Developer tools',
     iconType: 'code',
     href: '/developer-tools',
+    isBeta: true,
   },
   {
     id: 'settings',
     label: 'Settings',
     iconType: 'gear',
     href: '/settings/project/performance',
+    isBeta: true,
     sections: [
       {
         id: 'project',
@@ -230,6 +234,8 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
             id: 'project-fleet',
             label: 'Fleet',
             href: '/settings/project/fleet',
+            isBeta: true,
+            isExternal: true,
           },
         ],
       },
