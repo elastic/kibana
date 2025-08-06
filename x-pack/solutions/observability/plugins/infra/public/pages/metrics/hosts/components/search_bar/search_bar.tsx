@@ -7,33 +7,28 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
+import { UnifiedSearchBar } from '../../../../../components/shared/unified_search_bar';
 import { usePluginConfig } from '../../../../../containers/plugin_config_context';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
-import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
 import type { HostLimitOptions } from '../../types';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../../hooks/use_fetcher';
 
-export const UnifiedSearchBar = () => {
-  const {
-    services: { unifiedSearch },
-  } = useKibanaContextForPlugin();
+export const SearchBar = () => {
   const { featureFlags } = usePluginConfig();
-  const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit, onPreferredSchemaChange } =
     useUnifiedSearchContext();
   const { onPageRefreshStart } = usePerformanceContext();
-
-  const { SearchBar } = unifiedSearch.ui;
+  const { metricsView } = useMetricsDataViewContext();
 
   const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
 
@@ -85,22 +80,15 @@ export const UnifiedSearchBar = () => {
           </EuiFlexItem>
         )}
         <EuiFlexItem>
-          <SearchBar
-            appName={'Infra Hosts'}
-            displayStyle="inPage"
-            indexPatterns={metricsView && [metricsView.dataViewReference]}
+          <UnifiedSearchBar
+            onQuerySubmit={handleRefresh}
             placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
               defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
             })}
-            onQuerySubmit={handleRefresh}
-            allowSavingQueries
             showDatePicker
             showFilterBar
-            showQueryInput
+            showSubmitButton
             showQueryMenu
-            useDefaultBehaviors
-            isAutoRefreshDisabled
-            isRefreshPaused
           />
         </EuiFlexItem>
         <EuiFlexItem>
