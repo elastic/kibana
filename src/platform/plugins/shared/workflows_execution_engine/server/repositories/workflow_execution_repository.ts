@@ -15,9 +15,19 @@ export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
   constructor(private esClient: ElasticsearchClient) {}
 
+  /**
+   * Creates a new workflow execution document in Elasticsearch.
+   *
+   * @param workflowExecution - A partial object representing the workflow execution to be created.
+   * @returns A promise that resolves when the workflow execution has been indexed.
+   */
   public async createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
+    if (!workflowExecution.id) {
+      throw new Error('Workflow execution ID is required for creation');
+    }
+
     await this.esClient.index({
       index: this.indexName,
       id: workflowExecution.id,
@@ -26,6 +36,17 @@ export class WorkflowExecutionRepository {
     });
   }
 
+  /**
+   * Partially updates an existing workflow execution in Elasticsearch.
+   *
+   * This method requires the `id` property to be present in the `workflowExecution` object.
+   * If the `id` is missing, an error is thrown.
+   * The update operation is performed using the Elasticsearch client, and the document is refreshed after the update.
+   *
+   * @param workflowExecution - A partial object representing the workflow execution to update. Must include the `id` property.
+   * @throws {Error} If the `id` property is not provided in the `workflowExecution` object.
+   * @returns A promise that resolves when the update operation is complete.
+   */
   public async updateWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
@@ -33,11 +54,11 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.esClient.index({
+    await this.esClient.update<Partial<EsWorkflowExecution>>({
       index: this.indexName,
       id: workflowExecution.id,
       refresh: true,
-      document: workflowExecution,
+      doc: workflowExecution,
     });
   }
 }
