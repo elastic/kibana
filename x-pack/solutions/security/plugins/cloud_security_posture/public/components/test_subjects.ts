@@ -64,8 +64,8 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUD_SHELL: 'gcpGoogleCloudShellOptionTestId',
   MANUAL: 'gcpManualOptionTestId',
 };
-export const CIS_GCP_OPTION_TEST_SUBJ = 'cisGcpTestId';
-export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
+export const CIS_GCP_OPTION_TEST_SUBJ = 'cloudSetupGcpTestId';
+export const CIS_AZURE_OPTION_TEST_SUBJ = 'cloudSetupAzureTestId';
 
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 export const CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
