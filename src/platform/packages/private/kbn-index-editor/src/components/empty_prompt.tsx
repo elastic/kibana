@@ -9,7 +9,7 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const EmptyPrompt: FC = () => {
@@ -22,22 +22,44 @@ export const EmptyPrompt: FC = () => {
         e.stopPropagation();
         onFileSelectorClick();
       }}
+      css={{
+        cursor: 'pointer',
+      }}
     >
       <FormattedMessage id="indexEditor.emptyPrompt.uploadingLink" defaultMessage="uploading" />
     </EuiLink>
+  );
+
+  // Bold text for drag and drop instruction
+  const dragAndDrop = (
+    <strong>
+      <FormattedMessage
+        id="indexEditor.emptyPrompt.dragAndDrop"
+        defaultMessage="dragging and dropping"
+      />
+    </strong>
   );
 
   return (
     <EuiEmptyPrompt
       iconType={UploadIcon}
       body={
-        <EuiText color="subdued" textAlign="center" size="s">
-          <FormattedMessage
-            id="indexEditor.emptyPrompt.description"
-            defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or dragging and dropping a file."
-            values={{ uploading }}
-          />
-        </EuiText>
+        <>
+          <EuiText color="subdued" textAlign="center" size="s">
+            <FormattedMessage
+              id="indexEditor.emptyPrompt.description"
+              defaultMessage="Start creating your lookup index by adding cells to the table, by {uploading} or {dragAndDrop} a file."
+              values={{ uploading, dragAndDrop }}
+            />
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiText color="subdued" textAlign="center" size="xs">
+            <FormattedMessage
+              id="indexEditor.emptyPrompt.description.supportedFormats"
+              defaultMessage="Supports .csv files up to 500 MB."
+            />
+          </EuiText>
+        </>
       }
     />
   );
@@ -45,7 +67,7 @@ export const EmptyPrompt: FC = () => {
 
 // This icon will be replaced with an EUI icon in the future. https://github.com/elastic/eui/issues/8928
 const UploadIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="none" viewBox="0 0 128 128">
+  <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="none" viewBox="0 0 128 128">
     <path fill="#fff" d="M0 0h128v128H0z" />
     <path
       fill="#153385"
