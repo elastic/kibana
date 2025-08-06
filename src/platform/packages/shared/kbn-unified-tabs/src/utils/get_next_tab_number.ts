@@ -9,23 +9,6 @@
 
 import type { TabItem } from '../types';
 
-export const getNextTabNumber2 = (
-  allTabs: TabItem[],
-  defaultNameRegex: RegExp,
-  tabWithNumberRegex: RegExp
-) => {
-  const existingNumbers = allTabs
-    .filter((tab) => defaultNameRegex.test(tab.label.trim()))
-    .map((tab) => {
-      const match = tab.label.trim().match(tabWithNumberRegex);
-      const tabNumber = match?.groups?.tabNumber;
-      return tabNumber ? Number(tabNumber) : 1;
-    });
-
-  const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : null;
-  return nextNumber;
-};
-
 export const getNextTabNumber = (allTabs: TabItem[], baseLabel: string) => {
   // Find all tabs that start with the base label
   const numbers = allTabs
