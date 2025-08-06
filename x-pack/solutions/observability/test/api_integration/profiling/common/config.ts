@@ -22,6 +22,7 @@ import {
   InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
+import { getFips } from 'crypto';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
@@ -80,6 +81,7 @@ export function createTestConfig(
     const kibanaServer = servers.kibana as UrlObject;
     const kibanaServerUrl = format(kibanaServer);
     const esServer = servers.elasticsearch as UrlObject;
+    const isFipsMode = getFips() === 1;
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -139,6 +141,7 @@ export function createTestConfig(
                 Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`
               )
             : []),
+          ...(isFipsMode ? ['xpack.security.fipsMode.enabled=true'] : []),
         ],
       },
     };
