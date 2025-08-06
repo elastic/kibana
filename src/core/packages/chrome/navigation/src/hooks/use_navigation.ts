@@ -7,52 +7,71 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-import { MenuItem, SecondaryMenuItem } from '../../types';
-import { InitialMenuState } from '../utils/get_initial_active_items';
-
-interface UseNavigationProps {
-  logoId: string;
-  initialActiveItems: InitialMenuState;
-  isCollapsed: boolean;
-}
+import { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import { InitialMenuState, getInitialActiveItems } from '../utils/get_initial_active_items';
 
 interface NavigationState {
-  currentPageId: string | undefined;
-  currentSubpageId: string | undefined;
+  activePageId: string | undefined;
+  activeSubpageId: string | undefined;
   sidePanelContent: MenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
 
-export const useNavigation = ({
-  logoId,
-  initialActiveItems: { primaryItem, secondaryItem, isLogoActive },
-  isCollapsed,
-}: UseNavigationProps) => {
-  const [currentPageId, setCurrentPageId] = useState<string | undefined>(
+export const useNavigation = (
+  isCollapsed: boolean,
+  items: NavigationStructure,
+  logoId: string,
+  activeItemId?: string
+) => {
+  const { primaryItem, secondaryItem, isLogoActive } = getInitialActiveItems(
+    items,
+    activeItemId,
+    logoId
+  );
+
+  const [activePageId, setActivePageId] = useState<string | undefined>(
     isLogoActive ? logoId : primaryItem?.id
   );
-  const [currentSubpageId, setCurrentSubpageId] = useState<string | undefined>(secondaryItem?.id);
+  const [activeSubpageId, setActiveSubpageId] = useState<string | undefined>(secondaryItem?.id);
   const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(primaryItem);
 
-  // Determine if side panel should be open based on simple logic
   const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
 
-  // Navigate to a menu item
   const navigateTo = useCallback(
     (primaryMenuItem: MenuItem, secondaryMenuItem?: SecondaryMenuItem) => {
-      setCurrentPageId(primaryMenuItem.id);
-      setCurrentSubpageId(secondaryMenuItem?.id || undefined);
+      setActivePageId(primaryMenuItem.id);
+      setActiveSubpageId(secondaryMenuItem?.id || undefined);
       setSidePanelContent(primaryMenuItem);
     },
     []
   );
 
+  const resetActiveItems = useCallback(
+    (newActiveItems: InitialMenuState) => {
+      const {
+        primaryItem: newPrimaryItem,
+        secondaryItem: newSecondaryItem,
+        isLogoActive: newIsLogoActive,
+      } = newActiveItems;
+      setActivePageId(newIsLogoActive ? logoId : newPrimaryItem?.id);
+      setActiveSubpageId(newSecondaryItem?.id);
+      setSidePanelContent(newPrimaryItem);
+    },
+    [logoId]
+  );
+
+  // Update active items when `activeItemId` changes
+  useEffect(() => {
+    const newActiveItems = getInitialActiveItems(items, activeItemId, logoId);
+    resetActiveItems(newActiveItems);
+  }, [activeItemId, items, logoId, resetActiveItems]);
+
   const state: NavigationState = {
-    currentPageId,
-    currentSubpageId,
+    activePageId,
+    activeSubpageId,
     sidePanelContent,
     isCollapsed,
     isSidePanelOpen,

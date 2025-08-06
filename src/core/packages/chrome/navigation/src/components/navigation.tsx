@@ -20,7 +20,6 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { focusMainContent } from '../utils/focus_main_content';
 import { MAX_FOOTER_ITEMS } from '../constants';
-import { getInitialActiveItems } from '../utils/get_initial_active_items';
 
 export interface NavigationProps {
   /**
@@ -55,14 +54,8 @@ export const Navigation = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
 
-  const initialActiveItems = getInitialActiveItems(items, activeItemId, logo.id);
-
-  const { currentPageId, currentSubpageId, isSidePanelOpen, navigateTo, sidePanelContent } =
-    useNavigation({
-      logoId: logo.id,
-      initialActiveItems,
-      isCollapsed,
-    });
+  const { activePageId, activeSubpageId, isSidePanelOpen, navigateTo, sidePanelContent } =
+    useNavigation(isCollapsed, items, logo.id, activeItemId);
 
   const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
     isCollapsed,
@@ -100,7 +93,7 @@ export const Navigation = ({
     <>
       <SideNav isCollapsed={isCollapsed}>
         <SideNav.Logo
-          isActive={currentPageId === logo.id}
+          isActive={activePageId === logo.id}
           isCollapsed={isCollapsed}
           onClick={handleLogoClick}
           {...logo}
@@ -134,8 +127,8 @@ export const Navigation = ({
                         <SecondaryMenu.Item
                           key={subItem.id}
                           isActive={
-                            subItem.id === currentSubpageId ||
-                            (subItem.id === currentPageId && !currentSubpageId)
+                            subItem.id === activeSubpageId ||
+                            (subItem.id === activePageId && !activeSubpageId)
                           }
                           onClick={() => {
                             if (subItem.href) {
@@ -187,7 +180,7 @@ export const Navigation = ({
                       <NestedSecondaryMenu.Section hasGap label={null}>
                         {overflowMenuItems.map((item) => {
                           const isActive =
-                            item.id === currentPageId || item.id === currentSubpageId;
+                            item.id === activePageId || item.id === activeSubpageId;
                           const hasSubItems = getHasSubmenu(item);
 
                           return (
@@ -228,8 +221,8 @@ export const Navigation = ({
                               <NestedSecondaryMenu.Item
                                 key={subItem.id}
                                 isActive={
-                                  subItem.id === currentSubpageId ||
-                                  (subItem.id === currentPageId && !currentSubpageId)
+                                  subItem.id === activeSubpageId ||
+                                  (subItem.id === activePageId && !activeSubpageId)
                                 }
                                 onClick={() => {
                                   navigateTo(item, subItem);
@@ -250,7 +243,7 @@ export const Navigation = ({
                   <SecondaryMenu title="More">
                     <SecondaryMenu.Section hasGap label={null}>
                       {overflowMenuItems.map((item) => {
-                        const isActive = item.id === currentPageId || item.id === currentSubpageId;
+                        const isActive = item.id === activePageId || item.id === activeSubpageId;
 
                         return (
                           <SideNav.PrimaryMenuItem
@@ -305,8 +298,8 @@ export const Navigation = ({
                         <SecondaryMenu.Item
                           key={subItem.id}
                           isActive={
-                            subItem.id === currentSubpageId ||
-                            (subItem.id === currentPageId && !currentSubpageId)
+                            subItem.id === activeSubpageId ||
+                            (subItem.id === activePageId && !activeSubpageId)
                           }
                           onClick={() => {
                             if (subItem.href) {
@@ -338,8 +331,8 @@ export const Navigation = ({
                   <SecondaryMenu.Item
                     key={subItem.id}
                     isActive={
-                      subItem.id === currentSubpageId ||
-                      (subItem.id === currentPageId && !currentSubpageId)
+                      subItem.id === activeSubpageId ||
+                      (subItem.id === activePageId && !activeSubpageId)
                     }
                     onClick={() => {
                       if (subItem.href) {
