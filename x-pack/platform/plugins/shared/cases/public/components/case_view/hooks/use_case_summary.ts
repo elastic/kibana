@@ -89,12 +89,13 @@ export const useCaseSummary = ({ caseData, markdown }: UseCaseSummaryProps) => {
       setIsLoading(false);
     }
   }, [
-    chatService.value,
-    observabilityAIAssistantService,
-    connectors,
-    isObsAIAssistantEnabled,
-    handleComplete,
     caseData,
+    chatService.value,
+    connectors,
+    handleComplete,
+    isObsAIAssistantEnabled,
+    markdown,
+    observabilityAIAssistantService,
   ]);
 
   return {
