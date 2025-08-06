@@ -14,6 +14,9 @@ import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
+import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
+import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
+import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -62,6 +65,13 @@ jest.mock('./attack_discovery/get/get_attack_discovery');
 const getAttackDiscoveryRouteMock = getAttackDiscoveryRoute as jest.Mock;
 jest.mock('./attack_discovery/post/post_attack_discovery');
 const postAttackDiscoveryRouteMock = postAttackDiscoveryRoute as jest.Mock;
+jest.mock('./attack_discovery/get/find_attack_discoveries');
+const findAttackDiscoveriesRouteMock = findAttackDiscoveriesRoute as jest.Mock;
+jest.mock('./attack_discovery/get/get_attack_discovery_generations');
+const getAttackDiscoveryGenerationsRouteMock = getAttackDiscoveryGenerationsRoute as jest.Mock;
+jest.mock('./attack_discovery/post/post_attack_discovery_generations_dismiss');
+const postAttackDiscoveryGenerationsDismissRouteMock =
+  postAttackDiscoveryGenerationsDismissRoute as jest.Mock;
 jest.mock('./user_conversations/create_route');
 const createConversationRouteMock = createConversationRoute as jest.Mock;
 jest.mock('./user_conversations/delete_route');
@@ -147,6 +157,18 @@ describe('registerRoutes', () => {
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {
     expect(cancelAttackDiscoveryRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `findAttackDiscoveriesRouteMock`', () => {
+    expect(findAttackDiscoveriesRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `getAttackDiscoveryGenerationsRouteMock`', () => {
+    expect(getAttackDiscoveryGenerationsRouteMock).toHaveBeenCalledWith(server.router);
+  });
+
+  it('should call `postAttackDiscoveryGenerationsDismissRouteMock`', () => {
+    expect(postAttackDiscoveryGenerationsDismissRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getAttackDiscoveryRouteMock`', () => {
