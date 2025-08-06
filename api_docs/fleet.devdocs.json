@@ -27665,7 +27665,7 @@
             "label": "discovery",
             "description": [],
             "signature": [
-              "{ datasets?: ",
+              "{ fields?: { name: string; }[] | undefined; datasets?: ",
               "DiscoveryDataset",
               "[] | undefined; } | undefined"
             ],
@@ -30686,7 +30686,7 @@
             "section": "def-common.RegistryPolicyTemplate",
             "text": "RegistryPolicyTemplate"
           },
-          "[] | undefined; discovery?: { datasets?: ",
+          "[] | undefined; discovery?: { fields?: { name: string; }[] | undefined; datasets?: ",
           "DiscoveryDataset",
           "[] | undefined; } | undefined; }"
         ],
