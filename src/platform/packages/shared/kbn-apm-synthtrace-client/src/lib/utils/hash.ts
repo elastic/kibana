@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fast1a32 } from 'fnv-plus';
 import { Fields } from '../entity';
 
 export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
@@ -19,6 +18,19 @@ export function hashKeysOf<T extends Fields>(source: T, keys: Array<keyof T>) {
   return hashed;
 }
 
+// this hashing function has same output as fnv-plus
+function fnv1a32(str: string): number {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    // eslint-disable-next-line no-bitwise
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+    // eslint-disable-next-line no-bitwise
+    hash >>>= 0; // Convert to unsigned 32-bit integer
+  }
+  return hash;
+}
+
 export function appendHash(hash: string, value: string) {
-  return fast1a32(hash + ',' + value).toString();
+  return fnv1a32(hash + ',' + value).toString();
 }
