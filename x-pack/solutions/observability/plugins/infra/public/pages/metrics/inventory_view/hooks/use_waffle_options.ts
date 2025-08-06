@@ -192,8 +192,6 @@ export const useWaffleOptions = () => {
       setUrlState((previous) => ({
         ...previous,
         preferredSchema,
-        metric: DEFAULT_WAFFLE_OPTIONS_STATE.metric,
-        groupBy: DEFAULT_WAFFLE_OPTIONS_STATE.groupBy,
       }));
     },
     [setUrlState]
