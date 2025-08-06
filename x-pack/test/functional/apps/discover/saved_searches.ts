@@ -54,8 +54,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await dataGrid.getDocCount()).to.be(500);
 
         await panelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleShowCustomTimeRange();
-        await dashboardCustomizePanel.clickToggleQuickMenuButton();
+        await dashboardCustomizePanel.enableCustomTimeRange();
+        await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
 
