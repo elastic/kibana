@@ -71,8 +71,13 @@ export const streamGraph = async ({
     end: streamEnd,
     push,
     responseWithHeaders,
-    //@TODO: update type tool_calls
-  } = streamFactory<{ type: string; payload?: string; toolCalls?: any[] }>(request.headers, logger, false, false);
+    // @TODO: update type tool_calls
+  } = streamFactory<{ type: string; payload?: string; toolCalls?: any[] }>(
+    request.headers,
+    logger,
+    false,
+    false
+  );
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
@@ -140,10 +145,9 @@ export const streamGraph = async ({
               push({ payload: msg.content as string, type: 'content' });
             }
             if (!didEnd && msg.tool_calls) {
-              push({ toolCalls: msg.tool_calls, type: 'tool_calls' });
+              push({ tool_calls: msg.tool_calls, type: 'tool_calls' });
             }
           }
-
           if (
             event === 'on_chat_model_end' &&
             !data.output.lc_kwargs?.tool_calls?.length &&
@@ -165,6 +169,7 @@ export const streamGraph = async ({
 
   // Stream is from openai functions agent
   let finalMessage = '';
+  let toolMessage = '';
   const stream = assistantGraph.streamEvents(
     inputs,
     {
@@ -187,7 +192,10 @@ export const streamGraph = async ({
         if (event === 'on_llm_stream') {
           const chunk = data?.chunk;
           const msg = chunk.message;
+          // @TODO: remove
+          console.log(`--@@msg`, JSON.stringify(msg, null, 2));
           if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            toolMessage += msg.content;
             /* empty */
           } else if (!didEnd) {
             push({ payload: msg.content, type: 'content' });
@@ -196,6 +204,8 @@ export const streamGraph = async ({
         }
 
         if (event === 'on_llm_end' && !didEnd) {
+          console.log(`--@@toolMessage`, toolMessage);
+
           const generation = data.output?.generations[0][0];
           if (
             // if generation is null, an error occurred - do nothing and let error handling complete the stream

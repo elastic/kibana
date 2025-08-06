@@ -33,6 +33,7 @@ export interface GetPromptArgs {
   promptGroupId: string;
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  customPrompt?: string;
 }
 export interface GetPromptsByGroupIdArgs extends Omit<GetPromptArgs, 'promptId'> {
   promptGroupId: string;

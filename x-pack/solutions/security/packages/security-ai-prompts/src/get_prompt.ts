@@ -97,6 +97,8 @@ export const getPrompt = async ({
   promptId,
   provider: providedProvider,
   savedObjectsClient,
+  // @TODO: Pass this from client side
+  customPrompt = 'You are a helpful assistant',
 }: GetPromptArgs): Promise<string> => {
   const { provider, model } = await resolveProviderAndModel({
     providedProvider,
@@ -121,9 +123,13 @@ export const getPrompt = async ({
     localPrompts,
   });
   if (!prompt) {
-    throw new Error(
-      `Prompt not found for promptId: ${promptId} and promptGroupId: ${promptGroupId}`
-    );
+    if (customPrompt) {
+      return customPrompt;
+    } else {
+      throw new Error(
+        `Prompt not found for promptId: ${promptId} and promptGroupId: ${promptGroupId}`
+      );
+    }
   }
 
   return prompt;
