@@ -23,7 +23,7 @@ import {
   fromMetricLegacyToAPI,
 } from './charts';
 import { LensApiState } from './schema';
-import { isLensAPIFormat } from './utils';
+import { isLensLegacyFormat } from './utils';
 
 export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
 
@@ -64,8 +64,9 @@ export class LensConfigBuilder {
     config: LensConfig | LensApiState,
     options: LensConfigOptions = {}
   ): Promise<LensAttributes | LensEmbeddableInput> {
-    const chartType = isLensAPIFormat(config) ? config.type : config.chartType;
-    const chartConfig = await this.charts[chartType](config as any, {
+    const chartType = isLensLegacyFormat(config) ? config.chartType : config.type;
+    const chartBuilderFn = this.charts[chartType];
+    const chartConfig = await chartBuilderFn(config as any, {
       formulaAPI: this.formulaAPI,
       dataViewsAPI: this.dataViewsAPI,
     });

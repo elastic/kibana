@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import { filterSchema } from './filter';
 import { formatSchema } from './format';
 
-const genericOperationOptionsSchema = schema.object({
+const genericOperationOptionsSchema = formatSchema.extends({
   /**
    * Label for the operation
    */
@@ -22,10 +22,9 @@ const genericOperationOptionsSchema = schema.object({
       },
     })
   ),
-  ...formatSchema.getPropSchemas(),
 });
 
-export const staticOperationDefinitionSchema = schema.object({
+export const staticOperationDefinitionSchema = genericOperationOptionsSchema.extends({
   operation: schema.literal('static_value'),
   /**
    * Static value
@@ -35,10 +34,9 @@ export const staticOperationDefinitionSchema = schema.object({
       description: 'Static value',
     },
   }),
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const formulaOperationDefinitionSchema = schema.object({
+export const formulaOperationDefinitionSchema = genericOperationOptionsSchema.extends({
   operation: schema.literal('formula'),
   /**
    * Formula
@@ -48,10 +46,9 @@ export const formulaOperationDefinitionSchema = schema.object({
       description: 'Formula',
     },
   }),
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const metricOperationSharedSchema = schema.object({
+export const metricOperationSharedSchema = genericOperationOptionsSchema.extends({
   /**
    * Time scale
    */
@@ -73,18 +70,16 @@ export const metricOperationSharedSchema = schema.object({
    * Filter
    */
   filter: schema.maybe(filterSchema),
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const fieldBasedOperationSharedSchema = schema.object({
+export const fieldBasedOperationSharedSchema = metricOperationSharedSchema.extends({
   /**
    * Field to be used for the metric
    */
   field: schema.string({ meta: { description: 'Field to be used for the metric' } }),
-  ...metricOperationSharedSchema.getPropSchemas(),
 });
 
-const emptyAsNullSchema = schema.object({
+const emptyAsNullSchemaRawObject = {
   /**
    * Whether to consider null values as null
    */
@@ -95,9 +90,10 @@ const emptyAsNullSchema = schema.object({
       },
     })
   ),
-});
+};
 
-export const countMetricOperationSchema = schema.object({
+export const countMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  ...emptyAsNullSchemaRawObject,
   /**
    * Select the operation type
    */
@@ -106,17 +102,14 @@ export const countMetricOperationSchema = schema.object({
    * Field to be used for the metric
    */
   field: schema.maybe(schema.string()),
-  ...metricOperationSharedSchema.getPropSchemas(),
-  ...emptyAsNullSchema.getPropSchemas(),
 });
 
-export const uniqueCountMetricOperationSchema = schema.object({
+export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema.extends({
+  ...emptyAsNullSchemaRawObject,
   operation: schema.literal('unique_count'),
-  ...fieldBasedOperationSharedSchema.getPropSchemas(),
-  ...emptyAsNullSchema.getPropSchemas(),
 });
 
-export const metricOperationSchema = schema.object({
+export const metricOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.oneOf([
     schema.literal('min'),
     schema.literal('max'),
@@ -124,24 +117,20 @@ export const metricOperationSchema = schema.object({
     schema.literal('avg'),
     schema.literal('median'),
   ]),
-  ...fieldBasedOperationSharedSchema.getPropSchemas(),
 });
 
-export const lastValueOperationSchema = schema.object({
+export const lastValueOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('last_value'),
-  ...fieldBasedOperationSharedSchema.getPropSchemas(),
 });
 
-export const percentileOperationSchema = schema.object({
+export const percentileOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('percentile'),
   percentile: schema.number({ meta: { description: 'Percentile' } }),
-  ...fieldBasedOperationSharedSchema.getPropSchemas(),
 });
 
-export const percentileRanksOperationSchema = schema.object({
+export const percentileRanksOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('percentile_ranks'),
   ranks: schema.arrayOf(schema.number({ meta: { description: 'Rank' } })),
-  ...fieldBasedOperationSharedSchema.getPropSchemas(),
 });
 
 export const fieldMetricOperationsSchema = schema.oneOf([
@@ -153,35 +142,30 @@ export const fieldMetricOperationsSchema = schema.oneOf([
   percentileRanksOperationSchema,
 ]);
 
-export const differencesOperationSchema = schema.object({
+export const differencesOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('differences'),
   of: fieldMetricOperationsSchema,
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const movingAverageOperationSchema = schema.object({
+export const movingAverageOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('moving_average'),
   of: fieldMetricOperationsSchema,
   window: schema.number({ meta: { description: 'Window' } }),
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const cumulativeSumOperationSchema = schema.object({
+export const cumulativeSumOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('cumulative_sum'),
   of: fieldMetricOperationsSchema,
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const counterRateOperationSchema = schema.object({
+export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('counter_rate'),
   of: fieldMetricOperationsSchema,
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
-export const valueOperationSchema = schema.object({
+export const valueOperationSchema = fieldBasedOperationSharedSchema.extends({
   operation: schema.literal('value'),
   column: schema.string({ meta: { description: 'Value' } }),
-  ...genericOperationOptionsSchema.getPropSchemas(),
 });
 
 export const metricOperationDefinitionSchema = schema.oneOf([
