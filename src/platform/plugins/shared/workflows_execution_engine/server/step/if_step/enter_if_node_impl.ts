@@ -7,29 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EnterIfNode } from '@kbn/workflows';
+import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 
 export class EnterIfNodeImpl implements StepImplementation {
-  constructor(private step: EnterIfNode, private workflowState: WorkflowExecutionRuntimeManager) {}
+  constructor(
+    private step: EnterIfNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    await this.workflowState.startStep(this.step.id);
-    const evaluatedConditionResult = this.step.configuration.condition; // must be real condition from step definition
+    await this.wfExecutionRuntimeManager.startStep(this.step.id);
+    const successors: any[] = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
 
-    let runningBranch: string[];
-    let notRunningBranch: string[];
-
-    if (evaluatedConditionResult) {
-      runningBranch = this.step.trueNodeIds;
-      notRunningBranch = this.step.falseNodeIds;
-    } else {
-      runningBranch = this.step.falseNodeIds;
-      notRunningBranch = this.step.trueNodeIds;
+    if (successors.some((node) => node.type !== 'enter-condition-branch')) {
+      throw new Error(
+        `EnterIfNode with id ${
+          this.step.id
+        } must have only 'enter-condition-branch' successors, but found: ${successors
+          .map((node) => node.type)
+          .join(', ')}.`
+      );
     }
 
-    await this.workflowState.skipSteps(notRunningBranch);
-    this.workflowState.goToStep(runningBranch[0]);
+    const thenNode = successors?.find((node) =>
+      Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode;
+    // multiple else-if could be implemented similarly to thenNode
+    const elseNode = successors?.find(
+      (node) => !Object.hasOwn(node, 'condition')
+    ) as EnterConditionBranchNode;
+
+    const evaluatedConditionResult =
+      typeof thenNode.condition === 'boolean'
+        ? thenNode.condition
+        : thenNode.condition?.toLowerCase() === 'true'; // must be real condition from step definition)
+
+    if (evaluatedConditionResult) {
+      this.wfExecutionRuntimeManager.goToStep(thenNode.id);
+    } else if (elseNode) {
+      this.wfExecutionRuntimeManager.goToStep(elseNode.id);
+    } else {
+      // in the case when the condition evaluates to false and no else branch is defined
+      // we go straight to the exit node skipping "then" branch
+      this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
+    }
   }
 }

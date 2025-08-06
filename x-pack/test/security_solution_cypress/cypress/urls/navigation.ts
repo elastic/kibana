@@ -95,9 +95,12 @@ export const VISUALIZE_URL = '/app/visualize';
 export const MAPS_URL = '/app/maps';
 export const LENS_URL = '/app/lens';
 export const APP_DASHBOARDS_URL = '/app/dashboards';
+export const ADVANCED_SETTINGS_URL = '/app/management/kibana/settings';
 
 // Entity Analytics
 export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL =
+  '/app/security/entity_analytics_privileged_user_monitoring';
 
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
