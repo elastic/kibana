@@ -50,8 +50,10 @@ function createPackageManifest(packageName: string, packageSemver: string): Buff
   const packageManifest: PackageSpecManifest = {
     name: packageName,
     title: 'Prebuilt Security Detection Rules',
+    description: 'Mock security detection engine package for testing purposes',
     version: packageSemver,
     owner: { github: 'elastic/protections' },
+    format_version: '1.0.0',
   };
 
   const yamlContent = dump(packageManifest, {
