@@ -77,7 +77,7 @@ describe('of expression', () => {
     waitFor(() => {
       expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
     });
-    
+
     expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test2');
 
     // Open the popover to access the form elements
