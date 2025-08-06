@@ -16,7 +16,7 @@ import {
   STACK_NODE_HORIZONTAL_PADDING,
   STACK_NODE_MIN_HEIGHT,
   NODE_HEIGHT,
-  NODE_DETAILS_HEIGHT,
+  ENTITY_NODE_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
@@ -73,8 +73,7 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      // Increase entity node's height to make room for its node details
-      size.height += NODE_DETAILS_HEIGHT;
+      size.height = ENTITY_NODE_TOTAL_HEIGHT;
     }
 
     if (!nodesById[node.id]) {

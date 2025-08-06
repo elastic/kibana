@@ -25,6 +25,13 @@ import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
 /**
+ * The total height of an entity node including the shape and details below, in pixels.
+ * Required to calculate total node's height in layout_graph.ts
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+
+/**
  * The width of a node in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
@@ -35,13 +42,6 @@ export const NODE_WIDTH = 100;
  * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_HEIGHT = 100;
-
-/**
- * The height of a node details group in the graph, in pixels.
- * Required to calculate total node's height in layout_graph.ts
- * Must be a multiple of `GRID_SIZE * 2`.
- */
-export const NODE_DETAILS_HEIGHT = 100;
 
 /**
  * The width of a node label in the graph, in pixels.
