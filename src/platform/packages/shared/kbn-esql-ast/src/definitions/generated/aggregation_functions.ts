@@ -72,7 +72,6 @@ const avgDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS AVG(height)',
     'FROM employees\n| STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)',
@@ -242,7 +241,6 @@ const countDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS COUNT(height)',
     'FROM employees\n| STATS count = COUNT(*) BY languages\n| SORT languages DESC',
@@ -814,7 +812,6 @@ const countDistinctDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM hosts\n| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)',
     'FROM hosts\n| STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)',
@@ -944,7 +941,6 @@ const maxDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS MAX(languages)',
     'FROM employees\n| STATS max_avg_salary_change = MAX(MV_AVG(salary_change))',
@@ -994,7 +990,6 @@ const medianDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS MEDIAN(salary), PERCENTILE(salary, 50)',
     'FROM employees\n| STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))',
@@ -1044,7 +1039,6 @@ const medianAbsoluteDeviationDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)',
     'FROM employees\n| STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))',
@@ -1173,7 +1167,6 @@ const minDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS MIN(languages)',
     'FROM employees\n| STATS min_avg_salary_change = MIN(MV_AVG(salary_change))',
@@ -1337,7 +1330,6 @@ const percentileDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS p0 = PERCENTILE(salary,  0)\n     , p50 = PERCENTILE(salary, 50)\n     , p99 = PERCENTILE(salary, 99)',
     'FROM employees\n| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)',
@@ -1581,7 +1573,6 @@ const sampleDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: ['FROM employees\n| STATS sample = SAMPLE(gender, 5)'],
 };
 
@@ -1617,7 +1608,6 @@ const stCentroidAggDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: ['FROM airports\n| STATS centroid=ST_CENTROID_AGG(location)'],
 };
 
@@ -1676,7 +1666,6 @@ const stExtentAggDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: ['FROM airports\n| WHERE country == "India"\n| STATS extent = ST_EXTENT_AGG(location)'],
 };
 
@@ -1722,7 +1711,6 @@ const stdDevDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS STD_DEV(height)',
     'FROM employees\n| STATS stddev_salary_change = STD_DEV(MV_MAX(salary_change))',
@@ -1771,7 +1759,6 @@ const sumDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS SUM(languages)',
     'FROM employees\n| STATS total_salary_changes = SUM(MV_MAX(salary_change))',
@@ -1968,7 +1955,6 @@ const topDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS top_salaries = TOP(salary, 3, "desc"), top_salary = MAX(salary)',
   ],
@@ -2137,7 +2123,6 @@ const valuesDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| EVAL first_letter = SUBSTRING(first_name, 0, 1)\n| STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter\n| SORT first_letter',
   ],
@@ -2290,7 +2275,6 @@ const weightedAvgDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS],
-  validate: undefined,
   examples: [
     'FROM employees\n| STATS w_avg = WEIGHTED_AVG(salary, height) BY languages\n| EVAL w_avg = ROUND(w_avg)\n| KEEP w_avg, languages\n| SORT languages',
   ],

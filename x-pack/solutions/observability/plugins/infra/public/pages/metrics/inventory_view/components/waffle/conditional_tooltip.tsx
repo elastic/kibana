@@ -39,9 +39,11 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const { customMetrics } = useWaffleOptionsContext();
   const config = usePluginConfig();
 
+  const schema = config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined;
+
   const requestMetrics = model.metrics
     .getWaffleMapTooltipMetrics({
-      schema: config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : DataSchemaFormat.ECS,
+      schema,
     })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
@@ -50,15 +52,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${model.fields.id}": ${node.id}`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -66,6 +62,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    schema,
   });
 
   const dataNode = first(nodes);
