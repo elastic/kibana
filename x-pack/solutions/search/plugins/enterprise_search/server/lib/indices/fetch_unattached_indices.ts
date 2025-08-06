@@ -31,6 +31,7 @@ export const fetchUnattachedIndices = async (
   try {
     connectors = await fetchConnectors(client.asCurrentUser, indexNames);
     crawlers = await fetchCrawlers(client, indexNames);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     connectors = [];
     crawlers = [];

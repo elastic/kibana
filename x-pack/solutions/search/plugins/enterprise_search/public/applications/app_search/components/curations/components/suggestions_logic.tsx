@@ -50,7 +50,6 @@ export const SuggestionsLogic = kea<MakeLogicType<SuggestionsValues, SuggestionA
     suggestions: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSuggestionsLoaded: (_, { results }) => results,
       },
     ],
@@ -63,9 +62,7 @@ export const SuggestionsLogic = kea<MakeLogicType<SuggestionsValues, SuggestionA
         },
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSuggestionsLoaded: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],

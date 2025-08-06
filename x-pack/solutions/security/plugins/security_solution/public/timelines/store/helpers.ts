@@ -17,6 +17,8 @@ import type {
 } from '../components/timeline/data_providers/data_provider';
 import { IS_OPERATOR, EXISTS_OPERATOR } from '../components/timeline/data_providers/data_provider';
 import {
+  type RowRendererId,
+  type TimelineType,
   type DataProviderType,
   DataProviderTypeEnum,
   TimelineStatusEnum,
@@ -29,7 +31,6 @@ import type {
   TimelinePersistInput,
   SortColumnTimeline,
 } from '../../../common/types/timeline';
-import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';

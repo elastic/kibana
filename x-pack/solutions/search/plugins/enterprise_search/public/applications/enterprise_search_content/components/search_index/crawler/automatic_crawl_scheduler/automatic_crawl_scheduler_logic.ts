@@ -98,7 +98,6 @@ export const AutomaticCrawlSchedulerLogic = kea<
       false,
       {
         clearCrawlSchedule: () => false,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlAutomatically: (_, { crawlAutomatically }) => crawlAutomatically,
         setCrawlSchedule: () => true,
       },
@@ -107,11 +106,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
       DEFAULT_VALUES.crawlFrequency,
       {
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlFrequency,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlSchedule: (_, { crawlSchedule: { frequency } }) => frequency,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlFrequency: (_, { crawlFrequency }) => crawlFrequency,
-        // @ts-expect-error upgrade typescript v5.1.6
         setUseConnectorSchedule: (crawlFrequency) =>
           crawlFrequency || DEFAULT_VALUES.crawlFrequency,
       },
@@ -120,11 +116,8 @@ export const AutomaticCrawlSchedulerLogic = kea<
       DEFAULT_VALUES.crawlUnit,
       {
         clearCrawlSchedule: () => DEFAULT_VALUES.crawlUnit,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlSchedule: (_, { crawlSchedule: { unit } }) => unit,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlUnit: (_, { crawlUnit }) => crawlUnit,
-        // @ts-expect-error upgrade typescript v5.1.6
         setUseConnectorSchedule: (crawlUnit) => crawlUnit || DEFAULT_VALUES.crawlUnit,
       },
     ],
@@ -139,13 +132,10 @@ export const AutomaticCrawlSchedulerLogic = kea<
     useConnectorSchedule: [
       false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlAutomatically: (useConnectorSchedule, { crawlAutomatically }) =>
           crawlAutomatically || useConnectorSchedule,
-        // @ts-expect-error upgrade typescript v5.1.6
         setCrawlSchedule: (_, { crawlSchedule: { useConnectorSchedule = false } }) =>
           useConnectorSchedule,
-        // @ts-expect-error upgrade typescript v5.1.6
         setUseConnectorSchedule: (_, { useConnectorSchedule }) => useConnectorSchedule,
       },
     ],

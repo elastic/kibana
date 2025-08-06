@@ -104,13 +104,9 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     apiTokens: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setCredentialsData: (_, { apiTokens }) => apiTokens,
-        // @ts-expect-error upgrade typescript v5.1.6
         onApiTokenCreateSuccess: (apiTokens, apiToken) => [...apiTokens, apiToken],
-        // @ts-expect-error upgrade typescript v5.1.6
         onApiTokenUpdateSuccess: (apiTokens, apiToken) => [
-          // @ts-expect-error upgrade typescript v5.1.6
           ...apiTokens.filter((token) => token.name !== apiToken.name),
           apiToken,
         ],
@@ -119,9 +115,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     meta: [
       DEFAULT_META,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setCredentialsData: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
@@ -143,32 +137,26 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     engines: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setCredentialsDetails: (_, { engines }) => engines,
       },
     ],
     nameInputBlurred: [
       false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setNameInputBlurred: (_, nameInputBlurred) => nameInputBlurred,
       },
     ],
     activeApiToken: [
       defaultApiToken,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         addEngineName: (activeApiToken, engineName) => ({
           ...activeApiToken,
           engines: [...(activeApiToken.engines || []), engineName],
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         removeEngineName: (activeApiToken, engineName) => ({
           ...activeApiToken,
-          // @ts-expect-error upgrade typescript v5.1.6
           engines: (activeApiToken.engines || []).filter((name) => name !== engineName),
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         setAccessAllEngines: (activeApiToken, accessAll) => ({
           ...activeApiToken,
           access_all_engines: accessAll,
@@ -176,14 +164,11 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
         }),
         onApiTokenCreateSuccess: () => defaultApiToken,
         onApiTokenUpdateSuccess: () => defaultApiToken,
-        // @ts-expect-error upgrade typescript v5.1.6
         setTokenName: (activeApiToken, name) => ({ ...activeApiToken, name: formatApiName(name) }),
-        // @ts-expect-error upgrade typescript v5.1.6
         setTokenReadWrite: (activeApiToken, { name, checked }) => ({
           ...activeApiToken,
           [name]: checked,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         setTokenType: (activeApiToken, tokenType) => ({
           ...activeApiToken,
           access_all_engines:
@@ -193,16 +178,13 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
           read: tokenType === ApiTokenTypes.Private,
           type: tokenType as ApiTokenTypes,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         showCredentialsForm: (_, activeApiToken) => activeApiToken,
       },
     ],
     activeApiTokenRawName: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setTokenName: (_, activeApiTokenRawName) => activeApiTokenRawName,
-        // @ts-expect-error upgrade typescript v5.1.6
         showCredentialsForm: (_, activeApiToken) => activeApiToken.name,
         hideCredentialsForm: () => '',
         onApiTokenCreateSuccess: () => '',
@@ -221,7 +203,6 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     formErrors: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onApiTokenError: (_, formErrors) => formErrors,
         onApiTokenCreateSuccess: () => [],
         showCredentialsForm: () => [],

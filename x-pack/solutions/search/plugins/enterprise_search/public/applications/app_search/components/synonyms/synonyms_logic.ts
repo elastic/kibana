@@ -73,16 +73,13 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
     synonymSets: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSynonymsLoad: (_, { results }) => results,
       },
     ],
     meta: [
       SYNONYMS_PAGE_META,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSynonymsLoad: (_, { meta }) => meta,
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => updateMetaPageIndex(state, newPageIndex),
       },
     ],
@@ -96,7 +93,6 @@ export const SynonymsLogic = kea<MakeLogicType<SynonymsValues, SynonymsActions>>
     activeSynonymSet: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         openModal: (_, { synonymSet }) => synonymSet,
         closeModal: () => null,
       },
