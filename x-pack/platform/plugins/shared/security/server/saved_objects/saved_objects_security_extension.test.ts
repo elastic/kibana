@@ -816,7 +816,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -866,7 +866,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // two actions
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenCalledWith({
             error: {
@@ -943,7 +943,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -988,7 +988,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -1039,7 +1039,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length * 2); // two actions
+        expect(auditLogger.log).toHaveBeenCalledTimes(auditObjects.length);
         let i = 1;
         for (const obj of auditObjects) {
           expect(auditLogger.log).toHaveBeenNthCalledWith(i++, {
@@ -1117,7 +1117,7 @@ describe('#authorize (unpublished by interface)', () => {
           })
         ).rejects.toThrowError('Unable to bulk_update a,b,c');
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith({
           error: {
             code: 'Error',
@@ -6484,7 +6484,7 @@ describe('access control', () => {
 
     test('sets user for operation and checks for types requiring access control', async () => {
       const { securityExtension, checkPrivileges } = setup();
-      const mockUser = { username: 'testuser', profile_uid: 'user123' };
+      const mockUser = { username: 'testuser', profile_uid: 'u_userid_test' };
       getCurrentUser.mockReturnValue(mockUser);
 
       setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
@@ -6566,7 +6566,7 @@ describe('access control', () => {
     test('allows operation when user is admin but not owner', async () => {
       const currentUser = {
         username: 'admin_user',
-        profile_uid: 'admin_123',
+        profile_uid: 'u_admin_version',
       };
       const { securityExtension, checkPrivileges } = setup();
       getCurrentUser.mockReturnValue(currentUser);
@@ -6584,6 +6584,7 @@ describe('access control', () => {
         status: 'fully_authorized',
         typeMap: new Map(),
       });
+      getCurrentUser.mockClear();
     });
 
     test('allows operation when user is not admin but owner', async () => {
