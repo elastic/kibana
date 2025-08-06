@@ -13,7 +13,6 @@ import type {
   RegistryVarsEntry,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { merge } from 'lodash';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
@@ -86,11 +85,6 @@ export const getPosturePolicy = (
     namespace: newPolicy.namespace,
     // Enable new policy input and disable all others
     inputs,
-    // Set hidden policy vars
-    // vars: merge({}, newPolicy.vars, {
-    //   deployment: { value:  },
-    //   posture: { value: templateName },
-    // }),
   };
 };
 

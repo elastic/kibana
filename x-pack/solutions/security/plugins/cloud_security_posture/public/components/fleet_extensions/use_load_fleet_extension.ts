@@ -13,6 +13,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { merge } from 'lodash';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../../../common/types_old';
@@ -27,9 +28,11 @@ import {
   getMaxPackageName,
   getPostureInputHiddenVars,
   getPosturePolicy,
+  getPostureType,
   getVulnMgmtCloudFormationDefaultValue,
   hasErrors,
   isPostureInput,
+  getDeploymentType,
 } from './utils';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 
@@ -217,13 +220,20 @@ export const useLoadFleetExtension = ({
       isExtensionLoaded?: boolean;
       isValid?: boolean;
     }) => {
+      const newUpdatedPolicy = {
+        ...updatedPolicy,
+        vars: merge({}, updatedPolicy.vars, {
+          deployment: { value: getDeploymentType(input.type) },
+          posture: { value: getPostureType(input.type) },
+        }),
+      };
       onChange({
         isValid: isValid !== undefined ? isValid : isValidFormState,
-        updatedPolicy,
+        updatedPolicy: newUpdatedPolicy,
         isExtensionLoaded: isExtensionLoaded !== undefined ? isExtensionLoaded : !isLoading,
       });
     },
-    [isLoading, isValidFormState, onChange]
+    [input.type, isLoading, isValidFormState, onChange]
   );
 
   const setEnabledPolicyInput = useCallback(

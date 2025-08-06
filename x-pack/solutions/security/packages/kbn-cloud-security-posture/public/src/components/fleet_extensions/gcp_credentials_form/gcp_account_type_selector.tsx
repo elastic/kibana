@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
 import { gcpField, getInputVarsFields } from './gcp_utils';
-import { GCP_PROVIDER, UpdatePolicy } from '../types';
+import { UpdatePolicy } from '../types';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../cloud_setup_context';
 

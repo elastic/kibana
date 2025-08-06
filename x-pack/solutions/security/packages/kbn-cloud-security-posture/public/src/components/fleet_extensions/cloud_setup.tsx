@@ -38,7 +38,6 @@ import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_cr
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
 import { CloudSetupProvider, useCloudSetup } from './cloud_setup_context';
-import { i18n } from '@kbn/i18n';
 
 const EditScreenStepTitle = () => (
   <>
