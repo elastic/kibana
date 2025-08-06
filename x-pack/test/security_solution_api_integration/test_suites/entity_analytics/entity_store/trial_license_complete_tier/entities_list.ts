@@ -31,12 +31,14 @@ export default ({ getService }: FtrProviderContext) => {
       const esArchiver = getService('esArchiver');
 
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/entity_store');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/entity_store'
+        );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/entity_store'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/entity_store'
         );
       });
 
