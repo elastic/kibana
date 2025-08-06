@@ -10,29 +10,30 @@ import { esArchiver } from './support/es_archiver';
 import { samlAuthentication } from './support/saml_auth';
 import { esClient } from './support/es_client';
 
-// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
-  reporter: '../../../node_modules/cypress-multi-reporters',
+  reporter: '../../../../../../node_modules/cypress-multi-reporters',
   reporterOptions: {
     configFile: './cypress/reporter_config.json',
   },
   chromeWebSecurity: false,
-  defaultCommandTimeout: 150000,
+  defaultCommandTimeout: 300000,
   env: {
     grepFilterSpecs: true,
     grepOmitFiltered: true,
-    grepTags: '@serverless --@skipInServerless',
+    grepTags: '@serverless --@skipInServerless --@skipInServerlessMKI',
   },
-  execTimeout: 150000,
-  pageLoadTimeout: 150000,
+  execTimeout: 300000,
+  pageLoadTimeout: 300000,
   numTestsKeptInMemory: 0,
+  requestTimeout: 300000,
+  responseTimeout: 300000,
   retries: {
     runMode: 1,
   },
-  screenshotsFolder: '../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
   e2e: {
@@ -55,8 +56,8 @@ export default defineCypressConfig({
         return launchOptions;
       });
       samlAuthentication(on, config);
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       esClient(on, config);
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
       return config;

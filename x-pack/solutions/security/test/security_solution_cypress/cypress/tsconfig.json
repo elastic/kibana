@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "include": ["**/*", "fixtures/**/*.json"],
   "exclude": ["target/**/*"],
   "compilerOptions": {
@@ -14,7 +14,7 @@
     // in a way that can't be auto-matically deteceted at this time
     // so we have to force the inclusion of this reference
     {
-      "path": "../../../solutions/security/plugins/security_solution/tsconfig.json",
+      "path": "../../../plugins/security_solution/tsconfig.json",
       "force": true
     },
     "@kbn/rison",
