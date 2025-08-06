@@ -7,12 +7,13 @@
 
 import { EuiResizableContainer, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useRef } from 'react';
-import { useConversation } from '../../hooks/use_conversation';
+import React, { useEffect, useRef } from 'react';
+import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
+import { useConversationId } from '../../hooks/use_conversation_id';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -23,7 +24,8 @@ const conversationContainerStyles = css`
 `;
 
 export const Conversation: React.FC<{}> = () => {
-  const { conversation, conversationId, hasActiveConversation } = useConversation();
+  const conversationId = useConversationId();
+  const hasActiveConversation = useHasActiveConversation();
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -40,10 +42,6 @@ export const Conversation: React.FC<{}> = () => {
     setStickToBottom(true);
   }, [conversationId, setStickToBottom]);
 
-  const onSubmit = useCallback(() => {
-    setStickToBottom(true);
-  }, [setStickToBottom]);
-
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
       {(EuiResizablePanel, EuiResizableButton) => {
@@ -53,7 +51,7 @@ export const Conversation: React.FC<{}> = () => {
               <EuiResizablePanel initialSize={80}>
                 <div css={scrollContainerStyles}>
                   <div ref={scrollContainerRef}>
-                    <ConversationRounds conversationRounds={conversation?.rounds ?? []} />
+                    <ConversationRounds />
                   </div>
                 </div>
               </EuiResizablePanel>
@@ -66,7 +64,11 @@ export const Conversation: React.FC<{}> = () => {
             )}
             <EuiResizableButton />
             <EuiResizablePanel initialSize={20} minSize="20%">
-              <ConversationInputForm onSubmit={onSubmit} />
+              <ConversationInputForm
+                onSubmit={() => {
+                  setStickToBottom(true);
+                }}
+              />
             </EuiResizablePanel>
           </>
         );

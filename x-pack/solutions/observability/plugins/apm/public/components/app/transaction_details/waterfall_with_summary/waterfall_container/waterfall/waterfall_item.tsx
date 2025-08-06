@@ -25,7 +25,10 @@ import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
-import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import type {
+  IWaterfallSpan,
+  IWaterfallSpanOrTransaction,
+} from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -257,6 +260,11 @@ export function WaterfallItem({
 
   const waterfallItemFlyoutTab = 'metadata';
 
+  const itemName =
+    item.docType === 'transaction'
+      ? item.doc.transaction.name
+      : (item as IWaterfallSpan).doc.span.name;
+
   return (
     <Container
       ref={waterfallItemRef}
@@ -264,6 +272,29 @@ export function WaterfallItem({
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
+      data-test-subj="waterfallItem"
+      onKeyDown={(e) => {
+        if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+          // Ignore event if it comes from a link
+          if (e.target instanceof HTMLAnchorElement) {
+            return;
+          }
+          e.preventDefault(); // Prevent scroll if Space is pressed
+          onClick(item.id);
+        }
+      }}
+      tabIndex={onClick ? 0 : -1}
+      role={onClick ? 'button' : undefined}
+      aria-label={
+        onClick
+          ? i18n.translate('xpack.apm.waterfall.openDetailsButton', {
+              defaultMessage: 'View details for {name}',
+              values: {
+                name: itemName,
+              },
+            })
+          : undefined
+      }
       onClick={(e: React.MouseEvent) => {
         if (onClick) {
           e.stopPropagation();

@@ -8,25 +8,28 @@
 import path from 'path';
 import { z } from '@kbn/zod';
 import { ContentPackSavedObject, SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
+import { ContentPackStream } from './stream';
 
 export * from './api';
 export * from './saved_object';
+export * from './stream';
 
 export const SUPPORTED_ENTRY_TYPE: Record<ContentPackEntry['type'], string> = {
   ...SUPPORTED_SAVED_OBJECT_TYPE,
+  stream: 'stream',
 };
 
 export type SupportedEntryType = keyof typeof SUPPORTED_ENTRY_TYPE;
 
 export const isSupportedFile = (rootDir: string, filepath: string) => {
   return Object.values(SUPPORTED_ENTRY_TYPE).some(
-    (dir) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+    (dir) => path.dirname(filepath) === path.join(rootDir, dir)
   );
 };
 
 export const getEntryTypeByFile = (rootDir: string, filepath: string): SupportedEntryType => {
   const entry = Object.entries(SUPPORTED_ENTRY_TYPE).find(
-    ([t, dir]) => path.dirname(filepath) === path.join(rootDir, 'kibana', dir)
+    ([t, dir]) => path.dirname(filepath) === path.join(rootDir, dir)
   ) as [SupportedEntryType, string] | undefined;
 
   if (!entry) {
@@ -52,7 +55,7 @@ export const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object
   version: z.string(),
 });
 
-export type ContentPackEntry = ContentPackSavedObject;
+export type ContentPackEntry = ContentPackSavedObject | ContentPackStream;
 
 export interface ContentPack extends ContentPackManifest {
   entries: ContentPackEntry[];

@@ -20,9 +20,11 @@ import {
   EuiLoadingSpinner,
   EuiText,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { deleteJobs } from '../utils';
 import { BLOCKED_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
@@ -52,6 +54,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const [canDelete, setCanDelete] = useState(false);
   const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
   const [deleteAlertingRules, setDeleteAlertingRules] = useState(false);
+
+  const deleteJobModalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -85,7 +89,12 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const closeModal = useCallback(() => {
     setModalVisible(false);
     setCanDelete(false);
-  }, []);
+    // Manually return focus to the delete job action button
+    // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
+    if (jobIds.length === 1) {
+      createJobActionFocusRestoration(jobIds[0])();
+    }
+  }, [jobIds]);
 
   const deleteJob = useCallback(() => {
     setDeleting(true);
@@ -109,9 +118,13 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
 
   if (canDelete) {
     return (
-      <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
+      <EuiModal
+        aria-labelledby={deleteJobModalTitleId}
+        data-test-subj="mlDeleteJobConfirmModal"
+        onClose={closeModal}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={deleteJobModalTitleId}>
             <FormattedMessage
               id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
               defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"

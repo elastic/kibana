@@ -19,17 +19,21 @@ import { WorkflowList } from '../../features/workflow_list/ui';
 const workflowTemplateYaml = `workflow:
   name: New workflow
   enabled: false
+  triggers:
+    - type: triggers.elastic.manual
   steps:
-      - name: first-step
-        type: console
-        with:
-          message: First step executed
+    - name: first-step
+      type: console
+      with:
+        message: First step executed
 `;
 
 export function WorkflowsPage() {
   const { application, chrome, notifications } = useKibana().services;
   const { refetch } = useWorkflows();
   const { createWorkflow } = useWorkflowActions();
+
+  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
 
   chrome!.setBreadcrumbs([
     {
@@ -76,13 +80,15 @@ export function WorkflowsPage() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup>
-              <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
-                <FormattedMessage
-                  id="workflows.createWorkflowButton"
-                  defaultMessage="Create workflow"
-                  ignoreTag
-                />
-              </EuiButton>
+              {canCreateWorkflow && (
+                <EuiButton color="text" size="s" onClick={handleCreateWorkflow}>
+                  <FormattedMessage
+                    id="workflows.createWorkflowButton"
+                    defaultMessage="Create workflow"
+                    ignoreTag
+                  />
+                </EuiButton>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

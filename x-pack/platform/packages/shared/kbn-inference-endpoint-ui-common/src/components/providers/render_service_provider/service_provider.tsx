@@ -7,6 +7,12 @@
 
 import { EuiAvatar, EuiHighlight } from '@elastic/eui';
 import React from 'react';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
+import {
+  KIBANA_OBSERVABILITY_PROJECT,
+  KIBANA_SECURITY_PROJECT,
+  KIBANA_SEARCH_PROJECT,
+} from '@kbn/projects-solutions-groups';
 
 import { ServiceProviderKeys } from '../../../constants';
 import elasticIcon from '../assets/images/elastic.svg';
@@ -30,6 +36,16 @@ interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
   searchValue?: string;
 }
+
+type SolutionKeys = Partial<{
+  [key in SolutionView]: string;
+}>;
+
+export const solutionKeys: SolutionKeys = {
+  [KIBANA_OBSERVABILITY_PROJECT]: 'Observability',
+  [KIBANA_SECURITY_PROJECT]: 'Security',
+  [KIBANA_SEARCH_PROJECT]: 'Search',
+};
 
 export type ProviderSolution = 'Observability' | 'Security' | 'Search';
 

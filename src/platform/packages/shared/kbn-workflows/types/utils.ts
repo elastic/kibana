@@ -21,5 +21,5 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     tags: workflowDefinition.workflow.tags ?? [],
     status: workflowDefinition.workflow.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
     definition: workflowDefinition,
-  } as any;
+  };
 }

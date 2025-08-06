@@ -37,7 +37,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 // flaky test
-describe.skip('Storage Explorer', () => {
+describe.skip('Storage explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -70,7 +70,7 @@ describe.skip('Storage Explorer', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Storage Explorer');
+      cy.contains('h1', 'Storage explorer');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });

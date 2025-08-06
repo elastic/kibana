@@ -30,15 +30,17 @@ import {
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
+import type {
+  ControlsChainingSystem,
+  ControlsGroupState,
+  ControlsIgnoreParentSettings,
+  ControlsLabelPosition,
+} from '@kbn/controls-schemas';
 import {
-  ControlGroupChainingSystem,
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-  ControlLabelPosition,
   ControlPanelState,
   DefaultControlState,
-  ParentIgnoreSettings,
 } from '../../common';
 import { ControlFetchContext } from './control_fetch/control_fetch';
 
@@ -49,7 +51,7 @@ import { ControlFetchContext } from './control_fetch/control_fetch';
  */
 
 export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState> &
+  DefaultEmbeddableApi<ControlsGroupState> &
   PublishesFilters &
   PublishesDataViews &
   PublishesESQLVariables &
@@ -62,8 +64,8 @@ export type ControlGroupApi = PresentationContainer &
   Partial<HasParentApi<PublishesUnifiedSearch> & PublishesReload> & {
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;
-    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
-    labelPosition: PublishingSubject<ControlLabelPosition>;
+    ignoreParentSettings$: PublishingSubject<ControlsIgnoreParentSettings | undefined>;
+    labelPosition: PublishingSubject<ControlsLabelPosition>;
     controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
@@ -75,7 +77,7 @@ export type ControlGroupApi = PresentationContainer &
     getEditorConfig: () => ControlGroupEditorConfig | undefined;
 
     /** Public setters */
-    setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
+    setChainingSystem: (chainingSystem: ControlsChainingSystem) => void;
   };
 
 /**

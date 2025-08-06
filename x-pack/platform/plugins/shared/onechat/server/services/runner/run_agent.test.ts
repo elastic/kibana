@@ -90,6 +90,29 @@ describe('runAgent', () => {
     );
   });
 
+  it('propagates the abort signal when provided', async () => {
+    const abortCtrl = new AbortController();
+
+    const params: ScopedRunnerRunAgentParams = {
+      agentId: 'test-agent',
+      agentParams: { nextInput: { message: 'dolly' } },
+      abortSignal: abortCtrl.signal,
+    };
+
+    await runAgent({
+      agentExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(agentHandler).toHaveBeenCalledTimes(1);
+    expect(agentHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        abortSignal: abortCtrl.signal,
+      }),
+      expect.any(Object)
+    );
+  });
+
   it('returns the expected value', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',

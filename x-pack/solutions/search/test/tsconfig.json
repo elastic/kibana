@@ -27,5 +27,8 @@
     "@kbn/tooling-log",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/core-chrome-browser",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/inference-common",
+    "@kbn/test-suites-src",
   ]
 }

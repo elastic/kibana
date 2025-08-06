@@ -187,6 +187,14 @@ describe('FORK Autocomplete', () => {
             '| ',
             'NULLS FIRST',
             'NULLS LAST',
+            ...getFunctionSignaturesByReturnType(
+              Location.SORT,
+              'any',
+              {
+                operators: true,
+              },
+              ['integer']
+            ),
           ]);
         });
 
