@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Alert assignments API', function () {
+  describe('SecuritySolution Alert Workflows', () => {
+    loadTestFile(require.resolve('./set_alert_tags'));
     loadTestFile(require.resolve('./assignments'));
     loadTestFile(require.resolve('./assignments_ess'));
     loadTestFile(require.resolve('./assignments_serverless'));

@@ -8,7 +8,7 @@
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '@kbn/security-solution-plugin/common/constants';
 import TestAgent from 'supertest/lib/agent';
 
-import { setAlertAssignees } from '../../../../utils';
+import { setAlertAssignees } from '../../utils/alerts';
 import {
   createAlertsIndex,
   createRule,
@@ -18,9 +18,9 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+} from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');

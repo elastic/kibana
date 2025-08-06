@@ -14,7 +14,7 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { setAlertTags } from '../../../utils';
+import { setAlertTags } from '../../utils/alerts';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -25,9 +25,9 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
+} from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

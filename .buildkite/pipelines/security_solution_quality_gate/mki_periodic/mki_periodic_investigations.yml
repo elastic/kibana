@@ -6,7 +6,7 @@ steps:
         label: 'Cypress MKI - Alerts'
         key: test_investigations_alerts
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -20,7 +20,7 @@ steps:
         label: 'Cypress MKI - Dashboards'
         key: test_investigations_dashboards
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -34,7 +34,7 @@ steps:
         label: 'Cypress MKI - SIEM Integrations'
         key: test_investigations_siem_migrations
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -48,7 +48,7 @@ steps:
         label: 'Cypress MKI - Sourcerer'
         key: test_investigations_sourcerer
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -62,7 +62,7 @@ steps:
         label: 'Cypress MKI - Threat Intelligence'
         key: test_investigations_threat_intelligence
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -76,7 +76,7 @@ steps:
         label: 'Cypress MKI - Timeline Templates'
         key: test_investigations_timeline_templates
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -90,7 +90,7 @@ steps:
         label: 'Cypress MKI - Timelines'
         key: test_investigations_timelines
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-investigations'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -104,7 +104,7 @@ steps:
         label: 'Cypress MKI - Explore - Filters'
         key: test_explore_filters
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -118,7 +118,7 @@ steps:
         label: 'Cypress MKI - Explore - Guided Onboarding'
         key: test_explore_guided_onboarding
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -132,7 +132,7 @@ steps:
         label: 'Cypress MKI - Explore - Inspect'
         key: test_explore_inspect
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -146,7 +146,7 @@ steps:
         label: 'Cypress MKI - Explore - Navigation'
         key: test_explore_navigation
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -160,7 +160,7 @@ steps:
         label: 'Cypress MKI - Explore - Overview'
         key: test_explore_overview
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -174,7 +174,7 @@ steps:
         label: 'Cypress MKI - Explore - Pagination'
         key: test_explore_pagination
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -188,7 +188,7 @@ steps:
         label: 'Cypress MKI - Explore - URLs'
         key: test_explore_urls
         env:
-          BK_TEST_SUITE_KEY: "serverless-cypress-explore"
+          BK_TEST_SUITE_KEY: 'serverless-cypress-explore'
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -198,7 +198,7 @@ steps:
         timeout_in_minutes: 300
         parallelism: 1
 
-  - group: "API MKI - Investigations"
+  - group: 'API MKI - Investigations'
     key: api_test_investigations
     steps:
       - label: 'API MKI - investigations:timeline:runner:qa:serverless'
@@ -212,7 +212,7 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2
 
       - label: 'API MKI - investigations:saved-objects:runner:qa:serverless'
@@ -226,7 +226,21 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
+              limit: 2
+
+      - label: 'API MKI - investigations:alerts:runner:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:alerts:runner:qa:serverless
+        key: investigations:alerts:runner:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: '1'
               limit: 2
 
       - label: 'API MKI - explore:overview:runner:qa:serverless'
@@ -240,5 +254,5 @@ steps:
         timeout_in_minutes: 120
         retry:
           automatic:
-            - exit_status: "1"
+            - exit_status: '1'
               limit: 2

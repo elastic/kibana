@@ -11,8 +11,8 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   createUserAndRole,
   deleteUserAndRole,
-} from '../../../../../../../common/services/security_solution';
-import { setAlertAssignees } from '../../../../utils';
+} from '../../../../../common/services/security_solution';
+import { setAlertAssignees } from '../../utils/alerts';
 import {
   createAlertsIndex,
   createRule,
@@ -22,9 +22,9 @@ import {
   getRuleForAlertTesting,
   waitForAlertsToBePresent,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
+} from '../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
