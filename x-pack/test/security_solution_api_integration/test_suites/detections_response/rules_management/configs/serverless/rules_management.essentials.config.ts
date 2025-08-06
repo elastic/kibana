@@ -7,11 +7,12 @@
 
 import type { CreateTestConfigOptions } from '../../../../../config/serverless/config.base.essentials';
 import { createTestConfig } from '../../../../../config/serverless/config.base.essentials';
-import { LOGGING_CONFIG } from '../constants';
+import { LOGGING_CONFIG, FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP } from '../constants';
 
 export function createEssentialsTierTestConfig(options: CreateTestConfigOptions) {
   return createTestConfig({
     kbnTestServerArgs: [`--logging.loggers=${JSON.stringify(LOGGING_CONFIG)}`],
+    kbnTestServerWait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
     ...options,
   });
 }
