@@ -17,7 +17,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/kibana-react-plugin",
-    "@kbn/case-suggestion-registry-plugin",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/developer-examples-plugin",
     "@kbn/share-plugin",
