@@ -6,7 +6,7 @@
  */
 
 import { capitalize } from 'lodash';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
 import {
   AlertSuppression,
@@ -107,19 +107,24 @@ import {
   UPDATE_PREBUILT_RULE_PREVIEW,
 } from '../screens/alerts_detection_rules';
 
-export const openRuleInstallPreview = (ruleName: string) => {
+export const openPrebuiltRuleInstallFlyoutFor = (ruleName: string) => {
   cy.contains(ruleName).click();
   cy.get(INSTALL_PREBUILT_RULE_PREVIEW).should('be.visible');
 };
 
-export const openRuleUpdatePreview = (ruleName: string) => {
+export const closePrebuiltRuleInstallFlyout = () => {
+  cy.get(FLYOUT_CLOSE_BTN).click();
+  cy.get(INSTALL_PREBUILT_RULE_PREVIEW).should('not.exist');
+};
+
+export const openPrebuiltRuleUpgradeFlyoutFor = (ruleName: string) => {
   cy.contains(ruleName).click();
   cy.get(UPDATE_PREBUILT_RULE_PREVIEW).should('be.visible');
 };
 
-export const closeRulePreview = () => {
+export const closePrebuiltRuleUpgradeFlyout = () => {
   cy.get(FLYOUT_CLOSE_BTN).click();
-  cy.get(INSTALL_PREBUILT_RULE_PREVIEW).should('not.exist');
+  cy.get(UPDATE_PREBUILT_RULE_PREVIEW).should('not.exist');
 };
 
 export const selectPreviewTab = (tabTitle: string) =>

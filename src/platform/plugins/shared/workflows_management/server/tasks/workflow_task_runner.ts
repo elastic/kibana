@@ -12,7 +12,10 @@ import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { convertToSerializableGraph, convertToWorkflowGraph } from '../../common';
+import {
+  convertToSerializableGraph,
+  convertToWorkflowGraph,
+} from '../../common/lib/build_execution_graph/build_execution_graph';
 import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
@@ -56,7 +59,7 @@ export function createWorkflowTaskRunner({
           }
 
           // Convert to execution model
-          const executionGraph = convertToWorkflowGraph(workflow);
+          const executionGraph = convertToWorkflowGraph(workflow.definition.workflow);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
