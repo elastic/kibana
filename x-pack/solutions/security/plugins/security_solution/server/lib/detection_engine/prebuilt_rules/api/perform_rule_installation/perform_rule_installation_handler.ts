@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   PerformRuleInstallationResponseBody,
@@ -27,13 +27,13 @@ import { excludeLicenseRestrictedRules } from '../../logic/utils';
 export const performRuleInstallationHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<unknown, unknown, PerformRuleInstallationRequestBody>,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
   try {
     const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
-    const config = ctx.securitySolution.getConfig();
     const soClient = ctx.core.savedObjects.client;
     const rulesClient = await ctx.alerting.getRulesClient();
     const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
@@ -49,7 +49,7 @@ export const performRuleInstallationHandler = async (
 
     // If this API is used directly without hitting any detection engine
     // pages first, the rules package might be missing.
-    await ensureLatestRulesPackageInstalled(ruleAssetsClient, config, ctx.securitySolution);
+    await ensureLatestRulesPackageInstalled(ruleAssetsClient, ctx.securitySolution, logger);
 
     const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
     const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions();
