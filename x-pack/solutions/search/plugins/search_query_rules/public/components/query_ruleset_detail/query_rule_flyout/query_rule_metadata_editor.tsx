@@ -70,7 +70,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                     )}
                   >
                     <EuiIcon
-                      type="questionInCircle"
+                      type="question"
                       color="subdued"
                       aria-label={i18n.translate(
                         'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorTooltipLabel',
@@ -88,6 +88,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
             isDisabled={criteria.type === 'always'}
           >
             <EuiFieldText
+              isInvalid={!!error?.metadata}
               data-test-subj="searchQueryRulesQueryRuleMetadataEditorField"
               fullWidth
               aria-label={i18n.translate(
@@ -247,7 +248,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                           )}
                         >
                           <EuiIcon
-                            type="questionInCircle"
+                            type="question"
                             color="subdued"
                             aria-label={i18n.translate(
                               'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorValuesTooltipLabel',
@@ -265,6 +266,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isInvalid={!!error?.values}
                     isDisabled={criteria.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
                     fullWidth

@@ -53,11 +53,14 @@ export function prepareInlineEditPanel(
   uuid?: string,
   parentApi?: unknown
 ) {
-  return async function openConfigPanel({
+  return async function getConfigPanel({
+    closeFlyout,
     onApply,
     onCancel,
     hideTimeFilterInfo,
-  }: Partial<Pick<EditConfigPanelProps, 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>> = {}) {
+  }: Partial<
+    Pick<EditConfigPanelProps, 'closeFlyout' | 'onApply' | 'onCancel' | 'hideTimeFilterInfo'>
+  > = {}) {
     const currentState = getState();
     const attributes = currentState.attributes as TypedLensSerializedState['attributes'];
     const activeDatasourceId = (getActiveDatasourceIdFromDoc(attributes) ||
@@ -100,6 +103,7 @@ export function prepareInlineEditPanel(
 
     return (
       <Component
+        closeFlyout={closeFlyout}
         attributes={attributes}
         updateByRefInput={updateByRefInput}
         updatePanelState={updatePanelState}

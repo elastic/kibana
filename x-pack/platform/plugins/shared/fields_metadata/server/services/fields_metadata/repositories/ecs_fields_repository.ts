@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/PathReporter';
 import { mapValues } from 'lodash';
+import { isLeft } from 'fp-ts/Either';
+import { fieldsMetadataDictionaryRT } from '../../../../common/fields_metadata';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
-import { AnyFieldName, EcsFieldName, FieldMetadata, TEcsFields } from '../../../../common';
+import { AnyFieldName, EcsFieldName, FieldMetadata, FieldMetadataPlain } from '../../../../common';
+import { TEcsFields } from '../../../../common/fields_metadata/types';
 
-interface EcsFieldsRepositoryDeps {
+export interface EcsFieldsRepositoryDeps {
   ecsFields: TEcsFields;
 }
 
@@ -20,7 +24,7 @@ interface FindOptions {
 export class EcsFieldsRepository {
   private readonly ecsFields: Record<EcsFieldName, FieldMetadata>;
 
-  private constructor(ecsFields: TEcsFields) {
+  private constructor(ecsFields: Record<EcsFieldName, FieldMetadataPlain>) {
     this.ecsFields = mapValues(ecsFields, (field) =>
       FieldMetadata.create({ ...field, source: 'ecs' })
     );
@@ -49,6 +53,15 @@ export class EcsFieldsRepository {
   }
 
   public static create({ ecsFields }: EcsFieldsRepositoryDeps) {
-    return new EcsFieldsRepository(ecsFields);
+    const decodedFields = fieldsMetadataDictionaryRT.decode(ecsFields);
+    if (isLeft(decodedFields)) {
+      throw Error(
+        `EcsFieldsRepositoryDeps.create: could not validate data: ${PathReporter.report(
+          decodedFields
+        ).join('\n')}`
+      );
+    }
+
+    return new EcsFieldsRepository(decodedFields.right as Record<EcsFieldName, FieldMetadataPlain>);
   }
 }

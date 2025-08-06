@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/slo'));
     loadTestFile(require.resolve('../../apis/synthetics'));
     loadTestFile(require.resolve('../../apis/infra'));
-    loadTestFile(require.resolve('../../apis/streams'));
     loadTestFile(require.resolve('../../apis/onboarding'));
     loadTestFile(require.resolve('../../apis/incident_management'));
   });

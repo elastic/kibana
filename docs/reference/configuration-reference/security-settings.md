@@ -120,8 +120,9 @@ xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink ![logo
 % TBD: Available only on Elastic Cloud?
 
 #### Discontinued SAML settings
+
 ```{applies_to}
-ess: discontinued 8.0
+ess: removed 8.0
 ```
 The following settings are available in {{ecloud}} for all supported versions before 8.0:
 

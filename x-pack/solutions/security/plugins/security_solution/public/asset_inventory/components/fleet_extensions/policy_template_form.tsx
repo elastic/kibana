@@ -5,9 +5,22 @@
  * 2.0.
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCallOut,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import {
+  NamespaceComboBox,
+  SetupTechnology,
+  SetupTechnologySelector,
+} from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   type NewPackagePolicyInput,
@@ -25,7 +38,6 @@ import {
   getDefaultCloudCredentialsType,
   getCloudConnectorRemoteRoleTemplate,
 } from './utils';
-import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { PolicyTemplateInputSelector, PolicyTemplateVarsForm } from './policy_template_selectors';
 import type { AssetInput, NewPackagePolicyAssetInput } from './types';
@@ -33,7 +45,7 @@ import { AwsAccountTypeSelect } from './aws_credentials_form/aws_account_type_se
 import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
 import { GcpAccountTypeSelect } from './gcp_credentials_form/gcp_account_type_select';
 import { AzureAccountTypeSelect } from './azure_credentials_form/azure_account_type_select';
-import { useEnsureDefaultNamespace } from './hooks';
+
 import { useKibana } from '../../hooks/use_kibana';
 
 const EditScreenStepTitle = () => (
@@ -95,6 +107,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
     }) => {
       const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
+      const isServerless = !!cloud.serverless.projectType;
       const input = getSelectedOption(newPolicy.inputs);
       const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
         input,
@@ -122,6 +135,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
         cloud,
         packageInfo,
       });
+      const { euiTheme } = useEuiTheme();
 
       const showCloudConnectors =
         cloudConnectorsEnabled &&
@@ -172,8 +186,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
         setEnabledPolicyInput(input.type);
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [isLoading, input.policy_template, isEditPage]);
-
-      useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
 
       const integrationFields = [
         {
@@ -271,29 +283,71 @@ export const CloudAssetInventoryPolicyTemplateForm =
             fields={integrationFields}
             onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
           />
-          {shouldRenderAgentlessSelector && (
-            <SetupTechnologySelector
-              disabled={isEditPage}
-              setupTechnology={setupTechnology}
-              onSetupTechnologyChange={(value) => {
-                updateSetupTechnology(value);
-                updatePolicy(
-                  getAssetPolicy(
-                    newPolicy,
-                    input.type,
-                    getDefaultCloudCredentialsType(
-                      value === SetupTechnology.AGENTLESS,
-                      input.type as Extract<
-                        AssetInput,
-                        | 'cloudbeat/asset_inventory_aws'
-                        | 'cloudbeat/asset_inventory_azure'
-                        | 'cloudbeat/asset_inventory_gcp'
-                      >
-                    )
-                  )
-                );
+
+          <EuiSpacer size="m" />
+          <EuiAccordion
+            id="advancedOptions"
+            data-test-subj="advancedOptionsAccordion"
+            buttonContent={
+              <EuiText
+                size="xs"
+                color={euiTheme.colors.textPrimary}
+                css={{
+                  fontWeight: euiTheme.font.weight.medium,
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.fleetIntegration.advancedOptionsLabel"
+                  defaultMessage="Advanced options"
+                />
+              </EuiText>
+            }
+            paddingSize="m"
+          >
+            <NamespaceComboBox
+              fullWidth
+              namespace={newPolicy.namespace}
+              placeholder="default"
+              isEditPage={isEditPage}
+              validationError={validationResults?.namespace}
+              onNamespaceChange={(namespace: string) => {
+                updatePolicy({ ...newPolicy, namespace });
               }}
+              data-test-subj="namespaceInput"
+              labelId="xpack.csp.fleetIntegration.namespaceLabel"
+              helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
             />
+          </EuiAccordion>
+          {shouldRenderAgentlessSelector && (
+            <>
+              <EuiSpacer size="m" />
+              <SetupTechnologySelector
+                showLimitationsMessage={!isServerless}
+                disabled={isEditPage}
+                setupTechnology={setupTechnology}
+                allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
+                onSetupTechnologyChange={(value) => {
+                  updateSetupTechnology(value);
+                  updatePolicy(
+                    getAssetPolicy(
+                      newPolicy,
+                      input.type,
+                      getDefaultCloudCredentialsType(
+                        value === SetupTechnology.AGENTLESS,
+                        input.type as Extract<
+                          AssetInput,
+                          | 'cloudbeat/asset_inventory_aws'
+                          | 'cloudbeat/asset_inventory_azure'
+                          | 'cloudbeat/asset_inventory_gcp'
+                        >
+                      )
+                    )
+                  );
+                }}
+                showBetaBadge={false}
+                useDescribedFormGroup={false}
+              />
+            </>
           )}
           <PolicyTemplateVarsForm
             input={input}

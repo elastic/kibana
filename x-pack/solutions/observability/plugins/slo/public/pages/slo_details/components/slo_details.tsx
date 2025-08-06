@@ -57,7 +57,7 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
   }, [isAutoRefreshing]);
 
   if (selectedTabId === HISTORY_TAB_ID) {
-    return <SloDetailsHistory slo={slo} isAutoRefreshing={isAutoRefreshing} />;
+    return <SloDetailsHistory slo={slo} />;
   }
 
   if (selectedTabId === DEFINITION_TAB_ID) {

@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { NOTIFY_WHEN_OPTIONS } from '@kbn/response-ops-rule-form';
-import { ActionTypeRegistryContract, suspendedComponentWithProps } from '../../../..';
+import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
+import { ActionTypeRegistryContract } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { RuleUiAction } from '../../../../types';
 

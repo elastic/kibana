@@ -15,7 +15,7 @@ const { initTelemetry } = require('@kbn/telemetry');
 const rootDir = join(__dirname, '../..');
 const isKibanaDistributable = Boolean(build && build.distributable === true);
 
-module.exports = function (serviceName = name) {
-  initApm(process.argv, rootDir, isKibanaDistributable, serviceName);
-  initTelemetry(process.argv, rootDir, isKibanaDistributable, serviceName);
+module.exports = function (serviceName = name, argv = process.argv) {
+  initApm(argv, rootDir, isKibanaDistributable, serviceName);
+  initTelemetry(argv, rootDir, isKibanaDistributable, serviceName);
 };

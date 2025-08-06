@@ -137,8 +137,8 @@ describe('groupStatsRenderer', () => {
     jest.clearAllMocks();
   });
 
-  it('should return array of badges for signal.rule.id field', () => {
-    const badges = groupStatsRenderer('signal.rule.id', {
+  it('should return array of badges for signal.rule.rule_id field', () => {
+    const badges = groupStatsRenderer('signal.rule.rule_id', {
       key: '',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       rulesCountAggregation: { value: 3 },

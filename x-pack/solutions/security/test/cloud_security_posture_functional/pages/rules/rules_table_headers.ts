@@ -24,8 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/220524
-  describe.skip('Cloud Posture Rules Page - Table Headers', function () {
+  describe('Cloud Posture Rules Page - Table Headers', function () {
     this.tags(['cloud_security_posture_rules_page_table_headers']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
@@ -46,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -85,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     afterEach(async () => {

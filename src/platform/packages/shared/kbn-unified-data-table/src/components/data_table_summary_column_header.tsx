@@ -54,7 +54,7 @@ export const UnifiedDataTableSummaryColumnHeader = ({
       <span css={marginStyle}>
         <EuiIconTip
           data-test-subj={iconTipDataTestSubj}
-          type="questionInCircle"
+          type="question"
           content={tooltipContent}
           title={tooltipTitle}
         />

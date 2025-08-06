@@ -22,7 +22,6 @@ import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
 import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import type { InputControlPublicConfig } from '../server/config';
-import { InputControlDeprecationBadge } from './deprecation_badge';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -81,13 +80,11 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     );
   }
 
-  public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
-    // nothing to do here
-    const { uiActions } = deps;
-
-    const deprecationBadge = new InputControlDeprecationBadge();
-
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, deprecationBadge);
+  public start(core: CoreStart, { uiActions }: InputControlVisPluginStartDependencies) {
+    uiActions.addTriggerActionAsync(PANEL_BADGE_TRIGGER, 'ACTION_DEPRECATION_BADGE', async () => {
+      const { inputControlDeprecationBadge } = await import('./deprecation_badge');
+      return inputControlDeprecationBadge;
+    });
 
     return {};
   }

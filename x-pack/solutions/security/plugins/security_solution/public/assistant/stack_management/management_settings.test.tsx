@@ -64,7 +64,7 @@ describe('ManagementSettings', () => {
   }) => {
     useAssistantContextMock.mockReturnValue({
       http,
-      assistantAvailability: { isAssistantEnabled },
+      assistantAvailability: { isAssistantEnabled, isAssistantVisible: isAssistantEnabled },
       setCurrentUserAvatar,
     });
 

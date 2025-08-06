@@ -40,6 +40,7 @@ export interface RuleType<
   doesSetRecoveryContext?: boolean;
   enabledInLicense: boolean;
   authorizedConsumers: Record<string, ConsumerPrivileges>;
+  autoRecoverAlerts?: boolean;
 }
 
 export type ActionGroupIdsOf<T> = T extends ActionGroup<infer groups>

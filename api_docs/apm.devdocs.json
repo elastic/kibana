@@ -4635,6 +4635,8 @@
           "StringC",
           "; mark_as_applied_by_agent: ",
           "BooleanC",
+          "; error: ",
+          "StringC",
           "; }>]>; }>, ",
           "APMRouteHandlerResources",
           ", ",

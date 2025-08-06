@@ -29,7 +29,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         esNode = isRunningInCcsMode
           ? getService('remoteEsArchiver' as 'esArchiver')
           : getService('esArchiver');
-        await esNode.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+        await esNode.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       });
 
       after(async () => {

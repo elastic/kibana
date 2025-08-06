@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import {
-  ProductFeaturesPrivilegeId,
-  ProductFeaturesPrivileges,
-} from '../../product_features_privileges';
 
 import { SecuritySubFeatureId } from '../../product_features_keys';
 import { APP_ID, SECURITY_FEATURE_ID_V3 } from '../../constants';
@@ -115,6 +111,7 @@ const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
             'lists-summary',
             `${APP_ID}-writeTrustedApplications`,
             `${APP_ID}-readTrustedApplications`,
+            `${APP_ID}-writeGlobalArtifacts`,
           ],
           id: 'trusted_applications_all',
           includeIn: 'none',
@@ -187,6 +184,7 @@ const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
             'lists-summary',
             `${APP_ID}-deleteHostIsolationExceptions`,
             `${APP_ID}-readHostIsolationExceptions`,
+            `${APP_ID}-writeGlobalArtifacts`,
           ],
           id: 'host_isolation_exceptions_all',
           includeIn: 'none',
@@ -256,6 +254,7 @@ const blocklistSubFeature = (): SubFeatureConfig => ({
             'lists-summary',
             `${APP_ID}-writeBlocklist`,
             `${APP_ID}-readBlocklist`,
+            `${APP_ID}-writeGlobalArtifacts`,
           ],
           id: 'blocklist_all',
           includeIn: 'none',
@@ -326,6 +325,7 @@ const eventFiltersSubFeature = (): SubFeatureConfig => ({
             'lists-summary',
             `${APP_ID}-writeEventFilters`,
             `${APP_ID}-readEventFilters`,
+            `${APP_ID}-writeGlobalArtifacts`,
           ],
           id: 'event_filters_all',
           includeIn: 'none',
@@ -713,7 +713,12 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].all,
+          ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
+          api: [
+            `${APP_ID}-showEndpointExceptions`,
+            `${APP_ID}-crudEndpointExceptions`,
+            `${APP_ID}-writeGlobalArtifacts`,
+          ],
         },
         {
           replacedBy: [
@@ -726,7 +731,8 @@ const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
             all: [],
             read: [],
           },
-          ...ProductFeaturesPrivileges[ProductFeaturesPrivilegeId.endpointExceptions].read,
+          ui: ['showEndpointExceptions'],
+          api: [`${APP_ID}-showEndpointExceptions`],
         },
       ],
     },

@@ -175,6 +175,7 @@ describe('When calling package policy', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
     testPackagePolicy = {

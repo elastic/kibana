@@ -30,7 +30,7 @@ import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
 import { FieldsGroupNames } from '../../types';
-import type { ButtonAddFieldVariant, AdditionalFieldGroups } from '../../types';
+import type { ButtonAddFieldVariant } from '../../types';
 import { GroupedFieldsParams, useGroupedFields } from '../../hooks/use_grouped_fields';
 import { UnifiedFieldListItem, type UnifiedFieldListItemProps } from '../unified_field_list_item';
 import { SidebarToggleButton, type SidebarToggleButtonProps } from './sidebar_toggle_button';
@@ -77,11 +77,6 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Custom logic for determining which field is selected
    */
   onSelectedFieldFilter?: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'];
-
-  /**
-   * Prop to pass additional field groups to the field list
-   */
-  additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -170,7 +165,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onEditField,
   onDeleteField,
   onToggleSidebar,
-  additionalFieldGroups,
   additionalFilters,
 }) => {
   const styles = useMemoCss(componentStyles);
@@ -237,7 +231,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
         stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
       onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
       getNewFieldsBySpec,
-      additionalFieldGroups,
     });
 
   useEffect(() => {

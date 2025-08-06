@@ -10,7 +10,6 @@ import { asyncForEach } from '@kbn/std';
 import { omit } from 'lodash';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { getApmSynthtraceEsClient } from '../../lib/apm_es_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { generateUniqueKey } from '../../lib/get_test_data';
 
@@ -23,8 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const rules = getService('rules');
   const toasts = getService('toasts');
-  const esClient = getService('es');
-  const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
+  const synthtraceClient = getService('synthtrace');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
 
@@ -167,11 +165,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       esQueryRuleId = createdESRule.id;
 
-      const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
-      apmSynthtraceEsClient = await getApmSynthtraceEsClient({
-        client: esClient,
-        packageVersion: version,
-      });
+      const clients = await synthtraceClient.getClients(['apmEsClient']);
+      apmSynthtraceEsClient = clients.apmEsClient;
+
+      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
+
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');

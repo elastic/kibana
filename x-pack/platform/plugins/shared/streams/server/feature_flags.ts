@@ -37,7 +37,7 @@ export function registerFeatureFlags(
             type: 'boolean',
             schema: schema.boolean(),
             requiresPageReload: true,
-            solution: 'oblt',
+            solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
           },
         });
@@ -64,7 +64,7 @@ export function registerFeatureFlags(
       type: 'boolean',
       schema: schema.boolean(),
       requiresPageReload: true,
-      solution: 'oblt',
+      solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
     },
   });

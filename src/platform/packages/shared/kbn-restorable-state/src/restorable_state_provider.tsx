@@ -25,6 +25,9 @@ import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, Subject, map } from 'rxjs';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+const storage = new Storage(localStorage);
 
 export interface RestorableStateProviderProps<TState extends object> {
   initialState?: Partial<TState>;
@@ -245,7 +248,36 @@ export const createRestorableStateProvider = <TState extends object>() => {
     return valueRef;
   };
 
-  return { withRestorableState, useRestorableState, useRestorableRef };
+  const useRestorableLocalStorage = <TKey extends keyof TState>(
+    key: TKey,
+    localStorageKey: string,
+    initialValue: TState[TKey]
+  ) => {
+    const [value, _setValue] = useRestorableState(
+      key,
+      storage.get(localStorageKey) ?? initialValue,
+      {
+        shouldStoreDefaultValueRightAway: true,
+      }
+    );
+
+    const setValue = useStableFunction<typeof _setValue>((newValue) => {
+      _setValue((prevValue) => {
+        const nextValue =
+          typeof newValue === 'function'
+            ? (newValue as (prevValue: TState[TKey]) => TState[TKey])(prevValue)
+            : newValue;
+
+        storage.set(localStorageKey, nextValue);
+
+        return nextValue;
+      });
+    });
+
+    return [value, setValue] as const;
+  };
+
+  return { withRestorableState, useRestorableState, useRestorableRef, useRestorableLocalStorage };
 };
 
 const useStableFunction = <T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T) => {

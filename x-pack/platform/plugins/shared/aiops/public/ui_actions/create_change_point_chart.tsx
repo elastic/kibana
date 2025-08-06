@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
@@ -55,27 +57,36 @@ export function createAddChangePointChartAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      try {
-        const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/resolve_change_point_config_input'
-        );
-
-        const initialState = await resolveEmbeddableChangePointUserInput(
-          coreStart,
-          pluginStart,
-          context.embeddable,
-          context.embeddable.uuid
-        );
-
-        presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
-          panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-          serializedState: {
-            rawState: initialState,
-          },
-        });
-      } catch (e) {
-        return Promise.reject();
-      }
+      openLazyFlyout({
+        core: coreStart,
+        parentApi: context.embeddable,
+        flyoutProps: {
+          'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+          'aria-labelledby': 'changePointConfig',
+          focusedPanelId: context.embeddable.uuid,
+        },
+        loadContent: async ({ closeFlyout }) => {
+          const { EmbeddableChangePointUserInput } = await import(
+            '../embeddables/change_point_chart/change_point_config_input'
+          );
+          return (
+            <EmbeddableChangePointUserInput
+              coreStart={coreStart}
+              pluginStart={pluginStart}
+              onConfirm={(initialState) => {
+                presentationContainerParent.addNewPanel<ChangePointEmbeddableState>({
+                  panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+                  serializedState: {
+                    rawState: initialState,
+                  },
+                });
+                closeFlyout();
+              }}
+              onCancel={closeFlyout}
+            />
+          );
+        },
+      });
     },
   };
 }

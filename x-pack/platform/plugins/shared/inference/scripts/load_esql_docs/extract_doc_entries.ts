@@ -60,10 +60,12 @@ export async function extractDocEntries({
   log: ToolingLog;
   inferenceClient: ScriptInferenceClient;
 }): Promise<ExtractionOutput> {
-  const path = `${builtDocsDir}/html/en/elasticsearch/reference/current/esql*.html`;
-  const files = await fastGlob(path);
+  const paths = ['esql*.html', '_lookup_join.html'].map(
+    (path) => `${builtDocsDir}/html/en/elasticsearch/reference/current/${path}`
+  );
+  const files = await fastGlob(paths);
   if (!files.length) {
-    throw new Error(`No files found at path: ${path}`);
+    throw new Error(`No files found at paths: ${paths}`);
   }
 
   const output: ExtractionOutput = {
@@ -129,11 +131,24 @@ async function processFile({
       limiter,
       executePrompt,
     });
+  } else if (basename === '_lookup_join.html') {
+    const $element = load(fileContent)('*');
+    const command: ExtractedCommandOrFunc = {
+      name: 'lookup-join',
+      markdownContent: await executePrompt(
+        convertToMarkdownPrompt({ htmlContent: getSimpleText($element) })
+      ),
+      command: true,
+    };
+    output.commands.push(command);
   } else if (contextArticles.includes(basename)) {
     const $element = load(fileContent)('*');
     output.pages.push({
       sourceFile: basename,
-      name: basename === 'esql.html' ? 'overview' : basename.substring(5, basename.length - 5),
+      name:
+        basename === 'esql.html'
+          ? 'overview'
+          : basename.replace(/^esql-/, '').replace(/\.html$/, ''),
       content: getSimpleText($element),
     });
   } else {

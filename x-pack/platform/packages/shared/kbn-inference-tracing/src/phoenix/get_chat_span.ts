@@ -33,7 +33,7 @@ import {
   PROMPT_TEMPLATE_TEMPLATE,
   LLM_TOOLS,
 } from '@arizeai/openinference-semantic-conventions';
-import { ReadableSpan } from '@opentelemetry/sdk-trace-base';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { omit, partition } from 'lodash';
 import { ToolDefinition } from '@kbn/inference-common';
 import {
@@ -45,7 +45,7 @@ import {
 import { flattenAttributes } from '../util/flatten_attributes';
 import { unflattenAttributes } from '../util/unflatten_attributes';
 
-export function getChatSpan(span: ReadableSpan) {
+export function getChatSpan(span: tracing.ReadableSpan) {
   const [inputEvents, outputEvents] = partition(
     span.events.filter((event) => event.name !== 'exception'),
     (event) => event.name !== GenAISemanticConventions.GenAIChoice

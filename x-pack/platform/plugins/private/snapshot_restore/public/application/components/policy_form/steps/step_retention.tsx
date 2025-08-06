@@ -170,6 +170,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldNumber
+              isInvalid={touched.minCount && Boolean(errors.minCount)}
               fullWidth
               value={retention.minCount || ''}
               onBlur={() => setTouched({ ...touched, minCount: true })}
@@ -197,6 +198,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
             fullWidth
           >
             <EuiFieldNumber
+              isInvalid={touched.maxCount && Boolean(errors.maxCount)}
               fullWidth
               value={retention.maxCount || ''}
               onBlur={() => setTouched({ ...touched, maxCount: true })}

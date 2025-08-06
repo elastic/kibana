@@ -18,9 +18,11 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -39,6 +41,8 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
   agentPolicy: AgentPolicy;
 }> = ({ onClose, agentPolicy }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const [prerelease, setPrerelease] = React.useState<boolean>(false);
   const { data: settings } = useGetSettings();
 
@@ -102,7 +106,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             <EuiText size="m" color="subdued">
               <FormattedMessage
                 id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
-                defaultMessage="Search our observability integrations collection."
+                defaultMessage="Search our integrations collection."
               />
             </EuiText>
           </EuiFlexItem>
@@ -135,14 +139,18 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   return (
     <Suspense fallback={<Loading />}>
       <EuiErrorBoundary>
-        <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout">
+        <EuiFlyout
+          onClose={onClose}
+          data-test-subj="addIntegrationFlyout"
+          aria-labelledby={modalTitleId}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="baseline" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle>
-                      <h2>
+                      <h2 id={modalTitleId}>
                         <FormattedMessage
                           id="xpack.fleet.addIntegrationFlyout.flyoutHeaderTitle"
                           defaultMessage="Add integration to policy"
@@ -166,21 +174,28 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <CreatePackagePolicySinglePage
-              from="policy"
-              queryParamsPolicyId={agentPolicy.id}
-              prerelease={prerelease}
-              pkgLabel={selectedOptions[0]?.label}
-              pkgName={selectedOptions[0]?.value}
-              integration={selectedOptions[0]?.integration}
-              addIntegrationFlyoutProps={{
-                selectIntegrationStep,
-                onSubmitCompleted,
-                isSubmitted,
-                agentPolicy,
-                updateHasErrors,
-              }}
-            />
+            <>
+              <CreatePackagePolicySinglePage
+                from="policy"
+                queryParamsPolicyId={agentPolicy.id}
+                prerelease={prerelease}
+                pkgLabel={selectedOptions[0]?.label}
+                pkgName={selectedOptions[0]?.value}
+                integration={selectedOptions[0]?.integration}
+                addIntegrationFlyoutProps={{
+                  selectIntegrationStep,
+                  onSubmitCompleted,
+                  isSubmitted,
+                  agentPolicy,
+                  updateHasErrors,
+                }}
+              />
+              {isSubmitted && (
+                <EuiOverlayMask headerZindexLocation="below">
+                  <Loading />
+                </EuiOverlayMask>
+              )}
+            </>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

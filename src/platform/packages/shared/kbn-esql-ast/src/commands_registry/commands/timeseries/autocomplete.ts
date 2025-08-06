@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../utils/complete_items';
+import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
 import { specialIndicesToSuggestions } from '../../../definitions/utils/sources';
 import {
   getSourcesFromCommands,
   additionalSourcesSuggestions,
 } from '../../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
-import { withinQuotes } from '../../../definitions/utils/autocomplete';
+import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
 import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
 
@@ -22,9 +22,11 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
-  if (withinQuotes(query)) {
+  const innerText = query.substring(0, cursorPosition);
+  if (withinQuotes(innerText)) {
     return [];
   }
 
@@ -36,12 +38,12 @@ export async function autocomplete(
     suggestions.push(...definitions);
   };
 
-  const metadataSuggestions = getMetadataSuggestions(command, query);
+  const metadataSuggestions = getMetadataSuggestions(command, innerText);
   if (metadataSuggestions) {
     return metadataSuggestions;
   }
 
-  const metadataOverlap = getOverlapRange(query, 'METADATA');
+  const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
   // TS /
   if (indexes.length === 0) {
@@ -52,13 +54,13 @@ export async function autocomplete(
     return specialIndicesToSuggestions(timeseriesIndices);
   }
   // TS something /
-  else if (indexes.length > 0 && /\s$/.test(query) && !isRestartingExpression(query)) {
+  else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
   }
   // TS something MET/
-  else if (indexes.length > 0 && /^TS\s+\S+\s+/i.test(query) && metadataOverlap) {
+  else if (indexes.length > 0 && /^TS\s+\S+\s+/i.test(innerText) && metadataOverlap) {
     suggestions.push(metadataSuggestion);
   }
   // TS someth/
@@ -67,7 +69,7 @@ export async function autocomplete(
   else if (indexes.length) {
     const sources = context?.sources ?? [];
     const additionalSuggestions = await additionalSourcesSuggestions(
-      query,
+      innerText,
       sources,
       indexes.map(({ name }) => name),
       []

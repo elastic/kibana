@@ -8,25 +8,23 @@
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import createContainer from 'constate';
 import type { FetcherResult } from '@kbn/observability-shared-plugin/public';
+import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 import type { GetTimeRangeMetadataResponse } from '../../common/metrics_sources/get_has_data';
-import {
-  getTimeRangeMetadataResponseRT,
-  type SupportedDataSources,
-} from '../../common/metrics_sources/get_has_data';
+import { getTimeRangeMetadataResponseRT } from '../../common/metrics_sources/get_has_data';
 import { useFetcher } from './use_fetcher';
 
-const useTimeRangeMetadata = ({
+export const useTimeRangeMetadata = ({
   dataSource,
   kuery,
   start,
   end,
 }: {
   kuery?: string;
-  dataSource: SupportedDataSources;
+  dataSource: EntityTypes;
   start: string;
   end: string;
 }): FetcherResult<GetTimeRangeMetadataResponse> => {
-  const fetcherResult = useFetcher(
+  return useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/source/time_range_metadata', {
         method: 'GET',
@@ -42,8 +40,6 @@ const useTimeRangeMetadata = ({
     },
     [start, end, kuery, dataSource]
   );
-
-  return fetcherResult;
 };
 
 export const [TimeRangeMetadataProvider, useTimeRangeMetadataContext] =

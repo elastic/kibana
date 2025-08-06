@@ -60,7 +60,10 @@ const NewChatComponent: React.FC<Props> = ({
     tooltip,
     isAssistantEnabled
   );
-  const { codeBlockRef } = useAssistantContext();
+  const {
+    codeBlockRef,
+    assistantAvailability: { isAssistantVisible },
+  } = useAssistantContext();
 
   const showOverlay = useCallback(() => {
     showAssistantOverlay(true);
@@ -87,7 +90,7 @@ const NewChatComponent: React.FC<Props> = ({
     return iconType ?? 'discuss';
   }, [iconType]);
 
-  return useMemo(
+  const button = useMemo(
     () =>
       asLink ? (
         <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
@@ -105,6 +108,12 @@ const NewChatComponent: React.FC<Props> = ({
       ),
     [children, icon, showOverlay, color, asLink]
   );
+
+  if (!isAssistantVisible) {
+    return null;
+  }
+
+  return button;
 };
 
 NewChatComponent.displayName = 'NewChatComponent';

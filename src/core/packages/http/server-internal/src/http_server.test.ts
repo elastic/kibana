@@ -1886,6 +1886,7 @@ describe('setup contract', () => {
           options: {
             app: {
               access: 'public',
+              excludeFromRateLimiter: true,
               security: {
                 authz: {
                   enabled: false,

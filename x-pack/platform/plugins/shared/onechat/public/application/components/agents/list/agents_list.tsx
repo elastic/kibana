@@ -14,7 +14,7 @@ import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 
 export const AgentsList: React.FC = () => {
-  const { agentProfiles, isLoading, error } = useOnechatAgents();
+  const { agents, isLoading, error } = useOnechatAgents();
 
   const { createOnechatUrl } = useNavigation();
 
@@ -65,7 +65,7 @@ export const AgentsList: React.FC = () => {
       <EuiBasicTable
         loading={isLoading}
         columns={columns}
-        items={agentProfiles}
+        items={agents}
         itemId="id"
         error={errorMessage}
       />

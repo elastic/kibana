@@ -41,6 +41,7 @@
     ],
     "optionalPlugins": [
       "spaces",
+      "cases",
       "ml",
       "home",
       "osquery",
@@ -51,7 +52,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "observability",
       "licenseManagement",
       "kibanaUtils",

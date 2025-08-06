@@ -86,3 +86,14 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
   }
 );
+
+// Optimized implementation for Definition check - the fallback is a zod-based check
+WiredStream.Definition.is = (
+  stream: BaseStream.Model['Definition']
+): stream is WiredStream.Definition =>
+  Boolean(
+    'ingest' in stream &&
+      typeof stream.ingest === 'object' &&
+      stream.ingest &&
+      'wired' in stream.ingest
+  );

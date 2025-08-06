@@ -124,7 +124,7 @@ export const getSummaryTableColumns = ({
         name: CHECK_NOW,
         render: (item) => {
           return (
-            <EuiToolTip content={CHECK_NOW}>
+            <EuiToolTip content={CHECK_NOW} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="refresh"
@@ -140,7 +140,7 @@ export const getSummaryTableColumns = ({
         name: i18n.VIEW_HISTORY,
         render: (item) => {
           return (
-            <EuiToolTip content={i18n.VIEW_HISTORY}>
+            <EuiToolTip content={i18n.VIEW_HISTORY} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="clockCounter"

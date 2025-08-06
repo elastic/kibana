@@ -34,6 +34,10 @@ describe('Get Insights Route Handler', () => {
     router = httpServiceMock.createRouter();
     registerGetInsightsRoute(router, mockEndpointContext);
 
+    (
+      mockEndpointContext.service.getInternalFleetServices().ensureInCurrentSpace as jest.Mock
+    ).mockResolvedValue(undefined);
+
     callRoute = async (params, authz = { canReadWorkflowInsights: true }) => {
       const mockContext = {
         core: {
@@ -70,8 +74,8 @@ describe('Get Insights Route Handler', () => {
   describe('with valid privileges', () => {
     it('should fetch insights and return them', async () => {
       const mockInsights = [
-        { _id: 1, _source: { name: 'Insight 1' } },
-        { _id: 2, _source: { name: 'Insight 2' } },
+        { _id: 1, _source: { name: 'Insight 1', target: { ids: ['agent-123', 'agent-456'] } } },
+        { _id: 2, _source: { name: 'Insight 2', target: { ids: ['agent-123', 'agent-456'] } } },
       ];
       fetchMock.mockResolvedValue(mockInsights);
 
@@ -80,8 +84,8 @@ describe('Get Insights Route Handler', () => {
       expect(fetchMock).toHaveBeenCalledWith({ query: 'test-query' });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: [
-          { id: 1, name: 'Insight 1' },
-          { id: 2, name: 'Insight 2' },
+          { id: 1, name: 'Insight 1', target: { ids: ['agent-123', 'agent-456'] } },
+          { id: 2, name: 'Insight 2', target: { ids: ['agent-123', 'agent-456'] } },
         ],
       });
     });

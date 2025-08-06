@@ -14,10 +14,6 @@ import { labels } from '../utils/i18n';
 export const OnechatAgentsPage = () => {
   useBreadcrumb([
     {
-      text: labels.chat.title,
-      path: appPaths.root,
-    },
-    {
       text: labels.agents.title,
       path: appPaths.agents.list,
     },

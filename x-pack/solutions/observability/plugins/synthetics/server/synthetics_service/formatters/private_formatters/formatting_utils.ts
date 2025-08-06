@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inlineSourceFormatter } from '../formatting_utils';
 import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 
 export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => string | null;
@@ -53,8 +54,12 @@ export const tlsArrayToYamlFormatter: FormatterFn = (fields, key) => {
 };
 
 export const stringToJsonFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as string) ?? '';
+  if (key === ConfigKey.SOURCE_INLINE) {
+    const value = inlineSourceFormatter(fields, key);
 
+    return value ? JSON.stringify(value) : null;
+  }
+  const value = (fields[key] as string) ?? '';
   return value ? JSON.stringify(value) : null;
 };
 

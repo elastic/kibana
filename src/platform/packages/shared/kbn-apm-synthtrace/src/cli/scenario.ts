@@ -10,7 +10,7 @@
 import { Fields, Timerange } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
-import { SynthtraceClients } from './utils/get_clients';
+import { SynthtraceClients } from './utils/clients_manager';
 import { RunOptions } from './utils/parse_run_cli_flags';
 
 export type ScenarioInitOptions = RunOptions & { logger: Logger; from: number; to: number };

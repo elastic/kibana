@@ -8,7 +8,9 @@
  */
 
 import semverSatisfies from 'semver/functions/satisfies';
-import { DashboardState } from '../../../../common';
+import type { Reference } from '@kbn/content-management-utils';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
+import { DashboardState, prefixReferencesFromPanel } from '../../../../common';
 import { coreServices } from '../../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../../_dashboard_app_strings';
 
@@ -36,6 +38,7 @@ const isPanelVersionTooOld = (panels: unknown[]) => {
 
 export function extractPanelsState(state: { [key: string]: unknown }): {
   panels?: DashboardState['panels'];
+  savedObjectReferences?: DashboardState['references'];
 } {
   const panels = Array.isArray(state.panels) ? state.panels : [];
 
@@ -48,6 +51,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     return {};
   }
 
+  const savedObjectReferences: Reference[] = [];
   const standardizedPanels = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
@@ -69,8 +73,32 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
       delete panel.title;
     }
 
+    // < 9.2 dashboard managed saved object refs for panels
+    // Add saved object ref for panels that contain savedObjectId
+    // TODO remove once all panels inject references in dashboard server api
+    const { panelConfig, panelIndex, type } = panel;
+    if (
+      panelIndex &&
+      type &&
+      panelConfig?.savedObjectId &&
+      typeof panelConfig?.savedObjectId === 'string'
+    ) {
+      savedObjectReferences.push(
+        ...prefixReferencesFromPanel(panelIndex, [
+          {
+            id: panelConfig.savedObjectId,
+            name: SAVED_OBJECT_REF_NAME,
+            type,
+          },
+        ])
+      );
+    }
+
     return panel;
   });
 
-  return { panels: standardizedPanels };
+  return {
+    panels: standardizedPanels,
+    savedObjectReferences: savedObjectReferences.length ? savedObjectReferences : undefined,
+  };
 }

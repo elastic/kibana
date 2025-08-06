@@ -223,6 +223,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           error={error}
         >
           <EuiFieldText
+            isInvalid={!!error}
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
             onChange={(e) => {
@@ -253,6 +254,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           error={error}
         >
           <EuiFieldText
+            isInvalid={!!error}
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
             onChange={(e) => {

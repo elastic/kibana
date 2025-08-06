@@ -15,6 +15,7 @@ export function createChatCompleteApi({
   actions,
   logger,
   anonymizationRulesPromise,
+  regexWorker,
   esClient,
 }: CreateChatCompleteApiOptions) {
   const callbackApi = createChatCompleteCallbackApi({
@@ -22,6 +23,7 @@ export function createChatCompleteApi({
     actions,
     logger,
     anonymizationRulesPromise,
+    regexWorker,
     esClient,
   });
 

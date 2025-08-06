@@ -9,6 +9,7 @@ import { of, isObservable, firstValueFrom, toArray } from 'rxjs';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { createRegexWorkerServiceMock } from '../test_utils';
 import {
   MessageRole,
   type PromptAPI,
@@ -67,6 +68,7 @@ describe('createPromptApi', () => {
   let actions: ReturnType<typeof actionsMock.createStart>;
   let promptApi: PromptAPI;
   let mockCallbackApi: jest.MockedFn<ChatCompleteApiWithCallback>;
+  let regexWorker: ReturnType<typeof createRegexWorkerServiceMock>;
 
   const mockInput = { query: 'world' };
 
@@ -74,6 +76,7 @@ describe('createPromptApi', () => {
     request = httpServerMock.createKibanaRequest();
     logger = loggerMock.create();
     actions = actionsMock.createStart();
+    regexWorker = createRegexWorkerServiceMock();
 
     mockCallbackApi = jest.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
@@ -83,6 +86,7 @@ describe('createPromptApi', () => {
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
   });
@@ -97,6 +101,7 @@ describe('createPromptApi', () => {
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
+      regexWorker,
       esClient: mockEsClient,
     });
   });

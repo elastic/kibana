@@ -21,6 +21,7 @@ import {
   installPrebuiltRules,
   getCustomQueryRuleParams,
   createNonSecurityRule,
+  deleteAllPrebuiltRuleAssets,
 } from '../../../utils';
 import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
@@ -32,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('coverage_overview', () => {
     beforeEach(async () => {
+      await deleteAllPrebuiltRuleAssets(es, log);
       await deleteAllRules(supertest, log);
     });
 
@@ -489,13 +491,19 @@ export default ({ getService }: FtrProviderContext): void => {
           it('returns response filtered by prebuilt rules', async () => {
             await createPrebuiltRuleAssetSavedObjects(es, [
               createRuleAssetSavedObject({
-                rule_id: 'prebuilt-rule-1',
+                rule_id: 'coverage-overview-prebuilt-rule-1',
+                version: 1,
                 threat: generateThreatArray(1),
               }),
             ]);
             const {
               results: { created },
-            } = await installPrebuiltRules(es, supertest);
+            } = await installPrebuiltRules(es, supertest, [
+              {
+                rule_id: 'coverage-overview-prebuilt-rule-1',
+                version: 1,
+              },
+            ]);
             const expectedRule = created[0];
 
             await createRule(

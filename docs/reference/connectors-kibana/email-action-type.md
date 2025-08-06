@@ -101,7 +101,7 @@ For other email servers, you can check the list of well-known services that Node
 Use the preconfigured email connector (`Elastic-Cloud-SMTP`) to send emails from {{ecloud}}.
 
 ::::{note}
-For more information on the preconfigured email connector, see [{{ecloud}} email service limits](docs-content://explore-analyze/alerts-cases/watcher/enable-watcher.md#cloud-email-service-limits).
+For more information on the preconfigured email connector, see [{{ecloud}} email service limits](docs-content://deploy-manage/deploy/elastic-cloud/tools-apis.md#email-service-limits).
 ::::
 
 ### Gmail [gmail]

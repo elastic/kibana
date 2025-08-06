@@ -22,7 +22,7 @@ steps:
         timeout_in_minutes: 5
 
   - group: 'Project Deployment'
-    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security)/"
+    if: "build.env('GITHUB_PR_LABELS') =~ /ci:project-deploy-(elasticsearch|observability|log_essentials|security|ai4soc)/"
 
     steps:
       - command: .buildkite/scripts/lifecycle/pre_build.sh
