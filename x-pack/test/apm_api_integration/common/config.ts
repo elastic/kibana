@@ -22,7 +22,6 @@ import {
   kbnTestConfig,
 } from '@kbn/test';
 import path from 'path';
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
@@ -128,7 +127,6 @@ export function createTestConfig(
     const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
 
     return {
-      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
