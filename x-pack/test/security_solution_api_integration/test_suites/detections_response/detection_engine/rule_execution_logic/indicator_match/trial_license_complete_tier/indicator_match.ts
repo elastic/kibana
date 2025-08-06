@@ -2193,6 +2193,137 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('enrichemnt from partial matches', () => {
+      // cases to cover 2 execution paths of IM
+      const cases = [
+        {
+          eventsCount: 5,
+          threatsCount: 0,
+          title: `(threats first) events count is greater than threats count`,
+        },
+
+        {
+          eventsCount: 0,
+          threatsCount: 5,
+          title: `(events first) events count is smaller than threats count`,
+        },
+      ];
+
+      cases.forEach(({ eventsCount, threatsCount, title }) => {
+        describe(`Code execution path: ${title}`, () => {
+          const timestamp = new Date().toISOString();
+
+          const basicThreatMatchRuleWithDoesNotMatch = (
+            id: string
+          ): ThreatMatchRuleCreateProps => ({
+            ...threatMatchRuleEcsComplaint(id),
+            query: `id:${id} and NOT agent.type:threat`,
+            threat_query: `id:${id} and agent.type:threat`,
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+          });
+
+          it('should not add include partially matched threats in enrcihments', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                host: { name: `filler-host${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'bob-1' },
+                host: { name: 'host-1' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'bob-2' },
+                host: { name: 'host-1' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                host: { name: `filler-threat-host${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'bob-1' },
+                host: { name: 'host-1' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'bob-2' },
+                host: { name: 'host-1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['user.name'],
+            });
+
+            jestExpect(previewAlerts).toHaveLength(2);
+
+            jestExpect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments.length', 2);
+            jestExpect(previewAlerts[0]).toHaveProperty(
+              '_source.threat.enrichments',
+              jestExpect.arrayContaining([
+                {
+                  matched: {
+                    atomic: 'bob-1',
+                    field: 'user.name',
+                    id: jestExpect.any(String),
+                    index: 'ecs_compliant',
+                    type: 'indicator_match_rule',
+                  },
+                },
+                {
+                  matched: {
+                    atomic: 'host-1',
+                    field: 'host.name',
+                    id: jestExpect.any(String),
+                    index: 'ecs_compliant',
+                    type: 'indicator_match_rule',
+                  },
+                },
+              ])
+            );
+          });
+        });
+      });
+    });
+
     describe('alerts should be enriched', () => {
       before(async () => {
         await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
