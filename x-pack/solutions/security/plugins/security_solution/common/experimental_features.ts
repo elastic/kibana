@@ -272,7 +272,7 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -285,6 +285,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to import and migration dashboards through automatic migration service
    */
   automaticDashboardsMigration: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.1.2/8.19.2
+   */
+  microsoftDefenderEndpointCancelEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

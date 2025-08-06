@@ -127,6 +127,8 @@ export function registerConnectorTypes({
     actions.registerSubActionConnectorType(getInferenceConnectorType());
   }
   if (experimentalFeatures.microsoftDefenderEndpointOn) {
-    actions.registerSubActionConnectorType(getMicrosoftDefenderEndpointConnectorType());
+    actions.registerSubActionConnectorType(
+      getMicrosoftDefenderEndpointConnectorType(experimentalFeatures)
+    );
   }
 }
