@@ -12,7 +12,7 @@ import type { Filter } from '@kbn/es-query';
 import { useMemo, useCallback } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
+import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/alert_assignment/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';

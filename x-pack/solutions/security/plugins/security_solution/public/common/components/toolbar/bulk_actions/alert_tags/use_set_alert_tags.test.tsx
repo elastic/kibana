@@ -7,9 +7,9 @@
 
 import { renderHook } from '@testing-library/react';
 import { useSetAlertTags } from './use_set_alert_tags';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 
-jest.mock('../../../hooks/use_app_toasts');
+jest.mock('../../../../hooks/use_app_toasts');
 
 describe('useSetAlertTags', () => {
   it('should return a function', () => {

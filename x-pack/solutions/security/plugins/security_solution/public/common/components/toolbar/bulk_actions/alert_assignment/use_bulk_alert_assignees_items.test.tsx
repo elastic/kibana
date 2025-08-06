@@ -9,27 +9,27 @@ import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
 
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../../../mock';
 import type {
   UseBulkAlertAssigneesItemsProps,
   UseBulkAlertAssigneesPanel,
 } from './use_bulk_alert_assignees_items';
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
-import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
-import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
-import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
-import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useLicense } from '../../../hooks/use_license';
+import { useGetCurrentUserProfile } from '../../../user_profiles/use_get_current_user_profile';
+import { useBulkGetUserProfiles } from '../../../user_profiles/use_bulk_get_user_profiles';
+import { useSuggestUsers } from '../../../user_profiles/use_suggest_users';
+import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../assignees/test_ids';
+import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useLicense } from '../../../../hooks/use_license';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 jest.mock('./use_set_alert_assignees');
-jest.mock('../../user_profiles/use_get_current_user_profile');
-jest.mock('../../user_profiles/use_bulk_get_user_profiles');
-jest.mock('../../user_profiles/use_suggest_users');
-jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
-jest.mock('../../../hooks/use_license');
+jest.mock('../../../user_profiles/use_get_current_user_profile');
+jest.mock('../../../user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../../user_profiles/use_suggest_users');
+jest.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../../hooks/use_license');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },

@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { AlertTags } from '../../../../../common/api/detection_engine';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import * as i18n from './translations';
-import { setAlertTags } from '../../../containers/alert_tags/api';
+import type { AlertTags } from '../../../../../../common/api/detection_engine';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
+import * as i18n from '../translations';
+import { setAlertTags } from '../../../../containers/alert_tags/api';
 
 export type SetAlertTagsFunc = (
   tags: AlertTags,

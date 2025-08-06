@@ -6,10 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
 
-jest.mock('../../../hooks/use_app_toasts');
+jest.mock('../../../../hooks/use_app_toasts');
 
 describe('useSetAlertAssignees', () => {
   it('should return a function', () => {

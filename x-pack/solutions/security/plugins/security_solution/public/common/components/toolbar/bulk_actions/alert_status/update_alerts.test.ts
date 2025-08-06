@@ -10,7 +10,7 @@ import { updateAlertStatus } from './update_alerts';
 const mockUpdateAlertStatusByIds = jest.fn().mockReturnValue(new Promise(() => {}));
 const mockUpdateAlertStatusByQuery = jest.fn().mockReturnValue(new Promise(() => {}));
 
-jest.mock('../../../../detections/containers/detection_engine/alerts/api', () => {
+jest.mock('../../../../../detections/containers/detection_engine/alerts/api', () => {
   return {
     updateAlertStatusByQuery: (params: unknown) => mockUpdateAlertStatusByQuery(params),
     updateAlertStatusByIds: (params: unknown) => mockUpdateAlertStatusByIds(params),

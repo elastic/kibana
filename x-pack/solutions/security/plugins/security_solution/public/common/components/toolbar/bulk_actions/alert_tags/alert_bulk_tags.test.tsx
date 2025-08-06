@@ -8,14 +8,14 @@
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../mock';
-import { useUiSetting$ } from '../../../lib/kibana';
-import * as helpers from './helpers';
+import { TestProviders } from '../../../../mock';
+import { useUiSetting$ } from '../../../../lib/kibana';
+import * as helpers from '../helpers';
 
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 
-jest.mock('../../../lib/kibana');
+jest.mock('../../../../lib/kibana');
 
 const mockTagItems = [
   {

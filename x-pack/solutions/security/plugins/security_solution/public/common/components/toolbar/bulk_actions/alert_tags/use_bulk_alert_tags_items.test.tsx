@@ -7,19 +7,19 @@
 
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import { act, fireEvent, render, renderHook } from '@testing-library/react';
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../../../mock';
 import type {
   UseBulkAlertTagsItemsProps,
   UseBulkAlertTagsPanel,
 } from './use_bulk_alert_tags_items';
 import { useBulkAlertTagsItems } from './use_bulk_alert_tags_items';
 import { useSetAlertTags } from './use_set_alert_tags';
-import { useUiSetting$ } from '../../../lib/kibana';
+import { useUiSetting$ } from '../../../../lib/kibana';
 
 jest.mock('./use_set_alert_tags');
-jest.mock('../../../lib/kibana');
+jest.mock('../../../../lib/kibana');
 jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
     useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
   })

@@ -2758,15 +2758,6 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detection-engine
-
-### Alert tags, alert assignment owned by Threat Hunting Investigations
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.ts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.test.ts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.test.ts @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_tags @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_assignees @elastic/security-threat-hunting-investigations
-
 /x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine @elastic/security-detection-engine
 
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
@@ -2775,6 +2766,17 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/test/fixtures/es_archives/asset_criticality @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
+
+### Alert tags, alert assignment owned by Threat Hunting Investigations
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.ts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.test.ts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.ts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_assignees_route.test.ts @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_tags @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/alert_assignees @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions/alert_assignment @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions/alert_tags @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/assignees @elastic/security-threat-hunting-investigations
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/solutions/security/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine

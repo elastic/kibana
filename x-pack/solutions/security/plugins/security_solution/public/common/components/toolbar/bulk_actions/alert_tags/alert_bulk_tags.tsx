@@ -11,11 +11,11 @@ import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import React, { memo, useCallback, useMemo, useReducer, useEffect } from 'react';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
-import { useUiSetting$ } from '../../../lib/kibana';
-import * as i18n from './translations';
-import { createInitialTagsState } from './helpers';
-import { createAlertTagsReducer, initialState } from './reducer';
+import { DEFAULT_ALERT_TAGS_KEY } from '../../../../constants';
+import { useUiSetting$ } from '../../../../lib/kibana';
+import * as i18n from '../translations';
+import { createInitialTagsState } from '../helpers';
+import { createAlertTagsReducer, initialState } from '../reducer';
 import type { SetAlertTagsFunc } from './use_set_alert_tags';
 
 export interface BulkAlertTagsPanelComponentProps {

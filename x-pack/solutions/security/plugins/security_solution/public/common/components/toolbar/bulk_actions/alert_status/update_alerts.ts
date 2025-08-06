@@ -6,11 +6,11 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type { Status } from '../../../../../../common/api/detection_engine';
 import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,
-} from '../../../../detections/containers/detection_engine/alerts/api';
+} from '../../../../../detections/containers/detection_engine/alerts/api';
 
 interface UpdatedAlertsResponse {
   updated: number;
