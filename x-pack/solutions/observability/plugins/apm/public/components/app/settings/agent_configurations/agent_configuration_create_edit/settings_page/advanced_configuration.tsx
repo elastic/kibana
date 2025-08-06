@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo, useState, useEffect, useCallback } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,13 +15,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiButton,
-  EuiFormRow,
-  EuiFieldText,
-  EuiButtonIcon,
   EuiLink,
 } from '@elastic/eui';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import { AdvancedConfigKeyInput } from './advanced_config_key_input';
+import { AdvancedConfigValueInput } from './advanced_config_value_input';
 
 export function AdvancedConfiguration({
   newConfig,
@@ -197,183 +196,5 @@ export function AdvancedConfiguration({
       ))}
       <EuiSpacer size="m" />
     </>
-  );
-}
-
-function AdvancedConfigKeyInput({
-  configKey,
-  configValue,
-  index,
-  predefinedAgentConfigKeys,
-  unknownAgentConfigs,
-  setValidationErrors,
-  onUpdate,
-}: {
-  configKey: string;
-  configValue: string;
-  index: number;
-  predefinedAgentConfigKeys: string[];
-  unknownAgentConfigs: Array<[string, string]>;
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  onUpdate: (oldKey: string, newKey: string, value: string) => void;
-}) {
-  // Handle key inputs with local state to avoid duplicated keys overwriting each other
-  const [localKey, setLocalKey] = useState(configKey);
-  const [touched, setTouched] = useState(false);
-
-  useEffect(() => {
-    setLocalKey(configKey);
-  }, [configKey]);
-
-  const checkIfAdvancedConfigKeyExists = useCallback(
-    (key: string) => {
-      return unknownAgentConfigs.some(
-        ([unknownConfigKey], unknownConfigIndex) =>
-          unknownConfigKey === key && unknownConfigIndex !== index
-      );
-    },
-    [unknownAgentConfigs, index]
-  );
-
-  const checkIfPredefinedConfigKeyExists = useCallback(
-    (key: string) => {
-      return predefinedAgentConfigKeys.includes(key);
-    },
-    [predefinedAgentConfigKeys]
-  );
-
-  const isInvalidInput = (key: string) => {
-    return (
-      key === '' || checkIfPredefinedConfigKeyExists(key) || checkIfAdvancedConfigKeyExists(key)
-    );
-  };
-
-  const getKeyValidationError = (key: string) => {
-    if (key === '') {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
-        defaultMessage: 'Key cannot be empty',
-      });
-    }
-    if (checkIfPredefinedConfigKeyExists(key)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
-        defaultMessage: 'This key is already predefined in the standard configuration above',
-      });
-    }
-    if (checkIfAdvancedConfigKeyExists(key)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
-        defaultMessage: 'This key is already used in another advanced configuration',
-      });
-    }
-    return null;
-  };
-
-  const handleKeyChange = (newKey: string) => {
-    setTouched(true);
-    setLocalKey(newKey);
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`key${index}`]: isInvalidInput(newKey),
-    }));
-    // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
-    // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
-    if (!checkIfPredefinedConfigKeyExists(newKey) && !checkIfAdvancedConfigKeyExists(newKey)) {
-      onUpdate(configKey, newKey, configValue);
-    }
-  };
-
-  return (
-    <EuiFormRow
-      label={
-        index === 0
-          ? i18n.translate('xpack.apm.agentConfig.settingsPage.keyLabel', {
-              defaultMessage: 'key',
-            })
-          : undefined
-      }
-      error={getKeyValidationError(localKey)}
-      isInvalid={touched && isInvalidInput(localKey)}
-      fullWidth
-    >
-      <EuiFieldText
-        data-test-subj="apmSettingsAdvancedConfigurationKeyField"
-        aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.keyAriaLabel', {
-          defaultMessage: 'Advanced configuration key',
-        })}
-        fullWidth
-        value={localKey}
-        isInvalid={touched && isInvalidInput(localKey)}
-        onChange={(e) => handleKeyChange(e.target.value)}
-      />
-    </EuiFormRow>
-  );
-}
-
-function AdvancedConfigValueInput({
-  configValue,
-  configKey,
-  index,
-  setValidationErrors,
-  onUpdate,
-  onDelete,
-}: {
-  configValue: string;
-  configKey: string;
-  index: number;
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  onUpdate: (key: string, value: string) => void;
-  onDelete: (key: string, index: number) => void;
-}) {
-  const [touched, setTouched] = useState(false);
-
-  const isInvalidInput = (value: string) => {
-    return value === '';
-  };
-
-  const handleValueChange = (newValue: string) => {
-    setTouched(true);
-    onUpdate(configKey, newValue);
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`value${index}`]: isInvalidInput(newValue),
-    }));
-  };
-
-  return (
-    <EuiFormRow
-      label={
-        index === 0
-          ? i18n.translate('xpack.apm.agentConfig.settingsPage.valueLabel', {
-              defaultMessage: 'value',
-            })
-          : undefined
-      }
-      error={i18n.translate('xpack.apm.agentConfig.settingsPage.valueEmptyError', {
-        defaultMessage: 'Value cannot be empty',
-      })}
-      isInvalid={touched && isInvalidInput(configValue)}
-      fullWidth
-    >
-      <EuiFieldText
-        isInvalid={touched && isInvalidInput(configValue)}
-        data-test-subj="apmSettingsAdvancedConfigurationValueField"
-        aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
-          defaultMessage: 'Advanced configuration value',
-        })}
-        fullWidth
-        value={configValue}
-        onChange={(e) => handleValueChange(e.target.value)}
-        append={
-          <EuiButtonIcon
-            data-test-subj="apmSettingsRemoveAdvancedConfigurationButton"
-            aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.removeButtonAriaLabel', {
-              defaultMessage: 'Remove advanced configuration',
-            })}
-            iconType="trash"
-            color={'danger'}
-            onClick={() => onDelete(configKey, index)}
-          />
-        }
-      />
-    </EuiFormRow>
   );
 }
