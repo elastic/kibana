@@ -23,7 +23,7 @@ const inProgressMigrationStats: RuleMigrationStats = {
   name: 'test-migration',
   status: SiemMigrationTaskStatus.RUNNING,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
-  rules: { total: 26, pending: 6, processing: 10, completed: 9, failed: 1 },
+  items: { total: 26, pending: 6, processing: 10, completed: 9, failed: 1 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
@@ -31,7 +31,7 @@ const preparingMigrationStats: RuleMigrationStats = {
   ...inProgressMigrationStats,
   // status RUNNING and the same number of total and pending rules, means the migration is still preparing the environment
   status: SiemMigrationTaskStatus.RUNNING,
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
 };
 
 const renderMigrationProgressPanel = (migrationStats: RuleMigrationStats) => {

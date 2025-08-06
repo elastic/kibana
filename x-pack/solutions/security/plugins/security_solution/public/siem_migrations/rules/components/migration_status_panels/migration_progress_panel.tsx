@@ -39,10 +39,11 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
       stopMigration(migrationStats.id);
     }, [migrationStats.id, stopMigration]);
 
-    const finishedCount = migrationStats.rules.completed + migrationStats.rules.failed;
-    const progressValue = (finishedCount / migrationStats.rules.total) * 100;
+    const { items } = migrationStats;
+    const finishedCount = items.completed + items.failed;
+    const progressValue = (finishedCount / items.total) * 100;
 
-    const preparing = migrationStats.rules.pending === migrationStats.rules.total;
+    const preparing = items.pending === items.total;
 
     return (
       <EuiPanel data-test-subj="migrationProgressPanel" hasShadow={false} hasBorder paddingSize="m">
@@ -53,9 +54,7 @@ export const MigrationProgressPanel = React.memo<MigrationProgressPanelProps>(
                 <MigrationPanelTitle migrationStats={migrationStats} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  {i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(migrationStats.rules.total)}
-                </EuiText>
+                <EuiText size="s">{i18n.RULE_MIGRATION_PROGRESS_DESCRIPTION(items.total)}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

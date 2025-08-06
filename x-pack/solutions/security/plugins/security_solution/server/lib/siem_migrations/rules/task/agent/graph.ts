@@ -10,7 +10,7 @@ import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
-import type { MigrateRuleGraphConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
+import type { MigrateRuleConfig, MigrateRuleGraphParams, MigrateRuleState } from './types';
 
 export function getRuleMigrationAgent({
   model,
@@ -57,7 +57,7 @@ export function getRuleMigrationAgent({
   return graph;
 }
 
-const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRuleGraphConfig) => {
+const skipPrebuiltRuleConditional = (_state: MigrateRuleState, config: MigrateRuleConfig) => {
   if (config.configurable?.skipPrebuiltRulesMatching) {
     return 'translationSubGraph';
   }

@@ -7,7 +7,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { AsyncLocalStorageProviderSingleton } from '@langchain/core/singletons';
-import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
+import type { RuleMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
 import type { BaseLLMParams } from '@langchain/core/language_models/llms';
 
 export const createSiemMigrationTelemetryClientMock = () => {
@@ -32,7 +32,7 @@ export const createSiemMigrationTelemetryClientMock = () => {
     reportIntegrationsMatch: jest.fn(),
     reportPrebuiltRulesMatch: jest.fn(),
     startSiemMigrationTask: jest.fn().mockReturnValue(mockStartSiemMigrationTaskReturn),
-  } as jest.Mocked<PublicMethodsOf<SiemMigrationTelemetryClient>>;
+  } as jest.Mocked<PublicMethodsOf<RuleMigrationTelemetryClient>>;
 };
 
 // Factory function for the mock class
@@ -45,7 +45,7 @@ export const createRuleMigrationsTaskClientMock = () => ({
   stop: jest.fn().mockResolvedValue({ stopped: true }),
   getStats: jest.fn().mockResolvedValue({
     status: 'done',
-    rules: {
+    items: {
       total: 1,
       finished: 1,
       processing: 0,
