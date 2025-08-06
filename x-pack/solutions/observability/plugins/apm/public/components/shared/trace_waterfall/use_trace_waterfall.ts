@@ -50,10 +50,12 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
 export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
   const serviceNames = Array.from(new Set(traceItems.map((item) => item.serviceName)));
   const spanTypes = Array.from(new Set(traceItems.map((item) => item.spanType ?? '')));
-  const kinds = Array.from(new Set(traceItems.map((item) => item.kind ?? '')));
+  const kinds = traceItems.some((item) => item.kind)
+    ? Array.from(new Set(traceItems.map((item) => item.kind).filter(Boolean)))
+    : [];
 
   const palette = euiPaletteColorBlind({
-    rotations: Math.ceil((serviceNames.length + spanTypes.length) / 10),
+    rotations: Math.ceil((serviceNames.length + spanTypes.length + kinds.length) / 10),
   });
 
   let colorIndex = 0;
@@ -75,10 +77,10 @@ export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
     });
   });
 
-  kinds.forEach((spanType) => {
+  kinds.forEach((kind) => {
     legends.push({
       type: WaterfallLegendType.Kind,
-      value: spanType || '',
+      value: kind,
       color: palette[colorIndex++],
     });
   });
