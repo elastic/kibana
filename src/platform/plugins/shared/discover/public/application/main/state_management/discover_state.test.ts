@@ -72,7 +72,11 @@ async function getState(
   jest.spyOn(nextState.dataState, 'fetch');
   await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
   nextState.internalState.dispatch(
-    internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+    internalStateActions.setInitializationState({
+      hasESData: true,
+      hasUserDataView: true,
+      hasEnteredViaESQL: undefined,
+    })
   );
   if (savedSearch) {
     jest.spyOn(mockServices.savedSearch, 'get').mockImplementation(() => {
