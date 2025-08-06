@@ -47,7 +47,7 @@ export function AttributesOverview({
   dataView,
   textBasedHits,
   filter,
-  decreaseAvailableHeightBy,
+  decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) {
@@ -88,10 +88,7 @@ export function AttributesOverview({
   const { attributesFields, resourceAttributesFields, scopeAttributesFields } = groupedFields;
 
   const containerHeight = containerRef.current
-    ? getTabContentAvailableHeight(
-        containerRef.current,
-        decreaseAvailableHeightBy ?? DEFAULT_MARGIN_BOTTOM
-      )
+    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
     : 0;
 
   const filterFieldsBySearchTerm = (fields: AttributeField[]) =>
