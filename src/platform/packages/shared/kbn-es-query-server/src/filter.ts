@@ -34,10 +34,10 @@ export const filterMetaSchema = schema.object({
   isMultiIndex: schema.maybe(schema.boolean()),
   type: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
-  // TODO Consider creating FilterMetaParams as a schema. This is hard because
-  // FilterMetaParams can be a `filterSchema` which is defined below.
+  // We could consider creating FilterMetaParams as a schema to match the concrete Filter type.
+  // However, this is difficult because FilterMetaParams can be a `filterSchema` which is defined below.
   // This would require a more complex schema definition that can handle recursive types.
-  // For now, we use `any` to allow flexibility.
+  // For now, we use `schema.any()` to allow flexibility in the params field.
   params: schema.maybe(schema.any()),
   value: schema.maybe(schema.string()),
 });
