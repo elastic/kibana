@@ -9,18 +9,22 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, type Observable } from 'rxjs';
 
-import {
+import type {
+  CoreStatus,
   ElasticsearchClient,
   IRouter,
-  type MetricsServiceSetup,
+  MetricsServiceSetup,
   ServiceStatus,
-  ServiceStatusLevels,
 } from '@kbn/core/server';
-import { ICollectorSet } from '../../collector';
-import { Stats } from '../../../common/types';
-const SNAPSHOT_REGEX = /-snapshot/i;
+import {
+  instrumentOtelLegacyMetrics,
+  ServiceStatusToLegacyState,
+  SNAPSHOT_REGEX,
+} from './instrument_otel_legacy_metrics';
+import type { ICollectorSet } from '../../collector';
+import type { Stats } from '../../../common/types';
 
 export function registerStatsRoute({
   router,
@@ -28,6 +32,7 @@ export function registerStatsRoute({
   collectorSet,
   metrics,
   overallStatus$,
+  coreStatus$,
 }: {
   router: IRouter;
   config: {
@@ -44,12 +49,17 @@ export function registerStatsRoute({
   collectorSet: ICollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
+  coreStatus$: Observable<CoreStatus>;
 }) {
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
     const body = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
     return uuid;
   };
+
+  // Push the metrics to OTel in the same format as shipped by Metricbeat (which consumes from /api/stats)
+  // This way, users can migrate more easily from the Metricbeat stats collection.
+  instrumentOtelLegacyMetrics(metrics, overallStatus$, coreStatus$, config);
 
   router.get(
     {
@@ -132,10 +142,3 @@ export function registerStatsRoute({
     }
   );
 }
-
-const ServiceStatusToLegacyState: Stats.v1.KibanaServiceStatus = {
-  [ServiceStatusLevels.critical.toString()]: 'red',
-  [ServiceStatusLevels.unavailable.toString()]: 'red',
-  [ServiceStatusLevels.degraded.toString()]: 'yellow',
-  [ServiceStatusLevels.available.toString()]: 'green',
-};
