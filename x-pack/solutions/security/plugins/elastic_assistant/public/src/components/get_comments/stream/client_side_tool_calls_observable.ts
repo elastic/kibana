@@ -42,11 +42,7 @@ export const createClientSideToolCallObservable = ({
   http: HttpSetup;
   connectorId: string;
 }): Observable<ToolCallResult> => {
-  //@TODO: remove
-  console.log(`--@@createClientSideToolCallObservable payload`, payload);
   const clientSideToolCall = payload?.toolCalls?.[0];
-  //@TODO: remove
-  console.log(`--@@clientSideToolCall`, clientSideToolCall, 'connectorId', connectorId);
 
   if (!clientSideToolCall) {
     return of();
@@ -56,8 +52,6 @@ export const createClientSideToolCallObservable = ({
     mergeMap((toolCall) => {
       // Process the tool call
       if (toolCall.name === 'add_to_dashboard' && toolCall.id) {
-        //@TODO: remove
-        console.log(`--@@toolCall`, 'Making request to get metadata', toolCall.id, toolCall.name);
         // Make API request to get metadata
         return from(
           http.fetch(`/internal/elastic_assistant/actions/connector/${connectorId}/metadata`, {
@@ -78,66 +72,4 @@ export const createClientSideToolCallObservable = ({
       return of({ toolCall, metadata: undefined });
     })
   );
-};
-
-/**
- * Creates a queue-based Observable for processing client-side tool calls.
- * When clientSideToolCalls.length > 0, it processes them one by one.
- *
- * @param props - Configuration for the observable
- * @returns Observable that emits tool calls as they are processed
- */
-export const createClientSideToolCallsQueueObservable = ({
-  http,
-  connectorId,
-}: ClientSideToolCallObservableProps): Observable<ToolCallResult> => {
-  return new Observable<ToolCallResult>((observer) => {
-    let isProcessing = false;
-    const queue: ClientSideToolCall[] = [];
-
-    const processQueue = () => {
-      if (isProcessing || queue.length === 0) {
-        return;
-      }
-
-      isProcessing = true;
-      const toolCall = queue.shift();
-      if (!toolCall) {
-        isProcessing = false;
-        return;
-      }
-
-      createClientSideToolCallObservable({
-        clientSideToolCall: toolCall,
-        http,
-        connectorId,
-      }).subscribe({
-        next: (result) => {
-          observer.next(result);
-        },
-        error: (error) => {
-          // Error handling for tool call processing
-          observer.error(error);
-        },
-        complete: () => {
-          isProcessing = false;
-          // Process next item in queue
-          processQueue();
-        },
-      });
-    };
-
-    // Method to add tool calls to the queue
-    const addToQueue = (toolCalls: ClientSideToolCall[]) => {
-      if (toolCalls && toolCalls.length > 0) {
-        queue.push(...toolCalls);
-        processQueue();
-      }
-    };
-
-    // Return cleanup function
-    return () => {
-      // Cleanup logic if needed
-    };
-  });
 };
