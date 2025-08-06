@@ -37,6 +37,8 @@ import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/st
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../components/custom_urls';
 import { isManagedJob } from '../../../jobs_utils';
 import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -413,6 +415,10 @@ export class EditJobFlyoutUI extends Component {
           }}
           size="m"
           data-test-subj="mlJobEditFlyout"
+          aria-label={i18n.translate('xpack.ml.jobsList.editJobFlyout.ariaLabel', {
+            defaultMessage: 'Edit job flyout',
+          })}
+          focusTrapProps={createJobActionFocusTrapProps(job.job_id)}
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -480,6 +486,7 @@ export class EditJobFlyoutUI extends Component {
     }
 
     if (this.state.isConfirmationModalVisible) {
+      const returnFocus = createJobActionFocusRestoration(this.state.job.job_id);
       confirmationModal = (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
@@ -487,8 +494,14 @@ export class EditJobFlyoutUI extends Component {
             defaultMessage: 'Save changes before leaving?',
           })}
           titleProps={{ id: confirmModalTitleId }}
-          onCancel={() => this.closeFlyout(true)}
-          onConfirm={() => this.save()}
+          onCancel={() => {
+            this.closeFlyout(true);
+            returnFocus();
+          }}
+          onConfirm={() => {
+            this.save();
+            returnFocus();
+          }}
           cancelButtonText={i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.leaveAnywayButtonLabel',
             { defaultMessage: 'Leave anyway' }
