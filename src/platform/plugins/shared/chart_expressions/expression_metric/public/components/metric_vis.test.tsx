@@ -20,7 +20,7 @@ import { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
-import { setupChartMocks, cleanChartMocks } from './chart_testing_utilities';
+import { setupChartMocks, cleanChartMocks } from '@kbn/chart-expressions-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {

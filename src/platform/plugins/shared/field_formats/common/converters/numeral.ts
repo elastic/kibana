@@ -15,7 +15,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
-import { asPrettyString } from '../utils';
+import { NAN_LABEL, NULL_LABEL } from '../constants/replacement_labels';
 
 const numeralInst = numeral();
 
@@ -35,18 +35,14 @@ export abstract class NumeralFormat extends FieldFormat {
     alwaysShowSign: false,
   });
 
-  protected getConvertedValue(val: number | string | object): string {
+  protected getConvertedValue(val: unknown): string {
+    if (val == null) return NULL_LABEL;
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
-    if (typeof val === 'object') {
-      if (val === null) return '-';
-      return JSON.stringify(val);
-    } else if (typeof val !== 'number') {
-      val = parseFloat(val);
-    }
+    if (typeof val === 'object') return JSON.stringify(val);
+    if (typeof val === 'string') val = parseFloat(val);
 
-    if (isNaN(val)) return '';
-
+    if (Number.isNaN(val)) return NAN_LABEL;
     const previousLocale = numeral.language();
     const defaultLocale =
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
@@ -65,8 +61,8 @@ export abstract class NumeralFormat extends FieldFormat {
   }
 
   htmlConvert: HtmlContextTypeConvert = (val) => {
-    if (typeof val === 'object' && !Array.isArray(val)) {
-      return asPrettyString(val);
+    if (val === null || val === '__missing__') {
+      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
     }
     return this.getConvertedValue(val);
   };

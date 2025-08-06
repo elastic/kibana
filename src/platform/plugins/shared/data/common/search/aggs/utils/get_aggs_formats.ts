@@ -148,17 +148,18 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
       static hidden = true;
 
       convert = (val: string, type: FieldFormatsContentType) => {
+        console.log('conferting');
         const params = this._params;
         const format = this.getCachedFormat(
           params as SerializedFieldFormat<{}, SerializableRecord>
         );
 
-        if (val === '__other__') {
-          return `${params.otherBucketLabel}`;
-        }
-        if (val === '__missing__') {
-          return `${params.missingBucketLabel}`;
-        }
+        // if (val === '__other__') {
+        //   return `${params.otherBucketLabel}`;
+        // }
+        // if (val === '__missing__') {
+        //   return `${params.missingBucketLabel}`;
+        // }
 
         return format.convert(val, type);
       };

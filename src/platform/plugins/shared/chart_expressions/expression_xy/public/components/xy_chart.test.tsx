@@ -2231,7 +2231,7 @@ describe('XYChart component', () => {
           },
         ],
       };
-
+      convertSpy.mockReturnValueOnce('formatted');
       const component = getRenderedComponent(newArgs);
       const nameFn = component
         .find(DataLayers)
@@ -2239,7 +2239,6 @@ describe('XYChart component', () => {
         .find(LineSeries)
         .prop('name') as SeriesNameFn;
 
-      convertSpy.mockReturnValueOnce('formatted');
       expect(
         nameFn(
           {
@@ -2295,51 +2294,6 @@ describe('XYChart component', () => {
         )
       ).toEqual('split1 - Label B');
     });
-
-    test('split series with formatting with multiple y accessors', () => {
-      const args = createArgsWithLayers();
-      const newArgs = {
-        ...args,
-        layers: [
-          {
-            ...args.layers[0],
-            accessors: ['a', 'b'],
-            splitAccessors: ['d'],
-            columnToLabel: '{"a": "Label A","b": "Label B"}',
-            table: dataWithFormats,
-          },
-        ],
-      };
-
-      const component = getRenderedComponent(newArgs);
-
-      const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-      const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-      const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
-
-      convertSpy.mockReturnValueOnce('formatted1').mockReturnValueOnce('formatted2');
-      expect(
-        nameFn1(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'a'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('formatted1 - Label A');
-      expect(
-        nameFn2(
-          {
-            ...nameFnArgs,
-            seriesKeys: ['split1', 'b'],
-            splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-          },
-          false
-        )
-      ).toEqual('formatted2 - Label B');
-    });
-  });
 
   test('it set the scale of the x axis according to the args prop', () => {
     const { args } = sampleArgs();

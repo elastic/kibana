@@ -16,3 +16,8 @@ export {
 export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
 export { isChartSizeEvent } from './types';
 export { getColorCategories, getLegacyColorCategories } from './color_categories';
+
+export { getFormattedTable } from './formatted_table';
+export type { DatatableWithFormatInfo } from './formatted_table';
+
+export { setupChartMocks, cleanChartMocks } from './test-utilities/chart_testing_utilities';

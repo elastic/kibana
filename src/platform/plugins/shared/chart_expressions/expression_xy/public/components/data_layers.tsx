@@ -21,6 +21,7 @@ import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KbnPalettes } from '@kbn/palettes';
+import { DatatableWithFormatInfo } from '@kbn/chart-expressions-common';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -35,10 +36,10 @@ import {
   getFitOptions,
   GroupsConfiguration,
   getSeriesProps,
-  DatatablesWithFormatInfo,
   LayersAccessorsTitles,
   LayersFieldFormats,
   hasMultipleLayersWithSplits,
+  InvertedRawValueMap,
 } from '../helpers';
 
 interface Props {
@@ -52,7 +53,10 @@ interface Props {
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
-  formattedDatatables: DatatablesWithFormatInfo;
+  formattedDatatables: Record<
+    string,
+    DatatableWithFormatInfo & { invertedRawValueMap: InvertedRawValueMap }
+  >;
   syncColors: boolean;
   timeZone: string;
   emphasizeFitting?: boolean;
