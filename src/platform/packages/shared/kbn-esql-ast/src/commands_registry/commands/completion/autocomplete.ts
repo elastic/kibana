@@ -40,7 +40,6 @@ export enum CompletionPosition {
   AFTER_TARGET_ID = 'after_target_id',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
-  AFTER_WITH = 'after_with',
   WITHIN_MAP_EXPRESSION = 'within_map_expression',
   AFTER_COMMAND = 'after_command',
 }
@@ -50,13 +49,9 @@ function getPosition(
   command: ESQLCommand,
   context?: ICommandContext
 ): CompletionPosition | undefined {
-  const { prompt, inferenceId, targetField } = command as ESQLAstCompletionCommand;
+  const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
   const paramsMap = command.args[1] as ast.ESQLMap | undefined;
-
-  if (inferenceId.incomplete && /WITH\s*$/i.test(query)) {
-    return CompletionPosition.AFTER_WITH;
-  }
 
   if (paramsMap?.text && paramsMap.incomplete) {
     return CompletionPosition.WITHIN_MAP_EXPRESSION;
@@ -110,24 +105,8 @@ const withCompletionItem: ISuggestionItem = {
   kind: 'Reference',
   label: 'WITH',
   sortText: '1',
-  text: 'WITH ',
-  command: TRIGGER_SUGGESTION_COMMAND,
-};
-
-const namedParamsCompletionItem: ISuggestionItem = {
-  detail: i18n.translate('kbn-esql-ast.esql.definitions.completionNamedParamsDoc', {
-    defaultMessage: 'Parameters for the LLM prompt.',
-  }),
-  documentation: {
-    value: i18n.translate('kbn-esql-ast.esql.definitions.completionNamedParamsDocValue', {
-      defaultMessage: 'inference_id: The ID of the inference endpoint to use for the completion.',
-    }),
-  },
-  kind: 'Reference',
-  label: 'Parameters',
-  sortText: '1',
   asSnippet: true,
-  text: '{ $0 }',
+  text: 'WITH { $0 }',
   command: TRIGGER_SUGGESTION_COMMAND,
 };
 
@@ -142,7 +121,6 @@ function inferenceEndpointToCompletionItem(
     label: inferenceEndpoint.inference_id,
     sortText: '1',
     text: inferenceEndpoint.inference_id,
-    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
@@ -239,9 +217,6 @@ export async function autocomplete(
 
       return [withCompletionItem];
     }
-
-    case CompletionPosition.AFTER_WITH:
-      return [namedParamsCompletionItem];
 
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
       const availableParameters = {

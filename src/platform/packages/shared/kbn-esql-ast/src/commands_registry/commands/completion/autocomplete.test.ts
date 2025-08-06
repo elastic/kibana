@@ -72,20 +72,16 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   it('suggests WITH after the user writes a colum name that already exists', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the user writes a param as prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
-  });
-
-  it('suggests named parameters map after WITH', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['{ $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH { $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH { $0 }']);
   });
 
   it('suggests inference_id parameter within the named parameters map', async () => {
