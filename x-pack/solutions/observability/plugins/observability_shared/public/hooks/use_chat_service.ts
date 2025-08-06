@@ -17,30 +17,31 @@ export const useChatService = ({
   const ObservabilityAIAssistantChatServiceContext =
     observabilityAIAssistant?.ObservabilityAIAssistantChatServiceContext;
   const obsAIService = observabilityAIAssistant?.service;
+  const isObsAIAssistantEnabled = Boolean(
+    observabilityAIAssistant &&
+      ObservabilityAIAssistantChatServiceContext &&
+      obsAIService?.isEnabled()
+  );
   const { connectors = [], selectedConnector } =
     observabilityAIAssistant?.useGenAIConnectors() || {};
 
   const chatService = useAbortableAsync(
     async ({ signal }) => {
-      if (!obsAIService) {
+      if (!obsAIService || !isObsAIAssistantEnabled) {
         return Promise.resolve(null);
       }
       return obsAIService.start({ signal }).catch((error: Error) => {
         setErrors((prevErrors: Error[]) => [...prevErrors, error]);
       });
     },
-    [obsAIService]
-  );
-
-  const isObsAIAssistantEnabled = Boolean(
-    observabilityAIAssistant && ObservabilityAIAssistantChatServiceContext
+    [obsAIService, isObsAIAssistantEnabled]
   );
 
   return {
     ObservabilityAIAssistantChatServiceContext,
     chatService: chatService.value || null,
     observabilityAIAssistantService: obsAIService,
-    isObsAIAssistantEnabled: Boolean(isObsAIAssistantEnabled),
+    isObsAIAssistantEnabled,
     connectors,
     selectedConnector,
     errors,

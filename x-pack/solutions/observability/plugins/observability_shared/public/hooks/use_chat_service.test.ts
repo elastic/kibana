@@ -92,4 +92,52 @@ describe('useChatService', () => {
       expect(result.current.errors).toContain(mockError);
     });
   });
+
+  it('returns isObsAIAssistantEnabled as false when observability ai assistant is not available', () => {
+    const { result } = renderHook(() =>
+      useChatService({
+        observabilityAIAssistant: undefined,
+      })
+    );
+
+    expect(result.current).toEqual({
+      ObservabilityAIAssistantChatServiceContext: undefined,
+      chatService: null,
+      observabilityAIAssistantService: undefined,
+      isObsAIAssistantEnabled: false,
+      connectors: [],
+      selectedConnector: undefined,
+      errors: [],
+    });
+  });
+
+  it('returns isObsAIAssistantEnabled as false when context is not available', () => {
+    const { result } = renderHook(() =>
+      useChatService({
+        observabilityAIAssistant: {
+          ...mockObservabilityAIAssistant,
+          // @ts-ignore
+          ObservabilityAIAssistantChatServiceContext: undefined,
+        },
+      })
+    );
+
+    expect(result.current.isObsAIAssistantEnabled).toBe(false);
+  });
+
+  it('returns isObsAIAssistantEnabled as false when service is not enabled', () => {
+    const mockService = {
+      isEnabled: jest.fn().mockReturnValue(false),
+    };
+    const { result } = renderHook(() =>
+      useChatService({
+        observabilityAIAssistant: {
+          ...mockObservabilityAIAssistant,
+          service: mockService as any,
+        },
+      })
+    );
+
+    expect(result.current.isObsAIAssistantEnabled).toBe(false);
+  });
 });
