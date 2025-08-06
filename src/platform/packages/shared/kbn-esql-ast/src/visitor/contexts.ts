@@ -35,7 +35,6 @@ import type {
   ESQLOrderExpression,
   ESQLSource,
   ESQLStringLiteral,
-  ESQLTimeInterval,
 } from '../types';
 import type {
   CommandVisitorInput,
@@ -583,11 +582,6 @@ export class ListLiteralExpressionVisitorContext<
     }
   }
 }
-
-export class TimeIntervalLiteralExpressionVisitorContext<
-  Methods extends VisitorMethods = VisitorMethods,
-  Data extends SharedData = SharedData
-> extends ExpressionVisitorContext<Methods, Data, ESQLTimeInterval> {}
 
 export class InlineCastExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
