@@ -37,18 +37,24 @@ export async function getFileDownloadInfo(
     accessToken: options.accessToken,
   };
 
-  const fileInfo = await fileDownloadInfo(hubOptions);
+  try {
+    const fileInfo = await fileDownloadInfo(hubOptions);
 
-  if (!fileInfo) {
-    throw new Error(
-      `Cannot fetch file info for ${options.repo}/${options.path}@${hubOptions.revision}`
-    );
+    if (!fileInfo) {
+      throw new Error(
+        `File not found: ${options.repo}/${options.path}@${hubOptions.revision}. The file may not exist at the specified path or revision.`
+      );
+    }
+
+    return {
+      url: fileInfo.url,
+      size: fileInfo.size,
+    };
+  } catch (error) {
+    const baseMessage = `Failed to fetch file info for ${options.repo}/${options.path}@${hubOptions.revision}`;
+    const originalMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`${baseMessage}: ${originalMessage}`);
   }
-
-  return {
-    url: fileInfo.url,
-    size: fileInfo.size,
-  };
 }
 
 /**
@@ -70,7 +76,7 @@ export async function createFileStream(
   });
 
   if (!response.ok || !response.body) {
-    throw new Error(`HTTP ${response.status} while fetching ${url}`);
+    throw new Error(`HTTP ${response.status} - ${response.statusText}, while fetching ${url}`);
   }
 
   const stream = Readable.fromWeb(response.body as unknown as streamWeb.ReadableStream<any>);
@@ -102,7 +108,10 @@ export async function getFileContent(
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status} while fetching ${url}`);
+    const errorDetail = await response.text();
+    throw new Error(
+      `HTTP ${response.status} - ${response.statusText}, while fetching ${url}: ${errorDetail}`
+    );
   }
 
   const content = await response.text();
