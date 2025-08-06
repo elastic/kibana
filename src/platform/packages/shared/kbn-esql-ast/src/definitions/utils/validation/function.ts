@@ -235,6 +235,8 @@ function getSignatureWithMatchingTypes(
 
       if (givenType === 'null') return true;
 
+      if (givenType === 'unknown') return true;
+
       if (bothStringTypes(givenType, expectedType)) return true;
 
       if (

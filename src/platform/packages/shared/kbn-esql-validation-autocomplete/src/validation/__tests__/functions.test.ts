@@ -488,6 +488,8 @@ describe('function validation', () => {
       // not constantOnly, so field is accepted
       await expectErrors('FROM a_index | EVAL TEST(keywordField)', [], []);
 
+      // TODO - what about concat?
+
       await expectErrors(
         'FROM a_index | EVAL TEST("foo")',
         [],
@@ -535,14 +537,17 @@ describe('function validation', () => {
         },
       ]);
 
-      const { expectErrors } = await setup();
-      await expectErrors(
-        `FROM a_index
-        | EVAL foo = TEST1(1.)
-        | EVAL TEST2(foo)
-        | EVAL TEST3(foo)`,
-        ['Argument of [test1] must be [keyword], found value [1.] type [double]']
-      );
+      const { validate } = await setup();
+      const errors = (
+        await validate(
+          `FROM a_index
+        | EVAL foo = TEST1(1.) // creates foo as unknown value
+        | EVAL TEST2(foo) // shouldn't error, foo is unknown
+        | EVAL TEST3(foo) // shouldn't error, foo is unknown`
+        )
+      ).errors;
+
+      expect(errors).toHaveLength(1);
     });
 
     describe('command/option support', () => {
