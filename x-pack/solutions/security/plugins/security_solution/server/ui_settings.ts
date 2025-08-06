@@ -357,7 +357,7 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
         {
           defaultMessage:
-            '<p>If an alert is closed while suppression is active, you can choose whether suppression continues or resets.</p>',
+            'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
         }
       ),
       type: 'select',
