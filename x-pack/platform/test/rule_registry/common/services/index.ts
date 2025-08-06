@@ -7,8 +7,10 @@
 
 import { services as apiServices } from '../../../api_integration/services';
 import { clusterClientProvider } from './cluster_client';
+import { BsearchSecureService } from './bsearch_secure';
 
 export const services = {
   ...apiServices,
   cluster_client: clusterClientProvider,
+  secureBsearch: BsearchSecureService,
 };
