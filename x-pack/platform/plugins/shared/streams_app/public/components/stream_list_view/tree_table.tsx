@@ -40,6 +40,7 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
   RETENTION_COLUMN_HEADER_ARIA_LABEL,
+  NO_STREAMS_MESSAGE,
 } from './translations';
 
 export function StreamsTreeTable({
@@ -167,9 +168,7 @@ export function StreamsTreeTable({
       itemId="name"
       items={items}
       sorting={sorting}
-      noItemsMessage={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
-        defaultMessage: 'No streams found.',
-      })}
+      noItemsMessage={NO_STREAMS_MESSAGE}
       onTableChange={handleTableChange}
       pagination={{
         initialPageSize: 25,

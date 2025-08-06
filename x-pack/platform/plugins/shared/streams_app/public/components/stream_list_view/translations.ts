@@ -30,7 +30,9 @@ export const RETENTION_COLUMN_HEADER_ARIA_LABEL = i18n.translate(
 
 export const NO_STREAMS_MESSAGE = i18n.translate(
   'xpack.streams.streamsTreeTable.noStreamsMessage',
-  { defaultMessage: 'Loading streams...' }
+  {
+    defaultMessage: 'No streams found.',
+  }
 );
 
 export const STREAMS_TABLE_SEARCH_ARIA_LABEL = i18n.translate(
