@@ -8,10 +8,12 @@
  */
 
 import { useState, useCallback } from 'react';
+
 import { MenuItem, SecondaryMenuItem } from '../../types';
+import { InitialMenuState } from '../utils/get_initial_active_items';
 
 interface UseNavigationProps {
-  initialMenuItem: MenuItem | null;
+  initialActiveItems: InitialMenuState;
   isCollapsed: boolean;
 }
 
@@ -23,10 +25,13 @@ interface NavigationState {
   isSidePanelOpen: boolean;
 }
 
-export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationProps) => {
-  const [currentPageId, setCurrentPageId] = useState<string | undefined>(initialMenuItem?.id);
-  const [currentSubpageId, setCurrentSubpageId] = useState<string | undefined>();
-  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(initialMenuItem);
+export const useNavigation = ({
+  initialActiveItems: { primaryItem, secondaryItem },
+  isCollapsed,
+}: UseNavigationProps) => {
+  const [currentPageId, setCurrentPageId] = useState<string | undefined>(primaryItem?.id);
+  const [currentSubpageId, setCurrentSubpageId] = useState<string | undefined>(secondaryItem?.id);
+  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(primaryItem);
 
   // Determine if side panel should be open based on simple logic
   const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;

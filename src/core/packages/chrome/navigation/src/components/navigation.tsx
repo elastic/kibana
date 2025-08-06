@@ -20,13 +20,13 @@ import { useNavigation } from '../hooks/use_navigation';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 import { focusMainContent } from '../utils/focus_main_content';
 import { MAX_FOOTER_ITEMS } from '../constants';
-import { getInitialMenuItem } from '../utils/get_initial_menu_item';
+import { getInitialActiveItems } from '../utils/get_initial_active_items';
 
 interface NavigationProps {
   /**
    * The active path for the navigation, used for highlighting the current item.
    */
-  activeItemId: string;
+  activeItemId?: string;
   /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
@@ -65,11 +65,11 @@ export const Navigation = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isCollapsed = isMobile || isCollapsedProp;
 
-  const initialMenuItem = getInitialMenuItem(items, activeItemId);
+  const initialActiveItems = getInitialActiveItems(items, activeItemId);
 
   const { currentPageId, currentSubpageId, isSidePanelOpen, navigateTo, sidePanelContent } =
     useNavigation({
-      initialMenuItem,
+      initialActiveItems,
       isCollapsed,
     });
 
