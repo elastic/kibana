@@ -21581,6 +21581,21 @@
                           "discovery": {
                             "additionalProperties": true,
                             "properties": {
+                              "datasets": {
+                                "items": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
                               "fields": {
                                 "items": {
                                   "additionalProperties": true,
@@ -23714,6 +23729,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,
@@ -24647,6 +24677,21 @@
                         "discovery": {
                           "additionalProperties": true,
                           "properties": {
+                            "datasets": {
+                              "items": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "name"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
                             "fields": {
                               "items": {
                                 "additionalProperties": true,
@@ -58343,15 +58388,14 @@
                           "objects": {
                             "additionalProperties": false,
                             "properties": {
-                              "streams": {
-                                "items": {
-                                  "type": "string"
-                                },
-                                "type": "array"
+                              "all": {
+                                "additionalProperties": false,
+                                "properties": {},
+                                "type": "object"
                               }
                             },
                             "required": [
-                              "streams"
+                              "all"
                             ],
                             "type": "object"
                           }
@@ -58364,14 +58408,53 @@
                       {
                         "additionalProperties": false,
                         "properties": {
-                          "all": {
+                          "objects": {
                             "additionalProperties": false,
-                            "properties": {},
+                            "properties": {
+                              "queries": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "routing": {
+                                "items": {
+                                  "allOf": [
+                                    {},
+                                    {
+                                      "properties": {
+                                        "destination": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "destination"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  ]
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "queries",
+                              "routing"
+                            ],
                             "type": "object"
                           }
                         },
                         "required": [
-                          "all"
+                          "objects"
                         ],
                         "type": "object"
                       }

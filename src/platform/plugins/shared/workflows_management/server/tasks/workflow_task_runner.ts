@@ -59,7 +59,7 @@ export function createWorkflowTaskRunner({
           }
 
           // Convert to execution model
-          const executionGraph = convertToWorkflowGraph(workflow);
+          const executionGraph = convertToWorkflowGraph(workflow.definition.workflow);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
