@@ -12,7 +12,6 @@ import { EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 // @ts-ignore
 import registerSearchEmbeddableSource from '../react_embeddables/search/register_search_embeddable?raw';
 // @ts-ignore
-// import registerAttachActionSource from '../react_embeddables/search/register_search_panel_action?raw';
 import registerSearchPanelAction from '../react_embeddables/search/register_search_panel_action?raw';
 // @ts-ignore
 import createPanelAction from '../react_embeddables/search/create_search_panel_action?raw';
