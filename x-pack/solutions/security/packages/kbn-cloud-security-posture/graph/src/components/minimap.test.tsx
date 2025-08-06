@@ -10,7 +10,6 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { Minimap } from './minimap';
 import { Graph, type GraphProps } from './graph/graph';
 import {
-  GRAPH_CONTROLS_TOGGLE_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
@@ -71,7 +70,7 @@ xdescribe('Minimap', () => {
 describe('Minimap integrated with Graph', () => {
   const renderGraphPreview = (props: GraphProps) => render(<Graph {...props} />);
 
-  it('should not render minimap by default', () => {
+  it('should not render minimap by default in interactive graph', () => {
     renderGraphPreview({
       nodes: [],
       edges: [],
@@ -81,62 +80,37 @@ describe('Minimap integrated with Graph', () => {
     expect(screen.queryByTestId(GRAPH_MINIMAP_ID)).not.toBeInTheDocument();
   });
 
-  it('should not render "Toggle minimap" control if graph is not interactive', () => {
+  it('should render minimap when showMinimap is true in interactive graph', () => {
+    renderGraphPreview({
+      nodes: [],
+      edges: [],
+      interactive: true,
+      showMinimap: true,
+    });
+
+    expect(screen.queryByTestId(GRAPH_MINIMAP_ID)).toBeInTheDocument();
+  });
+
+  it('should not render Minimap even with showMinimap if graph is not interactive', () => {
     renderGraphPreview({
       nodes: [],
       edges: [],
       interactive: false,
+      showMinimap: true,
     });
 
-    // Minimap should not be visible
-    expect(screen.queryByTestId(GRAPH_MINIMAP_ID)).not.toBeInTheDocument();
-    // Toggle button should not be visible
-    expect(screen.queryByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID)).not.toBeInTheDocument();
-  });
-
-  it('should toggle minimap after "Toggle minimap" control is clicked', async () => {
-    renderGraphPreview({
-      nodes: [],
-      edges: [],
-      interactive: true,
-    });
-
-    // Initially, minimap should not be visible
-    expect(screen.queryByTestId(GRAPH_MINIMAP_ID)).not.toBeInTheDocument();
-
-    // Click the toggle button
-    const toggleButton = screen.getByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID);
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Now minimap should be visible
-    expect(screen.getByTestId(GRAPH_MINIMAP_ID)).toBeInTheDocument();
-
-    // Click the toggle button
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Now minimap should be hidden again
     expect(screen.queryByTestId(GRAPH_MINIMAP_ID)).not.toBeInTheDocument();
   });
 
-  it('should render minimap but not be pannable nor zoomable if graph is locked', async () => {
+  it('should render minimap but not be pannable nor zoomable if interactive graph is locked', async () => {
     renderGraphPreview({
       nodes: [],
       edges: [],
       interactive: true,
       isLocked: true,
+      showMinimap: true,
     });
 
-    // Click the toggle button
-    const toggleButton = screen.getByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID);
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Now minimap should be visible
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
 
@@ -199,15 +173,9 @@ describe('Minimap integrated with Graph', () => {
         },
       ],
       interactive: true,
+      showMinimap: true,
     });
 
-    // Click the toggle button
-    const toggleButton = screen.getByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID);
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Now minimap should be visible
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
 
@@ -260,15 +228,9 @@ describe('Minimap integrated with Graph', () => {
         },
       ],
       interactive: true,
+      showMinimap: true,
     });
 
-    // Click the toggle button
-    const toggleButton = screen.getByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID);
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Now minimap should be visible
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
 
@@ -333,15 +295,9 @@ describe('Minimap integrated with Graph', () => {
         },
       ],
       interactive: true,
+      showMinimap: true,
     });
 
-    // Click the toggle button to show minimap
-    const toggleButton = screen.getByTestId(GRAPH_CONTROLS_TOGGLE_MINIMAP_ID);
-    await act(() => {
-      fireEvent.click(toggleButton);
-    });
-
-    // Minimap should be visible
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap).toBeInTheDocument();
 
