@@ -26,6 +26,8 @@ import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_GCP,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
   VULN_MGMT_POLICY_TEMPLATE,
@@ -69,7 +71,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     setIntegrationToEnable,
   }) => {
     const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
-      policyTemplate: 'cspm',
+      policyTemplate: CSPM_POLICY_TEMPLATE,
       defaultProvider: 'aws',
       namespaceSupportEnabled: true,
       name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
@@ -85,7 +87,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       getStartedPath: `https://ela.st/cspm-get-started`,
       providers: {
         aws: {
-          type: 'cloudbeat/cis_aws',
+          type: CLOUDBEAT_AWS,
           showCloudConnectors: true,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.5.0-preview20',
@@ -93,7 +95,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           testId: 'cisAwsTestId',
         },
         gcp: {
-          type: 'cloudbeat/cis_gcp',
+          type: CLOUDBEAT_GCP,
           showCloudConnectors: false,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.6.0',
@@ -102,7 +104,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           testId: 'cisGcpTestId',
         },
         azure: {
-          type: 'cloudbeat/cis_azure',
+          type: CLOUDBEAT_AZURE,
           showCloudConnectors: false,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.7.0',

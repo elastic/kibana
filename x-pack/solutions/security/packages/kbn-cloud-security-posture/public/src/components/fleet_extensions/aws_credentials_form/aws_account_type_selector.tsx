@@ -15,7 +15,7 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getPosturePolicy } from '../utils';
 import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
-import { AWS_PROVIDER, AwsAccountType, UpdatePolicy } from '../types';
+import { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../cloud_setup_context';
 

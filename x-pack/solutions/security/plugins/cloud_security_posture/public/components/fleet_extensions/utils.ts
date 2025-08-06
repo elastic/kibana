@@ -160,7 +160,7 @@ export const isPostureInput = (
   SUPPORTED_POLICY_TEMPLATES.includes(input.policy_template as CloudSecurityPolicyTemplate) &&
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as PostureInput);
 
-const getPostureType = (policyTemplateInput: PostureInput) => {
+export const getPostureType = (policyTemplateInput: PostureInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_AZURE:
@@ -176,7 +176,7 @@ const getPostureType = (policyTemplateInput: PostureInput) => {
   }
 };
 
-const getDeploymentType = (policyTemplateInput: PostureInput) => {
+export const getDeploymentType = (policyTemplateInput: PostureInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_VULN_MGMT_AWS:
