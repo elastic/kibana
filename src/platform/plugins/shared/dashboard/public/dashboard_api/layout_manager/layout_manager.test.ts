@@ -42,7 +42,7 @@ describe('layout manager', () => {
   };
 
   const section1 = {
-    title: 'Section open on page load',
+    title: 'Section one',
     collapsed: false,
     gridData: {
       y: 1,
