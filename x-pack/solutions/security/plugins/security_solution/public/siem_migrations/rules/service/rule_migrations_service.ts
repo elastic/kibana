@@ -29,16 +29,15 @@ import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/cons
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import type { StartRuleMigrationParams } from '../api';
+import type { StartRuleMigrationParams, GetRuleMigrationsStatsAllParams } from '../api';
 import {
   createRuleMigration,
-  getRuleMigrationStats,
-  getRuleMigrationsStatsAll,
-  startRuleMigration,
-  type GetRuleMigrationsStatsAllParams,
-  getMissingResources,
-  upsertMigrationResources,
   getIntegrations,
+  getRuleMigrationsStatsAll,
+  getRuleMigrationStats,
+  getMissingResources,
+  startRuleMigration,
+  upsertMigrationResources,
 } from '../api';
 import {
   getMissingCapabilities,

@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SummaryColumnProps } from '@kbn/discover-contextual-components';
-import { CellRenderersExtensionParams } from '../../../../context_awareness';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SummaryColumnProps } from '@kbn/discover-contextual-components';
+import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import { SummaryColumn } from './summary_column';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;

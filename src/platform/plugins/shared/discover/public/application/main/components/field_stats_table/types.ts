@@ -17,8 +17,8 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { AdditionalFieldGroups } from '@kbn/unified-field-list';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {
