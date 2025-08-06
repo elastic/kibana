@@ -21,5 +21,7 @@
     "@kbn/developer-examples-plugin",
     "@kbn/share-plugin",
     "@kbn/es-query",
+    "@kbn/cases-plugin",
+    "@kbn/i18n",
   ]
 }
