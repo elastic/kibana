@@ -11,10 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
-import {
-  CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS,
-  NoPermissionsTooltip,
-} from '../common/components/permissions';
+import { NoPermissionsTooltip } from '../common/components/permissions';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
@@ -36,7 +33,6 @@ export const RunTestManually = () => {
   const { canSave } = useSyntheticsSettingsContext();
 
   const content = testInProgress ? TEST_SCHEDULED_LABEL : TEST_NOW_ARIA_LABEL;
-
 
   return (
     <NoPermissionsTooltip
