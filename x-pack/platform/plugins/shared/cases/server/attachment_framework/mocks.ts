@@ -19,6 +19,7 @@ import {
 } from '../../common';
 import { ExternalReferenceAttachmentTypeRegistry } from './external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
+import { AttachmentSuggestionRegistry } from './suggestion_registry';
 import type {
   PersistableStateAttachmentTypeSetup,
   PersistableStateAttachmentState,
@@ -151,3 +152,8 @@ export const createExternalReferenceAttachmentTypeRegistryMock =
 
     return externalReferenceAttachmentTypeRegistry;
   };
+
+export const createAttachmentSuggestionRegistryMock = () => {
+  const attachmentSuggestionRegistry = new AttachmentSuggestionRegistry();
+  return attachmentSuggestionRegistry;
+};

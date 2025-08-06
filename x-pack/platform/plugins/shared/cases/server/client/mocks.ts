@@ -41,6 +41,7 @@ import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createAttachmentSuggestionRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -218,6 +219,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    attachmentSuggestionRegistry: createAttachmentSuggestionRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
