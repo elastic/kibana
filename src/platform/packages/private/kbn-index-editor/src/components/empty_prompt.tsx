@@ -10,10 +10,17 @@
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextExtra } from '../types';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const EmptyPrompt: FC = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
+  const {
+    services: { fileUpload },
+  } = useKibana<KibanaContextExtra>();
+
+  const maxFileSize = fileUpload.getMaxBytesFormatted();
 
   const uploading = (
     <EuiLink
@@ -55,7 +62,10 @@ export const EmptyPrompt: FC = () => {
           <EuiText color="subdued" textAlign="center" size="xs">
             <FormattedMessage
               id="indexEditor.emptyPrompt.description.supportedFormats"
-              defaultMessage="Supports .csv files up to 500 MB."
+              defaultMessage="Supports .csv files up to {maxFileSize}."
+              values={{
+                maxFileSize,
+              }}
             />
           </EuiText>
         </>
