@@ -2814,17 +2814,18 @@ x-pack/solutions/security/plugins/security_solution/server/search_strategy/secur
 x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-entity-analytics
 
-x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/tasks/network @elastic/security-entity-analytics
-x-pack/test/security_solution_cypress/cypress/tasks/users @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/users @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/explore/ml @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/screens/users @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/hosts @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/network @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/users @elastic/security-entity-analytics
 x-pack/platform/test/fixtures/es_archives/auditbeat/hosts @elastic/security-entity-analytics
 x-pack/platform/test/fixtures/es_archives/auditbeat/uncommon_processes @elastic/security-entity-analytics
 x-pack/platform/test/fixtures/es_archives/auditbeat/users @elastic/security-entity-analytics
@@ -2876,9 +2877,9 @@ x-pack/test_serverless/functional/test_suites/security/config.cloud_security_pos
 x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 ## CSP e2e tests
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
-x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kibana-cloud-security-posture
 
 # Security Service Integrations
 x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
