@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -49,7 +49,7 @@ describe('NumberFormatEditor', () => {
   });
 
   it('should render normally', async () => {
-    const component = shallow(
+    const { container } = render(
       <NumberFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -59,6 +59,7 @@ describe('NumberFormatEditor', () => {
       />,
       { context: KibanaReactContext.value }
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 });

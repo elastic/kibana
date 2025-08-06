@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { StringFormatEditor } from './string';
@@ -40,7 +40,7 @@ describe('StringFormatEditor', () => {
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const component = shallow(
       <StringFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -49,7 +49,6 @@ describe('StringFormatEditor', () => {
         onError={onError}
       />
     );
-    expect(container).toBeInTheDocument();
-    expect(container.firstChild).toBeTruthy();
+    expect(component).toMatchSnapshot();
   });
 });

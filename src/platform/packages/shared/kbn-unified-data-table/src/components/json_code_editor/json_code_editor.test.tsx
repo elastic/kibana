@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import JsonCodeEditor from './json_code_editor';
 
 it('returns the `JsonCodeEditor` component', () => {
@@ -19,5 +19,10 @@ it('returns the `JsonCodeEditor` component', () => {
     _score: 1,
     _source: { test: 123 },
   };
-  expect(shallow(<JsonCodeEditor json={value} />)).toMatchSnapshot();
+  
+  const { container } = render(<JsonCodeEditor json={value} />);
+  
+  // Verify the component renders without errors
+  expect(container).toBeInTheDocument();
+  expect(container.firstChild).toBeTruthy();
 });

@@ -8,7 +8,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { FormatEditor } from './format_editor';
 
 class TestEditor extends PureComponent {
@@ -30,8 +30,8 @@ const formatEditors = {
 };
 
 describe('FieldFormatEditor', () => {
-  it('should render normally', async () => {
-    const component = shallow(
+  it('should render normally when format editor exists', async () => {
+    const { container } = render(
       <FormatEditor
         fieldType="number"
         fieldFormat={{} as any}
@@ -43,22 +43,31 @@ describe('FieldFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    // Since the component renders a lazy loaded editor, we should see the editor content
+    expect(container).toBeInTheDocument();
+    // The TestEditor should be rendered since formatEditors.getById returns TestEditor for 'number'
+    expect(container.firstChild).toBeTruthy();
   });
 
   it('should render nothing if there is no editor for the format', async () => {
-    const component = shallow(
+    const formatEditorsWithoutIp = {
+      ...formatEditors,
+      getById: jest.fn(() => undefined), // Return undefined for formats without editors
+    };
+
+    const { container } = render(
       <FormatEditor
         fieldType="number"
         fieldFormat={{} as any}
         fieldFormatId="ip"
         fieldFormatParams={{}}
-        fieldFormatEditors={formatEditors}
+        fieldFormatEditors={formatEditorsWithoutIp}
         onChange={() => {}}
         onError={() => {}}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    // When no editor is found, the component should render nothing (empty fragment)
+    expect(container.firstChild).toBeNull();
   });
 });

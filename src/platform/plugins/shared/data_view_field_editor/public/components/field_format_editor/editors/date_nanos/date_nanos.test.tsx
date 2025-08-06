@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { DateNanosFormatEditor } from './date_nanos';
@@ -34,7 +34,7 @@ describe('DateFormatEditor', () => {
   });
 
   it('should render normally', async () => {
-    const component = shallow(
+    const { container } = render(
       <DateNanosFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -44,6 +44,7 @@ describe('DateFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 });

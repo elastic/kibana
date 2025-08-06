@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { shallow } from 'enzyme';
 import { NoFieldsCallout } from './no_fields_callout';
 
 describe('UnifiedFieldList <NoFieldCallout />', () => {
   it('renders correctly for index with no fields', () => {
-    const { container } = render(<NoFieldsCallout fieldsExistInIndex={false} />);
+    const component = shallow(<NoFieldsCallout fieldsExistInIndex={false} />);
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
@@ -28,7 +28,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     `);
   });
   it('renders correctly when empty with no filters/timerange reasons', () => {
-    const { container } = render(<NoFieldsCallout fieldsExistInIndex={true} />);
+    const component = shallow(<NoFieldsCallout fieldsExistInIndex={true} />);
     expect(component).toMatchInlineSnapshot(`
       <EuiText
         color="subdued"
@@ -43,7 +43,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
     `);
   });
   it('renders correctly with passed defaultNoFieldsMessage', () => {
-    const { container } = render(
+    const component = shallow(
       <NoFieldsCallout fieldsExistInIndex={true} defaultNoFieldsMessage="No empty fields" />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -61,7 +61,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
   });
 
   it('renders properly when affected by field filter', () => {
-    const { container } = render(
+    const component = shallow(
       <NoFieldsCallout fieldsExistInIndex={true} isAffectedByFieldFilter={true} />
     );
     expect(component).toMatchInlineSnapshot(`
@@ -87,7 +87,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
   });
 
   it('renders correctly when affected by global filters and timerange', () => {
-    const { container } = render(
+    const component = shallow(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByTimerange={true}
@@ -121,7 +121,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
   });
 
   it('renders correctly when affected by global filters and field filters', () => {
-    const { container } = render(
+    const component = shallow(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByTimerange={true}
@@ -155,7 +155,7 @@ describe('UnifiedFieldList <NoFieldCallout />', () => {
   });
 
   it('renders correctly when affected by field filters, global filter and timerange', () => {
-    const { container } = render(
+    const component = shallow(
       <NoFieldsCallout
         fieldsExistInIndex={true}
         isAffectedByFieldFilter={true}

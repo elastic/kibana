@@ -115,7 +115,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -141,7 +141,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -198,7 +198,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -235,7 +235,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -303,7 +303,7 @@ describe('Unified data table cell rendering', function () {
       isPlainRecord: true,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -343,7 +343,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -383,7 +383,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 1,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -420,7 +420,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -497,7 +497,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -538,7 +538,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -576,7 +576,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -680,7 +680,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -715,7 +715,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={1}
         colIndex={1}
@@ -741,7 +741,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}
@@ -780,7 +780,7 @@ describe('Unified data table cell rendering', function () {
       maxEntries: 100,
       columnsMeta: undefined,
     });
-    const { container } = render(
+    const component = shallow(
       <DataTableCellValue
         rowIndex={0}
         colIndex={0}

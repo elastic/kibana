@@ -29,6 +29,7 @@ __tmp__
 # Ignore example plugin builds
 /examples/*/build
 /x-pack/examples/*/build
+/x-pack/plugins/screenshotting/*
 
 # Ignore certain functional test runner artifacts
 /src/platform/test/*/failure_debug

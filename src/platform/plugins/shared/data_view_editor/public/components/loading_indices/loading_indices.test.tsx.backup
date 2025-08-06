@@ -9,13 +9,12 @@
 
 import React from 'react';
 import { LoadingIndices } from '.';
-import { render, screen } from '@testing-library/react';
+import { shallow } from 'enzyme';
 
 describe('LoadingIndices', () => {
   it('should render normally', () => {
-    const { container } = render(<LoadingIndices />);
+    const component = shallow(<LoadingIndices />);
 
-    expect(container).toBeInTheDocument();
-    expect(container.firstChild).toBeTruthy();
+    expect(component).toMatchSnapshot();
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 
 import { DurationFormatEditor } from './duration';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -62,7 +62,7 @@ describe('DurationFormatEditor', () => {
   });
 
   it('should render human readable output normally', async () => {
-    const { container } = render(
+    const component = shallow(
       <DurationFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -71,8 +71,7 @@ describe('DurationFormatEditor', () => {
         onError={onError}
       />
     );
-    expect(container).toBeInTheDocument();
-    expect(container.firstChild).toBeTruthy();
+    expect(component).toMatchSnapshot();
   });
 
   it('should render non-human readable output normally', async () => {
@@ -88,7 +87,7 @@ describe('DurationFormatEditor', () => {
       }),
       isHuman: () => false,
     };
-    const { container } = render(
+    const component = shallow(
       <DurationFormatEditor
         fieldType={fieldType}
         format={newFormat as unknown as FieldFormat}
@@ -105,8 +104,7 @@ describe('DurationFormatEditor', () => {
       'Include space between suffix and value'
     );
 
-    expect(container).toBeInTheDocument();
-    expect(container.firstChild).toBeTruthy();
+    expect(component).toMatchSnapshot();
   });
 
   it('should not render show suffix on dynamic output', async () => {
@@ -123,7 +121,7 @@ describe('DurationFormatEditor', () => {
       isHuman: () => false,
       isHumanPrecise: () => true,
     };
-    const { container } = render(
+    const component = shallow(
       <DurationFormatEditor
         fieldType={fieldType}
         format={newFormat as unknown as FieldFormat}
@@ -147,7 +145,6 @@ describe('DurationFormatEditor', () => {
       'Include space between suffix and value'
     );
 
-    expect(container).toBeInTheDocument();
-    expect(container.firstChild).toBeTruthy();
+    expect(component).toMatchSnapshot();
   });
 });

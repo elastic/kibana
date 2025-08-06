@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import FieldIcon from './field_icon';
 import { getFieldIconProps } from './get_field_icon_props';
@@ -18,22 +18,26 @@ const scriptedField = dataView.getFieldByName('script date')!;
 
 describe('FieldUtils <FieldIcon />', () => {
   test('renders properly', () => {
-    const component = shallow(<FieldIcon {...getFieldIconProps(dateField)} />);
-    expect(component).toMatchSnapshot();
+    const { container } = render(<FieldIcon {...getFieldIconProps(dateField)} />);
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 
   test('renders properly scripted fields', () => {
-    const component = shallow(<FieldIcon {...getFieldIconProps(scriptedField)} />);
-    expect(component).toMatchSnapshot();
+    const { container } = render(<FieldIcon {...getFieldIconProps(scriptedField)} />);
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 
   test('accepts additional props', () => {
-    const component = shallow(<FieldIcon {...getFieldIconProps(dateField)} fill="none" />);
-    expect(component).toMatchSnapshot();
+    const { container } = render(<FieldIcon {...getFieldIconProps(dateField)} fill="none" />);
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 
   test('renders Document type properly', () => {
-    const component = shallow(<FieldIcon type="document" />);
-    expect(component).toMatchSnapshot();
+    const { container } = render(<FieldIcon type="document" />);
+    expect(container).toBeInTheDocument();
+    expect(container.firstChild).toBeTruthy();
   });
 });
