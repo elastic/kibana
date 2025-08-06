@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactWrapper } from 'enzyme';
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
+import { render, waitFor } from '@testing-library/react';
 import { BehaviorSubject, of } from 'rxjs';
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiProvider } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { KibanaEuiProvider } from './eui_provider';
+
+// Mock the EuiProvider component to capture its props
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiProvider: jest.fn(original.EuiProvider),
+  };
+});
 
 describe('KibanaEuiProvider', () => {
   let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
@@ -30,17 +39,8 @@ describe('KibanaEuiProvider', () => {
     euiTheme = undefined;
     userProfile = userProfileServiceMock.createStart();
     consoleWarnMock = jest.spyOn(global.console, 'warn').mockImplementation(() => {});
+    (EuiProvider as jest.Mock).mockImplementation(jest.requireActual('@elastic/eui').EuiProvider);
   });
-
-  const flushPromises = async () => {
-    await new Promise<void>(async (resolve, reject) => {
-      try {
-        setImmediate(() => resolve());
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
 
   const InnerComponent: FC = () => {
     const theme = useEuiTheme();
@@ -50,17 +50,10 @@ describe('KibanaEuiProvider', () => {
     return <div>foo</div>;
   };
 
-  const refresh = async (wrapper: ReactWrapper<unknown>) => {
-    await act(async () => {
-      await flushPromises();
-      wrapper.update();
-    });
-  };
-
   it('exposes the EUI theme provider', async () => {
     const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
 
-    const wrapper = mountWithIntl(
+    render(
       <KibanaEuiProvider
         theme={{ theme$: of(coreTheme) }}
         modify={{ breakpoint: { xxl: 1600 } }}
@@ -70,7 +63,10 @@ describe('KibanaEuiProvider', () => {
       </KibanaEuiProvider>
     );
 
-    await refresh(wrapper);
+    // Wait for the component to update
+    await waitFor(() => {
+      expect(euiTheme).toBeDefined();
+    });
 
     expect(euiTheme!.colorMode).toEqual('DARK');
     expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
@@ -80,23 +76,50 @@ describe('KibanaEuiProvider', () => {
   it('propagates changes of the coreTheme observable', async () => {
     const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
 
-    const wrapper = mountWithIntl(
+    render(
       <KibanaEuiProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
         <InnerComponent />
       </KibanaEuiProvider>
     );
 
-    await refresh(wrapper);
+    // Wait for the component to update with initial theme
+    await waitFor(() => {
+      expect(euiTheme).toBeDefined();
+    });
 
     expect(euiTheme!.colorMode).toEqual('DARK');
 
-    await act(async () => {
+    // Update the theme
+    act(() => {
       coreTheme$.next({ darkMode: false, name: 'amsterdam' });
     });
 
-    await refresh(wrapper);
+    // Wait for the component to update with new theme
+    await waitFor(() => {
+      expect(euiTheme!.colorMode).toEqual('LIGHT');
+    });
 
-    expect(euiTheme!.colorMode).toEqual('LIGHT');
     expect(consoleWarnMock).not.toBeCalled();
+  });
+
+  it('passes component defaults to EuiProvider', async () => {
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+
+    render(
+      <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} userProfile={userProfile}>
+        <div>test</div>
+      </KibanaEuiProvider>
+    );
+
+    expect(EuiProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        componentDefaults: {
+          EuiFlyout: {
+            includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+          },
+        },
+      }),
+      expect.anything()
+    );
   });
 });
