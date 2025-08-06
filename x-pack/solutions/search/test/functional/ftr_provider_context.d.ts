@@ -7,7 +7,7 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { pageObjects } from './page_objects';
-import { services } from './services';
+import { pageObjects } from '../functional_search/page_objects';
+import { services } from '../functional_search/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

@@ -7,8 +7,10 @@
 
 import { pageObjects as platformPageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { SearchClassicNavigationProvider } from './search_classic_navigation';
+import { SearchPlaygroundPageProvider } from './search_playground_page';
 
 export const pageObjects = {
   ...platformPageObjects,
   searchClassicNavigation: SearchClassicNavigationProvider,
+  searchPlayground: SearchPlaygroundPageProvider,
 };

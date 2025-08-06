@@ -52,8 +52,6 @@ import { UptimePageObject } from './uptime_page';
 import { SearchPlaygroundPageProvider } from './search_playground_page';
 import { SearchSynonymsPageProvider } from './search_synonyms_page';
 import { SearchQueryRulesPageProvider } from './search_query_rules_page';
-import { SearchClassicNavigationProvider } from './search_classic_navigation';
-import { SearchStartProvider } from './search_start';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -89,8 +87,6 @@ export const pageObjects = {
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,
   rollup: RollupPageObject,
-  searchClassicNavigation: SearchClassicNavigationProvider,
-  searchStart: SearchStartProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
