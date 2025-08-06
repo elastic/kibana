@@ -87,7 +87,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
   graph.setEdge(enterConditionNodeId, enterThenBranchNode.id);
   let thenPreviousStep: any = enterThenBranchNode;
-  trueSteps.forEach((ifTrueCurrentStep: any, index: number) => {
+  trueSteps.forEach((ifTrueCurrentStep: any) => {
     const currentNode = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep);
     graph.setNode(getNodeId(currentNode), currentNode);
     graph.setEdge(getNodeId(thenPreviousStep), getNodeId(currentNode));
@@ -110,9 +110,8 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
     let elsePreviousStep: any = enterElseBranchNode;
-    falseSteps.forEach((ifFalseCurrentStep: any, index: number) => {
-      const _previousStep = index > 0 ? falseSteps[index - 1] : elsePreviousStep;
-      const currentNode = visitAbstractStep(graph, _previousStep, ifFalseCurrentStep);
+    falseSteps.forEach((ifFalseCurrentStep: any) => {
+      const currentNode = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep);
       graph.setNode(getNodeId(currentNode), currentNode);
       graph.setEdge(getNodeId(elsePreviousStep), getNodeId(currentNode));
       elsePreviousStep = currentNode;
