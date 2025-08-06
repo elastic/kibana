@@ -37,7 +37,7 @@ export function extractTimeSeriesFields(
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
       // Check for time series metrics (numeric fields with time_series_metric)
-      if (numericTypes.includes(type) && typeInfo.time_series_metric) {
+      if (numericTypes.includes(type as ES_FIELD_TYPES) && typeInfo.time_series_metric) {
         timeSeriesFields.push({ fieldName, type, typeInfo, fieldType: 'metric' });
       }
       // Check for time series dimensions

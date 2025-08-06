@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+
+export interface Dimension {
+  name: string;
+  type: string;
+  description?: string;
+}
+
 export interface MetricField {
   name: string;
   index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
+  dimensions: Array<Dimension>;
   type: string;
   time_series_metric?: string;
   unit?: string;
@@ -17,4 +25,5 @@ export interface MetricField {
   stability?: string;
   display?: string;
   no_data?: boolean;
+  fieldCaps?: Record<string, Record<string, FieldCapsFieldCapability>>;
 }

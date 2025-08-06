@@ -11,21 +11,19 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { parse } from '@kbn/datemath';
 import { dateRangeQuery } from '@kbn/es-query';
 
-interface RetrieveFieldCapsProps {
-  esClient: ElasticsearchClient;
-  indexPattern: string;
-  fields?: Fields;
-  to?: string;
-  from?: string;
-}
-
 export async function retrieveFieldCaps({
   esClient,
   indexPattern,
   fields = '*',
   to,
   from,
-}: RetrieveFieldCapsProps) {
+}: {
+  esClient: ElasticsearchClient;
+  indexPattern: string;
+  fields?: Fields;
+  to?: string;
+  from?: string;
+}) {
   // Build index_filter for time range if provided
   let indexFilter: QueryDslQueryContainer | undefined;
   if (from && to) {

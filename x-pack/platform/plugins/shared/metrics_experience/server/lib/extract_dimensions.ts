@@ -7,12 +7,13 @@
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { getEcsFieldDescriptions } from './get_ecs_field_descriptions';
+import { Dimension } from '../types';
 
 export function extractDimensions(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>,
   filter?: string[]
-): Array<{ name: string; type: string; description?: string }> {
-  const dims: Array<{ name: string; type: string; description?: string }> = [];
+): Array<Dimension> {
+  const dims: Array<Dimension> = [];
 
   // Get all dimension field names for batch description lookup
   const dimensionFieldNames = Object.entries(fields)
@@ -25,10 +26,8 @@ export function extractDimensions(
     })
     .map(([fieldName]) => fieldName);
 
-  // Get ECS and OTel descriptions for dimension fields
   // TODO: this needs to be replaed by the FieldsMetadataService
   const ecsDescriptions = getEcsFieldDescriptions(dimensionFieldNames);
-  // const otelConventions = getOtelSemanticConventions(dimensionFieldNames);
 
   for (const [fieldName, fieldInfo] of Object.entries(fields)) {
     if (fieldName === '_metric_names_hash') continue;

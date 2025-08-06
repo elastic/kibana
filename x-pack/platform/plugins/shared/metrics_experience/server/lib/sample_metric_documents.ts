@@ -10,6 +10,8 @@ import { type Logger } from '@kbn/core/server';
 import { MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
 import { joinArrayValues } from './join_array_values';
 
+export type SampleMetricDocumentsResults = Promise<Map<string, string[]>>;
+
 export async function sampleMetricDocuments({
   esClient,
   indexPattern,
@@ -22,7 +24,7 @@ export async function sampleMetricDocuments({
   metricNames: string[];
   dimensionFields: string[];
   logger: Logger;
-}): Promise<Map<string, string[]>> {
+}): SampleMetricDocumentsResults {
   if (metricNames.length === 0) {
     return new Map();
   }
@@ -76,8 +78,6 @@ export async function sampleMetricDocuments({
   }
   return metricsDocumentMap;
 }
-
-export type SampleMetricDocumentsResults = Promise<Map<string, string[]>>;
 
 export async function batchedSampleMetricDocuments({
   esClient,

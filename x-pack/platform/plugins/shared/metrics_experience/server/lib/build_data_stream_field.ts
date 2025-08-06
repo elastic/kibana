@@ -6,12 +6,12 @@
  */
 
 import { type FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
-import { type MetricField } from '../types';
+import { Dimension, type MetricField } from '../types';
 
 export function buildMetricField(
   name: string,
   index: string,
-  dimensions: Array<{ name: string; type: string; description?: string }>,
+  dimensions: Array<Dimension>,
   type: string,
   typeInfo: FieldCapsFieldCapability
 ): MetricField {

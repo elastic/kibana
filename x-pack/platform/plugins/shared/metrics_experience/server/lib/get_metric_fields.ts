@@ -7,7 +7,7 @@
 
 import { type Fields } from '@elastic/elasticsearch/lib/api/types';
 import { type ElasticsearchClient, type Logger } from '@kbn/core/server';
-import { type MetricField } from '../types';
+import { Dimension, type MetricField } from '../types';
 import { deduplicateFields } from './deduplicate_fields';
 import { getEcsFieldDescriptions } from './get_ecs_field_descriptions';
 import { extractTimeSeriesFields } from './extract_time_series_fields';
@@ -98,7 +98,7 @@ export async function getMetricFields({
 
         // Store the fields with their field caps for later processing
         for (const field of deduped) {
-          (field as any)._fieldCaps = fieldCaps;
+          field.fieldCaps = fieldCaps;
         }
 
         allFields.push(...deduped);
@@ -120,23 +120,22 @@ export async function getMetricFields({
     }
 
     // Pre-compute all unique dimension field combinations to avoid repeated extraction
-    const uniqueDimensionSets = new Map<string, Array<{ name: string; type: string }>>();
+    const uniqueDimensionSets = new Map<string, Array<Dimension>>();
 
     // Update dimensions based on actual sampled documents
     for (const field of allFields) {
       // Get the sampled document fields for this metric
       const actualFields = allSampledDocs.get(field.name) || [];
-      const fieldCaps = (field as any)._fieldCaps;
+      const fieldCaps = field.fieldCaps;
 
       if (actualFields.length > 0) {
         // Create cache key from sorted field names
         const cacheKey = actualFields.sort().join(',');
 
         // Check if we've already computed dimensions for this field combination
-        if (!uniqueDimensionSets.has(cacheKey)) {
+        if (!uniqueDimensionSets.has(cacheKey) && fieldCaps) {
           uniqueDimensionSets.set(cacheKey, extractDimensions(fieldCaps, actualFields));
         }
-
         field.dimensions = uniqueDimensionSets.get(cacheKey)!;
         field.no_data = false;
       } else {
@@ -145,7 +144,7 @@ export async function getMetricFields({
       }
       // Otherwise keep all dimensions as fallback
       // Clean up temporary field caps reference
-      delete (field as any)._fieldCaps;
+      delete field.fieldCaps;
     }
 
     // Get ECS descriptions for all field names
