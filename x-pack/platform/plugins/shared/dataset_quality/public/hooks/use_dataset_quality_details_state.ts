@@ -100,7 +100,7 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const canUserReadFailureStore = Boolean(
-    dataStreamSettings?.datasetUserPrivileges?.canReadFailureStore
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
   const dataStreamDetails = useSelector(service, (state) =>
