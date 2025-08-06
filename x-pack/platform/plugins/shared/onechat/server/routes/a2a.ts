@@ -12,6 +12,7 @@ import { getHandlerWrapper } from './wrap_handler';
 import { ONECHAT_A2A_SERVER_UI_SETTING_ID } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
+import { getKibanaUrl } from '../utils/get_kibana_url';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
@@ -26,8 +27,7 @@ export function registerA2ARoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const getBaseUrl = () => {
-    const { protocol, hostname, port } = coreSetup.http.getServerInfo();
-    return `${protocol}://${hostname}:${port}`;
+    return getKibanaUrl(coreSetup);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
