@@ -65,6 +65,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
+      // Workaround for https://github.com/elastic/eui/issues/8949
+      const lockPopoverOpen$ = new BehaviorSubject(false);
+
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
         syncTimesliceWithTimeRangePercentage
@@ -328,8 +331,20 @@ export const getTimesliderControlFactory = (): ControlFactory<
                 />
               }
               isOpen={isPopoverOpen}
-              closePopover={() => isPopoverOpen$.next(false)}
+              closePopover={() => {
+                // Workaround for https://github.com/elastic/eui/issues/8949
+                if (!lockPopoverOpen$.getValue()) isPopoverOpen$.next(false);
+              }}
               panelPaddingSize="s"
+              panelProps={{
+                // Workaround for https://github.com/elastic/eui/issues/8949
+                onKeyDown: (event) => {
+                  if (event.key === 'Tab' && event.shiftKey) {
+                    lockPopoverOpen$.next(true);
+                    requestIdleCallback(() => lockPopoverOpen$.next(false));
+                  }
+                },
+              }}
             >
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
