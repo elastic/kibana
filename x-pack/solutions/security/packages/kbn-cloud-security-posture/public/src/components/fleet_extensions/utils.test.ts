@@ -17,7 +17,7 @@ import {
   getDefaultAzureCredentialsType,
   getDefaultGcpHiddenVars,
 } from './utils';
-import { getMockPolicyAWS, getPackageInfoMock, TEMPLATE_NAME } from './mocks';
+import { getMockPolicyAWS, getPackageInfoMock, TEMPLATE_NAME } from './test/mock';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
