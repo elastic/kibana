@@ -229,7 +229,7 @@ async function updateExistingStreamsManagedPipeline({
         type: 'update_default_ingest_pipeline',
         request: {
           name: action.dataStream,
-          pipeline: pipelineName,
+          pipeline: undefined,
         },
       }))
     );

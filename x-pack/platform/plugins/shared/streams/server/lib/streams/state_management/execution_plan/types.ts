@@ -85,7 +85,7 @@ export interface UpdateDefaultIngestPipelineAction {
   type: 'update_default_ingest_pipeline';
   request: {
     name: string;
-    pipeline: string;
+    pipeline: string | undefined;
   };
 }
 

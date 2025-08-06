@@ -96,11 +96,12 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
-        upsert_write_index_or_rollover: [
+        update_default_ingest_pipeline: [
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
         ],
@@ -213,17 +214,19 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
-        upsert_write_index_or_rollover: [
+        update_default_ingest_pipeline: [
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-other-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
         ],
@@ -380,17 +383,19 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
-        upsert_write_index_or_rollover: [
+        update_default_ingest_pipeline: [
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-datastream',
+              pipeline: 'my-template-pipeline',
             },
           },
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-third-datastream',
+              pipeline: 'my-other-template-pipeline',
             },
           },
         ],
@@ -472,11 +477,12 @@ describe('translateClassicStreamPipelineActions', () => {
             },
           },
         ],
-        upsert_write_index_or_rollover: [
+        update_default_ingest_pipeline: [
           {
-            type: 'upsert_write_index_or_rollover',
+            type: 'update_default_ingest_pipeline',
             request: {
               name: 'my-datastream',
+              pipeline: undefined,
             },
           },
         ],
@@ -1054,8 +1060,9 @@ function emptyActionsByType(): ActionsByType {
     delete_processor_from_ingest_pipeline: [],
     upsert_datastream: [],
     update_lifecycle: [],
-    upsert_write_index_or_rollover: [],
+    rollover: [],
     delete_datastream: [],
+    update_default_ingest_pipeline: [],
     upsert_dot_streams_document: [],
     delete_dot_streams_document: [],
     delete_queries: [],
