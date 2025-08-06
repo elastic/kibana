@@ -230,7 +230,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('disableRules calls the bulkDisableRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-    
+
     const ComponentToExtend = ({ bulkDisableRules, rules }: ComponentOpts & { rules: Rule[] }) => {
       return (
         <button
