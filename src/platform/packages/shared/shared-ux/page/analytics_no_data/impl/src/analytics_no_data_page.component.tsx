@@ -33,23 +33,19 @@ export interface Props {
 }
 
 type AnalyticsNoDataPageProps = Props &
-  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'>;
+  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'> & {
+    hasPermission?: boolean;
+  };
 
 const flavors: {
   [K in AnalyticsNoDataPageFlavor]: (deps: {
     kibanaGuideDocLink: string;
     hasApiKeys: boolean;
     prependBasePath: (path: string) => string;
+    hasPermission?: boolean;
   }) => KibanaNoDataPageProps['noDataConfig'];
 } = {
-  kibana: ({ kibanaGuideDocLink }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.analytics', {
-      defaultMessage: 'Analytics',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.analyticsPageTitle', {
-      defaultMessage: 'Welcome to Analytics!',
-    }),
-    logo: 'logoKibana',
+  kibana: ({ kibanaGuideDocLink, prependBasePath, hasPermission }) => ({
     action: {
       elasticAgent: {
         title: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
@@ -58,19 +54,16 @@ const flavors: {
         description: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsDescription', {
           defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
         }),
+        button: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsButton', {
+          defaultMessage: 'Browse integrations',
+        }),
+        href: prependBasePath('/app/integrations/browse'),
         'data-test-subj': 'kbnOverviewAddIntegrations',
+        docsLink: kibanaGuideDocLink,
       },
     },
-    docsLink: kibanaGuideDocLink,
   }),
   serverless_search: ({ hasApiKeys, prependBasePath }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.elasticsearch', {
-      defaultMessage: 'Elasticsearch',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchPageTitle', {
-      defaultMessage: 'Welcome to Elasticsearch!',
-    }),
-    logo: 'logoElasticsearch',
     action: {
       elasticsearch: {
         title: i18n.translate('sharedUXPackages.noDataConfig.elasticsearchTitle', {
@@ -85,22 +78,11 @@ const flavors: {
           ? prependBasePath('/app/elasticsearch/#ingestData') // use Ingest Data section of Home page if project has ES API keys
           : prependBasePath('/app/elasticsearch/'),
         /** force the no data card to be shown **/
-        canAccessFleet: true,
+        hasPermission: true,
       },
     },
   }),
   serverless_observability: ({ prependBasePath }) => ({
-    solution: i18n.translate('sharedUXPackages.noDataConfig.observability', {
-      defaultMessage: 'Observability',
-    }),
-    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageTitle', {
-      defaultMessage: 'Welcome to Elastic Observability!',
-    }),
-    pageDescription: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageDescription', {
-      defaultMessage:
-        'Converge metrics, logs, and traces to monitor the health of your applications.',
-    }),
-    logo: 'logoObservability',
     action: {
       observability: {
         title: i18n.translate('sharedUXPackages.noDataConfig.observabilityTitle', {
@@ -125,6 +107,7 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   showPlainSpinner,
   onTryESQL,
   onESQLNavigationComplete,
+  hasPermission,
   ...services
 }) => {
   const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
@@ -134,6 +117,7 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
     kibanaGuideDocLink,
     prependBasePath,
     hasApiKeys: Boolean(hasApiKeys),
+    hasPermission,
   });
 
   return (

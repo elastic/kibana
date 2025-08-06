@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { EuiFlexGrid, EuiText, EuiCallOut, EuiLink, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
@@ -40,4 +42,81 @@ export const Card = {
   },
 
   argTypes,
+  args: {
+    button: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
+};
+
+export const NoPermission = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    hasPermission: false,
+    button: 'Browse integrations',
+    href: '/app/integrations/browse',
+  },
+};
+
+export const WithComplexDescription = {
+  render: (params: NoDataCardStorybookParams) => {
+    return (
+      <NoDataCardProvider {...mock.getServices(params)}>
+        <NoDataCard {...params} />
+      </NoDataCardProvider>
+    );
+  },
+
+  argTypes,
+  args: {
+    title: 'Universal Profiling',
+    description: (
+      <EuiFlexGrid gutterSize="s">
+        <EuiText>
+          Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero
+          instrumentation. Understand what lines of code are consuming compute resources, at all
+          times, and across your entire infrastructure.
+        </EuiText>
+        <EuiCallOut
+          size="s"
+          color="warning"
+          title="To setup Universal Profiling, you must be logged in as a superuser."
+        />
+        <EuiText size="xs">
+          <ul>
+            <li>
+              <FormattedMessage
+                id="example.dataRetention"
+                defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
+                values={{
+                  dataRetentionLink: (
+                    <EuiLink
+                      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/set-up-lifecycle-policy.html"
+                      target="_blank"
+                    >
+                      controlling data retention
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </li>
+          </ul>
+        </EuiText>
+        <EuiFlexItem>
+          <EuiButton color="primary" fill onClick={() => {}}>
+            Set up Universal Profiling
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    ),
+    href: '/app/integrations/browse',
+    hideActions: true,
+  },
 };

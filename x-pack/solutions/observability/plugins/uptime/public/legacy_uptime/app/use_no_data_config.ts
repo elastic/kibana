@@ -36,9 +36,12 @@ export function useNoDataConfig(): NoDataConfig | undefined {
               'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
           }),
           href: basePath + `/app/home#/tutorial/uptimeMonitors`,
+          button: i18n.translate('xpack.uptime.noDataConfig.beatsCard.buttonLabel', {
+            defaultMessage: 'Add monitors',
+          }),
+          docsLink: docLinks!.links.observability.guide,
         },
       },
-      docsLink: docLinks!.links.observability.guide,
     };
   }
 }

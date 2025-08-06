@@ -12,7 +12,10 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no-data-types';
 
-type PropArguments = Pick<NoDataCardProps, 'title' | 'description' | 'button'>;
+type PropArguments = Pick<
+  NoDataCardProps,
+  'title' | 'description' | 'button' | 'href' | 'docsLink' | 'hasPermission'
+>;
 type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
 type Arguments = PropArguments & ServiceArguments;
 
@@ -51,6 +54,24 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: '',
     },
+    href: {
+      control: {
+        control: 'text',
+      },
+      defaultValue: '',
+    },
+    docsLink: {
+      control: {
+        control: 'text',
+      },
+      defaultValue: '',
+    },
+    hasPermission: {
+      control: {
+        control: 'boolean',
+      },
+      defaultValue: true,
+    },
   };
 
   serviceArguments = {
@@ -67,11 +88,15 @@ export class StorybookMock extends AbstractStorybookMock<
       title: this.getArgumentValue('title', params),
       description: this.getArgumentValue('description', params),
       button: this.getArgumentValue('button', params),
+      hasPermission: this.getArgumentValue('hasPermission', params),
+      href: this.getArgumentValue('href', params),
+      docsLink: this.getArgumentValue('docsLink', params),
     };
   }
 
   getServices(params: Params): NoDataCardServices {
-    const { canAccessFleet } = params;
+    // Use canAccessFleet from params, defaulting to true if not provided
+    const canAccessFleet = params?.canAccessFleet !== undefined ? params.canAccessFleet : true;
 
     return {
       canAccessFleet,

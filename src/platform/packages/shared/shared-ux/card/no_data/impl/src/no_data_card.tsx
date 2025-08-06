@@ -47,7 +47,7 @@ export const NoDataCard = ({
           title,
           button,
           docsLink,
-          canAccessFleet: props.canAccessFleet ?? canAccessFleet,
+          hasPermission: props.hasPermission ?? canAccessFleet,
         }}
       />
     </RedirectAppLinksContainer>

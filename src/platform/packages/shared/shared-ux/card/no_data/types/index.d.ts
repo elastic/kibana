@@ -65,12 +65,12 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
    * Description for the card;
    * If not provided, the default will be used
    */
-  description?: string;
-  /** True if the person has permission to access Fleet, false otherwise */
-  canAccessFleet?: boolean;
+  description?: React.ReactNode;
+  /** True if the person has permission, false otherwise */
+  hasPermission?: boolean;
   /**
-   * Provide a string for the button's label;
-   * The button will be hidden completely if `isDisabled=true`
+   * Provide a string or React element(s) for the button's label;
+   * The button will be hidden completely if `hasPermission=false`
    */
   button?: string;
   /**
@@ -84,6 +84,10 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
   docsLink?: string;
   /** Callback function for when the button is clicked */
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  /** Data test subject for the card */
+  'data-test-subj'?: string;
+  /** Optional flag to hide actions button (in case custom button is passed as part of custom description) */
+  hideActions?: boolean;
 };
 
 /**

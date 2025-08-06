@@ -9,12 +9,14 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate } from '@elastic/eui';
+
+import { EuiPageTemplate, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import { ActionCard } from './action_card';
 
-export const NoDataPage = ({ action, className }: NoDataPageProps) => {
+export const NoDataPage = ({ action, pageTitle, pageDescription, className }: NoDataPageProps) => {
   return (
     <EuiPageTemplate.Section
       alignment="center"
@@ -22,6 +24,20 @@ export const NoDataPage = ({ action, className }: NoDataPageProps) => {
       className={classNames('kbnNoDataPageContents', className)}
       data-test-subj="kbnNoDataPage"
     >
+      {(pageTitle || pageDescription) && (
+        <>
+          <EuiText textAlign="center" size="m">
+            <EuiSpacer size="l" />
+            {pageTitle && <h1>{pageTitle}</h1>}
+            {pageDescription && (
+              <EuiTextColor color="subdued">
+                <p>{pageDescription}</p>
+              </EuiTextColor>
+            )}
+            <EuiSpacer size="xxl" />
+          </EuiText>
+        </>
+      )}
       <ActionCard {...{ action }} />
     </EuiPageTemplate.Section>
   );

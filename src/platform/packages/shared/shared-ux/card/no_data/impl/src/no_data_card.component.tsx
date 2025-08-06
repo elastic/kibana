@@ -19,7 +19,8 @@ const defaultTitle = i18n.translate('sharedUXPackages.card.noData.title', {
 });
 
 const defaultDescription = i18n.translate('sharedUXPackages.card.noData.description', {
-  defaultMessage: `Browse integration options to find the best way to add your data and start analyzing.`,
+  defaultMessage:
+    'Browse integration options to find the best way to add your data and start analyzing.',
 });
 
 const defaultButton = i18n.translate('sharedUXPackages.card.noData.buttonLabel', {
@@ -40,35 +41,51 @@ const noPermissionDescription = i18n.translate(
 export const NoDataCard = ({
   title,
   description,
-  canAccessFleet,
+  hasPermission = true,
   href,
   button,
   docsLink: link,
   onClick,
   icon,
+  hideActions = false,
+  'data-test-subj': dataTestSubj = 'noDataCard',
 }: Props) => {
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
   const docsLink = link || 'https://www.elastic.co/kibana';
+  // Helper function to render content based on type
+  const renderContent = (content: React.ReactNode, fallback: string) => {
+    if (typeof content === 'string') {
+      return <p>{content}</p>;
+    }
+    return content || <p>{fallback}</p>;
+  };
+
   return (
     <EuiPageTemplate.EmptyPrompt
-      data-test-subj="noDataCard"
-      style={{ maxWidth: 400 }} // Adjust max width as needed
+      data-test-subj={dataTestSubj}
+      style={{ maxWidth: 400 }}
       title={
         <EuiTitle size="m">
-          <h2>{canAccessFleet ? title || defaultTitle : noPermissionTitle}</h2>
+          <h2>{hasPermission ? title || defaultTitle : noPermissionTitle}</h2>
         </EuiTitle>
       }
       icon={cardIcon}
-      body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
+      body={
+        hasPermission ? (
+          renderContent(description, defaultDescription)
+        ) : (
+          <p>{noPermissionDescription}</p>
+        )
+      }
       actions={
-        canAccessFleet && href ? (
+        !hideActions && hasPermission && href ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiButton
             color="primary"
             fill
             href={href}
-            data-test-subj="noDataDefaultFooterAction"
-            onClick={onClick}
+            data-test-subj="noDataDefaultActionButton"
+            onClick={onClick || (() => {})}
           >
             {button || defaultButton}
           </EuiButton>
