@@ -21,6 +21,7 @@ import { RegisterAPIRouteFn } from '../../types';
 import { ConfigBuilderStub } from '../../../../common/transforms';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
 import { getLensResponseItem } from '../utils';
+import { isNewApiFormat } from '../../../../common/transforms/config_builder_stub';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -79,21 +80,15 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      const { references, ...lensItem } =
-        'isNewApiFormat' in req.body.data.state
-          ? omit(
-              ConfigBuilderStub.in({
-                id: '', // TODO: Find a better way to conditionally omit id
-                ...req.body.data.state,
-              }),
-              'id'
-            )
-          : // For now we need to be able to create old SO, this may be moved to the config builder
-            ({
-              ...req.body.data,
-              description: req.body.data.description ?? undefined,
-              visualizationType: req.body.data.visualizationType ?? null,
-            } satisfies LensCreateIn['data']);
+      const { references, ...lensItem } = isNewApiFormat(req.body.data)
+        ? // TODO: Find a better way to conditionally omit id
+          omit(ConfigBuilderStub.in(req.body.data), 'id')
+        : // For now we need to be able to create old SO, this may be moved to the config builder
+          ({
+            ...req.body.data,
+            description: req.body.data.description ?? undefined,
+            visualizationType: req.body.data.visualizationType ?? null,
+          } satisfies LensCreateIn['data']);
 
       try {
         // Note: these types are to enforce loose param typings of client methods

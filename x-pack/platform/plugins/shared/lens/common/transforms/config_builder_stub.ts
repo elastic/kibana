@@ -7,6 +7,10 @@
 
 import type { LensAPIConfig, LensItem } from '../../server/content_management';
 
+export function isNewApiFormat(config: unknown): config is LensAPIConfig {
+  return (config as LensAPIConfig)?.state?.isNewApiFormat;
+}
+
 export const ConfigBuilderStub = {
   /**
    * @returns Lens item

@@ -86,10 +86,9 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      // TODO: Find a better way to conditionally omit id
       const { references, ...lensItem } = omit(
         ConfigBuilderStub.in({
-          id: '',
+          id: '', // TODO: Find a better way to conditionally omit id
           ...req.body.data,
         }),
         'id'
