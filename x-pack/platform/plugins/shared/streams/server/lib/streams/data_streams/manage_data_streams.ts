@@ -39,7 +39,7 @@ interface UpdateOrRolloverDataStreamOptions {
 interface UpdateDefaultIngestPipelineOptions {
   esClient: ElasticsearchClient;
   name: string;
-  pipeline: string;
+  pipeline: string | undefined;
 }
 
 export async function upsertDataStream({ esClient, name, logger }: DataStreamManagementOptions) {
