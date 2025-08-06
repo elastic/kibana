@@ -351,14 +351,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await unifiedTabs.createNewTab();
         await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
-        await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
 
         const draftQuery2 = 'from logstash-* | sort @timestamp desc | limit 150';
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await expectState(defaultQuery, false);
         await monacoEditor.setCodeEditorValue(draftQuery2);
@@ -413,8 +409,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectState(true, initialHeight);
 
         await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
-        await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
         await expectState(false, initialHeight);
         await esql.resizeEditorBy(distance);

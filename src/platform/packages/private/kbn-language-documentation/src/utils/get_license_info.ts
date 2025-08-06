@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition } from '../types';
+import { CommandDefinition, FunctionDefinition, LicenseInfo, MultipleLicenseInfo } from '../types';
 import { aggregateLicensesFromSignatures } from './aggregate_licenses_from_signatures';
-
-interface LicenseInfo {
-  name: string;
-  isSignatureSpecific: boolean;
-  paramsWithLicense: string[];
-}
-
-interface MultipleLicenseInfo {
-  licenses: LicenseInfo[];
-  hasMultipleLicenses: boolean;
-}
 
 /**
  * Transforms the aggregated license map into the final array of LicenseInfo objects.
@@ -35,7 +24,7 @@ function transformLicenseMap(licensesMap: Map<string, Set<string>>): LicenseInfo
   });
 }
 
-export function getLicenseInfo(
+export function getLicenseInfoForFunctions(
   fnDefinition: FunctionDefinition | undefined
 ): MultipleLicenseInfo | undefined {
   if (!fnDefinition) {
@@ -67,5 +56,25 @@ export function getLicenseInfo(
   return {
     licenses,
     hasMultipleLicenses: licenses.length > 1,
+  };
+}
+
+/**
+ * Creates license info structure for commands.
+ */
+export function getLicenseInfoForCommand(
+  commandDef: CommandDefinition | undefined
+): MultipleLicenseInfo | undefined {
+  if (!commandDef || !commandDef.license) {
+    return undefined;
+  }
+
+  return {
+    licenses: [
+      {
+        name: commandDef.license,
+      },
+    ],
+    hasMultipleLicenses: false,
   };
 }
