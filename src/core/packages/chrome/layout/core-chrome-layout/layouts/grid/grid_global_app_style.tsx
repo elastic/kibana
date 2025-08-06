@@ -15,11 +15,6 @@ import {
   APP_MAIN_SCROLL_CONTAINER_ID,
 } from '@kbn/core-chrome-layout-constants';
 import { CommonGlobalAppStyles } from '../common/global_app_styles';
-import {
-  useHackSyncPushFlyout,
-  hackEuiPushFlyoutPaddingInlineEnd,
-  hackEuiPushFlyoutPaddingInlineStart,
-} from './hack_use_sync_push_flyout';
 
 const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
   :root {
@@ -107,8 +102,8 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
   // push flyout should be pushing the application area, instead of body
   #${APP_MAIN_SCROLL_CONTAINER_ID} {
-    ${logicalCSS('padding-right', `var(${hackEuiPushFlyoutPaddingInlineEnd}, 0px)`)};
-    ${logicalCSS('padding-left', `var(${hackEuiPushFlyoutPaddingInlineStart}, 0px)`)};
+    ${logicalCSS('padding-right', `var(--euiPushFlyoutOffsetInlineEnd, 0px)`)};
+    ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
   }
   // this is a temporary hack to override EUI's body padding with push flyout
   .kbnBody {
@@ -119,7 +114,6 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
 export const GridLayoutGlobalStyles = () => {
   const { euiTheme } = useEuiTheme();
-  useHackSyncPushFlyout();
   return (
     <>
       <Global styles={[globalLayoutStyles(euiTheme), globalTempHackStyles(euiTheme)]} />
