@@ -9,19 +9,18 @@
 
 import { waitFor } from '@testing-library/dom';
 import { toNavigationItems } from './to_navigation_items';
-import { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import { ChromeProjectNavigationNode, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+beforeEach(() => {
+  consoleWarnSpy.mockClear();
+});
 
 describe('toNavigationItems', () => {
-  beforeEach(() => {
-    consoleWarnSpy.mockClear();
-  });
-
   const {
     logoItem,
     navItems: { footerItems, primaryItems },
@@ -81,5 +80,113 @@ describe('toNavigationItems', () => {
       • Navigation item \\"integrations\\" is missing a \\"icon\\". Using fallback value: \\"plugs\\".
       • Accordion items are not supported in the new navigation. Flattening them \\"stack_management, monitoring, integrations\\" and dropping accordion node \\"node-2\\"."
     `);
+  });
+});
+
+describe('isActive', () => {
+  it('should return null if no active paths', () => {
+    const { activeItemId } = toNavigationItems(navigationTree, [], []);
+    expect(activeItemId).toBeNull();
+  });
+
+  it('should return logo node as active item', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode]]);
+    expect(activeItemId).toBe(logoNode.id);
+  });
+
+  it('should return primary menu node as active item', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+    const primaryNode = logoNode.children![0]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(navigationTree, [], [[logoNode, primaryNode]]);
+    expect(activeItemId).toBe(primaryNode.id);
+  });
+
+  it('should return 1st primary menu node as active item if multiple matching', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+    const primaryNode1 = logoNode.children![0]! as ChromeProjectNavigationNode;
+    const primaryNode2 = logoNode.children![1]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [
+        [logoNode, primaryNode1],
+        [logoNode, primaryNode2],
+      ]
+    );
+    expect(activeItemId).toBe(primaryNode1.id);
+  });
+
+  it('should return secondary node as active item', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
+    const secondaryNode = primaryNode.children![1]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [[logoNode, primaryNode, secondaryNode]]
+    );
+    expect(activeItemId).toBe(secondaryNode.id);
+  });
+
+  it('should return secondary node as active item if active path is beyond navigation', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
+    const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
+    const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [[logoNode, primaryNode, secondaryNode, beyondNavNode]]
+    );
+    expect(activeItemId).toBe(secondaryNode.id);
+  });
+
+  it('out of two matching paths should pick the deepest', () => {
+    const logoNode = navigationTree.body[0] as ChromeProjectNavigationNode;
+    const primaryNode = logoNode.children![2]! as ChromeProjectNavigationNode;
+    const secondaryNode = primaryNode.children![0]! as ChromeProjectNavigationNode;
+    const beyondNavNode = secondaryNode.children![0]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [
+        [logoNode, primaryNode, secondaryNode, beyondNavNode],
+        [logoNode, primaryNode],
+      ]
+    );
+    expect(activeItemId).toBe(secondaryNode.id);
+  });
+
+  it('should support footer items as active', () => {
+    const footerRootNode = navigationTree.footer![0]! as ChromeProjectNavigationNode;
+    const managementAccordion = footerRootNode.children![2]! as ChromeProjectNavigationNode;
+    const managementPrimary = managementAccordion.children![0]! as ChromeProjectNavigationNode;
+    const managementSecondarySection =
+      managementPrimary.children![0]! as ChromeProjectNavigationNode;
+    const managementSecondaryItem =
+      managementSecondarySection.children![0]! as ChromeProjectNavigationNode;
+
+    const { activeItemId } = toNavigationItems(
+      navigationTree,
+      [],
+      [
+        [
+          footerRootNode,
+          managementAccordion,
+          managementPrimary,
+          managementSecondarySection,
+          managementSecondaryItem,
+        ],
+      ]
+    );
+
+    expect(activeItemId).toBe(managementSecondaryItem.id);
   });
 });
