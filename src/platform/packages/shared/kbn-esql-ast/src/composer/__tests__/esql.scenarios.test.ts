@@ -10,7 +10,6 @@
 import { ComposerQuery } from '../composer_query';
 import { esql } from '../esql';
 
-
 describe('various dynamic query construction scenarios', () => {
   test('can inline a primitive runtime value', () => {
     const field = 'foo';
@@ -40,13 +39,13 @@ describe('various dynamic query construction scenarios', () => {
       [['foo'], 42],
       [['bar', 'baz'], 24],
     ];
-    let where = esql.exp `TRUE`;
+    let where = esql.exp`TRUE`;
 
     for (const [field, value] of conditions) {
-      where = esql.exp `${where} AND ${field} > ${value}`;
+      where = esql.exp`${where} AND ${field} > ${value}`;
     }
     // console.log(where + '');
-    
+
     const query = esql`FROM index | WHERE ${where} | LIMIT 10`;
     // console.log(query + '');
 
@@ -61,4 +60,3 @@ describe('various dynamic query construction scenarios', () => {
     expect(query.print()).toBe('FROM index | WHERE `first`.name == "John"');
   });
 });
-``

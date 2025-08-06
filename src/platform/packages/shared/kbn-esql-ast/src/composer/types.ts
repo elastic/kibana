@@ -14,7 +14,7 @@ import type { ParameterHole } from './parameter_hole';
 
 /**
  * Holes are expressions that can be used in the `esql` tagged template function.
- * 
+ *
  * ```ts
  * esql `FROM index | WHERE foo > ${ hole } | LIMIT 10`;
  *                                  ^~~~~^
@@ -50,7 +50,11 @@ export type ParameterShorthandHole = Record<string, unknown>;
  */
 export type SingleKey<T> = IsUnion<keyof T> extends true ? never : {} extends T ? never : T;
 export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
+  k: infer I
+) => void
+  ? I
+  : never;
 
 export type ComposerTag<Return> = <T extends ComposerQueryTagHole[]>(
   template: TemplateStringsArray,
@@ -95,7 +99,6 @@ export type ComposerSortShorthand =
       order?: ESQLOrderExpression['order'],
       nulls?: ESQLOrderExpression['nulls']
     ];
-
 
 /**
  * The Elasticsearch request body as it can be sent to the `POST /_query` endpoint.
