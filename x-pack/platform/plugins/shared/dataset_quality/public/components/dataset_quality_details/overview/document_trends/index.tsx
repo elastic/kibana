@@ -6,14 +6,11 @@
  */
 
 import {
-  EuiAccordion,
-  EuiButtonGroup,
   EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiSkeletonRectangle,
   EuiSpacer,
   EuiTitle,
@@ -22,7 +19,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
@@ -33,7 +29,6 @@ import {
   overviewTrendsDocsText,
 } from '../../../../../common/translations';
 import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { TrendDocsChart } from './trend_docs_chart';
 
 const trendDocsTooltip = (
@@ -116,73 +111,39 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
   );
 
   return (
-    <EuiPanel hasBorder grow={false}>
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={accordionTitle}
-        paddingSize="none"
-        initialIsOpen={true}
-        data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
-      >
-        <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem>
-            {canShowFailureStoreInfo && (
-              <EuiButtonGroup
-                data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
-                legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {
-                  defaultMessage: 'Quality chart type',
-                })}
-                onChange={(id) => handleDocsTrendChartChange(id as QualityIssueType)}
-                options={[
-                  {
-                    id: 'degraded',
-                    label: i18n.translate('xpack.datasetQuality.details.chartType.degradedDocs', {
-                      defaultMessage: 'Ignored fields',
-                    }),
-                  },
-                  {
-                    id: 'failed',
-                    label: i18n.translate('xpack.datasetQuality.details.chartType.failedDocs', {
-                      defaultMessage: 'Failed docs',
-                    }),
-                  },
-                ]}
-                idSelected={docsTrendChart}
-              />
-            )}
-          </EuiFlexItem>
-          <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
-            <UnifiedBreakdownFieldSelector
-              dataView={dataView!}
-              breakdown={{
-                field:
-                  breakdown.dataViewField && breakdown.fieldSupportsBreakdown
-                    ? breakdown.dataViewField
-                    : undefined,
-              }}
-              onBreakdownFieldChange={breakdown.onChange}
-            />
-          </EuiSkeletonRectangle>
-          <EuiToolTip content={openInDiscoverText}>
-            <EuiButtonIcon
-              display="base"
-              iconType="discoverApp"
-              aria-label={discoverAriaText}
-              size="s"
-              data-test-subj="datasetQualityDetailsLinkToDiscover"
-              {...redirectLinkProps.linkProps}
-            />
-          </EuiToolTip>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <TrendDocsChart
-          {...qualityIssuesChartProps}
-          timeRange={timeRange}
-          lastReloadTime={lastReloadTime}
-          onTimeRangeChange={onTimeRangeChange}
-        />
-      </EuiAccordion>
-    </EuiPanel>
+    <>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
+        <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
+          <UnifiedBreakdownFieldSelector
+            dataView={dataView!}
+            breakdown={{
+              field:
+                breakdown.dataViewField && breakdown.fieldSupportsBreakdown
+                  ? breakdown.dataViewField
+                  : undefined,
+            }}
+            onBreakdownFieldChange={breakdown.onChange}
+          />
+        </EuiSkeletonRectangle>
+        <EuiToolTip content={openInDiscoverText}>
+          <EuiButtonIcon
+            display="base"
+            iconType="discoverApp"
+            aria-label={discoverAriaText}
+            size="s"
+            data-test-subj="datasetQualityDetailsLinkToDiscover"
+            {...redirectLinkProps.linkProps}
+          />
+        </EuiToolTip>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <TrendDocsChart
+        {...qualityIssuesChartProps}
+        timeRange={timeRange}
+        lastReloadTime={lastReloadTime}
+        onTimeRangeChange={onTimeRangeChange}
+      />
+    </>
   );
 }

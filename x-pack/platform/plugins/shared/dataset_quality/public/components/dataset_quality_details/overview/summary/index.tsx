@@ -10,18 +10,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useDatasetQualityDetailsState } from '../../../../hooks';
 import {
-  overviewPanelDatasetQualityIndicatorDegradedDocs,
-  overviewPanelDatasetQualityIndicatorFailedDocs,
   overviewPanelDocumentsIndicatorSize,
   overviewPanelDocumentsIndicatorTotalCount,
   overviewPanelResourcesIndicatorServices,
   overviewPanelResourcesIndicatorSize,
-  overviewPanelTitleDatasetQuality,
   overviewPanelTitleDocuments,
   overviewPanelTitleResources,
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
-import { DatasetQualityIndicator } from '../../../quality_indicator';
 import { Panel, PanelIndicator } from './panel';
 
 const degradedDocsTooltip = (
@@ -56,9 +52,6 @@ export default function Summary() {
     isUserAllowedToSeeSizeInBytes,
     totalServicesCount,
     totalHostsCount,
-    totalDegradedDocsCount,
-    totalFailedDocsCount,
-    quality,
   } = useOverviewSummaryPanel();
   return (
     <EuiFlexGroup gutterSize="m">
@@ -86,31 +79,6 @@ export default function Summary() {
           value={totalHostsCount}
           isLoading={isSummaryPanelLoading}
         />
-      </Panel>
-      <Panel
-        title={overviewPanelTitleDatasetQuality}
-        secondaryTitle={
-          <DatasetQualityIndicator
-            isLoading={isSummaryPanelLoading}
-            quality={quality}
-            textSize="xs"
-          />
-        }
-      >
-        <PanelIndicator
-          label={overviewPanelDatasetQualityIndicatorDegradedDocs}
-          value={totalDegradedDocsCount}
-          isLoading={isSummaryPanelLoading}
-          tooltip={degradedDocsTooltip}
-        />
-        {canShowFailureStoreInfo && (
-          <PanelIndicator
-            label={overviewPanelDatasetQualityIndicatorFailedDocs}
-            value={totalFailedDocsCount}
-            isLoading={isSummaryPanelLoading}
-            tooltip={failedDocsColumnTooltip}
-          />
-        )}
       </Panel>
     </EuiFlexGroup>
   );

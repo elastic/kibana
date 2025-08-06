@@ -7,16 +7,16 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer, OnRefreshProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer, OnRefreshProps, EuiSplitPanel } from '@elastic/eui';
+import { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
-import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 
 const OverviewHeader = dynamic(() => import('./header'));
 const Summary = dynamic(() => import('./summary'));
+const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'));
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
 export function Overview() {
@@ -40,6 +40,9 @@ export function Overview() {
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
+  const [selectedQualityCard, setSelectedQualityCard] =
+    React.useState<QualityIssueType>('degraded');
+
   const handleRefresh = useCallback(
     (refreshProps: OnRefreshProps) => {
       updateTimeRange(refreshProps);
@@ -52,40 +55,23 @@ export function Overview() {
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
       <OverviewHeader handleRefresh={handleRefresh} />
       <EuiSpacer size="m" />
-      {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore && (
-        <div style={{ marginBottom: 16 }}>
-          <EuiCallOut
-            color="warning"
-            title={
-              <>
-                {i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
-                  defaultMessage: 'Failure store is not enabled for this data stream. ',
-                })}
-                <EuiLink
-                  href={locator?.getRedirectUrl(locatorParams)}
-                  target="_blank"
-                  external={false}
-                  css={{ textDecoration: 'underline' }}
-                >
-                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                    defaultMessage: 'Enable failure store',
-                  })}
-                </EuiLink>
-              </>
-            }
-          />
-        </div>
-      )}
 
-      {!dataStreamSettingsLoading && !canUserReadFailureStore && (
-        <EuiFlexItem>
-          <FailureStoreWarning />
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-      )}
+      {/* This should be hidden in `streams` view */}
       <Summary />
       <EuiSpacer size="m" />
-      <DocumentTrends lastReloadTime={lastReloadTime} />
+
+      <EuiSplitPanel.Outer direction="row" data-test-subj="datasetQualityDetailsOverview">
+        <EuiSplitPanel.Inner color="subdued" grow={false}>
+          <QualitySummaryCards
+            selectedCard={selectedQualityCard}
+            setSelectedCard={setSelectedQualityCard}
+          />
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={true}>
+          <DocumentTrends lastReloadTime={lastReloadTime} />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
       <EuiSpacer size="m" />
       <QualityIssues />
     </>
