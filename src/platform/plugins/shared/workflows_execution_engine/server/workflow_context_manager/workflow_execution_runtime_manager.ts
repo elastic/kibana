@@ -95,6 +95,16 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecution.status;
   }
 
+  public getNodeSuccessors(nodeId: string): any[] {
+    const successors = this.workflowExecutionGraph.successors(nodeId);
+
+    if (!successors) {
+      return [];
+    }
+
+    return successors.map((successorId) => this.workflowExecutionGraph.node(successorId)) as any[];
+  }
+
   public getCurrentStep(): any {
     // must be a proper type
     if (this.currentStepIndex < 0 || this.currentStepIndex >= this.topologicalOrder.length) {
@@ -270,6 +280,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
+<<<<<<< HEAD
     // eslint-disable-next-line no-console
     console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
     // eslint-disable-next-line no-console
@@ -336,6 +347,19 @@ export class WorkflowExecutionRuntimeManager {
         };
       }
     );
+=======
+    const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+      id: this.workflowExecution.id,
+      status: ExecutionStatus.RUNNING,
+      startedAt: new Date().toISOString(),
+      workflowId: this.workflowExecution.workflowId,
+    };
+    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+    this.workflowExecution = {
+      ...this.workflowExecution,
+      ...updatedWorkflowExecution,
+    };
+>>>>>>> main
   }
 
   public async fail(error: any): Promise<void> {
@@ -382,8 +406,11 @@ export class WorkflowExecutionRuntimeManager {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       startedAt: this.workflowExecution.startedAt,
+<<<<<<< HEAD
       triggeredBy: this.workflowExecution.triggeredBy,
       traceId: this.workflowExecution.traceId,
+=======
+>>>>>>> main
     };
 
     if (this.isWorkflowFinished()) {

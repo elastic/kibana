@@ -27,6 +27,7 @@ export const getPolicySettingsFormTestSubjects = (
   const linuxEventsTestSubj = genTestSubj.withPrefix('linuxEvents');
   const antivirusTestSubj = genTestSubj.withPrefix('antivirusRegistration');
   const attackSurfaceTestSubj = genTestSubj.withPrefix('attackSurface');
+  const deviceControlTestSubj = genTestSubj.withPrefix('deviceControl');
 
   return {
     form: genTestSubj(),
@@ -132,6 +133,15 @@ export const getPolicySettingsFormTestSubjects = (
       enabledRadioButton: antivirusTestSubj(AntivirusRegistrationModes.enabled),
       syncRadioButton: antivirusTestSubj(AntivirusRegistrationModes.sync),
       osValueContainer: antivirusTestSubj('osValueContainer'),
+    },
+    deviceControl: {
+      card: deviceControlTestSubj(),
+      lockedCard: deviceControlTestSubj('locked'),
+      lockedCardTitle: deviceControlTestSubj('locked-title'),
+      enableDisableSwitch: deviceControlTestSubj('enableDisableSwitch'),
+      protectionAuditRadio: deviceControlTestSubj('protectionLevel-auditRadio'),
+      notifyUserCheckbox: deviceControlTestSubj('notifyUser-checkbox'),
+      osValuesContainer: deviceControlTestSubj('osValues'),
     },
     advancedSection: {
       container: advancedSectionTestSubj(''),
