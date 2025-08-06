@@ -6,7 +6,7 @@
  */
 
 import { capitalize } from 'lodash';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ThreatMapping } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import type { Module } from '@kbn/ml-plugin/common/types/modules';
 import {
   AlertSuppression,
