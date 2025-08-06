@@ -9,13 +9,15 @@ import { ToolType } from '@kbn/onechat-common';
 import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useToolsPreferences } from '../../context/tools_preferences_provider';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
-export const useOnechatTools = () => {
+export interface UseOnechatToolsProps {
+  includeSystemTools?: boolean;
+}
+
+export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {}) => {
   const { toolsService } = useOnechatServices();
-  const { includeSystemTools } = useToolsPreferences();
 
   const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.tools.all,
