@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableSavedSearch } from '../../../common/types';
-import { convertToSavedSearch } from '../../../common/service/get_saved_searches';
+import type { SerializableSavedSearch } from '../../common/types';
+import { convertToSavedSearch } from '../../common/service/get_saved_searches';
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import type { SavedSearchesServiceDeps } from './saved_searches_service';
 import type { SavedSearch, SavedSearchByValueAttributes } from './types';

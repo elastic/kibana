@@ -15,7 +15,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
 import type { SavedSearch } from '../common';
 import type { SerializableSavedSearch } from '../common/types';
-import type { SavedSearchUnwrapResult } from './services/saved_searches/to_saved_search';
+import type { SavedSearchUnwrapResult } from './service/to_saved_search';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {

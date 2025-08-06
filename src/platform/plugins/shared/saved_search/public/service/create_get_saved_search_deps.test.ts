@@ -11,7 +11,7 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
-import { getSavedSearch } from '../../../common/service/get_saved_searches';
+import { getSavedSearch } from '../../common/service/get_saved_searches';
 
 describe('createGetSavedSearchDeps', () => {
   test('should throw an error if SO not found', async () => {
