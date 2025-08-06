@@ -19,6 +19,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 import { GetAgentDetailsRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
 import { GetAgentPolicyRequestParamsInput } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
@@ -48,7 +49,6 @@ import {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
-import { routeWithNamespace } from './helpers';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
@@ -58,7 +58,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     getAgentDetails(props: GetAgentDetailsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/osquery/fleet_wrapper/agents/{id}', props.params),
             kibanaSpace
           )
@@ -69,14 +69,14 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     getAgentPackagePolicies(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/package_policies', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/fleet_wrapper/package_policies', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     getAgentPolicies(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/agent_policies', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/fleet_wrapper/agent_policies', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
@@ -84,7 +84,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     getAgentPolicy(props: GetAgentPolicyProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/internal/osquery/fleet_wrapper/agent_policies/{id}', props.params),
             kibanaSpace
           )
@@ -95,7 +95,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     getAgents(props: GetAgentsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/agents', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/fleet_wrapper/agents', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -106,7 +106,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryCreateLiveQuery(props: OsqueryCreateLiveQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/osquery/live_queries', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/osquery/live_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -117,7 +117,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryCreatePacks(props: OsqueryCreatePacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/osquery/packs', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/osquery/packs', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -128,7 +128,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/api/osquery/saved_queries', kibanaSpace))
+        .post(getRouteUrlForSpace('/api/osquery/saved_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -140,7 +140,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     osqueryDeletePacks(props: OsqueryDeletePacksProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+          getRouteUrlForSpace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -152,7 +152,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     osqueryDeleteSavedQuery(props: OsqueryDeleteSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
         .delete(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/osquery/saved_queries/{id}', props.params),
             kibanaSpace
           )
@@ -166,7 +166,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryFindLiveQueries(props: OsqueryFindLiveQueriesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/osquery/live_queries', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/osquery/live_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -177,7 +177,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryFindPacks(props: OsqueryFindPacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/osquery/packs', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/osquery/packs', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -188,7 +188,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
      */
     osqueryFindSavedQueries(props: OsqueryFindSavedQueriesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/api/osquery/saved_queries', kibanaSpace))
+        .get(getRouteUrlForSpace('/api/osquery/saved_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -203,7 +203,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/osquery/live_queries/{id}', props.params),
             kibanaSpace
           )
@@ -221,7 +221,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/osquery/live_queries/{id}/results/{actionId}', props.params),
             kibanaSpace
           )
@@ -237,7 +237,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     osqueryGetPacksDetails(props: OsqueryGetPacksDetailsProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
-          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+          getRouteUrlForSpace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -252,7 +252,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     ) {
       return supertest
         .get(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/osquery/saved_queries/{id}', props.params),
             kibanaSpace
           )
@@ -270,7 +270,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     osqueryUpdatePacks(props: OsqueryUpdatePacksProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+          getRouteUrlForSpace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -286,7 +286,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     osqueryUpdateSavedQuery(props: OsqueryUpdateSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
         .put(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams('/api/osquery/saved_queries/{id}', props.params),
             kibanaSpace
           )
@@ -298,7 +298,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     readAssetsStatus(props: ReadAssetsStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/assets', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/assets', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -306,21 +306,21 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
     },
     readInstallationStatus(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/status', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     readPrivilegesCheck(kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/internal/osquery/privileges_check', kibanaSpace))
+        .get(getRouteUrlForSpace('/internal/osquery/privileges_check', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     updateAssetsStatus(props: UpdateAssetsStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .post(routeWithNamespace('/internal/osquery/assets/update', kibanaSpace))
+        .post(getRouteUrlForSpace('/internal/osquery/assets/update', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
