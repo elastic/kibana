@@ -74,15 +74,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       policyTemplate: CSPM_POLICY_TEMPLATE,
       defaultProvider: 'aws',
       namespaceSupportEnabled: true,
-      name: i18n.translate('securitySolutionPackages.cspmIntegration.integration.nameTitle', {
+      name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
         defaultMessage: 'Cloud Security Posture Management',
       }),
-      shortName: i18n.translate(
-        'securitySolutionPackages.cspmIntegration.integration.shortNameTitle',
-        {
-          defaultMessage: 'CSPM',
-        }
-      ),
+      shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
+        defaultMessage: 'CSPM',
+      }),
       overviewPath: `https://ela.st/cspm-overview`,
       getStartedPath: `https://ela.st/cspm-get-started`,
       providers: {
