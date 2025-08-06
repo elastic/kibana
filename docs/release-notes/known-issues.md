@@ -20,10 +20,6 @@ If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `500
 
 To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equal to or less than `5000`.
 
-**Resolved**
-
-This issue is resolved in {{stack}} 9.0.4.
-
 ::::
 
 ::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
