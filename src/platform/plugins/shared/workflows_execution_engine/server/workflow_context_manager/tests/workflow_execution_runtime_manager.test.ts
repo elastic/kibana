@@ -75,7 +75,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       workflowExecutionRepository,
       stepExecutionRepository,
       workflowExecutionGraph,
-      workflowLogger
+      workflowLogger,
     });
   });
 
