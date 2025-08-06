@@ -199,31 +199,4 @@ export class WorkflowContextManager {
       }
     );
   }
-
-  /**
-   * Log step execution start
-   */
-  public logStepStart(stepId: string, stepName?: string): void {
-    this.workflowLogger?.logInfo(`Step '${stepName || stepId}' started`, {
-      event: { action: 'step-start', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'start'],
-    });
-  }
-
-  /**
-   * Log step execution completion
-   */
-  public logStepComplete(stepId: string, stepName?: string, success: boolean = true): void {
-    this.workflowLogger?.logInfo(
-      `Step '${stepName || stepId}' ${success ? 'completed' : 'failed'}`,
-      {
-        event: {
-          action: 'step-complete',
-          category: ['workflow', 'step'],
-          outcome: success ? 'success' : 'failure',
-        },
-        tags: ['workflow', 'step', 'complete'],
-      }
-    );
-  }
 }
