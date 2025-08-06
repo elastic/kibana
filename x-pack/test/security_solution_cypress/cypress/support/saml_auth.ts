@@ -36,6 +36,8 @@ export const samlAuthentication = async (
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
+  // TODO: Add support for serverless projects with different tiers
+  // ref https://github.com/elastic/kibana/pull/229919
   const rolesPath =
     '../../../../src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
 
