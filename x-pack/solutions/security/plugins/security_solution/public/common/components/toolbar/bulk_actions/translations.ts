@@ -138,7 +138,7 @@ export const BULK_ACTION_ACKNOWLEDGED_SELECTED = i18n.translate(
 export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   'xpack.securitySolution.bulkActions.closeSelectedTitle',
   {
-    defaultMessage: 'Mark as closed',
+    defaultMessage: 'Mark as closed --- SINGLE',
   }
 );
 
