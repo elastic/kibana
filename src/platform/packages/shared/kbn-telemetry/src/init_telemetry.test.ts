@@ -61,7 +61,6 @@ describe('initTelemetry', () => {
           'service.version': PKG_JSON.version,
           'service.instance.id': undefined,
           'deployment.environment.name': apmConfig.getConfig('test-service').environment, // using this reference because CI overrides the config via environment vars
-          kibana_uuid: expect.any(String),
           git_rev: expect.any(String),
         })
       );
