@@ -693,6 +693,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           name: this._definition.name,
         },
       },
+      {
+        type: 'delete_queries',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
   }
 }

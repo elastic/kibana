@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
@@ -79,7 +80,11 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
-  }, []);
+    // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
+    if (jobIds.length === 1) {
+      createJobActionFocusRestoration(jobIds[0])();
+    }
+  }, [jobIds]);
 
   const resetJob = useCallback(async () => {
     setResetting(true);

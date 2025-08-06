@@ -9,7 +9,13 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
-import type { ESQLSingleAstItem, ESQLFunction, ESQLAstItem, ESQLLiteral } from '../../../types';
+import type {
+  ESQLSingleAstItem,
+  ESQLFunction,
+  ESQLAstItem,
+  ESQLLiteral,
+  ESQLLocation,
+} from '../../../types';
 import type {
   ISuggestionItem,
   GetColumnsByTypeFn,
@@ -22,7 +28,6 @@ import {
   getCompatibleLiterals,
   buildConstantsDefinitions,
   isLiteralDateItem,
-  compareTypesWithLiterals,
 } from '../literals';
 import { EDITOR_MARKER } from '../../constants';
 import {
@@ -43,14 +48,11 @@ import {
   getOperatorsSuggestionsAfterNot,
   getSuggestionsToRightOfOperatorExpression,
 } from '../operators';
-import {
-  isColumn,
-  isFunctionExpression,
-  isIdentifier,
-  isLiteral,
-  isTimeInterval,
-} from '../../../ast/is';
+import { isColumn, isFunctionExpression, isIdentifier, isLiteral } from '../../../ast/is';
 import { Walker } from '../../../walker';
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 export const shouldBeQuotedText = (
   text: string,
@@ -324,7 +326,7 @@ export const getExpressionPosition = (
       return 'after_operator';
     }
 
-    if (isLiteral(expressionRoot) || isTimeInterval(expressionRoot)) {
+    if (isLiteral(expressionRoot)) {
       return 'after_literal';
     }
   }
@@ -344,23 +346,28 @@ export const getExpressionPosition = (
 export async function suggestForExpression({
   expressionRoot,
   innerText,
-  getColumnsByType,
+  getColumnsByType: _getColumnsByType,
   location,
   preferredExpressionType,
   context,
-  advanceCursorAfterInitialField = true,
+  advanceCursorAfterInitialColumn = true,
   hasMinimumLicenseRequired,
+  ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
   preferredExpressionType?: SupportedDataType;
   innerText: string;
-  getColumnsByType: GetColumnsByTypeFn;
+  getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
-  advanceCursorAfterInitialField?: boolean;
+  advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  // a set of columns not to suggest when the expression is empty
+  ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {
+  const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
+
   const suggestions: ISuggestionItem[] = [];
 
   const position = getExpressionPosition(innerText, expressionRoot);
@@ -411,7 +418,10 @@ export async function suggestForExpression({
             { location, returnTypes: ['boolean'] },
             hasMinimumLicenseRequired
           ),
-          ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
+          ...(await getColumnsByType('boolean', [], {
+            advanceCursor: true,
+            openSuggestions: true,
+          }))
         );
       } else {
         suggestions.push(...getOperatorsSuggestionsAfterNot());
@@ -465,10 +475,14 @@ export async function suggestForExpression({
       break;
 
     case 'empty_expression':
-      const columnSuggestions: ISuggestionItem[] = await getColumnsByType('any', [], {
-        advanceCursor: advanceCursorAfterInitialField,
-        openSuggestions: true,
-      });
+      const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
+        'any',
+        ignoredColumnsForEmptyExpression,
+        {
+          advanceCursor: advanceCursorAfterInitialColumn,
+          openSuggestions: true,
+        }
+      );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
         ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
@@ -571,7 +585,6 @@ export function extractTypeFromASTArg(
   | ESQLLiteral['literalType']
   | SupportedDataType
   | FunctionReturnType
-  | 'timeInterval'
   | string // @TODO remove this
   | undefined {
   if (Array.isArray(arg)) {
@@ -585,9 +598,6 @@ export function extractTypeFromASTArg(
     if (hit) {
       return hit.type;
     }
-  }
-  if (isTimeInterval(arg)) {
-    return arg.type;
   }
   if (isFunctionExpression(arg)) {
     const fnDef = getFunctionDefinition(arg.name);
@@ -615,10 +625,7 @@ function getValidFunctionSignaturesForPreviousArgs(
     (s) =>
       s.params?.length >= argIndex &&
       s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
-        return (
-          dataType === enrichedArgs[idx].dataType ||
-          compareTypesWithLiterals(dataType, enrichedArgs[idx].dataType)
-        );
+        return dataType === enrichedArgs[idx].dataType;
       })
   );
   return relevantFuncSignatures;

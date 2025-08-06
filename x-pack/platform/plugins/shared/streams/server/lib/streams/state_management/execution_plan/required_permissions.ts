@@ -70,6 +70,7 @@ export function getRequiredPermissionsForActions({
     // since they are done by the kibana system user
     upsert_dot_streams_document,
     delete_dot_streams_document,
+    delete_queries,
     ...rest
   } = actionsByType;
   assertEmptyObject(rest);

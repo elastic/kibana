@@ -377,6 +377,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'delete_queries',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
     if (this._definition.ingest.processing.length > 0) {

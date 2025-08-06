@@ -60,7 +60,7 @@ describe('Service inventory', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Services');
+      cy.contains('h1', 'Service inventory');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });
@@ -163,7 +163,7 @@ describe('Service inventory', () => {
       );
 
       cy.visitKibana(`${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`);
-      cy.contains('Services');
+      cy.contains('Service inventory');
       cy.get('.euiPagination__list').children().should('have.length', 5);
       cy.wait('@detailedStatisticsRequest').then((payload) => {
         expect(payload.request.body.serviceNames).eql(

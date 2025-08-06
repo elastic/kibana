@@ -16,11 +16,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Global rule event log list', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
       await PageObjects.common.navigateToApp('triggersActionsUiExample/global_rule_event_log_list');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+      );
     });
 
     it('should load from the shareable lazy loader', async () => {
