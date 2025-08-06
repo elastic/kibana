@@ -11,7 +11,7 @@ import { services } from '../services';
 export default createTestConfig({
   serverlessProject: 'chat',
   services,
-  testFiles: [require.resolve('../test_suites/platform_security')],
+  testFiles: [require.resolve('.')],
   junit: {
     reportName: 'Serverless Chat API Integration Tests',
   },

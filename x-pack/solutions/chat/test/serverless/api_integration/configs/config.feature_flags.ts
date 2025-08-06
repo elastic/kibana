@@ -15,9 +15,6 @@ import { services } from '../services';
 export default createTestConfig({
   serverlessProject: 'chat',
   services,
-  testFiles: [
-    // require.resolve('./path/to/tests'),
-  ],
   junit: {
     reportName: 'Serverless Chat Feature Flags API Integration Tests',
   },
@@ -26,6 +23,9 @@ export default createTestConfig({
   kbnServerArgs: [
     // e.g. `--xpack.searchIndices.enabled=true`, // global empty state FF
   ],
+  // load tests in the index file
+  testFiles: [require.resolve('./index.feature_flags.ts')],
+
   // include settings from project controller
   esServerArgs: [],
 });
