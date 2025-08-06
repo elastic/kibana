@@ -54,8 +54,6 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
   registerRemoteSyncedIntegrations(fleetAuthzRouter);
   registerDebugRoutes(fleetAuthzRouter);
-
-  // Register cloud connector routes
   registerCloudConnectorRoutes(fleetAuthzRouter);
 
   // Conditional config routes

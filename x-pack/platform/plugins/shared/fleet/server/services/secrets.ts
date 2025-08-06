@@ -282,6 +282,7 @@ export async function extractAndWriteSecrets(opts: {
   );
 
   // cloud connectors secret refs are not created as secrets, but are added to the secretReferences
+  // Todo: Check Package Policy for cloud connector id and add it to the secretReferences
   const cloudConnectorsSecret = secretPaths
     .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
     .map((secretPath) => ({

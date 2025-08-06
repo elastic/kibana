@@ -8,11 +8,12 @@
 import { cloudConnectorService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
+import { CloudProvider } from '../../../common/types/models/cloud_connector';
 
 export interface CreateCloudConnectorRequest {
   name: string;
   vars: Record<string, any>;
-  cloudProvider: string;
+  cloudProvider: CloudProvider;
 }
 
 export const createCloudConnectorHandler: FleetRequestHandler<

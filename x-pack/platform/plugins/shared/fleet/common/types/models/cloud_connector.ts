@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import type { SavedObjectsClientContract } from '@kbn/core/public';
+
 import type { PackagePolicyConfigRecordEntry } from './package_policy';
 
-export type CloudProvider = 'AWS' | 'Azure' | 'GCP';
+export type CloudProvider = 'aws' | 'azure' | 'gcp';
 
-export interface CloudConnectorSecretVar {
+export interface CloudConnectorSecretVarValue {
   isSecretRef: boolean;
   id: string;
+}
+
+export interface CloudConnectorSecretVar {
+  type: 'password';
+  value: CloudConnectorSecretVarValue;
+  frozen?: boolean;
 }
 
 export interface CloudConnectorVars {
@@ -19,14 +27,11 @@ export interface CloudConnectorVars {
   'aws.role_arn'?: PackagePolicyConfigRecordEntry | string;
   role_arn?: PackagePolicyConfigRecordEntry | string;
   // AWS credentials variables
-  'aws.credentials.external_id'?: PackagePolicyConfigRecordEntry;
-  external_id?: {
-    type?: string;
-    value: CloudConnectorSecretVar;
-  };
+  'aws.credentials.external_id'?: CloudConnectorSecretVar;
+  external_id?: CloudConnectorSecretVar;
   // Azure variables
-  client_id?: PackagePolicyConfigRecordEntry;
-  tenant_id?: PackagePolicyConfigRecordEntry;
+  client_id?: CloudConnectorSecretVar;
+  tenant_id?: CloudConnectorSecretVar;
 }
 
 export interface CloudConnectorSO {
@@ -44,8 +49,19 @@ export interface CloudConnectorListOptions {
   perPage?: number;
 }
 
+export interface CloudConnectorServiceInterface {
+  create(
+    soClient: SavedObjectsClientContract,
+    cloudConnector: CreateCloudConnectorRequest
+  ): Promise<CloudConnectorSO>;
+  getList(
+    soClient: SavedObjectsClientContract,
+    options?: CloudConnectorListOptions
+  ): Promise<CloudConnectorSO[]>;
+}
+
 export interface CreateCloudConnectorRequest {
   name: string;
-  vars: Record<string, any>;
-  cloudProvider: string;
+  vars: CloudConnectorVars;
+  cloudProvider: CloudProvider;
 }

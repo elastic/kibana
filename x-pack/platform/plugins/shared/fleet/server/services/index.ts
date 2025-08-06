@@ -65,6 +65,6 @@ export { FleetUsageSender } from './telemetry/fleet_usage_sender';
 export { checkAllowedPackages } from './check_allowed_packages';
 
 export { cloudConnectorService } from './cloud_connector';
-export type { CloudConnectorServiceInterface } from './cloud_connector';
+export type { CloudConnectorServiceInterface } from '../../common/types/models/cloud_connector';
 
 export type { MessageSigningServiceInterface } from './security';

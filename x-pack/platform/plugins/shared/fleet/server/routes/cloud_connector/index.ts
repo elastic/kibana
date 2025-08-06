@@ -49,9 +49,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                 maxLength: 255,
               }),
               cloudProvider: schema.oneOf([
-                schema.literal('AWS'),
-                schema.literal('Azure'),
-                schema.literal('GCP'),
+                schema.literal('aws'),
+                schema.literal('azure'),
+                schema.literal('gcp'),
               ]),
               vars: schema.recordOf(
                 schema.string({ minLength: 1, maxLength: 100 }),
@@ -80,11 +80,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                 schema.object({
                   id: schema.string(),
                   name: schema.string(),
-                  attributes: schema.object({
-                    cloudProvider: schema.string(),
-                    vars: schema.recordOf(schema.string(), schema.any()),
-                    packagePolicyCount: schema.number(),
-                  }),
+                  cloudProvider: schema.string(),
+                  vars: schema.recordOf(schema.string(), schema.any()),
+                  packagePolicyCount: schema.number(),
+                  created_at: schema.string(),
+                  updated_at: schema.string(),
                 }),
             },
             400: {
@@ -134,11 +134,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                   schema.object({
                     id: schema.string(),
                     name: schema.string(),
-                    attributes: schema.object({
-                      cloudProvider: schema.string(),
-                      vars: schema.recordOf(schema.string(), schema.any()),
-                      packagePolicyCount: schema.number(),
-                    }),
+                    cloudProvider: schema.string(),
+                    vars: schema.recordOf(schema.string(), schema.any()),
+                    packagePolicyCount: schema.number(),
+                    created_at: schema.string(),
+                    updated_at: schema.string(),
                   })
                 ),
             },

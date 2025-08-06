@@ -248,14 +248,6 @@
     "type"
   ],
   "cloud": [],
-  "cloud-connector": [
-    "cloudProvider",
-    "created_at",
-    "name",
-    "packagePolicyCount",
-    "updated_at",
-    "vars"
-  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
