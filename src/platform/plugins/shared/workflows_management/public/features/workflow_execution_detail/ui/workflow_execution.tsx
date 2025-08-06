@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import {
   EuiText,
   EuiFlexGroup,
@@ -21,7 +21,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
+import { useWorkflowTraceSearch } from '../../../hooks/use_workflow_trace_search';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
@@ -129,6 +131,55 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     ];
   }, [workflowExecution]);
 
+  // Search for actual APM traces using stored trace ID
+  const { 
+    traceId: foundTraceId, 
+    entryTransactionId: foundEntryTransactionId, 
+    loading: traceSearchLoading,
+    error: traceSearchError
+  } = useWorkflowTraceSearch({
+    workflowExecution,
+  });
+
+  // APM Trace Waterfall properties - NOW USES STORED TRACE ID
+  const { traceId, rangeFrom, rangeTo, entryTransactionId, hasApmTrace } = useMemo(() => {
+    if (!workflowExecution?.startedAt || !foundTraceId) {
+      return { traceId: null, rangeFrom: null, rangeTo: null, entryTransactionId: null, hasApmTrace: false };
+    }
+
+    const startedAt = new Date(workflowExecution.startedAt);
+    const finishedAt = workflowExecution.finishedAt 
+      ? new Date(workflowExecution.finishedAt) 
+      : new Date();
+
+    console.log('🎯 Using STORED trace ID for embeddable:', foundTraceId);
+
+    return {
+      traceId: foundTraceId, // 🔥 KEY CHANGE: Use the stored trace ID from workflow execution
+      rangeFrom: startedAt.toISOString(),
+      rangeTo: finishedAt.toISOString(),
+      serviceName: 'workflow-engine',
+      entryTransactionId: foundEntryTransactionId || workflowExecution.stepExecutions?.[0]?.id || workflowExecution.id,
+      hasApmTrace: true,
+    };
+  }, [workflowExecution, foundTraceId, foundEntryTransactionId]);
+
+  // Create stable parent API for embeddable - following unified_doc_viewer pattern
+  const getParentApi = useCallback(
+    () => ({
+      getSerializedStateForChild: () => ({
+        rawState: {
+          traceId,
+          rangeFrom,
+          rangeTo,
+          serviceName: 'workflow-engine',
+          entryTransactionId,
+        },
+      }),
+    }),
+    [traceId, rangeFrom, rangeTo, entryTransactionId]
+  );
+
   if (isLoading) {
     return (
       <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
@@ -175,6 +226,73 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         responsiveBreakpoint={false}
       />
       <EuiSpacer size="l" />
+      
+      {/* APM Trace Waterfall Embeddable with Search */}
+      {workflowExecution?.startedAt && (
+        <>
+          <EuiTitle size="xs">
+            <h3>Execution Trace</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          
+          {/* Show loading state while searching for traces */}
+          {traceSearchLoading && (
+            <>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    Searching for execution traces...
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          {/* Show error if trace search failed */}
+          {traceSearchError && !traceSearchLoading && (
+            <>
+              <EuiText size="s" color="danger">
+                Unable to find APM traces for this execution: {traceSearchError.message}
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          {/* Show embeddable when trace is found */}
+          {hasApmTrace && !traceSearchLoading && traceId && (
+            <>
+              <EuiText size="s" color="success">
+                Found trace: {traceId}
+              </EuiText>
+              <EuiSpacer size="s" />
+              <div style={{ height: '400px' }}>
+                <EmbeddableRenderer
+                  type="APM_TRACE_WATERFALL_EMBEDDABLE"
+                  maybeId={`workflow-trace-${workflowExecutionId}`}
+                  getParentApi={getParentApi}
+                  hidePanelChrome={true}
+                />
+              </div>
+              <EuiSpacer size="l" />
+            </>
+          )}
+
+          {/* Show message when no traces found but search completed */}
+          {!hasApmTrace && !traceSearchLoading && !traceSearchError && (
+            <>
+              <EuiText size="s" color="subdued">
+                No APM traces found for this workflow execution.
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
+          )}
+        </>
+      )}
+      
       <WorkflowExecutionLogsTable executionId={workflowExecutionId} />
     </div>
   );

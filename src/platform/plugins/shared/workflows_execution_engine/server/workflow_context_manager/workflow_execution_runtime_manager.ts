@@ -9,6 +9,7 @@
 
 import { EsWorkflowExecution, EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { graphlib } from '@dagrejs/dagre';
+import { withSpan } from '@kbn/apm-utils';
 import { RunStepResult } from '../step/step_base';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -34,6 +35,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  * - Navigates between steps according to topological order, skipping steps as needed.
  * - Initiates and finalizes step and workflow executions, updating persistent storage.
  * - Handles workflow completion and error propagation.
+ * - Creates APM traces compatible with APM TraceWaterfall embeddable
  *
  * @remarks
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
@@ -46,6 +48,10 @@ export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = 0;
   private topologicalOrder: string[];
   private contextManager?: IWorkflowContextLogger;
+  
+  // APM trace properties - consistent traceId for entire workflow execution
+  private readonly traceId: string;
+  private entryTransactionId?: string;
 
   public workflowExecution: EsWorkflowExecution;
   private workflowExecutionRepository: WorkflowExecutionRepository;
@@ -59,6 +65,9 @@ export class WorkflowExecutionRuntimeManager {
     this.stepExecutionRepository = workflowExecutionRuntimeManagerInit.stepExecutionRepository;
     this.workflowExecutionGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
     this.topologicalOrder = graphlib.alg.topsort(this.workflowExecutionGraph);
+    
+    // Use workflow execution ID as traceId for APM compatibility
+    this.traceId = this.workflowExecution.id;
   }
 
   /**
@@ -66,6 +75,20 @@ export class WorkflowExecutionRuntimeManager {
    */
   public setLogger(logger: IWorkflowContextLogger): void {
     this.contextManager = logger;
+  }
+
+  /**
+   * Get the APM trace ID for this workflow execution
+   */
+  public getTraceId(): string {
+    return this.traceId;
+  }
+
+  /**
+   * Get the entry transaction ID (main workflow transaction)
+   */
+  public getEntryTransactionId(): string | undefined {
+    return this.entryTransactionId;
   }
 
   public getWorkflowExecutionStatus(): ExecutionStatus {
@@ -122,75 +145,107 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async startStep(stepId: string): Promise<void> {
-    const workflowId = 'anything'; // Replace with actual workflow ID
-    const workflowRunId = this.workflowExecution.id;
-    const nodeId = stepId;
-    const workflowStepExecutionId = `${workflowRunId}-${nodeId}`;
-    const stepStartedAt = new Date();
+    return withSpan(
+      {
+        name: `workflow.step.${stepId}`,
+        type: 'workflow',
+        subtype: 'step',
+        labels: {
+          'workflow_step_id': stepId,
+          'workflow_execution_id': this.workflowExecution.id,
+          'workflow_id': this.workflowExecution.workflowId,
+          'trace_id': this.traceId, // Ensure consistent traceId
+          'service_name': 'workflow-engine',
+        },
+      },
+      async () => {
+        const workflowId = this.workflowExecution.workflowId;
+        const workflowRunId = this.workflowExecution.id;
+        const nodeId = stepId;
+        const workflowStepExecutionId = `${workflowRunId}-${nodeId}`;
+        const stepStartedAt = new Date();
 
-    // Get step details from the graph
-    const stepNode = this.workflowExecutionGraph.node(stepId) as any;
-    const stepName = stepNode?.name || stepId;
+        // Get step details from the graph
+        const stepNode = this.workflowExecutionGraph.node(stepId) as any;
+        const stepName = stepNode?.name || stepId;
 
-    const stepExecution = {
-      id: workflowStepExecutionId,
-      workflowId, // Replace with actual workflow ID
-      workflowRunId,
-      stepId: nodeId,
-      topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
-      status: ExecutionStatus.RUNNING,
-      startedAt: stepStartedAt.toISOString(),
-    } as Partial<EsWorkflowStepExecution>;
+        const stepExecution = {
+          id: workflowStepExecutionId,
+          workflowId,
+          workflowRunId,
+          stepId: nodeId,
+          topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
+          status: ExecutionStatus.RUNNING,
+          startedAt: stepStartedAt.toISOString(),
+        } as Partial<EsWorkflowStepExecution>;
 
-    // Log step start using context manager
-    this.contextManager?.logStepStart(stepId, stepName);
+        // Log step start using context manager
+        this.contextManager?.logStepStart(stepId, stepName);
 
-    await this.stepExecutionRepository.createStepExecution(stepExecution);
-    this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
+        await this.stepExecutionRepository.createStepExecution(stepExecution);
+        this.stepExecutions.set(nodeId, stepExecution as EsWorkflowStepExecution);
+      }
+    );
   }
 
   public async finishStep(stepId: string): Promise<void> {
-    const startedStepExecution = this.stepExecutions.get(stepId);
-    const stepResult: RunStepResult = this.stepResults.get(stepId) || {
-      error: undefined,
-      output: undefined,
-    };
+    return withSpan(
+      {
+        name: `workflow.step.${stepId}.complete`,
+        type: 'workflow',
+        subtype: 'step_completion',
+        labels: {
+          'workflow_step_id': stepId,
+          'workflow_execution_id': this.workflowExecution.id,
+          'workflow_id': this.workflowExecution.workflowId,
+          'trace_id': this.traceId,
+          'service_name': 'workflow-engine',
+        },
+      },
+      async () => {
+        const startedStepExecution = this.stepExecutions.get(stepId);
+        const stepResult: RunStepResult = this.stepResults.get(stepId) || {
+          error: undefined,
+          output: undefined,
+        };
 
-    if (!startedStepExecution) {
-      throw new Error(`Step execution not found for step ID: ${stepId}`);
-    }
+        if (!startedStepExecution) {
+          throw new Error(`Step execution not found for step ID: ${stepId}`);
+        }
 
-    const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
-    const completedAt = new Date();
-    const executionTimeMs =
-      completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
-    const stepExecutionUpdate = {
-      id: startedStepExecution.id,
-      status: stepStatus,
-      completedAt: completedAt.toISOString(),
-      executionTimeMs,
-      error: stepResult.error,
-      output: stepResult.output,
-    } as Partial<EsWorkflowStepExecution>;
+        const stepStatus = stepResult.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED;
+        const completedAt = new Date();
+        const executionTimeMs =
+          completedAt.getTime() - new Date(startedStepExecution.startedAt).getTime();
+        const stepExecutionUpdate = {
+          id: startedStepExecution.id,
+          status: stepStatus,
+          completedAt: completedAt.toISOString(),
+          executionTimeMs,
+          error: stepResult.error,
+          output: stepResult.output,
+        } as Partial<EsWorkflowStepExecution>;
 
-    // Log step completion using context manager
-    const success = !stepResult.error;
-    const stepNode = this.workflowExecutionGraph.node(stepId) as any;
-    const stepName = stepNode?.name || stepId;
-    this.contextManager?.logStepComplete(stepId, stepName, success);
+        // Log step completion using context manager
+        const success = !stepResult.error;
+        const stepNode = this.workflowExecutionGraph.node(stepId) as any;
+        const stepName = stepNode?.name || stepId;
+        this.contextManager?.logStepComplete(stepId, stepName, success);
 
-    await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
-    this.stepExecutions.set(stepId, {
-      ...startedStepExecution,
-      ...stepExecutionUpdate,
-    } as EsWorkflowStepExecution);
+        await this.stepExecutionRepository.updateStepExecution(stepExecutionUpdate);
+        this.stepExecutions.set(stepId, {
+          ...startedStepExecution,
+          ...stepExecutionUpdate,
+        } as EsWorkflowStepExecution);
 
-    await this.updateWorkflowState();
+        await this.updateWorkflowState();
 
-    // If the currentStepIndex has not explicitly changed (by a node), go to the next step
-    if (this.currentStepIndex === this.topologicalOrder.indexOf(stepId)) {
-      this.goToNextStep();
-    }
+        // If the currentStepIndex has not explicitly changed (by a node), go to the next step
+        if (this.currentStepIndex === this.topologicalOrder.indexOf(stepId)) {
+          this.goToNextStep();
+        }
+      }
+    );
   }
 
   public async skipSteps(stepIds: string[]): Promise<void> {
@@ -215,40 +270,104 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
-    const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      id: this.workflowExecution.id,
-      status: ExecutionStatus.RUNNING,
-      startedAt: new Date().toISOString(),
-      workflowId: this.workflowExecution.workflowId,
-      triggeredBy: this.workflowExecution.triggeredBy,
-    };
-    await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
-    this.workflowExecution = {
-      ...this.workflowExecution,
-      ...updatedWorkflowExecution,
-    };
+    console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
+    console.log('🚀 Labels that will be set:', {
+      'workflow_execution_id': this.workflowExecution.id,
+      'workflow_id': this.workflowExecution.workflowId,
+      'trace_id': this.traceId,
+      'service_name': 'workflow-engine',
+      'transaction_type': 'workflow_execution',
+    });
+    
+    return withSpan(
+      {
+        name: `workflow.execution.${this.workflowExecution.workflowId}`,
+        type: 'workflow',
+        subtype: 'execution',
+        labels: {
+          'workflow_execution_id': this.workflowExecution.id,
+          'workflow_id': this.workflowExecution.workflowId,
+          'trace_id': this.traceId,
+          'service_name': 'workflow-engine',
+          'transaction_type': 'workflow_execution',
+        },
+      },
+             async (span) => {
+        // Store entry transaction ID from APM span (use span ID as fallback)
+        if (span?.ids) {
+          this.entryTransactionId = span.ids['span.id'] || this.workflowExecution.id;
+        }
+
+        // Capture the real APM trace ID
+        let realTraceId: string | undefined;
+        console.log('🔍 Available span properties:', span ? Object.keys(span) : 'No span');
+        console.log('🔍 Span object:', span);
+        
+        if ((span as any)?.traceId) {
+          realTraceId = (span as any).traceId;
+          console.log('🎯 Captured APM trace ID from span.traceId:', realTraceId);
+        } else if (span?.ids?.['trace.id']) {
+          realTraceId = span.ids['trace.id'];
+          console.log('🎯 Captured APM trace ID from span.ids[trace.id]:', realTraceId);
+        } else {
+          console.log('⚠️ Could not capture APM trace ID, using workflow execution ID as fallback');
+          realTraceId = this.workflowExecution.id;
+        }
+
+        const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
+          id: this.workflowExecution.id,
+          status: ExecutionStatus.RUNNING,
+          startedAt: new Date().toISOString(),
+          workflowId: this.workflowExecution.workflowId,
+          triggeredBy: this.workflowExecution.triggeredBy,
+          traceId: realTraceId, // Store the real APM trace ID
+        };
+        await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
+        this.workflowExecution = {
+          ...this.workflowExecution,
+          ...updatedWorkflowExecution,
+        };
+      }
+    );
   }
 
   public async fail(error: any): Promise<void> {
-    const currentStep = this.getCurrentStep();
+    return withSpan(
+      {
+        name: `workflow.execution.fail`,
+        type: 'workflow',
+        subtype: 'execution_failure',
+        labels: {
+          'workflow_execution_id': this.workflowExecution.id,
+          'workflow_id': this.workflowExecution.workflowId,
+          'trace_id': this.traceId,
+          'service_name': 'workflow-engine',
+          'error_message': String(error),
+        },
+      },
+      async () => {
+        const currentStep = this.getCurrentStep();
 
-    if (currentStep) {
-      await this.setStepResult(currentStep.id, {
-        output: undefined,
-        error,
-      });
-    }
+        if (currentStep) {
+          await this.setStepResult(currentStep.id, {
+            output: undefined,
+            error,
+          });
+        }
 
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      id: this.workflowExecution.id,
-      status: ExecutionStatus.FAILED,
-      error: String(error),
-    };
-    await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
-    this.workflowExecution = {
-      ...this.workflowExecution,
-      ...workflowExecutionUpdate,
-    };
+        const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+          id: this.workflowExecution.id,
+          status: ExecutionStatus.FAILED,
+          error: String(error),
+          traceId: this.traceId, // Ensure traceId is set
+        };
+        await this.workflowExecutionRepository.updateWorkflowExecution(workflowExecutionUpdate);
+        this.workflowExecution = {
+          ...this.workflowExecution,
+          ...workflowExecutionUpdate,
+        };
+      }
+    );
   }
 
   private async updateWorkflowState(): Promise<void> {
@@ -257,6 +376,7 @@ export class WorkflowExecutionRuntimeManager {
       workflowId: this.workflowExecution.workflowId,
       startedAt: this.workflowExecution.startedAt,
       triggeredBy: this.workflowExecution.triggeredBy,
+      traceId: this.workflowExecution.traceId,
     };
 
     if (this.isWorkflowFinished()) {

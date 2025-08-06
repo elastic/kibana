@@ -18,7 +18,11 @@
       "workflowsExecutionEngine",
       "features",
       "security",
-      "spaces"
+      "spaces",
+      "embeddable"
+    ],
+    "optionalPlugins": [
+      "apm"
     ]
   }
 }
