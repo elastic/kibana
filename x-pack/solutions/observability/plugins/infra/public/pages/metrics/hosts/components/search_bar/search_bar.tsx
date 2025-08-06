@@ -10,7 +10,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { useEuiTheme, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { UnifiedSearchBar } from '../../../../../components/shared/unified_search_bar';
@@ -43,10 +43,7 @@ export const SearchBar = () => {
     const current = searchCriteria.preferredSchema;
 
     if (current === null) {
-      const next = schemas.includes(DataSchemaFormat.SEMCONV)
-        ? DataSchemaFormat.SEMCONV
-        : schemas[0];
-      onPreferredSchemaChange(next);
+      onPreferredSchemaChange(timeRangeMetadata.preferredSchema);
     }
   }, [
     timeRangeMetadata,
