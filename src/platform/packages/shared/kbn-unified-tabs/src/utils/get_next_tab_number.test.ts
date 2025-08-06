@@ -10,18 +10,18 @@
 import { getNextTabNumber } from './get_next_tab_number';
 import type { TabItem } from '../types';
 
-const COPY_REGEX = /^Untitled\s*\(copy\)( (\d+))?$/;
-const TAB_REGEX = /^Untitled( (\d+))?$/;
+const DEFAULT_TAB_LABEL = 'Untitled';
+const DEFAULT_TAB_COPY_LABEL = 'Untitled (copy)';
 
-describe('getNextTabNumber', () => {
-  it('should return null when no tabs match the regex pattern', () => {
+describe('getNextNumber', () => {
+  it('should return null when no tabs match the base label pattern', () => {
     const tabs: TabItem[] = [
       { id: '1', label: 'Some tab' },
       { id: '2', label: 'Another tab' },
       { id: '3', label: 'Different label' },
     ];
 
-    const result = getNextTabNumber(tabs, COPY_REGEX);
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
 
     expect(result).toBeNull();
   });
@@ -34,7 +34,7 @@ describe('getNextTabNumber', () => {
       { id: '4', label: 'Some other tab' },
     ];
 
-    const result = getNextTabNumber(tabs, TAB_REGEX);
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
 
     expect(result).toBe(5); // Should be max(1, 2, 4) + 1 = 5
   });
@@ -46,9 +46,9 @@ describe('getNextTabNumber', () => {
       { id: '3', label: 'Some other tab' },
     ];
 
-    const result = getNextTabNumber(tabs, COPY_REGEX);
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_COPY_LABEL);
 
-    expect(result).toBe(2);
+    expect(result).toBe(2); // "Untitled (copy)" is treated as number 1
   });
 
   it('should return the next number when multiple numbered copy tabs exist', () => {
@@ -60,8 +60,75 @@ describe('getNextTabNumber', () => {
       { id: '5', label: 'Some other tab' },
     ];
 
-    const result = getNextTabNumber(tabs, COPY_REGEX);
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_COPY_LABEL);
 
     expect(result).toBe(6); // Should be max(1, 2, 5) + 1 = 6
+  });
+
+  it('should count copy and regular tabs separately', () => {
+    const tabs: TabItem[] = [
+      { id: '1', label: 'Untitled 3' },
+      { id: '2', label: 'Untitled (copy) 2' },
+      { id: '3', label: 'Some other tab' },
+    ];
+
+    const nextCopyNumber = getNextTabNumber(tabs, DEFAULT_TAB_COPY_LABEL);
+    expect(nextCopyNumber).toBe(3);
+
+    const nextTabNumber = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
+    expect(nextTabNumber).toBe(4);
+  });
+
+  it('should handle tabs with whitespace correctly', () => {
+    const tabs: TabItem[] = [
+      { id: '1', label: '  Untitled  ' },
+      { id: '2', label: 'Untitled 2  ' },
+      { id: '3', label: '  Untitled 3' },
+    ];
+
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
+
+    expect(result).toBe(4); // Should be max(1, 2, 3) + 1 = 4
+  });
+
+  it('should handle case with only base label', () => {
+    const tabs: TabItem[] = [{ id: '1', label: 'Untitled' }];
+
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
+
+    expect(result).toBe(2); // "Untitled" is treated as number 1, so next is 2
+  });
+
+  it('should ignore differently named tabs', () => {
+    const tabs: TabItem[] = [
+      { id: '1', label: 'Untitled' },
+      { id: '2', label: 'Untitled abc 4' }, // Invalid - should be ignored
+      { id: '3', label: 'Untitled 2' },
+      { id: '4', label: 'Untitled extra text 2' }, // Invalid - should be ignored
+    ];
+
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
+
+    expect(result).toBe(3); // Should be max(1, 2) + 1 = 3
+  });
+
+  it('should work with complex base labels containing special characters', () => {
+    const tabs: TabItem[] = [
+      { id: '1', label: 'My Tab (special/?)' },
+      { id: '2', label: 'My Tab (special*) 2' },
+      { id: '3', label: 'My Tab (^special) 5' },
+    ];
+
+    const result = getNextTabNumber(tabs, 'My Tab (special/?)');
+
+    expect(result).toBe(2);
+  });
+
+  it('should handle empty tabs array', () => {
+    const tabs: TabItem[] = [];
+
+    const result = getNextTabNumber(tabs, DEFAULT_TAB_LABEL);
+
+    expect(result).toBeNull();
   });
 });

@@ -135,16 +135,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       newItem.duplicatedFromId = item.id;
 
       const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
-      const escapedCopyLabel = escapeRegExp(copyLabel);
-      const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
-      const baseLabel = item.label.replace(baseRegex, '');
-      const escapedBaseLabel = escapeRegExp(baseLabel);
-      const tabRegex = new RegExp(`^${escapedBaseLabel}\\s*\\(${escapedCopyLabel}\\)( (\\d+))?$`);
 
-      const nextNumber = getNextTabNumber(state.items, tabRegex);
-      newItem.label = nextNumber
-        ? `${baseLabel} (${copyLabel}) ${nextNumber}`
-        : `${baseLabel} (${copyLabel})`;
+      // Remove existing (copy) or (copy N) suffix to get base label
+      const copyPattern = `\\s*\\(${escapeRegExp(copyLabel)}\\)(?:\\s+\\d+)?$`;
+      const baseLabel = item.label.replace(new RegExp(copyPattern), '');
+
+      // Create the copy base pattern: "Original Label (copy)"
+      const copyBaseLabel = `${baseLabel} (${copyLabel})`;
+
+      const nextNumber = getNextTabNumber(state.items, copyBaseLabel);
+      newItem.label = nextNumber ? `${copyBaseLabel} ${nextNumber}` : copyBaseLabel;
 
       tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
       changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));

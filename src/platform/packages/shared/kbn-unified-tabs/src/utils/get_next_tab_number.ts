@@ -9,21 +9,37 @@
 
 import type { TabItem } from '../types';
 
-export const getNextTabNumber = (allTabs: TabItem[], regex: RegExp) => {
-  const result = allTabs.reduce(
-    (acc, tab) => {
-      const match = tab.label.trim().match(regex);
+export const getNextTabNumber2 = (
+  allTabs: TabItem[],
+  defaultNameRegex: RegExp,
+  tabWithNumberRegex: RegExp
+) => {
+  const existingNumbers = allTabs
+    .filter((tab) => defaultNameRegex.test(tab.label.trim()))
+    .map((tab) => {
+      const match = tab.label.trim().match(tabWithNumberRegex);
+      const tabNumber = match?.groups?.tabNumber;
+      return tabNumber ? Number(tabNumber) : 1;
+    });
 
-      if (!match) return acc;
+  const nextNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : null;
+  return nextNumber;
+};
 
-      const currentNumber = match[1] ? Number(match[1]) : 1;
-      return {
-        hasMatch: true,
-        maxNumber: Math.max(acc.maxNumber, currentNumber),
-      };
-    },
-    { hasMatch: false, maxNumber: 0 }
-  );
+export const getNextTabNumber = (allTabs: TabItem[], baseLabel: string) => {
+  // Find all tabs that start with the base label
+  const numbers = allTabs
+    .map((tab) => tab.label.trim())
+    .filter((label) => label === baseLabel || label.startsWith(`${baseLabel} `))
+    .map((label) => {
+      if (label === baseLabel) return 1; // First occurrence has implicit number 1
 
-  return result.hasMatch ? result.maxNumber + 1 : null;
+      // Extract number from "Base Label X" format
+      const suffix = label.slice(baseLabel.length + 1);
+      const num = Number(suffix);
+      return isNaN(num) ? null : num;
+    })
+    .filter((num): num is number => num !== null);
+
+  return numbers.length > 0 ? Math.max(...numbers) + 1 : null;
 };
