@@ -6,6 +6,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 export const BadgesColumn: React.FC<{
@@ -16,7 +17,13 @@ export const BadgesColumn: React.FC<{
   items && items.length > 0 ? (
     <div>
       {items.map((title, idx) => (
-        <EuiBadge key={`${prefix}-${idx}`} color={color}>
+        <EuiBadge
+          key={`${prefix}-${idx}`}
+          color={color}
+          css={css`
+            max-width: 400px;
+          `}
+        >
           {title}
         </EuiBadge>
       ))}

@@ -703,6 +703,10 @@ describe('translateClassicStreamPipelineActions', () => {
         .mockImplementationOnce(async () => {
           return {
             'my-template-pipeline': {
+              created_date_millis: 123456789,
+              created_date: '2023-10-01T00:00:00.000Z',
+              modified_date_millis: 123456789,
+              modified_date: '2023-10-01T00:00:00.000Z',
               processors: [
                 {
                   set: {
@@ -1054,5 +1058,6 @@ function emptyActionsByType(): ActionsByType {
     delete_datastream: [],
     upsert_dot_streams_document: [],
     delete_dot_streams_document: [],
+    delete_queries: [],
   };
 }

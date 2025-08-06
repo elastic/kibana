@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -26,6 +25,9 @@ import {
   EuiTabs,
   EuiNotificationBadge,
   EuiText,
+  EuiIconTip,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
@@ -53,34 +55,31 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
+          <EuiLink
+            onClick={toggleHistory}
+            external={false}
+            data-test-subj="ESQLEditor-hide-queries-link"
           >
-            <EuiIcon
+            <EuiIconTip
               type="clockCounter"
               color="primary"
               size="m"
-              onClick={toggleHistory}
-              css={css`
-                margin-right: ${euiTheme.size.s};
-                cursor: pointer;
-              `}
+              content={
+                isHistoryOpen
+                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                      defaultMessage: 'Hide recent queries',
+                    })
+                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                      defaultMessage: 'Show recent queries',
+                    })
+              }
+              position="top"
             />
-          </EuiToolTip>
+          </EuiLink>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (

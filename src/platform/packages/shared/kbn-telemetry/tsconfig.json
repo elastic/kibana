@@ -17,5 +17,11 @@
     "@kbn/apm-config-loader",
     "@kbn/tracing",
     "@kbn/logging",
+    "@kbn/metrics",
+    "@kbn/opentelemetry-attributes",
+    "@kbn/telemetry-config",
+    "@kbn/repo-info",
+    "@kbn/utility-types",
+    "@kbn/metrics-config",
   ]
 }
