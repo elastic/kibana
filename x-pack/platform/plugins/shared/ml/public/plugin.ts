@@ -145,25 +145,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private experimentalFeatures: ExperimentalFeatures = {
     ruleFormV2: false,
   };
-  private nlpSettings: NLPSettings = {
-    modelDeployment: {
-      allowStaticAllocations: true,
-      vCPURange: {
-        low: {
-          min: 0,
-          max: 2,
-        },
-        medium: {
-          min: 1,
-          max: 16,
-        },
-        high: {
-          min: 1,
-          max: 32,
-        },
-      },
-    },
-  };
+  private nlpSettings: NLPSettings = {};
 
   private telemetry = new TelemetryService();
 

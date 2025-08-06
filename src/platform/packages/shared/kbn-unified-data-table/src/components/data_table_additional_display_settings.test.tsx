@@ -281,7 +281,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeRowHeightLines,
       });
       fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 5 } });
-      expect(onChangeRowHeightLines).toHaveBeenCalledWith(5);
+      expect(onChangeRowHeightLines).toHaveBeenCalledWith(5, true);
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeRowHeight).toHaveBeenCalledWith('auto');
     });
@@ -310,7 +310,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         onChangeHeaderRowHeightLines,
       });
       fireEvent.change(screen.getByRole('spinbutton'), { target: { value: 3 } });
-      expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3);
+      expect(onChangeHeaderRowHeightLines).toHaveBeenCalledWith(3, true);
       await userEvent.click(screen.getByRole('button', { name: 'Auto' }));
       expect(onChangeHeaderRowHeight).toHaveBeenCalledWith('auto');
     });

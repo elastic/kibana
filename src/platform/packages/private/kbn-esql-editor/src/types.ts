@@ -136,3 +136,8 @@ export interface ESQLEditorDeps {
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
 }
+
+export enum HistoryTabId {
+  recentQueries = 'history-queries-tab',
+  standardQueries = 'starred-queries-tab',
+}

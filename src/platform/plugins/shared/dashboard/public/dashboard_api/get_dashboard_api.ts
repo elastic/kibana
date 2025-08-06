@@ -109,8 +109,7 @@ export function getDashboardApi({
 
   function getState() {
     const { panels, references: panelReferences } = layoutManager.internalApi.serializeLayout();
-    const { state: unifiedSearchState, references: searchSourceReferences } =
-      unifiedSearchManager.internalApi.getState();
+    const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
@@ -125,7 +124,6 @@ export function getDashboardApi({
       dashboardState,
       controlGroupReferences,
       panelReferences: panelReferences ?? [],
-      searchSourceReferences,
     };
   }
 
@@ -176,10 +174,8 @@ export function getDashboardApi({
       }
 
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(
-          saveResult.savedState,
-          saveResult.references ?? []
-        );
+        references$.next(saveResult.references);
+        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -190,28 +186,24 @@ export function getDashboardApi({
           title: saveResult.savedState.title,
         });
         savedObjectId$.next(saveResult.id);
-
-        references$.next(saveResult.references);
       }
 
       return saveResult;
     },
     runQuickSave: async () => {
       if (isManaged) return;
-      const { controlGroupReferences, dashboardState, panelReferences, searchSourceReferences } =
-        getState();
+      const { controlGroupReferences, dashboardState, panelReferences } = getState();
       const saveResult = await getDashboardContentManagementService().saveDashboardState({
         controlGroupReferences,
         dashboardState,
         panelReferences,
-        searchSourceReferences,
         saveOptions: {},
         lastSavedId: savedObjectId$.value,
       });
 
       if (saveResult?.error) return;
-      unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
       references$.next(saveResult.references);
+      unsavedChangesManager.internalApi.onSave(dashboardState);
 
       return;
     },

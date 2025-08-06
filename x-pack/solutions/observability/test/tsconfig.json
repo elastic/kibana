@@ -74,11 +74,6 @@
     "@kbn/observability-onboarding-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
-    "@kbn/streams-schema",
-    "@kbn/streams-plugin",
-    "@kbn/es-errors",
-    "@kbn/content-packs-schema",
-    "@kbn/server-route-repository-utils",
     "@kbn/cases-plugin",
     "@kbn/infra-forge",
     "@kbn/test-suites-src",
@@ -90,6 +85,6 @@
     "@kbn/typed-react-router-config",
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/dev-utils",
-    "@kbn/test-suites-xpack",
+    "@kbn/data-quality-plugin",
   ]
 }

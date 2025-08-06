@@ -58,11 +58,6 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
-  visitTimeIntervalLiteral?: (
-    node: types.ESQLTimeInterval,
-    parent: types.ESQLProperNode | undefined,
-    walker: WalkerVisitorApi
-  ) => void;
   visitInlineCast?: (
     node: types.ESQLInlineCast,
     parent: types.ESQLProperNode | undefined,
@@ -254,6 +249,40 @@ export class Walker {
   ): types.ESQLProperNode[] => {
     const predicate = templateToPredicate(template);
     return Walker.findAll(tree, predicate, options);
+  };
+
+  public static readonly replace = (
+    tree: WalkerAstNode,
+    matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
+    newValue: types.ESQLProperNode
+  ): types.ESQLProperNode | undefined => {
+    const node =
+      typeof matcher === 'function' ? Walker.find(tree, matcher) : Walker.match(tree, matcher);
+    if (!node) return;
+    for (const key in node)
+      if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
+        delete (node as any)[key];
+    Object.assign(node, newValue);
+    return node;
+  };
+
+  public static readonly replaceAll = (
+    tree: WalkerAstNode,
+    matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
+    newValue: types.ESQLProperNode
+  ): types.ESQLProperNode[] => {
+    const nodes =
+      typeof matcher === 'function'
+        ? Walker.findAll(tree, matcher)
+        : Walker.matchAll(tree, matcher);
+    if (nodes.length === 0) return [];
+    for (const node of nodes) {
+      for (const key in node)
+        if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
+          delete (node as any)[key];
+      Object.assign(node, newValue);
+    }
+    return nodes;
   };
 
   /**
@@ -675,10 +704,6 @@ export class Walker {
       }
       case 'list': {
         this.walkListLiteral(node, parent);
-        break;
-      }
-      case 'timeInterval': {
-        (options.visitTimeIntervalLiteral ?? options.visitAny)?.(node, parent, this);
         break;
       }
       case 'inlineCast': {

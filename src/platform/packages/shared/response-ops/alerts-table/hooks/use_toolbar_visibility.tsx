@@ -156,7 +156,7 @@ const useGetDefaultVisibility = ({
         },
       },
       showColumnSelector: {
-        allowHide: false,
+        allowHide: true,
       },
       showSortSelector: true,
     };

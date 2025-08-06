@@ -106,6 +106,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/dev/packages/*',
   'src/core/packages/*/*',
   'src/platform/packages/private/*',
+  'src/platform/packages/private/opentelemetry/*',
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',

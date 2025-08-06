@@ -9,6 +9,7 @@ import { EuiFlexItem, EuiTextArea, keys } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
+import { useConversationId } from '../../../hooks/use_conversation_id';
 
 const inputContainerStyles = css`
   display: flex;
@@ -17,16 +18,17 @@ const inputContainerStyles = css`
   .euiFormControlLayout__childrenWrapper {
     height: 100%;
   }
-`;
-const textareaStyles = css`
-  height: 100%;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  &:focus:focus-visible {
+  /* Using ID for high specificity selector */
+  #conversationInput {
+    border: none;
+    box-shadow: none;
     outline: none;
     background-image: none;
   }
+`;
+const textareaStyles = css`
+  height: 100%;
+  padding: 0;
 `;
 
 interface ConversationInputTextAreaProps {
@@ -40,15 +42,19 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
   setMessage,
   handleSubmit,
 }) => {
+  const conversationId = useConversationId();
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
+    // Auto focus the text area when the user switches conversations
     setTimeout(() => {
       textAreaRef.current?.focus();
     }, 200);
-  }, []);
+  }, [conversationId]);
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
+        id="conversationInput"
         name={i18n.translate('xpack.onechat.conversationInputForm.textArea.name', {
           defaultMessage: 'Conversation input',
         })}

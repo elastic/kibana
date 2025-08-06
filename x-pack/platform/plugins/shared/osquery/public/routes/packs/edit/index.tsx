@@ -15,6 +15,7 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -29,6 +30,8 @@ import { useDeletePack } from '../../../packs/use_delete_pack';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const { packId } = useParams<{ packId: string }>();
   const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -116,6 +119,8 @@ const EditPackPageComponent = () => {
     [isReadOnly]
   );
 
+  const titleProps = useMemo(() => ({ id: confirmModalTitleId }), [confirmModalTitleId]);
+
   if (isLoading) return null;
 
   return (
@@ -132,6 +137,8 @@ const EditPackPageComponent = () => {
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
+          aria-labelledby={confirmModalTitleId}
+          titleProps={titleProps}
           title={
             <FormattedMessage
               id="xpack.osquery.deletePack.confirmationModal.title"

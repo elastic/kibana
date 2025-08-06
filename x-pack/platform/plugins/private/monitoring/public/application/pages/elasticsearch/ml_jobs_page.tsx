@@ -46,7 +46,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
   const [data, setData] = useState({} as any);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
-    defaultMessage: 'Elasticsearch - Machine Learning Jobs',
+    defaultMessage: 'Elasticsearch - Machine learning jobs',
   });
 
   const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.pageTitle', {

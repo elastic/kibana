@@ -38,7 +38,12 @@ import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 import { MetricVisualizationState, SecondaryTrend } from './types';
-import { getColorMode, getDefaultConfigForMode, getTrendPalette } from './helpers';
+import {
+  getColorMode,
+  getDefaultConfigForMode,
+  getTrendPalette,
+  isSecondaryTrendConfigInvalid,
+} from './helpers';
 import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
@@ -555,20 +560,30 @@ export const getMetricVisualization = ({
     if (!datasourceLayer) {
       return { state, references: [] };
     }
+
     // this should clean up the secondary trend state if in conflict
-    const { isNumeric: isMetricNumeric } = getAccessorType(datasourceLayer, state.metricAccessor);
-    const colorMode = getColorMode(state.secondaryTrend, isMetricNumeric);
-    // if there are no conflicts, it's all persistable as is
-    if (colorMode === state.secondaryTrend?.type) {
-      return { state, references: [] };
+    const { isNumeric: isPrimaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.metricAccessor
+    );
+    const { isNumeric: isSecondaryMetricNumeric } = getAccessorType(
+      datasourceLayer,
+      state.secondaryMetricAccessor
+    );
+    const colorMode = getColorMode(state.secondaryTrend, isSecondaryMetricNumeric);
+
+    if (isSecondaryTrendConfigInvalid(state.secondaryTrend, colorMode, isPrimaryMetricNumeric)) {
+      return {
+        state: {
+          ...state,
+          secondaryPrefix: undefined,
+          secondaryTrend: getDefaultConfigForMode(colorMode),
+        },
+        references: [],
+      };
     }
-    return {
-      state: {
-        ...state,
-        secondaryTrend: getDefaultConfigForMode(colorMode),
-      },
-      references: [],
-    };
+    // if there are no conflicts, it's all persistable as is
+    return { state, references: [] };
   },
 
   setDimension({ prevState, columnId, groupId }) {

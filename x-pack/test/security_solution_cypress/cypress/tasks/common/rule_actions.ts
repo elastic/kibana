@@ -70,7 +70,7 @@ export const createEmailConnector = () => {
 };
 
 export const fillEmailRuleActionForm = (email: string, subject: string) => {
-  cy.get(EMAIL_ACTION_TO_INPUT).type(`${email}{enter}`);
+  cy.get(EMAIL_ACTION_TO_INPUT).type(email);
   cy.get(EMAIL_ACTION_SUBJECT_INPUT).type(subject);
 };
 

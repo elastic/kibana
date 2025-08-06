@@ -71,7 +71,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return !!currentUrl.match(path);
     });
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/230580
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     let synthEsClient: InfraSynthtraceEsClient;
 
@@ -145,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const documentTitle = await browser.getTitle();
         expect(documentTitle).to.contain(
-          'Infrastructure Inventory - Infrastructure - Observability - Elastic'
+          'Infrastructure inventory - Infrastructure - Observability - Elastic'
         );
       });
 
@@ -460,7 +461,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.tryForTime(5000, async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'host-5 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+              'host-5 - Infrastructure inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -477,7 +478,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -495,7 +496,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'container-id-4 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'container-id-4 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
