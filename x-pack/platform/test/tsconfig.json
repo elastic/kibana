@@ -139,6 +139,10 @@
     "@kbn/ci-stats-reporter",
     "@kbn/usage-collection-plugin",
     "@kbn/core-deprecations-common",
-    "@kbn/controls-plugin",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/sse-utils-server",
+    "@kbn/inference-common",
+    "@kbn/rule-registry-plugin",
+    "@kbn/controls-plugin"
   ]
 }

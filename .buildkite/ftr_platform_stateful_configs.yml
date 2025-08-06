@@ -49,7 +49,7 @@ disabled:
   - x-pack/performance/configs/http2_config.ts
 
   # Gen AI suites, running with their own pipeline
-  - x-pack/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -263,7 +263,6 @@ enabled:
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
-  - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
@@ -273,10 +272,10 @@ enabled:
   - x-pack/platform/test/reporting_functional/reporting_and_deprecated_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_without_security.config.ts
-  - x-pack/test/rule_registry/security_and_spaces/config_basic.ts
-  - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
-  - x-pack/test/rule_registry/spaces_only/config_basic.ts
-  - x-pack/test/rule_registry/spaces_only/config_trial.ts
+  - x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts
+  - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
+  - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
+  - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
@@ -316,7 +315,6 @@ enabled:
   - x-pack/platform/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/platform/test/security_functional/user_profiles.config.ts
   - x-pack/platform/test/security_functional/expired_session.config.ts
-  - x-pack/test/session_view/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
