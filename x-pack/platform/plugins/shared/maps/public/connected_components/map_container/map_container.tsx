@@ -7,7 +7,7 @@
 
 import '../../_index.scss';
 import React, { Component } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, UseEuiTheme, EuiFocusTrap } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
@@ -15,20 +15,19 @@ import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { openLazyFlyout } from '@kbn/presentation-util';
+import { Provider, ReactReduxContext } from 'react-redux';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
-import { EditLayerPanel } from '../edit_layer_panel';
-import { AddLayerPanel } from '../add_layer_panel';
-import { isScreenshotMode } from '../../kibana_services';
+import { isScreenshotMode, coreStart, untilPluginStartServicesReady } from '../../kibana_services';
 import { RawValue, RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
-import { MapSettingsPanel } from '../map_settings_panel';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
+import { updateFlyout } from '../../actions';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -70,8 +69,13 @@ interface State {
 const mapWrapperStyles = css({ position: 'relative' });
 
 export class MapContainer extends Component<Props, State> {
+  static contextType = ReactReduxContext;
+  declare context: React.ContextType<typeof ReactReduxContext>;
+
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
+
+  private _closeFlyout: () => void = () => {};
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -86,7 +90,7 @@ export class MapContainer extends Component<Props, State> {
     this._loadShowTimesliderButton();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps: Props) {
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
     if (
@@ -96,6 +100,9 @@ export class MapContainer extends Component<Props, State> {
     ) {
       this._isInitalLoadRenderTimerStarted = true;
       this._startInitialLoadRenderTimer();
+    }
+    if (prevProps.flyoutDisplay !== this.props.flyoutDisplay) {
+      this._updateFlyout(this.props.flyoutDisplay);
     }
   }
 
@@ -148,6 +155,42 @@ export class MapContainer extends Component<Props, State> {
     }
   }
 
+  _updateFlyout = async (flyoutDisplay: FLYOUT_STATE) => {
+    this._closeFlyout();
+    if (flyoutDisplay === FLYOUT_STATE.NONE) return;
+
+    await untilPluginStartServicesReady();
+    const flyoutRef = openLazyFlyout({
+      core: coreStart,
+      loadContent: async ({ closeFlyout }) => {
+        this._closeFlyout = closeFlyout;
+        let flyoutPanel = null;
+        switch (flyoutDisplay) {
+          case FLYOUT_STATE.ADD_LAYER_WIZARD:
+            const { AddLayerPanel } = await import('../add_layer_panel');
+            flyoutPanel = <AddLayerPanel />;
+            break;
+          case FLYOUT_STATE.LAYER_PANEL:
+            const { EditLayerPanel } = await import('../edit_layer_panel');
+            flyoutPanel = <EditLayerPanel />;
+            break;
+          case FLYOUT_STATE.MAP_SETTINGS_PANEL:
+            const { MapSettingsPanel } = await import('../map_settings_panel');
+            flyoutPanel = <MapSettingsPanel />;
+            break;
+        }
+        return <Provider store={this.context.store}>{flyoutPanel}</Provider>;
+      },
+      flyoutProps: {
+        outsideClickCloses: false,
+        ownFocus: true,
+      },
+    });
+
+    // Ensure the built-in close buttons from openLazyFlyout correctly update the Redux state
+    flyoutRef.onClose.then(() => this.context.store.dispatch(updateFlyout(FLYOUT_STATE.NONE)));
+  };
+
   _startInitialLoadRenderTimer = () => {
     window.setTimeout(() => {
       if (this._isMounted) {
@@ -163,7 +206,6 @@ export class MapContainer extends Component<Props, State> {
       getFilterActions,
       getActionContext,
       onSingleValueTrigger,
-      flyoutDisplay,
       isFullScreen,
       exitFullScreen,
       mapInitError,
@@ -232,56 +274,8 @@ export class MapContainer extends Component<Props, State> {
           )}
           <RightSideControls />
         </EuiFlexItem>
-        <FlyoutPanelWrapper flyoutDisplay={flyoutDisplay} />
         {exitFullScreenButton}
       </EuiFlexGroup>
     );
   }
 }
-
-const componentStyles = {
-  flyoutPanelWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      overflow: 'hidden',
-      borderLeftWidth: 1,
-      borderLeftColor: euiTheme.colors.borderBaseSubdued,
-      borderLeftStyle: 'solid',
-      width: 0,
-      '& > * > *': {
-        width: `calc(${euiTheme.size.xxl} * 12)`,
-      },
-    }),
-  flyoutVisibleStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: `calc(${euiTheme.size.xxl} * 12)`,
-      transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
-    }),
-  flyoutFocusTrapStyles: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-    }),
-};
-
-const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
-  let flyoutPanel = null;
-  if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
-    flyoutPanel = <AddLayerPanel />;
-  } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-    flyoutPanel = <EditLayerPanel />;
-  } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
-    flyoutPanel = <MapSettingsPanel />;
-  }
-  const isVisible = !!flyoutPanel;
-  const styles = useMemoCss(componentStyles);
-  return (
-    <EuiFlexItem
-      css={[styles.flyoutPanelWrapperStyles, isVisible && styles.flyoutVisibleStyles]}
-      grow={false}
-    >
-      <EuiFocusTrap css={styles.flyoutFocusTrapStyles}>{flyoutPanel}</EuiFocusTrap>
-    </EuiFlexItem>
-  );
-};
