@@ -154,7 +154,7 @@ describe('Cloud Security Posture Plugin', () => {
         await Promise.resolve();
       }
 
-      await mockPlugins.fleet.fleetSetupCompleted();;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       jest.useRealTimers();
 
@@ -298,7 +298,7 @@ describe('Cloud Security Posture Plugin', () => {
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
 
-      await mockPlugins.fleet.fleetSetupCompleted();;
+      await mockPlugins.fleet.fleetSetupCompleted();
 
       // Allow any microtasks from promise chain to complete
       await new Promise((resolve) => setTimeout(resolve, 0));
