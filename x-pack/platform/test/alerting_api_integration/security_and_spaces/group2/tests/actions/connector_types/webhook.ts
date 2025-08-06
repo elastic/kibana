@@ -7,6 +7,7 @@
 
 import type httpProxy from 'http-proxy';
 import type http from 'http';
+
 import expect from '@kbn/expect';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
@@ -356,6 +357,44 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling webhook, retry later/);
       expect(result.service_message).to.eql('[500] Internal Server Error');
+    });
+
+    it('sends both config and secret headers in the webhook request', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+            secretHeaders: {
+              secret: 'secretValue',
+            },
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              config: 'configValue',
+            },
+          },
+        })
+        .expect(200);
+
+      // execute the connector
+      const actionId = createdAction.id;
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${actionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'headers',
+          },
+        })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
     });
 
     after(() => {
