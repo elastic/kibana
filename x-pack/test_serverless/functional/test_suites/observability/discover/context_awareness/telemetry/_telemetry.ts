@@ -279,6 +279,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
         expect(event2.properties).to.eql({
           eventName: 'dataTableSelection',
+          fieldName: '<non-ecs>',
         });
       });
 
