@@ -24243,6 +24243,16 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            datasets:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                             fields:
                               items:
                                 additionalProperties: true
@@ -25412,6 +25422,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -26043,6 +26063,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -52486,23 +52516,47 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            streams:
-                              items:
-                                type: string
-                              type: array
+                            all:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
                           required:
-                            - streams
+                            - all
                       required:
                         - objects
                     - additionalProperties: false
                       type: object
                       properties:
-                        all:
+                        objects:
                           additionalProperties: false
                           type: object
-                          properties: {}
+                          properties:
+                            queries:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                required:
+                                  - id
+                              type: array
+                            routing:
+                              items:
+                                allOf:
+                                  - {}
+                                  - type: object
+                                    properties:
+                                      destination:
+                                        type: string
+                                    required:
+                                      - destination
+                              type: array
+                          required:
+                            - queries
+                            - routing
                       required:
-                        - all
+                        - objects
                 name:
                   type: string
                 version:
@@ -64448,25 +64502,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/Security_Detections_API_ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    Security_Detections_API_ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     Security_Detections_API_ThreatMatchRule:
       allOf:
         - type: object
