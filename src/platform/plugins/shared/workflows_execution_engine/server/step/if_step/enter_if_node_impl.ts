@@ -10,11 +10,16 @@
 import { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows';
 import { StepImplementation } from '../step_base';
 import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import { evaluateKql } from './eval_kql';
+import { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
 
 export class EnterIfNodeImpl implements StepImplementation {
   constructor(
     private step: EnterIfNode,
-    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
+    private workflowContextManager: WorkflowContextManager,
+    private workflowContextLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
@@ -39,19 +44,35 @@ export class EnterIfNodeImpl implements StepImplementation {
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
 
-    const evaluatedConditionResult =
-      typeof thenNode.condition === 'boolean'
-        ? thenNode.condition
-        : thenNode.condition?.toLowerCase() === 'true'; // must be real condition from step definition)
+    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
 
     if (evaluatedConditionResult) {
+      this.workflowContextLogger.logInfo(
+        `Condition "${thenNode.condition}" evaluated to true for step ${this.step.id}. Going to then branch.`
+      );
       this.wfExecutionRuntimeManager.goToStep(thenNode.id);
     } else if (elseNode) {
+      this.workflowContextLogger.logInfo(
+        `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. Going to else branch.`
+      );
       this.wfExecutionRuntimeManager.goToStep(elseNode.id);
     } else {
       // in the case when the condition evaluates to false and no else branch is defined
       // we go straight to the exit node skipping "then" branch
+      this.workflowContextLogger.logInfo(
+        `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. No else branch defined. Exiting if condition.`
+      );
       this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
     }
+  }
+
+  private evaluateCondition(condition: string | boolean | undefined): boolean {
+    if (typeof condition === 'boolean') {
+      return condition;
+    } else if (typeof condition === 'undefined') {
+      return false; // Undefined condition defaults to false
+    }
+
+    return evaluateKql(condition, this.workflowContextManager.getContext());
   }
 }
