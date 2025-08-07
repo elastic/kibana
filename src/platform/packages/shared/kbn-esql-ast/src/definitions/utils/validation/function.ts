@@ -155,14 +155,19 @@ class FunctionValidator {
       return [errors.licenseRequiredForSignature(this.fn, S[0])];
     }
 
-    const columnMessages = this.fn.args.flatMap((arg) => {
+    const columnMessages = this.fn.args.flat().flatMap((arg) => {
       if (isColumn(arg) || isIdentifier(arg)) {
         return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
       }
       return [];
     });
 
-    return columnMessages;
+    // @TODO - remove this approach when align field availability detection with autocomplete
+    // (start using columnsAfter instead of collectUserDefinedColumns)
+    //
+    // This is due to a special case in enrich where an implicit assignment is possible
+    // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
+    return uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`);
   }
 
   /**

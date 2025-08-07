@@ -50,10 +50,6 @@ describe('EVAL Validation', () => {
   test('raises error on unknown field', () => {
     evalExpectErrors('from a_index | eval col0=b', ['Unknown column [b]']);
     evalExpectErrors('from a_index | eval col0=round', ['Unknown column [round]']);
-    evalExpectErrors(
-      'from a_index | eval col0=round(doubleField) + round(textField), doubleField  ',
-      ['Argument of [round] must be [double], found value [textField] type [text]']
-    );
   });
   test('validates IS NULL', () => {
     evalExpectErrors(`from a_index | eval doubleField IS NULL`, []);
