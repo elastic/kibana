@@ -304,7 +304,6 @@ The 8.16.1 release includes the following known issues and bug fixes.
 [[known-issues-8.16.1]]
 === Known issues
 
-<<<<<<< HEAD
 [discrete]
 [[known-201115]]
 .Kibana `Dev Tools > Console` incorrectly splits a request string that contains concatenated JSON objects, resulting in errors when submitting the requests to Elasticsearch.
