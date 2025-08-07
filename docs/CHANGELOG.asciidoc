@@ -208,7 +208,6 @@ Kibana security::
 [[release-notes-8.16.3]]
 
 == {kib} 8.16.3
-<<<<<<< HEAD
 The 8.16.3 release includes the following bug fixes.
 =======
 
