@@ -33,6 +33,15 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
+import {
+  NAME_COLUMN_HEADER,
+  DOCUMENTS_COLUMN_HEADER,
+  RETENTION_COLUMN_HEADER,
+  STREAMS_TABLE_SEARCH_ARIA_LABEL,
+  STREAMS_TABLE_CAPTION_ARIA_LABEL,
+  RETENTION_COLUMN_HEADER_ARIA_LABEL,
+  NO_STREAMS_MESSAGE,
+} from './translations';
 
 export function StreamsTreeTable({
   loading,
@@ -82,9 +91,7 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'nameSortKey',
-          name: i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
-            defaultMessage: 'Name',
-          }),
+          name: NAME_COLUMN_HEADER,
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
@@ -99,9 +106,20 @@ export function StreamsTreeTable({
               {item.children && (
                 <EuiFlexItem grow={false}>
                   {isEmpty(item.children) ? (
-                    <EuiIcon type="empty" color="text" size="m" />
+                    <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
                   ) : (
-                    <EuiIcon type="arrowDown" color="text" size="m" />
+                    <EuiIcon
+                      type="arrowDown"
+                      color="text"
+                      size="m"
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamsTreeTable.expandedNodeAriaLabel',
+                        {
+                          defaultMessage: 'Expanded node with {childCount} children',
+                          values: { childCount: item.children.length },
+                        }
+                      )}
+                    />
                   )}
                 </EuiFlexItem>
               )}
@@ -118,17 +136,7 @@ export function StreamsTreeTable({
         },
         {
           field: 'documentsCount',
-          name: (
-            <span
-              className={css`
-                margin-right: ${euiTheme.size.l};
-              `}
-            >
-              {i18n.translate('xpack.streams.streamsTreeTable.documentsColumnName', {
-                defaultMessage: 'Documents',
-              })}
-            </span>
-          ),
+          name: DOCUMENTS_COLUMN_HEADER,
           width: '280px',
           sortable: false,
           dataType: 'number',
@@ -139,24 +147,28 @@ export function StreamsTreeTable({
         },
         {
           field: 'retentionMs',
-          name: i18n.translate('xpack.streams.streamsTreeTable.retentionColumnName', {
-            defaultMessage: 'Retention',
-          }),
+          name: (
+            <span aria-label={RETENTION_COLUMN_HEADER_ARIA_LABEL}>{RETENTION_COLUMN_HEADER}</span>
+          ),
           width: '160px',
           align: 'left',
           sortable: (row: TableRow) => row.rootRetentionMs,
           dataType: 'number',
           render: (_: unknown, item: TableRow) => (
-            <RetentionColumn lifecycle={item.effective_lifecycle} />
+            <RetentionColumn
+              lifecycle={item.effective_lifecycle}
+              aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
+                defaultMessage: 'Retention policy for {name}',
+                values: { name: item.stream.name },
+              })}
+            />
           ),
         },
       ]}
       itemId="name"
       items={items}
       sorting={sorting}
-      noItemsMessage={i18n.translate('xpack.streams.streamsTreeTable.noStreamsMessage', {
-        defaultMessage: 'No streams found.',
-      })}
+      noItemsMessage={NO_STREAMS_MESSAGE}
       onTableChange={handleTableChange}
       pagination={{
         initialPageSize: 25,
@@ -167,9 +179,11 @@ export function StreamsTreeTable({
         onChange: handleQueryChange,
         box: {
           incremental: true,
+          'aria-label': STREAMS_TABLE_SEARCH_ARIA_LABEL,
         },
         toolsRight: <StreamsAppSearchBar showDatePicker />,
       }}
+      tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />
   );
 }
