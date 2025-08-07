@@ -22,7 +22,6 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { TutorialService } from '../services/tutorials';
 import { AddDataService } from '../services/add_data';
@@ -53,7 +52,6 @@ export interface HomeKibanaServices {
   tutorialService: TutorialService;
   addDataService: AddDataService;
   welcomeService: WelcomeService;
-  guidedOnboardingService?: GuidedOnboardingApi;
   cloud: CloudSetup;
   cloudStart: CloudStart;
   overlays: OverlayStart;

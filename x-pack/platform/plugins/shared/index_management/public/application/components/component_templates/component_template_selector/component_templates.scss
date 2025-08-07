@@ -30,9 +30,6 @@ $heightHeader: $euiSizeL * 2;
   }
 
   &__filterListButton {
-    border-bottom: $euiBorderThin;
-    border-top: $euiBorderThin;
-    border-left: $euiBorderThin;
     box-shadow: none;
     height: $euiSizeXXL; /* [2] */
 
@@ -40,6 +37,10 @@ $heightHeader: $euiSizeL * 2;
     & > :first-child .euiFilterButton { /* EUI specificity override */
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
+    }
+
+    &::after {
+      border: $euiBorderThin;
     }
   }
 
