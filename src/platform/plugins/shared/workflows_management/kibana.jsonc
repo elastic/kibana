@@ -18,11 +18,13 @@
       "workflowsExecutionEngine",
       "features",
       "security",
+      "triggersActionsUi",
       "spaces",
       "embeddable"
     ],
     "optionalPlugins": [
-      "apm"
+      "apm",
+      "alerting"
     ]
   }
 }

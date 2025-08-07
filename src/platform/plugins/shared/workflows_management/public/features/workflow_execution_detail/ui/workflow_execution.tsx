@@ -9,27 +9,27 @@
 
 import React, { useEffect, useMemo, useCallback } from 'react';
 import {
-  EuiText,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiToolTip,
-  EuiDescriptionList,
-  EuiTitle,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
   EuiBadge,
 } from '@elastic/eui';
-import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
+import { EsWorkflowStepExecution, ExecutionStatus } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { useWorkflowTraceSearch } from '../../../hooks/use_workflow_trace_search';
 import { StatusBadge } from '../../../shared/ui/status_badge';
-import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
+import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
 
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;
