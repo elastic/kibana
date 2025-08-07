@@ -21,6 +21,13 @@ export const TEST_SUBJ_TOOLTIP_COUNTRY = 'country-flags-tooltip-country';
 export const MAX_COUNTRY_FLAGS_IN_TOOLTIP = 10;
 const VISIBLE_FLAGS_LIMIT = 2;
 
+const toolTipAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.countryFlags.toolTipAriaLabel',
+  {
+    defaultMessage: 'Show geolocation details',
+  }
+);
+
 const toolTipTitle = i18n.translate(
   'securitySolutionPackages.csp.graph.countryFlags.toolTipTitle',
   {
@@ -100,7 +107,7 @@ export const CountryFlags = memo(({ countryCodes }: CountryFlagsProps) => {
       content={toolTipContent}
     >
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton>
+      <ToolTipButton aria-label={toolTipAriaLabel}>
         <RoundedBadge data-test-subj={TEST_SUBJ_BADGE} euiTheme={euiTheme}>
           {visibleFlags}
           {counter}

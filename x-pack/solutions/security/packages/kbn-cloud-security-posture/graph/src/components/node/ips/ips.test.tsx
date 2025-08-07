@@ -40,6 +40,14 @@ describe('Ips', () => {
     expect(screen.getByTestId(TEST_SUBJ_PLUS_COUNT)).toHaveTextContent('+2');
   });
 
+  test('renders aria-label in focusable button', () => {
+    const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
+    render(<Ips ips={testIps} />);
+
+    const tooltipButton = screen.getByRole('button');
+    expect(tooltipButton).toHaveAccessibleName('Show IP address details');
+  });
+
   describe('tooltip', () => {
     test('does not render tooltip for a single IP', async () => {
       const testIps = ['192.168.1.1'];

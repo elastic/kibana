@@ -20,6 +20,10 @@ export const TEST_SUBJ_TOOLTIP_IP = 'ips-tooltip-ip';
 export const VISIBLE_IPS_LIMIT = 1;
 export const MAX_IPS_IN_TOOLTIP = 10;
 
+const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipAriaLabel', {
+  defaultMessage: 'Show IP address details',
+});
+
 const toolTipTitle = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipTitle', {
   defaultMessage: 'IP Addresses',
 });
@@ -96,7 +100,7 @@ export const Ips = ({ ips }: IpsProps) => {
       content={ips.length > VISIBLE_IPS_LIMIT ? toolTipContent : null}
     >
       {/* Wrap badge with button to make it focusable and open ToolTip with keyboard */}
-      <ToolTipButton>
+      <ToolTipButton aria-label={toolTipAriaLabel}>
         <EuiFlexGroup
           responsive={false}
           gutterSize="xs"

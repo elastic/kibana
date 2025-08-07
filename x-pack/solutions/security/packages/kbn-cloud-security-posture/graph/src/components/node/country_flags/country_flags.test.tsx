@@ -115,6 +115,13 @@ describe('CountryFlags', () => {
     expect(tooltipContent).toHaveTextContent('Geolocation');
   });
 
+  test('renders aria-label in focusable button', () => {
+    render(<CountryFlags countryCodes={['us', 'fr', 'es']} />);
+
+    const tooltipButton = screen.getByRole('button');
+    expect(tooltipButton).toHaveAccessibleName('Show geolocation details');
+  });
+
   describe('ignores invalid country codes', () => {
     test('renders null if all country codes are invalid', async () => {
       const { container } = render(
