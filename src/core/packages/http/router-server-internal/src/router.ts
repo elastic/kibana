@@ -211,7 +211,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     handler: InternalRouteHandler;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    let apmSpan: Span | undefined;
+    let apmSpan: Span | null | undefined;
     try {
       apmSpan = apm.startSpan('route handler');
       const kibanaResponse = await handler(request);
