@@ -10,6 +10,10 @@
 import { evaluateKql } from '../eval_kql';
 
 describe('evaluateKql', () => {
+  it('should throw an error for invalid KQL', () => {
+    expect(() => evaluateKql('invalid kql', {})).toThrowError();
+  });
+
   describe('simple expressions', () => {
     it('should correctly evaluate a simple "is" KQL expression', () => {
       const kql = 'status: active';

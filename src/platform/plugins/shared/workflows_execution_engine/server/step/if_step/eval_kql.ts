@@ -8,29 +8,28 @@
  */
 
 import { fromKueryExpression, KueryNode } from '@kbn/es-query';
-import { KqlLiteralNode, KQL_NODE_TYPE_WILDCARD, KqlFunctionNode } from '@kbn/es-query/src/kuery/node_types';
+import {
+  KqlLiteralNode,
+  KQL_NODE_TYPE_WILDCARD,
+  KqlFunctionNode,
+} from '@kbn/es-query/src/kuery/node_types';
 
 export function evaluateKql(kql: string, context: Record<string, any>): boolean {
-  try {
-    const kqlAst = fromKueryExpression(kql);
-    return evaluate(kqlAst, context);
-  } catch (error) {
-    console.error(`Error evaluating KQL: ${error.message}`);
-    return false;
-  }
+  const kqlAst = fromKueryExpression(kql);
+  return evaluateRecursive(kqlAst, context);
 }
 
-function evaluate(node: KueryNode, context: Record<string, any>): boolean {
+function evaluateRecursive(node: KueryNode, context: Record<string, any>): boolean {
   if (node.type === 'function') {
     const functionNode = node as KqlFunctionNode;
 
     switch (functionNode.function) {
       case 'and':
-        return functionNode.arguments.every((arg) => evaluate(arg as KueryNode, context));
+        return functionNode.arguments.every((arg) => evaluateRecursive(arg as KueryNode, context));
       case 'or':
-        return functionNode.arguments.some((arg) => evaluate(arg as KueryNode, context));
+        return functionNode.arguments.some((arg) => evaluateRecursive(arg as KueryNode, context));
       case 'not':
-        return !evaluate(functionNode.arguments[0] as KueryNode, context);
+        return !evaluateRecursive(functionNode.arguments[0] as KueryNode, context);
       case 'range':
         return visitRange(functionNode, context);
       case 'is':
