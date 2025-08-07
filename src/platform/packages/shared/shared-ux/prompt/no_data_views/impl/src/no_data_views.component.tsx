@@ -187,8 +187,38 @@ export const NoDataViewsPrompt = ({
 
         <EuiSpacer size="xl" />
 
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem style={{ minHeight: '100%' }}>
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="stretch"
+          css={css`
+            min-height: 400px;
+
+            /* Ensure all flex items stretch to full height */
+            > .euiFlexItem {
+              display: flex !important;
+              flex-direction: column !important;
+            }
+
+            /* Target nested elements to stretch */
+            .euiFlexItem > section,
+            [class*='css-'][class*='-euiPageSection-grow-l-center-transparent'],
+            [class*='css-'][class*='-euiPageSection__content-l-center'] {
+              flex: 1 !important;
+              display: flex !important;
+              flex-direction: column !important;
+            }
+
+            /* Final EmptyPrompt components */
+            [data-test-subj='noDataViewsPromptCreateDataView'],
+            [data-test-subj='noDataViewsTryESQL'] {
+              flex: 1 !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important;
+            }
+          `}
+        >
+          <EuiFlexItem>
             <PromptAddDataViews
               {...{
                 onClickCreate,
@@ -198,7 +228,7 @@ export const NoDataViewsPrompt = ({
               }}
             />
           </EuiFlexItem>
-          <EuiFlexItem style={{ minHeight: '100%' }}>
+          <EuiFlexItem>
             <PromptTryEsql
               {...{
                 onTryESQL,
