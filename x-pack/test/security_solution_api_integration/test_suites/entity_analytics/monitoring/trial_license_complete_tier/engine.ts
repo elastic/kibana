@@ -40,11 +40,11 @@ export default ({ getService }: FtrProviderContext) => {
       },
     });
 
-  const waitForPrivMonUsersToBeSynced = async () =>
+  const waitForPrivMonUsersToBeSynced = async (length = 1) =>
     retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
       const res = await api.listPrivMonUsers({ query: {} });
       log.info(`PrivMon users sync check: found ${res.body.length} users`);
-      return res.body.length > 0; // wait until we have at least one user
+      return res.body.length >= length; // wait until we have at least one user
     });
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
@@ -62,7 +62,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('health', () => {
       it('should be healthy', async () => {
-        log.info(`Checking health of privilege monitoring`);
         const res = await api.privMonHealth();
 
         if (res.status !== 200) {
@@ -146,25 +145,22 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bulkBody = [...uniqueUsers, ...repeatedUsers];
         await es.bulk({ index: indexName, body: bulkBody, refresh: true });
-        // register entity source
-        const response = await api.createEntitySource({ body: entitySource });
 
-        expect(response.status).toBe(200);
         // Call init to trigger the sync
         await privMonUtils.initPrivMonEngine();
-        // default-monitoring-index should exist now
-        const result = await kibanaServer.savedObjects.find({
-          type: 'entity-analytics-monitoring-entity-source',
-          space: 'default',
-        });
 
-        const names = result.saved_objects.map((so) => so.attributes.name);
+        // register entity source
+        const response = await api.createEntitySource({ body: entitySource });
+        expect(response.status).toBe(200);
+
+        // default-monitoring-index should exist now
+        const sources = await api.listEntitySources({ query: {} });
+        const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
-        await waitForPrivMonUsersToBeSynced();
+        await waitForPrivMonUsersToBeSynced(9);
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);
-        log.info(`Found users: ${userNames.join(', ')}`);
         expect(userNames).toContain('Luke Skywalker');
         expect(userNames).toContain('C-3PO');
         expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
