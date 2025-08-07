@@ -49,51 +49,26 @@ describe('logStateTransition', () => {
       expect(loggerMock.collect(logger)).toEqual({
         error: [],
         fatal: [],
-        info: [['[PREFIX] info message'], ['[PREFIX] PREVIOUS -> NEXT. took: 500ms.']],
+        info: [['[PREFIX] info message']],
         log: [],
         trace: [],
         warn: [['[PREFIX] warning message']],
-        debug: [],
-      });
-    });
-  });
-
-  describe('when DEBUG log level is enabled', () => {
-    beforeEach(() => {
-      logger.isLevelEnabled.mockReturnValue(true);
-    });
-
-    it('logs a debug message with the correct meta', () => {
-      const previous: LogAwareState = {
-        controlState: 'PREVIOUS',
-        logs: [],
-      };
-      const next: LogAwareState = {
-        controlState: 'NEXT',
-        logs: [
-          ...previous.logs,
-          { level: 'info', message: 'info message' },
-          { level: 'warning', message: 'warning message' },
-        ],
-      };
-
-      logStateTransition(logger, messagePrefix, previous, next, 500);
-
-      expect(loggerMock.collect(logger).debug).toEqual([
-        [
-          '[PREFIX] PREVIOUS -> NEXT. took: 500ms.',
-          {
-            kibana: {
-              migrations: {
-                duration: 500,
-                state: expect.objectContaining({
-                  controlState: 'NEXT',
-                }),
+        debug: [
+          [
+            '[PREFIX] PREVIOUS -> NEXT. took: 500ms.',
+            {
+              kibana: {
+                migrations: {
+                  duration: 500,
+                  state: expect.objectContaining({
+                    controlState: 'NEXT',
+                  }),
+                },
               },
             },
-          },
+          ],
         ],
-      ]);
+      });
     });
   });
 });

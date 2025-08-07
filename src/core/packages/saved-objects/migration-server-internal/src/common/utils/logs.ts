@@ -9,6 +9,7 @@
 
 import type { Logger, LogMeta } from '@kbn/logging';
 import { MigrationLog } from '../../types';
+import { ControlStateTransitionTracker } from './control_state_transition_tracker';
 
 export interface LogAwareState {
   controlState: string;
@@ -65,3 +66,17 @@ export const logActionResponse = (
 ) => {
   logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`);
 };
+
+export function logMigrationFailureDetails({
+  logger,
+  index,
+  cstTracker,
+}: {
+  logger: Logger;
+  index: string;
+  cstTracker: ControlStateTransitionTracker;
+}): void {
+  logger
+    .get('control-state-transitions')
+    .error(`[${index}] Migration failed after transitioning through: ${cstTracker.pretty()}`);
+}
