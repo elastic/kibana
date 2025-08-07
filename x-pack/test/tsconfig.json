@@ -33,7 +33,6 @@
     "@kbn/apm-plugin",
     "@kbn/fleet-plugin",
     "@kbn/infra-plugin",
-    "@kbn/ml-plugin",
     "@kbn/observability-plugin",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
