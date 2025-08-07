@@ -103,7 +103,7 @@ const TrustedDevicesPolicyCard = memo<PolicyArtifactCardProps>(({ policyId }) =>
       getArtifactsPath={getArtifactPathHandler}
       searchableFields={TRUSTED_DEVICES_SEARCHABLE_FIELDS}
       labels={TRUSTED_DEVICES_LABELS}
-      data-test-subj="trustedApps"
+      data-test-subj="trustedDevices"
     />
   );
 });

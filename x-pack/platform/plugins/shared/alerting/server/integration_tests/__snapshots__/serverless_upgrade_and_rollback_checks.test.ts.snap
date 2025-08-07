@@ -7069,6 +7069,9 @@ Object {
                     "field": Object {
                       "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
                     },
+                    "negate": Object {
+                      "type": "boolean",
+                    },
                     "type": Object {
                       "const": "mapping",
                       "type": "string",
