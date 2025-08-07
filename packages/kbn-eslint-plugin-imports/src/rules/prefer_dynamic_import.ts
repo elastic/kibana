@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in, at your election,
- * the "Elastic License 2.0", the "GNU Affero General Public License v3.0 only",
- * or the "Server Side Public License, v 1".
- */
-
 import { TSESLint, TSESTree, AST_NODE_TYPES } from '@typescript-eslint/utils';
 import { Rule } from 'eslint';
 import { getImportResolver } from '../get_import_resolver';
@@ -24,30 +15,19 @@ import { getSourcePath } from '../helpers/source';
 
 type PreferDynamicImportRuleOptions = [{ autofix?: boolean }?];
 
-// rules/import-only-used-in-async.ts
 export const PreferDynamicImportRule: TSESLint.RuleModule<
   'preferDynamicImport' | 'rewriteToDynamicImport',
   PreferDynamicImportRuleOptions
 > = {
-  defaultOptions: [
-    {
-      autofix: false,
-    },
-  ],
+  defaultOptions: [{ autofix: false }],
   meta: {
     type: 'suggestion',
     docs: { description: 'Flag static imports only used in async functions' },
-    // No automatic fix; show a code-fix suggestion instead.
     hasSuggestions: true,
     schema: [
-      {
-        type: 'object',
-        properties: {
-          autofix: { type: 'boolean' },
-        },
-        additionalProperties: false,
-      },
+      { type: 'object', properties: { autofix: { type: 'boolean' } }, additionalProperties: false },
     ],
+    fixable: 'code',
     messages: {
       preferDynamicImport:
         "Import '{{source}}' is only used in async functions; consider converting to dynamic import().",
@@ -56,30 +36,46 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
   },
   create(context) {
     const eslintRuleContext = context as unknown as Rule.RuleContext;
-
     const resolver = getImportResolver(eslintRuleContext);
     const classifier = getRepoSourceClassifier(resolver);
     const sourcePath = getSourcePath(eslintRuleContext);
     const self = classifier.classify(sourcePath);
-
     if (self.type !== 'server package') {
       return {};
     }
 
     const [{ autofix = false } = {}] = context.options ?? [];
-
     const sourceCode = context.sourceCode;
 
-    // ESLint attaches `.parent` at runtime; add a local helper to satisfy TS.
     type WithParent = TSESTree.Node & { parent?: TSESTree.Node | null };
-    const parentOf = (n: TSESTree.Node | null | undefined) =>
-      (n as WithParent | null | undefined)?.parent ?? null;
+    const parentOf = (n: TSESTree.Node | null | undefined) => (n as WithParent)?.parent ?? null;
+
+    const isTypePosition = (n: TSESTree.Node): boolean => {
+      for (let p = parentOf(n); p; p = parentOf(p)) {
+        if (
+          p.type === AST_NODE_TYPES.TSTypeReference ||
+          p.type === AST_NODE_TYPES.TSTypeAnnotation ||
+          p.type === AST_NODE_TYPES.TSInterfaceDeclaration ||
+          p.type === AST_NODE_TYPES.TSTypeAliasDeclaration
+        ) {
+          return true;
+        }
+        if (
+          p.type === AST_NODE_TYPES.ExpressionStatement ||
+          p.type === AST_NODE_TYPES.VariableDeclaration ||
+          p.type === AST_NODE_TYPES.PropertyDefinition ||
+          p.type === AST_NODE_TYPES.Program
+        ) {
+          return false;
+        }
+      }
+      return false;
+    };
 
     type FnLike =
       | TSESTree.FunctionDeclaration
       | TSESTree.FunctionExpression
       | TSESTree.ArrowFunctionExpression;
-
     const nearestFunction = (start: TSESTree.Node): FnLike | null => {
       for (let p = parentOf(start); p; p = parentOf(p)) {
         switch (p.type) {
@@ -93,10 +89,7 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
       }
       return null;
     };
-
     const isInAsyncFunction = (n: TSESTree.Node) => !!nearestFunction(n)?.async;
-
-    // Avoid replacing within class fields / decorators where `await` is illegal.
     const inDisallowedContext = (n: TSESTree.Node) => {
       for (let p = parentOf(n); p; p = parentOf(p)) {
         if (
@@ -110,13 +103,10 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
       return false;
     };
 
-    // Determine if a given reference is part of an export/re-export.
     const isRefDirectlyReexported = (id: TSESTree.Identifier): boolean => {
       for (let p = parentOf(id); p; p = parentOf(p)) {
         if (p.type === AST_NODE_TYPES.ExportSpecifier) {
-          // export { local as exported }
           const es = p as TSESTree.ExportSpecifier;
-          // The identifier node inside the specifier corresponds to es.local (not es.exported)
           if (es.local.type === AST_NODE_TYPES.Identifier && es.local.name === id.name) return true;
           return false;
         }
@@ -127,19 +117,14 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
           );
         }
         if (p.type === AST_NODE_TYPES.ExportNamedDeclaration) {
-          // Only consider specifier-based re-exports. If there are no specifiers,
-          // this is a declaration export (e.g., export const x = ...), which we DO NOT treat as re-export of `id`.
           const en = p as TSESTree.ExportNamedDeclaration;
           if (!en.specifiers || en.specifiers.length === 0) return false;
-          // If we reached ExportNamedDeclaration without hitting an ExportSpecifier ancestor,
-          // the identifier is not the specifier token; treat as not a direct re-export.
           return false;
         }
         if (p.type === AST_NODE_TYPES.Program) break;
       }
       return false;
     };
-
     const isBindingReexported = (refs: TSESLint.Scope.Reference[]) =>
       refs.some(
         (r) => r.identifier && isRefDirectlyReexported(r.identifier as TSESTree.Identifier)
@@ -156,14 +141,44 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
     ): TSESLint.RuleFix[] => {
       const fixes: TSESLint.RuleFix[] = [];
       const source = node.source.value as string;
+      const awaitedModuleExpr = `(await import(${JSON.stringify(source)}))`;
 
       for (const r of refs) {
         const id = r.identifier;
         if (!id) continue;
 
-        const awaitedModuleExpr = `(await import(${JSON.stringify(source)}))`;
-        let replacement: string;
+        // Handle type-only usage
+        if (isTypePosition(id)) {
+          let importedName = '';
+          if (spec.type === AST_NODE_TYPES.ImportDefaultSpecifier) {
+            importedName = 'default';
+          } else if (spec.type === AST_NODE_TYPES.ImportSpecifier) {
+            importedName =
+              spec.imported.type === AST_NODE_TYPES.Identifier
+                ? spec.imported.name
+                : spec.imported.value;
+          }
+          const typeReplacement = importedName
+            ? `import(${JSON.stringify(source)})${'.' + importedName}`
+            : `import(${JSON.stringify(source)})`;
+          fixes.push(fixer.replaceText(id, typeReplacement));
+          continue;
+        }
 
+        // Handle object shorthand
+        const parent = parentOf(id);
+        if (
+          parent &&
+          parent.type === AST_NODE_TYPES.Property &&
+          (parent as TSESTree.Property).shorthand
+        ) {
+          const keyName = id.name;
+          fixes.push(fixer.replaceText(parent, `${keyName}: ${awaitedModuleExpr}.${keyName}`));
+          continue;
+        }
+
+        // Runtime usage
+        let replacement: string;
         switch (spec.type) {
           case AST_NODE_TYPES.ImportNamespaceSpecifier:
             replacement = awaitedModuleExpr;
@@ -175,18 +190,16 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
             const importedName =
               spec.imported.type === AST_NODE_TYPES.Identifier
                 ? spec.imported.name
-                : spec.imported.value; // string literal
+                : spec.imported.value;
             replacement = `${awaitedModuleExpr}.${importedName}`;
             break;
           }
           default:
             replacement = awaitedModuleExpr;
         }
-
         fixes.push(fixer.replaceText(id, `(${replacement})`));
       }
 
-      // Remove the import specifier (or the whole declaration if last one).
       if (node.specifiers.length === 1) {
         fixes.push(fixer.remove(node));
       } else {
@@ -204,59 +217,64 @@ export const PreferDynamicImportRule: TSESLint.RuleModule<
     return {
       ImportDeclaration(node: TSESTree.ImportDeclaration) {
         const source = node.source.value;
-        if (typeof source !== 'string') return;
-        if (node.importKind === 'type') return;
+        if (typeof source !== 'string' || node.importKind === 'type') return;
 
+        const specToRefs: Array<{
+          spec:
+            | TSESTree.ImportSpecifier
+            | TSESTree.ImportDefaultSpecifier
+            | TSESTree.ImportNamespaceSpecifier;
+          refs: TSESLint.Scope.Reference[];
+        }> = [];
         for (const spec of node.specifiers) {
           if (
-            spec.type === AST_NODE_TYPES.ImportSpecifier ||
-            spec.type === AST_NODE_TYPES.ImportDefaultSpecifier ||
-            spec.type === AST_NODE_TYPES.ImportNamespaceSpecifier
-          ) {
-            const variable = context.sourceCode.getDeclaredVariables(spec)[0];
-            if (!variable) continue;
+            spec.type !== AST_NODE_TYPES.ImportSpecifier &&
+            spec.type !== AST_NODE_TYPES.ImportDefaultSpecifier &&
+            spec.type !== AST_NODE_TYPES.ImportNamespaceSpecifier
+          )
+            continue;
+          const variable = context.sourceCode.getDeclaredVariables(spec)[0];
+          if (!variable) continue;
+          const refs = variable.references.filter((r) => r.isRead());
+          if (refs.length === 0 || isBindingReexported(refs)) continue;
+          const allAsync = refs.every(
+            (r) =>
+              r.identifier && isInAsyncFunction(r.identifier) && !inDisallowedContext(r.identifier)
+          );
+          if (!allAsync) continue;
+          specToRefs.push({ spec, refs });
+        }
 
-            const refs = variable.references.filter((r) => r.isRead());
-            if (refs.length === 0) continue;
+        if (specToRefs.length === 0) return;
 
-            // Skip if this imported binding is exported/re-exported from this module.
-            if (isBindingReexported(refs)) continue;
-
-            const allAsync = refs.every(
-              (r) =>
-                r.identifier &&
-                isInAsyncFunction(r.identifier as TSESTree.Node) &&
-                !inDisallowedContext(r.identifier as TSESTree.Node)
-            );
-            if (!allAsync) continue;
-
-            const suggestFix = (fixer: TSESLint.RuleFixer) =>
-              buildInlineImportFixes(spec, refs, node, fixer);
-
-            const reportBase = {
-              node: spec,
-              messageId: 'preferDynamicImport' as const,
-              data: { source },
-              suggest: [
-                {
-                  data: { source },
-                  messageId: 'rewriteToDynamicImport' as const,
-                  fix: suggestFix,
-                },
-              ],
-            };
-
-            if (autofix) {
-              // Provide an autofix (used by --fix). Keep a suggestion as well for editor UX.
-              context.report({
-                ...reportBase,
-                fix: suggestFix,
-              });
-            } else {
-              // Only suggestions; no autofix.
-              context.report(reportBase);
-            }
+        const reportFixFn = (fixer: TSESLint.RuleFixer) => {
+          let fixes: TSESLint.RuleFix[] = [];
+          for (const { spec, refs } of specToRefs) {
+            fixes = fixes.concat(buildInlineImportFixes(spec, refs, node, fixer));
           }
+          return fixes;
+        };
+
+        const reportBase = {
+          node,
+          messageId: 'preferDynamicImport' as const,
+          data: { source },
+          suggest: [
+            {
+              data: { source },
+              messageId: 'rewriteToDynamicImport' as const,
+              fix: reportFixFn,
+            },
+          ],
+        };
+
+        if (autofix) {
+          context.report({
+            ...reportBase,
+            fix: reportFixFn,
+          });
+        } else {
+          context.report(reportBase);
         }
       },
     };

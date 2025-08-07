@@ -325,7 +325,7 @@ module.exports = {
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
-    '@kbn/imports/prefer_dynamic_import': 'warn',
+    '@kbn/imports/prefer_dynamic_import': ['error', { autofix: true }],
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
