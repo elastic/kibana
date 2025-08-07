@@ -23,6 +23,7 @@ import {
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+import { SessionValue } from '@kbn/security-plugin/server/session_management';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -588,10 +589,8 @@ export default function ({ getService }: FtrProviderContext) {
           await es.deleteByQuery({
             index: '.kibana_security_session*',
             refresh: true, // Refresh index immediately after deletion
-            body: {
-              query: {
-                match_all: {}, // Delete all documents
-              },
+            query: {
+              match_all: {}, // Delete all documents
             },
           });
 
@@ -639,29 +638,31 @@ export default function ({ getService }: FtrProviderContext) {
           await es.indices.refresh({ index: '.kibana_security_session*' });
 
           // Get all authenticated sessions from ES for verification
-          const sessionResponse = await es.search({
+          const sessionResponse = await es.search<SessionValue>({
             index: '.kibana_security_session*',
             size: 100,
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {},
-                    },
-                  ],
-                },
+            query: {
+              bool: {
+                must: [
+                  {
+                    match_all: {},
+                  },
+                ],
               },
             },
           });
 
-          expect(sessionResponse.hits.total.value).to.equal(1);
+          expect(sessionResponse.hits.hits.length).to.equal(1);
 
           const sources = sessionResponse.hits.hits.map((hit) => {
+            if (!hit._source) {
+              return { id: hit._id, idleTimeoutExpiration: null, isoExpirationDate: null };
+            }
+            const idleTimeout = hit._source.idleTimeoutExpiration;
             return {
               id: hit._id,
-              idleTimeoutExpiration: hit._source.idleTimeoutExpiration,
-              isoExpirationDate: new Date(hit._source.idleTimeoutExpiration).toISOString(),
+              idleTimeoutExpiration: idleTimeout,
+              isoExpirationDate: idleTimeout ? new Date(idleTimeout).toISOString() : null,
             };
           });
 
@@ -672,8 +673,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const preparedCallbacks = [];
 
-          let newCookie;
-          let firstResponse;
+          let newCookie: Cookie | undefined;
+          let firstResponse: Response | undefined;
 
           for (const requestId of Object.keys(samlResponseMapByRequestId)) {
             const index = Object.keys(samlResponseMapByRequestId).indexOf(requestId);
@@ -682,7 +683,7 @@ export default function ({ getService }: FtrProviderContext) {
             // For the first request, we perform the callback immediately to obtain the authenticated cookie.
             // This is to mock real world scenario where some callbacks may happen after the cookie has been updated to reference
             // the authenticated session.
-            if (!newCookie) {
+            if (newCookie === undefined) {
               firstResponse = await supertest
                 .post('/api/security/saml/callback')
                 .ca(CA_CERT)
@@ -702,7 +703,7 @@ export default function ({ getService }: FtrProviderContext) {
                       .set(
                         'Cookie',
                         index % 2 === 0 // We are going to alternate between authenticated cookie and cookies that corresponded to the initial login attempts
-                          ? newCookie.cookieString()
+                          ? newCookie?.cookieString()
                           : samlValues.cookie.cookieString()
                       )
                       .send({
@@ -724,10 +725,10 @@ export default function ({ getService }: FtrProviderContext) {
             })
           );
 
-          responses.unshift(firstResponse);
+          if (firstResponse) responses.unshift(firstResponse);
 
-          const locations = [];
-          const statusCodes = [];
+          const locations: string[] = [];
+          const statusCodes: number[] = [];
 
           responses.map((response: Response) => {
             locations.push(response.headers.location);
@@ -755,27 +756,33 @@ export default function ({ getService }: FtrProviderContext) {
           expect(statusCodes).to.eql([302, 302, 302, 302, 302, 302, 302, 302, 302, 302]);
 
           await es.indices.refresh({ index: '.kibana_security_session*' });
-          const finalSessionResponse = await es.search({
+          const finalSessionResponse = await es.search<SessionValue>({
             index: '.kibana_security_session*',
             size: 100,
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      match_all: {},
-                    },
-                  ],
-                },
+            query: {
+              bool: {
+                must: [
+                  {
+                    match_all: {},
+                  },
+                ],
               },
             },
           });
 
           const finalSources = finalSessionResponse.hits.hits.map((hit) => {
+            if (!hit._source) {
+              return {
+                id: hit._id,
+                idleTimeoutExpiration: null,
+                isoExpirationDate: null,
+              };
+            }
+            const idleTimeout = hit._source.idleTimeoutExpiration;
             return {
               id: hit._id,
-              idleTimeoutExpiration: hit._source.idleTimeoutExpiration,
-              isoExpirationDate: new Date(hit._source.idleTimeoutExpiration).toISOString(),
+              idleTimeoutExpiration: idleTimeout,
+              isoExpirationDate: idleTimeout ? new Date(idleTimeout).toISOString() : null,
             };
           });
 
@@ -790,7 +797,9 @@ export default function ({ getService }: FtrProviderContext) {
           })[0];
 
           expect(
-            intermediateSession.idleTimeoutExpiration > intermediateIdleTimeoutExpiration
+            intermediateSession?.idleTimeoutExpiration != null &&
+              intermediateIdleTimeoutExpiration != null &&
+              intermediateSession.idleTimeoutExpiration > intermediateIdleTimeoutExpiration
           ).to.be(true);
         });
       });
