@@ -27,7 +27,7 @@ export function AdvancedConfigKeyInput({
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
-  const [touched, setTouched] = useState(false);
+  const touched = localKey !== configKey;
 
   useEffect(() => {
     setLocalKey(configKey);
@@ -61,17 +61,15 @@ export function AdvancedConfigKeyInput({
   };
 
   const handleKeyChange = (newKey: string) => {
-    setTouched(true);
     setLocalKey(newKey);
+    const isInvalid = isInvalidInput(newKey);
+
     setValidationErrors((prev) => ({
       ...prev,
-      [`key${index}`]: isInvalidInput(newKey),
+      [`key${index}`]: isInvalid,
     }));
-    // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
-    if (
-      !checkIfPredefinedConfigKeyExists(newKey) &&
-      !checkIfAdvancedConfigKeyExists(newKey, configKey)
-    ) {
+
+    if (!isInvalid) {
       onChange(newKey);
     }
   };
