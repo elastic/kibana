@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
         // index doesn't exist
       }
 
-      await waitForAgents(supertest, 0, 10);
+      await waitForAgents(supertest, 0, 20);
     };
 
     const cleanupSecrets = async () => {
