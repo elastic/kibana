@@ -6,11 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import {
-  StreamQueryKql,
-  type IdentifiedFeatureEventsGenerateResponse,
-  type SignificantEventsGenerateResponse,
-} from '@kbn/streams-schema';
+import { StreamQueryKql, type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 
 interface SignificantEventsApiBulkOperationCreate {
@@ -29,7 +25,6 @@ interface SignificantEventsApi {
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   generate: (connectorId: string) => SignificantEventsGenerateResponse;
-  identifySystem: (connectorId: string) => IdentifiedFeatureEventsGenerateResponse;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -71,15 +66,6 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
     generate: (connectorId: string) => {
       return streamsRepositoryClient.stream(
         `GET /api/streams/{name}/significant_events/_generate 2023-10-31`,
-        {
-          signal,
-          params: { path: { name }, query: { connectorId } },
-        }
-      );
-    },
-    identifySystem: (connectorId: string) => {
-      return streamsRepositoryClient.stream(
-        `GET /api/streams/{name}/features/_generate 2023-10-31`,
         {
           signal,
           params: { path: { name }, query: { connectorId } },

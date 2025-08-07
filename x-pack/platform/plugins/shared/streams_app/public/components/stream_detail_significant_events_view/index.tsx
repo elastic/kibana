@@ -23,6 +23,7 @@ import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 import { ManageFeaturesFlyout } from './manage_features_flyout/manage_features_flyout';
+import { useFeaturesApi } from '../../hooks/use_features_api';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -51,6 +52,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
+  const { upsertFeature } = useFeaturesApi({ name: definition.stream.name });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
@@ -147,7 +149,29 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
     <ManageFeaturesFlyout
       definition={definition.stream}
-      onSave={async () => {}}
+      onSave={async (feature: string) => {
+        await upsertFeature({ id: 'identified_system', feature }).then(
+          () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.manageFeatures.saveSuccessToastTitle',
+                { defaultMessage: `Successfully saved identified system feature` }
+              ),
+            });
+            setIsIdentifySystemFlyoutOpen(false);
+          },
+          (error) => {
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.manageFeatures.saveErrorToastTitle',
+                { defaultMessage: `Could not save identified system feature` }
+              ),
+              error,
+            });
+          }
+        );
+        setIsIdentifySystemFlyoutOpen(false);
+      }}
       onClose={() => {
         setIsIdentifySystemFlyoutOpen(false);
       }}

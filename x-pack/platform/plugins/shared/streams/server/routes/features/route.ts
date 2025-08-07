@@ -7,7 +7,7 @@
 import { badRequest } from '@hapi/boom';
 import {
   upsertStreamFeatureRequestSchema,
-  type IdentifiedFeatureEventsGenerateResponse,
+  type IdentifiedFeatureGenerateResponse,
   type StreamFeature,
 } from '@kbn/streams-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
@@ -143,7 +143,7 @@ const generateSystemFeaturesRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<IdentifiedFeatureEventsGenerateResponse> => {
+  }): Promise<IdentifiedFeatureGenerateResponse> => {
     const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
       await getScopedClients({
         request,

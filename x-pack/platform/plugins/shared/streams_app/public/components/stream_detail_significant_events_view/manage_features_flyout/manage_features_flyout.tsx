@@ -22,14 +22,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { useFeaturesApi } from '../../../hooks/use_features_api';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../../hooks/use_significant_events_api';
 import { useAIFeatures } from '../common/use_ai_features';
 
 interface Props {
   definition: Streams.all.Definition;
   onClose: () => void;
-  onSave: () => Promise<void>;
+  onSave: (feature: string) => Promise<void>;
 }
 
 export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
@@ -37,7 +37,7 @@ export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
     core: { notifications, http },
   } = useKibana();
   const aiFeatures = useAIFeatures();
-  const { identifySystem } = useSignificantEventsApi({ name: definition.name });
+  const { generate } = useFeaturesApi({ name: definition.name });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [identifiedSystem, setIdentifiedSystem] = React.useState<string>();
@@ -112,8 +112,8 @@ export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
                     onClick={() => {
                       setIsGenerating(true);
 
-                      const identifySystem$ = identifySystem(aiFeatures?.selectedConnector!);
-                      identifySystem$.subscribe({
+                      const generate$ = generate(aiFeatures?.selectedConnector!);
+                      generate$.subscribe({
                         next: (result) => {
                           setIdentifiedSystem(result.feature);
                         },
@@ -164,13 +164,22 @@ export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-          <EuiButton color="text" onClick={() => onClose()} disabled={false}>
+          <EuiButton color="text" onClick={() => onClose()} disabled={isSubmitting || isGenerating}>
             {i18n.translate(
               'xpack.streams.streamDetailView.manageFeaturesFlyout.cancelButtonLabel',
               { defaultMessage: 'Cancel' }
             )}
           </EuiButton>
-          <EuiButton color="primary" fill disabled={false} isLoading={false} onClick={() => {}}>
+          <EuiButton
+            color="primary"
+            fill
+            disabled={isSubmitting || isGenerating || !identifiedSystem?.trim()}
+            isLoading={isSubmitting}
+            onClick={() => {
+              setIsSubmitting(true);
+              onSave(identifiedSystem!).finally(() => setIsSubmitting(false));
+            }}
+          >
             {i18n.translate('xpack.streams.streamDetailView.manageFeaturesFlyout.saveButtonLabel', {
               defaultMessage: 'Save',
             })}
