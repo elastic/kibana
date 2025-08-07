@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable playwright/no-nth-methods */
+
 import { ScoutPage, expect } from '@kbn/scout';
 import { ProcessorType } from '@kbn/streams-schema';
 import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
@@ -169,7 +172,7 @@ export class StreamsApp {
 
   async expectRoutingOrder(expectedOrder: string[]) {
     // Wait for the routing rules to be rendered before getting their locators
-    // eslint-disable-next-line playwright/no-nth-methods
+
     await expect(this.page.locator('[data-test-subj^="routingRule-"]').first()).toBeVisible();
 
     const rulesLocators = await this.page.testSubj.locator('^routingRule-').all();
@@ -193,7 +196,8 @@ export class StreamsApp {
   }
 
   async expectToastVisible() {
-    await expect(this.page.getByRole('log')).toBeVisible();
+    // Check if at least one element appears and is visible.
+    await expect(this.page.getByTestId('toastCloseButton').first()).toBeVisible();
   }
 
   async saveRuleOrder() {
@@ -382,6 +386,7 @@ export class StreamsApp {
   }
 
   async openFieldActionsMenu() {
+    await expect(this.page.getByTestId('streamsAppActionsButton')).toHaveCount(1);
     await this.page.getByTestId('streamsAppActionsButton').click();
     await expect(this.getModal().getByText('Field actions')).toBeVisible();
   }
@@ -414,9 +419,17 @@ export class StreamsApp {
   /**
    * Share utility methods
    */
-  async closeToast() {
-    await this.page.getByTestId('toastCloseButton').click();
-    await expect(this.page.getByRole('log')).toBeHidden();
+  async closeToasts() {
+    await this.expectToastVisible();
+    // Check if at least one element appears and is visible.
+
+    // Get an array of all locators and loop through them
+    const allCloseButtons = this.page.getByTestId('toastCloseButton');
+    for (const button of await allCloseButtons.all()) {
+      await button.click();
+    }
+
+    await expect(this.page.getByTestId('toastCloseButton')).toHaveCount(0);
   }
 
   async closeFlyout() {

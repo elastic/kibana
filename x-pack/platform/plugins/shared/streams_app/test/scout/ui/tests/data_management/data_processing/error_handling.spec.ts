@@ -49,7 +49,7 @@ test.describe(
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
       await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Restore network and retry
       await context.setOffline(false);
@@ -70,7 +70,7 @@ test.describe(
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveProcessorsListChanges();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Edit the processor
       await pageObjects.streams.clickEditProcessor(0);
@@ -85,7 +85,7 @@ test.describe(
       // Should show error and return to editing state
       await pageObjects.streams.expectToastVisible();
       await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Restore network and retry
       await context.setOffline(false);

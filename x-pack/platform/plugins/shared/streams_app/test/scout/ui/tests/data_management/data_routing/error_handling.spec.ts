@@ -43,7 +43,7 @@ test.describe(
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
       await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
 
       // Restore network and retry
@@ -63,7 +63,7 @@ test.describe(
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('logs.error-test');
       await pageObjects.streams.saveRoutingRule();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Edit the rule
       await pageObjects.streams.clickEditRoutingRule('logs.error-test');
@@ -76,7 +76,7 @@ test.describe(
       // Should show error and return to editing state
       await pageObjects.streams.expectToastVisible();
       await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToast();
+      await pageObjects.streams.closeToasts();
 
       // Restore network and retry
       await context.setOffline(false);
