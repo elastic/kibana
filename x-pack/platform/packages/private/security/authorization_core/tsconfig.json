@@ -14,5 +14,6 @@
     "@kbn/security-plugin-types-server",
     "@kbn/core-security-server",
     "@kbn/licensing-types",
+    "@kbn/core-saved-objects-base-server-mocks",
   ]
 }
