@@ -6,7 +6,9 @@
  */
 
 import { fieldsApi } from './api/fields';
+import { dimensionsApi } from './api/dimensions';
 
 export const routeRepository = {
   ...fieldsApi,
+  ...dimensionsApi,
 };
