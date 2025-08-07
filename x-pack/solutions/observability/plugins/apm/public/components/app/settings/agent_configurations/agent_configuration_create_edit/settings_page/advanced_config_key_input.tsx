@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 
 export function AdvancedConfigKeyInput({
   configKey,
-  configValue,
   index,
   setValidationErrors,
   onChange,
@@ -20,10 +19,9 @@ export function AdvancedConfigKeyInput({
   checkIfPredefinedConfigKeyExists,
 }: {
   configKey: string;
-  configValue: string;
   index: number;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  onChange: (key: string, value: string, oldKey: string) => void;
+  onChange: (newKey: string) => void;
   checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
 }) {
@@ -70,12 +68,11 @@ export function AdvancedConfigKeyInput({
       [`key${index}`]: isInvalidInput(newKey),
     }));
     // Skip updating if key already exists to prevent overwriting existing values, it gives users chance to correct the key
-    // e.g. { keyName: 1, keyName: 2 } => { keyName: 2 }
     if (
       !checkIfPredefinedConfigKeyExists(newKey) &&
       !checkIfAdvancedConfigKeyExists(newKey, configKey)
     ) {
-      onChange(newKey, configValue, configKey);
+      onChange(newKey);
     }
   };
 

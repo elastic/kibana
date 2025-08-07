@@ -121,10 +121,9 @@ export function AdvancedConfiguration({
             <EuiFlexItem>
               <AdvancedConfigKeyInput
                 configKey={configKey}
-                configValue={configValue}
                 index={index}
                 setValidationErrors={setValidationErrors}
-                onChange={onChange}
+                onChange={(newKey) => onChange(newKey, configValue, configKey)}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
               />
@@ -132,11 +131,10 @@ export function AdvancedConfiguration({
             <EuiFlexItem>
               <AdvancedConfigValueInput
                 configValue={configValue}
-                configKey={configKey}
                 index={index}
                 setValidationErrors={setValidationErrors}
-                onChange={onChange}
-                onDelete={onDelete}
+                onChange={(newValue) => onChange(configKey, newValue)}
+                onDelete={() => onDelete(configKey, index)}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
