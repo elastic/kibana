@@ -10,6 +10,7 @@ disabled:
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
   - x-pack/solutions/security/test/api_integration/config.ts
+  - x-pack/solutions/security/test/functional/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.cloud.ts
@@ -130,3 +131,4 @@ enabled:
   - x-pack/solutions/security/test/functional_solution_sidenav/config.ts
   - x-pack/solutions/security/test/session_view/basic/config.ts
   - x-pack/solutions/security/test/plugin_functional/config.ts
+  - x-pack/solutions/security/test/accessibility/config.ts

@@ -11,7 +11,7 @@ import { pageObjects } from '../../page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../functional/config.base.js')
+    require.resolve('../../../functional/config.base.ts')
   );
 
   return {
