@@ -205,6 +205,14 @@ describe('getCerts', () => {
                   },
                   Object {
                     "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-7d",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "range": Object {
                       "monitor.timespan": Object {
                         "gte": 10000,
                         "lte": 10000,

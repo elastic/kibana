@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import type { UnifiedDocViewerStorybookArgs } from '../../../../../.storybook/preview';
+import httpServerApmFixture from '../../../../__fixtures__/transaction_http_server_apm.json';
 import httpServerOtelFixture from '../../../../__fixtures__/transaction_http_server_otel.json';
 import { TransactionOverview, type TransactionOverviewProps } from './transaction_overview';
 
@@ -21,9 +22,25 @@ export default meta;
 
 type Story = StoryObj<Args>;
 
+/**
+ * APM HTTP transaction
+ */
+export const ApmHttpServer: Story = {
+  name: 'APM HTTP server transaction',
+  args: {
+    hit: httpServerApmFixture,
+  },
+  tags: ['transaction', 'span', 'http', 'server', 'apm'],
+};
+
+/**
+ * OpenTelemetry HTTP server span.
+ * Processed by the elasticapmprocessor to add APM transaction and span attributes.
+ */
 export const OtelHttpServer: Story = {
-  name: 'Otel HTTP server transaction',
+  name: 'OpenTelemetry HTTP server transaction',
   args: {
     hit: httpServerOtelFixture,
   },
+  tags: ['otel', 'transaction', 'span', 'http', 'server', 'apm'],
 };

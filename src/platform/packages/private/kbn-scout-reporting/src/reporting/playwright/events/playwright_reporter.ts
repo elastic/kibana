@@ -30,6 +30,7 @@ import {
   getOwningTeamsForPath,
   findAreaForCodeOwner,
 } from '@kbn/code-owners';
+import { SCOUT_TARGET_TYPE, SCOUT_TARGET_MODE } from '@kbn/scout-info';
 import {
   ScoutEventsReport,
   ScoutFileInfo,
@@ -63,7 +64,13 @@ export class ScoutPlaywrightReporter implements Reporter {
     this.log.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.log);
-    this.baseTestRunInfo = { id: this.runId };
+    this.baseTestRunInfo = {
+      id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
@@ -113,6 +120,7 @@ export class ScoutPlaywrightReporter implements Reporter {
 
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
+      fully_parallel: config.fullyParallel,
       config: configInfo,
     };
 

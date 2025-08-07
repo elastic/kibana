@@ -18,6 +18,7 @@ import type { OnErrorClick, OnNodeClick } from './trace_waterfall_context';
 import { TraceWaterfallContextProvider, useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import type { IWaterfallGetRelatedErrorsHref } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { TraceWarning } from './trace_warning';
 
 export interface Props {
   traceItems: TraceItem[];
@@ -51,7 +52,9 @@ export function TraceWaterfall({
       getRelatedErrorsHref={getRelatedErrorsHref}
       isEmbeddable={isEmbeddable}
     >
-      <TraceWaterfallComponent />
+      <TraceWarning>
+        <TraceWaterfallComponent />
+      </TraceWarning>
     </TraceWaterfallContextProvider>
   );
 }
@@ -60,14 +63,9 @@ function TraceWaterfallComponent() {
   const { euiTheme } = useEuiTheme();
   const {
     duration,
-    rootItem,
     margin: { left, right },
     isEmbeddable,
   } = useTraceWaterfallContext();
-
-  if (!rootItem) {
-    return null;
-  }
 
   return (
     <div style={{ position: 'relative' }}>

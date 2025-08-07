@@ -292,7 +292,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
           const COLUMNS = 11;
           before(async () => {
-            await esArchiver.load('x-pack/test/functional/es_archives/infra/alerts');
+            await esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            );
             await navigateToNodeDetails('demo-stack-apache-01', 'host', {
               name: 'demo-stack-apache-01',
             });
@@ -311,7 +313,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               name: 'host-1',
             });
             await pageObjects.header.waitUntilLoadingHasFinished();
-            await esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts');
+            await esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            );
           });
 
           it('should show / hide alerts section with active alerts and show / hide closed section content', async () => {
@@ -479,8 +483,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // FLAKY: https://github.com/elastic/kibana/issues/192891
       describe.skip('Processes Tab', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_hosts_processes'
+          );
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
           await navigateToNodeDetails('Jennys-MBP.fritz.box', 'host', {
             name: 'Jennys-MBP.fritz.box',
           });
@@ -493,9 +501,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/infra/metrics_hosts_processes'
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_hosts_processes'
           );
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
           await navigateToNodeDetails('host-1', 'host', { name: 'host-1' });
         });
 

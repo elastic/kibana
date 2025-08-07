@@ -177,7 +177,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     packageInfo &&
     packageHasAtLeastOneSecret({ packageInfo });
 
-  const hideAgentlessSelector = !!addIntegrationFlyoutProps;
+  const isAddIntegrationFlyout = !!addIntegrationFlyoutProps;
   // Save package policy
   const {
     onSubmit,
@@ -210,7 +210,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
-    hideAgentlessSelector,
+    isAddIntegrationFlyout,
   });
 
   if (addIntegrationFlyoutProps?.agentPolicy) {
@@ -457,7 +457,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           />
 
           {/* TODO move SetupTechnologySelector out of extensionView */}
-          {!extensionView && !hideAgentlessSelector && isAgentlessIntegration(packageInfo) && (
+          {!extensionView && !isAddIntegrationFlyout && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
               allowedSetupTechnologies={allowedSetupTechnologies}
@@ -516,7 +516,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
       allowedSetupTechnologies,
-      hideAgentlessSelector,
+      isAddIntegrationFlyout,
     ]
   );
 

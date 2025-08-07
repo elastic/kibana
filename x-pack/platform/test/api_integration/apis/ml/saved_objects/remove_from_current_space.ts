@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('POST saved_objects/remove_item_from_current_space', () => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
 
       // create spaces
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });

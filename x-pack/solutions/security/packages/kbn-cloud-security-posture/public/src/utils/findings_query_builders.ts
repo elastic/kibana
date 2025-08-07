@@ -255,12 +255,19 @@ export const createGetVulnerabilityFindingsQuery = (
   eventId?: string | string[]
 ) => {
   const filters: Array<{ terms: Record<string, string[]> }> = [];
+  const mustNotFilters: estypes.QueryDslQueryContainer[] = [];
 
   const addTermFilter = (field: string, value?: string | string[]) => {
     if (value !== undefined) {
       filters.push({
         terms: {
           [field]: Array.isArray(value) ? value : [value],
+        },
+      });
+    } else {
+      mustNotFilters.push({
+        exists: {
+          field,
         },
       });
     }
@@ -275,6 +282,7 @@ export const createGetVulnerabilityFindingsQuery = (
   return {
     bool: {
       filter: filters,
+      must_not: mustNotFilters,
     },
   };
 };

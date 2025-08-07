@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, SCOUT_TARGET_MODE, SCOUT_TARGET_TYPE } from '@kbn/scout-info';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
   datasources,
@@ -68,6 +68,10 @@ export class ScoutFTRReporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.baseTestRunInfo = {
       id: this.runId,
+      target: {
+        type: SCOUT_TARGET_TYPE,
+        mode: SCOUT_TARGET_MODE,
+      },
       config: {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
         category: config.get('testConfigCategory'),

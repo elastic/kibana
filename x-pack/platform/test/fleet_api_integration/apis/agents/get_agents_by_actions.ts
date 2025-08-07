@@ -18,7 +18,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_get_agents_by_actions', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
 
       // Clean slate
       await es.deleteByQuery({
@@ -118,7 +118,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/agents');
     });
 
     describe('POST /agents/', () => {

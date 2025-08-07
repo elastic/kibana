@@ -26,6 +26,7 @@ The settings are grouped by feature or purpose, for example:
 - [Reporting](/reference/configuration-reference/reporting-settings.md)
 - [Search sessions](/reference/configuration-reference/search-sessions-settings.md)
 - [Security](/reference/configuration-reference/security-settings.md)
+- [Share](/reference/configuration-reference/share-settings.md)
 - [Spaces](/reference/configuration-reference/spaces-settings.md)
 - [Task Manager](/reference/configuration-reference/task-manager-settings.md)
 - [Telemetry](/reference/configuration-reference/telemetry-settings.md)

@@ -170,4 +170,4 @@ With PATH_TO_CONFIG and other options as follows.
          node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts
          node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=transform
 
-    Transform accessibility tests are located in `x-pack/test/accessibility/apps/group2`.
+    Transform accessibility tests are located in `x-pack/platform/test/accessibility/apps/group2`.
