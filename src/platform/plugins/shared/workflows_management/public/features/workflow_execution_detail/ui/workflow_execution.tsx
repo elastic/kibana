@@ -19,6 +19,7 @@ import {
   EuiDescriptionList,
   EuiTitle,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 import { ExecutionStatus, EsWorkflowStepExecution } from '@kbn/workflows';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
@@ -256,9 +257,18 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       {/* APM Trace Waterfall Embeddable with Search */}
       {workflowExecution?.startedAt && (
         <>
-          <EuiTitle size="xs">
-            <h3>Execution Trace</h3>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>Execution trace</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {traceId && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{traceId}</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
 
           {/* Show loading state while searching for traces */}
@@ -291,10 +301,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           {/* Show embeddable when trace is found */}
           {hasApmTrace && !traceSearchLoading && traceId && (
             <>
-              <EuiText size="s" color="success">
-                Found trace: {traceId}
-              </EuiText>
-              <EuiSpacer size="s" />
               <div
                 style={{
                   minHeight: '300px', // Minimum height but allows growth
