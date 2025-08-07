@@ -172,13 +172,31 @@ const buildEsqlQuery = ({
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
+| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 ${
   isEnrichPolicyExists
     ? `| ENRICH ${enrichPolicyName} ON actor.entity.id WITH actorEntityName = entity.name, actorEntityType = entity.type
-| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type`
-    : ''
+| ENRICH ${enrichPolicyName} ON target.entity.id WITH targetEntityName = entity.name, targetEntityType = entity.type
+// Contact actor and target entities data
+| EVAL actorDocData = CONCAT("{",
+    "\\"id\\":\\"", actor.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", actorEntityName, "\\"",
+      ",\\"type\\":\\"", actorEntityType, "\\"",
+    "}",
+  "}")
+| EVAL targetDocData = CONCAT("{",
+    "\\"id\\":\\"", target.entity.id, "\\"",
+    ",\\"type\\":\\"", "entity", "\\"",
+    ",\\"entity\\":", "{",
+      "\\"name\\":\\"", targetEntityName, "\\"",
+      ",\\"type\\":\\"", targetEntityType, "\\"",
+    "}",
+  "}")`
+    : `| EVAL actorDocData = TO_STRING(null)
+| EVAL targetDocData = TO_STRING(null)`
 }
-| WHERE event.action IS NOT NULL AND actor.entity.id IS NOT NULL
 // Origin event and alerts allow us to identify the start position of graph traversal
 | EVAL isOrigin = ${
     originEventIds.length > 0
@@ -208,31 +226,6 @@ ${
         : ''
     }
   "}")
-// Contact actor and target entities data
-| EVAL actorDocData = ${
-    isEnrichPolicyExists
-      ? `CONCAT("{",
-    "\\"id\\":\\"", actor.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", actorEntityName, "\\"",
-      ",\\"type\\":\\"", actorEntityType, "\\"",
-    "}",
-  "}")`
-      : 'TO_STRING(null)'
-  }
-| EVAL targetDocData = ${
-    isEnrichPolicyExists
-      ? `CONCAT("{",
-    "\\"id\\":\\"", target.entity.id, "\\"",
-    ",\\"type\\":\\"", "entity", "\\"",
-    ",\\"entity\\":", "{",
-      "\\"name\\":\\"", targetEntityName, "\\"",
-      ",\\"type\\":\\"", targetEntityType, "\\"",
-    "}",
-  "}")`
-      : 'TO_STRING(null)'
-  }
 | STATS badge = COUNT(*),
   docs = VALUES(docData),
   actorsDocData = VALUES(actorDocData),
