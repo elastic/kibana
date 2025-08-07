@@ -37,7 +37,7 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('body.text');
+      await pageObjects.streams.fillFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
 
@@ -66,7 +66,7 @@ test.describe(
     }) => {
       // Create a processor first
       await pageObjects.streams.clickAddProcessor();
-      await pageObjects.streams.fillFieldInput('body.text');
+      await pageObjects.streams.fillFieldInput('message');
       await pageObjects.streams.fillGrokPatternInput('%{WORD:attributes.method}');
       await pageObjects.streams.clickSaveProcessor();
       await pageObjects.streams.saveProcessorsListChanges();

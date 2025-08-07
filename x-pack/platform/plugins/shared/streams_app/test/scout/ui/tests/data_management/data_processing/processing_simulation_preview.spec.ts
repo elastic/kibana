@@ -55,14 +55,14 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('body.text');
+    await page.locator('input[name="target_field"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       await pageObjects.streams.expectCellValueContains({
-        columnName: 'body.text',
+        columnName: 'message',
         rowIndex,
         value: 'Test log message',
       });
@@ -76,14 +76,14 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('body.text');
+    await page.locator('input[name="target_field"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       await pageObjects.streams.expectCellValueContains({
-        columnName: 'body.text',
+        columnName: 'message',
         rowIndex,
         value: 'Test log message',
       });
@@ -109,14 +109,14 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('body.text');
+    await page.locator('input[name="target_field"]').fill('message');
 
     const rows = await pageObjects.streams.getPreviewTableRows();
     expect(rows.length).toBeGreaterThan(0);
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       await pageObjects.streams.expectCellValueContains({
-        columnName: 'body.text',
+        columnName: 'message',
         rowIndex,
         value: 'Test log message',
       });
@@ -144,7 +144,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
     await pageObjects.streams.clickAddProcessor();
     await pageObjects.streams.selectProcessorType('rename');
     await pageObjects.streams.fillFieldInput('message');
-    await page.locator('input[name="target_field"]').fill('body.text');
+    await page.locator('input[name="target_field"]').fill('message');
     await pageObjects.streams.clickSaveProcessor();
 
     await pageObjects.streams.clickAddProcessor();
@@ -158,7 +158,7 @@ test.describe('Stream data processing - simulation preview', { tag: ['@ess', '@s
 
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       await pageObjects.streams.expectCellValueContains({
-        columnName: 'body.text',
+        columnName: 'message',
         rowIndex,
         value: 'Test log message',
       });

@@ -19,7 +19,7 @@ test.describe('Stream data processing - editing processors', { tag: ['@ess', '@s
     await browserAuth.loginAsAdmin();
     // Clear existing processors before each test
     await apiServices.streams.updateStreamProcessors('logs-generic-default', [
-      { grok: { field: 'body.text', patterns: ['%{WORD:attributes.method}'] } },
+      { grok: { field: 'message', patterns: ['%{WORD:attributes.method}'] } },
     ]);
 
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');

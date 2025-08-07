@@ -23,7 +23,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.updateStreamProcessors('logs-generic-default', [
-        { grok: { field: 'body.text', patterns: ['%{WORD:attributes.method}'] } },
+        { grok: { field: 'message', patterns: ['%{WORD:attributes.method}'] } },
         { set: { field: 'custom_field', value: 'custom_value' } },
         { rename: { field: 'custom_field', target_field: 'renamed_custom_field' } },
       ]);
