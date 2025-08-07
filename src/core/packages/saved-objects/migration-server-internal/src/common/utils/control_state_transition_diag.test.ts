@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlStateTransitionDiag } from './control_state_transition_tracker';
+import { ControlStateTransitionDiag } from './control_state_transition_diag';
 
-describe('ControlStateTransitionTracker', () => {
+describe('ControlStateTransitionDiag', () => {
   let cstDiag: ControlStateTransitionDiag;
   beforeEach(() => {
     cstDiag = ControlStateTransitionDiag.create();

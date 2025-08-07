@@ -9,7 +9,7 @@
 
 import type { Logger, LogMeta } from '@kbn/logging';
 import { MigrationLog } from '../../types';
-import { ControlStateTransitionDiag } from './control_state_transition_tracker';
+import { ControlStateTransitionDiag } from './control_state_transition_diag';
 
 export interface LogAwareState {
   controlState: string;
