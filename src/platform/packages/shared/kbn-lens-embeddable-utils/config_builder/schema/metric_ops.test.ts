@@ -165,7 +165,7 @@ describe('Metric Operations Schemas', () => {
     it('validates cumulative sum operation', () => {
       const input = {
         operation: 'cumulative_sum' as const,
-        field: 'value'
+        field: 'value',
       };
 
       const validated = cumulativeSumOperationSchema.validate(input);

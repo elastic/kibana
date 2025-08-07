@@ -161,7 +161,6 @@ export const counterRateOperationSchema = fieldBasedOperationSharedSchema.extend
   operation: schema.literal('counter_rate'),
 });
 
-
 export const metricOperationDefinitionSchema = schema.oneOf([
   formulaOperationDefinitionSchema,
   staticOperationDefinitionSchema,
