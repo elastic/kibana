@@ -288,7 +288,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           auditLogger: getAuditLogger(),
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
-          config: config.entityAnalytics.monitoring,
         });
       }),
       getMonitoringEntitySourceDataClient: memoize(() => {
