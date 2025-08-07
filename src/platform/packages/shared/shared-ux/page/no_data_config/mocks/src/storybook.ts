@@ -18,7 +18,7 @@ import type {
 import { NoDataPageStorybookMock } from '@kbn/shared-ux-page-no-data-mocks';
 import type { NoDataPageStorybookParams } from '@kbn/shared-ux-page-no-data-mocks';
 
-type PropArguments = Pick<NoDataConfig, 'docsLink' | 'pageTitle'>;
+type PropArguments = Pick<NoDataConfig, 'pageTitle'>;
 
 export type Params = ArgumentParams<PropArguments, {}> & NoDataPageStorybookParams;
 
@@ -30,10 +30,6 @@ export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
   PropArguments
 > {
   propArguments = {
-    docsLink: {
-      control: { control: 'text' },
-      defaultValue: 'docs/link',
-    },
     pageTitle: {
       control: { control: 'text' },
       defaultValue: '',
@@ -52,7 +48,6 @@ export class NoDataConfigPageStorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        docsLink: this.getArgumentValue('docsLink', params),
         pageTitle: this.getArgumentValue('pageTitle', params),
       },
     };
