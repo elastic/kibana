@@ -10,21 +10,26 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { AddPageAttachmentToCaseModal } from '@kbn/observability-shared-plugin/public';
+import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 
 export function AddToCaseContextItem() {
   const [isAddToCaseModalOpen, setIsAddToCaseModalOpen] = useState(false);
+  const services = useKibana<ClientPluginsStart>().services;
+  const observabilityAIAssistant = services.observabilityAIAssistant;
+  const cases = services.cases;
+  const canUseCases = cases?.helpers?.canUseCases;
+  const notifications = services.notifications;
+
   const { monitor } = useSelectedMonitor();
   const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
-  const services = useKibana<ClientPluginsStart>().services;
-  const cases = services.cases;
-  const observabilityAIAssistant = services.observabilityAIAssistant;
-  const notifications = services.notifications;
-  const canUseCases = cases?.helpers.canUseCases;
+  const timeRange: TimeRange = {
+    from: dateRangeStart,
+    to: dateRangeEnd,
+  };
 
   const casesPermissions: CasesPermissions = useMemo(() => {
     if (!canUseCases) {
@@ -44,17 +49,9 @@ export function AddToCaseContextItem() {
     }
     return canUseCases();
   }, [canUseCases]);
-
   const hasCasesPermissions =
     casesPermissions.read && casesPermissions.update && casesPermissions.push;
 
-  const timeRange: TimeRange = useMemo(
-    () => ({
-      from: dateRangeStart,
-      to: dateRangeEnd,
-    }),
-    [dateRangeStart, dateRangeEnd]
-  );
   const redirectUrl = useMonitorDetailLocator({
     configId: monitor?.config_id ?? '',
     timeRange,
@@ -88,7 +85,7 @@ export function AddToCaseContextItem() {
     <>
       <EuiContextMenuItem
         key="addToCase"
-        data-test-subj="sloAddToCaseButton"
+        data-test-subj="syntheticsMonitorAddToCaseButton"
         icon="plusInCircle"
         onClick={onClick}
       >
@@ -99,12 +96,12 @@ export function AddToCaseContextItem() {
       {isAddToCaseModalOpen && (
         <AddPageAttachmentToCaseModal
           pageAttachmentState={{
-            type: 'dashboard',
+            type: 'synthetics_monitor',
             url: {
               pathAndQuery: redirectUrl,
               label: monitor.name,
               actionLabel: i18n.translate(
-                'xpack.synthetics.cases.addToCaseModal.goToDashboardActionLabel',
+                'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryLinkLabel',
                 {
                   defaultMessage: 'Go to Monitor History',
                 }

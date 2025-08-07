@@ -43,7 +43,6 @@ export function useMonitorDetailLocator({
       configId,
       locationId,
       timeRange: useAbsoluteDate && timeRange ? convertToAbsoluteTimeRange(timeRange) : timeRange,
-      useAbsoluteDate,
       tabId,
       ...getMonitorSpaceToAppend(space, spaces),
     });
