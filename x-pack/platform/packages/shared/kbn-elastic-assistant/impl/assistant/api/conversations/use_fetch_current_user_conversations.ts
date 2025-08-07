@@ -16,6 +16,7 @@ import {
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  User,
 } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Conversation } from '../../../assistant_context/types';
@@ -28,6 +29,7 @@ export interface FetchConversationsResponse {
 }
 
 export interface UseFetchCurrentUserConversationsParams {
+  currentUser?: User;
   http: HttpSetup;
   fields?: string[];
   filter?: string;
@@ -40,9 +42,11 @@ export interface UseFetchCurrentUserConversationsParams {
   isAssistantEnabled: boolean;
   setTotalItemCount?: (total: number) => void;
 }
-
+interface ConversationWithOwner extends Conversation {
+  isConversationOwner?: boolean;
+}
 export interface FetchCurrentUserConversations {
-  data: Record<string, Conversation>;
+  data: Record<string, ConversationWithOwner>;
   isLoading: boolean;
   refetch: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
@@ -56,8 +60,6 @@ const query = {
   page: 1,
   perPage: 28,
   // keep request small returning a subset of fields
-  // un-requested required fields like the users array will now appear empty
-  // something to consider if/when we add support for global/shared conversations.
   fields: ['id', 'title', 'apiConfig', 'updatedAt'],
 };
 
@@ -78,6 +80,7 @@ const formatFetchedData = (data: InfiniteData<FetchConversationsResponse> | unde
  * API call for fetching assistant conversations for the current user
  */
 export const useFetchCurrentUserConversations = ({
+  currentUser,
   http,
   fields = query.fields,
   filter,
@@ -136,6 +139,27 @@ export const useFetchCurrentUserConversations = ({
         enabled: isAssistantEnabled,
         getNextPageParam,
         refetchOnWindowFocus,
+        select: (searchResponse) => {
+          if (currentUser && (currentUser.id || currentUser.name)) {
+            return {
+              ...searchResponse,
+              pages: searchResponse.pages.map((p) => ({
+                ...p,
+                data: p.data.map((conversation) => ({
+                  ...conversation,
+                  ...(conversation.createdBy
+                    ? {
+                        isConversationOwner:
+                          conversation?.createdBy.id === currentUser?.id ||
+                          conversation?.createdBy.name === currentUser?.name,
+                      }
+                    : {}),
+                })),
+              })),
+            };
+          }
+          return searchResponse;
+        },
       }
     );
   useEffect(() => {

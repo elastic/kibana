@@ -232,21 +232,38 @@ export const ConversationSidePanel = React.memo<Props>(
                                   cId: conversation.id,
                                 })
                               }
+                              css={css`
+                                .euiListGroupItem__button {
+                                  flex-direction: row-reverse;
+                                }
+                              `}
                               label={conversation.title}
+                              iconType={conversation.users.length !== 1 ? 'users' : undefined}
+                              iconProps={{
+                                size: 's',
+                                css: css`
+                                  margin-inline-start: 12px;
+                                  margin-inline-end: 0px;
+                                `,
+                              }}
                               data-test-subj={`conversation-select-${conversation.title}`}
                               isActive={
                                 !isEmpty(conversation.id)
                                   ? conversation.id === currentConversation?.id
                                   : conversation.title === currentConversation?.title
                               }
-                              extraAction={{
-                                color: 'danger',
-                                onClick: () => setDeleteConversationItem(conversation),
-                                iconType: 'trash',
-                                iconSize: 's',
-                                'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                                'data-test-subj': 'delete-option',
-                              }}
+                              extraAction={
+                                conversation.isConversationOwner
+                                  ? {
+                                      color: 'danger',
+                                      onClick: () => setDeleteConversationItem(conversation),
+                                      iconType: 'trash',
+                                      iconSize: 's',
+                                      'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                      'data-test-subj': 'delete-option',
+                                    }
+                                  : undefined
+                              }
                             />
                             {conversation.id === lastConversationId && (
                               <div
