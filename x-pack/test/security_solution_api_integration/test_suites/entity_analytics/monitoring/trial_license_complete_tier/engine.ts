@@ -81,8 +81,8 @@ export default ({ getService }: FtrProviderContext) => {
 
       after(async () => {
         // Clean up engines and settings
-        await enablePrivmonSetting(kibanaServer);
-        await enablePrivmonSetting(kibanaServer, customSpace);
+        await disablePrivmonSetting(kibanaServer);
+        await disablePrivmonSetting(kibanaServer, customSpace);
         await api.deleteMonitoringEngine({ query: { data: true } });
         await api.deleteMonitoringEngine({ query: { data: true } }, customSpace);
       });
@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // Initialize and disable workflow tests
-    describe('init and disable workflow', () => {
+    describe('privMon init and disable engine workflow', () => {
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
       });
@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
-        await enablePrivmonSetting(kibanaServer);
+        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should handle complete init-disable-reinit cycle', async () => {
@@ -197,8 +197,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // Custom space init and disable workflow tests
-    describe('init and disable workflow in custom space', () => {
+    // Custom space init and disable engine workflow tests
+    describe('privMon init and disable engine workflow in custom space', () => {
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer, customSpace);
       });
@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
         } catch (err) {
           log.warning(`Failed to clean up in afterEach for custom space: ${err.message}`);
         }
-        await enablePrivmonSetting(kibanaServer, customSpace);
+        await disablePrivmonSetting(kibanaServer, customSpace);
       });
 
       it('should handle complete init-disable-reinit cycle in custom space', async () => {
