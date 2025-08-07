@@ -133,27 +133,27 @@ describe('provides correct series naming', () => {
     expect(debugState?.lines?.[0]?.name).toBe('a');
   });
 
-  test('simplest xy chart with empty name', () => {
+  test('simplest xy chart with empty name', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
       layers: [
         {
           ...args.layers[0],
+          xAccessor: 'c',
           accessors: ['a'],
-          splitAccessor: undefined,
+          splitAccessors: [],
           columnToLabel: '{"a":""}',
+          xScaleType: XScaleTypes.ORDINAL,
           table: dataWithoutFormats,
         },
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
-    const nameFn = component.find(DataLayers).dive().find(LineSeries).prop('name') as SeriesNameFn;
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    // In this case, the ID is used as the name. This shouldn't happen in practice
-    expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('');
-    expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
+    expect(debugState?.lines).toHaveLength(1);
+    expect(debugState?.lines?.[0]?.name).toBe('');
   });
 
   test('simplest xy chart with human-readable name', () => {
