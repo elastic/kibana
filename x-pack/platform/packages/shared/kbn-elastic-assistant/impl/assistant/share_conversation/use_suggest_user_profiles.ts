@@ -56,7 +56,7 @@ export const useSuggestUserProfiles = ({
       suggestUserProfiles({
         http,
         searchTerm: debouncedSearchTerm,
-        size,
+        size: debouncedSearchTerm.length > 0 ? size : 0,
         signal,
       }),
     {

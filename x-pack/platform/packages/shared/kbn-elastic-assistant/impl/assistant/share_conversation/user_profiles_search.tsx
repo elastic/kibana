@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfile } from '@kbn/core-user-profile-common';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
@@ -22,14 +22,11 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   selectedUsers,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const searchEnabled = useMemo(() => searchTerm.length > 0, [searchTerm]);
+
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
     searchTerm,
-    enabled: searchEnabled,
   });
-
-  const showLoading = useMemo(() => searchEnabled && isLoading, [searchEnabled, isLoading]);
 
   const onChange = useCallback(
     (nextSelectedOptions: UserProfileWithAvatar[]) => {
@@ -44,10 +41,15 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   return (
     <UserProfilesSelectable
       {...{
-        isLoading: showLoading,
+        isLoading,
         onChange,
         onSearchChange: setSearchTerm,
-        options: userProfiles,
+        options: Array.from(
+          new Map(
+            // always show selected users
+            [...(userProfiles ?? []), ...selectedUsers].map((user) => [user.uid, user])
+          ).values()
+        ),
         selectedOptions: selectedUsers,
       }}
     />
