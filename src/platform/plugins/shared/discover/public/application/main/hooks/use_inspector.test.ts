@@ -10,8 +10,9 @@
 import { renderHook, act } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useInspector } from './use_inspector';
-import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
-import { OverlayRef } from '@kbn/core/public';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import type { DataTableRecord } from '@kbn/discover-utils/types';

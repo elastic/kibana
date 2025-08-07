@@ -9,7 +9,7 @@
 
 import { createMemoryHistory } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 
 export function createSearchSessionMock(

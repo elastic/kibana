@@ -49,7 +49,6 @@ export function drawCursor(
     .selectAll('.ml-anomaly-chart-cursor-line')
     .data(cursorData);
 
-  // @ts-expect-error d3 types are not up to date
   cursorMouseLine
     .enter()
     .append('path')
@@ -59,6 +58,7 @@ export function drawCursor(
       return `M${xPosition},${CHART_HEIGHT} ${xPosition},0`;
     })
     // Use elastic chart's cursor line style if possible
+    // @ts-expect-error upgrade typescript v5.4.5
     .style('stroke', crosshairLine.stroke)
     .style('stroke-width', `${crosshairLine.strokeWidth}px`)
     .style('stroke-dasharray', crosshairLine.dash?.join(',') ?? '4,4')

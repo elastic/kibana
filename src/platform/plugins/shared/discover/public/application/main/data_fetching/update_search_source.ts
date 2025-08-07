@@ -12,7 +12,7 @@ import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { SORT_DEFAULT_ORDER_SETTING, getSortForSearchSource } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting

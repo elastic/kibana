@@ -11,9 +11,10 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
-import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
+import type { ContextAppFetchProps } from './use_context_app_fetch';
+import { useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,
   mockPredecessorHits,
@@ -22,7 +23,7 @@ import {
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
 import { createContextSearchSourceStub } from '../services/_stubs';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 

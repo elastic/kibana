@@ -1118,6 +1118,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           },
           headers: { 'content-type': 'application/json' },
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,

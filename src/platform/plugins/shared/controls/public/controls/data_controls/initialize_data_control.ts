@@ -144,6 +144,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     ).reduce((prev, key) => {
       return {
         ...prev,
+        // @ts-expect-error upgrade typescript v5.4.5
         [key]: mergedStateManager[key]?.getValue(),
       };
     }, {} as DefaultDataControlState & EditorState);
@@ -155,7 +156,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
           // apply the changes from the new state via the state manager
           (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
             (key) => {
+              // @ts-expect-error upgrade typescript v5.4.5
               if (!isEqual(mergedStateManager[key].getValue(), newState[key])) {
+                // @ts-expect-error upgrade typescript v5.4.5
                 mergedStateManager[key].next(
                   newState[key] as DefaultDataControlState & EditorState[typeof key]
                 );
