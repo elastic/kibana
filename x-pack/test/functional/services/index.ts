@@ -24,9 +24,6 @@ import { RandomProvider } from '@kbn/test-suites-xpack-platform/functional/servi
 import { PipelineListProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_list';
 import { DataStreamProvider } from '@kbn/test-suites-xpack-platform/functional/services/data_stream';
 import { PipelineEditorProvider } from '@kbn/test-suites-xpack-platform/functional/services/pipeline_editor';
-import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
-import { services as commonServices } from '../../common/services';
-
 import {
   MonitoringNoDataProvider,
   MonitoringClusterListProvider,
@@ -58,7 +55,10 @@ import {
   MonitoringEnterpriseSearchOverviewProvider,
   MonitoringEnterpriseSearchSummaryStatusProvider,
   // @ts-ignore not ts yet
-} from './monitoring';
+} from '@kbn/test-suites-xpack-platform/functional/services/monitoring';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
+import { services as commonServices } from '../../common/services';
+
 // @ts-ignore not ts yet
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';

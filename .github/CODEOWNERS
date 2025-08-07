@@ -1408,8 +1408,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/monitoring_api_integration @elastic/stack-monitoring
 /x-pack/platform/test/functional/page_objects/monitoring_page.ts @elastic/stack-monitoring
 /x-pack/test/functional/es_archives/monitoring @elastic/stack-monitoring
-/x-pack/test/functional/services/monitoring @elastic/stack-monitoring
-/x-pack/test/functional/apps/monitoring @elastic/stack-monitoring
+/x-pack/platform/test/functional/services/monitoring @elastic/stack-monitoring
+/x-pack/platform/test/functional/apps/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/api_integration/apis/monitoring @elastic/stack-monitoring
 /x-pack/platform/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 /x-pack/test/accessibility/apps/group1/kibana_overview.ts @elastic/stack-monitoring
@@ -1430,11 +1430,11 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/**/test_suites/**/fleet/ @elastic/fleet
 
 # APM
-/x-pack/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-^/src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
@@ -1473,12 +1473,14 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/functional/test_suites/observability/landing_page.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/navigation.ts @elastic/obs-ux-logs-team
 /x-pack/test/functional/page_objects/dataset_quality.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/dataset_quality.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/index* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/cypress @elastic/obs-ux-logs-team
 /x-pack/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/services/infra_source_configuration_form.ts @elastic/obs-ux-infra_services-team
 /x-pack/solutions/observability/test/functional/services/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/page_objects/observability_logs_explorer.ts @elastic/obs-ux-logs-team
 /src/platform/test/functional/services/selectable.ts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/index.feature_flags.ts @elastic/obs-ux-logs-team
@@ -1487,7 +1489,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/test_serverless/api_integration/test_suites/observability/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
-/x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team

@@ -66,8 +66,6 @@
     "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
     "@kbn/logs-explorer-plugin",
-    "@kbn/observability-ai-assistant-plugin",
-    "@kbn/dataset-quality-plugin",
     "@kbn/slo-schema",
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/slo-plugin",
@@ -79,7 +77,6 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/osquery-plugin",
     "@kbn/scout-info",
-    "@kbn/inference-common",
     "@kbn/test-suites-xpack-platform",
     "@kbn/dev-proc-runner",
     "@kbn/test-suites-xpack-platform",
@@ -92,5 +89,6 @@
     "@kbn/uptime-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-server",
+    "@kbn/inference-common",
   ]
 }
