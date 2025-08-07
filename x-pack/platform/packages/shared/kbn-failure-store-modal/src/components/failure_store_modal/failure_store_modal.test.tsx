@@ -155,9 +155,9 @@ describe('FailureStoreModal', () => {
       expect(valueSelector).not.toBeDisabled();
       expect(unitSelector).not.toBeDisabled();
 
-      // The custom retention period by default is 30d, so the value should be 30 and unit 'd'
-      expect(valueSelector).toHaveValue(30);
-      expect(unitSelector).toHaveValue('d');
+      // The custom retention period by default is the default period, so the value should be 40 and unit 'm'
+      expect(valueSelector).toHaveValue(40);
+      expect(unitSelector).toHaveValue('m');
 
       fireEvent.change(unitSelector, {
         target: { value: 's' },

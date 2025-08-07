@@ -125,17 +125,21 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
 
   const isDirty = useFormIsModified({ form });
 
-  const isDefaultPeriod = periodType === 'default';
+  const isCustomPeriod = periodType === 'custom';
 
   // Synchronize form values when period type changes
   useEffect(() => {
     form.setFieldValue(
       'retentionPeriodValue',
-      isDefaultPeriod ? defaultRetentionPeriod.size : customRetentionPeriod?.size ?? 30
+      isCustomPeriod && customRetentionPeriod
+        ? customRetentionPeriod.size
+        : defaultRetentionPeriod.size
     );
     form.setFieldValue(
       'retentionPeriodUnit',
-      isDefaultPeriod ? defaultRetentionPeriod.unit : customRetentionPeriod?.unit ?? 'd'
+      isCustomPeriod && customRetentionPeriod
+        ? customRetentionPeriod.unit
+        : defaultRetentionPeriod.unit
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodType]);
@@ -201,8 +205,8 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                       component={NumericField}
                       euiFieldProps={{
                         options: failureStorePeriodOptions,
-                        disabled: isDefaultPeriod,
-                        min: 1,
+                        disabled: !isCustomPeriod,
+                        min: 0,
                         placeholder: 30,
                         'data-test-subj': 'selectFailureStorePeriodValue',
                       }}
@@ -214,7 +218,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                       component={SelectField}
                       euiFieldProps={{
                         options: timeUnits,
-                        disabled: isDefaultPeriod,
+                        disabled: !isCustomPeriod,
                         placeholder: 'd',
                         'data-test-subj': 'selectFailureStoreRetentionPeriodUnit',
                       }}
