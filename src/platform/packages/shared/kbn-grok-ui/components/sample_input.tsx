@@ -50,8 +50,8 @@ export const SampleInput = ({
 
   // Monaco doesn't support dynamic inline styles, so we need to generate static styles.
   const colourPaletteStyles = useMemo(() => {
-    return grokCollection.getColourPaletteStyles();
-  }, [grokCollection]);
+    return grokCollection.getColourPaletteStyles(eui.euiTheme);
+  }, [eui.euiTheme, grokCollection]);
 
   useEffect(() => {
     const subscription = combineLatest(
