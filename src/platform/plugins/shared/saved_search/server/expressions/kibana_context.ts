@@ -8,7 +8,6 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core/server';
-import type { DiscoverSessionAttributes } from '../saved_objects/schema';
 import { getKibanaContextFn } from '../../common/expressions/kibana_context';
 import type { SavedSearchServerStartDeps } from '../plugin';
 import { getSavedSearch } from '../../common/service/get_saved_searches';

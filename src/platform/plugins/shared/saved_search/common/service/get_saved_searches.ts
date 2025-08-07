@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
 import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
-import { extractTabs } from './extract_tabs';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
 
