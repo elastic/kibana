@@ -9,6 +9,7 @@ import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { GenAiSettingsApp } from './gen_ai_settings_app';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 
@@ -42,7 +43,9 @@ describe('GenAiSettingsApp', () => {
 
   const renderComponent = (props = {}) => {
     return renderWithI18n(
-      <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} coreStart={coreStart} {...props} />
+      <KibanaContextProvider services={coreStart}>
+        <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
+      </KibanaContextProvider>
     );
   };
 
@@ -127,8 +130,7 @@ describe('GenAiSettingsApp', () => {
   });
 
   describe('permissions-based view', () => {
-    it('should conditionally render permissions section based on settings', () => {
-      // permissions-based view is enabled and canManageSpaces is true
+    it('should render permissions button when isPermissionsBased is true and canManageSpaces is true', () => {
       mockUseEnabledFeatures.mockReturnValue({
         showSpacesIntegration: true,
         isPermissionsBased: true,
@@ -145,8 +147,14 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
       expect(screen.getByTestId('goToPermissionsTabButton')).toBeInTheDocument();
+    });
 
-      // permissions-based view is enabled and canManageSpaces is false
+    it('should not render permissions button when canManageSpaces is false', () => {
+      mockUseEnabledFeatures.mockReturnValue({
+        showSpacesIntegration: true,
+        isPermissionsBased: true,
+        showAiBreadcrumb: true,
+      });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
         management: {
