@@ -32,7 +32,7 @@ interface APMRootTransactionResponse {
 export function useWorkflowTraceSearch({
   workflowExecution,
 }: {
-  workflowExecution: any; // The workflow execution object with traceId
+  workflowExecution: any | null; // The workflow execution object with traceId, or null to disable
 }): WorkflowTraceSearchResult {
   const [result, setResult] = useState<WorkflowTraceSearchResult>({
     traceId: null,
@@ -47,14 +47,16 @@ export function useWorkflowTraceSearch({
   const { services } = useKibana();
 
   useEffect(() => {
+    // Return early if workflowExecution is null (APM disabled) or has no traceId
     if (!workflowExecution?.traceId) {
-      // eslint-disable-next-line no-console
-      console.log('❌ No trace ID found in workflow execution');
       setResult({
         traceId: null,
         entryTransactionId: null,
         loading: false,
-        error: new Error('No trace ID found for this workflow execution'),
+        error:
+          workflowExecution === null
+            ? null
+            : new Error('No trace ID found for this workflow execution'),
         isTraceComplete: false,
         expectedSpanCount: null,
         actualSpanCount: null,
@@ -64,11 +66,6 @@ export function useWorkflowTraceSearch({
 
     // Check if we already have the entry transaction ID stored
     if (workflowExecution.entryTransactionId) {
-      // eslint-disable-next-line no-console
-      console.log(
-        '✅ Using stored entry transaction ID (with expanded time range):',
-        workflowExecution.entryTransactionId
-      );
       setResult({
         traceId: workflowExecution.traceId,
         entryTransactionId: workflowExecution.entryTransactionId,
@@ -81,16 +78,11 @@ export function useWorkflowTraceSearch({
       return;
     }
 
-    // eslint-disable-next-line no-console
-    console.log('🔍 Workflow execution traceId:', workflowExecution.traceId);
     setResult((prev) => ({ ...prev, loading: true, error: null }));
 
     // Find the root transaction for this trace
     const fetchRootTransaction = async () => {
       try {
-        // eslint-disable-next-line no-console
-        console.log('🔍 Fetching root transaction for trace:', workflowExecution.traceId);
-
         // Calculate time range for the search (expanded to include parent transaction)
         const startedAt = new Date(workflowExecution.startedAt);
         const finishedAt = workflowExecution.finishedAt
@@ -111,8 +103,6 @@ export function useWorkflowTraceSearch({
         )) as APMRootTransactionResponse;
 
         if (response?.transaction?.id) {
-          // eslint-disable-next-line no-console
-          console.log('🎯 Found root transaction ID:', response.transaction.id);
           setResult({
             traceId: workflowExecution.traceId,
             entryTransactionId: response.transaction.id,
@@ -123,8 +113,6 @@ export function useWorkflowTraceSearch({
             actualSpanCount: null,
           });
         } else {
-          // eslint-disable-next-line no-console
-          console.log('⚠️ No root transaction found, using trace ID only');
           setResult({
             traceId: workflowExecution.traceId,
             entryTransactionId: workflowExecution.traceId, // Fallback to trace ID
@@ -137,7 +125,7 @@ export function useWorkflowTraceSearch({
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('❌ Error fetching root transaction:', error);
+        console.error('Error fetching root transaction:', error);
         // Fallback: use the stored trace ID without entry transaction
         setResult({
           traceId: workflowExecution.traceId,

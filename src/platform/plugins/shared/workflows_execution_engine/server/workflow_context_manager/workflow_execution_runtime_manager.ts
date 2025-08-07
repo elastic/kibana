@@ -282,8 +282,9 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async start(): Promise<void> {
-    // eslint-disable-next-line no-console
-    console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
+    this.contextManager?.logInfo('Starting workflow execution with APM tracing', {
+      workflow: { execution_id: this.workflowExecution.id },
+    });
 
     const existingTransaction = agent.currentTransaction;
 
@@ -291,20 +292,22 @@ export class WorkflowExecutionRuntimeManager {
       // Check if this is triggered by alerting (has alerting labels) or task manager directly
       const isTriggeredByAlerting = !!(existingTransaction as any)._labels?.alerting_rule_id;
 
-      // eslint-disable-next-line no-console
-      console.log('🔍 Transaction context:', {
-        transactionName: existingTransaction.name,
-        transactionType: existingTransaction.type,
-        isTriggeredByAlerting,
-        alertingRuleId: (existingTransaction as any)._labels?.alerting_rule_id,
-        transactionId: existingTransaction.ids?.['transaction.id'],
+      this.contextManager?.logDebug('Found existing transaction context', {
+        transaction: {
+          name: existingTransaction.name,
+          type: existingTransaction.type,
+          is_triggered_by_alerting: isTriggeredByAlerting,
+          alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
+          transaction_id: existingTransaction.ids?.['transaction.id'],
+        },
       });
 
       if (isTriggeredByAlerting) {
         // For alerting-triggered workflows, create a dedicated workflow transaction
         // This provides a focused view for the embeddable instead of the entire alerting trace
-        // eslint-disable-next-line no-console
-        console.log('📊 Creating dedicated workflow transaction within alerting trace');
+        this.contextManager?.logInfo(
+          'Creating dedicated workflow transaction within alerting trace'
+        );
 
         const workflowTransaction = agent.startTransaction(
           `workflow.execution.${this.workflowExecution.workflowId}`,
@@ -329,8 +332,9 @@ export class WorkflowExecutionRuntimeManager {
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
         if (workflowTransactionId) {
-          // eslint-disable-next-line no-console
-          console.log('💾 Storing workflow transaction ID:', workflowTransactionId);
+          this.contextManager?.logDebug('Storing workflow transaction ID', {
+            transaction: { workflow_transaction_id: workflowTransactionId },
+          });
 
           await this.workflowExecutionRepository.updateWorkflowExecution({
             id: this.workflowExecution.id,
@@ -342,8 +346,7 @@ export class WorkflowExecutionRuntimeManager {
             entryTransactionId: workflowTransactionId,
           };
 
-          // eslint-disable-next-line no-console
-          console.log('✅ Workflow transaction ID stored in workflow execution');
+          this.contextManager?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
         // Capture trace ID from the workflow transaction
@@ -357,8 +360,9 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         if (realTraceId) {
-          // eslint-disable-next-line no-console
-          console.log('🎯 Captured APM trace ID from workflow transaction:', realTraceId);
+          this.contextManager?.logDebug('Captured APM trace ID from workflow transaction', {
+            trace: { trace_id: realTraceId },
+          });
           await this.workflowExecutionRepository.updateWorkflowExecution({
             id: this.workflowExecution.id,
             traceId: realTraceId,
@@ -371,8 +375,7 @@ export class WorkflowExecutionRuntimeManager {
         }
       } else {
         // For task manager triggered workflows, reuse the existing transaction
-        // eslint-disable-next-line no-console
-        console.log('📊 Reusing task manager transaction for workflow execution');
+        this.contextManager?.logInfo('Reusing task manager transaction for workflow execution');
 
         this.workflowTransaction = existingTransaction;
 
@@ -388,8 +391,9 @@ export class WorkflowExecutionRuntimeManager {
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];
         if (taskTransactionId) {
-          // eslint-disable-next-line no-console
-          console.log('💾 Storing task transaction ID:', taskTransactionId);
+          this.contextManager?.logDebug('Storing task transaction ID', {
+            transaction: { task_transaction_id: taskTransactionId },
+          });
 
           await this.workflowExecutionRepository.updateWorkflowExecution({
             id: this.workflowExecution.id,
@@ -401,8 +405,7 @@ export class WorkflowExecutionRuntimeManager {
             entryTransactionId: taskTransactionId,
           };
 
-          // eslint-disable-next-line no-console
-          console.log('✅ Task transaction ID stored in workflow execution');
+          this.contextManager?.logDebug('Task transaction ID stored in workflow execution');
         }
 
         // Capture trace ID from the task transaction
@@ -416,8 +419,9 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         if (realTraceId) {
-          // eslint-disable-next-line no-console
-          console.log('🎯 Captured APM trace ID from task transaction:', realTraceId);
+          this.contextManager?.logDebug('Captured APM trace ID from task transaction', {
+            trace: { trace_id: realTraceId },
+          });
           await this.workflowExecutionRepository.updateWorkflowExecution({
             id: this.workflowExecution.id,
             traceId: realTraceId,
@@ -448,8 +452,9 @@ export class WorkflowExecutionRuntimeManager {
       existingTransaction.outcome = 'success';
     } else {
       // Fallback if no task transaction exists - proceed without tracing
-      // eslint-disable-next-line no-console
-      console.warn('⚠️ No active Task Manager transaction found, proceeding without APM tracing');
+      this.contextManager?.logWarn(
+        'No active Task Manager transaction found, proceeding without APM tracing'
+      );
       const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
         id: this.workflowExecution.id,
         status: ExecutionStatus.RUNNING,
@@ -511,12 +516,14 @@ export class WorkflowExecutionRuntimeManager {
           const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
           if (isTriggeredByAlerting) {
             this.workflowTransaction.end();
-            // eslint-disable-next-line no-console
-            console.log('🏁 Workflow transaction ended: failure (alerting-triggered)');
+            this.contextManager?.logDebug(
+              'Workflow transaction ended with failure outcome (alerting-triggered)'
+            );
           } else {
             // For task manager triggered workflows, Task Manager will handle ending
-            // eslint-disable-next-line no-console
-            console.log('🏁 Task transaction outcome updated: failure (task manager will end)');
+            this.contextManager?.logDebug(
+              'Task transaction outcome updated to failure (task manager will end)'
+            );
           }
         }
       }
@@ -561,15 +568,16 @@ export class WorkflowExecutionRuntimeManager {
         const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
         if (isTriggeredByAlerting) {
           this.workflowTransaction.end();
-          // eslint-disable-next-line no-console
-          console.log(
-            `🏁 Workflow transaction ended: ${this.workflowTransaction.outcome} (alerting-triggered)`
-          );
+          this.contextManager?.logDebug('Workflow transaction ended (alerting-triggered)', {
+            transaction: { outcome: this.workflowTransaction.outcome },
+          });
         } else {
           // For task manager triggered workflows, Task Manager will handle ending
-          // eslint-disable-next-line no-console
-          console.log(
-            `🏁 Task transaction outcome updated: ${this.workflowTransaction.outcome} (task manager will end)`
+          this.contextManager?.logDebug(
+            'Task transaction outcome updated (task manager will end)',
+            {
+              transaction: { outcome: this.workflowTransaction.outcome },
+            }
           );
         }
       }

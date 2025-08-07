@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -37,6 +37,36 @@ export interface WorkflowExecutionProps {
   fields?: Array<keyof EsWorkflowStepExecution>;
 }
 
+// Hook to check if APM trace waterfall embeddable is available
+// This allows graceful degradation when APM is not enabled or not available
+const useApmEmbeddableAvailable = () => {
+  const [isAvailable, setIsAvailable] = useState<boolean>(false);
+  const [isChecking, setIsChecking] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkApmEmbeddable = async () => {
+      try {
+        // Try to get the APM embeddable factory to check if APM is available
+        // This will throw an error if the factory is not registered (APM plugin not enabled)
+        const { getReactEmbeddableFactory } = await import(
+          '@kbn/embeddable-plugin/public/react_embeddable_system/react_embeddable_registry'
+        );
+        await getReactEmbeddableFactory('APM_TRACE_WATERFALL_EMBEDDABLE');
+        setIsAvailable(true);
+      } catch (error) {
+        // APM embeddable is not available - this is expected when APM plugin is not enabled
+        setIsAvailable(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkApmEmbeddable();
+  }, []);
+
+  return { isAvailable, isChecking };
+};
+
 export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   workflowExecutionId,
   workflowYaml,
@@ -48,6 +78,9 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     error,
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
+
+  // Check if APM embeddable is available
+  const { isAvailable: isApmEmbeddableAvailable } = useApmEmbeddableAvailable();
 
   const columns = useMemo<Array<EuiBasicTableColumn<EsWorkflowStepExecution>>>(
     () =>
@@ -132,14 +165,14 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     ];
   }, [workflowExecution]);
 
-  // Search for actual APM traces using stored trace ID
+  // Search for actual APM traces using stored trace ID - only if APM is available
   const {
     traceId: foundTraceId,
     entryTransactionId: foundEntryTransactionId,
     loading: traceSearchLoading,
     error: traceSearchError,
   } = useWorkflowTraceSearch({
-    workflowExecution,
+    workflowExecution: isApmEmbeddableAvailable ? workflowExecution : null,
   });
 
   // APM Trace Waterfall properties - NOW USES STORED TRACE ID
@@ -165,15 +198,18 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     const expandedStartTime = new Date(startedAt.getTime() - 30000); // 30 seconds before
     const expandedEndTime = new Date(finishedAt.getTime() + 30000); // 30 seconds after
 
-    // eslint-disable-next-line no-console
-    console.log('🎯 Using STORED trace ID for embeddable:', foundTraceId);
-    // eslint-disable-next-line no-console
-    console.log('🎯 Time range expanded for parent trace (alerting/task):', {
-      originalStart: startedAt.toISOString(),
-      expandedStart: expandedStartTime.toISOString(),
-      originalEnd: finishedAt.toISOString(),
-      expandedEnd: expandedEndTime.toISOString(),
-    });
+    // Debug logging for trace embeddable (development only)
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.debug('Using stored trace ID for embeddable:', foundTraceId);
+      // eslint-disable-next-line no-console
+      console.debug('Time range expanded for parent trace:', {
+        originalStart: startedAt.toISOString(),
+        expandedStart: expandedStartTime.toISOString(),
+        originalEnd: finishedAt.toISOString(),
+        expandedEnd: expandedEndTime.toISOString(),
+      });
+    }
 
     return {
       traceId: foundTraceId, // 🔥 KEY CHANGE: Use the stored trace ID from workflow execution
@@ -254,8 +290,8 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
       <EuiSpacer size="l" />
 
-      {/* APM Trace Waterfall Embeddable with Search */}
-      {workflowExecution?.startedAt && (
+      {/* APM Trace Waterfall Embeddable with Search - only show if APM is available */}
+      {workflowExecution?.startedAt && isApmEmbeddableAvailable && (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -301,19 +337,20 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           {/* Show embeddable when trace is found */}
           {hasApmTrace && !traceSearchLoading && traceId && (
             <>
-              {/* Debug logging for embeddable parameters */}
-              {(() => {
-                // eslint-disable-next-line no-console
-                console.log('🔍 Embeddable parameters:', {
-                  traceId,
-                  rangeFrom,
-                  rangeTo,
-                  entryTransactionId,
-                  workflowExecutionId,
-                  hasApmTrace,
-                });
-                return null;
-              })()}
+              {/* Debug logging for embeddable parameters (development only) */}
+              {process.env.NODE_ENV === 'development' &&
+                (() => {
+                  // eslint-disable-next-line no-console
+                  console.debug('Embeddable parameters:', {
+                    traceId,
+                    rangeFrom,
+                    rangeTo,
+                    entryTransactionId,
+                    workflowExecutionId,
+                    hasApmTrace,
+                  });
+                  return null;
+                })()}
               <div
                 style={{
                   minHeight: '300px', // Minimum height but allows growth
