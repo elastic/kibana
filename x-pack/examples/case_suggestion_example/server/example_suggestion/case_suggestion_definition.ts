@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SuggestionContext } from '@kbn/cases-plugin/common';
-import type { SuggestionType } from '@kbn/cases-plugin/server';
+import type { SuggestionType, SuggestionHandlerParams } from '@kbn/cases-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { SyntheticsMonitorSuggestion } from '../../common/types';
@@ -51,13 +50,12 @@ export const getExampleByServiceName = (dependencies: {
       },
     },
     handlers: {
-      searchExampleByServiceName: async ({
-        'service.name': serviceName,
-        timeRange,
-      }: SuggestionContext) => {
+      searchExampleByServiceName: async ({ context, request }: SuggestionHandlerParams) => {
         const { getExampleByServiceName: getExampleByServiceNameHandler } = await import(
           './handlers'
         );
+
+        const { 'service.name': serviceName, timeRange } = context;
 
         /* All handler parameters are optional. If your required params
          * are not present, return an empty response rather than throwing

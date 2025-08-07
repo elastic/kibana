@@ -27,4 +27,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export type { CasesServerSetup, CasesServerStart } from './types';
-export type { SuggestionType } from './attachment_framework/types';
+export type { SuggestionType, SuggestionHandlerParams } from './attachment_framework/types';

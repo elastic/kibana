@@ -15,14 +15,15 @@ import type { GetAllForOwnersArgs } from './types';
  * Retrieves all the suggestions for the specified owners.
  */
 export async function getAllForOwners(
-  { owners, context }: GetAllForOwnersArgs,
+  { owners, context, request }: GetAllForOwnersArgs,
   clientArgs: CasesClientArgs
 ): Promise<SuggestionResponse> {
   const { attachmentSuggestionRegistry } = clientArgs;
 
   const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwners(
     owners,
-    context
+    context,
+    request
   );
 
   return suggestions;
