@@ -19,15 +19,15 @@ import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
-} from '../../../../common/constants';
-import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
-import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
-import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
-import { generateUsingZeroShot } from '../../../lib/significant_events/zero_shot';
-import { SecurityError } from '../../../lib/streams/errors/security_error';
-import type { StreamsServer } from '../../../types';
-import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+} from '../../../common/constants';
+import { generateSignificantEventDefinitions } from '../../lib/significant_events/generate_significant_events';
+import { previewSignificantEvents } from '../../lib/significant_events/preview_significant_events';
+import { readSignificantEventsFromAlertsIndices } from '../../lib/significant_events/read_significant_events_from_alerts_indices';
+import { generateUsingZeroShot } from '../../lib/significant_events/zero_shot';
+import { SecurityError } from '../../lib/streams/errors/security_error';
+import type { StreamsServer } from '../../types';
+import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
 async function assertLicenseAndPricingTier(
   server: StreamsServer,
