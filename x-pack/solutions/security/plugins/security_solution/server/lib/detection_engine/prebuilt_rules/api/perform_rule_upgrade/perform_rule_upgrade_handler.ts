@@ -45,7 +45,7 @@ import { getPossibleUpgrades } from '../../logic/utils';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest<undefined, undefined, PerformRuleUpgradeRequestBody>,
+  request: KibanaRequest<unknown, unknown, PerformRuleUpgradeRequestBody>,
   response: KibanaResponseFactory,
   logger: Logger
 ) => {
