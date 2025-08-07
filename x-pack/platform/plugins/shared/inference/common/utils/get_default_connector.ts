@@ -10,16 +10,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorList } from './get_connector_list';
 
-/**
- * Naive utility function to consistently return the "best" default connector for onechat features.
- *
- * For now, the logic is, by order of priority:
- * - any inference connector
- * - any openAI connector
- * - any other GenAI-compatible connector.
- *
- */
-export const getDefaultConnector = async ({
+export const loadDefaultConnector = async ({
   actions,
   request,
 }: {
@@ -27,6 +18,14 @@ export const getDefaultConnector = async ({
   request: KibanaRequest;
 }): Promise<InferenceConnector> => {
   const connectors = await getConnectorList({ actions, request });
+  return getDefaultConnector({ connectors });
+};
+
+export const getDefaultConnector = ({
+  connectors,
+}: {
+  connectors: InferenceConnector[];
+}): InferenceConnector => {
   const inferenceConnector = connectors.find(
     (connector) => connector.type === InferenceConnectorType.Inference
   );
