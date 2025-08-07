@@ -6,12 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { metrics } from './metrics';
-import {
-  aws as awsRequiredMetrics,
-  nginx as nginxRequireMetrics,
-} from '../shared/metrics/required_metrics';
 import { createInventoryModel } from '../shared/create_inventory_model';
+import { DataSchemaFormat } from '../types';
+import {
+  DATASTREAM_DATASET,
+  EVENT_MODULE,
+  HOST_METRICS_RECEIVER_OTEL,
+  METRICSET_MODULE,
+  SYSTEM_INTEGRATION,
+} from '../../constants';
 
 export const host = createInventoryModel('host', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.host.displayName', {
@@ -23,7 +28,10 @@ export const host = createInventoryModel('host', {
       defaultMessage: 'Host',
     }
   ),
-  requiredModule: 'system',
+  requiredIntegration: {
+    beats: 'system',
+    otel: 'hostmetricsreceiver.otel',
+  },
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -38,21 +46,41 @@ export const host = createInventoryModel('host', {
     cloudProvider: 'cloud.provider',
   },
   metrics,
-  requiredMetrics: [
-    'hostSystemOverview',
-    'hostCpuUsageTotal',
-    'hostCpuUsage',
-    'hostLoad',
-    'hostMemoryUsage',
-    'hostNetworkTraffic',
-    'hostK8sOverview',
-    'hostK8sCpuCap',
-    'hostK8sMemoryCap',
-    'hostK8sDiskCap',
-    'hostK8sPodCap',
-    ...awsRequiredMetrics,
-    ...nginxRequireMetrics,
-  ],
-  tooltipMetrics: ['cpuV2', 'memory', 'txV2', 'rxV2', 'cpu', 'tx', 'rx'],
-  legacyMetrics: ['cpu', 'tx', 'rx'],
+  nodeFilter: (args?: { schema?: DataSchemaFormat }): estypes.QueryDslQueryContainer[] => {
+    const { schema } = args ?? {};
+    if (!schema) {
+      return [];
+    }
+
+    return [
+      {
+        bool:
+          schema === DataSchemaFormat.ECS
+            ? {
+                should: [
+                  {
+                    term: {
+                      [EVENT_MODULE]: SYSTEM_INTEGRATION,
+                    },
+                  },
+                  {
+                    term: {
+                      [METRICSET_MODULE]: SYSTEM_INTEGRATION,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              }
+            : {
+                filter: [
+                  {
+                    term: {
+                      [DATASTREAM_DATASET]: HOST_METRICS_RECEIVER_OTEL,
+                    },
+                  },
+                ],
+              },
+      },
+    ];
+  },
 });

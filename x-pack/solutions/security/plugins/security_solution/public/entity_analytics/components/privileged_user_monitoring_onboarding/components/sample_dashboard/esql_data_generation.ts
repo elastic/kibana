@@ -41,7 +41,7 @@ export const generateESQLSource = () => {
   return right(`ROW data=[${rows}]
             | MV_EXPAND data
             | EVAL row = SPLIT(data, ",")
-            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = MV_SLICE(row, 4)
+            | EVAL privileged_user = MV_SLICE(row, 0), target_user = MV_SLICE(row, 1), right = MV_SLICE(row, 2), ip = MV_SLICE(row, 3), @timestamp = TO_DATETIME(MV_SLICE(row, 4))
             | DROP row`);
 };
 
@@ -56,10 +56,9 @@ export const generateListESQLQuery =
   };
 
 export const generateVisualizationESQLQuery =
-  (esqlSource: EsqlQueryOrInvalidFields) => (stackByField: string) => {
-    return map<string, string>(
+  (esqlSource: EsqlQueryOrInvalidFields) =>
+  (stackByField: string, timerange: { from: string; to: string }) =>
+    map<string, string>(
       (src) => `${src}
-        | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-        | STATS results = COUNT(*) by timestamp, ${stackByField}`
+        | STATS results = COUNT(*) by timestamp = BUCKET(@timestamp, 30, "${timerange.from}", "${timerange.to}"), ${stackByField}`
     )(esqlSource);
-  };

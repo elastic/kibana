@@ -39,8 +39,6 @@ export type {
   CloudLink,
   CloudLinks,
   CloudURLs,
-  SideNavCompProps,
-  SideNavComponent,
   SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,

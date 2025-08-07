@@ -102,7 +102,7 @@ export const getFieldDefinition = <T extends SettingType>(
     type,
     userValue: savedValue,
     value: defaultValue,
-    solution,
+    solutionViews,
     technicalPreview,
   } = setting;
 
@@ -146,7 +146,7 @@ export const getFieldDefinition = <T extends SettingType>(
     savedValue,
     type,
     unsavedFieldId: `${id}-unsaved`,
-    solution,
+    solutionViews,
     technicalPreview,
   };
 

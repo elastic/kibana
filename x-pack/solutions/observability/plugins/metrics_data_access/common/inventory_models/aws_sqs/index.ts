@@ -19,7 +19,7 @@ export const awsSQS = createInventoryModel('awsSQS', {
       defaultMessage: 'SQS Queue',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -31,18 +31,4 @@ export const awsSQS = createInventoryModel('awsSQS', {
     id: 'aws.sqs.queue.name',
     name: 'aws.sqs.queue.name',
   },
-  requiredMetrics: [
-    'awsSQSMessagesVisible',
-    'awsSQSMessagesDelayed',
-    'awsSQSMessagesSent',
-    'awsSQSMessagesEmpty',
-    'awsSQSOldestMessage',
-  ],
-  tooltipMetrics: [
-    'sqsMessagesVisible',
-    'sqsMessagesDelayed',
-    'sqsMessagesEmpty',
-    'sqsMessagesSent',
-    'sqsOldestMessage',
-  ],
 });

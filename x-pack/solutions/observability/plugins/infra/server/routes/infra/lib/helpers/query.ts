@@ -7,41 +7,12 @@
 
 import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
-import type { SchemaTypes } from '../../../../../common/http_api/shared/schema_type';
-import { integrationNameByEntityType } from '../../../../lib/sources/constants';
-import type { EntityTypes } from '../../../../../common/http_api/shared/entity_type';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
-import {
-  DATASTREAM_DATASET,
-  EVENT_MODULE,
-  METRICSET_MODULE,
-  METRIC_SCHEMA_ECS,
-} from '../../../../../common/constants';
-import type { InfraEntityMetricType } from '../../../../../common/http_api/infra';
 
-export const getFilterForEntityType = (
-  entityType: EntityTypes,
-  schema: SchemaTypes = METRIC_SCHEMA_ECS
-) => {
-  const source = integrationNameByEntityType[entityType];
-  return {
-    bool:
-      schema === METRIC_SCHEMA_ECS
-        ? {
-            should: [
-              ...termQuery(EVENT_MODULE, source.beats),
-              ...termQuery(METRICSET_MODULE, source.beats),
-            ],
-            minimum_should_match: 1,
-          }
-        : {
-            filter: [...termQuery(DATASTREAM_DATASET, source.otel)],
-          },
-  };
-};
+import type { InfraEntityMetricType } from '../../../../../common/http_api/infra';
 
 const getApmDocumentsFilter = async ({
   apmDataAccessServices,
@@ -77,9 +48,14 @@ export const getDocumentsFilter = async ({
   apmDocumentSources?: TimeRangeMetadata['sources'];
   from: number;
   to: number;
-  schema?: SchemaTypes;
+  schema?: DataSchemaFormat;
 }) => {
-  const filters: estypes.QueryDslQueryContainer[] = [getFilterForEntityType('host', schema)];
+  const inventoryModel = findInventoryModel('host');
+  const filters: estypes.QueryDslQueryContainer[] =
+    inventoryModel.nodeFilter?.({
+      schema,
+    }) ?? [];
+
   const apmDocumentsFilter =
     apmDataAccessServices && apmDocumentSources
       ? await getApmDocumentsFilter({
@@ -98,11 +74,12 @@ export const getDocumentsFilter = async ({
 };
 
 export const getInventoryModelAggregations = async (
-  entityType: 'host',
-  metrics: InfraEntityMetricType[]
+  assetType: 'host',
+  metrics: InfraEntityMetricType[],
+  schema?: DataSchemaFormat
 ) => {
-  const inventoryModel = findInventoryModel(entityType);
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const inventoryModel = findInventoryModel(assetType);
+  const aggregations = await inventoryModel.metrics.getAggregations({ schema });
 
   return metrics.reduce<Partial<Record<InfraEntityMetricType, MetricsUIAggregation>>>(
     (acc, metric) => {

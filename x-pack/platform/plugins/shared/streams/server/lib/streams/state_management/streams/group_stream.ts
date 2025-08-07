@@ -139,7 +139,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       if (!Streams.ingest.all.Definition.is(memberStream.definition)) {
         return {
           isValid: false,
-          errors: [new Error(`Member stream ${member} is neither a wired nor an unwired stream`)],
+          errors: [new Error(`Member stream ${member} is neither a wired nor an classic stream`)],
         };
       }
     }

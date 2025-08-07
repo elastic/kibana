@@ -504,6 +504,92 @@
           },
           {
             "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.HttpInterceptor.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [
+              "\nDefine an interceptor to be executed at the fetch call."
+            ],
+            "signature": [
+              "((next: (fetchOptions: ",
+              "HttpFetchOptionsWithPath",
+              ") => Promise<",
+              "HttpResponse",
+              "<unknown>>, fetchOptions: Readonly<",
+              "HttpFetchOptionsWithPath",
+              ">, controller: ",
+              "IHttpInterceptController",
+              ") => Promise<",
+              "HttpResponse",
+              "<unknown>>) | undefined"
+            ],
+            "path": "src/core/packages/http/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpInterceptor.fetch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "next",
+                "description": [
+                  "{@link HttpSetup.fetch }"
+                ],
+                "signature": [
+                  "(fetchOptions: ",
+                  "HttpFetchOptionsWithPath",
+                  ") => Promise<",
+                  "HttpResponse",
+                  "<unknown>>"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpInterceptor.fetch.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "fetchOptions",
+                "description": [
+                  "{@link HttpFetchOptionsWithPath }"
+                ],
+                "signature": [
+                  "Readonly<",
+                  "HttpFetchOptionsWithPath",
+                  ">"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-http-browser",
+                "id": "def-public.HttpInterceptor.fetch.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "controller",
+                "description": [
+                  "{@link IHttpInterceptController }"
+                ],
+                "signature": [
+                  "IHttpInterceptController"
+                ],
+                "path": "src/core/packages/http/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpInterceptor.response",
             "type": "Function",
             "tags": [],
