@@ -7,8 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
-export { exp, expression } from './expression';
-export { cmd, command } from './command';
-export { qry, query } from './query';
-export * from './nodes';
+import { par } from '../nodes';
+
+test('can construct a param', () => {
+  const node1 = par('my_param');
+  const node2 = par('?my_param');
+
+  expect(node1.paramKind).toBe('?');
+  expect(node2.paramKind).toBe('?');
+
+  expect(node1 + '').toBe('?my_param');
+  expect(node2 + '').toBe('?my_param');
+});
+
+test('can construct a double param', () => {
+  const node = par('??my_param');
+
+  expect(node.paramKind).toBe('??');
+
+  expect(node + '').toBe('??my_param');
+});
