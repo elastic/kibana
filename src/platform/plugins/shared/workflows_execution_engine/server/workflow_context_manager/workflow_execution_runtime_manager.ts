@@ -227,19 +227,10 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public async fail(error: any): Promise<void> {
-    const currentStep = this.getCurrentStep();
-
-    if (currentStep) {
-      await this.setStepResult(currentStep.id, {
-        output: null,
-        error,
-      });
-    }
-
-    await this.updateWorkflowState();
+    await this.updateWorkflowState(error);
   }
 
-  private async updateWorkflowState(): Promise<void> {
+  private async updateWorkflowState(error: any): Promise<void> {
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
       id: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
@@ -249,11 +240,11 @@ export class WorkflowExecutionRuntimeManager {
     if (this.isWorkflowFinished()) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
-    const currentStepError = this.getCurrentStepError();
+    const workflowError = error || this.getCurrentStepError();
 
-    if (currentStepError) {
+    if (workflowError) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
-      workflowExecutionUpdate.error = currentStepError;
+      workflowExecutionUpdate.error = workflowError;
     }
 
     if (
