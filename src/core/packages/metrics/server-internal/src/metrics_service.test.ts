@@ -10,12 +10,21 @@
 import moment from 'moment';
 import { merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { lastValueFrom, take, toArray } from 'rxjs';
+import { firstValueFrom, lastValueFrom, toArray } from 'rxjs';
 import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+
+jest.mock('rxjs', () => {
+  const original = jest.requireActual('rxjs');
+  return {
+    ...original,
+    timer: jest.fn((start, interval) => original.timer(start, interval)),
+  };
+});
+
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { OpsMetricsCollector } from './ops_metrics_collector';
@@ -38,7 +47,7 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
     mockOpsCollector.collect.mockResolvedValue(getBaseTestMetrics());
 
     const configService = configServiceMock.create({
@@ -55,6 +64,8 @@ describe('MetricsService', () => {
 
   describe('#start', () => {
     it('invokes setInterval with the configured interval', async () => {
+      const { timer } = jest.requireMock('rxjs');
+
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
 
@@ -65,47 +76,39 @@ describe('MetricsService', () => {
         expect.objectContaining({ logger: logger.get('metrics') })
       );
 
-      expect(setInterval).toHaveBeenCalledTimes(1);
-      expect(setInterval).toHaveBeenCalledWith(expect.any(Function), testInterval);
+      expect(timer).toHaveBeenCalledTimes(1);
+      expect(timer).toHaveBeenCalledWith(0, testInterval);
     });
 
     it('collects the metrics at every interval', async () => {
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
 
+      await jest.advanceTimersByTimeAsync(0); // Advancing 0ms, but to make sure that the initial timer round is executed
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      await jest.advanceTimersByTimeAsync(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
-      jest.advanceTimersByTime(testInterval);
+      await jest.advanceTimersByTimeAsync(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
     });
 
     it('resets the collector after each collection', async () => {
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
-      const { getOpsMetrics$ } = await metricsService.start();
+      await metricsService.start();
 
-      // `advanceTimersByTime` only ensure the interval handler is executed
-      // however the `reset` call is executed after the async call to `collect`
-      // meaning that we are going to miss the call if we don't wait for the
-      // actual observable emission that is performed after. The extra
-      // `nextTick` is to ensure we've done a complete roundtrip of the event
-      // loop.
-      const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
-        await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
-      };
-
+      await jest.advanceTimersByTimeAsync(0);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);
 
-      await nextEmission();
+      // await nextEmission();
+      await jest.advanceTimersByTimeAsync(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(2);
 
-      await nextEmission();
+      // await nextEmission();
+      await jest.advanceTimersByTimeAsync(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(3);
     });
@@ -127,9 +130,8 @@ describe('MetricsService', () => {
       const { getOpsMetrics$ } = await metricsService.start();
 
       const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
-        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
+        const emission = firstValueFrom(getOpsMetrics$());
+        await jest.advanceTimersByTimeAsync(testInterval);
         return emission;
       };
 
@@ -175,16 +177,9 @@ describe('MetricsService', () => {
         .mockResolvedValueOnce(firstMetrics)
         .mockResolvedValueOnce(secondMetrics);
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
-      const { getOpsMetrics$ } = await metricsService.start();
+      await metricsService.start();
 
-      const nextEmission = async () => {
-        jest.advanceTimersByTime(testInterval);
-        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
-        await new Promise((resolve) => process.nextTick(resolve));
-        return emission;
-      };
-
-      await nextEmission();
+      await jest.advanceTimersByTimeAsync(testInterval);
       const opsLogs = loggingSystemMock.collect(opsLogger).debug;
       expect(opsLogs.length).toEqual(2);
       expect(opsLogs[0][1]).not.toEqual(opsLogs[1][1]);
@@ -200,11 +195,15 @@ describe('MetricsService', () => {
       const { getEluMetrics$ } = await metricsService.start();
       const eluMetricsPromise = lastValueFrom(getEluMetrics$().pipe(toArray()));
 
-      jest.advanceTimersByTime(testInterval * 2);
-      await new Promise((resolve) => process.nextTick(resolve));
+      await jest.advanceTimersByTimeAsync(testInterval * 2);
       await metricsService.stop();
 
       await expect(eluMetricsPromise).resolves.toEqual([
+        expect.objectContaining({
+          short: 0,
+          medium: 0,
+          long: 0,
+        }),
         expect.objectContaining({
           short: expect.closeTo(0.1),
           medium: expect.closeTo(0.1),
@@ -230,6 +229,7 @@ describe('MetricsService', () => {
       );
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       await metricsService.start();
+      await jest.advanceTimersByTimeAsync(0);
       expect(loggingSystemMock.collect(opsLogger).debug[0]).toMatchInlineSnapshot(`
         Array [
           " utilization: 1.00000",
@@ -282,13 +282,14 @@ describe('MetricsService', () => {
       await metricsService.setup({ http: httpMock, elasticsearchService: esServiceMock });
       const { getOpsMetrics$ } = await metricsService.start();
 
+      await jest.advanceTimersByTimeAsync(0);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(testInterval);
+      await jest.advanceTimersByTimeAsync(testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
       await metricsService.stop();
-      jest.advanceTimersByTime(10 * testInterval);
+      await jest.advanceTimersByTimeAsync(10 * testInterval);
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
 
       getOpsMetrics$().subscribe({ complete: () => {} });
