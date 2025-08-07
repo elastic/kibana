@@ -267,7 +267,7 @@ export class IndexUpdateService {
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
   ]).pipe(
-    switchMap(async ([dataView, pendingColumnsToBeSaved]) => {
+    map(([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
