@@ -16,20 +16,19 @@ import { getKibanaUrl } from '../utils/get_kibana_url';
 
 const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
-const A2A_SERVER_PATH = '/api/chat/a2a';
+export const A2A_SERVER_PATH = '/api/chat/a2a';
 
 export function registerA2ARoutes({
   router,
   getInternalServices,
   coreSetup,
   logger,
+  pluginsSetup,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getBaseUrl = async () => {
-    const [, { cloud }] = await coreSetup.getStartServices();
-
-    return getKibanaUrl(coreSetup, cloud);
+  const getBaseUrl = () => {
+    return getKibanaUrl(coreSetup, pluginsSetup.cloud);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);

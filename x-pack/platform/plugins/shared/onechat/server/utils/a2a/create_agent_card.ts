@@ -10,6 +10,7 @@ import type { AgentDefinition } from '@kbn/onechat-common';
 import { filterToolsBySelection } from '@kbn/onechat-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolsServiceStart } from '../../services/tools';
+import { A2A_SERVER_PATH } from '../../routes/a2a';
 
 interface CreateAgentCardParams {
   agent: AgentDefinition;
@@ -42,7 +43,7 @@ export async function createAgentCard({
   return {
     name: agent.name,
     description: agent.description,
-    url: `${baseUrl}/api/chat/a2a/${agent.id}`,
+    url: `${baseUrl}${A2A_SERVER_PATH}/${agent.id}`,
     provider: {
       organization: 'Elastic',
       url: 'https://elastic.co',

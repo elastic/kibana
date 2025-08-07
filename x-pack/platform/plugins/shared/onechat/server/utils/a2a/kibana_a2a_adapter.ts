@@ -26,7 +26,7 @@ export class KibanaA2AAdapter {
   constructor(
     private logger: Logger,
     private getInternalServices: () => InternalStartServices,
-    private getBaseUrl: () => Promise<string>
+    private getBaseUrl: () => string
   ) {}
 
   /**
@@ -40,7 +40,7 @@ export class KibanaA2AAdapter {
 
     const agentCard = await createAgentCard({
       agent,
-      baseUrl: await this.getBaseUrl(),
+      baseUrl: this.getBaseUrl(),
       toolsService: tools,
       request: kibanaRequest,
     });
