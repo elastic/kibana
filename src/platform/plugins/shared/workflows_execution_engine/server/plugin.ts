@@ -129,23 +129,33 @@ export class WorkflowsExecutionEnginePlugin
       // Log workflow execution start
       await workflowRuntime.start();
 
-      try {
-        do {
-          const currentNode = workflowRuntime.getCurrentStep();
+      do {
+        const currentNode = workflowRuntime.getCurrentStep();
 
-          const step = new StepFactory().create(
-            currentNode as any,
-            contextManager,
-            connectorExecutor,
-            workflowRuntime,
-            workflowLogger
-          );
+        const step = new StepFactory().create(
+          currentNode as any,
+          contextManager,
+          connectorExecutor,
+          workflowRuntime,
+          workflowLogger
+        );
 
+        try {
           await step.run();
-        } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-      } catch (error) {
-        await workflowRuntime.fail(error);
-      }
+        } catch (error) {
+          // If an unhandled error occurs in a step, it terminates the workflow execution
+          workflowLogger.logError(
+            `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
+          );
+          await workflowRuntime.setStepResult(currentNode.id, {
+            output: null,
+            error: String(error),
+          });
+          await workflowRuntime.finishStep(currentNode.id);
+          await workflowRuntime.fail(error);
+          break;
+        }
+      } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
     };
 
     return {
