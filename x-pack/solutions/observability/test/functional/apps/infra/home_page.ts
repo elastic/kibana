@@ -186,7 +186,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders the waffle map and tooltips for dates with data', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_HOSTS_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
       describe('Asset Details flyout for a host', () => {
@@ -463,6 +462,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should redirect to Pod Details page', async () => {
             await pageObjects.infraHome.goToPods();
             await pageObjects.infraHome.goToTime(DATE_WITH_POD_DATA);
+
+            // Check if the Kubernetes feedback button is visible
+            await pageObjects.infraHome.ensureKubernetesFeedbackLinkIsVisible();
+
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 
