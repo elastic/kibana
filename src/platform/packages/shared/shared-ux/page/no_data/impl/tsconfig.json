@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-no-data-mocks",
   ],
   "exclude": [
