@@ -44,7 +44,17 @@ export class EnterIfNodeImpl implements StepImplementation {
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
 
-    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
+    let evaluatedConditionResult: boolean;
+
+    try {
+      evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
+    } catch (error) {
+      throw new Error(
+        `Syntax error in condition "${thenNode.condition}" for step ${this.step.id}: ${String(
+          error
+        )}`
+      );
+    }
 
     if (evaluatedConditionResult) {
       this.workflowContextLogger.logInfo(
