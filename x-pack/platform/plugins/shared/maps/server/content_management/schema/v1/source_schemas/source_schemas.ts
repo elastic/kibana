@@ -73,7 +73,34 @@ export const kibanaTilemapSourceSchema = schema.object(
   },
   {
     meta: {
-      description: 'Tile map service configured by map.tilemap.url kibana.yml setting.',
+      description: `Tile map service configured by 'map.tilemap.url' kibana.yml setting.`,
+    },
+    unknowns: 'forbid',
+  }
+);
+
+export const WMSSourceSchema = schema.object(
+  {
+    serviceUrl: schema.uri({
+      meta: {
+        description: 'WMS base URL'
+      }
+    }),
+    layers: schema.string({
+      meta: {
+        description: 'Comma separated list of layer names'
+      }
+    }),
+    styles: schema.string({
+      meta: {
+        description: 'Comma separated list of style names'
+      }
+    }),
+    type: schema.literal(SOURCE_TYPES.WMS),
+  },
+  {
+    meta: {
+      description: 'Raster source from Web Map Service (WMS)',
     },
     unknowns: 'forbid',
   }

@@ -39,12 +39,6 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   applyForceRefresh: boolean;
 };
 
-export type WMSSourceDescriptor = AbstractSourceDescriptor & {
-  serviceUrl: string;
-  layers: string;
-  styles: string;
-};
-
 export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
   urlTemplate: string;
 };

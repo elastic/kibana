@@ -28,4 +28,5 @@ export type {
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
+  WMSSourceDescriptor,
 } from '../../server';

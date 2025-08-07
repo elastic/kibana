@@ -9,24 +9,7 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
-export type {
-  CountAggDescriptor,
-  FieldedAggDescriptor,
-  PercentileAggDescriptor,
-  AggDescriptor,
-  AbstractESAggSourceDescriptor,
-  AbstractESJoinSourceDescriptor,
-  AbstractESSourceDescriptor,
-  EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
-  ESGeoGridSourceDescriptor,
-  ESGeoLineSourceDescriptor,
-  ESPewPewSourceDescriptor,
-  ESSearchSourceDescriptor,
-  ESDistanceSourceDescriptor,
-  ESTermSourceDescriptor,
-  KibanaTilemapSourceDescriptor,
-} from './content_management';
+export type * from './content_management';
 export { MapsStorage } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
