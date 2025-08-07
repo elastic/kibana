@@ -42,7 +42,6 @@
     "@kbn/dev-utils",
     "@kbn/rison",
     "@kbn/serverless-observability-settings",
-    "@kbn/serverless-search-settings",
     "@kbn/serverless-security-settings",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
