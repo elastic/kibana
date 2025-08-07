@@ -283,8 +283,13 @@ export class Session {
    * Updates session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
+   * @param shouldOverrideIdleTimeout If `true`, the idle timeout expiration will be set to the `idleTimeoutExpiration` of the passed session value.
    */
-  async update(request: KibanaRequest, sessionValue: Readonly<SessionValue>) {
+  async update(
+    request: KibanaRequest,
+    sessionValue: Readonly<SessionValue>,
+    shouldOverrideIdleTimeout = false
+  ) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     const sessionLogger = this.getLoggerForSID(sessionValue.sid);
     if (!sessionCookieValue) {
@@ -294,7 +299,8 @@ export class Session {
 
     const sessionExpirationInfo = this.calculateExpiry(
       sessionValue.provider,
-      sessionCookieValue.lifespanExpiration
+      sessionCookieValue.lifespanExpiration,
+      shouldOverrideIdleTimeout ? sessionValue.idleTimeoutExpiration : undefined
     );
     // We filter out the `createdAt` field and rely on the one stored in `metadata.index` since it isn't
     // supposed to be updated after it was initially set during creation.
@@ -327,7 +333,7 @@ export class Session {
       ...sessionExpirationInfo,
     });
 
-    sessionLogger.debug('Successfully updated existing session.');
+    sessionLogger.info('Successfully updated existing session.');
 
     return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
       username,
@@ -491,7 +497,8 @@ export class Session {
 
   private calculateExpiry(
     provider: AuthenticationProvider,
-    currentLifespanExpiration?: number | null
+    currentLifespanExpiration?: number | null,
+    idleTimeoutExpirationOverride?: number | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
     const now = Date.now();
     const { idleTimeout, lifespan } = this.options.config.session.getExpirationTimeouts(provider);
@@ -504,7 +511,15 @@ export class Session {
       currentLifespanExpiration && lifespan
         ? currentLifespanExpiration
         : lifespan && now + lifespan.asMilliseconds();
-    const idleTimeoutExpiration = idleTimeout && now + idleTimeout.asMilliseconds();
+
+    let idleTimeoutExpiration;
+    if (!idleTimeoutExpirationOverride) {
+      idleTimeoutExpiration = idleTimeout && now + idleTimeout.asMilliseconds();
+    } else {
+      console.log('KURT');
+      console.log(idleTimeoutExpirationOverride);
+      idleTimeoutExpiration = idleTimeoutExpirationOverride;
+    }
 
     return { idleTimeoutExpiration, lifespanExpiration };
   }
