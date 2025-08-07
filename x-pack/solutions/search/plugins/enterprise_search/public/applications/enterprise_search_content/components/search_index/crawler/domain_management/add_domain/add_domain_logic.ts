@@ -120,15 +120,12 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
     }),
     validateDomainNetworkConnectivity: true,
   }),
-  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     addDomainFormInputValue: [
       DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.addDomainFormInputValue,
-        // @ts-expect-error upgrade typescript v5.1.6
         setAddDomainFormInputValue: (_, newValue: string) => newValue,
-        // @ts-expect-error upgrade typescript v5.1.6
         validateDomainInitialVerification: (_, { newValue }: { newValue: string }) => newValue,
       },
     ],
@@ -137,7 +134,6 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.domainValidationResult,
-        // @ts-expect-error upgrade typescript v5.1.6
         setDomainValidationResult: ({ steps }, { change }) => ({
           steps: {
             ...steps,
@@ -159,7 +155,6 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.entryPointValue,
-        // @ts-expect-error upgrade typescript v5.1.6
         validateDomainInitialVerification: (_, { newEntryPointValue }) => newEntryPointValue,
       },
     ],
@@ -167,7 +162,6 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       [],
       {
         clearDomainFormInputValue: () => [],
-        // @ts-expect-error upgrade typescript v5.1.6
         onSubmitNewDomainError: (_, { errors }) => errors,
         setAddDomainFormInputValue: () => [],
         submitNewDomain: () => [],
@@ -179,7 +173,6 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       {
         clearDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
         setAddDomainFormInputValue: () => DEFAULT_SELECTOR_VALUES.ignoreValidationFailure,
-        // @ts-expect-error upgrade typescript v5.1.6
         setIgnoreValidationFailure: (_, newValue: boolean) => newValue,
       },
     ],
@@ -295,6 +288,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
               break;
           }
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         actions.setDomainValidationResult({
           [stepName]: {

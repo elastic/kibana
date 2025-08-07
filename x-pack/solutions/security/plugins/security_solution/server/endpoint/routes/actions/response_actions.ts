@@ -13,7 +13,6 @@ import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { RunScriptActionRequestBody } from '../../../../common/api/endpoint';
 import {
   EndpointActionGetFileSchema,
   type ExecuteActionRequestBody,
@@ -33,6 +32,7 @@ import {
   type UploadActionApiRequestBody,
   UploadActionRequestSchema,
   RunScriptActionRequestSchema,
+  type RunScriptActionRequestBody,
 } from '../../../../common/api/endpoint';
 
 import {

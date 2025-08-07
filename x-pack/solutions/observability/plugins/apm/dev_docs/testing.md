@@ -41,7 +41,7 @@ open target/coverage/jest/index.html
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
+The API tests are located in [`x-pack/solutions/observability/test/apm_api_integration/`](/x-pack/solutions/observability/test/apm_api_integration/).
 
 #### Start server and run test (single process)
 
