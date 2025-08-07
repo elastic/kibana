@@ -236,7 +236,6 @@ function getSignaturesMatchingTypes(
   literalMask: boolean[]
 ): FunctionDefinition['signatures'] {
   return definition.signatures.filter((sig) => {
-    // TODO check this - it may not be correct
     if (givenTypes.length < sig.params.filter(({ optional }) => !optional).length) {
       return false;
     }
@@ -267,10 +266,13 @@ function argMatchesParamType(
 
   if (givenType === 'param') return true;
 
-  if (givenType === 'null') return true;
-
   if (givenType === 'unknown') return true;
 
+  // all ES|QL functions accept null, but this is not reflected
+  // in our function definitions so we let it through here
+  if (givenType === 'null') return true;
+
+  // all functions accept keyword literals for text parameters
   if (bothStringTypes(givenType, expectedType)) return true;
 
   if (
