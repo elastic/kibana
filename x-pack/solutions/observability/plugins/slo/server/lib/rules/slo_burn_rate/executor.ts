@@ -22,6 +22,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { upperCase } from 'lodash';
 import {
   ALERT_ACTION,
@@ -35,7 +36,7 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
 } from '../../../../common/field_names/slo';
-import { Duration } from '../../../domain/models';
+import { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
 import { evaluate } from './lib/evaluate';
 import { evaluateDependencies } from './lib/evaluate_dependencies';
@@ -84,7 +85,17 @@ export const getRuleExecutor = (basePath: IBasePath) =>
     }
 
     const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const slo = await sloRepository.findById(params.sloId);
+    let slo: SLODefinition;
+    try {
+      slo = await sloRepository.findById(params.sloId);
+    } catch (err) {
+      throw createTaskRunError(
+        new Error(
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+        ),
+        TaskErrorSource.USER
+      );
+    }
 
     if (!slo.enabled) {
       return { state: {} };

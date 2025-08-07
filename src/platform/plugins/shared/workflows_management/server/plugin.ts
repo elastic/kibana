@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
@@ -15,6 +22,7 @@ import {
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../common';
+import type { WorkflowsManagementConfig } from './config';
 import { workflowSavedObjectType } from './saved_objects/workflow';
 import { SchedulerService } from './scheduler/scheduler_service';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
@@ -28,10 +36,16 @@ import type {
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
+// Import the workflows connector
+import {
+  getWorkflowsConnectorAdapter,
+  getConnectorType as getWorkflowsConnectorType,
+} from './connectors/workflows';
 import { registerFeatures } from './features';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
+  private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private schedulerService: SchedulerService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
@@ -41,10 +55,41 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    // Register workflows connector if actions plugin is available
+    if (plugins.actions) {
+      // Create workflows service function for the connector
+      const getWorkflowsService = async (request: KibanaRequest) => {
+        // Return a function that will be called by the connector
+        return async (workflowId: string, inputs: Record<string, unknown>) => {
+          if (!this.api) {
+            throw new Error('Workflows management API not initialized');
+          }
+
+          // Get the workflow first
+          const workflow = await this.api.getWorkflow(workflowId);
+          if (!workflow) {
+            throw new Error(`Workflow not found: ${workflowId}`);
+          }
+
+          // Run the workflow, @tb: maybe switch to scheduler?
+          return await this.api.runWorkflow(workflow, inputs);
+        };
+      };
+
+      // Register the workflows connector
+      plugins.actions.registerType(getWorkflowsConnectorType({ getWorkflowsService }));
+
+      // Register connector adapter for alerting if available
+      if (plugins.alerting) {
+        plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
+      }
+    }
 
     // Register workflow task definition
     if (plugins.taskManager) {
@@ -136,7 +181,8 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       getSavedObjectsClient,
       WORKFLOWS_EXECUTIONS_INDEX,
       WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
+      this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService);
 
