@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -22,6 +22,31 @@ import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 
+const CreateMonitorQueryParamsSchema = schema.object({
+  id: schema.maybe(schema.string()),
+  preserve_namespace: schema.maybe(schema.boolean()),
+  gettingStarted: schema.maybe(schema.boolean()),
+  internal: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+    })
+  ),
+  // primarily used for testing purposes, to specify the type of saved object
+  savedObjectType: schema.maybe(
+    schema.oneOf(
+      [
+        schema.literal(syntheticsMonitorSavedObjectType),
+        schema.literal(legacySyntheticsMonitorTypeSingle),
+      ],
+      {
+        defaultValue: syntheticsMonitorSavedObjectType,
+      }
+    )
+  ),
+});
+
+export type CreateMonitorQueryParams = TypeOf<typeof CreateMonitorQueryParamsSchema>;
+
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
@@ -29,28 +54,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   validation: {
     request: {
       body: schema.any(),
-      query: schema.object({
-        id: schema.maybe(schema.string()),
-        preserve_namespace: schema.maybe(schema.boolean()),
-        gettingStarted: schema.maybe(schema.boolean()),
-        internal: schema.maybe(
-          schema.boolean({
-            defaultValue: false,
-          })
-        ),
-        // primarily used for testing purposes, to specify the type of saved object
-        savedObjectType: schema.maybe(
-          schema.oneOf(
-            [
-              schema.literal(syntheticsMonitorSavedObjectType),
-              schema.literal(legacySyntheticsMonitorTypeSingle),
-            ],
-            {
-              defaultValue: syntheticsMonitorSavedObjectType,
-            }
-          )
-        ),
-      }),
+      query: CreateMonitorQueryParamsSchema,
     },
   },
   handler: async (routeContext): Promise<any> => {
