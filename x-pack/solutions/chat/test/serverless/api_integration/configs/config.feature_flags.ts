@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/api_integration/config.base';
+import { services } from '../services';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
@@ -13,6 +14,7 @@ import { createTestConfig } from '../../config.base';
  */
 export default createTestConfig({
   serverlessProject: 'chat',
+  services,
   junit: {
     reportName: 'Serverless Chat Feature Flags API Integration Tests',
   },

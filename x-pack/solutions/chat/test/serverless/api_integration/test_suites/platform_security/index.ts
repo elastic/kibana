@@ -8,9 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless chat API', function () {
-    this.tags(['esGate']);
-
-    loadTestFile(require.resolve('./platform_security'));
+  describe('Platform security APIs', function () {
+    loadTestFile(require.resolve('./authorization'));
   });
 }

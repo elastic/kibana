@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless chat UI', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('./navigation/navigation.ts'));
+    loadTestFile(require.resolve('../test_suites/navigation/navigation.ts'));
   });
 }

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Platform security APIs', function () {
-    loadTestFile(require.resolve('./authorization'));
+  describe('serverless chat UI - feature flags', function () {
+    // add tests that require feature flags, defined in config.feature_flags.ts
+    // loadTestFile(require.resolve('./path/to/tests'));
   });
 }
