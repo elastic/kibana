@@ -76,11 +76,11 @@ export const getValueInputPopover =
 
     const saveValue = useCallback(
       (newValue: string) => {
-        if (docId && newValue !== cellValue) {
+        if (!isPlaceholder && docId && newValue !== cellValue) {
           onValueChange(docId, { [columnId]: newValue });
         }
       },
-      [docId, cellValue, columnId]
+      [isPlaceholder, docId, cellValue, columnId]
     );
 
     const onSubmit = useCallback(

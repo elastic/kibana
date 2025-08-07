@@ -125,11 +125,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
 
   // This effect is needed to ensure that the activeColumns state is always in sync with the rendered columns
   // This is necessary because DataTable onSetColumns method is not updated when new columns are added.
-  useEffect(() => {
-    if (!isEqual(activeColumns, renderedColumns)) {
-      setActiveColumns(renderedColumns);
-    }
-  }, [renderedColumns, activeColumns]);
+  useEffect(
+    function syncActiveColumns() {
+      if (!isEqual(activeColumns, renderedColumns)) {
+        setActiveColumns(renderedColumns);
+      }
+    },
+    [renderedColumns, activeColumns]
+  );
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {

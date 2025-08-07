@@ -150,6 +150,9 @@ export class IndexUpdateService {
               Builder.expression.column({
                 args: [Builder.identifier({ name: '_id' })],
               }),
+              Builder.expression.column({
+                args: [Builder.identifier({ name: '_source' })],
+              }),
             ],
           }),
         ],
@@ -343,20 +346,16 @@ export class IndexUpdateService {
           switchMap((updates) => {
             return from(this.bulkUpdate(updates)).pipe(
               withLatestFrom(this._rows$, this.dataView$),
-              switchMap(([response, rows, dataView]) => {
-                // Refresh the data view fields after the update, to get any new field type added
-                return from(this.data.dataViews.refreshFields(dataView)).pipe(
-                  map(() => {
-                    return { updates, response, rows, dataView };
-                  })
-                );
+              map(([response, rows, dataView]) => {
+                return { updates, response, rows, dataView };
               })
             );
           })
         )
         .subscribe({
-          next: ({ updates, response, rows, dataView }) => {
-            // TODO do we need to re-fetch docs using _mget, in order to retrieve a full doc update?
+          next: async ({ updates, response, rows, dataView }) => {
+            // Refresh the data view fields to get new columns types if any
+            await this.data.dataViews.refreshFields(dataView, false, true);
 
             const mappedResponse = response.items.reduce((acc, item, index) => {
               // Updates that were successful
