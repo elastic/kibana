@@ -15,7 +15,7 @@ export function AdvancedConfigKeyInput({
   configValue,
   index,
   setValidationErrors,
-  onUpdate,
+  onChange,
   checkIfAdvancedConfigKeyExists,
   checkIfPredefinedConfigKeyExists,
 }: {
@@ -23,7 +23,7 @@ export function AdvancedConfigKeyInput({
   configValue: string;
   index: number;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  onUpdate: (oldKey: string, newKey: string, value: string) => void;
+  onChange: (key: string, value: string, oldKey: string) => void;
   checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
 }) {
@@ -75,7 +75,7 @@ export function AdvancedConfigKeyInput({
       !checkIfPredefinedConfigKeyExists(newKey) &&
       !checkIfAdvancedConfigKeyExists(newKey, configKey)
     ) {
-      onUpdate(configKey, newKey, configValue);
+      onChange(newKey, configValue, configKey);
     }
   };
 

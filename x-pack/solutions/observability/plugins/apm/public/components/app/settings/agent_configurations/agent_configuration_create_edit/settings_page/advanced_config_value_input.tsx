@@ -15,14 +15,14 @@ export function AdvancedConfigValueInput({
   configKey,
   index,
   setValidationErrors,
-  onUpdate,
+  onChange,
   onDelete,
 }: {
   configValue: string;
   configKey: string;
   index: number;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
-  onUpdate: (key: string, value: string) => void;
+  onChange: (key: string, value: string) => void;
   onDelete: (key: string, index: number) => void;
 }) {
   const [touched, setTouched] = useState(false);
@@ -33,7 +33,7 @@ export function AdvancedConfigValueInput({
 
   const handleValueChange = (newValue: string) => {
     setTouched(true);
-    onUpdate(configKey, newValue);
+    onChange(configKey, newValue);
     setValidationErrors((prev) => ({
       ...prev,
       [`value${index}`]: isInvalidInput(newValue),

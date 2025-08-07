@@ -109,6 +109,65 @@ export function SettingsPage({
     });
   };
 
+  const handleChange = (key: string, value: string, oldKey?: string) => {
+    setNewConfig((prev) => {
+      if (oldKey !== undefined) {
+        // Maintain the order by recreating the config object while preserving key positions
+        const newConfigs: Record<string, string> = {};
+
+        Object.entries(prev.settings).forEach(([currentKey, currentVal]) => {
+          if (currentKey === oldKey) {
+            // Replace the old key with the new key at the same position
+            newConfigs[key] = value;
+          } else {
+            // Keep other keys in their original positions
+            newConfigs[currentKey] = currentVal;
+          }
+        });
+
+        return {
+          ...prev,
+          settings: newConfigs,
+        };
+      } else if (key === '' && value === '') {
+        // Add new empty setting at the top
+        return {
+          ...prev,
+          settings: {
+            ['']: '',
+            ...prev.settings,
+          },
+        };
+      } else {
+        return {
+          ...prev,
+          settings: {
+            ...prev.settings,
+            [key]: value,
+          },
+        };
+      }
+    });
+  };
+
+  const handleDelete = (key: string, index: number) => {
+    if (newConfig.settings[key] !== undefined) {
+      setRemovedConfigCount((prev) => prev + 1);
+    }
+    setValidationErrors((prev) => ({
+      ...prev,
+      [`key${index}`]: false,
+      [`value${index}`]: false,
+    }));
+    setNewConfig((prev) => {
+      const { [key]: deleted, ...rest } = prev.settings;
+      return {
+        ...prev,
+        settings: rest,
+      };
+    });
+  };
+
   if (status === FETCH_STATUS.FAILURE) {
     return (
       <EuiCallOut
@@ -208,18 +267,18 @@ export function SettingsPage({
               {renderSettings({
                 unsavedChanges,
                 newConfig,
-                setNewConfig,
                 settingsDefinitionsByAgent,
+                handleChange,
               })}
               {isAdvancedConfigSupported && (
                 <>
                   <EuiHorizontalRule />
                   <AdvancedConfiguration
                     newConfig={newConfig}
-                    setNewConfig={setNewConfig}
                     setValidationErrors={setValidationErrors}
                     settingsDefinitionsByAgent={settingsDefinitionsByAgent}
-                    setRemovedConfigCount={setRemovedConfigCount}
+                    onChange={handleChange}
+                    onDelete={handleDelete}
                   />
                 </>
               )}
@@ -253,13 +312,13 @@ export function SettingsPage({
 function renderSettings({
   newConfig,
   unsavedChanges,
-  setNewConfig,
   settingsDefinitionsByAgent,
+  handleChange,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
-  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
   settingsDefinitionsByAgent: SettingDefinition[];
+  handleChange: (key: string, value: string) => void;
 }) {
   // filter out agent specific items that are not applicable
   // to the selected service
@@ -269,15 +328,7 @@ function renderSettings({
       key={setting.key}
       setting={setting}
       value={newConfig.settings[setting.key]}
-      onChange={(key, value) => {
-        setNewConfig((prev) => ({
-          ...prev,
-          settings: {
-            ...prev.settings,
-            [key]: value,
-          },
-        }));
-      }}
+      onChange={(key, value) => handleChange(key, value)}
     />
   ));
 }

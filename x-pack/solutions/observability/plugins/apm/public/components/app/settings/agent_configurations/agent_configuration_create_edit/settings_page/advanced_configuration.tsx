@@ -25,17 +25,18 @@ import { AdvancedConfigValueInput } from './advanced_config_value_input';
 export function AdvancedConfiguration({
   newConfig,
   settingsDefinitionsByAgent,
-  setNewConfig,
-  setRemovedConfigCount,
   setValidationErrors,
+  onChange,
+  onDelete,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitionsByAgent: SettingDefinition[];
-  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
-  setRemovedConfigCount: React.Dispatch<React.SetStateAction<number>>;
   setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  onChange: (key: string, value: string, oldKey?: string) => void;
+  onDelete: (key: string, index: number) => void;
 }) {
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
+
   const predefinedAgentConfigKeys = useMemo(
     () => settingsDefinitionsByAgent.map((setting) => setting.key),
     [settingsDefinitionsByAgent]
@@ -47,6 +48,7 @@ export function AdvancedConfiguration({
     );
   }, [predefinedAgentConfigKeys, newConfig.settings]);
 
+  // Validations
   const checkIfAdvancedConfigKeyExists = useCallback(
     (newKey: string, oldKey: string) => newKey !== oldKey && unknownAgentConfigs.has(newKey),
     [unknownAgentConfigs]
@@ -56,70 +58,6 @@ export function AdvancedConfiguration({
     (key: string) => predefinedAgentConfigKeys.includes(key),
     [predefinedAgentConfigKeys]
   );
-
-  const updateValue = (key: string, value: string) => {
-    setNewConfig((prev) => {
-      return {
-        ...prev,
-        settings: {
-          ...prev.settings,
-          [key]: value,
-        },
-      };
-    });
-  };
-
-  const updateKey = (oldKey: string, newKey: string, value: string) => {
-    setNewConfig((prev) => {
-      // Maintain the order by recreating the config object while preserving key positions
-      const newConfigs: Record<string, string> = {};
-
-      Object.entries(prev.settings).forEach(([key, val]) => {
-        if (key === oldKey) {
-          // Replace the old key with the new key at the same position
-          newConfigs[newKey] = value;
-        } else {
-          // Keep other keys in their original positions
-          newConfigs[key] = val;
-        }
-      });
-
-      return {
-        ...prev,
-        settings: newConfigs,
-      };
-    });
-  };
-
-  const addNewRow = () => {
-    setNewConfig((prev) => {
-      return {
-        ...prev,
-        settings: {
-          ['']: '',
-          ...prev.settings,
-        },
-      };
-    });
-  };
-
-  const deleteRow = (key: string, index: number) => {
-    if (newConfig.settings[key] !== undefined) {
-      setRemovedConfigCount((prev) => prev + 1);
-    }
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`key${index}`]: false,
-      [`value${index}`]: false,
-    }));
-    setNewConfig((prev) => {
-      const { [key]: deleted, ...rest } = prev.settings;
-      return {
-        ...prev,
-        settings: rest,
-      };
-    });
-  };
 
   return (
     <>
@@ -164,7 +102,7 @@ export function AdvancedConfiguration({
               <EuiButton
                 data-test-subj="apmSettingsAddAdvancedConfigurationButton"
                 iconType="plusInCircle"
-                onClick={addNewRow}
+                onClick={() => onChange('', '')}
               >
                 {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {
                   defaultMessage: 'Add custom setting',
@@ -186,7 +124,7 @@ export function AdvancedConfiguration({
                 configValue={configValue}
                 index={index}
                 setValidationErrors={setValidationErrors}
-                onUpdate={updateKey}
+                onChange={onChange}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
               />
@@ -197,8 +135,8 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 index={index}
                 setValidationErrors={setValidationErrors}
-                onUpdate={updateValue}
-                onDelete={deleteRow}
+                onChange={onChange}
+                onDelete={onDelete}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
