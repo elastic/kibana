@@ -17,7 +17,12 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import { MigrationLastExecution, MigrationStatus, MigrationTaskStats } from './migration.gen';
+import {
+  MigrationLastExecution,
+  MigrationTranslationResult,
+  MigrationStatus,
+  MigrationTaskStats,
+} from './migration.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -116,6 +121,10 @@ export const DashboardMigrationDashboardData = z.object({
    * The original dashboard to migrate.
    */
   original_dashboard: OriginalDashboard,
+  /**
+   * The rule translation result.
+   */
+  translation_result: MigrationTranslationResult.optional(),
   /**
    * The status of the dashboard migration process.
    */

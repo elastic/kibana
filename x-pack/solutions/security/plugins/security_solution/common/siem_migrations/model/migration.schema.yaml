@@ -47,6 +47,14 @@ components:
           type: boolean
           description: Indicates if the last execution was stopped by the user.
 
+    MigrationTranslationResult:
+      type: string
+      description: The migration translation result.
+      enum: # should match RuleTranslationResult enum at ../constants.ts TODO: refactor enum to MigrationTranslationResult
+        - full
+        - partial
+        - untranslatable
+
     MigrationTaskStats:
       type: object
       description: The migration task stats object.

@@ -137,9 +137,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
       const migrationId = 'testId';
       const index = '.kibana-siem-rule-migrations';
 
-      const operations = await siemMigrationsDataMigrationClient.prepareDelete({
-        id: migrationId,
-      });
+      const operations = await siemMigrationsDataMigrationClient.prepareDelete(migrationId);
 
       expect(operations).toMatchObject([
         {

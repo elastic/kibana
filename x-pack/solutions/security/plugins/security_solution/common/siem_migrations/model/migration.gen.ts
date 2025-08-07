@@ -68,6 +68,14 @@ export const MigrationLastExecution = z.object({
 });
 
 /**
+ * The migration translation result.
+ */
+export type MigrationTranslationResult = z.infer<typeof MigrationTranslationResult>;
+export const MigrationTranslationResult = z.enum(['full', 'partial', 'untranslatable']);
+export type MigrationTranslationResultEnum = typeof MigrationTranslationResult.enum;
+export const MigrationTranslationResultEnum = MigrationTranslationResult.enum;
+
+/**
  * The migration items stats.
  */
 export type MigrationTaskItemsStats = z.infer<typeof MigrationTaskItemsStats>;

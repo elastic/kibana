@@ -73,6 +73,9 @@ components:
         original_dashboard:
           description: The original dashboard to migrate.
           $ref: '#/components/schemas/OriginalDashboard'
+        translation_result:
+          description: The rule translation result.
+          $ref: './migration.schema.yaml#/components/schemas/MigrationTranslationResult'
         status:
           description: The status of the dashboard migration process.
           $ref: './migration.schema.yaml#/components/schemas/MigrationStatus'

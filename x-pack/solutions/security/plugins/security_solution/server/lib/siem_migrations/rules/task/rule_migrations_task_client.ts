@@ -13,6 +13,7 @@ import type {
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationsTaskClient } from '../../common/task/siem_migrations_task_client';
 import type { MigrateRuleConfigSchema } from './agent/types';
+import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 
 export type RuleMigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 export class RuleMigrationsTaskClient extends SiemMigrationsTaskClient<
@@ -21,6 +22,7 @@ export class RuleMigrationsTaskClient extends SiemMigrationsTaskClient<
   MigrateRuleConfigSchema
 > {
   protected readonly TaskRunnerClass = RuleMigrationTaskRunner;
+  protected readonly EvaluatorClass = RuleMigrationTaskEvaluator;
 
   // Rules specific last_execution config
   protected getLastExecutionConfig(

@@ -42,16 +42,16 @@ export class SiemMigrationsDataMigrationClient<
    * Gets the migration document by id or returns undefined if it does not exist.
    *
    * */
-  async get({ id }: { id: string }): Promise<Stored<M> | undefined> {
+  async get(migrationId: string): Promise<Stored<M> | undefined> {
     const index = await this.getIndexName();
     return this.esClient
-      .get<Stored<M>>({ index, id })
+      .get<Stored<M>>({ index, id: migrationId })
       .then(this.processHit)
       .catch((error) => {
         if (isNotFoundError(error)) {
           return undefined;
         }
-        this.logger.error(`Error getting migration ${id}: ${error}`);
+        this.logger.error(`Error getting migration ${migrationId}: ${error}`);
         throw error;
       });
   }
@@ -80,10 +80,10 @@ export class SiemMigrationsDataMigrationClient<
    * Prepares bulk ES delete operation for a migration document based on its id.
    *
    */
-  async prepareDelete({ id }: { id: string }): Promise<BulkOperationContainer[]> {
+  async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
     const index = await this.getIndexName();
     const migrationDeleteOperation = {
-      delete: { _index: index, _id: id },
+      delete: { _index: index, _id: migrationId },
     };
     return [migrationDeleteOperation];
   }

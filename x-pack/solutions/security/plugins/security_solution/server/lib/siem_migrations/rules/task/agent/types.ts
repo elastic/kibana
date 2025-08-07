@@ -10,10 +10,10 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsRetriever } from '../retrievers';
 import type { EsqlKnowledgeBase } from '../util/esql_knowledge_base';
-import type { ChatModel } from '../util/actions_client_chat';
+import type { ChatModel } from '../../../common/task/util/actions_client_chat';
+import type { MigrationState } from '../../../common/task/types';
 import type { migrateRuleConfigSchema, migrateRuleState } from './state';
 import type { RuleMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
-import type { MigrationState } from '../../../common/task/types';
 
 export type MigrateRuleGraphState = typeof migrateRuleState.State;
 export type MigrateRuleState = MigrationState<RuleMigrationRule>;
