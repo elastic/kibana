@@ -303,5 +303,90 @@ export default function (providerContext: FtrProviderContext) {
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
     });
+
+    describe('Knowledge Base', () => {
+      it('returns knowledge base content for an installed package', async function () {
+        await installPackage(testPkgName, testPkgVersion);
+        const res = await supertest
+          .get(`internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        expect(res.body).to.have.property('package_name');
+        expect(res.body).to.have.property('version');
+        expect(res.body).to.have.property('installed_at');
+        expect(res.body).to.have.property('knowledge_base_content');
+        expect(res.body.package_name).to.equal(testPkgName);
+        expect(res.body.knowledge_base_content).to.be.an('array');
+
+        await uninstallPackage(testPkgName, testPkgVersion);
+      });
+
+      it('returns 404 for knowledge base of non-existent package', async function () {
+        await supertest
+          .get(
+            `internal/fleet/api/fleet/epm/packages/nonexistent/knowledge_base?pkgName=nonexistent`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(404);
+      });
+
+      it('returns 400 for knowledge base request without pkgName query parameter', async function () {
+        await supertest
+          .get(`internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(400);
+      });
+
+      it('validates knowledge base content structure', async function () {
+        await installPackage(testPkgName, testPkgVersion);
+        const res = await supertest
+          .get(
+            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
+          )
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // Validate response structure matches schema
+        expect(res.body.package_name).to.be.a('string');
+        expect(res.body.version).to.be.a('string');
+        expect(res.body.installed_at).to.be.a('string');
+        expect(res.body.knowledge_base_content).to.be.an('array');
+
+        // Validate knowledge base content items structure
+        res.body.knowledge_base_content.forEach((item: any) => {
+          expect(item).to.have.property('filename');
+          expect(item).to.have.property('content');
+          expect(item.filename).to.be.a('string');
+          expect(item.content).to.be.a('string');
+        });
+
+        await uninstallPackage(testPkgName, testPkgVersion);
+      });
+
+      it('allows user with integrations read permission to access knowledge base', async () => {
+        await installPackage(testPkgName, testPkgVersion);
+        await supertestWithoutAuth
+          .get(
+            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
+          )
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        await uninstallPackage(testPkgName, testPkgVersion);
+      });
+
+      it('allows user with fleet permission to access knowledge base', async () => {
+        await installPackage(testPkgName, testPkgVersion);
+        await supertestWithoutAuth
+          .get(
+            `internal/fleet/api/fleet/epm/packages/${testPkgName}/knowledge_base?pkgName=${testPkgName}`
+          )
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        await uninstallPackage(testPkgName, testPkgVersion);
+      });
+    });
   });
 }

@@ -12,7 +12,7 @@ import type { KnowledgeBaseItem } from '../../../../common/types';
 export const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 
 export const INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE = {
-  index_patterns: [INTEGRATION_KNOWLEDGE_INDEX],
+  index_patterns: [`${INTEGRATION_KNOWLEDGE_INDEX}*`], // Add wildcard support to template here so that we can reuse the const everywhere else
   template: {
     settings: {
       'index.hidden': true,
