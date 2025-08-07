@@ -15,6 +15,7 @@
     "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/esql-types",
+    "@kbn/core-pricing-common"
   ],
   "exclude": [
     "target/**/*",
