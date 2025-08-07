@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';

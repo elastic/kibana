@@ -6,10 +6,10 @@
  */
 
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
+import type { MigrationTranslationResult } from '../../../../common/siem_migrations/model/migration.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,
-  RuleMigrationTranslationResult,
   UpdateRuleMigrationRule,
   RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
@@ -41,7 +41,7 @@ export interface RuleMigrationPrebuiltRule {
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 
 export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
-  translation_result?: RuleMigrationTranslationResult;
+  translation_result?: MigrationTranslationResult;
 };
 
 /**

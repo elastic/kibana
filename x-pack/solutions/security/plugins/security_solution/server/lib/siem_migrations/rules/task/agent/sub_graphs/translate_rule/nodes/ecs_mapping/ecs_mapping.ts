@@ -10,7 +10,7 @@ import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base'
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../../../common/task/util/comments';
 
 interface GetEcsMappingNodeParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;

@@ -190,7 +190,7 @@ components:
           $ref: '#/components/schemas/ElasticRule'
         translation_result:
           description: The rule translation result.
-          $ref: '#/components/schemas/RuleMigrationTranslationResult'
+          $ref: './migration.schema.yaml#/components/schemas/MigrationTranslationResult'
         status:
           description: The status of the rule migration process.
           $ref: './migration.schema.yaml#/components/schemas/MigrationStatus'
@@ -274,14 +274,6 @@ components:
             failed:
               type: integer
               description: The number of rules that have failed translation.
-
-    RuleMigrationTranslationResult:
-      type: string
-      description: The rule translation result.
-      enum: # should match SiemMigrationRuleTranslationResult enum at ../constants.ts
-        - full
-        - partial
-        - untranslatable
 
     RuleMigrationComment:
       type: object

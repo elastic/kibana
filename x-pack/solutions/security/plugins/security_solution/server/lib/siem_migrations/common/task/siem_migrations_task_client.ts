@@ -22,11 +22,13 @@ import type {
   ItemDocument,
 } from '../types';
 import type {
+  SiemMigrationTaskEvaluateParams,
   SiemMigrationTaskStartParams,
   SiemMigrationTaskStartResult,
   SiemMigrationTaskStopResult,
 } from './types';
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
+import type { SiemMigrationTaskEvaluator } from './siem_migrations_task_evaluator';
 
 export abstract class SiemMigrationsTaskClient<
   M extends MigrationDocument = StoredSiemMigration,
@@ -34,6 +36,7 @@ export abstract class SiemMigrationsTaskClient<
   C extends object = {}
 > {
   protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, C>;
+  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluator<M, I, C>;
 
   constructor(
     protected migrationsRunning: Map<string, SiemMigrationTaskRunner<M, I, C>>,
@@ -138,7 +141,7 @@ export abstract class SiemMigrationsTaskClient<
 
   /** Returns the stats of a migration */
   public async getStats(migrationId: string): Promise<SiemMigrationTaskStats> {
-    const migration = await this.data.migrations.get({ id: migrationId });
+    const migration = await this.data.migrations.get(migrationId);
     if (!migration) {
       throw new Error(`Migration with ID ${migrationId} not found`);
     }
@@ -224,23 +227,27 @@ export abstract class SiemMigrationsTaskClient<
   }
 
   /** Creates a new evaluator for the rule migration task */
-  async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
-    // const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
-    //   params;
-    // const migrationLogger = this.logger.get('evaluate');
-    // const migrationTaskEvaluator = new RuleMigrationTaskEvaluator(
-    //   evaluationId,
-    //   this.currentUser,
-    //   abortController,
-    //   this.data,
-    //   migrationLogger,
-    //   this.dependencies
-    // );
-    // await migrationTaskEvaluator.evaluate({
-    //   connectorId,
-    //   langsmithOptions,
-    //   invocationConfig,
-    // });
+  async evaluate(params: SiemMigrationTaskEvaluateParams<C>): Promise<void> {
+    if (!this.EvaluatorClass) {
+      throw new Error('Evaluator class needs to be defined to use evaluate method');
+    }
+
+    const { evaluationId, langsmithOptions, connectorId, invocationConfig, abortController } =
+      params;
+    const migrationLogger = this.logger.get('evaluate');
+    const migrationTaskEvaluator = new this.EvaluatorClass(
+      evaluationId,
+      this.currentUser,
+      abortController,
+      this.data,
+      migrationLogger,
+      this.dependencies
+    );
+    await migrationTaskEvaluator.evaluate({
+      connectorId,
+      langsmithOptions,
+      invocationConfig,
+    });
   }
 
   /** Returns if a migration is running or not */

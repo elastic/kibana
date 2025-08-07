@@ -11,7 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { GraphNode } from '../../../../types';
 import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../../../common/task/util/comments';
 
 interface GetInlineQueryNodeParams {
   model: ChatModel;

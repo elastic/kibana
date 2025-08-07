@@ -18,7 +18,12 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { MigrationStatus, MigrationTaskStats, MigrationLastExecution } from './migration.gen';
+import {
+  MigrationTranslationResult,
+  MigrationStatus,
+  MigrationTaskStats,
+  MigrationLastExecution,
+} from './migration.gen';
 
 /**
  * The original rule vendor identifier.
@@ -192,14 +197,6 @@ export const RuleMigration = z
   .merge(RuleMigrationData);
 
 /**
- * The rule translation result.
- */
-export type RuleMigrationTranslationResult = z.infer<typeof RuleMigrationTranslationResult>;
-export const RuleMigrationTranslationResult = z.enum(['full', 'partial', 'untranslatable']);
-export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslationResult.enum;
-export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
-
-/**
  * The comment for the migration
  */
 export type RuleMigrationComment = z.infer<typeof RuleMigrationComment>;
@@ -252,7 +249,7 @@ export const RuleMigrationRuleData = z.object({
   /**
    * The rule translation result.
    */
-  translation_result: RuleMigrationTranslationResult.optional(),
+  translation_result: MigrationTranslationResult.optional(),
   /**
    * The status of the rule migration process.
    */

@@ -29,7 +29,7 @@ export abstract class SiemMigrationsDataClient<
       migrationItemsDeleteOperations,
       migrationResourcesDeleteOperations,
     ] = await Promise.all([
-      this.migrations.prepareDelete({ id: migrationId }),
+      this.migrations.prepareDelete(migrationId),
       this.items.prepareDelete(migrationId),
       this.resources.prepareDelete(migrationId),
     ]);

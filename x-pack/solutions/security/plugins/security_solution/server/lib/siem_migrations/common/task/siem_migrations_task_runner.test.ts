@@ -11,7 +11,7 @@ import type { AuthenticatedUser } from '@kbn/core/server';
 import type { StoredRuleMigration } from '../types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { SiemMigrationsClientDependencies } from '../types';
 
 jest.mock('./rule_migrations_telemetry_client');
 

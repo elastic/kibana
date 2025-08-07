@@ -26,6 +26,7 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
   status: { type: 'keyword', required: true },
+  translation_result: { type: 'keyword', required: true },
   updated_at: { type: 'date', required: true },
   updated_by: { type: 'keyword', required: true },
   original_dashboard: { type: 'object', required: true },

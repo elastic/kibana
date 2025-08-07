@@ -44,9 +44,7 @@ export const registerSiemRuleMigrationsGetRoute = (
           const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
           await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-          const storedMigration = await ruleMigrationsClient.data.migrations.get({
-            id: migrationId,
-          });
+          const storedMigration = await ruleMigrationsClient.data.migrations.get(migrationId);
 
           if (!storedMigration) {
             return res.notFound({

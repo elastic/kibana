@@ -29,7 +29,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   RuleMigrationRule,
   MigrateRuleConfigSchema
 > {
-  declare task?: MigrationTask<RuleMigrationRule, MigrateRuleConfigSchema>;
+  protected declare task?: MigrationTask<RuleMigrationRule, MigrateRuleConfigSchema>;
   private retriever: RuleMigrationsRetriever;
 
   constructor(
