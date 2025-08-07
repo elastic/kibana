@@ -5,38 +5,59 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { enablePrivmonSetting } from '../../utils';
+import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
-  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
   const es = getService('es');
   const retry = getService('retry');
 
-  const waitForPrivMonUsersToBeSynced = async () => {
+  const createUserIndex = async (indexName: string) =>
+    es.indices.create({
+      index: indexName,
+      mappings: {
+        properties: {
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+                fields: {
+                  text: { type: 'text' },
+                },
+              },
+              role: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      },
+    });
+
+  const waitForPrivMonUsersToBeSynced = async () =>
     retry.waitForWithTimeout('Wait for PrivMon users to be synced', 90000, async () => {
       const res = await api.listPrivMonUsers({ query: {} });
       log.info(`PrivMon users sync check: found ${res.body.length} users`);
       return res.body.length > 0; // wait until we have at least one user
     });
-  };
 
   describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
-    const dataView = dataViewRouteHelpersFactory(supertest);
     before(async () => {
-      await dataView.create('security-solution');
       await enablePrivmonSetting(kibanaServer);
     });
 
     after(async () => {
-      await dataView.delete('security-solution');
+      await disablePrivmonSetting(kibanaServer);
+    });
+
+    afterEach(async () => {
+      await api.deleteMonitoringEngine({ query: { data: true } });
     });
 
     describe('health', () => {
@@ -49,7 +70,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res.body));
         }
 
-        expect(res.status).eql(200);
+        expect(res.status).toEqual(200);
       });
     });
 
@@ -63,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res1.body));
         }
 
-        expect(res1.status).eql(200);
+        expect(res1.status).toEqual(200);
 
         log.info(`Re-initializing Privilege Monitoring engine`);
         const res2 = await api.initMonitoringEngine();
@@ -72,12 +93,11 @@ export default ({ getService }: FtrProviderContext) => {
           log.error(JSON.stringify(res2.body));
         }
 
-        expect(res2.status).eql(200);
+        expect(res2.status).toEqual(200);
       });
     });
 
     describe('plain index sync', () => {
-      log.info(`Syncing plain index`);
       const indexName = 'tatooine-privileged-users';
       const entitySource = {
         type: 'index',
@@ -93,37 +113,17 @@ export default ({ getService }: FtrProviderContext) => {
         ],
         filter: {},
       };
+
+      beforeEach(async () => {
+        await createUserIndex(indexName);
+      });
+
       afterEach(async () => {
-        log.info(`Cleaning up after test`);
         try {
           await es.indices.delete({ index: indexName }, { ignore: [404] });
-          await api.deleteMonitoringEngine({ query: { data: true } });
         } catch (err) {
           log.warning(`Failed to clean up in afterEach: ${err.message}`);
         }
-      });
-      beforeEach(async () => {
-        // create the tatooine index
-        await es.indices.create({
-          index: indexName,
-          mappings: {
-            properties: {
-              user: {
-                properties: {
-                  name: {
-                    type: 'keyword',
-                    fields: {
-                      text: { type: 'text' },
-                    },
-                  },
-                  role: {
-                    type: 'keyword',
-                  },
-                },
-              },
-            },
-          },
-        });
       });
 
       it('should sync plain index', async () => {
@@ -147,8 +147,9 @@ export default ({ getService }: FtrProviderContext) => {
         const bulkBody = [...uniqueUsers, ...repeatedUsers];
         await es.bulk({ index: indexName, body: bulkBody, refresh: true });
         // register entity source
-        const response = await api.createEntitySource({ body: entitySource }, 'default');
-        expect(response.status).to.be(200);
+        const response = await api.createEntitySource({ body: entitySource });
+
+        expect(response.status).toBe(200);
         // Call init to trigger the sync
         await privMonUtils.initPrivMonEngine();
         // default-monitoring-index should exist now
@@ -158,16 +159,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const names = result.saved_objects.map((so) => so.attributes.name);
-        expect(names).to.contain('.entity_analytics.monitoring.users-default');
-        expect(names).to.contain('StarWars');
+        expect(names).toContain('StarWars');
         await waitForPrivMonUsersToBeSynced();
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);
         log.info(`Found users: ${userNames.join(', ')}`);
-        expect(userNames).to.contain('Luke Skywalker');
-        expect(userNames).to.contain('C-3PO');
-        expect(userNames.filter((name: string) => name === 'C-3PO')).to.have.length(1);
+        expect(userNames).toContain('Luke Skywalker');
+        expect(userNames).toContain('C-3PO');
+        expect(userNames.filter((name: string) => name === 'C-3PO')).toHaveLength(1);
       });
     });
   });

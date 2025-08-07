@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type {
-  Logger,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  AuditLogger,
-  IScopedClusterClient,
-  AnalyticsServiceSetup,
-  AuditEvent,
+import {
+  type Logger,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+  type AuditLogger,
+  type IScopedClusterClient,
+  type AnalyticsServiceSetup,
+  type AuditEvent,
 } from '@kbn/core/server';
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -82,6 +82,7 @@ import {
 } from './elasticsearch/pipelines/event_ingested';
 import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
+import { ignoreSONotFoundError } from './saved_objects/helpers';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -189,7 +190,7 @@ export class PrivilegeMonitoringDataClient {
   async delete(deleteData = false): Promise<{ deleted: boolean }> {
     this.log('info', 'Deleting privilege monitoring engine');
 
-    await this.engineClient.delete();
+    await this.engineClient.delete().catch(ignoreSONotFoundError);
 
     if (deleteData) {
       await this.esClient.indices.delete(
@@ -210,9 +211,11 @@ export class PrivilegeMonitoringDataClient {
       taskManager: this.opts.taskManager,
     });
 
-    await this.monitoringIndexSourceClient
-      .findAll({})
-      .then((sos) => sos.forEach((so) => this.monitoringIndexSourceClient.delete(so.id)));
+    const allDataSources = await this.monitoringIndexSourceClient.findAll({});
+    const deleteSourcePromises = allDataSources.map((so) =>
+      this.monitoringIndexSourceClient.delete(so.id)
+    );
+    await Promise.all(deleteSourcePromises);
 
     return { deleted: true };
   }
