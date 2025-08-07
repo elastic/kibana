@@ -58,11 +58,15 @@ export function fnv1a32(str: string): number {
     v1 = (t1 + (t0 >>> 16)) & 65535;
 
     v0 = t0 & 65535;
+
     v0 ^= str.charCodeAt(i++);
     t0 = v0 * 403;
     t1 = v1 * 403;
+
     t1 += v0 << 8;
+
     v1 = (t1 + (t0 >>> 16)) & 65535;
+
     v0 = t0 & 65535;
   }
 
@@ -70,8 +74,11 @@ export function fnv1a32(str: string): number {
     v0 ^= str.charCodeAt(i++);
     t0 = v0 * 403;
     t1 = v1 * 403;
+
     t1 += v0 << 8;
+
     v1 = (t1 + (t0 >>> 16)) & 65535;
+
     v0 = t0 & 65535;
   }
 
