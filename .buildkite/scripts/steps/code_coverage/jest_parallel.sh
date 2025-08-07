@@ -88,7 +88,12 @@ printf "%s\n" "${results[@]}"
 
 # Scout reporter
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events --dontFailOnError --dontFailOnMissingEventLogPath
+
+if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+  node scripts/scout upload-events --dontFailOnError
+else
+  echo "SCOUT_REPORTER_ENABLED is not 'true'. Skipping Scout event upload."
+fi
 
 # Force exit 0 to ensure the next build step starts.
 exit 0

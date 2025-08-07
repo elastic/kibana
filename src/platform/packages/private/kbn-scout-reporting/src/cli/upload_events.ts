@@ -42,20 +42,12 @@ export const uploadAllEventsFromPath = async (
     esURL: string;
     esAPIKey: string;
     verifyTLSCerts: boolean;
-    dontFailOnMissingEventLogPath: boolean;
     log: ToolingLog;
   }
 ) => {
   // Validate CLI options
   if (!fs.existsSync(eventLogPath)) {
-    if (options.dontFailOnMissingEventLogPath) {
-      options.log.warning(
-        `⚠️ The provided event log path '${eventLogPath}' does not exist. Won't upload any events.`
-      );
-      return;
-    } else {
-      throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
-    }
+    throw createFlagError(`The provided event log path '${eventLogPath}' does not exist.`);
   }
 
   // If the provided event log path is a file, ensure it ends with .ndjson
@@ -113,21 +105,19 @@ export const uploadEvents: Command<void> = {
   description: 'Upload events recorded by the Scout reporter to Elasticsearch',
   flags: {
     string: ['eventLogPath', 'esURL', 'esAPIKey'],
-    boolean: ['verifyTLSCerts', 'dontFailOnError', 'dontFailOnMissingEventLogPath'],
+    boolean: ['verifyTLSCerts', 'dontFailOnError'],
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
       dontFailOnError: false,
-      dontFailOnMissingEventLogPath: false,
     },
     help: `
-    --esURL                         (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
-    --esAPIKey                      (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-    --verifyTLSCerts                (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --eventLogPath                  (optional)  Path to an event log file or directory. If omitted, all events in the Scout reports output directory will be uploaded
-    --dontFailOnError               (optional)  If present, errors during upload will be logged but not thrown, allowing the process to complete without failure (default: false)
-    --dontFailOnMissingEventLogPath (optional)  If present, log a warning instead of throwing an error if the event log file or directory don't exist (default: false)
+    --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --eventLogPath    (optional)  Path to an event log file or directory. If omitted, all events in the Scout reports output directory will be uploaded
+    --dontFailOnError (optional)  If present, errors during upload will be logged but not thrown, allowing the process to complete without failure (default: false)
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -138,14 +128,12 @@ export const uploadEvents: Command<void> = {
     const esAPIKey = flagsReader.requiredString('esAPIKey');
     const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
     const dontFailOnError = flagsReader.boolean('dontFailOnError');
-    const dontFailOnMissingEventLogPath = flagsReader.boolean('dontFailOnMissingEventLogPath');
 
     try {
       await uploadAllEventsFromPath(eventLogPath, {
         esURL,
         esAPIKey,
         verifyTLSCerts,
-        dontFailOnMissingEventLogPath,
         log,
       });
     } catch (error) {

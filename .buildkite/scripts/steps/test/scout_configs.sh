@@ -123,6 +123,10 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
 fi
 
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events --dontFailOnError --dontFailOnMissingEventLogPath
+if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+  node scripts/scout upload-events --dontFailOnError
+else
+  echo "SCOUT_REPORTER_ENABLED is not 'true'. Skipping Scout event upload."
+fi
 
 exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures

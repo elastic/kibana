@@ -47,7 +47,7 @@ describe('uploadAllEventsFromPath', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if the provided eventLogPath does not exist dontFailOnMissingEventLogPath is false', async () => {
+  it('should throw an error if the provided eventLogPath does not exist', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     await expect(
@@ -55,29 +55,10 @@ describe('uploadAllEventsFromPath', () => {
         esURL: 'esURL',
         esAPIKey: 'esAPIKey',
         verifyTLSCerts: true,
-        // should throw an error if the event log path does not exist
-        dontFailOnMissingEventLogPath: false,
         log,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"The provided event log path 'non_existent_path' does not exist."`
-    );
-  });
-
-  it('should log a warning if the provided eventLogPath does not exist and dontFailOnMissingEventLogPath is true', async () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(false);
-
-    await uploadAllEventsFromPath('non_existent_path', {
-      esURL: 'esURL',
-      esAPIKey: 'esAPIKey',
-      verifyTLSCerts: true,
-      log,
-      // should not throw an error if the event log path does not exist
-      dontFailOnMissingEventLogPath: true,
-    });
-
-    expect(log.warning).toHaveBeenCalledWith(
-      `⚠️ The provided event log path 'non_existent_path' does not exist. Won't upload any events.`
     );
   });
 
@@ -92,7 +73,6 @@ describe('uploadAllEventsFromPath', () => {
         esURL: 'esURL',
         esAPIKey: 'esAPIKey',
         verifyTLSCerts: true,
-        dontFailOnMissingEventLogPath: false,
         log,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -122,7 +102,6 @@ describe('uploadAllEventsFromPath', () => {
       esURL: 'esURL',
       esAPIKey: 'esAPIKey',
       verifyTLSCerts: true,
-      dontFailOnMissingEventLogPath: false,
       log,
     });
 
@@ -149,7 +128,6 @@ describe('uploadAllEventsFromPath', () => {
       esURL: 'esURL',
       esAPIKey: 'esAPIKey',
       verifyTLSCerts: true,
-      dontFailOnMissingEventLogPath: false,
       log,
     });
 
@@ -185,7 +163,6 @@ describe('uploadAllEventsFromPath', () => {
       esURL: 'esURL',
       esAPIKey: 'esAPIKey',
       verifyTLSCerts: true,
-      dontFailOnMissingEventLogPath: false,
       log,
     });
 
@@ -221,7 +198,6 @@ describe('uploadAllEventsFromPath', () => {
       esURL: 'esURL',
       esAPIKey: 'esAPIKey',
       verifyTLSCerts: true,
-      dontFailOnMissingEventLogPath: false,
       log,
     });
 
