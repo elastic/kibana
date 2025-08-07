@@ -398,7 +398,6 @@ Sharing::
 
 [[release-notes-8.17.2]]
 == {kib} 8.17.2
-<<<<<<< HEAD
 
 The 8.17.2 release includes the following bug fixes.
 =======
