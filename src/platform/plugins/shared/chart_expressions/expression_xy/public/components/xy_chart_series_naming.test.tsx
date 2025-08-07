@@ -203,34 +203,30 @@ describe('provides correct series naming', () => {
     expect(debugState?.lines?.[1]?.name).toBe('b');
   });
 
-  test('split series without formatting and single y accessor', () => {
+  test('split series without formatting and single y accessor', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
       layers: [
         {
           ...args.layers[0],
+          xAccessor: 'c',
           accessors: ['a'],
           splitAccessors: ['d'],
           columnToLabel: '{"a": "Label A"}',
+          xScaleType: XScaleTypes.ORDINAL,
           table: dataWithoutFormats,
         },
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
-    const nameFn = component.find(DataLayers).dive().find(LineSeries).prop('name') as SeriesNameFn;
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    expect(
-      nameFn(
-        {
-          ...nameFnArgs,
-          seriesKeys: ['split1', 'a'],
-          splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-        },
-        false
-      )
-    ).toEqual('split1');
+    expect(debugState?.lines).toHaveLength(2);
+    expect(debugState?.lines?.[0]?.points).toHaveLength(1);
+    expect(debugState?.lines?.[1]?.points).toHaveLength(1);
+    expect(debugState?.lines?.[0]?.name).toBe('Row 1');
+    expect(debugState?.lines?.[1]?.name).toBe('Row 2');
   });
 
   test('split series with formatting and single y accessor', () => {
