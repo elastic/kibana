@@ -7,11 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { MetricTextAlign } from '@elastic/charts';
 import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
 
+type TextAlign = 'left' | 'center' | 'right';
+
 const alignmentOptions: Array<{
-  id: MetricTextAlign;
+  id: TextAlign;
   label: string;
 }> = [
   {
@@ -38,8 +39,8 @@ export function TitlesAlignmentOption({
   value,
   onChange,
 }: {
-  value: MetricTextAlign;
-  onChange: (alignment: MetricTextAlign) => void;
+  value: TextAlign;
+  onChange: (alignment: TextAlign) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.titlesAlignment', {
     defaultMessage: 'Titles alignment',
@@ -74,7 +75,7 @@ export function TitlesAlignmentOption({
         options={alignmentOptions}
         idSelected={value}
         onChange={(alignment) => {
-          onChange(alignment as MetricTextAlign);
+          onChange(alignment as TextAlign);
         }}
       />
     </EuiFormRow>
@@ -85,8 +86,8 @@ export function PrimaryAlignmentOption({
   value,
   onChange,
 }: {
-  value: MetricTextAlign;
-  onChange: (alignment: MetricTextAlign) => void;
+  value: TextAlign;
+  onChange: (alignment: TextAlign) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.primaryAlignment', {
     defaultMessage: 'Primary alignment',
@@ -119,7 +120,7 @@ export function PrimaryAlignmentOption({
         options={alignmentOptions}
         idSelected={value}
         onChange={(alignment) => {
-          onChange(alignment as MetricTextAlign);
+          onChange(alignment as TextAlign);
         }}
       />
     </EuiFormRow>
@@ -130,8 +131,8 @@ export function SecondaryAlignmentOption({
   value,
   onChange,
 }: {
-  value: MetricTextAlign;
-  onChange: (alignment: MetricTextAlign) => void;
+  value: TextAlign;
+  onChange: (alignment: TextAlign) => void;
 }) {
   const label = i18n.translate('xpack.lens.metric.toolbarTitlesText.secondaryMetricAlignment', {
     defaultMessage: 'Secondary alignment',
@@ -164,7 +165,7 @@ export function SecondaryAlignmentOption({
         options={alignmentOptions}
         idSelected={value}
         onChange={(alignment) => {
-          onChange(alignment as MetricTextAlign);
+          onChange(alignment as TextAlign);
         }}
       />
     </EuiFormRow>

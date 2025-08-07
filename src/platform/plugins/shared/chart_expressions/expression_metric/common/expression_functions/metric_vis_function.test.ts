@@ -35,6 +35,7 @@ describe('interpreter/functions#metricVis', () => {
     primaryPosition: 'bottom',
     titleWeight: 'bold',
     secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   it('should pass over overrides from variables', async () => {

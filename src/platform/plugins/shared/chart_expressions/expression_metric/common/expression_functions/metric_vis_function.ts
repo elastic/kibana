@@ -196,6 +196,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       required: false,
     },
+    applyColorTo: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.applyColorTo.help', {
+        defaultMessage:
+          'Determines whether the metric color is applied to the background area or to the value',
+      }),
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
@@ -285,6 +293,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               palette: args.secondaryTrendPalette,
             },
             secondaryLabelPosition: args.secondaryLabelPosition,
+            applyColorTo: args.applyColorTo,
           },
           dimensions: {
             metric: args.metric,

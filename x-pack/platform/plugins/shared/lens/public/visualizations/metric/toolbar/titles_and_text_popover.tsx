@@ -56,20 +56,20 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
 
       <TitlesAlignmentOption
         value={state.titlesTextAlign ?? metricStateDefaults.titlesTextAlign}
-        onChange={(titlesTextAlign) => {
+        onChange={(newTitlesTextAlign) => {
           setState({
             ...state,
-            titlesTextAlign,
+            titlesTextAlign: newTitlesTextAlign,
           });
         }}
       />
 
       <TitleWeightOption
         value={state.titleWeight ?? metricStateDefaults.titleWeight}
-        onChange={(titleWeight) => {
+        onChange={(newTitleWeight) => {
           setState({
             ...state,
-            titleWeight,
+            titleWeight: newTitleWeight,
           });
         }}
       />
@@ -88,10 +88,10 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
       {state.icon && state.icon !== 'empty' && (
         <IconAlignmentOption
           value={state.iconAlign ?? metricStateDefaults.iconAlign}
-          onChange={(iconAlign) => {
+          onChange={(newIconAlign) => {
             setState({
               ...state,
-              iconAlign,
+              iconAlign: newIconAlign,
             });
           }}
         />
@@ -99,10 +99,10 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
 
       <PrimaryAlignmentOption
         value={state.primaryAlign ?? metricStateDefaults.primaryAlign}
-        onChange={(primaryAlign) => {
+        onChange={(newPrimaryAlign) => {
           setState({
             ...state,
-            primaryAlign,
+            primaryAlign: newPrimaryAlign,
           });
         }}
       />
@@ -117,10 +117,10 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
       {state.secondaryMetricAccessor && (
         <SecondaryAlignmentOption
           value={state.secondaryAlign ?? metricStateDefaults.secondaryAlign}
-          onChange={(secondaryAlign) => {
+          onChange={(newSecondaryAlign) => {
             setState({
               ...state,
-              secondaryAlign,
+              secondaryAlign: newSecondaryAlign,
             });
           }}
         />

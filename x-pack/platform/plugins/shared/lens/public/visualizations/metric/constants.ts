@@ -40,6 +40,7 @@ export const metricStateDefaults: Required<
     | 'primaryPosition'
     | 'titleWeight'
     | 'secondaryLabelPosition'
+    | 'applyColorTo'
   >
 > = {
   titlesTextAlign: 'left',
@@ -50,6 +51,7 @@ export const metricStateDefaults: Required<
   primaryPosition: 'bottom',
   titleWeight: 'bold',
   secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

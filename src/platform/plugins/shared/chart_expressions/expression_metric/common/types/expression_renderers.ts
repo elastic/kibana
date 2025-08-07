@@ -46,6 +46,13 @@ export interface MetricVisParam {
   minTiles?: number;
   trends?: TrendlineResult['trends'];
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
+  /**
+   * Determines where the metric color should be applied.
+   * Only applies when the supporting visualization is a panel.
+   * - 'background': Applies the color to the metric's background area.
+   * - 'value': Applies the color to the Primary Metric's value.
+   */
+  applyColorTo: 'background' | 'value';
 }
 
 export interface VisParams {
