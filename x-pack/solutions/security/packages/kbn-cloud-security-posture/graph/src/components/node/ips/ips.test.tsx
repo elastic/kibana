@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   Ips,
   TEST_SUBJ_TEXT,
@@ -45,7 +46,7 @@ describe('Ips', () => {
       render(<Ips ips={testIps} />);
 
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_TEXT));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
 
       await waitFor(() => {
         expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
@@ -58,7 +59,7 @@ describe('Ips', () => {
 
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_TEXT));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
 
       await waitFor(() => {
         expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -83,7 +84,7 @@ describe('Ips', () => {
 
       expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).not.toBeInTheDocument();
       expect(screen.getByTestId(TEST_SUBJ_TEXT)).toHaveTextContent(`${'IP: '}${testIps[0]}`);
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_TEXT));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
 
       await waitFor(() => {
         expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
@@ -104,7 +105,7 @@ describe('Ips', () => {
       const testIps = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
       render(<Ips ips={testIps} />);
 
-      fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_TEXT));
+      await userEvent.hover(screen.getByTestId(TEST_SUBJ_TEXT));
 
       await waitFor(() => {
         expect(screen.getByTestId(TEST_SUBJ_TOOLTIP_CONTENT)).toBeInTheDocument();
