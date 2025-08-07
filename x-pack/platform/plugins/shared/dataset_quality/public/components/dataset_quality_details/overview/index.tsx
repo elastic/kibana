@@ -57,7 +57,12 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
       <Summary />
       <EuiSpacer size="m" />
 
-      <EuiSplitPanel.Outer direction="row" data-test-subj="datasetQualityDetailsOverview">
+      <EuiSplitPanel.Outer
+        direction="row"
+        data-test-subj="datasetQualityDetailsOverview"
+        hasShadow={false}
+        hasBorder={true}
+      >
         <EuiSplitPanel.Inner color="subdued" grow={false}>
           <QualitySummaryCards
             selectedCard={selectedQualityCard}
