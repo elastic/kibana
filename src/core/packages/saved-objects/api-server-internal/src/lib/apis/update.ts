@@ -178,6 +178,8 @@ export const executeUpdate = async <T>(
 
   // UPSERT CASE START
   if (shouldPerformUpsert) {
+    // Note: Upsert does not support adding accessControl properties. To do so, the `create` API should be used.
+
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties
     const migratedUpsert = migrationHelper.migrateInputDocument({
@@ -191,9 +193,6 @@ export const executeUpdate = async <T>(
       created_at: time,
       updated_at: time,
       ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
-      ...(accessControl && {
-        accessControl,
-      }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
