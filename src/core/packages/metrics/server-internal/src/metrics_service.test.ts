@@ -58,6 +58,7 @@ describe('MetricsService', () => {
   });
 
   afterEach(() => {
+    metricsService.stop();
     jest.clearAllMocks();
     jest.clearAllTimers();
   });
