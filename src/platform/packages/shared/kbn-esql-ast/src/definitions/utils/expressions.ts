@@ -170,6 +170,9 @@ export function getExpressionType(
     if (!column) {
       return 'unknown';
     }
+    if ('hasConflict' in column && column.hasConflict) {
+      return 'unknown';
+    }
     return column.type;
   }
 

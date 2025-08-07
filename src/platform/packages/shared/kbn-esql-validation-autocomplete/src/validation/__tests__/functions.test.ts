@@ -444,57 +444,91 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
     });
 
-    it('validates values of type unknown', async () => {
-      setTestFunctions([
-        {
-          name: 'test1',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'test2',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'test3',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'long' }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
+    describe('values of unknown type', () => {
+      it('doesnt validate user-defined columns of type unknown', async () => {
+        setTestFunctions([
+          {
+            name: 'test1',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'test2',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+          {
+            name: 'test3',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'long' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
 
-      const { validate } = await setup();
-      const errors = (
-        await validate(
-          `FROM a_index
+        const { validate } = await setup();
+        const errors = (
+          await validate(
+            `FROM a_index
         | EVAL foo = TEST1(1.) // creates foo as unknown value
         | EVAL TEST2(foo) // shouldn't error, foo is unknown
         | EVAL TEST3(foo) // shouldn't error, foo is unknown`
-        )
-      ).errors;
+          )
+        ).errors;
 
-      expect(errors).toHaveLength(1);
+        expect(errors).toHaveLength(1);
+      });
+
+      it("doesn't raise errors for conflict fields", async () => {
+        setTestFunctions([
+          {
+            name: 'test',
+            type: FunctionDefinitionTypes.SCALAR,
+            description: '',
+            locationsAvailable: [Location.EVAL],
+            signatures: [
+              {
+                params: [{ name: 'arg1', type: 'keyword' }],
+                returnType: 'keyword',
+              },
+            ],
+          },
+        ]);
+
+        const { expectErrors, callbacks } = await setup();
+
+        callbacks.getColumnsFor = () => {
+          return [
+            {
+              name: 'conflictField',
+              type: 'unsupported',
+              hasConflict: true,
+            },
+          ];
+        };
+
+        // conflict fields are not validated, so this should not raise an error
+        await expectErrors(`FROM a_index | EVAL TEST(conflictField)`, []);
+      });
     });
 
     describe('command/option support', () => {
