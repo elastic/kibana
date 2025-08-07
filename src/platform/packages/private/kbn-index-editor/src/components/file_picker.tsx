@@ -7,26 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const FilePicker = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
 
   return (
-    <EuiButtonIcon
-      display="base"
+    <EuiButton
       size={'m'}
       color={'text'}
       onClick={() => {
         onFileSelectorClick();
       }}
-      iconType="export"
+      iconType="importAction"
       aria-label={i18n.translate('indexEditor.filePicker.uploadButtonAriaLabel', {
         defaultMessage: 'Upload file button',
       })}
-    />
+    >
+      <EuiText size="xs">
+        <FormattedMessage
+          id="indexEditor.filePicker.uploadButtonLabel"
+          defaultMessage="Upload file"
+        />
+      </EuiText>
+    </EuiButton>
   );
 };
