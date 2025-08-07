@@ -9,7 +9,7 @@
 
 import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import apm from 'elastic-apm-node';
+import apm, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import {
   isUnauthorizedError as isElasticsearchUnauthorizedError,
