@@ -47,6 +47,9 @@ export class FileUploadPlugin implements Plugin {
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', PLUGIN_ID],
       catalogue: [PLUGIN_ID],
+      privilegesTooltip: i18n.translate('xpack.fileUpload.privilegesTooltip', {
+        defaultMessage: 'Grants access to the File Upload tool in ML and the Add Data UI.',
+      }),
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
