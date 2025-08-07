@@ -20,7 +20,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { PromiseResolvedValue } from '../../../../../common/endpoint/types';
+import type { PolicyData, PromiseResolvedValue } from '../../../../../common/endpoint/types';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
@@ -741,42 +741,69 @@ export class ManifestManager {
       },
     });
 
-    for await (const policies of await this.fetchAllPolicies()) {
+    const isNewManifestVersionGreaterThanPolicyManifestVersion = (
+      policyManifestVersion: string
+    ): boolean => {
+      try {
+        return semver.gt(manifestVersion, policyManifestVersion);
+      } catch (e) {
+        this.logger.debug(
+          () =>
+            `Failed to validate if new manifest version [${manifestVersion}] is great than policy Manifest Version [${policyManifestVersion}]:\n${stringify(
+              e
+            )}`
+        );
+
+        // If unable to perform version check - assume new manifest version
+        // is greater than the version from the policy
+        return true;
+      }
+    };
+
+    for await (const _policies of await this.fetchAllPolicies()) {
+      const policies = _policies as PolicyData[];
+
       for (const packagePolicy of policies) {
-        const { id, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
+        const { id: policyId, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
 
         this.logger.debug(
-          `Checking if policy [${id}][${name}] in space(s) [${spaceIds.join(
-            ', '
-          )}] needs to be updated with new artifact manifest`
+          () =>
+            `Checking if policy [${policyId}][${name}] in space(s) [${spaceIds.join(
+              ', '
+            )}] needs to be updated with new artifact manifest`
         );
 
         if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
-          const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
-            value: {},
-          };
+          const oldManifest: ManifestSchema | undefined =
+            packagePolicy.inputs[0].config?.artifact_manifest?.value;
 
-          const newManifestVersion = manifest.getSemanticVersion();
+          this.logger.debug(
+            () =>
+              `Policy [${policyId}][${name}] currently has manifest version [${oldManifest?.manifest_version}]`
+          );
 
-          if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-            const serializedManifest = manifest.toPackagePolicyManifest(id);
+          if (isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest.manifest_version)) {
+            const serializedManifest = manifest.toPackagePolicyManifest(policyId);
 
             if (!manifestDispatchSchema.is(serializedManifest)) {
               errors.push(
-                new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest)
+                new EndpointError(
+                  `Invalid manifest for policy ${policyId}. The new generated manifest did not pass schema validation`,
+                  serializedManifest
+                )
               );
-            } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+            } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
               packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
               policyUpdateBatchProcessor.addToQueue(packagePolicy);
             } else {
-              unChangedPolicies.push(`[${id}][${name}] No change in manifest content`);
+              unChangedPolicies.push(`[${policyId}][${name}] No change in manifest content`);
             }
           } else {
-            unChangedPolicies.push(`[${id}][${name}] No change in manifest version`);
+            unChangedPolicies.push(`[${policyId}][${name}] No change in manifest version`);
           }
         } else {
           errors.push(
-            new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+            new EndpointError(`Package Policy ${policyId} has no 'inputs[0].config'`, packagePolicy)
           );
         }
       }
