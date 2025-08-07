@@ -9,21 +9,21 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { deleteAllRules } from '../../../../config/services/detections_response';
+import { deleteAllRules } from '../../../../../config/services/detections_response';
 import {
   createMigrationRules,
   defaultElasticRule,
   deleteAllRuleMigrations,
   getMigrationRuleDocuments,
   ruleMigrationRouteHelpersFactory,
-} from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
   deleteAllTimelines,
-} from '../../../detections_response/utils';
+} from '../../../../detections_response/utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');

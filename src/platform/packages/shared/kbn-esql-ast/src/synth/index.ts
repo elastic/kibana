@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export type * from './types';
 export { exp, expression } from './expression';
 export { cmd, command } from './command';
 export { qry, query } from './query';
+export * from './nodes';
