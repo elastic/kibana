@@ -40,7 +40,7 @@ interface Props {
   sourceId: string;
   accountId?: string;
   region?: string;
-  schema?: DataSchemaFormat;
+  schema?: DataSchemaFormat | null;
 }
 
 export const ExpressionChart = ({
@@ -50,7 +50,7 @@ export const ExpressionChart = ({
   sourceId,
   accountId = '',
   region = '',
-  schema = 'ecs',
+  schema,
 }: Props) => {
   const chartTheme = useTimelineChartTheme();
   const timerange = useMemo(

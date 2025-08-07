@@ -18,7 +18,7 @@ export interface InventoryPrefillState {
   kuery: string | undefined;
   metric: SnapshotMetricInput;
   customMetrics: SnapshotCustomMetricInput[];
-  schema: DataSchemaFormat;
+  schema: DataSchemaFormat | null;
   region: string;
   accountId: string;
 }

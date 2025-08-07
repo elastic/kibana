@@ -37,7 +37,6 @@ function mapInventoryViewToState(savedView: InventoryView): InventoryFiltersStat
 
 export const useWaffleFilters = () => {
   const { currentView } = useInventoryViewsContext();
-  const { inventoryPrefill } = useAlertPrefillContext();
   const { services } = useKibanaContextForPlugin();
   const {
     data: {

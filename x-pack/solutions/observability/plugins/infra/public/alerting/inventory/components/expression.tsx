@@ -71,10 +71,11 @@ export interface AlertContextMeta {
   filter?: string;
   customMetrics?: SnapshotCustomMetricInput[];
   schema?: DataSchemaFormat;
+  hostOtelEnabled?: boolean;
 }
 
 type Criteria = InventoryMetricConditions[];
-type Props = Omit<
+export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
       criteria: Criteria;
@@ -87,7 +88,8 @@ type Props = Omit<
       alertOnNoData?: boolean;
       accountId?: string;
       region?: string;
-      schema?: DataSchemaFormat;
+      schema?: DataSchemaFormat | null;
+      hostOtelEnabled?: boolean;
     },
     AlertContextMeta
   >,
@@ -108,8 +110,9 @@ export const defaultExpression = {
   },
 } as InventoryMetricConditions;
 
-export const Expressions: React.FC<Props> = (props) => {
+export const Expressions: React.FC<ExpressionsProps> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
+  const { hostOtelEnabled = false } = metadata ?? {};
   const { source } = useSourceContext();
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
@@ -203,7 +206,7 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const updateSchema = useCallback(
-    (nt: any) => {
+    (nt: DataSchemaFormat) => {
       setRuleParams('schema', nt);
     },
     [setRuleParams]
@@ -318,36 +321,39 @@ export const Expressions: React.FC<Props> = (props) => {
           </div>
         </EuiFlexGroup>
       </div>
-      <div css={StyledExpressionCss}>
-        <EuiFlexGroup css={StyledExpressionRowCss}>
-          <div css={NonCollapsibleExpressionCss}>
-            <ExpressionDropDown
-              options={schemaOptions}
-              value={ruleParams.schema ?? 'ecs'}
-              onChange={updateSchema}
-              description={i18n.translate(
-                'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
-                {
-                  defaultMessage: 'Schema',
-                }
-              )}
-              popoverTitle={i18n.translate(
-                'xpack.infra.metrics.alertFlyout.expression.schema.popoverTitle',
-                {
-                  defaultMessage: 'Schema',
-                }
-              )}
-              data-test-subj="forExpressionSelect"
-              aria-label={i18n.translate(
-                'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
-                {
-                  defaultMessage: 'Select a schema',
-                }
-              )}
-            />
-          </div>
-        </EuiFlexGroup>
-      </div>
+      {hostOtelEnabled && ruleParams.nodeType === 'host' && (
+        <div css={StyledExpressionCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss}>
+            <div css={NonCollapsibleExpressionCss}>
+              <ExpressionDropDown
+                options={schemaOptions}
+                value={ruleParams.schema ?? 'ecs'}
+                onChange={updateSchema}
+                description={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                popoverTitle={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.schema.popoverTitle',
+                  {
+                    defaultMessage: 'Schema',
+                  }
+                )}
+                data-test-subj="forExpressionSelect"
+                aria-label={i18n.translate(
+                  'xpack.infra.metrics.alertFlyout.expression.for.ariaLabel',
+                  {
+                    defaultMessage: 'Select a schema',
+                  }
+                )}
+              />
+            </div>
+          </EuiFlexGroup>
+        </div>
+      )}
+
       <EuiSpacer size="xs" />
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
@@ -466,7 +472,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
 // required for dynamic import
 // eslint-disable-next-line import/no-default-export
-export default withSourceProvider<Props>(Expressions)('default');
+export default withSourceProvider<ExpressionsProps>(Expressions)('default');
 
 interface ExpressionRowProps {
   nodeType: InventoryItemType;

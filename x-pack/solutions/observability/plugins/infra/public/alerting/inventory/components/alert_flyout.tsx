@@ -21,7 +21,7 @@ interface Props {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
-  schema?: DataSchemaFormat;
+  schema?: DataSchemaFormat | null;
   setVisible(val: boolean): void;
 }
 
