@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import {
   getFieldValidityAndErrorMessage,
@@ -55,6 +56,17 @@ import { ProviderSecretHiddenField } from './hidden_fields/provider_secret_hidde
 import { ProviderConfigHiddenField } from './hidden_fields/provider_config_hidden_field';
 import { useProviders } from '../hooks/use_providers';
 
+// Custom trigger button CSS
+export const buttonCss = css`
+  &:hover {
+    text-decoration: none;
+  }
+`;
+export const accordionCss = css`
+  .euiAccordion__triggerWrapper {
+    display: inline-flex;
+  }
+`;
 export function isProviderForSolutions(
   filterBySolution: SolutionView,
   provider: InferenceProvider

@@ -36,13 +36,7 @@ import * as LABELS from '../translations';
 import { DEFAULT_TASK_TYPE } from '../constants';
 import { Config } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
-
-// Custom trigger button CSS
-const buttonCss = css`
-  &:hover {
-    text-decoration: none;
-  }
-`;
+import { buttonCss, accordionCss } from './inference_service_form_fields';
 
 interface AdditionalOptionsFieldsProps {
   config: Config;
@@ -152,11 +146,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       id="inferenceAdditionalOptions"
       data-test-subj="inference-endpoint-additional-options"
       buttonProps={{ css: buttonCss }}
-      css={css`
-        .euiAccordion__triggerWrapper {
-          display: inline-flex;
-        }
-      `}
+      css={accordionCss}
       element="fieldset"
       arrowDisplay="right"
       arrowProps={{
