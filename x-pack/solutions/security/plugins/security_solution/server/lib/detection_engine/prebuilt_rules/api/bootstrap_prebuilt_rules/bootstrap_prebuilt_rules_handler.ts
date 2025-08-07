@@ -87,6 +87,8 @@ export const bootstrapPrebuiltRulesHandler = async (
         version: securityAiPromptsResult.package.version,
         status: securityAiPromptsResult.status,
       });
+    } else {
+      logger.debug('bootstrapPrebuiltRulesHandler: Security AI prompts package failed to install');
     }
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
@@ -94,10 +96,15 @@ export const bootstrapPrebuiltRulesHandler = async (
       rules: ruleResults,
     };
 
+    logger.debug(
+      `bootstrapPrebuiltRulesHandler: Total packages installed: ${packageResults.length}`
+    );
+
     return response.ok({
       body: responseBody,
     });
   } catch (err) {
+    logger.error(`bootstrapPrebuiltRulesHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

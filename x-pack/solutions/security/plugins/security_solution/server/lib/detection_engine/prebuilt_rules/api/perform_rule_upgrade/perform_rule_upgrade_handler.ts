@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PerformRuleUpgradeRequestBody,
@@ -46,7 +46,8 @@ import { getPossibleUpgrades } from '../../logic/utils';
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest<undefined, undefined, PerformRuleUpgradeRequestBody>,
-  response: KibanaResponseFactory
+  response: KibanaResponseFactory,
+  logger: Logger
 ) => {
   const siemResponse = buildSiemResponse(response);
 
@@ -198,7 +199,8 @@ export const performRuleUpgradeHandler = async (
       } else {
         const { results: upgradeResults, errors: installationErrors } = await upgradePrebuiltRules(
           detectionRulesClient,
-          modifiedPrebuiltRuleAssets
+          modifiedPrebuiltRuleAssets,
+          logger
         );
         ruleErrors.push(...installationErrors);
         updatedRules.push(...upgradeResults.map(({ result }) => result));
@@ -209,7 +211,8 @@ export const performRuleUpgradeHandler = async (
 
     if (!isDryRun) {
       const { error: timelineInstallationError } = await performTimelinesInstallation(
-        ctx.securitySolution
+        ctx.securitySolution,
+        logger
       );
 
       if (timelineInstallationError) {
