@@ -7,6 +7,8 @@
 
 import { getPrebuiltRuleMockOfType } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { IS_SERVERLESS } from '../../../../env_var_names_constants';
+import { waitForPageTitleToBeShown } from '../../../../tasks/alert_assignments';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import {
   getReviewSingleRuleButtonByRuleId,
@@ -564,8 +566,10 @@ describe(
           rulePatches: [],
           newRuleAssets: [NEW_PREBUILT_RULE_ASSET],
         });
-        login(ROLES.reader);
+        const isServerless = Cypress.env(IS_SERVERLESS);
+        login(isServerless ? ROLES.t1_analyst : ROLES.reader);
         visitRulesUpgradeTable();
+        waitForPageTitleToBeShown();
 
         cy.get(RULES_UPDATES_TAB).should('not.exist');
       });
