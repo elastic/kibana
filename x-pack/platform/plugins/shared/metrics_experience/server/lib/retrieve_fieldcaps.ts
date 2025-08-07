@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { Fields, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import {
+  FieldCapsFieldCapability,
+  Fields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { type ElasticsearchClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { parse } from '@kbn/datemath';
@@ -26,6 +30,11 @@ export async function retrieveFieldCaps({
 }) {
   // Build index_filter for time range if provided
   let indexFilter: QueryDslQueryContainer | undefined;
+  const dataStreamFieldCapsMap = new Map<
+    string,
+    Record<string, Record<string, FieldCapsFieldCapability>>
+  >();
+
   if (from && to) {
     const start = parse(from);
     const end = parse(to, { roundUp: true });
@@ -43,44 +52,39 @@ export async function retrieveFieldCaps({
   const dataStreams = resolveResponse.data_streams || [];
 
   if (dataStreams.length === 0) {
-    return [];
+    return dataStreamFieldCapsMap;
   }
 
   // Call field caps in parallel for each data stream
   const fieldCapsPromises = dataStreams.map(async (dataStream) => {
-    try {
-      const fieldCaps = await esClient.fieldCaps({
-        index: dataStream.name,
-        fields,
-        include_unmapped: false,
-        index_filter: indexFilter,
-        types: [
-          // Numeric types for metrics
-          ES_FIELD_TYPES.LONG,
-          ES_FIELD_TYPES.INTEGER,
-          ES_FIELD_TYPES.SHORT,
-          ES_FIELD_TYPES.BYTE,
-          ES_FIELD_TYPES.DOUBLE,
-          ES_FIELD_TYPES.FLOAT,
-          ES_FIELD_TYPES.HALF_FLOAT,
-          ES_FIELD_TYPES.SCALED_FLOAT,
-          ES_FIELD_TYPES.UNSIGNED_LONG,
-          ES_FIELD_TYPES.HISTOGRAM,
-          // String types for dimensions
-          ES_FIELD_TYPES.KEYWORD,
-        ],
-      });
+    const fieldCaps = await esClient.fieldCaps({
+      index: dataStream.name,
+      fields,
+      include_unmapped: false,
+      index_filter: indexFilter,
+      types: [
+        // Numeric types for metrics
+        ES_FIELD_TYPES.LONG,
+        ES_FIELD_TYPES.INTEGER,
+        ES_FIELD_TYPES.SHORT,
+        ES_FIELD_TYPES.BYTE,
+        ES_FIELD_TYPES.DOUBLE,
+        ES_FIELD_TYPES.FLOAT,
+        ES_FIELD_TYPES.HALF_FLOAT,
+        ES_FIELD_TYPES.SCALED_FLOAT,
+        ES_FIELD_TYPES.UNSIGNED_LONG,
+        ES_FIELD_TYPES.HISTOGRAM,
+        // String types for dimensions
+        ES_FIELD_TYPES.KEYWORD,
+      ],
+    });
 
-      return {
-        dataStreamName: dataStream.name,
-        fieldCaps: fieldCaps.fields || {},
-      };
-    } catch {
-      // Error handling for field caps fetch
-      return undefined;
-    }
+    dataStreamFieldCapsMap.set(dataStream.name, fieldCaps.fields);
   });
 
   // Wait for all field caps requests to complete
-  return Promise.all(fieldCapsPromises);
+  await Promise.all(fieldCapsPromises);
+
+  // Return the datastream field caps map.
+  return dataStreamFieldCapsMap;
 }

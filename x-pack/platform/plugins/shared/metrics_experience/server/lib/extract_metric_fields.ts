@@ -9,7 +9,7 @@ import { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { FILTER_OUT_EXACT_FIELDS_FOR_CONTENT } from '@kbn/discover-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
-export function extractTimeSeriesFields(
+export function extractMetricFields(
   fields: Record<string, Record<string, FieldCapsFieldCapability>>
 ) {
   const numericTypes = [
@@ -33,16 +33,13 @@ export function extractTimeSeriesFields(
   }> = [];
 
   for (const [fieldName, fieldInfo] of Object.entries(fields)) {
+    // Filter out metadata fields
     if (FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(fieldName)) continue;
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
       // Check for time series metrics (numeric fields with time_series_metric)
       if (numericTypes.includes(type as ES_FIELD_TYPES) && typeInfo.time_series_metric) {
         timeSeriesFields.push({ fieldName, type, typeInfo, fieldType: 'metric' });
-      }
-      // Check for time series dimensions
-      else if (typeInfo.time_series_dimension === true) {
-        timeSeriesFields.push({ fieldName, type, typeInfo, fieldType: 'dimension' });
       }
     }
   }

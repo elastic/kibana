@@ -15,7 +15,7 @@ export interface Dimension {
 
 export interface MetricField {
   name: string;
-  index: string;
+  index: string; // TODO: Change this to `datastream`
   dimensions: Array<Dimension>;
   type: string;
   time_series_metric?: string;
@@ -25,5 +25,9 @@ export interface MetricField {
   stability?: string;
   display?: string;
   no_data?: boolean;
-  fieldCaps?: Record<string, Record<string, FieldCapsFieldCapability>>;
 }
+
+export type DataStreamFieldCapsMap = Map<
+  string,
+  Record<string, Record<string, FieldCapsFieldCapability>>
+>;

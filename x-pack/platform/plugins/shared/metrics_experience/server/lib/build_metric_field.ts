@@ -8,13 +8,19 @@
 import { type FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { Dimension, type MetricField } from '../types';
 
-export function buildMetricField(
-  name: string,
-  index: string,
-  dimensions: Array<Dimension>,
-  type: string,
-  typeInfo: FieldCapsFieldCapability
-): MetricField {
+export function buildMetricField({
+  name,
+  index,
+  dimensions,
+  type,
+  typeInfo,
+}: {
+  name: string;
+  index: string;
+  dimensions: Array<Dimension>;
+  type: string;
+  typeInfo: FieldCapsFieldCapability;
+}): MetricField {
   const unit = Array.isArray(typeInfo.meta?.unit)
     ? typeInfo.meta.unit.join(', ')
     : typeInfo.meta?.unit;
