@@ -194,7 +194,7 @@ export class SiemMigrationAuditLogger {
   }): Promise<void> {
     const { migrationId, error, count } = params;
     const message = `User adding ${
-      count ?? ''
+      count ?? '0'
     } dashboards to the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS,
