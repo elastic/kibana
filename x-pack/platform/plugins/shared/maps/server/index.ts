@@ -10,6 +10,10 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
 export type {
+  AggDescriptor,
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
   AbstractESAggSourceDescriptor,
   AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,

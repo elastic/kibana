@@ -27,6 +27,9 @@ import {
   ESSourceSchema,
   ESTermSourceSchema,
   KibanaTilemapSourceSchema,
+  countAggSchema,
+  fieldedAggSchema,
+  percentileAggSchema,
 } from './source_schemas';
 
 export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
@@ -38,6 +41,11 @@ export type MapsSearchOptions = TypeOf<typeof mapsSearchOptionsSchema>;
 export type MapsGetOut = TypeOf<typeof mapsGetResultSchema>;
 export type MapsCreateOut = TypeOf<typeof mapsCreateResultSchema>;
 export type MapsUpdateOut = TypeOf<typeof mapsCreateResultSchema>;
+
+export type CountAggDescriptor = TypeOf<typeof countAggSchema>;
+export type FieldedAggDescriptor = TypeOf<typeof fieldedAggSchema>;
+export type PercentileAggDescriptor = TypeOf<typeof percentileAggSchema>;
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = TypeOf<typeof ESAggSourceSchema>;
 export type AbstractESJoinSourceDescriptor = TypeOf<typeof ESJoinSourceSchema>;

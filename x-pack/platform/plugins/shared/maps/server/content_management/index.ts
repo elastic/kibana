@@ -6,6 +6,10 @@
  */
 
 export type {
+  AggDescriptor,
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
   AbstractESAggSourceDescriptor,
   AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,

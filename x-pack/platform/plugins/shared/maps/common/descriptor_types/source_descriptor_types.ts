@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ESQLColumn } from '@kbn/es-types';
-import { AGG_TYPE, MASK_OPERATOR, MVT_FIELD_TYPE } from '../constants';
+import { MVT_FIELD_TYPE } from '../constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -38,38 +38,6 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   narrowByMapBounds: boolean;
   applyForceRefresh: boolean;
 };
-
-type AbstractAggDescriptor = {
-  type: AGG_TYPE;
-  label?: string;
-  mask?: {
-    operator: MASK_OPERATOR;
-    value: number;
-  };
-};
-
-export type CountAggDescriptor = AbstractAggDescriptor & {
-  type: AGG_TYPE.COUNT;
-};
-
-export type FieldedAggDescriptor = AbstractAggDescriptor & {
-  type:
-    | AGG_TYPE.UNIQUE_COUNT
-    | AGG_TYPE.MAX
-    | AGG_TYPE.MIN
-    | AGG_TYPE.SUM
-    | AGG_TYPE.AVG
-    | AGG_TYPE.TERMS;
-  field?: string;
-};
-
-export type PercentileAggDescriptor = AbstractAggDescriptor & {
-  type: AGG_TYPE.PERCENTILE;
-  field?: string;
-  percentile?: number;
-};
-
-export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;

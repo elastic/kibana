@@ -12,6 +12,10 @@ export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
 
 export type {
+  AggDescriptor,
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
   AbstractESAggSourceDescriptor,
   AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,
