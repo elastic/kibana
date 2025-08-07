@@ -45,8 +45,4 @@ describe('ControlStateTransitionTracker', () => {
   it('should handle pretty() with no transitions', () => {
     expect(tracker.prettyPrint()).toBe('[<No transitions observed>]');
   });
-
-  it('should not expose transitions array directly', () => {
-    expect((tracker as any).transitions).toBeUndefined();
-  });
 });

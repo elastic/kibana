@@ -59,13 +59,13 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${context.indexPrefix}] `;
   let prevTimestamp = startTime;
-  let lastState: State = initialState;
+  let lastState: State | undefined;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),
       (state, res) => {
-        const previousState = lastState.controlState;
+        const previousState = lastState?.controlState;
         lastState = state;
         logActionResponse(logger, logMessagePrefix, state, res);
         const newState = model(state, res, context);
@@ -86,7 +86,7 @@ export async function migrationStateActionMachine({
         const tookMs = now - prevTimestamp;
         logStateTransition(logger, logMessagePrefix, state, redactedNewState as State, tookMs);
 
-        cstDiag.observeTransition(previousState, newState.controlState, tookMs);
+        cstDiag.observeTransition(previousState ?? 'INIT', newState.controlState, tookMs);
 
         prevTimestamp = now;
         return newState;
