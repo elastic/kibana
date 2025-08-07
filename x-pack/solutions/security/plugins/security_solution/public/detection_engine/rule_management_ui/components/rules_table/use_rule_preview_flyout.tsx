@@ -27,9 +27,11 @@ interface UseRulePreviewFlyoutBaseParams {
   flyoutProps: RulePreviewFlyoutProps;
 }
 
+export type RulePreviewFlyoutCloseReason = 'dismiss' | 'call_to_action';
+
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
-  closeRulePreviewAction?: (rule: RuleResponse, reason: 'dismiss' | 'call_to_action') => void;
+  closeRulePreviewAction?: (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => void;
 }
 
 interface RulePreviewFlyoutProps {
@@ -43,7 +45,7 @@ interface RulePreviewFlyoutProps {
 interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
   openRulePreview: (ruleId: RuleSignatureId) => void;
-  closeRulePreview: (reason: 'dismiss' | 'call_to_action') => void;
+  closeRulePreview: (reason: RulePreviewFlyoutCloseReason) => void;
 }
 
 export function useRulePreviewFlyout({
@@ -56,7 +58,7 @@ export function useRulePreviewFlyout({
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
   const closeRulePreview = useCallback(
-    (reason: 'dismiss' | 'call_to_action') => {
+    (reason: RulePreviewFlyoutCloseReason) => {
       if (closeRulePreviewAction && rule) {
         closeRulePreviewAction(rule, reason);
       }
@@ -102,7 +104,7 @@ const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
   flyoutProps,
 }: UseRulePreviewFlyoutBaseParams & {
   rule: RuleResponse | undefined;
-  closeRulePreview: (reason: 'dismiss' | 'call_to_action') => void;
+  closeRulePreview: (reason: RulePreviewFlyoutCloseReason) => void;
 }) {
   const { isEditingRule } = useRulePreviewContext();
 

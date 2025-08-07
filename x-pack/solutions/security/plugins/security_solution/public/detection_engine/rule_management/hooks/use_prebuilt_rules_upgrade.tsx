@@ -40,6 +40,7 @@ import { RuleUpgradeTab } from '../components/rule_details/three_way_diff';
 import { TabContentPadding } from '../../../siem_migrations/rules/components/rule_details_flyout';
 import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_type_change_callout';
 import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
+import type { RulePreviewFlyoutCloseReason } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import { useRulePreviewFlyout } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
 import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
@@ -361,7 +362,7 @@ export function usePrebuiltRulesUpgrade({
     },
     [rulesUpgradeState, isRulesCustomizationEnabled, setRuleFieldResolvedValue]
   );
-  const closeRulePreviewAction = (rule: RuleResponse, reason: 'dismiss' | 'call_to_action') => {
+  const closeRulePreviewAction = (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => {
     const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
     const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
     if (reason === 'dismiss') {
