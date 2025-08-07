@@ -24,7 +24,7 @@ describe('ControlStateTransitionDiag', () => {
     expect(cstDiag.length).toBe(2);
   });
 
-  it('should format 1 transitions with pretty()', () => {
+  it('should format 1 transitions with prettyPrint()', () => {
     cstDiag.observeTransition('Init', 'Running', 5);
 
     expect(cstDiag.prettyPrint()).toBe(`[
@@ -32,7 +32,7 @@ describe('ControlStateTransitionDiag', () => {
 ]`);
   });
 
-  it('should format >1 transitions with pretty()', () => {
+  it('should format >1 transitions with prettyPrint()', () => {
     cstDiag.observeTransition('Init', 'Running', 5);
     cstDiag.observeTransition('Running', 'Done', 15);
 
@@ -42,7 +42,7 @@ describe('ControlStateTransitionDiag', () => {
 ]`);
   });
 
-  it('should handle pretty() with no transitions', () => {
+  it('should handle prettyPrint() with no transitions', () => {
     expect(cstDiag.prettyPrint()).toBe('[<No transitions observed>]');
   });
 });
