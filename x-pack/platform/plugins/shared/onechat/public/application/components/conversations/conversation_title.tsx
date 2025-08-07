@@ -9,13 +9,11 @@ import React from 'react';
 import { EuiTitle, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useConversationTitle } from '../../hooks/use_conversation';
 
-interface ConversationTitleProps {
-  title: string;
-}
-
-export const ConversationTitle: React.FC<ConversationTitleProps> = ({ title }) => {
+export const ConversationTitle: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
+  const title = useConversationTitle();
 
   const labels = {
     ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {

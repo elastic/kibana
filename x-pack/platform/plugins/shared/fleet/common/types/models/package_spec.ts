@@ -37,6 +37,9 @@ export interface PackageSpecManifest {
   };
   asset_tags?: PackageSpecTags[];
   discovery?: {
+    fields?: Array<{
+      name: string;
+    }>;
     datasets?: DiscoveryDataset[];
   };
 }
