@@ -48,7 +48,6 @@ import type {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
   SavedObjectsChangeAccessControlResponse,
-  SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeOwnershipOptions,
