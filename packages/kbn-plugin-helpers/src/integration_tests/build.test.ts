@@ -69,8 +69,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
-     info run bazel and build required artifacts for the optimizer
-     succ bazel run successfully and artifacts were created
+     info building required artifacts for the optimizer
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
