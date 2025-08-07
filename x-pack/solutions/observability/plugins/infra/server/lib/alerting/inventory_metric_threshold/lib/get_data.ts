@@ -8,7 +8,7 @@
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import { unflattenKnownApmEventFields as unflattenKnownFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -88,7 +88,7 @@ const getMetadata = (
     return undefined;
   }
 
-  if (schema === DataSchemaFormat.SEMCONV) {
+  if (schema === 'semconv') {
     const metadata = bucketHits[0].fields;
 
     if (!metadata) {

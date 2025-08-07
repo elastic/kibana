@@ -6,7 +6,7 @@
  */
 import type { ESSearchRequest } from '@kbn/es-types';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
 import { rangeQuery } from '@kbn/observability-plugin/server';
@@ -90,13 +90,14 @@ export const createRequest = async (
       top_hits: {
         size: 1,
         _source:
-          schema === DataSchemaFormat.SEMCONV
+          schema === 'semconv'
             ? false
             : {
                 includes: allowList,
                 excludes: METADATA_BLOCKED_LIST,
               },
-        docvalue_fields: schema === DataSchemaFormat.SEMCONV ? allowList : [],
+        // otel docs don't support _source to select fields, so we use docvalue_fields
+        docvalue_fields: schema === 'semconv' ? allowList : [],
       },
     },
   };

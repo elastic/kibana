@@ -45,6 +45,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
+import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
@@ -816,16 +817,12 @@ const nodeTypeOptions: Record<InventoryItemType, EuiSelectOption> = {
 };
 
 const schemaOptions: Record<DataSchemaFormat, EuiSelectOption> = {
-  [DataSchemaFormatEnum.ECS]: {
-    text: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
-      defaultMessage: 'Elastic System Integration',
-    }),
+  ecs: {
+    text: schemaTranslationMap.ecs,
     value: DataSchemaFormatEnum.ECS,
   },
-  [DataSchemaFormatEnum.SEMCONV]: {
-    text: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
-      defaultMessage: 'OpenTelemetry',
-    }),
+  semconv: {
+    text: schemaTranslationMap.semconv,
     value: DataSchemaFormatEnum.SEMCONV,
   },
 };
