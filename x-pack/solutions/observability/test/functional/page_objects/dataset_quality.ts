@@ -143,7 +143,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
-    datasetQualityTypesSelectable: 'datasetQualityFilterType',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
@@ -155,6 +154,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDetailsLinkToDiscover: 'datasetQualityDetailsLinkToDiscover',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
+    datasetQualityTypesSelectableButton: 'datasetQualityFilterTypeSelectableButton',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
@@ -253,9 +253,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async waitUntilSummaryPanelLoaded(isStateful: boolean = true) {
-      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`, {
-        timeout: 5 * 1000, // Increasing timeout since tests were flaky
-      });
+      await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       if (isStateful) {
         await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
       }
