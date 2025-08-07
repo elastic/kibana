@@ -900,8 +900,6 @@
       "@kbn/embeddable-alerts-table-plugin/*": ["x-pack/platform/plugins/shared/embeddable_alerts_table/*"],
       "@kbn/embeddable-enhanced": ["x-pack/platform/packages/shared/embeddable-enhanced"],
       "@kbn/embeddable-enhanced/*": ["x-pack/platform/packages/shared/embeddable-enhanced/*"],
-      "@kbn/embeddable-enhanced-plugin": ["x-pack/platform/plugins/shared/embeddable_enhanced"],
-      "@kbn/embeddable-enhanced-plugin/*": ["x-pack/platform/plugins/shared/embeddable_enhanced/*"],
       "@kbn/embeddable-examples-plugin": ["examples/embeddable_examples"],
       "@kbn/embeddable-examples-plugin/*": ["examples/embeddable_examples/*"],
       "@kbn/embeddable-plugin": ["src/platform/plugins/shared/embeddable"],
