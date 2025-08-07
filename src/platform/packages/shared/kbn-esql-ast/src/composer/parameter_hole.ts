@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '../pretty_print';
-import type { ESQLProperNode } from '../types';
-
-export const serialize = (node: ESQLProperNode): string => {
-  return node.type === 'query'
-    ? BasicPrettyPrinter.print(node)
-    : node.type === 'command'
-    ? BasicPrettyPrinter.command(node)
-    : BasicPrettyPrinter.expression(node);
-};
+export class ParameterHole {
+  constructor(public value: unknown, public name?: string) {}
+}
