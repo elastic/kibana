@@ -131,8 +131,7 @@
                 "docId": "kibKbnTelemetryConfigPluginApi",
                 "section": "def-common.TelemetryConfig",
                 "text": "TelemetryConfig"
-              },
-              " | undefined"
+              }
             ],
             "path": "src/platform/packages/private/kbn-apm-config-loader/src/config.ts",
             "deprecated": false,

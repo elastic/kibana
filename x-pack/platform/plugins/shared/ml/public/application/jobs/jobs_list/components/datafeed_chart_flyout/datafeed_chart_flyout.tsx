@@ -23,7 +23,6 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiLoadingChart,
-  EuiPortal,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -52,6 +51,8 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { FocusTrapProps } from '../../../../util/create_focus_trap_props';
+import { createJobActionFocusTrapProps } from '../../../../util/create_focus_trap_props';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
@@ -88,6 +89,7 @@ interface DatafeedChartFlyoutProps {
   end: number;
   onClose: () => void;
   onModelSnapshotAnnotationClick?: (modelSnapshot: ModelSnapshot) => void;
+  focusTrapProps?: FocusTrapProps;
 }
 
 function setLineAnnotationHeader(
@@ -110,6 +112,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   end,
   onClose,
   onModelSnapshotAnnotationClick,
+  focusTrapProps,
 }) => {
   const mlApi = useMlApi();
   const [data, setData] = useState<{
@@ -280,389 +283,385 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   );
 
   return (
-    <EuiPortal>
-      <EuiFlyout
-        size="m"
-        ownFocus
-        onClose={onClose}
-        aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
-          defaultMessage: 'Datafeed chart flyout',
-        })}
-        data-test-subj="mlAnnotationsViewDatafeedFlyout"
-      >
-        <EuiFlyoutHeader hasBorder data-test-subj="mlAnnotationsViewDatafeedFlyoutTitle">
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
+    <EuiFlyout
+      focusTrapProps={focusTrapProps}
+      size="m"
+      onClose={onClose}
+      aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
+        defaultMessage: 'Datafeed chart flyout',
+      })}
+      data-test-subj="mlAnnotationsViewDatafeedFlyout"
+    >
+      <EuiFlyoutHeader hasBorder data-test-subj="mlAnnotationsViewDatafeedFlyoutTitle">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  color="primary"
+                  type="question"
+                  content={
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedChart.headerTooltipContent"
+                      defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.ml.jobsList.datafeedChart.header"
+                      defaultMessage="Datafeed chart for {jobId}"
+                      values={{
+                        jobId,
+                      }}
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ padding: '10px' }}>
+            <EuiDatePicker
+              aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.chartIntervalEndTime', {
+                defaultMessage: 'Chart interval end time',
+              })}
+              showTimeSelect
+              selected={endDate}
+              onChange={handleChange}
+              popoverPlacement="leftUp"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {isLoadingChartData || isInitialized === false ? <EuiLoadingChart size="l" /> : null}
+        {!isLoadingChartData && isInitialized && datafeedConfig !== undefined && bucketSpan ? (
+          <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    color="primary"
-                    type="question"
-                    content={
-                      <FormattedMessage
-                        id="xpack.ml.jobsList.datafeedChart.headerTooltipContent"
-                        defaultMessage="Charts the event counts of the job and the source data to identify where missing data has occurred."
-                      />
-                    }
+                  <EditQueryDelay
+                    datafeedId={datafeedConfig.datafeed_id}
+                    queryDelay={datafeedConfig.query_delay}
+                    isEnabled={datafeedConfig.state === DATAFEED_STATE.STOPPED && canUpdateDatafeed}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h4>
-                      <FormattedMessage
-                        id="xpack.ml.jobsList.datafeedChart.header"
-                        defaultMessage="Datafeed chart for {jobId}"
-                        values={{
-                          jobId,
-                        }}
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiCheckbox
+                        id={checkboxIdAnnotation}
+                        label={
+                          <EuiText size={'xs'}>
+                            <FormattedMessage
+                              id="xpack.ml.jobsList.datafeedChart.showAnnotationsCheckboxLabel"
+                              defaultMessage="Show annotations"
+                            />
+                          </EuiText>
+                        }
+                        checked={showAnnotations}
+                        onChange={() => setShowAnnotations(!showAnnotations)}
                       />
-                    </h4>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ padding: '10px' }}>
-              <EuiDatePicker
-                aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.chartIntervalEndTime', {
-                  defaultMessage: 'Chart interval end time',
-                })}
-                showTimeSelect
-                selected={endDate}
-                onChange={handleChange}
-                popoverPlacement="leftUp"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {isLoadingChartData || isInitialized === false ? <EuiLoadingChart size="l" /> : null}
-          {!isLoadingChartData && isInitialized && datafeedConfig !== undefined && bucketSpan ? (
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <EditQueryDelay
-                      datafeedId={datafeedConfig.datafeed_id}
-                      queryDelay={datafeedConfig.query_delay}
-                      isEnabled={
-                        datafeedConfig.state === DATAFEED_STATE.STOPPED && canUpdateDatafeed
-                      }
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup>
+                    </EuiFlexItem>
+                    {onModelSnapshotAnnotationClick ? (
                       <EuiFlexItem grow={false}>
                         <EuiCheckbox
-                          id={checkboxIdAnnotation}
+                          id={checkboxIdModelSnapshot}
                           label={
                             <EuiText size={'xs'}>
                               <FormattedMessage
-                                id="xpack.ml.jobsList.datafeedChart.showAnnotationsCheckboxLabel"
-                                defaultMessage="Show annotations"
+                                id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
+                                defaultMessage="Show model snapshots"
                               />
                             </EuiText>
                           }
-                          checked={showAnnotations}
-                          onChange={() => setShowAnnotations(!showAnnotations)}
+                          checked={showModelSnapshots}
+                          onChange={() => setShowModelSnapshots(!showModelSnapshots)}
                         />
                       </EuiFlexItem>
-                      {onModelSnapshotAnnotationClick ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiCheckbox
-                            id={checkboxIdModelSnapshot}
-                            label={
-                              <EuiText size={'xs'}>
-                                <FormattedMessage
-                                  id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
-                                  defaultMessage="Show model snapshots"
-                                />
-                              </EuiText>
-                            }
-                            checked={showModelSnapshots}
-                            onChange={() => setShowModelSnapshots(!showModelSnapshots)}
-                          />
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="none" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        <FormattedMessage
-                          id="xpack.ml.jobsList.datafeedChart.chartLeftArrowTooltip"
-                          defaultMessage="Previous time window"
-                        />
-                      }
-                    >
-                      <EuiButtonEmpty
-                        aria-label={i18n.translate(
-                          'xpack.ml.jobsList.datafeedChart.chartIntervalLeftArrow',
-                          {
-                            defaultMessage: 'Previous time window',
-                          }
-                        )}
-                        color="primary"
-                        onClick={() => {
-                          handleEndDateChange(CHART_DIRECTION.BACK);
-                        }}
-                        iconType="arrowLeft"
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="none" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.datafeedChart.chartLeftArrowTooltip"
+                        defaultMessage="Previous time window"
                       />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
-                      <Chart size={CHART_SIZE}>
-                        <Tooltip type={TooltipType.VerticalCursor} showNullValues />
-                        <Settings
-                          showLegend
-                          legendPosition={Position.Bottom}
-                          onAnnotationClick={(annotations: {
-                            rects: RectAnnotationEvent[];
-                            lines: LineAnnotationEvent[];
-                          }) => {
-                            // If it's not a line annotation or if it's not a model snapshot annotation then do nothing
-                            if (
-                              !(canCreateJob && canStartStopDatafeed) ||
-                              annotations.lines?.length === 0 ||
-                              (annotations.lines &&
-                                !annotations.lines[0].id.includes('Model snapshots'))
-                            )
-                              return;
+                    }
+                  >
+                    <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.ml.jobsList.datafeedChart.chartIntervalLeftArrow',
+                        {
+                          defaultMessage: 'Previous time window',
+                        }
+                      )}
+                      color="primary"
+                      onClick={() => {
+                        handleEndDateChange(CHART_DIRECTION.BACK);
+                      }}
+                      iconType="arrowLeft"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div data-test-subj="mlAnnotationsViewDatafeedFlyoutChart">
+                    <Chart size={CHART_SIZE}>
+                      <Tooltip type={TooltipType.VerticalCursor} showNullValues />
+                      <Settings
+                        showLegend
+                        legendPosition={Position.Bottom}
+                        onAnnotationClick={(annotations: {
+                          rects: RectAnnotationEvent[];
+                          lines: LineAnnotationEvent[];
+                        }) => {
+                          // If it's not a line annotation or if it's not a model snapshot annotation then do nothing
+                          if (
+                            !(canCreateJob && canStartStopDatafeed) ||
+                            annotations.lines?.length === 0 ||
+                            (annotations.lines &&
+                              !annotations.lines[0].id.includes('Model snapshots'))
+                          )
+                            return;
 
-                            if (
-                              onModelSnapshotAnnotationClick &&
-                              isPopulatedObject<string, ModelSnapshot>(
-                                annotations.lines?.[0]?.datum,
-                                ['modelSnapshot']
-                              )
-                            ) {
-                              onModelSnapshotAnnotationClick(
-                                annotations.lines[0].datum.modelSnapshot
-                              );
-                            }
-                          }}
-                          theme={{
-                            lineSeriesStyle: {
-                              point: {
-                                visible: 'never',
-                              },
-                            },
-                            chartMargins: {
-                              top: 10,
-                            },
-                          }}
-                          baseTheme={baseTheme}
-                          locale={i18n.getLocale()}
-                        />
-                        <Axis
-                          id="bottom"
-                          position={Position.Bottom}
-                          showOverlappingTicks
-                          tickFormat={dateFormatter}
-                          title={i18n.translate('xpack.ml.jobsList.datafeedChart.xAxisTitle', {
-                            defaultMessage: 'Bucket span ({bucketSpan})',
-                            values: { bucketSpan },
-                          })}
-                        />
-                        <Axis
-                          id="left"
-                          title={i18n.translate('xpack.ml.jobsList.datafeedChart.yAxisTitle', {
-                            defaultMessage: 'Count',
-                          })}
-                          position={Position.Left}
-                          domain={
-                            hasOnlyEmptyValues
-                              ? {
-                                  min: 0,
-                                  max: 10,
-                                }
-                              : undefined
+                          if (
+                            onModelSnapshotAnnotationClick &&
+                            isPopulatedObject<string, ModelSnapshot>(
+                              annotations.lines?.[0]?.datum,
+                              ['modelSnapshot']
+                            )
+                          ) {
+                            onModelSnapshotAnnotationClick(
+                              annotations.lines[0].datum.modelSnapshot
+                            );
                           }
-                          tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
-                        />
-                        {showAnnotations ? (
-                          <>
-                            <LineAnnotation
-                              id={i18n.translate(
-                                'xpack.ml.jobsList.datafeedChart.annotationLineSeriesId',
-                                {
-                                  defaultMessage: 'Annotations line result',
-                                }
-                              )}
-                              key="annotation-results-line"
-                              domainType={AnnotationDomainType.XDomain}
-                              dataValues={annotationData.line}
-                              marker={<EuiIcon type="annotation" />}
-                              markerPosition={Position.Top}
-                              style={{
-                                line: {
-                                  strokeWidth: 3,
-                                  stroke: euiTheme.colors.textDanger,
-                                  opacity: 0.5,
-                                },
-                              }}
-                            />
-                            <RectAnnotation
-                              key="annotation-results-rect"
-                              customTooltip={customTooltip}
-                              dataValues={annotationData.rect}
-                              id={i18n.translate(
-                                'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',
-                                {
-                                  defaultMessage: 'Annotations rectangle result',
-                                }
-                              )}
-                              style={{ fill: euiTheme.colors.textDanger }}
-                            />
-                          </>
-                        ) : null}
-                        {showModelSnapshots ? (
+                        }}
+                        theme={{
+                          lineSeriesStyle: {
+                            point: {
+                              visible: 'never',
+                            },
+                          },
+                          chartMargins: {
+                            top: 10,
+                          },
+                        }}
+                        baseTheme={baseTheme}
+                        locale={i18n.getLocale()}
+                      />
+                      <Axis
+                        id="bottom"
+                        position={Position.Bottom}
+                        showOverlappingTicks
+                        tickFormat={dateFormatter}
+                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.xAxisTitle', {
+                          defaultMessage: 'Bucket span ({bucketSpan})',
+                          values: { bucketSpan },
+                        })}
+                      />
+                      <Axis
+                        id="left"
+                        title={i18n.translate('xpack.ml.jobsList.datafeedChart.yAxisTitle', {
+                          defaultMessage: 'Count',
+                        })}
+                        position={Position.Left}
+                        domain={
+                          hasOnlyEmptyValues
+                            ? {
+                                min: 0,
+                                max: 10,
+                              }
+                            : undefined
+                        }
+                        tickFormat={(d) => (d === null ? notAvailableMessage : String(d))}
+                      />
+                      {showAnnotations ? (
+                        <>
                           <LineAnnotation
                             id={i18n.translate(
-                              'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
+                              'xpack.ml.jobsList.datafeedChart.annotationLineSeriesId',
                               {
-                                defaultMessage: 'Model snapshots',
+                                defaultMessage: 'Annotations line result',
                               }
                             )}
-                            key="model-snapshots-results-line"
+                            key="annotation-results-line"
                             domainType={AnnotationDomainType.XDomain}
-                            dataValues={modelSnapshotDataForTimeRange}
-                            marker={<EuiIcon type="asterisk" />}
+                            dataValues={annotationData.line}
+                            marker={<EuiIcon type="annotation" />}
                             markerPosition={Position.Top}
                             style={{
                               line: {
                                 strokeWidth: 3,
-                                // Amsterdam: euiTheme.colors.vis.euiColorVis1
-                                // Borealis:  euiTheme.colors.vis.euiColorVis2
-                                stroke: euiTheme.flags.hasVisColorAdjustment
-                                  ? euiTheme.colors.vis.euiColorVis1
-                                  : euiTheme.colors.vis.euiColorVis2,
+                                stroke: euiTheme.colors.textDanger,
                                 opacity: 0.5,
                               },
                             }}
                           />
-                        ) : null}
-                        {messageData.length > 0 ? (
-                          <>
-                            <LineAnnotation
-                              id={i18n.translate(
-                                'xpack.ml.jobsList.datafeedChart.messageLineAnnotationId',
-                                {
-                                  defaultMessage: 'Job messages line result',
-                                }
-                              )}
-                              key="messages-results-line"
-                              domainType={AnnotationDomainType.XDomain}
-                              dataValues={messageData}
-                              marker={<EuiIcon type="tableDensityNormal" />}
-                              markerPosition={Position.Top}
-                              style={{
-                                line: {
-                                  strokeWidth: 3,
-                                  stroke: euiTheme.colors.accent,
-                                  opacity: 0.5,
-                                },
-                              }}
-                            />
-                          </>
-                        ) : null}
-                        <LineSeries
-                          key={'source-results'}
-                          color={euiTheme.colors.primary}
-                          id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                            defaultMessage: 'Source indices document count',
-                          })}
-                          xScaleType={ScaleType.Time}
-                          yScaleType={ScaleType.Linear}
-                          xAccessor={0}
-                          yAccessors={[1]}
-                          data={sourceData}
-                          curve={CurveType.LINEAR}
+                          <RectAnnotation
+                            key="annotation-results-rect"
+                            customTooltip={customTooltip}
+                            dataValues={annotationData.rect}
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedChart.annotationRectSeriesId',
+                              {
+                                defaultMessage: 'Annotations rectangle result',
+                              }
+                            )}
+                            style={{ fill: euiTheme.colors.textDanger }}
+                          />
+                        </>
+                      ) : null}
+                      {showModelSnapshots ? (
+                        <LineAnnotation
+                          id={i18n.translate(
+                            'xpack.ml.jobsList.datafeedChart.modelSnapshotsLineSeriesId',
+                            {
+                              defaultMessage: 'Model snapshots',
+                            }
+                          )}
+                          key="model-snapshots-results-line"
+                          domainType={AnnotationDomainType.XDomain}
+                          dataValues={modelSnapshotDataForTimeRange}
+                          marker={<EuiIcon type="asterisk" />}
+                          markerPosition={Position.Top}
+                          style={{
+                            line: {
+                              strokeWidth: 3,
+                              // Amsterdam: euiTheme.colors.vis.euiColorVis1
+                              // Borealis:  euiTheme.colors.vis.euiColorVis2
+                              stroke: euiTheme.flags.hasVisColorAdjustment
+                                ? euiTheme.colors.vis.euiColorVis1
+                                : euiTheme.colors.vis.euiColorVis2,
+                              opacity: 0.5,
+                            },
+                          }}
                         />
-                        <LineSeries
-                          key={'job-results'}
-                          color={euiTheme.colors.textAccent}
-                          id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Datafeed document count',
-                          })}
-                          xScaleType={ScaleType.Time}
-                          yScaleType={ScaleType.Linear}
-                          xAccessor={0}
-                          yAccessors={[1]}
-                          data={bucketData}
-                          curve={CurveType.LINEAR}
-                        />
-                      </Chart>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        <FormattedMessage
-                          id="xpack.ml.jobsList.datafeedChart.chartRightArrowTooltip"
-                          defaultMessage="Next time window"
-                        />
-                      }
-                    >
-                      <EuiButtonEmpty
-                        aria-label={i18n.translate(
-                          'xpack.ml.jobsList.datafeedChart.chartIntervalRightArrow',
-                          {
-                            defaultMessage: 'Next time window',
-                          }
-                        )}
-                        color="primary"
-                        onClick={() => {
-                          handleEndDateChange(CHART_DIRECTION.FORWARD);
-                        }}
-                        iconType="arrowRight"
+                      ) : null}
+                      {messageData.length > 0 ? (
+                        <>
+                          <LineAnnotation
+                            id={i18n.translate(
+                              'xpack.ml.jobsList.datafeedChart.messageLineAnnotationId',
+                              {
+                                defaultMessage: 'Job messages line result',
+                              }
+                            )}
+                            key="messages-results-line"
+                            domainType={AnnotationDomainType.XDomain}
+                            dataValues={messageData}
+                            marker={<EuiIcon type="tableDensityNormal" />}
+                            markerPosition={Position.Top}
+                            style={{
+                              line: {
+                                strokeWidth: 3,
+                                stroke: euiTheme.colors.accent,
+                                opacity: 0.5,
+                              },
+                            }}
+                          />
+                        </>
+                      ) : null}
+                      <LineSeries
+                        key={'source-results'}
+                        color={euiTheme.colors.primary}
+                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
+                          defaultMessage: 'Source indices document count',
+                        })}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor={0}
+                        yAccessors={[1]}
+                        data={sourceData}
+                        curve={CurveType.LINEAR}
                       />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                      <LineSeries
+                        key={'job-results'}
+                        color={euiTheme.colors.textAccent}
+                        id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
+                          defaultMessage: 'Datafeed document count',
+                        })}
+                        xScaleType={ScaleType.Time}
+                        yScaleType={ScaleType.Linear}
+                        xAccessor={0}
+                        yAccessors={[1]}
+                        data={bucketData}
+                        curve={CurveType.LINEAR}
+                      />
+                    </Chart>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.datafeedChart.chartRightArrowTooltip"
+                        defaultMessage="Next time window"
+                      />
+                    }
+                  >
+                    <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.ml.jobsList.datafeedChart.chartIntervalRightArrow',
+                        {
+                          defaultMessage: 'Next time window',
+                        }
+                      )}
+                      color="primary"
+                      onClick={() => {
+                        handleEndDateChange(CHART_DIRECTION.FORWARD);
+                      }}
+                      iconType="arrowRight"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {range !== undefined ? (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column">
+                  <EuiTitle size="xs">
+                    <h4>
+                      <FormattedMessage
+                        id="xpack.ml.jobsList.datafeedChart.messagesTableTitle"
+                        defaultMessage="Job messages"
+                      />
+                    </h4>
+                  </EuiTitle>
+                  <JobMessagesPane
+                    jobId={jobId}
+                    {...range}
+                    actionHandler={function toggleChartMessage(message: JobMessage) {
+                      if (
+                        messageData.length > 0 &&
+                        messageData[0].dataValue === message.timestamp
+                      ) {
+                        setMessageData([]);
+                      } else {
+                        const datum = setLineAnnotationHeader({
+                          dataValue: message.timestamp,
+                          details: message.message,
+                        });
+
+                        setMessageData([datum]);
+                      }
+                    }}
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {range !== undefined ? (
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="column">
-                    <EuiTitle size="xs">
-                      <h4>
-                        <FormattedMessage
-                          id="xpack.ml.jobsList.datafeedChart.messagesTableTitle"
-                          defaultMessage="Job messages"
-                        />
-                      </h4>
-                    </EuiTitle>
-                    <JobMessagesPane
-                      jobId={jobId}
-                      {...range}
-                      actionHandler={function toggleChartMessage(message: JobMessage) {
-                        if (
-                          messageData.length > 0 &&
-                          messageData[0].dataValue === message.timestamp
-                        ) {
-                          setMessageData([]);
-                        } else {
-                          const datum = setLineAnnotationHeader({
-                            dataValue: message.timestamp,
-                            details: message.message,
-                          });
-
-                          setMessageData([datum]);
-                        }
-                      }}
-                    />
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          ) : null}
-        </EuiFlyoutBody>
-      </EuiFlyout>
-    </EuiPortal>
+            ) : null}
+          </EuiFlexGroup>
+        ) : null}
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 };
 
@@ -729,6 +728,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
         }}
         end={job.latestResultsTimestampMs || Date.now()}
         jobId={job.id}
+        focusTrapProps={createJobActionFocusTrapProps(job.id)}
       />
     );
   }
