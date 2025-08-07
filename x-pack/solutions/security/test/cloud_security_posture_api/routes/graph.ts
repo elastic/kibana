@@ -20,9 +20,11 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
+import { dataViewRouteHelpersFactory } from '../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -35,6 +37,8 @@ export default function (providerContext: FtrProviderContext) {
   const spacesService = getService('spaces');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
+  const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   const postGraph = (
     agent: Agent,
@@ -733,6 +737,237 @@ export default function (providerContext: FtrProviderContext) {
             `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
           );
           expect(edge.type).equal('solid');
+        });
+      });
+
+      describe('Enrich graph with entity metadata', () => {
+        const enrichPolicyCreationTimeout = 10000;
+        const customNamespaceId = 'test';
+        const entitiesIndex = '.entities.v1.latest.security_*';
+
+        before(async () => {
+          await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+          await esArchiver.load(
+            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
+          );
+
+          // Create a test space
+          await spacesService.create({
+            id: customNamespaceId,
+            name: `${customNamespaceId} namespace`,
+            solution: 'security',
+            disabledFeatures: [],
+          });
+        });
+
+        after(async () => {
+          await es.deleteByQuery({
+            index: entitiesIndex,
+            query: { match_all: {} },
+            conflicts: 'proceed',
+          });
+
+          await spacesService.delete(customNamespaceId);
+          await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
+        });
+
+        it('should return 200 when securitySolution:enableAssetInventory is true without enrich policy', async () => {
+          const response = await postGraph(supertest, {
+            query: {
+              originEventIds: [],
+              start: '2024-09-01T00:00:00Z',
+              end: '2024-09-02T00:00:00Z',
+              esQuery: {
+                bool: {
+                  filter: [
+                    {
+                      match_phrase: {
+                        'actor.entity.id': 'admin@example.com',
+                      },
+                    },
+                  ],
+                  must_not: [
+                    {
+                      match_phrase: {
+                        'event.action': 'google.iam.admin.v1.UpdateRole',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }).expect(result(200));
+
+          expect(response.body).to.have.property('nodes').length(3);
+          expect(response.body).to.have.property('edges').length(2);
+        });
+
+        it('should contain entity data when asset inventory is enabled', async () => {
+          // initialize security-solution-default data-view - needed for entity store
+          const dataView = dataViewRouteHelpersFactory(supertest);
+          await dataView.create('security-solution');
+
+          // enable asset inventory - install underlying indexes and enrich policies
+          await supertest
+            .post(`/api/asset_inventory/enable`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
+
+          // although enrich policy is already create via 'api/asset_inventory/enable'
+          // we still would like to replicate as if cloud asset discovery integration was fully installed
+          await supertest
+            .post(`/api/fleet/epm/packages/_bulk`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packages: [
+                {
+                  name: 'cloud_asset_inventory',
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
+                },
+              ],
+            })
+            .expect(200);
+
+          // Looks like there's some async operation that runs in the background
+          // so we use retry.tryForTime to wait for it to finish - otherwise sometimes policy is not yet created
+          await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            const response = await postGraph(supertest, {
+              query: {
+                originEventIds: [],
+                start: '2024-09-01T00:00:00Z',
+                end: '2024-09-02T00:00:00Z',
+                esQuery: {
+                  bool: {
+                    filter: [
+                      {
+                        match_phrase: {
+                          'actor.entity.id': 'admin@example.com',
+                        },
+                      },
+                    ],
+                    must_not: [
+                      {
+                        match_phrase: {
+                          'event.action': 'google.iam.admin.v1.UpdateRole',
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            }).expect(result(200));
+
+            expect(response.body).to.have.property('nodes').length(3);
+            expect(response.body).to.have.property('edges').length(2);
+            expect(response.body).not.to.have.property('messages');
+            // Find the actor node
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'admin@example.com'
+            ) as EntityNodeDataModel;
+
+            // Verify entity enrichment
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.label).to.equal('AdminExample');
+            expect(actorNode.icon).to.equal('user');
+            expect(actorNode.shape).to.equal('ellipse');
+            expect(actorNode.tag).to.equal('Identity');
+
+            // Verify other nodes
+            response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
+              expect(node).to.have.property('color');
+              expect(node.color).equal(
+                'primary',
+                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+              );
+
+              if (node.shape === 'label') {
+                expect(node.documentsData).to.have.length(1);
+                expect(node.documentsData?.[0]).to.have.property(
+                  'type',
+                  node.shape === 'label' ? 'event' : 'entity'
+                );
+              }
+            });
+
+            response.body.edges.forEach((edge: EdgeDataModel) => {
+              expect(edge).to.have.property('color');
+              expect(edge.color).equal(
+                'subdued',
+                `edge color mismatched [edge: ${edge.id}] [actual: ${edge.color}]`
+              );
+              expect(edge.type).equal('solid');
+            });
+          });
+        });
+
+        it('should return enriched data when asset inventory is enabled in a different space', async () => {
+          await kibanaServer.uiSettings.update(
+            { 'securitySolution:enableAssetInventory': true },
+            { space: customNamespaceId }
+          );
+
+          // Create the data view in the test space
+          const dataView = dataViewRouteHelpersFactory(supertest, customNamespaceId);
+          await dataView.create('security-solution');
+
+          // Enable asset inventory in the test space
+          await supertest
+            .post(`/s/${customNamespaceId}/api/asset_inventory/enable`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({})
+            .expect(200);
+
+          await supertest
+            .post(`/s/${customNamespaceId}/api/fleet/epm/packages/_bulk`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              packages: [
+                {
+                  name: 'cloud_asset_inventory',
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
+                },
+              ],
+            })
+            .expect(200);
+
+          await retry.tryForTime(enrichPolicyCreationTimeout, async () => {
+            const response = await postGraph(
+              supertest,
+              {
+                query: {
+                  indexPatterns: ['logs-*'],
+                  originEventIds: [],
+                  start: '2024-09-01T00:00:00Z',
+                  end: '2024-09-02T00:00:00Z',
+                  esQuery: {
+                    bool: {
+                      filter: [
+                        {
+                          match_phrase: {
+                            'actor.entity.id': 'admin@example.com',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              undefined,
+              customNamespaceId
+            ).expect(result(200, logger));
+
+            const actorNode = response.body.nodes.find(
+              (node: NodeDataModel) => node.id === 'admin@example.com'
+            ) as EntityNodeDataModel;
+
+            // Verify entity enrichment
+            expect(actorNode).not.to.be(undefined);
+            expect(actorNode.label).to.equal('AdminExample');
+            expect(actorNode.icon).to.equal('user');
+            expect(actorNode.shape).to.equal('ellipse');
+            expect(actorNode.tag).to.equal('Identity');
+          });
         });
       });
     });

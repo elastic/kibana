@@ -11,7 +11,7 @@ import { fetchGraph } from './fetch_graph';
 import type { EsQuery, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
 
-export interface GraphContextServices {
+interface GraphContextServices {
   logger: Logger;
   esClient: IScopedClusterClient;
 }
@@ -52,6 +52,7 @@ export const getGraph = async ({
     end,
     originEventIds,
     indexPatterns,
+    spaceId,
     esQuery,
   });
 
