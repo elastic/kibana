@@ -18,7 +18,11 @@
       "workflowsExecutionEngine",
       "features",
       "security",
+      "triggersActionsUi",
       "spaces"
+    ],
+    "optionalPlugins": [
+      "alerting"
     ]
   }
 }
