@@ -328,12 +328,12 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               />
             ) : null}
           </EuiPanel>
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel
-            agent={agent}
-            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
-          />
-        </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectLogLevel
+              agent={agent}
+              agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+            />
+          </EuiFlexItem>
         </EuiFlexItem>
       </WrapperFlexGroup>
     );
