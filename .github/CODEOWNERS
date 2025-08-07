@@ -1709,7 +1709,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /src/platform/test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/canvas/ @elastic/kibana-presentation
-/x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
+/x-pack/solutions/search/test/serverless/functional/test_suites/dashboards/ @elastic/kibana-presentation
 /src/platform/test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
@@ -2265,12 +2265,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/security/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/observability/cases @elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/solutions/search/test/serverless/functional/test_suites/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/security/ftr/cases/ @elastic/kibana-cases
-/x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/solutions/search/test/serverless/api_integration/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/search/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/solutions/search/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/platform/test/serverless/api_integration/test_suites/alerting/ @elastic/response-ops
@@ -2304,11 +2304,11 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
 /x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
-/x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/search/config.ts @elastic/search-kibana  @elastic/appex-qa
+/x-pack/solutions/search/test/serverless/api_integration/serverless_search @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/functional/test_suites/ @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/functional/configs/config.ts @elastic/search-kibana  @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
-/x-pack/test_serverless/api_integration/test_suites/search @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/api_integration @elastic/search-kibana
 /x-pack/platform/test/serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/solutions/search/test/functional_search/ @elastic/search-kibana
