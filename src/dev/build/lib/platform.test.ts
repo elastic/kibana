@@ -11,19 +11,19 @@ import { Platform } from './platform';
 
 describe('getName()', () => {
   it('returns the name argument', () => {
-    expect(new Platform('win32', 'x64', 'foo', null).getName()).toBe('win32');
+    expect(new Platform('win32', 'x64', 'foo', null, null).getName()).toBe('win32');
   });
 });
 
 describe('getNodeArch()', () => {
   it('returns the node arch for the passed name', () => {
-    expect(new Platform('win32', 'x64', 'foo', null).getNodeArch()).toBe('win32-x64');
+    expect(new Platform('win32', 'x64', 'foo', null, null).getNodeArch()).toBe('win32-x64');
   });
 });
 
 describe('getBuildName()', () => {
   it('returns the build name for the passed name', () => {
-    expect(new Platform('linux', 'arm64', 'linux-aarch64', null).getBuildName()).toBe(
+    expect(new Platform('linux', 'arm64', 'linux-aarch64', null, null).getBuildName()).toBe(
       'linux-aarch64'
     );
   });
@@ -31,27 +31,27 @@ describe('getBuildName()', () => {
 
 describe('isWindows()', () => {
   it('returns true if name is win32', () => {
-    expect(new Platform('win32', 'x64', 'foo', null).isWindows()).toBe(true);
-    expect(new Platform('linux', 'x64', 'foo', null).isWindows()).toBe(false);
-    expect(new Platform('darwin', 'x64', 'foo', null).isWindows()).toBe(false);
-    expect(new Platform('darwin', 'arm64', 'foo', null).isWindows()).toBe(false);
+    expect(new Platform('win32', 'x64', 'foo', null, null).isWindows()).toBe(true);
+    expect(new Platform('linux', 'x64', 'foo', null, null).isWindows()).toBe(false);
+    expect(new Platform('darwin', 'x64', 'foo', null, null).isWindows()).toBe(false);
+    expect(new Platform('darwin', 'arm64', 'foo', null, null).isWindows()).toBe(false);
   });
 });
 
 describe('isLinux()', () => {
   it('returns true if name is linux', () => {
-    expect(new Platform('win32', 'x64', 'foo', null).isLinux()).toBe(false);
-    expect(new Platform('linux', 'x64', 'foo', null).isLinux()).toBe(true);
-    expect(new Platform('darwin', 'x64', 'foo', null).isLinux()).toBe(false);
-    expect(new Platform('darwin', 'arm64', 'foo', null).isLinux()).toBe(false);
+    expect(new Platform('win32', 'x64', 'foo', null, null).isLinux()).toBe(false);
+    expect(new Platform('linux', 'x64', 'foo', null, null).isLinux()).toBe(true);
+    expect(new Platform('darwin', 'x64', 'foo', null, null).isLinux()).toBe(false);
+    expect(new Platform('darwin', 'arm64', 'foo', null, null).isLinux()).toBe(false);
   });
 });
 
 describe('isMac()', () => {
   it('returns true if name is darwin', () => {
-    expect(new Platform('win32', 'x64', 'foo', null).isMac()).toBe(false);
-    expect(new Platform('linux', 'x64', 'foo', null).isMac()).toBe(false);
-    expect(new Platform('darwin', 'x64', 'foo', null).isMac()).toBe(true);
-    expect(new Platform('darwin', 'arm64', 'foo', null).isMac()).toBe(true);
+    expect(new Platform('win32', 'x64', 'foo', null, null).isMac()).toBe(false);
+    expect(new Platform('linux', 'x64', 'foo', null, null).isMac()).toBe(false);
+    expect(new Platform('darwin', 'x64', 'foo', null, null).isMac()).toBe(true);
+    expect(new Platform('darwin', 'arm64', 'foo', null, null).isMac()).toBe(true);
   });
 });
