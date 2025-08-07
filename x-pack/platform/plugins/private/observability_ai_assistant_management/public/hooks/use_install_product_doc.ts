@@ -26,6 +26,7 @@ export function useInstallProductDoc() {
       return productDocBase!.installation.install({ inferenceId });
     },
     {
+      networkMode: 'always',
       onSuccess: () => {
         toasts.addSuccess(
           i18n.translate(
