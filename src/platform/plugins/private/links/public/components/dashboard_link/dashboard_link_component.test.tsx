@@ -21,7 +21,6 @@ import { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
-import { createLinksSavedObjectRef } from '../../lib/saved_object_ref_utils';
 
 function createMockLinksParent({
   initialQuery,
@@ -31,7 +30,7 @@ function createMockLinksParent({
   initialFilters?: Filter[];
 }) {
   const parent = {
-    ...getMockLinksParentApi({}, [createLinksSavedObjectRef('456')]),
+    ...getMockLinksParentApi({ savedObjectId: '456' }),
     locator: {
       getRedirectUrl: jest.fn().mockReturnValue('https://my-kibana.com/dashboard/123'),
       navigate: jest.fn(),
