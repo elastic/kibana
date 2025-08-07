@@ -353,7 +353,9 @@ export class StreamsApp {
   }
 
   async searchFields(searchTerm: string) {
-    const searchBox = this.page.getByRole('searchbox');
+    const searchBox = this.page
+      .getByTestId('streamsAppSchemaEditorControls')
+      .getByRole('searchbox');
     await expect(searchBox).toBeVisible();
     searchBox.clear();
     await searchBox.focus();
@@ -361,7 +363,9 @@ export class StreamsApp {
   }
 
   async clearFieldSearch() {
-    const searchBox = this.page.getByRole('searchbox');
+    const searchBox = this.page
+      .getByTestId('streamsAppSchemaEditorControls')
+      .getByRole('searchbox');
     await searchBox.clear();
   }
 
