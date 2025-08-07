@@ -175,6 +175,7 @@
     {
       "groupName": "@elastic/appex-ai-infra dependencies",
       "matchDepNames": [
+        "@langtrase/trace-attributes",
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
         "@smithy/node-http-handler",
@@ -2238,6 +2239,8 @@
         "@types/d3-interpolate",
         "@types/d3-scale",
         "@types/d3-selection",
+        "@types/d3-shape",
+        "@types/d3-time",
         "@types/d3-transition",
         "d3",
         "d3-array",
@@ -2245,6 +2248,8 @@
         "d3-interpolate",
         "d3-scale",
         "d3-selection",
+        "d3-shape",
+        "d3-time",
         "d3-transition"
       ],
       "reviewers": [
