@@ -200,12 +200,7 @@ export const DiscoverSessionView = ({
           {...initializationState}
           onDataViewCreated={async (dataViewUnknown) => {
             await dispatch(internalStateActions.loadDataViewList());
-            dispatch(
-              internalStateActions.setInitializationState({
-                hasESData: true,
-                hasUserDataView: true,
-              })
-            );
+            internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true });
             const dataView = dataViewUnknown as DataView;
             initializeSession({
               defaultUrlState: dataView.id
@@ -214,12 +209,6 @@ export const DiscoverSessionView = ({
             });
           }}
           onESQLNavigationComplete={() => {
-            dispatch(
-              internalStateActions.setInitializationState({
-                hasESData: true,
-                hasUserDataView: false,
-              })
-            );
             initializeSession();
           }}
         />

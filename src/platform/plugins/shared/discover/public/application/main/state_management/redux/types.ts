@@ -97,10 +97,7 @@ export enum TabsBarVisibility {
 }
 
 export interface DiscoverInternalState {
-  initializationState: {
-    hasESData: boolean;
-    hasUserDataView: boolean;
-  };
+  initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
