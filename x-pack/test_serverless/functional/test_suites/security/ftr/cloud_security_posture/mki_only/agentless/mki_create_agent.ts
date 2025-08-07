@@ -18,7 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
+  const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
