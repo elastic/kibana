@@ -64,7 +64,7 @@ interface BaseOptions extends ImageOptions {
 }
 
 export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
-export const ServerlessProductTiers = new Set<string>([
+export const serverlessProductTiers = new Set<string>([
   'essentials',
   'logs_essentials',
   'complete',

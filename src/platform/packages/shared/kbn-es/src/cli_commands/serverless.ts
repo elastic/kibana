@@ -24,13 +24,13 @@ import {
   ServerlessOptions,
   isServerlessProjectType,
   serverlessProjectTypes,
-  ServerlessProductTiers,
+  serverlessProductTiers,
 } from '../utils';
 import { Command } from './types';
 import { createCliError } from '../errors';
 
 const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
-const supportedProductTiersStr = Array.from(ServerlessProductTiers).join(' | ').trim();
+const supportedProductTiersStr = Array.from(serverlessProductTiers).join(' | ').trim();
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -129,7 +129,7 @@ export const serverless: Command = {
           `--productTier flag 'search_ai_lake' can only be used with projectType 'security'`
         );
       }
-      if (!ServerlessProductTiers.has(options.productTier)) {
+      if (!serverlessProductTiers.has(options.productTier)) {
         throw createCliError(
           `--productTier flag and must be a string: ${supportedProductTiersStr}`
         );
