@@ -321,7 +321,6 @@ directory, e.g. from the `x-pack` directory run:
 ```bash
 node scripts/functional_tests_server.js --config test_serverless/api_integration/test_suites/search/config.ts
 
-
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
 ```
 
