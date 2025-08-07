@@ -321,7 +321,6 @@ For more information, refer to {kibana-issue}200201[#200201] and {kibana-issue}2
 The 8.16.1 release includes the following bug fixes.
 =======
 include::CHANGELOG.asciidoc[tag=known-issue-1991]
->>>>>>> 34557d33828 ([DOCS][Known issue] Reporting failing in >= 8.15 when using server.protocol: http2 (#230894))
 
 [float]
 [[fixes-v8.16.1]]
