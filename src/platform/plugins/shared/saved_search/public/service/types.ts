@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
-import type { DiscoverSessionAttributes } from '../../server/saved_objects/schema';
 import type { SavedSearch as SavedSearchCommon, SavedSearchAttributes } from '../../common';
 
 /** @public **/
