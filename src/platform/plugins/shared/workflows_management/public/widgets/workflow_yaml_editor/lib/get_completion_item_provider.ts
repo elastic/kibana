@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import _ from 'lodash';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import { MUSTACHE_REGEX_GLOBAL, UNFINISHED_MUSTACHE_REGEX_GLOBAL } from './regex';
 

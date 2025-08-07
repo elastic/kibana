@@ -33,8 +33,8 @@
     "@kbn/core-application-common",
     "@kbn/security-plugin-types-server",
     "@kbn/css-utils",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/alerting-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

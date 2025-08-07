@@ -15,7 +15,7 @@ import { CurrentStepContext } from '../model/types';
 
 function getRootContext(definition: WorkflowYaml): CurrentStepContext {
   return {
-    consts: definition.workflow.consts ?? {},
+    consts: definition.consts ?? {},
     steps: {},
   };
 }

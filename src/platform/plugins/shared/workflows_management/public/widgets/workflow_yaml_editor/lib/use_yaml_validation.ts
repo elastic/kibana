@@ -12,7 +12,7 @@ import { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
 import { parseDocument } from 'yaml';
 import _ from 'lodash';
-import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
+import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MUSTACHE_REGEX_GLOBAL } from './regex';
 import { MarkerSeverity, getSeverityString } from './utils';
