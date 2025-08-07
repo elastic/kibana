@@ -14,7 +14,7 @@ Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
 **Details**
 
-If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`.  PDF and PNG reports will fail when this setting is used in 9.0.3, 9.0.4, 9.1.0 and when a maintenance window is active.
 
 **Action**
 
