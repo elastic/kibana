@@ -512,6 +512,7 @@
     "@kbn/elasticsearch-client-plugin": "link:src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin",
     "@kbn/elasticsearch-client-xpack-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client",
     "@kbn/embeddable-alerts-table-plugin": "link:x-pack/platform/plugins/shared/embeddable_alerts_table",
+    "@kbn/embeddable-enhanced": "link:x-pack/platform/packages/shared/embeddable-enhanced",
     "@kbn/embeddable-enhanced-plugin": "link:x-pack/platform/plugins/shared/embeddable_enhanced",
     "@kbn/embeddable-examples-plugin": "link:examples/embeddable_examples",
     "@kbn/embeddable-plugin": "link:src/platform/plugins/shared/embeddable",
