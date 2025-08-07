@@ -12,7 +12,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 const savedSession = 'my ESQL session';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { discover, common, header } = getPageObjects(['discover', 'common', 'header']);
+  const { discover, common, header, dashboardControls } = getPageObjects([
+    'discover',
+    'common',
+    'header',
+    'dashboardControls',
+  ]);
   const retry = getService('retry');
   const esql = getService('esql');
   const browser = getService('browser');
@@ -82,6 +87,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
         expect(controlGroupVisible).to.be(true);
       });
+    });
+
+    it('should reset successfully a saved session with a control group', async () => {
+      // load saved search
+      await discover.loadSavedSearch(savedSession);
+      await header.waitUntilLoadingHasFinished();
+
+      // Make a change in the controls
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSelectOption('CN');
+
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await discover.revertUnsavedChanges();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
     });
   });
 }
