@@ -996,7 +996,7 @@ export async function getPackageKnowledgeBase(options: {
     return {
       package_name: pkgName,
       version: pkgVersion || 'latest',
-      installed_at: new Date().toISOString(),
+      installed_at: new Date().toISOString(), // TODO: This should be the installation date from the package, not the date its being fetched. Need to make sure we're storing it
       knowledge_base_content: knowledgeBaseItems,
     };
   } catch (error) {
