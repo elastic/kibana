@@ -320,8 +320,6 @@ function renderSettings({
   settingsDefinitionsByAgent: SettingDefinition[];
   handleChange: (key: string, value: string) => void;
 }) {
-  // filter out agent specific items that are not applicable
-  // to the selected service
   return settingsDefinitionsByAgent.map((setting) => (
     <SettingFormRow
       isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
