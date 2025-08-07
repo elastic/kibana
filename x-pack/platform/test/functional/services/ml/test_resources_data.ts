@@ -169,10 +169,37 @@ export const savedSearches = {
                   highlightAll: true,
                   version: true,
                   query: {
-                    query: 'airline:A*',
+                    query: '',
                     language: 'lucene',
                   },
-                  filter: [],
+                  filter: [
+                    {
+                      meta: {
+                        index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                        negate: false,
+                        disabled: false,
+                        alias: null,
+                        type: 'phrase',
+                        key: 'airline',
+                        value: 'ASA',
+                        params: {
+                          query: 'ASA',
+                          type: 'phrase',
+                        },
+                      },
+                      query: {
+                        match: {
+                          airline: {
+                            query: 'ASA',
+                            type: 'phrase',
+                          },
+                        },
+                      },
+                      $state: {
+                        store: 'appState',
+                      },
+                    },
+                  ],
                   indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 }),
               },
