@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../config/serverless/config.base';
+import { createCompleteTierTestConfig } from '../../../configs/serverless/rules_management.complete.config';
 
-export default createTestConfig({
+export default createCompleteTierTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:

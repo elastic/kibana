@@ -1215,7 +1215,7 @@
         "label": "generateEsql",
         "description": [],
         "signature": [
-          "({ query, context, index, model, esClient, }: { query: string; context?: string | undefined; index?: string | undefined; model: ",
+          "({ nlQuery, context, index, model, esClient, }: { nlQuery: string; context?: string | undefined; index?: string | undefined; model: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
@@ -1244,7 +1244,7 @@
             "id": "def-server.generateEsql.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  context,\n  index,\n  model,\n  esClient,\n}",
+            "label": "{\n  nlQuery,\n  context,\n  index,\n  model,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql.ts",
             "deprecated": false,
@@ -1252,10 +1252,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/onechat-genai-utils",
-                "id": "def-server.generateEsql.$1.query",
+                "id": "def-server.generateEsql.$1.nlQuery",
                 "type": "string",
                 "tags": [],
-                "label": "query",
+                "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/generate_esql.ts",
                 "deprecated": false,
@@ -4449,7 +4449,7 @@
         "label": "indexExplorer",
         "description": [],
         "signature": [
-          "({ query, indexPattern, limit, esClient, model, }: { query: string; indexPattern?: string | undefined; limit?: number | undefined; esClient: ",
+          "({ nlQuery, indexPattern, limit, esClient, model, }: { nlQuery: string; indexPattern?: string | undefined; limit?: number | undefined; esClient: ",
           "ElasticsearchClient",
           "; model: ",
           {
@@ -4478,7 +4478,7 @@
             "id": "def-server.indexExplorer.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  indexPattern = '*',\n  limit = 1,\n  esClient,\n  model,\n}",
+            "label": "{\n  nlQuery,\n  indexPattern = '*',\n  limit = 1,\n  esClient,\n  model,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
             "deprecated": false,
@@ -4486,10 +4486,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/onechat-genai-utils",
-                "id": "def-server.indexExplorer.$1.query",
+                "id": "def-server.indexExplorer.$1.nlQuery",
                 "type": "string",
                 "tags": [],
-                "label": "query",
+                "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/index_explorer.ts",
                 "deprecated": false,
@@ -6608,7 +6608,7 @@
         "label": "naturalLanguageSearch",
         "description": [],
         "signature": [
-          "({ query, context, index, model, esClient, }: { query: string; context?: string | undefined; index?: string | undefined; model: ",
+          "({ nlQuery, context, index, model, esClient, }: { nlQuery: string; context?: string | undefined; index?: string | undefined; model: ",
           {
             "pluginId": "@kbn/onechat-server",
             "scope": "common",
@@ -6623,8 +6623,8 @@
             "pluginId": "@kbn/onechat-genai-utils",
             "scope": "server",
             "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.NaturalLanguageSearchResponse",
-            "text": "NaturalLanguageSearchResponse"
+            "section": "def-server.EsqlResponse",
+            "text": "EsqlResponse"
           },
           ">"
         ],
@@ -6637,7 +6637,7 @@
             "id": "def-server.naturalLanguageSearch.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  query,\n  context,\n  index,\n  model,\n  esClient,\n}",
+            "label": "{\n  nlQuery,\n  context,\n  index,\n  model,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
             "deprecated": false,
@@ -6645,10 +6645,10 @@
             "children": [
               {
                 "parentPluginId": "@kbn/onechat-genai-utils",
-                "id": "def-server.naturalLanguageSearch.$1.query",
+                "id": "def-server.naturalLanguageSearch.$1.nlQuery",
                 "type": "string",
                 "tags": [],
-                "label": "query",
+                "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
                 "deprecated": false,
@@ -9131,28 +9131,6 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/steps/get_mappings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/onechat-genai-utils",
-        "id": "def-server.NaturalLanguageSearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "NaturalLanguageSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/onechat-genai-utils",
-            "scope": "server",
-            "docId": "kibKbnOnechatGenaiUtilsPluginApi",
-            "section": "def-server.EsqlResponse",
-            "text": "EsqlResponse"
-          },
-          " | { success: false; reason: string; }"
-        ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-genai-utils/tools/nl_search.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

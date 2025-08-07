@@ -6,8 +6,6 @@
  */
 
 import {
-  EuiButton,
-  EuiToolTip,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,10 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
-import {
-  CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS,
-  NoPermissionsTooltip,
-} from '../common/components/permissions';
+import { NoPermissionsTooltip } from '../common/components/permissions';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
@@ -31,49 +26,6 @@ import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
 } from '../../state/manual_test_runs';
-
-export const RunTestManually = () => {
-  const dispatch = useDispatch();
-
-  const { monitor } = useSelectedMonitor();
-  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor?.config_id));
-
-  const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
-
-  const { space } = useKibanaSpace();
-
-  const content = !canUsePublicLocations
-    ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS
-    : testInProgress
-    ? TEST_SCHEDULED_LABEL
-    : TEST_NOW_ARIA_LABEL;
-
-  return (
-    <EuiToolTip content={content} key={content}>
-      <EuiButton
-        data-test-subj="syntheticsRunTestManuallyButton"
-        color="success"
-        iconType="beaker"
-        isLoading={!Boolean(monitor) || testInProgress}
-        isDisabled={!canUsePublicLocations}
-        onClick={() => {
-          if (monitor) {
-            const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
-            dispatch(
-              manualTestMonitorAction.get({
-                configId: monitor.config_id,
-                name: monitor.name,
-                ...(spaceId && spaceId !== space?.id ? { spaceId } : {}),
-              })
-            );
-          }
-        }}
-      >
-        {RUN_TEST_LABEL}
-      </EuiButton>
-    </EuiToolTip>
-  );
-};
 
 export const RunTestManuallyContextItem = () => {
   const dispatch = useDispatch();
