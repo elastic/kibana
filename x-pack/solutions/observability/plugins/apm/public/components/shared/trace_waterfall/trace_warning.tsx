@@ -23,9 +23,6 @@ export function TraceWarning({ children }: { children: React.ReactNode }) {
   const { traceState } = useTraceWaterfallContext();
 
   switch (traceState) {
-    case TraceDataState.Full:
-      return children;
-
     case TraceDataState.Partial:
       return (
         <EuiFlexGroup direction="column">
@@ -50,5 +47,8 @@ export function TraceWarning({ children }: { children: React.ReactNode }) {
           title={FALLBACK_WARNING}
         />
       );
+
+    default:
+      return children;
   }
 }

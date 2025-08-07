@@ -25,13 +25,16 @@ import { useTraceWaterfallContext } from './trace_waterfall_context';
 import { isFailureOrError } from './utils/is_failure_or_error';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 
-const ORPHAN_TITLE = i18n.translate('xpack.apm.barDetails.euiIconTip.orphanTitleLabel', {
+const ORPHAN_TITLE = i18n.translate('xpack.apm.trace.barDetails.euiIconTip.orphanTitleLabel', {
   defaultMessage: 'Orphan',
 });
-const ORPHAN_CONTENT = i18n.translate('xpack.apm.barDetails.euiIconTip.orphanSpanContentLabel', {
-  defaultMessage:
-    'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
-});
+const ORPHAN_CONTENT = i18n.translate(
+  'xpack.apm.trace.barDetails.euiIconTip.orphanSpanContentLabel',
+  {
+    defaultMessage:
+      'This span is orphaned due to missing trace context and has been reparented to the root to restore the execution flow',
+  }
+);
 
 export function BarDetails({
   item,
