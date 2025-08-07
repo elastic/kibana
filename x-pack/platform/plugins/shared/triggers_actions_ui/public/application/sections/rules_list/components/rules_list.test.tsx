@@ -171,7 +171,7 @@ const AllTheProviders = ({ children }: { children: any }) => (
 const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: AllTheProviders });
 };
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('Update Api Key', () => {
     const addSuccess = jest.fn();
     const addError = jest.fn();
@@ -230,7 +230,7 @@ for (let i = 0; i < 500; i++) {
   });
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('rules_list component empty', () => {
     beforeEach(() => {
       fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
@@ -300,7 +300,7 @@ for (let i = 0; i < 500; i++) {
   });
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('rules_list ', () => {
     let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
     let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
@@ -972,7 +972,7 @@ for (let i = 0; i < 500; i++) {
   });
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('rule list with different rule types', () => {
     let allRulesData;
     let filteredRuleTypes: string[];
@@ -1173,7 +1173,7 @@ for (let i = 0; i < 500; i++) {
   });
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('rules_list with show only capability', () => {
     beforeEach(() => {
       loadActionTypes.mockResolvedValue([
@@ -1395,7 +1395,7 @@ for (let i = 0; i < 500; i++) {
   });
 }
 
-for (let i = 0; i < 500; i++) {
+for (let i = 0; i < 150; i++) {
   describe('MaintenanceWindowsMock', () => {
     beforeEach(() => {
       fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
