@@ -54,7 +54,6 @@
     "@kbn/osquery-plugin",
     "@kbn/scout-info",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/response-ops-rule-params",
     "@kbn/ml-string-hash",
   ]
 }
