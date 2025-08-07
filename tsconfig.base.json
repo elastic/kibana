@@ -132,8 +132,6 @@
       "@kbn/babel-transform/*": ["src/platform/packages/private/kbn-babel-transform/*"],
       "@kbn/banners-plugin": ["x-pack/platform/plugins/private/banners"],
       "@kbn/banners-plugin/*": ["x-pack/platform/plugins/private/banners/*"],
-      "@kbn/bazel-runner": ["packages/kbn-bazel-runner"],
-      "@kbn/bazel-runner/*": ["packages/kbn-bazel-runner/*"],
       "@kbn/cache-cli": ["src/platform/packages/shared/kbn-cache-cli"],
       "@kbn/cache-cli/*": ["src/platform/packages/shared/kbn-cache-cli/*"],
       "@kbn/calculate-auto": ["src/platform/packages/shared/kbn-calculate-auto"],
