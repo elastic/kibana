@@ -47,6 +47,7 @@ import {
   PackageFailedVerificationError,
   PackageUnsupportedMediaTypeError,
   ArchiveNotFoundError,
+  RegistryConnectionError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -58,6 +59,10 @@ import { verifyPackageArchiveSignature } from '../packages/package_verification'
 import type { ArchiveIterator } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
+
+import { getPackageAssetsMapCache } from '../packages/cache';
+
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
 import { fetchUrl, getResponse, getResponseStreamWithSize } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -138,7 +143,9 @@ async function _fetchFindLatestPackage(
           return bundledPackage;
         }
         return latestPackageFromRegistry;
-      } else if (airGappedUtils().shouldSkipRegistryRequests && bundledPackage) {
+      } else if (bundledPackage) {
+        logger.debug('getPackage - use bundled package');
+        // falling back on bundled package if exists
         return bundledPackage;
       } else {
         return null;
@@ -196,13 +203,13 @@ export async function fetchInfo(
   pkgVersion: string
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
-  // if isAirGapped config enabled and bundled package, use the bundled version
-  if (airGappedUtils().shouldSkipRegistryRequests) {
-    const archivePackage = await getBundledArchive(pkgName, pkgVersion);
-    if (archivePackage) {
-      return archivePackage.packageInfo;
-    }
+  let archivePackage;
+  // if there is a bundled package, use the bundled version
+  archivePackage = await getBundledArchive(pkgName, pkgVersion);
+  if (archivePackage) {
+    return archivePackage.packageInfo;
   }
+
   try {
     // Trailing slash avoids 301 redirect / extra hop
     const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
@@ -210,7 +217,7 @@ export async function fetchInfo(
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
-      const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+      archivePackage = await getBundledArchive(pkgName, pkgVersion);
       if (archivePackage) {
         return archivePackage.packageInfo;
       }
@@ -380,11 +387,22 @@ export async function getPackage(
 }> {
   const logger = appContextService.getLogger();
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
+  const bundledPackage = await getBundledPackageByName(name);
+
   let verificationResult: PackageVerificationResult | undefined = getVerificationResult({
     name,
     version,
   });
   try {
+    let buffer;
+    let archivePathToUse: string = '';
+
+    // use bundled package if available
+    if (bundledPackage) {
+      logger.debug('getPackage - use bundled package');
+      buffer = await bundledPackage?.getBuffer();
+      archivePathToUse = `${name}-${version}.zip`;
+    }
     const {
       archiveBuffer,
       archivePath,
@@ -397,31 +415,53 @@ export async function getPackage(
         ignoreUnverified: options?.ignoreUnverified,
       })
     );
+    logger.debug('getPackage - Fetch package archive from archive buffer');
+    buffer = archiveBuffer;
+    archivePathToUse = archivePath;
 
     if (latestVerificationResult) {
       verificationResult = latestVerificationResult;
       setVerificationResult({ name, version }, latestVerificationResult);
     }
 
-    const contentType = ensureContentType(archivePath);
+    const contentType = ensureContentType(archivePathToUse);
     const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
+      archiveBuffer: buffer,
       contentType,
       useStreaming: options?.useStreaming,
     });
 
     if (!packageInfo) {
-      packageInfo = await getPackageInfoFromArchiveOrCache(
-        name,
-        version,
-        archiveBuffer,
-        archivePath
-      );
+      packageInfo = await getPackageInfoFromArchiveOrCache(name, version, buffer, archivePathToUse);
     }
 
-    return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
+    return {
+      paths,
+      packageInfo,
+      assetsMap,
+      archiveIterator,
+      verificationResult,
+    };
   } catch (error) {
     logger.warn(`getPackage failed with error: ${error}`);
+    if (error instanceof RegistryConnectionError) {
+      logger.debug('getPackage - falling back on values from cache');
+      const assetsMap = getPackageAssetsMapCache(name, version);
+
+      if (!packageInfo || !assetsMap) {
+        throw new PackageNotFoundError(
+          `Error while retrieving package from cache: ${name}-${version} not found`
+        );
+      }
+      const archiveIterator = createArchiveIteratorFromMap(assetsMap);
+      return {
+        paths: [],
+        packageInfo,
+        assetsMap,
+        archiveIterator,
+        verificationResult,
+      };
+    }
     throw error;
   }
 }
