@@ -348,7 +348,6 @@ Management::
 
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
-<<<<<<< HEAD
 
 The 8.17.3 release includes the following bug fixes and known issue.
 =======
