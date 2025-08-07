@@ -59,7 +59,7 @@ export const NoPermission = {
 
   argTypes,
   args: {
-    hasPermission: false,
+    canAccessFleet: false,
     button: 'Browse integrations',
     href: '/app/integrations/browse',
   },

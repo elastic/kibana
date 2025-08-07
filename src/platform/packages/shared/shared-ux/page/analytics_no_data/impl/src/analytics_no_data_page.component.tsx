@@ -33,19 +33,16 @@ export interface Props {
 }
 
 type AnalyticsNoDataPageProps = Props &
-  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'> & {
-    hasPermission?: boolean;
-  };
+  Pick<Services, 'getHttp' | 'prependBasePath' | 'kibanaGuideDocLink' | 'pageFlavor'>;
 
 const flavors: {
   [K in AnalyticsNoDataPageFlavor]: (deps: {
     kibanaGuideDocLink: string;
     hasApiKeys: boolean;
     prependBasePath: (path: string) => string;
-    hasPermission?: boolean;
   }) => KibanaNoDataPageProps['noDataConfig'];
 } = {
-  kibana: ({ kibanaGuideDocLink, prependBasePath, hasPermission }) => ({
+  kibana: ({ kibanaGuideDocLink, prependBasePath }) => ({
     action: {
       elasticAgent: {
         title: i18n.translate('sharedUXPackages.noDataConfig.addIntegrationsTitle', {
@@ -78,7 +75,7 @@ const flavors: {
           ? prependBasePath('/app/elasticsearch/#ingestData') // use Ingest Data section of Home page if project has ES API keys
           : prependBasePath('/app/elasticsearch/'),
         /** force the no data card to be shown **/
-        hasPermission: true,
+        canAccessFleet: true,
       },
     },
   }),
@@ -107,7 +104,6 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
   showPlainSpinner,
   onTryESQL,
   onESQLNavigationComplete,
-  hasPermission,
   ...services
 }) => {
   const { prependBasePath, kibanaGuideDocLink, getHttp: get, pageFlavor } = services;
@@ -117,7 +113,6 @@ export const AnalyticsNoDataPage: React.FC<AnalyticsNoDataPageProps> = ({
     kibanaGuideDocLink,
     prependBasePath,
     hasApiKeys: Boolean(hasApiKeys),
-    hasPermission,
   });
 
   return (

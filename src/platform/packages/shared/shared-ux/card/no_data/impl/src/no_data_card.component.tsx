@@ -41,7 +41,7 @@ const noPermissionDescription = i18n.translate(
 export const NoDataCard = ({
   title,
   description,
-  hasPermission = true,
+  canAccessFleet = true,
   href,
   button,
   docsLink: link,
@@ -66,19 +66,19 @@ export const NoDataCard = ({
       style={{ maxWidth: 400 }}
       title={
         <EuiTitle size="m">
-          <h2>{hasPermission ? title || defaultTitle : noPermissionTitle}</h2>
+          <h2>{canAccessFleet ? title || defaultTitle : noPermissionTitle}</h2>
         </EuiTitle>
       }
       icon={cardIcon}
       body={
-        hasPermission ? (
+        canAccessFleet ? (
           renderContent(description, defaultDescription)
         ) : (
           <p>{noPermissionDescription}</p>
         )
       }
       actions={
-        !hideActions && hasPermission && href ? (
+        !hideActions && canAccessFleet && href ? (
           // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiButton
             color="primary"

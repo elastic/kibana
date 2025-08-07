@@ -14,7 +14,14 @@ import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no
 
 type PropArguments = Pick<
   NoDataCardProps,
-  'title' | 'description' | 'button' | 'href' | 'docsLink' | 'hasPermission'
+  | 'title'
+  | 'description'
+  | 'button'
+  | 'href'
+  | 'docsLink'
+  | 'canAccessFleet'
+  | 'hideActions'
+  | 'data-test-subj'
 >;
 type ServiceArguments = Pick<NoDataCardServices, 'canAccessFleet'>;
 type Arguments = PropArguments & ServiceArguments;
@@ -66,7 +73,7 @@ export class StorybookMock extends AbstractStorybookMock<
       },
       defaultValue: '',
     },
-    hasPermission: {
+    canAccessFleet: {
       control: {
         control: 'boolean',
       },
@@ -88,7 +95,7 @@ export class StorybookMock extends AbstractStorybookMock<
       title: this.getArgumentValue('title', params),
       description: this.getArgumentValue('description', params),
       button: this.getArgumentValue('button', params),
-      hasPermission: this.getArgumentValue('hasPermission', params),
+      canAccessFleet: this.getArgumentValue('canAccessFleet', params),
       href: this.getArgumentValue('href', params),
       docsLink: this.getArgumentValue('docsLink', params),
     };

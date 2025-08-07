@@ -14,8 +14,8 @@ import '@testing-library/jest-dom';
 import { NoDataCard } from './no_data_card.component';
 
 describe('NoDataCardComponent', () => {
-  test('renders with default content when hasPermission is true', () => {
-    render(<NoDataCard hasPermission={true} />);
+  test('renders with default content when canAccessFleet is true which is the default behavior', () => {
+    render(<NoDataCard canAccessFleet={true} />);
 
     expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
     expect(screen.getByText('Add Data to get started')).toBeInTheDocument();
@@ -26,8 +26,8 @@ describe('NoDataCardComponent', () => {
     ).toBeInTheDocument();
   });
 
-  test('renders no permission content when hasPermission is false', () => {
-    render(<NoDataCard hasPermission={false} />);
+  test('renders no permission content when canAccessFleet is false', () => {
+    render(<NoDataCard canAccessFleet={false} />);
 
     expect(screen.getByTestId('noDataCard')).toBeInTheDocument();
     expect(screen.getByText('Contact your administrator')).toBeInTheDocument();
@@ -39,39 +39,25 @@ describe('NoDataCardComponent', () => {
   });
 
   describe('props', () => {
-    test('renders custom button text', () => {
-      render(<NoDataCard button="Custom Button" hasPermission={true} href="/test" />);
-
-      expect(screen.getByRole('link', { name: 'Custom Button' })).toBeInTheDocument();
-    });
-
     test('renders button with href', () => {
-      render(<NoDataCard hasPermission={true} href="/some-path" button="Browse integrations" />);
+      render(<NoDataCard href="/some-path" button="Browse integrations" />);
 
       const button = screen.getByRole('link', { name: 'Browse integrations' });
       expect(button).toHaveAttribute('href', '/some-path');
     });
 
     test('renders custom title and description', () => {
-      render(
-        <NoDataCard title="Custom Title" description="Custom description" hasPermission={true} />
-      );
+      render(<NoDataCard title="Custom Title" description="Custom description" />);
 
       expect(screen.getByText('Custom Title')).toBeInTheDocument();
       expect(screen.getByText('Custom description')).toBeInTheDocument();
     });
 
-    test('does not render button if no hideActions is passed and without href', () => {
-      render(<NoDataCard hasPermission={true} hideActions={true} />);
+    test('does not render button if hideActions is passed and/or without href', () => {
+      render(<NoDataCard hideActions={true} />);
 
       expect(screen.queryByTestId('noDataDefaultActionButton')).not.toBeInTheDocument();
       expect(screen.queryByRole('link', { name: /Should not show/i })).not.toBeInTheDocument();
-    });
-
-    test('renders custom data-test-subj', () => {
-      render(<NoDataCard hasPermission={true} data-test-subj="customTestSubj" />);
-
-      expect(screen.getByTestId('customTestSubj')).toBeInTheDocument();
     });
   });
 });

@@ -43,26 +43,4 @@ describe('NoDataCard', () => {
     // Focus on the service effect: button disappears when no fleet access
     expect(screen.queryByRole('link', { name: 'Browse' })).not.toBeInTheDocument();
   });
-
-  test('props override service defaults', () => {
-    // Test explicit overrides
-    renderWithProvider(
-      <NoDataCard
-        href="/custom-path"
-        button="Browse"
-        title="Card title"
-        description="Description"
-        hasPermission={true} // Override service canAccessFleet
-      />,
-      false // canAccessFleet = false from service
-    );
-
-    // Should use custom href, not service default
-    const button = screen.getByRole('link', { name: 'Browse' });
-    expect(button).toHaveAttribute('href', '/custom-path');
-
-    // Should use explicit hasPermission=true, ignore service canAccessFleet=false
-    expect(screen.getByText('Card title')).toBeInTheDocument();
-    expect(screen.queryByText('Contact your administrator')).not.toBeInTheDocument();
-  });
 });

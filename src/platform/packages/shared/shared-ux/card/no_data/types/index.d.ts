@@ -66,11 +66,11 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
    * If not provided, the default will be used
    */
   description?: React.ReactNode;
-  /** True if the person has permission, false otherwise */
-  hasPermission?: boolean;
+  /** True if the person has access to Fleet, false otherwise */
+  canAccessFleet?: boolean;
   /**
    * Provide a string or React element(s) for the button's label;
-   * The button will be hidden completely if `hasPermission=false`
+   * The button will be hidden completely if `canAccessFleet=false`
    */
   button?: string;
   /**
