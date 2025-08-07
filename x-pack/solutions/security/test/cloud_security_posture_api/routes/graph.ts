@@ -700,18 +700,32 @@ export default function (providerContext: FtrProviderContext) {
 
       describe('Enrich graph with entity metadata', () => {
         const enrichPolicyCreationTimeout = 10000;
+        const customNamespaceId = 'test';
+        const entitiesIndex = '.entities.v1.latest.security_*';
 
         before(async () => {
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
           );
+
+          // Create a test space
+          await spacesService.create({
+            id: customNamespaceId,
+            name: `${customNamespaceId} namespace`,
+            solution: 'security',
+            disabledFeatures: [],
+          });
         });
 
         after(async () => {
-          await esArchiver.unload(
-            'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/entity_store'
-          );
+          await es.deleteByQuery({
+            index: entitiesIndex,
+            query: { match_all: {} },
+            conflicts: 'proceed',
+          });
+
+          await spacesService.delete(customNamespaceId);
           await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
         });
 
@@ -852,15 +866,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return enriched data when asset inventory is enabled in a different space', async () => {
-          const customNamespaceId = 'test';
-          // Create a test space
-          await spacesService.create({
-            id: customNamespaceId,
-            name: `${customNamespaceId} namespace`,
-            solution: 'security',
-            disabledFeatures: [],
-          });
-
           await kibanaServer.uiSettings.update(
             { 'securitySolution:enableAssetInventory': true },
             { space: customNamespaceId }
@@ -932,9 +937,6 @@ export default function (providerContext: FtrProviderContext) {
             expect(actorNode.icon).to.equal('user');
             expect(actorNode.shape).to.equal('ellipse');
             expect(actorNode.tag).to.equal('Identity');
-
-            // Clean up the test space
-            await spacesService.delete(customNamespaceId);
           });
         });
       });
