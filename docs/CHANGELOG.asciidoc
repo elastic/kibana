@@ -271,7 +271,6 @@ The 8.17.5 release includes the following enhancements and fixes.
 =======
 
 The 8.17.5 release includes the following known issues, enhancements, and fixes.
->>>>>>> 34557d33828 ([DOCS][Known issue] Reporting failing in >= 8.15 when using server.protocol: http2 (#230894))
 
 [float]
 [[known-issues-8.17.5]]
