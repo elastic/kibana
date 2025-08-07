@@ -32,10 +32,10 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
+const mockUseGetRuleTypesPermissions = jest.fn();
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  useGetRuleTypesPermissions: jest.fn(),
+  useGetRuleTypesPermissions: mockUseGetRuleTypesPermissions,
 }));
-const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -127,7 +127,7 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    useGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+    mockUseGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
 
     return render(
       <QueryClientProvider client={new QueryClient()}>
@@ -154,7 +154,7 @@ describe('Rule Definition', () => {
   it('show rule type name from "useGetRuleTypesPermissions"', async () => {
     await setup();
     // The hook might be called multiple times due to React's rendering behavior
-    expect(useGetRuleTypesPermissions).toHaveBeenCalled();
+    expect(mockUseGetRuleTypesPermissions).toHaveBeenCalled();
     const ruleType = screen.getByTestId('ruleSummaryRuleType');
     expect(ruleType).toBeInTheDocument();
     expect(ruleType).toHaveTextContent(mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name || '');
