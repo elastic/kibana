@@ -19,7 +19,7 @@ const Summary = dynamic(() => import('./summary'));
 const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'));
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
-export function Overview() {
+export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const {
     dataStream,
     isNonAggregatable,
@@ -65,7 +65,11 @@ export function Overview() {
           />
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={true}>
-          <DocumentTrends lastReloadTime={lastReloadTime} />
+          <DocumentTrends
+            lastReloadTime={lastReloadTime}
+            displayCreateRuleButton={selectedQualityCard === 'degraded'}
+            openAlertFlyout={openAlertFlyout}
+          />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
 

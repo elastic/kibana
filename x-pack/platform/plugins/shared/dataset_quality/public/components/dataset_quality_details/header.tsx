@@ -16,8 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
-import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import React from 'react';
 import { openInDiscoverText } from '../../../common/translations';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import {
@@ -28,7 +27,13 @@ import {
 } from '../../hooks';
 import { IntegrationIcon } from '../common';
 
-export function Header() {
+export function Header({
+  isAlertFlyoutOpen,
+  closeAlertFlyout,
+}: {
+  isAlertFlyoutOpen: boolean;
+  closeAlertFlyout: () => void;
+}) {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
 
@@ -45,8 +50,6 @@ export function Header() {
     timeRangeConfig: timeRange,
     sendTelemetry,
   });
-
-  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   const pageTitle =
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
@@ -99,15 +102,7 @@ export function Header() {
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <AlertFlyout
-        dataStream={rawName}
-        addFlyoutVisible={!!ruleType}
-        setAddFlyoutVisibility={(visible) => {
-          if (!visible) {
-            setRuleType(null);
-          }
-        }}
-      />
+      {isAlertFlyoutOpen && <AlertFlyout dataStream={rawName} closeFlyout={closeAlertFlyout} />}
     </EuiFlexGroup>
   );
 }

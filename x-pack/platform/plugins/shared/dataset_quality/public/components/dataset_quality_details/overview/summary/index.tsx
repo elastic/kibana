@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFlexGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
-import { useDatasetQualityDetailsState } from '../../../../hooks';
 import {
   overviewPanelDocumentsIndicatorSize,
   overviewPanelDocumentsIndicatorTotalCount,
@@ -20,31 +18,9 @@ import {
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { Panel, PanelIndicator } from './panel';
 
-const degradedDocsTooltip = (
-  <FormattedMessage
-    id="xpack.datasetQuality.details.degradedDocsTooltip"
-    defaultMessage="The number of degraded documents —documents with the {ignoredProperty} property— in your data set."
-    values={{
-      ignoredProperty: (
-        <EuiCode language="json" transparentBackground>
-          _ignored
-        </EuiCode>
-      ),
-    }}
-  />
-);
-
-const failedDocsColumnTooltip = (
-  <FormattedMessage
-    id="xpack.datasetQuality.failedDocsSummaryTooltip"
-    defaultMessage="The number of documents sent to failure store due to an issue during ingestion. Failed documents are only captured if the failure store is explicitly enabled."
-  />
-);
-
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
-  const { canShowFailureStoreInfo } = useDatasetQualityDetailsState();
   const {
     isSummaryPanelLoading,
     totalDocsCount,

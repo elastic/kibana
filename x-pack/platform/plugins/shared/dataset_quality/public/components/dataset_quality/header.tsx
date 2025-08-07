@@ -8,7 +8,6 @@
 import { EuiBetaBadge, EuiButton, EuiCode, EuiLink, EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { default as React, useMemo, useState } from 'react';
 import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
 import { AlertFlyout } from '../../alerts/alert_flyout';
@@ -25,7 +24,7 @@ export default function Header() {
   } = useKibanaContextForPlugin();
   const { capabilities } = application;
 
-  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
+  const [isAlertFlyoutOpen, setIsAlertFlyoutOpen] = useState(false);
 
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
   const { isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes } =
@@ -85,20 +84,15 @@ export default function Header() {
                 <EuiButton
                   data-test-subj="datasetQualityDetailsHeaderButton"
                   onClick={() => {
-                    setRuleType(DEGRADED_DOCS_RULE_TYPE_ID);
+                    setIsAlertFlyoutOpen(true);
                   }}
                   iconType="bell"
                 >
                   {createAlertText}
                 </EuiButton>
-                <AlertFlyout
-                  addFlyoutVisible={!!ruleType}
-                  setAddFlyoutVisibility={(visible) => {
-                    if (!visible) {
-                      setRuleType(null);
-                    }
-                  }}
-                />
+                {isAlertFlyoutOpen && (
+                  <AlertFlyout closeFlyout={() => setIsAlertFlyoutOpen(false)} />
+                )}
               </>,
             ]
           : undefined

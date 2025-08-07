@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
@@ -22,6 +22,8 @@ export default function DatasetQualityDetails() {
     useDatasetQualityDetailsState();
   const { startTracking } = useDatasetDetailsTelemetry();
 
+  const [isAlertFlyoutOpen, setIsAlertFlyoutOpen] = useState(false);
+
   useEffect(() => {
     startTracking();
   }, [startTracking]);
@@ -31,9 +33,12 @@ export default function DatasetQualityDetails() {
     <>
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="datasetDetailsContainer">
         <EuiFlexItem grow={false}>
-          <Header />
+          <Header
+            isAlertFlyoutOpen={isAlertFlyoutOpen}
+            closeAlertFlyout={() => setIsAlertFlyoutOpen(false)}
+          />
           <EuiHorizontalRule />
-          <Overview />
+          <Overview openAlertFlyout={() => setIsAlertFlyoutOpen(true)} />
           <EuiHorizontalRule />
           <Details />
         </EuiFlexItem>

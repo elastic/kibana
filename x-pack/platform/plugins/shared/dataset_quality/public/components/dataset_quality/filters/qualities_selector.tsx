@@ -66,7 +66,6 @@ export function QualitiesSelector({
       <QualityIndicator
         quality={quality.label}
         description={capitalize(quality.label)}
-        isColoredDescription
       />
     </EuiText>
   );
