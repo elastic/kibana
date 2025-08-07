@@ -108,9 +108,12 @@ export async function executeNerRule({
               } catch (error) {
                 span?.recordException(error);
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
-                  cause: error,
-                });
+                throw new Error(
+                  `Inference failed for NER model '${rule.modelId}': ${errorMessage}`,
+                  {
+                    cause: error,
+                  }
+                );
               }
             }
           )
