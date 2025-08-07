@@ -46,7 +46,8 @@ const buildRule = (id: number): BulkFillGapsByRuleIdsParams['rules'][0] => {
     alertTypeId: `rule-alert-type-id-${id % 2}`,
   };
 };
-const backfillRange = { start: '2025-05-09T09:15:09.457Z', end: '2025-05-09T09:24:09.457Z' };
+const now = new Date();
+const backfillRange = { start: new Date(now.getTime() - 10 * 60 * 1000).toISOString(), end: now.toISOString() }; // 10 minutes range
 const successfulRules = Array.from({ length: 3 }, (_, idx) =>
   buildRule(idx)
 ) as BulkFillGapsByRuleIdsParams['rules'];
@@ -54,14 +55,14 @@ const erroredRuleAtAuthorization = buildRule(3);
 erroredRuleAtAuthorization.alertTypeId = 'should-break';
 erroredRuleAtAuthorization.consumer = 'should-break';
 const skippedRule = buildRule(4);
-const errroredRuleAtBackfilling = buildRule(5);
+const erroredRuleAtBackfilling = buildRule(5);
 const allRules = [
   ...successfulRules,
   erroredRuleAtAuthorization,
   skippedRule,
-  errroredRuleAtBackfilling,
+  erroredRuleAtBackfilling,
 ];
-const rulesThatAttemptedToBackfill = [...successfulRules, skippedRule, errroredRuleAtBackfilling];
+const rulesThatAttemptedToBackfill = [...successfulRules, skippedRule, erroredRuleAtBackfilling];
 
 let rulesClientContext: RulesClientContext;
 
@@ -94,11 +95,11 @@ describe.skip('bulkFillGapsByRuleIds', () => {
         };
       }
 
-      if (ruleId === errroredRuleAtBackfilling.id) {
+      if (ruleId === erroredRuleAtBackfilling.id) {
         return {
           outcome: BulkFillGapsScheduleResult.ERRORED,
           error: toBulkGapFillError(
-            errroredRuleAtBackfilling,
+            erroredRuleAtBackfilling,
             BulkGapsFillStep.SCHEDULING,
             schedulingError
           ),
@@ -175,7 +176,7 @@ describe.skip('bulkFillGapsByRuleIds', () => {
         BulkGapsFillStep.ACCESS_VALIDATION,
         authorizationError
       ),
-      toBulkGapFillError(errroredRuleAtBackfilling, BulkGapsFillStep.SCHEDULING, schedulingError),
+      toBulkGapFillError(erroredRuleAtBackfilling, BulkGapsFillStep.SCHEDULING, schedulingError),
     ]);
   });
 
