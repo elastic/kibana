@@ -23,7 +23,17 @@ export class StepExecutionRepository {
   //   return [];
   // }
 
+  /**
+   * Creates a new step execution document in Elasticsearch.
+   *
+   * @param stepExecution - A partial object representing the workflow step execution to be indexed.
+   * @returns A promise that resolves when the document has been successfully indexed.
+   */
   public async createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
+    if (!stepExecution.id) {
+      throw new Error('Step execution ID is required for creation');
+    }
+
     await this.esClient.index({
       index: this.indexName,
       id: stepExecution.id,
@@ -32,10 +42,28 @@ export class StepExecutionRepository {
     });
   }
 
+  /**
+   * Updates a single workflow step execution in the repository.
+   *
+   * @param stepExecution - A partial object representing the workflow step execution to update.
+   * @returns A promise that resolves when the update operation is complete.
+   */
   public updateStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
     return this.updateStepExecutions([stepExecution]);
   }
 
+  /**
+   * Updates multiple step executions in Elasticsearch.
+   *
+   * This method takes an array of partial `EsWorkflowStepExecution` objects,
+   * validates that each has an `id`, and performs a bulk update operation
+   * in Elasticsearch for all provided step executions.
+   *
+   * @param stepExecutions - An array of partial step execution objects to update.
+   * Each object must include an `id` property.
+   * @throws {Error} If any step execution does not have an `id`.
+   * @returns A promise that resolves when the bulk update operation completes.
+   */
   public async updateStepExecutions(
     stepExecutions: Array<Partial<EsWorkflowStepExecution>>
   ): Promise<void> {
