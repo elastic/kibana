@@ -90,8 +90,13 @@ export const TestRunsTable = ({
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
 
+  const isLast10 = paginable === false && page.size === 10;
+  const timeRangeContext = `between ${from} and ${to} UTC`;
+
   const screenContext = dedent`
-    This table shows ${page.size} test runs for the monitor between ${from} and ${to} UTC.
+    This table shows ${isLast10 ? 'the last ' : ''}${page.size} test runs for the monitor${
+    isLast10 ? '' : ` ${timeRangeContext}`
+  }.
 
     ${pings
       .map((ping, i) => {
@@ -99,7 +104,7 @@ export const TestRunsTable = ({
           ping.observer.geo.name
         } with status ${ping.monitor.status} and duration ${formatTestDuration(
           ping.monitor.duration?.us
-        )}.\n ${ping.error?.message ? `Error: ${ping.error.message}` : ''}`;
+        )}.\n ${ping.error?.message ? `Error: ${ping.error.message}` : ''}\n`;
       })
       .join('\n')}
   `;

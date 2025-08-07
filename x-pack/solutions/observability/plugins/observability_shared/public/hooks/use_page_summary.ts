@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import dedent from 'dedent';
 import { v4 as uuidv4 } from 'uuid';
 import { useRef, useCallback, useState, useMemo } from 'react';
 import {
@@ -75,7 +76,15 @@ export const usePageSummary = ({
             message: {
               role: MessageRole.User,
               content:
-                'Create a 3 sentence summary of the key information and insights from the current page. Be sure to include details that would be relevant to analyse in the context of an investigation. Reference this page generally and avoid referring to a specific user.',
+                dedent(`Create a 1 sentence summary of the current page.  State facts directly without descriptive phrases like "shows," "indicates," or "reveals." 
+
+                Include specific numbers, percentages, error counts, response times, and exact timestamps when available.
+                
+                Report anomalies, spikes, drops, or failures with their precise timing and impact.
+                
+                Use both UTC and local timestamps if provided - do not convert times yourself.
+                
+                Begin immediately with the most urgent findings.`),
             },
           },
         ],
@@ -121,3 +130,5 @@ export const usePageSummary = ({
     errors,
   };
 };
+
+// Create a 1 sentence summary of the key insights and critical information from the current page with exact values and time ranges. Report any anomalies or issues. Start with the most critical findings. No introductory text.

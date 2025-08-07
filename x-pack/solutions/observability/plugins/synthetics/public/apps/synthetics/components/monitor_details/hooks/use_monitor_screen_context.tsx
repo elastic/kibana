@@ -21,15 +21,21 @@ export const useMonitorScreenContext = () => {
     if (!monitor || !setScreenContext) {
       return;
     }
+
     if (setScreenContext) {
-      return setScreenContext({
-        screenDescription: dedent`The user is looking at the details of a monitor.
+      const screenContext = dedent`The user is looking at the details of a monitor.
             
-            Monitor ID: ${monitor.config_id || 'N/A'}
-            Monitor Saved Object ID: ${monitor.id || 'N/A'}
-            Monitor Type: ${monitor.type || 'N/A'}
-            Monitor Name: ${monitor.name || 'N/A'}
-            Location: ${selectedLocation.label || 'N/A'}`,
+          Monitor ID: ${monitor.id}
+          Monitor Saved Object ID: ${monitor.config_id}
+          Monitor Type: ${monitor.type}
+          Monitor Name: ${monitor.name}
+          Location: ${selectedLocation.label}
+          
+          When referencing the monitor, use the monitor name. 
+          Only utilize monitor ID when needed for a specific Elasticsearch query`;
+
+      return setScreenContext({
+        screenDescription: screenContext,
       });
     }
   }, [setScreenContext, monitor, selectedLocation?.label]);
