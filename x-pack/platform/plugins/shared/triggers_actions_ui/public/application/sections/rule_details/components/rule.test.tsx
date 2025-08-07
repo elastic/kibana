@@ -643,13 +643,9 @@ describe('tabbed content', () => {
     const eventLogTab = screen.getByRole('tab', { name: /history/i });
     await userEvent.click(eventLogTab);
 
-    // Wait for the event log content to load (it's lazy-loaded)
-    await waitFor(
-      () => {
-        expect(eventLogTab).toHaveAttribute('aria-selected', 'true');
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(() => {
+      expect(eventLogTab).toHaveAttribute('aria-selected', 'true');
+    });
 
     // Click on alert list tab
     const alertListTab = screen.getByRole('tab', { name: /alerts/i });
