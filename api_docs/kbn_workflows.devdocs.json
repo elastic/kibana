@@ -329,20 +329,6 @@
             "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/workflows",
-            "id": "def-common.ConnectorContract.availableConnectorIds",
-            "type": "Array",
-            "tags": [],
-            "label": "availableConnectorIds",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1434,6 +1420,135 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowListItemAction",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowListItemAction",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.isPrimary",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPrimary",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListItemAction.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "(item: ",
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.WorkflowListItemDto",
+                "text": "WorkflowListItemDto"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows",
+                "id": "def-common.WorkflowListItemAction.onClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/workflows",
+                    "scope": "common",
+                    "docId": "kibKbnWorkflowsPluginApi",
+                    "section": "def-common.WorkflowListItemDto",
+                    "text": "WorkflowListItemDto"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.WorkflowListItemDto",
         "type": "Interface",
         "tags": [],
@@ -1637,6 +1752,21 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.EnterConditionBranchNode",
+        "type": "Type",
+        "tags": [],
+        "label": "EnterConditionBranchNode",
+        "description": [],
+        "signature": [
+          "{ id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.EnterForeachNode",
         "type": "Type",
         "tags": [],
@@ -1658,7 +1788,7 @@
         "label": "EnterIfNode",
         "description": [],
         "signature": [
-          "{ id: string; type: \"enter-if\"; configuration: { type: \"if\"; name: string; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }; trueNodeIds: string[]; falseNodeIds: string[]; }"
+          "{ id: string; type: \"enter-if\"; configuration: { type: \"if\"; name: string; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }; exitNodeId: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
@@ -1684,6 +1814,21 @@
           "; definition: { version: \"1\"; workflow: { name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; if?: string | undefined; with?: Record<string, any> | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"triggers.elastic.detectionRule\"; enabled: boolean; with: { rule_id: string; } | { rule_name: string; }; } | { type: \"triggers.elastic.scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"triggers.elastic.manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }; }; yaml: string; lastUpdatedAt: Date; lastUpdatedBy: string; description?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ExitConditionBranchNode",
+        "type": "Type",
+        "tags": [],
+        "label": "ExitConditionBranchNode",
+        "description": [],
+        "signature": [
+          "{ id: string; type: \"exit-condition-branch\"; startNodeId: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1874,6 +2019,36 @@
           "Zod.ZodObject<{ type: Zod.ZodLiteral<\"triggers.elastic.detectionRule\">; enabled: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; with: Zod.ZodUnion<[Zod.ZodObject<{ rule_id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { rule_id: string; }, { rule_id: string; }>, Zod.ZodObject<{ rule_name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { rule_name: string; }, { rule_name: string; }>]>; }, \"strip\", Zod.ZodTypeAny, { type: \"triggers.elastic.detectionRule\"; enabled: boolean; with: { rule_id: string; } | { rule_name: string; }; }, { type: \"triggers.elastic.detectionRule\"; with: { rule_id: string; } | { rule_name: string; }; enabled?: boolean | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.EnterConditionBranchNodeSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "EnterConditionBranchNodeSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"enter-condition-branch\">; condition: Zod.ZodUnion<[Zod.ZodString, Zod.ZodUndefined]>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }, { id: string; type: \"enter-condition-branch\"; condition?: string | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.ExitConditionBranchNodeSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "ExitConditionBranchNodeSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodLiteral<\"exit-condition-branch\">; startNodeId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"exit-condition-branch\"; startNodeId: string; }, { id: string; type: \"exit-condition-branch\"; startNodeId: string; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/branching_nodes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

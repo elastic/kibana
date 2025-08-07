@@ -122,7 +122,7 @@ export const EsqlDashboardPanel = <TableItemType extends Record<string, string>>
         />
         <EuiSpacer size="s" />
         <ul>
-          {visualizationQuery.left.map((field, index) => (
+          {visualizationQuery.left.invalidFields?.map((field, index) => (
             <li key={index}>{field}</li>
           ))}
         </ul>

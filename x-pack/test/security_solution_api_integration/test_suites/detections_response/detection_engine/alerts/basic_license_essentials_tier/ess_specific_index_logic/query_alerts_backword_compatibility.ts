@@ -22,11 +22,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess query_alerts_backword_compatibility', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/endpoint/resolver/signals'
+      );
       await createAlertsIndex(supertest, log);
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/endpoint/resolver/signals'
+      );
       await deleteAllAlerts(supertest, log, es);
     });
 

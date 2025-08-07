@@ -9,7 +9,7 @@ export { Streams } from './src/models/streams';
 export { IngestBase } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
-export { UnwiredIngest } from './src/models/ingest/unwired';
+export { ClassicIngest } from './src/models/ingest/classic';
 export { Group } from './src/models/group';
 
 export {
@@ -107,7 +107,7 @@ export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lif
 
 export {
   type IngestStreamLifecycle,
-  type UnwiredIngestStreamEffectiveLifecycle,
+  type ClassicIngestStreamEffectiveLifecycle,
   type IlmPolicyPhases,
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,

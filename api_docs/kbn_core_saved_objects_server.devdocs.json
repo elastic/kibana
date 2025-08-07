@@ -5213,72 +5213,72 @@
             "path": "x-pack/platform/plugins/shared/alerting/common/rule.ts"
           },
           {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
+          },
+          {
             "plugin": "savedSearch",
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "savedSearch",
             "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/application/connector/methods/create/create.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/platform/plugins/shared/actions/server/types.ts"
           },
           {
             "plugin": "alerting",
@@ -8313,6 +8313,46 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.getUnsafeInternalClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getUnsafeInternalClient",
+            "description": [
+              "\nCreates a {@link SavedObjectsClientContract | Saved Objects client} that\nuses the internal Kibana user for authenticating with Elasticsearch.\nThis client supports extensions (encryption, spaces) but bypasses user-based security.\n"
+            ],
+            "signature": [
+              "(options?: ",
+              "SavedObjectsClientProviderOptions",
+              " | undefined) => ",
+              "SavedObjectsClientContract"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.getUnsafeInternalClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Options for configuring the internal client."
+                ],
+                "signature": [
+                  "SavedObjectsClientProviderOptions",
+                  " | undefined"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsServiceStart.createScopedRepository",
             "type": "Function",
             "tags": [],
@@ -8958,6 +8998,10 @@
                 "path": "x-pack/platform/plugins/shared/task_manager/server/saved_objects/index.ts"
               },
               {
+                "plugin": "links",
+                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
+              },
+              {
                 "plugin": "dataViews",
                 "path": "src/platform/plugins/shared/data_views/server/saved_objects/data_views.ts"
               },
@@ -9014,14 +9058,6 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
               },
               {
-                "plugin": "apmSourcesAccess",
-                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
-              },
-              {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
@@ -9032,6 +9068,14 @@
               {
                 "plugin": "share",
                 "path": "src/platform/plugins/shared/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "lens",
@@ -9152,10 +9196,6 @@
               {
                 "plugin": "eventAnnotation",
                 "path": "src/platform/plugins/private/event_annotation/server/saved_objects.ts"
-              },
-              {
-                "plugin": "links",
-                "path": "src/platform/plugins/private/links/server/saved_objects/links.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -9821,16 +9861,16 @@
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "savedSearch",
                 "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "lens",

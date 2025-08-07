@@ -18,4 +18,7 @@ export const getSettingsCapabilitiesMock = (): SettingsCapabilities => ({
     show: true,
     save: true,
   },
+  filterSettings: {
+    bySolutionView: true,
+  },
 });
