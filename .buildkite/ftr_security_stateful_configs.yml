@@ -129,3 +129,4 @@ enabled:
   - x-pack/solutions/security/test/fleet_api_integration/config.package_policy.ts
   - x-pack/solutions/security/test/functional_solution_sidenav/config.ts
   - x-pack/solutions/security/test/session_view/basic/config.ts
+  - x-pack/solutions/security/test/plugin_functional/config.ts
