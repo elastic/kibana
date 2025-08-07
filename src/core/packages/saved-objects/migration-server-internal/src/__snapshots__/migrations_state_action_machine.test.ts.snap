@@ -848,7 +848,14 @@ Object {
       },
     ],
   ],
-  "error": Array [],
+  "error": Array [
+    Array [
+      "Reached FATAL state after: [
+  INIT -> LEGACY_DELETE (0ms)
+  LEGACY_DELETE -> FATAL (0ms)
+]",
+    ],
+  ],
   "fatal": Array [],
   "info": Array [
     Array [

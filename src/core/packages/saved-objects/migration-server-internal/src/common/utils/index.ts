@@ -14,4 +14,4 @@ export {
   type LogAwareState,
 } from './logs';
 export { createDelayFn, type RetryableState } from './delay';
-export { ControlStateTransitionTracker } from './control_state_transition_tracker';
+export { ControlStateTransitionDiag } from './control_state_transition_tracker';

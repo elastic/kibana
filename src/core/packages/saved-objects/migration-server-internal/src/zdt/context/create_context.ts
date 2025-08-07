@@ -11,7 +11,7 @@ import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-intern
 import type { MigrateIndexOptions } from '../migrate_index';
 import type { MigratorContext } from './types';
 
-export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
+export type CreateContextOps = Omit<MigrateIndexOptions, 'logger' | 'cstDiag'>;
 
 /**
  * Create the context object that will be used for this index migration.

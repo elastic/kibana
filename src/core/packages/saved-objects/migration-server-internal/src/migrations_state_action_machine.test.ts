@@ -20,14 +20,17 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { AllControlStates, State } from './state';
 import { createInitialState } from './initial_state';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { ControlStateTransitionDiag } from './common/utils';
 
 describe('migrationsStateActionMachine', () => {
+  let cstDiag: ControlStateTransitionDiag;
   beforeAll(() => {
     jest
       .spyOn(global.Date, 'now')
       .mockImplementation(() => new Date('2021-04-12T16:00:00.000Z').valueOf());
   });
   beforeEach(() => {
+    cstDiag = ControlStateTransitionDiag.create();
     jest.clearAllMocks();
   });
 
@@ -113,6 +116,7 @@ describe('migrationsStateActionMachine', () => {
     await migrationStateActionMachine({
       initialState,
       logger: mockLogger.get(),
+      cstDiag: ControlStateTransitionDiag.create(),
       model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
       next,
       abort,
@@ -126,6 +130,7 @@ describe('migrationsStateActionMachine', () => {
 
   it('logs state transitions, messages in state.logs and action responses when reaching FATAL', async () => {
     await migrationStateActionMachine({
+      cstDiag,
       initialState: {
         ...initialState,
         reason: 'the fatal reason',
@@ -149,6 +154,7 @@ describe('migrationsStateActionMachine', () => {
 
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState,
         logger,
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
@@ -175,6 +181,7 @@ describe('migrationsStateActionMachine', () => {
   it('resolves when reaching the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState,
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
@@ -187,6 +194,7 @@ describe('migrationsStateActionMachine', () => {
   it('resolves with migrated status if some sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
@@ -199,6 +207,7 @@ describe('migrationsStateActionMachine', () => {
   it('resolves with patched status if none sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState: { ...initialState, ...{ sourceIndex: Option.none } },
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'LEGACY_DELETE', 'DONE']),
@@ -211,6 +220,7 @@ describe('migrationsStateActionMachine', () => {
   it('rejects with error message when reaching the FATAL state', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
@@ -225,6 +235,7 @@ describe('migrationsStateActionMachine', () => {
   it('rejects and logs the error when an action throws with a ResponseError', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
@@ -267,6 +278,7 @@ describe('migrationsStateActionMachine', () => {
   it('rejects and logs the error when an action throws', async () => {
     await expect(
       migrationStateActionMachine({
+        cstDiag,
         initialState: { ...initialState, reason: 'the fatal reason' } as State,
         logger: mockLogger.get(),
         model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
@@ -298,6 +310,7 @@ describe('migrationsStateActionMachine', () => {
     it('calls abort function when an action throws', async () => {
       await expect(
         migrationStateActionMachine({
+          cstDiag,
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
           model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),
@@ -313,6 +326,7 @@ describe('migrationsStateActionMachine', () => {
     it('calls abort function when reaching the FATAL state', async () => {
       await expect(
         migrationStateActionMachine({
+          cstDiag,
           initialState: { ...initialState, reason: 'the fatal reason' } as State,
           logger: mockLogger.get(),
           model: transitionModel(['LEGACY_REINDEX', 'LEGACY_DELETE', 'FATAL']),

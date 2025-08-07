@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createControlStateTransitionTracker } from './control_state_transition_tracker';
+import { ControlStateTransitionDiag } from './control_state_transition_tracker';
 
 describe('ControlStateTransitionTracker', () => {
+  let tracker: ControlStateTransitionDiag;
+  beforeEach(() => {
+    tracker = ControlStateTransitionDiag.create();
+  });
   it('should observe transitions and update length', () => {
-    const tracker = createControlStateTransitionTracker();
     expect(tracker.length).toBe(0);
 
     tracker.observeTransition('A', 'B', 10);
@@ -22,32 +25,28 @@ describe('ControlStateTransitionTracker', () => {
   });
 
   it('should format 1 transitions with pretty()', () => {
-    const tracker = createControlStateTransitionTracker();
     tracker.observeTransition('Init', 'Running', 5);
 
-    expect(tracker.pretty()).toBe(`[
+    expect(tracker.prettyPrint()).toBe(`[
   Init -> Running (5ms)
 ]`);
   });
 
   it('should format >1 transitions with pretty()', () => {
-    const tracker = createControlStateTransitionTracker();
     tracker.observeTransition('Init', 'Running', 5);
     tracker.observeTransition('Running', 'Done', 15);
 
-    expect(tracker.pretty()).toBe(`[
+    expect(tracker.prettyPrint()).toBe(`[
   Init -> Running (5ms)
   Running -> Done (15ms)
 ]`);
   });
 
   it('should handle pretty() with no transitions', () => {
-    const tracker = createControlStateTransitionTracker();
-    expect(tracker.pretty()).toBe('[<No transitions observed>]');
+    expect(tracker.prettyPrint()).toBe('[<No transitions observed>]');
   });
 
   it('should not expose transitions array directly', () => {
-    const tracker = createControlStateTransitionTracker();
     expect((tracker as any).transitions).toBeUndefined();
   });
 });

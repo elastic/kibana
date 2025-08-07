@@ -30,6 +30,7 @@ import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { cleanup } from './migrations_state_machine_cleanup';
 import type { State } from './state';
 import type { AliasAction } from './actions';
+import { ControlStateTransitionDiag } from './common/utils';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -66,6 +67,7 @@ export interface RunResilientMigratorParams {
   typeRegistry: ISavedObjectTypeRegistry;
   docLinks: DocLinksServiceStart;
   esCapabilities: ElasticsearchCapabilities;
+  cstDiag: ControlStateTransitionDiag;
 }
 
 /**
@@ -95,6 +97,7 @@ export async function runResilientMigrator({
   typeRegistry,
   docLinks,
   esCapabilities,
+  cstDiag,
 }: RunResilientMigratorParams): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -132,5 +135,6 @@ export async function runResilientMigrator({
       // but we are going to throw and shutdown Kibana anyway, so there's no real point in it
       await cleanup(client, state);
     },
+    cstDiag,
   });
 }

@@ -17,7 +17,7 @@ import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   logStateTransition,
   logActionResponse,
-  createControlStateTransitionTracker,
+  type ControlStateTransitionDiag,
 } from '../common/utils';
 import { type Next, stateActionMachine } from '../state_action_machine';
 import { cleanup } from '../migrations_state_machine_cleanup';
@@ -44,12 +44,14 @@ export async function migrationStateActionMachine({
   next,
   model,
   logger,
+  cstDiag,
 }: {
   initialState: State;
   context: MigratorContext;
   next: Next<State>;
   model: (state: State, res: any, context: MigratorContext) => State;
   logger: Logger;
+  cstDiag: ControlStateTransitionDiag;
 }) {
   const startTime = Date.now();
   // Since saved object index names usually start with a `.` and can be
@@ -57,7 +59,6 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${context.indexPrefix}] `;
   let prevTimestamp = startTime;
-  const cstTracker = createControlStateTransitionTracker();
   let lastState: State = initialState;
   try {
     const finalState = await stateActionMachine<State>(
@@ -85,7 +86,7 @@ export async function migrationStateActionMachine({
         const tookMs = now - prevTimestamp;
         logStateTransition(logger, logMessagePrefix, state, redactedNewState as State, tookMs);
 
-        cstTracker.observeTransition(previousState, newState.controlState, tookMs);
+        cstDiag.observeTransition(previousState, newState.controlState, tookMs);
 
         prevTimestamp = now;
         return newState;
@@ -116,9 +117,9 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
-    if (cstTracker.length) {
+    if (cstDiag.length) {
       logger.error(
-        logMessagePrefix + `Failed with ${e} after transitioning through: ${cstTracker.pretty()}`
+        logMessagePrefix + `Failed with ${e} after transitioning through: ${cstDiag.prettyPrint()}`
       );
     } else {
       logger.error(logMessagePrefix + `Failed with ${e} at INIT`);

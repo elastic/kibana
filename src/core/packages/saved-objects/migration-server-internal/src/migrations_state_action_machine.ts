@@ -16,11 +16,7 @@ import {
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { MigrationResult } from '@kbn/core-saved-objects-base-server-internal';
-import {
-  logActionResponse,
-  logStateTransition,
-  createControlStateTransitionTracker,
-} from './common/utils';
+import { logActionResponse, logStateTransition, ControlStateTransitionDiag } from './common/utils';
 import { type Model, type Next, stateActionMachine } from './state_action_machine';
 import type { ReindexSourceToTempTransform, ReindexSourceToTempIndexBulk, State } from './state';
 import { redactBulkOperationBatches } from './common/redact_state';
@@ -37,12 +33,14 @@ import { redactBulkOperationBatches } from './common/redact_state';
 export async function migrationStateActionMachine({
   initialState,
   logger,
+  cstDiag,
   next,
   model,
   abort,
 }: {
   initialState: State;
   logger: Logger;
+  cstDiag: ControlStateTransitionDiag;
   next: Next<State>;
   model: Model<State>;
   abort: (state?: State) => Promise<void>;
@@ -53,7 +51,6 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${initialState.indexPrefix}] `;
   let prevTimestamp = startTime;
-  const cstTracker = createControlStateTransitionTracker();
   let lastState: State | undefined;
   try {
     const finalState = await stateActionMachine<State>(
@@ -88,7 +85,7 @@ export async function migrationStateActionMachine({
         const now = Date.now();
         const tookMs = now - prevTimestamp;
         logStateTransition(logger, logMessagePrefix, state, redactedNewState as State, tookMs);
-        cstTracker.observeTransition(state.controlState, newState.controlState, tookMs);
+        cstDiag.observeTransition(state.controlState, newState.controlState, tookMs);
         prevTimestamp = now;
         return newState;
       }
@@ -112,7 +109,7 @@ export async function migrationStateActionMachine({
         };
       }
     } else if (finalState.controlState === 'FATAL') {
-      logger.error(`Reached FATAL state after: ${cstTracker.pretty()}`);
+      logger.error(`Reached FATAL state after: ${cstDiag.prettyPrint()}`);
       try {
         await abort(finalState);
       } catch (e) {

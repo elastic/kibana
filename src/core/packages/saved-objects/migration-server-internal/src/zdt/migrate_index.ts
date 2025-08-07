@@ -28,6 +28,7 @@ import { createContext } from './context';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './state';
+import { ControlStateTransitionDiag } from '../common/utils';
 
 export interface MigrateIndexOptions {
   kibanaVersion: string;
@@ -51,10 +52,12 @@ export interface MigrateIndexOptions {
   readonly nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */
   esCapabilities: ElasticsearchCapabilities;
+  cstDiag: ControlStateTransitionDiag;
 }
 
 export const migrateIndex = async ({
   logger,
+  cstDiag,
   ...options
 }: MigrateIndexOptions): Promise<MigrationResult> => {
   const context = createContext(options);
@@ -66,5 +69,6 @@ export const migrateIndex = async ({
     model,
     context,
     logger,
+    cstDiag,
   });
 };

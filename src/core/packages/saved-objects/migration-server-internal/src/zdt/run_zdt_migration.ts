@@ -25,6 +25,7 @@ import type {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
+import { ControlStateTransitionDiag, logMigrationFailureDetails } from '../common/utils';
 
 export interface RunZeroDowntimeMigrationOpts {
   /** The current Kibana version */
@@ -51,9 +52,10 @@ export interface RunZeroDowntimeMigrationOpts {
   esCapabilities: ElasticsearchCapabilities;
 }
 
-export const runZeroDowntimeMigration = async (
-  options: RunZeroDowntimeMigrationOpts
-): Promise<MigrationResult[]> => {
+export const runZeroDowntimeMigration = async ({
+  logger,
+  ...options
+}: RunZeroDowntimeMigrationOpts): Promise<MigrationResult[]> => {
   const migratorConfigs = buildMigratorConfigs({
     kibanaIndexPrefix: options.kibanaIndexPrefix,
     typeRegistry: options.typeRegistry,
@@ -61,9 +63,19 @@ export const runZeroDowntimeMigration = async (
 
   return await Promise.all(
     migratorConfigs.map((migratorConfig) => {
+      const cstDiag = ControlStateTransitionDiag.create();
       return migrateIndex({
         ...options,
         ...migratorConfig,
+        logger,
+        cstDiag,
+      }).catch((e) => {
+        logMigrationFailureDetails({
+          logger,
+          index: options.kibanaIndexPrefix,
+          cstDiag,
+        });
+        throw e;
       });
     })
   );
