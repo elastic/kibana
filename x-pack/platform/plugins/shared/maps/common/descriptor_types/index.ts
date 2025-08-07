@@ -6,7 +6,6 @@
  */
 
 export type * from './data_request_descriptor_types';
-export type * from './source_descriptor_types';
 export type * from './layer_descriptor_types';
 export type * from './map_descriptor';
 export type * from './style_property_descriptor_types';
@@ -33,4 +32,5 @@ export type {
   XYZTMSSourceDescriptor,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  SourceDescriptor,
 } from '../../server';

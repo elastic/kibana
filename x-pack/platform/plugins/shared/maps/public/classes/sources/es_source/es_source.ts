@@ -32,7 +32,6 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import {
   AbstractESSourceDescriptor,
-  AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
   VectorSourceRequestMeta,
@@ -114,7 +113,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return true;
   }
 
-  cloneDescriptor(): AbstractSourceDescriptor {
+  cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuidv4();

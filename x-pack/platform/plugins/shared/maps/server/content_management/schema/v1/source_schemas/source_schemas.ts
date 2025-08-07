@@ -8,6 +8,12 @@
 import { schema } from '@kbn/config-schema';
 import { SOURCE_TYPES } from '../../../../../common';
 import { MVT_FIELD_TYPE } from '../../../../../common/constants';
+import {
+  ESGeoGridSourceSchema,
+  ESGeoLineSourceSchema,
+  ESPewPewSourceSchema,
+} from './es_agg_source_schemas';
+import { ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
 
 export const EMSFileSourceSchema = schema.object(
   {
@@ -181,3 +187,25 @@ export const TiledSingleLayerVectorSourceSchema = schema.object(
     unknowns: 'forbid',
   }
 );
+
+export const sourceSchema = schema.oneOf([
+  schema.object(
+    {
+      type: schema.string(),
+    },
+    {
+      unknowns: 'allow',
+    }
+  ),
+  EMSFileSourceSchema,
+  EMSTMSSourceSchema,
+  kibanaTilemapSourceSchema,
+  WMSSourceSchema,
+  XYZTMSSourceSchema,
+  TiledSingleLayerVectorSourceSchema,
+  ESGeoGridSourceSchema,
+  ESGeoLineSourceSchema,
+  ESPewPewSourceSchema,
+  ESSearchSourceSchema,
+  ESQLSourceSchema,
+]);
