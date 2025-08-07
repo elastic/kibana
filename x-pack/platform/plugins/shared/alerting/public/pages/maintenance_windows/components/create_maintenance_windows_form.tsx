@@ -476,26 +476,31 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         )}
         <EuiHorizontalRule margin="xl" />
       </EuiFlexGroup>
-      {isEditMode && (
-        <>
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
-            <p>{i18n.ARCHIVE_SUBTITLE}</p>
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
+        gutterSize="l"
+        responsive={false}
+      >
+        {isEditMode && (
+          <EuiFlexItem grow={false}>
             <EuiButton fill color="danger" onClick={showModal}>
               {i18n.ARCHIVE}
             </EuiButton>
             {modal}
-          </EuiCallOut>
-          <EuiHorizontalRule margin="xl" />
-        </>
-      )}
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="l" responsive={false}>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>
