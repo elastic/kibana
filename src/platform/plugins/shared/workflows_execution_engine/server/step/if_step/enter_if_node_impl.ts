@@ -49,11 +49,15 @@ export class EnterIfNodeImpl implements StepImplementation {
     try {
       evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
     } catch (error) {
-      throw new Error(
-        `Syntax error in condition "${thenNode.condition}" for step ${this.step.id}: ${String(
-          error
-        )}`
-      );
+      if (error?.message?.includes('KQLSyntaxError')) {
+        throw new Error(
+          `Syntax error in condition "${thenNode.condition}" for step ${this.step.id}: ${String(
+            error
+          )}`
+        );
+      }
+
+      throw error;
     }
 
     if (evaluatedConditionResult) {
