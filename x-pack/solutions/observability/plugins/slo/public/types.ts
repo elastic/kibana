@@ -15,7 +15,6 @@ import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/pub
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -53,6 +52,7 @@ import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export type SLORepositoryClient = RouteRepositoryClient<SLORouteRepository, DefaultClientOptions>;
 
@@ -85,7 +85,7 @@ export interface SLOPublicPluginsStart {
   discover?: DiscoverStart;
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;

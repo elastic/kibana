@@ -28,7 +28,7 @@
     "@kbn/alerting-plugin",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
-    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/embeddable-enhanced",
     "@kbn/lens-plugin",
     "@kbn/es-query",
     "@kbn/react-kibana-mount",
