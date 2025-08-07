@@ -66,28 +66,41 @@ export const validateCompleteThreatMatches = (
 
   signalIdToMatchedQueriesMap.forEach((threatQueries, signalId) => {
     const allMatchedThreatQueriesSet = new Set<ThreatMatchNamedQuery>();
-    threatMapping.forEach((andGroup) => {
-      const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
-      const hasMatchForAndGroup = andGroup.entries.every((entry) => {
-        const filteredThreatQueries = threatQueries.filter(
-          (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
-        );
 
-        if (filteredThreatQueries.length > 0) {
-          matchedThreatQueriesForAndGroup.push(...filteredThreatQueries);
-          return true;
+    // split threat queries by id to avoid false positives when there partial matches in multiple threats
+    const threatQueriesMap = threatQueries.reduce<Record<string, ThreatMatchNamedQuery[]>>(
+      (acc, threatQuery) => {
+        if (!acc[threatQuery.id]) {
+          acc[threatQuery.id] = [];
         }
+        acc[threatQuery.id].push(threatQuery);
+        return acc;
+      },
+      {}
+    );
 
-        return false;
+    Object.values(threatQueriesMap).forEach((threatQueriesPerId) => {
+      threatMapping.forEach((andGroup) => {
+        const matchedThreatQueriesForAndGroup: ThreatMatchNamedQuery[] = [];
+        const hasMatchForAndGroup = andGroup.entries.every((entry) => {
+          const filteredThreatQueries = threatQueriesPerId.filter(
+            (threatQuery) => threatQuery.field === entry.field && threatQuery.value === entry.value
+          );
+
+          if (filteredThreatQueries.length > 0) {
+            matchedThreatQueriesForAndGroup.push(...filteredThreatQueries);
+            return true;
+          }
+
+          return false;
+        });
+
+        if (hasMatchForAndGroup) {
+          matchedThreatQueriesForAndGroup.forEach((threatQuery) =>
+            allMatchedThreatQueriesSet.add(threatQuery)
+          );
+        }
       });
-
-      if (hasMatchForAndGroup) {
-        matchedThreatQueriesForAndGroup.forEach((threatQuery) =>
-          allMatchedThreatQueriesSet.add(threatQuery)
-        );
-      }
-
-      return hasMatchForAndGroup;
     });
 
     if (allMatchedThreatQueriesSet.size > 0) {
