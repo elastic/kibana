@@ -44,40 +44,41 @@ export class EnterIfNodeImpl implements StepImplementation {
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
 
-    let evaluatedConditionResult: boolean;
-
-    try {
-      evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
-    } catch (error) {
-      if (error?.message?.includes('KQLSyntaxError')) {
-        throw new Error(
-          `Syntax error in condition "${thenNode.condition}" for step ${this.step.id}: ${String(
-            error
-          )}`
-        );
-      }
-
-      throw error;
-    }
+    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
 
     if (evaluatedConditionResult) {
-      this.workflowContextLogger.logDebug(
-        `Condition "${thenNode.condition}" evaluated to true for step ${this.step.id}. Going to then branch.`
-      );
-      this.wfExecutionRuntimeManager.goToStep(thenNode.id);
+      this.goToThenBranch(thenNode);
     } else if (elseNode) {
-      this.workflowContextLogger.logDebug(
-        `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. Going to else branch.`
-      );
-      this.wfExecutionRuntimeManager.goToStep(elseNode.id);
+      this.goToElseBranch(thenNode, elseNode);
     } else {
       // in the case when the condition evaluates to false and no else branch is defined
       // we go straight to the exit node skipping "then" branch
-      this.workflowContextLogger.logDebug(
-        `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. No else branch defined. Exiting if condition.`
-      );
-      this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
+      this.goToExitNode(thenNode);
     }
+  }
+
+  private goToThenBranch(thenNode: EnterConditionBranchNode): void {
+    this.workflowContextLogger.logDebug(
+      `Condition "${thenNode.condition}" evaluated to true for step ${this.step.id}. Going to then branch.`
+    );
+    this.wfExecutionRuntimeManager.goToStep(thenNode.id);
+  }
+
+  private goToElseBranch(
+    thenNode: EnterConditionBranchNode,
+    elseNode: EnterConditionBranchNode
+  ): void {
+    this.workflowContextLogger.logDebug(
+      `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. Going to else branch.`
+    );
+    this.wfExecutionRuntimeManager.goToStep(elseNode.id);
+  }
+
+  private goToExitNode(thenNode: EnterConditionBranchNode): void {
+    this.workflowContextLogger.logDebug(
+      `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. No else branch defined. Exiting if condition.`
+    );
+    this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
   }
 
   private evaluateCondition(condition: string | boolean | undefined): boolean {
@@ -87,6 +88,16 @@ export class EnterIfNodeImpl implements StepImplementation {
       return false; // Undefined condition defaults to false
     }
 
-    return evaluateKql(condition, this.workflowContextManager.getContext());
+    try {
+      return evaluateKql(condition, this.workflowContextManager.getContext());
+    } catch (error) {
+      if (error?.message?.includes('KQLSyntaxError')) {
+        throw new Error(
+          `Syntax error in condition "${condition}" for step ${this.step.id}: ${String(error)}`
+        );
+      }
+
+      throw error;
+    }
   }
 }
