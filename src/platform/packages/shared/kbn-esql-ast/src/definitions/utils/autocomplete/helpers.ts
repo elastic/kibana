@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLSingleAstItem,
   ESQLFunction,
@@ -190,7 +191,8 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -244,7 +246,8 @@ export async function getFieldsOrFunctionsSuggestions(
             returnTypes: types,
             ignored: ignoreFn,
           },
-          hasMinimumLicenseRequired
+          hasMinimumLicenseRequired,
+          activeProduct
         )
       : [],
     userDefinedColumns
@@ -353,6 +356,7 @@ export async function suggestForExpression({
   context,
   advanceCursorAfterInitialColumn = true,
   hasMinimumLicenseRequired,
+  activeProduct,
   ignoredColumnsForEmptyExpression = [],
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
@@ -361,6 +365,7 @@ export async function suggestForExpression({
   innerText: string;
   getColumnsByType?: GetColumnsByTypeFn | undefined;
   context?: ICommandContext;
+  activeProduct?: PricingProduct;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
@@ -390,13 +395,17 @@ export async function suggestForExpression({
       }
 
       suggestions.push(
-        ...getOperatorSuggestions({
-          location,
-          // In case of a param literal, we don't know the type of the left operand
-          // so we can only suggest operators that accept any type as a left operand
-          leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
-          ignored: ['='],
-        })
+        ...getOperatorSuggestions(
+          {
+            location,
+            // In case of a param literal, we don't know the type of the left operand
+            // so we can only suggest operators that accept any type as a left operand
+            leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
+            ignored: ['='],
+          },
+          hasMinimumLicenseRequired,
+          activeProduct
+        )
       );
 
       break;
@@ -417,7 +426,8 @@ export async function suggestForExpression({
         suggestions.push(
           ...getFunctionSuggestions(
             { location, returnTypes: ['boolean'] },
-            hasMinimumLicenseRequired
+            hasMinimumLicenseRequired,
+            activeProduct
           ),
           ...(await getColumnsByType('boolean', [], {
             advanceCursor: true,
@@ -470,6 +480,7 @@ export async function suggestForExpression({
             getExpressionType(expression, context?.fields, context?.userDefinedColumns),
           getColumnsByType,
           hasMinimumLicenseRequired,
+          activeProduct,
         }))
       );
 
@@ -486,7 +497,7 @@ export async function suggestForExpression({
       );
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired)
+        ...getFunctionSuggestions({ location }, hasMinimumLicenseRequired, activeProduct)
       );
 
       break;

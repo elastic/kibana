@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { LicenseType } from '@kbn/licensing-types';
+
 import { uniq } from 'lodash';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   isAssignment,
   isColumn,
@@ -369,7 +371,8 @@ export async function getFunctionArgsSuggestions(
                 ) as FunctionParameterType[]),
             ignored: fnToIgnore,
           },
-          hasMinimumLicenseRequired
+          hasMinimumLicenseRequired,
+          context?.activeProduct
         ).map((suggestion) => ({
           ...suggestion,
           text: addCommaIf(shouldAddComma, suggestion.text),
@@ -441,7 +444,8 @@ async function getListArgsSuggestions(
   getFieldsByType: GetColumnsByTypeFn,
   fieldsMap: Map<string, ESQLFieldWithMetadata>,
   offset: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  activeProduct?: PricingProduct
 ) {
   const suggestions = [];
   const { command, node } = findAstPosition(commands, offset);
@@ -490,7 +494,8 @@ async function getListArgsSuggestions(
               userDefinedColumns: anyUserDefinedColumns,
             },
             { ignoreColumns: [firstArg.name, ...otherArgs.map(({ name }) => name)] },
-            hasMinimumLicenseRequired
+            hasMinimumLicenseRequired,
+            activeProduct
           ))
         );
       }
@@ -540,6 +545,7 @@ export const getInsideFunctionsSuggestions = async (
           getExpressionType(expression, context?.fields, context?.userDefinedColumns),
         getColumnsByType: callbacks?.getByType ?? (() => Promise.resolve([])),
         hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+        activeProduct: context?.activeProduct,
       });
     }
     if (['in', 'not in'].includes(node.name)) {
@@ -551,7 +557,8 @@ export const getInsideFunctionsSuggestions = async (
         callbacks?.getByType ?? (() => Promise.resolve([])),
         context?.fields ?? new Map(),
         cursorPosition ?? 0,
-        callbacks?.hasMinimumLicenseRequired
+        callbacks?.hasMinimumLicenseRequired,
+        context?.activeProduct
       );
     }
     if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {

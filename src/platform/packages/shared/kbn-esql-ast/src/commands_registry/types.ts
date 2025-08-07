@@ -13,6 +13,7 @@ import type {
   ESQLControlVariable,
 } from '@kbn/esql-types';
 import { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -140,6 +141,7 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  activeProduct?: PricingProduct | undefined;
 }
 
 /**

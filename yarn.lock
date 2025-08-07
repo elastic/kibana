@@ -4263,6 +4263,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/chart-test-jest-helpers@link:src/platform/packages/shared/chart-test-jest-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/charts-plugin@link:src/platform/plugins/shared/charts":
   version "0.0.0"
   uid ""
