@@ -20,17 +20,16 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
+  SideNavLogo,
 } from '@kbn/core-chrome-navigation/types';
+
+import { isActiveFromUrl } from '@kbn/shared-ux-chrome-navigation/src/utils';
 import { AppDeepLinkIdToIcon } from './hack_icons_mappings';
 
 export interface NavigationItems {
-  logoItem: LogoItem;
+  logoItem: SideNavLogo;
   navItems: NavigationStructure;
-}
-
-export interface LogoItem {
-  logoType: string;
-  label: string;
+  activeItemId?: string;
 }
 
 /**
@@ -66,6 +65,18 @@ export const toNavigationItems = (
   let primaryNodes: ChromeProjectNavigationNode[] = [];
   let footerNodes: ChromeProjectNavigationNode[] = [];
 
+  let deepestActiveItemId: string | undefined;
+  let currentActiveItemIdLevel = -1;
+
+  const maybeMarkActive = (navNode: ChromeProjectNavigationNode, level: number) => {
+    if (deepestActiveItemId == null || currentActiveItemIdLevel < level) {
+      if (isActiveFromUrl(navNode.path, activeNodes, false)) {
+        deepestActiveItemId = navNode.id;
+        currentActiveItemIdLevel = level;
+      }
+    }
+  };
+
   if (navigationTree.body.length === 1) {
     const firstNode = navigationTree.body[0];
     if (!isRecentlyAccessedDefinition(firstNode)) {
@@ -88,8 +99,18 @@ export const toNavigationItems = (
     );
   }
 
-  const logoItem: LogoItem = {
-    logoType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+  if (logoNode) {
+    maybeMarkActive(logoNode, 0);
+  } else {
+    warnOnce(
+      'Navigation tree is missing a logo node. The first level should contain a logo node with solution logo, name and home page href.'
+    );
+  }
+
+  const logoItem: SideNavLogo = {
+    href: warnIfMissing(logoNode, 'href', '/missing-href-😭'),
+    iconType: warnIfMissing(logoNode, 'icon', 'logoKibana') as string,
+    id: warnIfMissing(logoNode, 'id', 'kibana'),
     label: warnIfMissing(logoNode, 'title', 'Kibana'),
   };
 
@@ -167,6 +188,7 @@ export const toNavigationItems = (
             label: null,
             items: navNode.children.map((child) => {
               warnUnsupportedNavNodeOptions(child);
+              maybeMarkActive(child, 2);
               return {
                 id: child.id,
                 label: warnIfMissing(child, 'title', 'Missing Title 😭'),
@@ -192,6 +214,7 @@ export const toNavigationItems = (
                 .filter((subChild) => subChild.sideNavStatus !== 'hidden')
                 .map((subChild) => {
                   warnUnsupportedNavNodeOptions(subChild);
+                  maybeMarkActive(subChild, 2);
                   return {
                     id: subChild.id,
                     label: warnIfMissing(subChild, 'title', 'Missing Title 😭'),
@@ -238,6 +261,8 @@ export const toNavigationItems = (
       itemHref = warnIfMissing(navNode, 'href', 'missing-href-😭');
     }
 
+    maybeMarkActive(navNode, 1);
+
     return {
       id: navNode.id,
       label: warnIfMissing(navNode, 'title', 'Missing Title 😭'),
@@ -263,7 +288,7 @@ export const toNavigationItems = (
     );
   }
 
-  return { logoItem, navItems: { primaryItems, footerItems } };
+  return { logoItem, navItems: { primaryItems, footerItems }, activeItemId: deepestActiveItemId };
 };
 
 // =====================
