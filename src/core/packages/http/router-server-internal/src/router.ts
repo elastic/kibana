@@ -28,7 +28,6 @@ import type {
   RouteRegistrar,
   PostValidationMetadata,
   IKibanaResponse,
-  KibanaRequestState,
 } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
@@ -212,7 +211,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     handler: InternalRouteHandler;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
-    let apmSpan = (request.app as KibanaRequestState).span;
+    let apmSpan: Span | undefined;
     try {
       apmSpan = apm.startSpan('route handler');
       const kibanaResponse = await handler(request);
