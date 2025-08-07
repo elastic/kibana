@@ -39,7 +39,6 @@
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "scripts": {
     "backport-skip-ci": "backport --prDescription \"[skip-ci]\"",
-    "bazel": "bazel",
     "build": "node --no-experimental-require-module scripts/build --all-platforms",
     "build:apidocs": "node --no-experimental-require-module scripts/build_api_docs",
     "checkLicenses": "node --no-experimental-require-module scripts/check_licenses --dev",
@@ -78,7 +77,6 @@
   },
   "resolutions": {
     "**/@babel/parser": "7.24.7",
-    "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "^0.3.57",
     "**/@langchain/google-common": "^0.1.8",
@@ -107,6 +105,7 @@
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
+    "@a2a-js/sdk": "^0.3.0",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
@@ -1434,8 +1433,6 @@
     "@babel/register": "^7.24.6",
     "@babel/traverse": "^7.24.7",
     "@babel/types": "7.21.2",
-    "@bazel/ibazel": "^0.16.2",
-    "@bazel/typescript": "4.6.2",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.2",
@@ -1465,9 +1462,9 @@
     "@kbn/babel-preset": "link:packages/kbn-babel-preset",
     "@kbn/babel-register": "link:src/platform/packages/shared/kbn-babel-register",
     "@kbn/babel-transform": "link:src/platform/packages/private/kbn-babel-transform",
-    "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
     "@kbn/cache-cli": "link:src/platform/packages/shared/kbn-cache-cli",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
+    "@kbn/chart-test-jest-helpers": "link:src/platform/packages/shared/chart-test-jest-helpers",
     "@kbn/check-mappings-update-cli": "link:packages/kbn-check-mappings-update-cli",
     "@kbn/check-prod-native-modules-cli": "link:packages/kbn-check-prod-native-modules-cli",
     "@kbn/ci-stats-core": "link:src/platform/packages/private/kbn-ci-stats-core",
@@ -1646,6 +1643,7 @@
     "@kbn/test-suites-serverless": "link:x-pack/test_serverless",
     "@kbn/test-suites-src": "link:src/platform/test",
     "@kbn/test-suites-xpack": "link:x-pack/test",
+    "@kbn/test-suites-xpack-chat": "link:x-pack/solutions/chat/test",
     "@kbn/test-suites-xpack-observability": "link:x-pack/solutions/observability/test",
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
     "@kbn/test-suites-xpack-platform": "link:x-pack/platform/test",
