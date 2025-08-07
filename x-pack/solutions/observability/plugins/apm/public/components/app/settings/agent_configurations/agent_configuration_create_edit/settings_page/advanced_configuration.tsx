@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -42,10 +42,20 @@ export function AdvancedConfiguration({
   );
 
   const unknownAgentConfigs = useMemo(() => {
-    return Object.entries(newConfig.settings).filter(
-      ([key]) => !predefinedAgentConfigKeys.includes(key)
+    return new Map(
+      Object.entries(newConfig.settings).filter(([key]) => !predefinedAgentConfigKeys.includes(key))
     );
   }, [predefinedAgentConfigKeys, newConfig.settings]);
+
+  const checkIfAdvancedConfigKeyExists = useCallback(
+    (newKey: string, oldKey: string) => newKey !== oldKey && unknownAgentConfigs.has(newKey),
+    [unknownAgentConfigs]
+  );
+
+  const checkIfPredefinedConfigKeyExists = useCallback(
+    (key: string) => predefinedAgentConfigKeys.includes(key),
+    [predefinedAgentConfigKeys]
+  );
 
   const updateValue = (key: string, value: string) => {
     setNewConfig((prev) => {
@@ -165,9 +175,9 @@ export function AdvancedConfiguration({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      {unknownAgentConfigs.map(([configKey, configValue], index) => (
+      {[...unknownAgentConfigs].map(([configKey, configValue], index, array) => (
         // Use reverse index as key prop to allow adding new rows at the top
-        <Fragment key={unknownAgentConfigs.length - 1 - index}>
+        <Fragment key={array.length - 1 - index}>
           {index > 0 && <EuiSpacer size="s" />}
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -175,10 +185,10 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 configValue={configValue}
                 index={index}
-                predefinedAgentConfigKeys={predefinedAgentConfigKeys}
-                unknownAgentConfigs={unknownAgentConfigs}
                 setValidationErrors={setValidationErrors}
                 onUpdate={updateKey}
+                checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
+                checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
               />
             </EuiFlexItem>
             <EuiFlexItem>
