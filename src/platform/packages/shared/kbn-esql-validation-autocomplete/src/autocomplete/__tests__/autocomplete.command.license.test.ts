@@ -9,11 +9,12 @@
 
 import { setup } from './helpers';
 import { getCallbackMocks } from '../../__tests__/helpers';
+import { ILicense } from '@kbn/licensing-types';
 
 export function getLicenseMock(level: string) {
   return {
     hasAtLeast: (requiredLevel: string) => level === requiredLevel,
-  };
+  } as ILicense;
 }
 
 describe('autocomplete.suggest', () => {
