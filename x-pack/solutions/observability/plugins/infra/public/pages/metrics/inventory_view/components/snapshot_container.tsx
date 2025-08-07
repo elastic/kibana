@@ -30,7 +30,7 @@ export const SnapshotContainer = React.memo(() => {
     interval = '60s',
   } = useSnapshot(
     {
-      kuery: filterQuery.expression,
+      kuery: filterQuery.query,
       metrics: [metric],
       groupBy,
       nodeType,
