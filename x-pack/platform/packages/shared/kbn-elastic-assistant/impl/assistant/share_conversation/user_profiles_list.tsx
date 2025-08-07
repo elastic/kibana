@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback } from 'react';
 import { UserProfilesSelectable, type UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfile } from '@kbn/core-user-profile-common';
-import { useSuggestUserProfiles } from './use_suggest_user_profiles';
+import { useUserProfiles } from './use_user_profiles';
 
 interface Props {
-  forbiddenUsers: string[];
   onUsersSelect: (users: UserProfile[]) => void;
+  allUsers: string[];
   selectedUsers: UserProfile[];
 }
 
-const UserProfilesSearchComponent: React.FC<Props> = ({
-  forbiddenUsers,
-  onUsersSelect,
-  selectedUsers,
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const searchEnabled = useMemo(() => searchTerm.length > 0, [searchTerm]);
-  const { data: userProfiles, isLoading } = useSuggestUserProfiles({
-    forbiddenUsers,
-    searchTerm,
-    enabled: searchEnabled,
-  });
-
-  const showLoading = useMemo(() => searchEnabled && isLoading, [searchEnabled, isLoading]);
-
+const UserProfilesListComponent: React.FC<Props> = ({ allUsers, onUsersSelect, selectedUsers }) => {
+  const { data: userProfiles, isLoading } = useUserProfiles(allUsers);
+  console.log('userProfiles', userProfiles);
   const onChange = useCallback(
     (nextSelectedOptions: UserProfileWithAvatar[]) => {
       const nextUsers: UserProfile[] = nextSelectedOptions.filter(
@@ -44,9 +32,8 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   return (
     <UserProfilesSelectable
       {...{
-        isLoading: showLoading,
         onChange,
-        onSearchChange: setSearchTerm,
+        searchable: false,
         options: userProfiles,
         selectedOptions: selectedUsers,
       }}
@@ -54,4 +41,4 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   );
 };
 
-export const UserProfilesSearch = React.memo(UserProfilesSearchComponent);
+export const UserProfilesList = React.memo(UserProfilesListComponent);

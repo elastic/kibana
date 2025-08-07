@@ -18,8 +18,9 @@ import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-ht
 import { useAssistantContext } from '../../..';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & {
+  enabled?: boolean;
   onDebounce?: () => void;
-  includeCurrentUser?: boolean;
+  forbiddenUsers?: string[];
 };
 
 /**
@@ -30,14 +31,15 @@ type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & {
  */
 const STALE_TIME = 1000 * 60;
 const SEARCH_DEBOUNCE_MS = 250;
-const DEFAULT_USER_SIZE = 10;
+const DEFAULT_USER_SIZE = 5;
 export const useSuggestUserProfiles = ({
-  includeCurrentUser = true,
+  enabled = true,
+  forbiddenUsers = [],
   searchTerm,
   size = DEFAULT_USER_SIZE,
   onDebounce = noop,
 }: Props) => {
-  const { http, toasts, currentUser } = useAssistantContext();
+  const { http, toasts } = useAssistantContext();
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   useDebounce(
     () => {
@@ -49,7 +51,7 @@ export const useSuggestUserProfiles = ({
   );
 
   return useQuery<SuggestUsersResponse, IHttpFetchError<ResponseErrorBody>, SuggestUsersResponse>(
-    ['users', 'suggest', debouncedSearchTerm, size],
+    ['users', 'suggest', debouncedSearchTerm, size, enabled],
     ({ signal }) =>
       suggestUserProfiles({
         http,
@@ -58,15 +60,11 @@ export const useSuggestUserProfiles = ({
         signal,
       }),
     {
+      enabled,
       retry: false,
       keepPreviousData: true,
       staleTime: STALE_TIME,
-      select: (data) =>
-        includeCurrentUser
-          ? data
-          : data.filter(
-              (user) => user.uid !== currentUser?.id && user.user.username !== currentUser?.name
-            ),
+      select: (data) => data.filter((user) => !forbiddenUsers.includes(user.uid)),
       onError: (error) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(

@@ -126,6 +126,7 @@ export interface UserProfilesSelectableProps<Option extends UserProfileWithAvata
    * Label for default options group separator.
    */
   defaultOptionsLabel?: string;
+  searchable?: boolean;
 }
 
 /**
@@ -138,6 +139,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
   onChange,
   onSearchChange,
   isLoading = false,
+  searchable = true,
   singleSelection = false,
   limit,
   height,
@@ -306,7 +308,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       }}
       css={{ maxHeight: height }}
       singleSelection={singleSelection}
-      searchable
+      searchable={searchable}
       searchProps={{
         placeholder:
           searchPlaceholder ??

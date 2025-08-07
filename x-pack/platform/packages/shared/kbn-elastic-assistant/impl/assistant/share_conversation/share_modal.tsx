@@ -19,6 +19,7 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 import { UserProfile } from '@kbn/core-user-profile-common';
+import { UserProfilesList } from './user_profiles_list';
 import { useConversation } from '../use_conversation';
 import { COPY_URL } from '../settings/settings_context_menu/translations';
 import * as i18n from './translations';
@@ -52,9 +53,15 @@ const ShareModalComponent: React.FC<Props> = ({
   const { updateConversationUsers } = useConversation();
   const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>('everyone');
   const { currentUser } = useAssistantContext();
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  useEffect(() => {
+    // Reset sharing option when modal opens
+    setSharingOption(selectedUsers.length === 0 ? 'everyone' : 'selected');
+  }, [selectedUsers.length]);
+  const [nextSelectedUsers, setNextSelectedUsers] = useState<UserProfile[]>([]);
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
-    setNextUsers(
+    const conversationUsers =
       selectedConversation?.users
         // do not show current user in UI
         .filter((user) => user.id !== currentUser?.id && user.name !== currentUser?.name)
@@ -64,8 +71,9 @@ const ShareModalComponent: React.FC<Props> = ({
           enabled: true,
           user: { username: name ?? id ?? '' },
           data: {},
-        })) || []
-    );
+        })) || [];
+    setSelectedUsers(conversationUsers.map(({ uid }) => uid));
+    setNextSelectedUsers(conversationUsers);
   }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
 
   const accessText = useMemo(
@@ -73,8 +81,12 @@ const ShareModalComponent: React.FC<Props> = ({
     [sharingOption]
   );
 
-  const onUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
+  const onNextUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
     setNextUsers(updatedUsers);
+  }, []);
+
+  const onNextSelectedUsersSelect = useCallback((updatedUsers: UserProfile[]) => {
+    setNextSelectedUsers(updatedUsers);
   }, []);
 
   const onCancelShare = useCallback(() => {
@@ -91,6 +103,10 @@ const ShareModalComponent: React.FC<Props> = ({
             id: user?.uid ?? '',
             name: user?.user?.username ?? '',
           })),
+          ...nextSelectedUsers.map((user) => ({
+            id: user?.uid ?? '',
+            name: user?.user?.username ?? '',
+          })),
           // readd current user
           ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
         ],
@@ -99,6 +115,7 @@ const ShareModalComponent: React.FC<Props> = ({
     }
   }, [
     currentUser,
+    nextSelectedUsers,
     nextUsers,
     refetchCurrentConversation,
     selectedConversation,
@@ -128,7 +145,11 @@ const ShareModalComponent: React.FC<Props> = ({
 
         {sharingOption === 'selected' && (
           <>
-            <UserProfilesSearch onUsersSelect={onUsersSelect} selectedUsers={nextUsers} />
+            <UserProfilesSearch
+              onUsersSelect={onNextUsersSelect}
+              selectedUsers={nextUsers}
+              forbiddenUsers={[...selectedUsers, ...(currentUser?.id ? [currentUser?.id] : [])]}
+            />
             <EuiSpacer size="m" />
           </>
         )}
@@ -136,6 +157,13 @@ const ShareModalComponent: React.FC<Props> = ({
         <EuiText size="s">
           <strong>{i18n.WHO_HAS_ACCESS}</strong>
           <p>{accessText}</p>
+          {sharingOption === 'selected' && (
+            <UserProfilesList
+              onUsersSelect={onNextSelectedUsersSelect}
+              allUsers={selectedUsers}
+              selectedUsers={nextSelectedUsers}
+            />
+          )}
         </EuiText>
 
         <EuiSpacer size="m" />
