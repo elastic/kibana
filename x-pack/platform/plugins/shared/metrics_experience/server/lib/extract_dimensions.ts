@@ -34,7 +34,7 @@ export function extractDimensions(
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
       if (typeInfo.time_series_dimension === true && (!filter || filter.includes(fieldName))) {
-        // Get description from various sources (priority: field caps -> ECS -> OTel)
+        // Get description from various sources (priority: field caps -> metadata service)
         const fieldCapsDescription = Array.isArray(typeInfo.meta?.description)
           ? typeInfo.meta.description.join(', ')
           : typeInfo.meta?.description;
