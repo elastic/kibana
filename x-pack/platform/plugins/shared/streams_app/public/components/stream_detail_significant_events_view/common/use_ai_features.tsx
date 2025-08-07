@@ -7,7 +7,7 @@
 
 import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function useAIFeatures(): {
   loading: boolean;

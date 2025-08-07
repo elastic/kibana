@@ -21,7 +21,7 @@ import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
-import { useAIFeatures } from './use_ai_features';
+import { useAIFeatures } from '../../common/use_ai_features';
 
 interface Props {
   definition: Streams.all.Definition;

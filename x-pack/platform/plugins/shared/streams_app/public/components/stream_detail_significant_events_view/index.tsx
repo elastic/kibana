@@ -22,6 +22,7 @@ import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
+import { ManageFeaturesFlyout } from './manage_features_flyout/manage_features_flyout';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -52,6 +53,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
+  const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
 
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
@@ -142,6 +144,16 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
     />
   ) : null;
 
+  const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
+    <ManageFeaturesFlyout
+      definition={definition.stream}
+      onSave={async () => {}}
+      onClose={() => {
+        setIsIdentifySystemFlyoutOpen(false);
+      }}
+    />
+  ) : null;
+
   if (significantEventsFetchState.value.length === 0) {
     return (
       <>
@@ -150,8 +162,12 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
             setIsEditFlyoutOpen(true);
             setQueryToEdit(undefined);
           }}
+          onIdentifySystemClick={() => {
+            setIsIdentifySystemFlyoutOpen(true);
+          }}
         />
         {editFlyout}
+        {identifySystemFlyout}
       </>
     );
   }
@@ -203,6 +219,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
         </EuiFlexItem>
       </EuiFlexGroup>
       {editFlyout}
+      {identifySystemFlyout}
     </>
   );
 }

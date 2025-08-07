@@ -6,7 +6,11 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { StreamQueryKql, type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
+import {
+  StreamQueryKql,
+  type IdentifiedFeatureEventsGenerateResponse,
+  type SignificantEventsGenerateResponse,
+} from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 
 interface SignificantEventsApiBulkOperationCreate {
@@ -25,6 +29,7 @@ interface SignificantEventsApi {
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
   generate: (connectorId: string) => SignificantEventsGenerateResponse;
+  identifySystem: (connectorId: string) => IdentifiedFeatureEventsGenerateResponse;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -43,14 +48,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
-          path: {
-            name,
-            queryId: id,
-          },
-          body: {
-            kql,
-            title,
-          },
+          path: { name, queryId: id },
+          body: { kql, title },
         },
       });
     },
@@ -59,26 +58,14 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
         {
           signal,
-          params: {
-            path: {
-              name,
-              queryId: id,
-            },
-          },
+          params: { path: { name, queryId: id } },
         }
       );
     },
     bulk: async (operations) => {
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
         signal,
-        params: {
-          path: {
-            name,
-          },
-          body: {
-            operations,
-          },
-        },
+        params: { path: { name }, body: { operations } },
       });
     },
     generate: (connectorId: string) => {
@@ -86,14 +73,16 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         `GET /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
           signal,
-          params: {
-            path: {
-              name,
-            },
-            query: {
-              connectorId,
-            },
-          },
+          params: { path: { name }, query: { connectorId } },
+        }
+      );
+    },
+    identifySystem: (connectorId: string) => {
+      return streamsRepositoryClient.stream(
+        `GET /api/streams/{name}/features/_generate 2023-10-31`,
+        {
+          signal,
+          params: { path: { name }, query: { connectorId } },
         }
       );
     },
