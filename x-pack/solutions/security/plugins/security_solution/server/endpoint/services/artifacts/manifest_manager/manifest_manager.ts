@@ -773,37 +773,51 @@ export class ManifestManager {
             )}] needs to be updated with new artifact manifest`
         );
 
-        if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
-          const oldManifest: ManifestSchema | undefined =
-            packagePolicy.inputs[0].config?.artifact_manifest?.value;
+        try {
+          if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
+            const oldManifest: ManifestSchema | undefined =
+              packagePolicy.inputs[0].config?.artifact_manifest?.value;
 
-          this.logger.debug(
-            () =>
-              `Policy [${policyId}][${name}] currently has manifest version [${oldManifest?.manifest_version}]`
-          );
+            this.logger.debug(
+              () =>
+                `Policy [${policyId}][${name}] currently has manifest version [${oldManifest?.manifest_version}]`
+            );
 
-          if (isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest.manifest_version)) {
-            const serializedManifest = manifest.toPackagePolicyManifest(policyId);
+            if (
+              isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest.manifest_version)
+            ) {
+              const serializedManifest = manifest.toPackagePolicyManifest(policyId);
 
-            if (!manifestDispatchSchema.is(serializedManifest)) {
-              errors.push(
-                new EndpointError(
-                  `Invalid manifest for policy ${policyId}. The new generated manifest did not pass schema validation`,
-                  serializedManifest
-                )
-              );
-            } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
-              packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-              policyUpdateBatchProcessor.addToQueue(packagePolicy);
+              if (!manifestDispatchSchema.is(serializedManifest)) {
+                errors.push(
+                  new EndpointError(
+                    `Invalid manifest for policy ${policyId}. The new generated manifest did not pass schema validation`,
+                    serializedManifest
+                  )
+                );
+              } else if (!oldManifest || !manifestsEqual(serializedManifest, oldManifest)) {
+                packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+                policyUpdateBatchProcessor.addToQueue(packagePolicy);
+              } else {
+                unChangedPolicies.push(`[${policyId}][${name}] No change in manifest content`);
+              }
             } else {
-              unChangedPolicies.push(`[${policyId}][${name}] No change in manifest content`);
+              unChangedPolicies.push(`[${policyId}][${name}] No change in manifest version`);
             }
           } else {
-            unChangedPolicies.push(`[${policyId}][${name}] No change in manifest version`);
+            errors.push(
+              new EndpointError(
+                `Package Policy ${policyId} has no 'inputs[0].config'`,
+                packagePolicy
+              )
+            );
           }
-        } else {
+        } catch (e) {
           errors.push(
-            new EndpointError(`Package Policy ${policyId} has no 'inputs[0].config'`, packagePolicy)
+            new EndpointError(
+              `Error thrown while processing policy [${policyId}][${name}]:\n${stringify(e)}`,
+              e
+            )
           );
         }
       }
