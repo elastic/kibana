@@ -4370,14 +4370,22 @@ components:
       type: object
       properties:
         add:
-          description: A list of users ids to assign.
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            description: >-
+              A list of user profile `uid`s to assign. Users need to activate
+              their user profile by logging into Kibana at least once.
+            format: nonempty
+            minLength: 1
+            type: string
           type: array
         remove:
-          description: A list of users ids to unassign.
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            description: >-
+              A list of user profile `uid`s to unassign. Users need to activate
+              their user profile by logging into Kibana at least once.
+            format: nonempty
+            minLength: 1
+            type: string
           type: array
       required:
         - add
@@ -9562,6 +9570,9 @@ components:
       type: object
       properties:
         signal_ids:
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
           items:
             $ref: '#/components/schemas/NonEmptyString'
           minItems: 1
