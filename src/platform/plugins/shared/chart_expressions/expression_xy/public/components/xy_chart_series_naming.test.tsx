@@ -156,25 +156,27 @@ describe('provides correct series naming', () => {
     expect(debugState?.lines?.[0]?.name).toBe('');
   });
 
-  test('simplest xy chart with human-readable name', () => {
+  test('simplest xy chart with human-readable name', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
       layers: [
         {
           ...args.layers[0],
+          xAccessor: 'c',
           accessors: ['a'],
-          splitAccessor: undefined,
+          splitAccessors: [],
           columnToLabel: '{"a":"Column A"}',
+          xScaleType: XScaleTypes.ORDINAL,
           table: dataWithoutFormats,
         },
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
-    const nameFn = component.find(DataLayers).dive().find(LineSeries).prop('name') as SeriesNameFn;
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Column A');
+    expect(debugState?.lines).toHaveLength(1);
+    expect(debugState?.lines?.[0]?.name).toBe('Column A');
   });
 
   test('multiple y accessors', () => {
