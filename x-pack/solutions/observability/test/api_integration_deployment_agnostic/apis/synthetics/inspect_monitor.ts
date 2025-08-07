@@ -230,7 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       delete compiledStream.id;
       delete compiledStream.processors[0].add_fields.fields.config_id;
 
-      expect(enabledStream?.vars.password.value).eql(
+      expect(enabledStream?.vars?.password.value).eql(
         '"-----BEGIN CERTIFICATE-----\n\nMIICMzBgNV\n\n\npAqEAJlQND\n\n-----END CERTIFICATE-----"'
       );
 
