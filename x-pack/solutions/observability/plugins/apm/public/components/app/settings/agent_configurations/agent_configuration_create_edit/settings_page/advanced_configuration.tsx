@@ -156,8 +156,8 @@ export function AdvancedConfiguration({
                 iconType="plusInCircle"
                 onClick={addNewRow}
               >
-                {i18n.translate('xpack.apm.settingsPage.addAdvancedConfigurationButton', {
-                  defaultMessage: 'Add configuration',
+                {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {
+                  defaultMessage: 'Add custom setting',
                 })}
               </EuiButton>
             </EuiFlexItem>
