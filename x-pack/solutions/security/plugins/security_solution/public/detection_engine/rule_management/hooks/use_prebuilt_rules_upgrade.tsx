@@ -361,9 +361,23 @@ export function usePrebuiltRulesUpgrade({
     },
     [rulesUpgradeState, isRulesCustomizationEnabled, setRuleFieldResolvedValue]
   );
+  const closeRulePreviewAction = (rule: RuleResponse, reason: 'dismiss' | 'call_to_action') => {
+    const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
+    const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+    if (reason === 'dismiss') {
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
+        type: 'dismiss',
+        hasMissingBaseVersion,
+      });
+    } else {
+      telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
+        type: 'update',
+        hasMissingBaseVersion,
+      });
+    }
+  };
   const { rulePreviewFlyout, openRulePreview: openRulePreviewDefault } = useRulePreviewFlyout({
     rules: ruleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
-    rulesUpgradeState,
     subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,
@@ -371,6 +385,7 @@ export function usePrebuiltRulesUpgrade({
       id: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
       dataTestSubj: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
     },
+    closeRulePreviewAction,
   });
 
   const openRulePreview = useCallback(

@@ -8,7 +8,6 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useState, useMemo, memo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { RuleUpgradeEventTypes } from '../../../../common/lib/telemetry/events/rule_upgrade/types';
 import { invariant } from '../../../../../common/utils/invariant';
 import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -17,9 +16,6 @@ import {
   RulePreviewContextProvider,
   useRulePreviewContext,
 } from './upgrade_prebuilt_rules_table/rule_preview_context';
-import type { RuleUpgradeState } from '../../../rule_management/model/prebuilt_rule_upgrade';
-import { useKibana } from '../../../../common/lib/kibana';
-
 interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
@@ -33,7 +29,7 @@ interface UseRulePreviewFlyoutBaseParams {
 
 interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
   rules: RuleResponse[];
-  rulesUpgradeState?: Record<string, RuleUpgradeState>;
+  closeRulePreviewAction?: (rule: RuleResponse, reason: 'dismiss' | 'call_to_action') => void;
 }
 
 interface RulePreviewFlyoutProps {
@@ -47,33 +43,26 @@ interface RulePreviewFlyoutProps {
 interface UseRulePreviewFlyoutResult {
   rulePreviewFlyout: ReactNode;
   openRulePreview: (ruleId: RuleSignatureId) => void;
-  closeRulePreview: (type: 'update' | 'dismiss') => void;
+  closeRulePreview: (reason: 'dismiss' | 'call_to_action') => void;
 }
 
 export function useRulePreviewFlyout({
   rules,
-  rulesUpgradeState,
   extraTabsFactory,
   ruleActionsFactory,
   subHeaderFactory,
   flyoutProps,
+  closeRulePreviewAction,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
-  const { telemetry } = useKibana().services;
-
   const closeRulePreview = useCallback(
-    (type: 'update' | 'dismiss') => {
-      setRuleForPreview(undefined);
-      if (rule && rulesUpgradeState) {
-        const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
-        const hasMissingBaseVersion = ruleUpgradeState?.has_base_version === false;
-        telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
-          type,
-          hasMissingBaseVersion,
-        });
+    (reason: 'dismiss' | 'call_to_action') => {
+      if (closeRulePreviewAction && rule) {
+        closeRulePreviewAction(rule, reason);
       }
+      setRuleForPreview(undefined);
     },
-    [rule, rulesUpgradeState, telemetry]
+    [closeRulePreviewAction, rule]
   );
   const openRulePreview = useCallback(
     (ruleId: RuleSignatureId) => {
@@ -113,12 +102,12 @@ const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
   flyoutProps,
 }: UseRulePreviewFlyoutBaseParams & {
   rule: RuleResponse | undefined;
-  closeRulePreview: (type: 'update' | 'dismiss') => void;
+  closeRulePreview: (reason: 'dismiss' | 'call_to_action') => void;
 }) {
   const { isEditingRule } = useRulePreviewContext();
 
   const ruleActions = useMemo(
-    () => rule && ruleActionsFactory(rule, () => closeRulePreview('update'), isEditingRule),
+    () => rule && ruleActionsFactory(rule, () => closeRulePreview('call_to_action'), isEditingRule),
     [rule, ruleActionsFactory, closeRulePreview, isEditingRule]
   );
   const extraTabs = useMemo(
