@@ -26,7 +26,7 @@ import type {
   UpdateProfilesContextWith,
 } from './types';
 
-export const NON_ESC_FIELD = '<non-ecs>';
+export const NON_ECS_FIELD = '<non-ecs>';
 
 type FilterOperation = '+' | '-' | '_exists_';
 
@@ -94,7 +94,7 @@ export class ScopedDiscoverEBTManager {
       if (fields[fieldName]?.short) {
         eventData[FIELD_USAGE_FIELD_NAME] = fieldName;
       } else {
-        eventData[FIELD_USAGE_FIELD_NAME] = NON_ESC_FIELD;
+        eventData[FIELD_USAGE_FIELD_NAME] = NON_ECS_FIELD;
       }
     }
 

@@ -14,7 +14,7 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { NON_ESC_FIELD } from './scoped_discover_ebt_manager';
+import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -289,7 +289,7 @@ describe('DiscoverEBTManager', () => {
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
         eventName: 'dataTableSelection',
-        fieldName: NON_ESC_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -319,7 +319,7 @@ describe('DiscoverEBTManager', () => {
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
         eventName: 'dataTableRemoval',
-        fieldName: NON_ESC_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -352,7 +352,7 @@ describe('DiscoverEBTManager', () => {
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
         eventName: 'filterAddition',
-        fieldName: NON_ESC_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
         filterOperation: '_exists_',
       });
     });
