@@ -229,7 +229,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
    * Return the schema for this object's underlying properties
    */
   public getPropSchemas(): P {
-    return this.props;
+    return { ...this.props };
   }
 
   validateKey(key: string, value: any) {

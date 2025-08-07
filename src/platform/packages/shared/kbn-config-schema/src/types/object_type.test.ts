@@ -188,6 +188,7 @@ describe('#getPropSchemas', () => {
     } satisfies Props;
     const type = schema.object(props);
 
+    expect(type.getPropSchemas()).not.toBe(props);
     expect(type.getPropSchemas()).toEqual(props);
   });
 
