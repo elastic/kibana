@@ -31,16 +31,15 @@ export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 retag_image_by_architecture() {
   local image="$1"
-  local tag="$2"
-  local artifact="$3"
+  local artifact="$2"
 
-  docker rmi "$image:$tag" || true
+  docker rmi "$image" || true
   docker load < "target/${artifact}-amd64.tar.gz"
-  docker tag "$image:$tag" "$image:$tag-amd64"
+  docker tag "$image" "$image-amd64"
 
-  docker rmi "$image:$tag" || true
+  docker rmi "$image" || true
   docker load < "target/${artifact}-arm64.tar.gz"
-  docker tag "$image:$tag" "$image:$tag-arm64"
+  docker tag "$image" "$image-arm64"
 }
 
 create_and_push_manifest() {
@@ -77,11 +76,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  retag_image_by_architecture "$KIBANA_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_CHAT_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-chat-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_OBSERVABILITY_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-observability-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_BASE_SEARCH_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-search-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_SECURITY_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-security-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_CHAT_IMAGE" "kibana-serverless-chat-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
