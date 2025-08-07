@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 import { getNoDataConfigPageServicesMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 
@@ -27,13 +28,42 @@ describe('NoDataConfigPage', () => {
     },
   };
   test('renders', () => {
-    const component = mountWithIntl(
+    render(
       <NoDataConfigPageProvider {...getNoDataConfigPageServicesMock()}>
         <NoDataConfigPage noDataConfig={noDataConfig} />
       </NoDataConfigPageProvider>
     );
-    expect(component.find('a[data-test-subj="noDataDefaultFooterAction"]').html()).toContain(
-      'Click me'
+
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+    expect(screen.getByText('Page with no data')).toBeInTheDocument();
+  });
+
+  test('renders nothing when noDataConfig is not provided', () => {
+    const { container } = render(
+      <NoDataConfigPageProvider {...getNoDataConfigPageServicesMock()}>
+        <NoDataConfigPage />
+      </NoDataConfigPageProvider>
     );
+
+    // Should render nothing when noDataConfig is undefined
+    expect(container.firstChild).toBeNull();
+  });
+
+  test('renders with sidebar when pageSideBar is provided', () => {
+    render(
+      <NoDataConfigPageProvider {...getNoDataConfigPageServicesMock()}>
+        <NoDataConfigPage
+          noDataConfig={noDataConfig}
+          pageSideBar={<div data-test-subj="test-sidebar">Test Sidebar</div>}
+        />
+      </NoDataConfigPageProvider>
+    );
+
+    // Should render the sidebar
+    expect(screen.getByTestId('test-sidebar')).toBeInTheDocument();
+    expect(screen.getByText('Test Sidebar')).toBeInTheDocument();
+
+    // Should also render the main content
+    expect(screen.getByText('Click me')).toBeInTheDocument();
   });
 });

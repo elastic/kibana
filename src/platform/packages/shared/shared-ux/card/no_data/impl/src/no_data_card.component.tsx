@@ -52,8 +52,7 @@ export const NoDataCard = ({
 }: Props) => {
   const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
   const docsLink = link || 'https://www.elastic.co/kibana';
-  // Helper function to render content based on type
-  const renderContent = (content: React.ReactNode, fallback: string) => {
+  const renderDescription = (content: React.ReactNode, fallback: string) => {
     if (typeof content === 'string') {
       return <p>{content}</p>;
     }
@@ -72,7 +71,7 @@ export const NoDataCard = ({
       icon={cardIcon}
       body={
         canAccessFleet ? (
-          renderContent(description, defaultDescription)
+          renderDescription(description, defaultDescription)
         ) : (
           <p>{noPermissionDescription}</p>
         )

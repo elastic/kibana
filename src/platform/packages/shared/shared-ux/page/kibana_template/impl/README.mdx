@@ -22,6 +22,7 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
   isEmptyState={true}
   pageHeader={{
     pageTitle: 'Dashboards',
+    iconType: 'dashboardApp',
     description: "You don't have any dashboards yet.",
     rightSideItems: [
       <EuiButton fill iconType="plusInCircleFilled">
@@ -124,26 +125,70 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts):
 
-1. `docsLink: string`: Required to set the docs link for the whole solution _(required)_
-2. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
+1. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
+2. `pageDescription?: string`: Optionally provide a custom description for the page
 3. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
 
 ### `NoDataPageActions`
 
+Each action configuration is of type [`NoDataCardProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts) and supports the following properties:
+
+**Required:**
+
+- No required properties - all are optional with sensible defaults
+
+**Optional:**
+
+- `title?: string`: Custom title for the card (defaults to "Add Data to get started")
+- `description?: React.ReactNode`: Custom description for the card
+- `button?: string`: Custom label for the action button (defaults to "Browse integrations")
+- `href?: string`: Custom URL for the button (defaults to integrations browse page)
+- `onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void`: Custom click handler
+- `canAccessFleet?: boolean`: Whether user has Fleet access - affects button visibility and content
+- `hideActions?: boolean`: Hide the action button completely
+- `docsLink?: string`: Custom documentation link
+- `icon?: EuiEmptyPromptProps['icon']`: Custom icon for the card
+- `data-test-subj?: string`: Custom test subject for testing
+
+#### Main Action: Elastic Agent
+
 There is a main action for adding data that we promote throughout Kibana - Elastic Agent. It is added to the card by using the key `elasticAgent`. For consistent messaging, this card is pre-configured but requires specific `href`s and/or `onClick` handlers for directing the user to the right location for that solution.
 
-Optionally you can also replace the `button` label by passing a string, or the whole component by passing a `ReactNode`.
+#### Permission-based Behavior
+
+The component automatically adapts based on user permissions:
+
+- **With Fleet access (`canAccessFleet: true`)**: Shows the full "Add Data" experience with action buttons
+- **Without Fleet access (`canAccessFleet: false`)**: Shows "Contact your administrator" message with disabled actions
 
 ```tsx
 // Perform your own check
 const hasData = checkForData();
 
-// No data configuration
+// No data configuration with custom properties
 const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-  docsLink: '#',
+  pageTitle: 'Welcome to Observability', // Custom page title
+  pageDescription: 'Start monitoring your applications and infrastructure', // Custom description
   action: {
     elasticAgent: {
-      href: '#',
+      href: '/app/integrations/browse/elastic_agent', // Solution-specific URL
+      title: 'Add Observability data', // Custom card title
+      description:
+        'Use Elastic Agent to collect logs, metrics, and traces from your infrastructure.',
+      button: 'Add data', // Custom button text
+      onClick: (e) => {
+        // Custom click handling
+        trackAnalyticsEvent('no_data_add_clicked');
+      },
+      docsLink: 'https://www.elastic.co/guide/en/observability/current/add-observability-data.html',
+    },
+    // You can add additional custom actions
+    customAction: {
+      title: 'Import existing data',
+      description: 'Already have data? Import it directly.',
+      button: 'Import data',
+      href: '/app/management/data/import',
+      icon: 'importAction',
     },
   },
 };

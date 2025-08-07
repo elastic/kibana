@@ -69,10 +69,12 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
   /** True if the person has access to Fleet, false otherwise */
   canAccessFleet?: boolean;
   /**
-   * Provide a string or React element(s) for the button's label;
-   * The button will be hidden completely if `canAccessFleet=false`
+   * Provide a string for the button's label;
+   * The button will be hidden completely if `canAccessFleet=false` or `hideActions=true`
    */
   button?: string;
+  /** Optional flag to hide actions button (in case custom button is passed as part of custom description) */
+  hideActions?: boolean;
   /**
    * Provide a href for the button;
    */
@@ -86,8 +88,6 @@ export type NoDataCardComponentProps = Pick<EuiEmptyPromptProps, 'icon'> & {
   onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   /** Data test subject for the card */
   'data-test-subj'?: string;
-  /** Optional flag to hide actions button (in case custom button is passed as part of custom description) */
-  hideActions?: boolean;
 };
 
 /**
