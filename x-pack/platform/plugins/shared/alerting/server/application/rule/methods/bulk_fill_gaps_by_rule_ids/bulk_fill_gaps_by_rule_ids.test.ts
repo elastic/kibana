@@ -69,8 +69,7 @@ const rulesThatAttemptedToBackfill = [...successfulRules, skippedRule, erroredRu
 
 let rulesClientContext: RulesClientContext;
 
-// Failing: See https://github.com/elastic/kibana/issues/230949
-describe.skip('bulkFillGapsByRuleIds', () => {
+describe('bulkFillGapsByRuleIds', () => {
   let refreshIndexMock: jest.Mock;
   let results: BulkFillGapsByRuleIdsResult;
   let ensuredAuthorizedMock: jest.Mock;
