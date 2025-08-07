@@ -5,7 +5,6 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
-
 source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
@@ -24,12 +23,34 @@ export KIBANA_CHAT_IMAGE="$KIBANA_CHAT_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
 export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-KIBANA_BASE_SEARCH_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-search"
-export KIBANA_SEARCH_IMAGE="$KIBANA_BASE_SEARCH_IMAGE:$KIBANA_IMAGE_TAG"
+KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-search"
+export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
 export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
+retag_image_by_architecture() {
+  local image="$1"
+  local tag="$2"
+  local artifact="$3"
+
+  docker rmi "$image:$tag" || true
+  docker load < "target/${artifact}-amd64.tar.gz"
+  docker tag "$image:$tag" "$image:$tag-amd64"
+
+  docker rmi "$image:$tag" || true
+  docker load < "target/${artifact}-arm64.tar.gz"
+  docker tag "$image:$tag" "$image:$tag-arm64"
+}
+
+create_and_push_manifest() {
+  local image="$1"
+  docker manifest create \
+    "$image" \
+    --amend "$image-arm64" \
+    --amend "$image-amd64"
+  docker manifest push "$image"
+}
 
 echo "--- Verify manifest does not already exist"
 echo "Checking manifest for $KIBANA_IMAGE"
@@ -56,45 +77,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
-
-  docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
-
-  docker rmi "$KIBANA_CHAT_IMAGE"
-  docker load < "target/kibana-serverless-chat-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_CHAT_IMAGE" "$KIBANA_CHAT_IMAGE-amd64"
-
-  docker rmi "$KIBANA_CHAT_IMAGE"
-  docker load < "target/kibana-serverless-chat-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_CHAT_IMAGE" "$KIBANA_CHAT_IMAGE-arm64"
-
-  docker rmi "$KIBANA_OBSERVABILITY_IMAGE"
-  docker load < "target/kibana-serverless-observability-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_OBSERVABILITY_IMAGE" "$KIBANA_OBSERVABILITY_IMAGE-amd64"
-
-  docker rmi "$KIBANA_OBSERVABILITY_IMAGE"
-  docker load < "target/kibana-serverless-observability-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_OBSERVABILITY_IMAGE" "$KIBANA_OBSERVABILITY_IMAGE-arm64"
-
-  docker rmi "$KIBANA_SEARCH_IMAGE"
-  docker load < "target/kibana-serverless-search-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_SEARCH_IMAGE" "$KIBANA_SEARCH_IMAGE-amd64"
-
-  docker rmi "$KIBANA_SEARCH_IMAGE"
-  docker load < "target/kibana-serverless-search-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_SEARCH_IMAGE" "$KIBANA_SEARCH_IMAGE-arm64"
-
-  docker rmi "$KIBANA_SECURITY_IMAGE"
-  docker load < "target/kibana-serverless-security-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_SECURITY_IMAGE" "$KIBANA_SECURITY_IMAGE-amd64"
-
-  docker rmi "$KIBANA_SECURITY_IMAGE"
-  docker load < "target/kibana-serverless-security-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_SECURITY_IMAGE" "$KIBANA_SECURITY_IMAGE-arm64"
+  retag_image_by_architecture "$KIBANA_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_CHAT_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-chat-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_OBSERVABILITY_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-observability-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_BASE_SEARCH_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_by_architecture "$KIBANA_SECURITY_BASE_IMAGE" "$KIBANA_IMAGE_TAG" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -109,67 +96,19 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   docker_with_retry push "$KIBANA_SECURITY_IMAGE-amd64"
 
   echo "--- Create and push manifests"
-  docker manifest create \
-    "$KIBANA_IMAGE" \
-    --amend "$KIBANA_IMAGE-arm64" \
-    --amend "$KIBANA_IMAGE-amd64"
-  docker manifest push "$KIBANA_IMAGE"
-
-  docker manifest create \
-    "$KIBANA_CHAT_IMAGE" \
-    --amend "$KIBANA_CHAT_IMAGE-arm64" \
-    --amend "$KIBANA_CHAT_IMAGE-amd64"
-  docker manifest push "$KIBANA_CHAT_IMAGE"
-
-  docker manifest create \
-    "$KIBANA_OBSERVABILITY_IMAGE" \
-    --amend "$KIBANA_OBSERVABILITY_IMAGE-arm64" \
-    --amend "$KIBANA_OBSERVABILITY_IMAGE-amd64"
-  docker manifest push "$KIBANA_OBSERVABILITY_IMAGE"
-
-  docker manifest create \
-    "$KIBANA_SEARCH_IMAGE" \
-    --amend "$KIBANA_SEARCH_IMAGE-arm64" \
-    --amend "$KIBANA_SEARCH_IMAGE-amd64"
-  docker manifest push "$KIBANA_SEARCH_IMAGE"
-
-  docker manifest create \
-  "$KIBANA_SECURITY_IMAGE" \
-  --amend "$KIBANA_SECURITY_IMAGE-arm64" \
-  --amend "$KIBANA_SECURITY_IMAGE-amd64"
-  docker manifest push "$KIBANA_SECURITY_IMAGE"
+  create_and_push_manifest "$KIBANA_IMAGE"
+  create_and_push_manifest "$KIBANA_CHAT_IMAGE"
+  create_and_push_manifest "$KIBANA_OBSERVABILITY_IMAGE"
+  create_and_push_manifest "$KIBANA_SEARCH_IMAGE"
+  create_and_push_manifest "$KIBANA_SECURITY_IMAGE"
 
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    docker manifest create \
-      "$KIBANA_BASE_IMAGE:latest" \
-      --amend "$KIBANA_IMAGE-arm64" \
-      --amend "$KIBANA_IMAGE-amd64"
-    docker manifest push "$KIBANA_BASE_IMAGE:latest"
-
-    docker manifest create \
-      "$KIBANA_CHAT_BASE_IMAGE:latest" \
-      --amend "$KIBANA_CHAT_IMAGE-arm64" \
-      --amend "$KIBANA_CHAT_IMAGE-amd64"
-    docker manifest push "$KIBANA_CHAT_BASE_IMAGE:latest"
-
-    docker manifest create \
-      "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest" \
-      --amend "$KIBANA_OBSERVABILITY_IMAGE-arm64" \
-      --amend "$KIBANA_OBSERVABILITY_IMAGE-amd64"
-    docker manifest push "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest"
-
-    docker manifest create \
-      "$KIBANA_SEARCH_BASE_IMAGE:latest" \
-      --amend "$KIBANA_SEARCH_IMAGE-arm64" \
-      --amend "$KIBANA_SEARCH_IMAGE-amd64"
-    docker manifest push "$KIBANA_SEARCH_BASE_IMAGE:latest"
-
-    docker manifest create \
-      "$KIBANA_SECURITY_BASE_IMAGE:latest" \
-      --amend "$KIBANA_SECURITY_IMAGE-arm64" \
-      --amend "$KIBANA_SECURITY_IMAGE-amd64"
-    docker manifest push "$KIBANA_SECURITY_BASE_IMAGE:latest"
+    create_and_push_manifest "$KIBANA_BASE_IMAGE:latest"
+    create_and_push_manifest "$KIBANA_CHAT_BASE_IMAGE:latest"
+    create_and_push_manifest "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest"
+    create_and_push_manifest "$KIBANA_SEARCH_BASE_IMAGE:latest"
+    create_and_push_manifest "$KIBANA_SECURITY_BASE_IMAGE:latest"
   fi
 
   echo "--- Build dependencies report"
