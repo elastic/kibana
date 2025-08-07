@@ -158,6 +158,8 @@
       "@kbn/chart-expressions-common/*": ["src/platform/packages/shared/chart-expressions-common/*"],
       "@kbn/chart-icons": ["src/platform/packages/shared/kbn-chart-icons"],
       "@kbn/chart-icons/*": ["src/platform/packages/shared/kbn-chart-icons/*"],
+      "@kbn/chart-test-jest-helpers": ["src/platform/packages/shared/chart-test-jest-helpers"],
+      "@kbn/chart-test-jest-helpers/*": ["src/platform/packages/shared/chart-test-jest-helpers/*"],
       "@kbn/charts-plugin": ["src/platform/plugins/shared/charts"],
       "@kbn/charts-plugin/*": ["src/platform/plugins/shared/charts/*"],
       "@kbn/charts-theme": ["src/platform/packages/shared/kbn-charts-theme"],
@@ -2336,7 +2338,8 @@
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
       "@elastic/opentelemetry-node/sdk": ["typings/@elastic/opentelemetry-node/sdk"],
-      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"]
+      "@typescript-eslint/parser": ["typings/@typescript-eslint/parser"],
+      "@a2a-js/sdk/server": ["typings/@a2a-js-sdk/server"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
