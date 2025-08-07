@@ -21,7 +21,7 @@ set of helper methods and sub-directories for
 - `security` project specific functionality
 
 The `shared` directory contains fixtures, services, ... that are shared across
-`api_integration` abd `functional` tests.
+`api_integration` and `functional` tests.
 
 ```
 x-pack/test_serverless/
@@ -59,7 +59,7 @@ In case a common test needs to be skipped for one of the projects
 there are the following suite tags available to do so: 
 `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
-```
+```ts
 describe('my test suite', function () {
   this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
   // or for a single tag: this.tags('skipSvlSec');
@@ -107,7 +107,7 @@ particularly when it comes to timing for API requests and UI interaction.
 ### Roles-based testing
 
 Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
-and in oder to properly test Kibana functionality, test design requires to login with
+and in order to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
 
@@ -125,7 +125,7 @@ Recommendations:
 - no need to log out, you can change role by calling `loginWithRole` again.
 - for the common tests you can use `loginWithPrivilegedRole` to login as Editor/Developer 
 
-```
+```ts
 describe("my test suite", async function() {
   before(async () => {
     await PageObjects.svlCommonPage.loginWithRole('viewer');
@@ -145,7 +145,7 @@ describe("my test suite", async function() {
 
 API Authentication in Kibana: Public vs. Internal APIs
 
-Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
+Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are utilized by end users.
 
 - Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflects how an end user calls these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
 
@@ -157,7 +157,7 @@ Recommendations:
 - pass `useCookieHeader: true` to use Cookie header for request authentication
 - don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
-```
+```ts
 describe("my public APIs test suite", async function() {
     before(async () => {
       supertestViewerWithApiKey =
@@ -170,7 +170,7 @@ describe("my public APIs test suite", async function() {
       await supertestViewerWithApiKey.destroy();
     });
 
-    it(''test step', async () => {
+    it('test step', async () => {
       const { body, status } = await supertestViewerWithApiKey
         .delete('/api/spaces/space/default')
       ...
@@ -178,7 +178,7 @@ describe("my public APIs test suite", async function() {
 });
 ```
 
-```
+```ts
 describe("my internal APIs test suite", async function() {
     before(async () => {
       supertestViewerWithCookieCredentials =
@@ -192,7 +192,7 @@ describe("my internal APIs test suite", async function() {
       // no need to call '.destroy' since we didn't create API key and Cookie persist for the role within FTR run
     });
 
-    it(''test step', async () => {
+    it('test step', async () => {
       await supertestAdminWithCookieCredentials
         .post(`/internal/kibana/settings`)
         .send({ changes: { [TEST_SETTING]: 500 } })
@@ -204,23 +204,23 @@ describe("my internal APIs test suite", async function() {
 
 #### Testing with custom roles
 
-With custom native roles now enabled for the Security and Search projects on MKI, the FTR supports
-defining and authenticating with custom roles in both UI functional tests and API integration tests.
+With custom native roles now enabled for Security, Search, and Observability projects on MKI, FTR supports
+defining and authenticating with custom roles in both UI functional and API integration tests.
 
-To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
+To test custom roles on a project type that doesn't yet support them, use a feature flags test config ([example](./functional/test_suites/observability/config.feature_flags.ts)). This allows testing in the Kibana CI before the feature is enabled on MKI. Once the project type officially supports custom roles, move the tests to a standard FTR config to enable execution on MKI.
 
 When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
 ```json
 {
   "viewer": {
-    "email": ...,
-    "password": ..."
+    "email": "...",
+    "password": "..."
   },
   ...
   "custom_role_worker_1": {
-    "email": ...,
-    "password": ...
+    "email": "...",
+    "password": "..."
   }
 }
 ```
@@ -228,7 +228,8 @@ When running tests locally against MKI, ensure that the `.ftr/role_users.json` f
 When using QAF to create a project with a custom native role, ensure that the role name `custom_role_worker_1` is configured as a Kibana role. While the test user is automatically assigned to the custom role, you must update the role's privileges before performing actions such as logging in via the browser, generating a cookie header, or creating an API key within each test suite.
 
 FTR UI test example:
-```
+
+```ts
 // First, set privileges for the custom role
 await samlAuth.setCustomRole({
   elasticsearch: {
@@ -243,6 +244,7 @@ await samlAuth.setCustomRole({
     },
   ],
 });
+
 // Then, log in via the browser as a user with the newly defined privileges
 await pageObjects.svlCommonPage.loginWithCustomRole();
 
@@ -251,7 +253,8 @@ await samlAuth.deleteCustomRole();
 ```
 
 FTR api_integration test example:
-```
+
+```ts
 // First, set privileges for the custom role
 await samlAuth.setCustomRole({
   elasticsearch: {
@@ -298,15 +301,16 @@ If you want to add feature flag specific tests:
 
 As mentioned above, these tests are not part of the regular test run against MKI
 projects. If you still want to run feature flag tests against an MKI project,
-this requires a Kibana docker build that has the feature flags enabled by default.
-This docker image can then be used to create a project in serverless QA and the
+this requires a Kibana Docker build that has the feature flags enabled by default.
+This Docker image can then be used to create a project in serverless QA and the
 feature flags tests can be pointed to the project.
 
 ## Run tests
 Similar to how functional tests are run in `x-pack/test`, you can point the
 functional tests server and test runner to config files in this `x-pack/test_serverless`
 directory, e.g. from the `x-pack` directory run:
-```
+
+```bash
 node scripts/functional_tests_server.js --config test_serverless/api_integration/test_suites/search/config.ts
 
 node scripts/functional_test_runner.js --config test_serverless/api_integration/test_suites/search/config.ts
@@ -314,7 +318,8 @@ node scripts/functional_test_runner.js --config test_serverless/api_integration/
 
 ## Run tests on MKI
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
-```
+
+```bash
 TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config test_serverless/api_integration/test_suites/search/config.ts --exclude-tag=skipMKI
 ```
 
@@ -330,7 +335,8 @@ Steps to follow to run on QA environment:
   ```
 
   In response you should get credentials.
-  ```
+
+  ```json
   {
     "password": "testing-internal_pwd",
     "username": "testing-internal"
@@ -338,9 +344,9 @@ Steps to follow to run on QA environment:
   ```
   We would use these credentials for `TEST_ES_URL="https://USERNAME:PASSWORD@ES_HOSTNAME:443"` and `TEST_KIBANA_URL="https://USERNAME:PASSWORD@KIBANA_HOSTNAME"`
 - Now we need to create a user with the roles we want to test. Go to members page - `CLOUD_HOST_NAME/account/members` and click `[Invite member]`.
-  - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instanse access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
+  - Select the access level you want to grant and your project type. For example, to create a user with viewer role, toggle `[Instance access]`, select project (should correspond to your project type, i.e Security), select `Viewer` role.
   - Create `.ftr/role_users.json` in the root of Kibana repo. Add record for created user.
-    ```
+    ```json
     {
       "viewer": {
         "password": "xxxx",
@@ -349,15 +355,18 @@ Steps to follow to run on QA environment:
     }
     ```
 - Now run the tests from the `x-pack` directory
-```
+
+```bash
 TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config test_serverless/functional/test_suites/security/common_configs/config.group1.ts --exclude-tag=skipMKI
 ```
 
 
 ## Skipping tests for MKI run
-The tests that are listed in the the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
+
+The tests that are listed in the regular `config.ts` generally should work in both Kibana CI and MKI. However some tests might not work properly against MKI projects by design.
 Tag the tests with `skipMKI` to be excluded for MKI run. It works only for the `describe` block:
-```
+
+```ts
 describe("my test suite", async function() {
     this.tags(['skipMKI']);
     ...
@@ -368,16 +377,16 @@ If you are running tests from your local against MKI projects, make sure to add 
 
 ## Run tests with dockerized package registry
 
-For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakyness of them when calling the real endpoint.
+For tests using package registry we have enabled a configuration that uses a dockerized lite version to execute the tests in the CI, this will reduce the flakiness of them when calling the real endpoint.
 
-To be able to run this version locally you must have a docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
+To be able to run this version locally you must have a Docker daemon running in your system and set `FLEET_PACKAGE_REGISTRY_PORT` env var. In order to set this variable execute
 
-```
+```bash
 export set FLEET_PACKAGE_REGISTRY_PORT=12345
 ```
 
 To unset the variable, and run the tests against the real endpoint again, execute
 
-```
-unset FLEET_PACKAGE_REGISTRY_PORT 
+```bash
+unset FLEET_PACKAGE_REGISTRY_PORT
 ```

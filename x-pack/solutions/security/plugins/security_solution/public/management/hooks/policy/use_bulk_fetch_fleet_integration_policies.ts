@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { QueryObserverResult } from '@tanstack/react-query';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import type { BulkGetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';

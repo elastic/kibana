@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type {
   Color,
   EdgeDataModel,
