@@ -62,9 +62,11 @@ export function ParentRelationshipAnalysis({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="success">
-                {destinationHits.length}{' '}
                 {i18n.translate('xpack.apm.diagnosticResults.documentsBadgeLabel', {
-                  defaultMessage: 'documents',
+                  defaultMessage: '{count, plural, one {# document} other {# documents}}',
+                  values: {
+                    count: destinationHits.length,
+                  },
                 })}
               </EuiBadge>
             </EuiFlexItem>
@@ -74,7 +76,7 @@ export function ParentRelationshipAnalysis({
             <p>
               {i18n.translate('xpack.apm.serviceMap.diagnosticResults.parentIdsFoundDescription', {
                 defaultMessage:
-                  'Found {count} document(s) showing parent relationships pointing to {destinationNode} from {sourceNode} during the selected time range.',
+                  'Found {count, plural, one {# document} other {# documents}} showing parent relationships pointing to {destinationNode} from {sourceNode} during the selected time range.',
                 values: {
                   count: destinationHits.length,
                   destinationNode,

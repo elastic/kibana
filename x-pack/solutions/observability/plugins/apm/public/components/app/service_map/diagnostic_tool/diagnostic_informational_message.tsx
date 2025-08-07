@@ -11,16 +11,16 @@ import { i18n } from '@kbn/i18n';
 
 export function DiagnosticInformationalMessage() {
   return (
-    <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+    <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="iInCircle" color="subdued" size="s" />
+        <EuiIcon type="warning" size="s" />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s" color="subdued" style={{ fontStyle: 'italic' }}>
           <p>
             {i18n.translate('xpack.apm.serviceMap.diagnosticResults.informationalMessage', {
               defaultMessage:
-                '*This information is provided for initial troubleshooting. For comprehensive analysis and further investigation, please download the full diagnostic report using the "Download report" button.',
+                'This information is provided for initial troubleshooting. For comprehensive analysis and further investigation, please download the full diagnostic report using the "Download report" button.',
             })}
           </p>
         </EuiText>

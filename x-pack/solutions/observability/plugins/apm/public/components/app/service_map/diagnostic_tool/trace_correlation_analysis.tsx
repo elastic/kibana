@@ -88,7 +88,7 @@ export function TraceCorrelationAnalysis({
             <p>
               {i18n.translate('xpack.apm.serviceMap.diagnostics.traceCorrelation.successDetails', {
                 defaultMessage:
-                  'The trace was successfully found in both services: {sourceCount} document(s) in {sourceNode} and {destinationCount} document(s) in {destinationNode}. This indicates proper trace correlation between the services.',
+                  'The trace was successfully found in both services: {sourceCount, plural, one {# document} other {# documents}} in {sourceNode} and {destinationCount, plural, one {# document} other {# documents}} in {destinationNode}. This indicates proper trace correlation between the services.',
                 values: {
                   sourceCount: sourceNodeDocumentCount,
                   sourceNode,
