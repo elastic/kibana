@@ -22,7 +22,8 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
-    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/embeddable-enhanced",
+    "@kbn/ui-actions-enhanced-plugin",
     "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]

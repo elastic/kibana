@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState, HasDynamicActions } from '@kbn/embeddable-enhanced';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
   HasEditCapabilities,

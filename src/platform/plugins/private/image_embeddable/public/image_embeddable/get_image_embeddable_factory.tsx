@@ -10,9 +10,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
@@ -25,9 +26,11 @@ import { IMAGE_EMBEDDABLE_TYPE } from './constants';
 import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export const getImageEmbeddableFactory = ({
-  embeddableEnhanced,
+  embeddableService,
+  uiActionsEnhanced,
 }: {
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  embeddableService: EmbeddableStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
 }) => {
   const imageEmbeddableFactory: EmbeddableFactory<
     ImageEmbeddableSerializedState,
@@ -36,12 +39,12 @@ export const getImageEmbeddableFactory = ({
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-
-      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = uiActionsEnhanced ? initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
-        initialState
-      );
+        initialState,
+        { embeddable: embeddableService, uiActionsEnhanced }
+      ) : undefined;
       // if it is provided, start the dynamic actions manager
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 

@@ -14,7 +14,6 @@ import {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
@@ -23,6 +22,7 @@ import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from './image_embeddable/constants';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -36,9 +36,9 @@ export interface ImageEmbeddableStartDependencies {
   files: FilesStart;
   security?: SecurityPluginStart;
   uiActions: UiActionsStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   embeddable: EmbeddableStart;
   screenshotMode?: ScreenshotModePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -65,12 +65,13 @@ export class ImageEmbeddablePlugin
     plugins.uiActions.registerTrigger(imageClickTrigger);
 
     plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
-      const [_, { getImageEmbeddableFactory }, [__, { embeddableEnhanced }]] = await Promise.all([
-        untilPluginStartServicesReady(),
-        import('./image_embeddable/get_image_embeddable_factory'),
-        core.getStartServices(),
-      ]);
-      return getImageEmbeddableFactory({ embeddableEnhanced });
+      const [_, { getImageEmbeddableFactory }, [__, { embeddable, uiActionsEnhanced }]] =
+        await Promise.all([
+          untilPluginStartServicesReady(),
+          import('./image_embeddable/get_image_embeddable_factory'),
+          core.getStartServices(),
+        ]);
+      return getImageEmbeddableFactory({ embeddableService: embeddable, uiActionsEnhanced });
     });
     return {};
   }
