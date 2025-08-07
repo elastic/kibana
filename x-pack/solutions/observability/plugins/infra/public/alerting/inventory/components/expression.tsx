@@ -28,14 +28,18 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash';
-import type { ChangeEvent, FC, PropsWithChildren } from 'react';
+import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  InventoryItemType,
+  SnapshotMetricType,
+  DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import {
+  DataSchemaFormatEnum,
   findInventoryModel,
   SnapshotMetricTypeRT,
-  DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
@@ -318,7 +322,7 @@ export const Expressions: React.FC<Props> = (props) => {
           <div css={NonCollapsibleExpressionCss}>
             <ExpressionDropDown
               options={schemaOptions}
-              value={ruleParams.schema || DataSchemaFormat.ECS}
+              value={ruleParams.schema ?? 'ecs'}
               onChange={updateSchema}
               description={i18n.translate(
                 'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
@@ -812,17 +816,17 @@ const nodeTypeOptions: Record<InventoryItemType, EuiSelectOption> = {
 };
 
 const schemaOptions: Record<DataSchemaFormat, EuiSelectOption> = {
-  [DataSchemaFormat.ECS]: {
+  [DataSchemaFormatEnum.ECS]: {
     text: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
       defaultMessage: 'Elastic System Integration',
     }),
-    value: DataSchemaFormat.ECS,
+    value: DataSchemaFormatEnum.ECS,
   },
-  [DataSchemaFormat.SEMCONV]: {
+  [DataSchemaFormatEnum.SEMCONV]: {
     text: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
       defaultMessage: 'OpenTelemetry',
     }),
-    value: DataSchemaFormat.SEMCONV,
+    value: DataSchemaFormatEnum.SEMCONV,
   },
 };
 
