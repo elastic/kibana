@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import { isLeft } from 'fp-ts/Either';
 import { createKeyInsightsPanelLensAttributes } from './lens_attributes';
@@ -90,7 +91,14 @@ export const KeyInsightsTile: React.FC<KeyInsightsTileProps> = ({
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h3>{'N/A'}</h3>
+                <h3>
+                  {i18n.translate(
+                    'xpack.securitySolution.privilegedUserMonitoring.keyInsights.NA',
+                    {
+                      defaultMessage: 'N/A',
+                    }
+                  )}
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
