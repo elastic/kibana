@@ -40,17 +40,11 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
-import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import { getFormattedTable, getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
-import {
-  applyPaletteParams,
-  findMinMaxByColumnId,
-  getFormattedTable,
-  getSortPredicate,
-} from './helpers';
+import { applyPaletteParams, findMinMaxByColumnId, getSortPredicate } from './helpers';
 import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
@@ -225,12 +219,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
     const yAxisColumnIndex = table.columns.findIndex((v) => v.id === yAccessor);
 
-    const xAxisColumn = table.columns[xAxisColumnIndex] as DatatableColumn | undefined;
-    const yAxisColumn = table.columns[yAxisColumnIndex] as DatatableColumn | undefined;
-    const valueColumn = table.columns.find((v) => v.id === valueAccessor) as
-      | DatatableColumn
-      | undefined;
+    const xAxisColumn = table.columns[xAxisColumnIndex];
+    const yAxisColumn = table.columns[yAxisColumnIndex];
+    const valueColumn = table.columns.find((v) => v.id === valueAccessor);
     const xAxisMeta = xAxisColumn?.meta;
+
     const isTimeBasedSwimLane = xAxisMeta?.type === 'date';
 
     const xValuesFormatter = useMemo(
@@ -246,7 +239,12 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       [args.valueAccessor, formatFactory, table.columns]
     );
 
-    const formattedTable = getFormattedTable(table, formatFactory);
+    const formattedTable = getFormattedTable(
+      table,
+      (id) => (id === xAccessor && !isTimeBasedSwimLane) || id === yAccessor,
+      (_, meta) => formatFactory(meta.params)
+    );
+
     let chartData = formattedTable.table.rows.filter(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );

@@ -395,7 +395,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -405,7 +411,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -437,6 +451,7 @@ exports[`XYChart component it renders area 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -445,7 +460,10 @@ exports[`XYChart component it renders area 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -1268,7 +1286,13 @@ exports[`XYChart component it renders area 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -1278,7 +1302,15 @@ exports[`XYChart component it renders area 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -1310,22 +1342,6 @@ exports[`XYChart component it renders area 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -1373,7 +1389,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1383,7 +1405,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1398,7 +1428,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1408,7 +1444,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1423,7 +1467,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1433,7 +1483,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1448,7 +1506,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1458,7 +1522,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1473,7 +1545,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1483,7 +1561,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1498,7 +1584,13 @@ exports[`XYChart component it renders area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1508,57 +1600,15 @@ exports[`XYChart component it renders area 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -1572,6 +1622,7 @@ exports[`XYChart component it renders area 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -1580,7 +1631,10 @@ exports[`XYChart component it renders area 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -1818,7 +1872,13 @@ exports[`XYChart component it renders area 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -1828,7 +1888,15 @@ exports[`XYChart component it renders area 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -1983,7 +2051,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -1993,7 +2067,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -2025,6 +2107,7 @@ exports[`XYChart component it renders bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -2033,7 +2116,10 @@ exports[`XYChart component it renders bar 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -2856,7 +2942,13 @@ exports[`XYChart component it renders bar 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -2866,7 +2958,15 @@ exports[`XYChart component it renders bar 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -2898,22 +2998,6 @@ exports[`XYChart component it renders bar 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -2961,7 +3045,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -2971,7 +3061,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -2986,7 +3084,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -2996,7 +3100,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3011,7 +3123,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -3021,7 +3139,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3036,7 +3162,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -3046,7 +3178,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3061,7 +3201,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -3071,7 +3217,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3086,7 +3240,13 @@ exports[`XYChart component it renders bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -3096,57 +3256,15 @@ exports[`XYChart component it renders bar 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3160,6 +3278,7 @@ exports[`XYChart component it renders bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -3168,7 +3287,10 @@ exports[`XYChart component it renders bar 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -3406,7 +3528,13 @@ exports[`XYChart component it renders bar 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -3416,7 +3544,15 @@ exports[`XYChart component it renders bar 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -3571,7 +3707,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -3581,7 +3723,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -3613,6 +3763,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -3621,7 +3772,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -4444,7 +4598,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -4454,7 +4614,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -4486,22 +4654,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -4549,7 +4701,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4559,7 +4717,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4574,7 +4740,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4584,7 +4756,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4599,7 +4779,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4609,7 +4795,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4624,7 +4818,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4634,7 +4834,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4649,7 +4857,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4659,7 +4873,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4674,7 +4896,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -4684,57 +4912,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -4748,6 +4934,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -4756,7 +4943,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -4994,7 +5184,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -5004,7 +5200,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -5159,7 +5363,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -5169,7 +5379,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -5201,6 +5419,7 @@ exports[`XYChart component it renders line 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -5209,7 +5428,10 @@ exports[`XYChart component it renders line 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -6032,7 +6254,13 @@ exports[`XYChart component it renders line 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -6042,7 +6270,15 @@ exports[`XYChart component it renders line 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -6074,22 +6310,6 @@ exports[`XYChart component it renders line 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -6137,7 +6357,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6147,7 +6373,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6162,7 +6396,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6172,7 +6412,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6187,7 +6435,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6197,7 +6451,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6212,7 +6474,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6222,7 +6490,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6237,7 +6513,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6247,7 +6529,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6262,7 +6552,13 @@ exports[`XYChart component it renders line 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6272,57 +6568,15 @@ exports[`XYChart component it renders line 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6336,6 +6590,7 @@ exports[`XYChart component it renders line 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -6344,7 +6599,10 @@ exports[`XYChart component it renders line 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -6582,7 +6840,13 @@ exports[`XYChart component it renders line 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -6592,7 +6856,15 @@ exports[`XYChart component it renders line 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -6747,7 +7019,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -6757,7 +7035,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -6789,6 +7075,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -6797,7 +7084,10 @@ exports[`XYChart component it renders stacked area 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -7620,7 +7910,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -7630,7 +7926,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -7662,22 +7966,6 @@ exports[`XYChart component it renders stacked area 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -7725,7 +8013,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7735,7 +8029,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7750,7 +8052,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7760,7 +8068,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7775,7 +8091,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7785,7 +8107,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7800,7 +8130,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7810,7 +8146,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7825,7 +8169,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7835,7 +8185,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7850,7 +8208,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -7860,57 +8224,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -7924,6 +8246,7 @@ exports[`XYChart component it renders stacked area 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -7932,7 +8255,10 @@ exports[`XYChart component it renders stacked area 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -8170,7 +8496,13 @@ exports[`XYChart component it renders stacked area 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -8180,7 +8512,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -8335,7 +8675,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -8345,7 +8691,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -8377,6 +8731,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -8385,7 +8740,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -9208,7 +9566,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -9218,7 +9582,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -9250,22 +9622,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -9313,7 +9669,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9323,7 +9685,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9338,7 +9708,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9348,7 +9724,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9363,7 +9747,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9373,7 +9763,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9388,7 +9786,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9398,7 +9802,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9413,7 +9825,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9423,7 +9841,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9438,7 +9864,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9448,57 +9880,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9512,6 +9902,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -9520,7 +9911,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -9758,7 +10152,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -9768,7 +10168,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -9923,7 +10331,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -9933,7 +10347,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -9965,6 +10387,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -9973,7 +10396,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -10796,7 +11222,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -10806,7 +11238,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -10838,22 +11278,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "000,0",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "string",
@@ -10901,7 +11325,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -10911,7 +11341,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -10926,7 +11364,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -10936,7 +11380,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -10951,7 +11403,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -10961,7 +11419,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -10976,7 +11442,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -10986,7 +11458,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -11001,7 +11481,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -11011,7 +11497,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -11026,7 +11520,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -11036,57 +11536,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         },
                         Object {
                           "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
                         },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
                         Object {
                           "type": "return",
-                          "value": 1652034840000,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -11100,6 +11558,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -11108,7 +11567,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -11346,7 +11808,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -11356,7 +11824,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -11525,10 +12001,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -11542,11 +12024,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -11579,6 +12069,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -11590,7 +12081,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -12489,10 +12983,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             5,
                           ],
                           Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -12506,11 +13006,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 5,
                           },
                           Object {
                             "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -12542,14 +13050,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "number",
@@ -12608,10 +13108,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12625,11 +13131,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12647,10 +13161,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12664,11 +13184,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12686,10 +13214,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12703,11 +13237,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12725,10 +13267,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12742,11 +13290,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12764,10 +13320,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12781,11 +13343,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12803,10 +13373,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12820,11 +13396,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12842,10 +13426,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -12859,42 +13449,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         },
                         Object {
                           "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
@@ -12903,6 +13458,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -12917,6 +13476,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "formattedColumns": Object {
                   "b": true,
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -12928,7 +13488,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -13173,10 +13736,16 @@ exports[`XYChart component split chart should render split chart if both, splitR
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         5,
                       ],
                       Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -13190,11 +13759,19 @@ exports[`XYChart component split chart should render split chart if both, splitR
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 5,
                       },
                       Object {
                         "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -13359,10 +13936,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -13376,11 +13959,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -13413,6 +14004,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -13424,7 +14016,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -14316,10 +14911,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             5,
                           ],
                           Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -14333,11 +14934,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 5,
                           },
                           Object {
                             "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -14369,14 +14978,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "number",
@@ -14435,10 +15036,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14452,11 +15059,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14474,10 +15089,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14491,11 +15112,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14513,10 +15142,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14530,11 +15165,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14552,10 +15195,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14569,11 +15218,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14591,10 +15248,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14608,11 +15271,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14630,10 +15301,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14647,11 +15324,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14669,10 +15354,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -14686,42 +15377,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         },
                         Object {
                           "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
@@ -14730,6 +15386,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -14744,6 +15404,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "formattedColumns": Object {
                   "b": true,
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -14755,7 +15416,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -14998,10 +15662,16 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         5,
                       ],
                       Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -15015,11 +15685,19 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 5,
                       },
                       Object {
                         "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },
@@ -15184,10 +15862,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -15201,11 +15885,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -15238,6 +15930,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+                "d": true,
               },
               "invertedRawValueMap": Map {
                 "a" => Map {},
@@ -15249,7 +15942,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                   1652034840000 => 1652034840000,
                   1652122440000 => 1652122440000,
                 },
-                "d" => Map {},
+                "d" => Map {
+                  "Foo" => "Foo",
+                  "Bar" => "Bar",
+                },
               },
               "table": Object {
                 "columns": Array [
@@ -16141,10 +16837,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                             1652034840000,
                           ],
                           Array [
+                            "Foo",
+                          ],
+                          Array [
                             5,
                           ],
                           Array [
                             1652122440000,
+                          ],
+                          Array [
+                            "Bar",
                           ],
                         ],
                         "results": Array [
@@ -16158,11 +16860,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           },
                           Object {
                             "type": "return",
+                            "value": "Foo",
+                          },
+                          Object {
+                            "type": "return",
                             "value": 5,
                           },
                           Object {
                             "type": "return",
                             "value": 1652122440000,
+                          },
+                          Object {
+                            "type": "return",
+                            "value": "Bar",
                           },
                         ],
                       },
@@ -16194,14 +16904,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           formatFactory={
             [MockFunction] {
               "calls": Array [
-                Array [
-                  Object {
-                    "id": "number",
-                    "params": Object {
-                      "pattern": "0,0.000",
-                    },
-                  },
-                ],
                 Array [
                   Object {
                     "id": "number",
@@ -16260,10 +16962,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16277,11 +16985,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16299,10 +17015,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16316,11 +17038,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16338,10 +17068,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16355,11 +17091,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16377,10 +17121,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16394,11 +17144,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16416,10 +17174,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16433,11 +17197,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16455,10 +17227,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16472,11 +17250,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
+                          "value": "Foo",
+                        },
+                        Object {
+                          "type": "return",
                           "value": 5,
                         },
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16494,10 +17280,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                           1652034840000,
                         ],
                         Array [
+                          "Foo",
+                        ],
+                        Array [
                           5,
                         ],
                         Array [
                           1652122440000,
+                        ],
+                        Array [
+                          "Bar",
                         ],
                       ],
                       "results": Array [
@@ -16511,42 +17303,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         },
                         Object {
                           "type": "return",
-                          "value": 5,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652122440000,
-                        },
-                      ],
-                    },
-                  },
-                },
-                Object {
-                  "type": "return",
-                  "value": Object {
-                    "convert": [MockFunction] {
-                      "calls": Array [
-                        Array [
-                          2,
-                        ],
-                        Array [
-                          1652034840000,
-                        ],
-                        Array [
-                          5,
-                        ],
-                        Array [
-                          1652122440000,
-                        ],
-                      ],
-                      "results": Array [
-                        Object {
-                          "type": "return",
-                          "value": 2,
-                        },
-                        Object {
-                          "type": "return",
-                          "value": 1652034840000,
+                          "value": "Foo",
                         },
                         Object {
                           "type": "return",
@@ -16555,6 +17312,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         Object {
                           "type": "return",
                           "value": 1652122440000,
+                        },
+                        Object {
+                          "type": "return",
+                          "value": "Bar",
                         },
                       ],
                     },
@@ -16569,6 +17330,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "formattedColumns": Object {
                   "b": true,
                   "c": true,
+                  "d": true,
                 },
                 "invertedRawValueMap": Map {
                   "a" => Map {},
@@ -16580,7 +17342,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                     1652034840000 => 1652034840000,
                     1652122440000 => 1652122440000,
                   },
-                  "d" => Map {},
+                  "d" => Map {
+                    "Foo" => "Foo",
+                    "Bar" => "Bar",
+                  },
                 },
                 "table": Object {
                   "columns": Array [
@@ -16823,10 +17588,16 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                         1652034840000,
                       ],
                       Array [
+                        "Foo",
+                      ],
+                      Array [
                         5,
                       ],
                       Array [
                         1652122440000,
+                      ],
+                      Array [
+                        "Bar",
                       ],
                     ],
                     "results": Array [
@@ -16840,11 +17611,19 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                       },
                       Object {
                         "type": "return",
+                        "value": "Foo",
+                      },
+                      Object {
+                        "type": "return",
                         "value": 5,
                       },
                       Object {
                         "type": "return",
                         "value": 1652122440000,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": "Bar",
                       },
                     ],
                   },

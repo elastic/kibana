@@ -20,5 +20,6 @@
     "@kbn/expressions-plugin",
     "@kbn/data-plugin",
     "@kbn/coloring",
+    "@kbn/field-formats-plugin",
   ]
 }

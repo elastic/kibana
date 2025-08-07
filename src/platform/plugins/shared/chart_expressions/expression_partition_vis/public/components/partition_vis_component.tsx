@@ -313,7 +313,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         visParams,
         visData,
         { ...props.uiState?.get('vis.colors', {}), ...props.visParams.labels.colorOverrides },
-        visData.rows,
         props.palettesRegistry,
         palettes,
         formatters,

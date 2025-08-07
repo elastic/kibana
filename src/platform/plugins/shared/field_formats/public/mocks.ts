@@ -60,3 +60,13 @@ export const fieldFormatsServiceMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
 };
+
+export const getFieldFormatsRegistryMock = (uiSettingsMock: Record<string, any> = {}) => {
+  const coreMock = {
+    uiSettings: {
+      get: (key: string) => uiSettingsMock[key],
+    },
+  } as unknown as CoreSetup;
+
+  return getFieldFormatsRegistry(coreMock);
+};

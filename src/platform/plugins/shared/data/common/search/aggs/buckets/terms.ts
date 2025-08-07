@@ -73,6 +73,7 @@ export const getTermsBucketAgg = () =>
       return agg.getFieldDisplayName() + ': ' + params.order.text;
     },
     getSerializedFormat(agg) {
+      console.log(JSON.stringify(agg, null, 2));
       const format = agg.params.field
         ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
         : { id: undefined, params: undefined };
@@ -154,9 +155,6 @@ export const getTermsBucketAgg = () =>
       {
         name: 'otherBucketLabel',
         type: 'string',
-        default: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
-          defaultMessage: 'Other',
-        }),
         displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
           defaultMessage: 'Label for other bucket',
         }),
@@ -170,11 +168,6 @@ export const getTermsBucketAgg = () =>
       },
       {
         name: 'missingBucketLabel',
-        default: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel', {
-          defaultMessage: 'Missing',
-          description: `Default label used in charts when documents are missing a field.
-          Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
-        }),
         type: 'string',
         displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
           defaultMessage: 'Label for missing values',
