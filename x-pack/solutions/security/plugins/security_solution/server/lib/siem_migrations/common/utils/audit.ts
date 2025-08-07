@@ -78,7 +78,7 @@ export class SiemMigrationAuditLogger {
   private auditLogger?: AuditLogger | null = null;
   constructor(
     private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>,
-    private readonly migrationType: 'rules' | 'dashboards' = 'rules'
+    private readonly migrationType: 'rules' | 'dashboards'
   ) {}
 
   private setAuditLogger = async (): Promise<boolean> => {
