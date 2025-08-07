@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
+import { RoleCredentials } from '../services';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -13,14 +14,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const dataViewApi = getService('dataViewApi');
+  const samlAuth = getService('samlAuth');
+  let roleAuthc: RoleCredentials;
 
   describe('default dataView', function () {
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       // re-create the default data view in case it has been cleaned up by another test
       await dataViewApi.create({
+        roleAuthc,
         id: 'default_all_data_id',
         name: 'default:all-data',
         title: '*,-.*',

@@ -6,12 +6,14 @@
  */
 
 import { services as svlPlatformServices } from '@kbn/test-suites-xpack-platform/serverless/functional/services';
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
 
 export const services = {
   ...svlPlatformServices,
   // Search Solution serverless FTR services
   svlSearchNavigation: SvlSearchNavigationServiceProvider,
+  ml: platformServices.ml,
 };
 
 export type {
