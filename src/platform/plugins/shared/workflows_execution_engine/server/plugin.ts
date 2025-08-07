@@ -34,6 +34,7 @@ import { WorkflowContextManager } from './workflow_context_manager/workflow_cont
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -91,12 +92,27 @@ export class WorkflowsExecutionEnginePlugin
         await plugins.actions.getUnsecuredActionsClient()
       );
 
+      const workflowLogger = new WorkflowEventLogger(
+        this.esClient,
+        this.logger,
+        WORKFLOWS_EXECUTION_LOGS_INDEX,
+        {
+          workflowId: workflow.id,
+          workflowName: workflow.name,
+          executionId: workflowRunId,
+        },
+        {
+          enableConsoleLogging: this.config.logging.console,
+        }
+      );
+
       // Create workflow runtime first (simpler, fewer dependencies)
       const workflowRuntime = new WorkflowExecutionRuntimeManager({
         workflowExecution: workflowExecution as EsWorkflowExecution,
         workflowExecutionRepository,
         stepExecutionRepository,
         workflowExecutionGraph,
+        workflowLogger,
       });
 
       const contextManager = new WorkflowContextManager({
@@ -109,17 +125,11 @@ export class WorkflowsExecutionEnginePlugin
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
-        enableConsoleLogging: this.config.logging.console,
         workflowExecutionGraph,
         workflowState: workflowRuntime,
       });
 
-      // Set the logger reference using a clean setter method
-      workflowRuntime.setLogger(contextManager);
-
       // Log workflow execution start
-      await contextManager.logWorkflowStart();
-
       await workflowRuntime.start();
 
       try {
@@ -135,11 +145,8 @@ export class WorkflowsExecutionEnginePlugin
 
           await step.run();
         } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-
-        contextManager.logWorkflowComplete(true);
       } catch (error) {
         await workflowRuntime.fail(error);
-        contextManager.logWorkflowComplete(false);
       }
     };
 
