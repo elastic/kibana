@@ -6,6 +6,7 @@
  */
 import { ScoutPage, expect } from '@kbn/scout';
 import { ProcessorType } from '@kbn/streams-schema';
+import { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   constructor(private readonly page: ScoutPage) {}
@@ -342,6 +343,68 @@ export class StreamsApp {
       `[data-gridcell-column-id="${columnName}"][data-gridcell-row-index="${rowIndex}"]`
     );
     await expect(cellContent).toContainText(value);
+  }
+
+  /**
+   * Schema Editor specific utility methods
+   */
+  async expectSchemaEditorTableVisible() {
+    await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
+  }
+
+  async searchFields(searchTerm: string) {
+    const searchBox = this.page.getByRole('searchbox');
+    await expect(searchBox).toBeVisible();
+    searchBox.clear();
+    await searchBox.focus();
+    await this.page.keyboard.type(searchTerm);
+  }
+
+  async clearFieldSearch() {
+    const searchBox = this.page.getByRole('searchbox');
+    await searchBox.clear();
+  }
+
+  async clickFieldTypeFilter() {
+    await this.page.getByRole('button', { name: 'Type' }).click();
+  }
+
+  async clickFieldStatusFilter() {
+    await this.page.getByRole('button', { name: 'Status' }).click();
+  }
+
+  async selectFilterValue(value: string) {
+    await this.getModal().getByRole('option').getByText(value).click();
+  }
+
+  async openFieldActionsMenu() {
+    await this.page.getByTestId('streamsAppActionsButton').click();
+    await expect(this.getModal().getByText('Field actions')).toBeVisible();
+  }
+
+  async clickFieldAction(actionName: string) {
+    await this.getModal().getByText(actionName).click();
+    await expect(this.getModal().getByText('Field actions')).toBeHidden();
+  }
+
+  async expectFieldFlyoutOpen() {
+    await expect(this.page.getByTestId('streamsAppSchemaEditorFlyoutCloseButton')).toBeVisible();
+  }
+
+  async setFieldMappingType(type: FieldTypeOption) {
+    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
+    await expect(typeSelector).toBeVisible();
+    await typeSelector.selectOption(type);
+  }
+
+  async saveFieldMappingChanges() {
+    await this.page.getByTestId('streamsAppSchemaEditorFieldSaveButton').click();
+  }
+
+  async unmapField() {
+    await this.openFieldActionsMenu();
+    await this.clickFieldAction('Unmap field');
+    await this.getModal().getByRole('button', { name: 'Unmap field' }).click();
   }
 
   /**

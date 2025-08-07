@@ -36,6 +36,7 @@ export function generateLogsData(
           .message(`${new Date(timestamp).toISOString()} main Test log message`)
           .timestamp(timestamp)
           .logLevel(getLogLevel())
+          .setHostIp('127.0.0.1')
           .defaults({
             'service.name': 'test-service',
           })

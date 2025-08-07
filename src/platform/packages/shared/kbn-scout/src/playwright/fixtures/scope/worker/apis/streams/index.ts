@@ -21,6 +21,7 @@ export interface StreamsApiService {
   deleteStream: (streamName: string) => Promise<void>;
   updateStream: (streamName: string, updateBody: { ingest: Ingest }) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
+  clearStreamMappings: (streamName: string) => Promise<void>;
   clearStreamProcessors: (streamName: string) => Promise<void>;
   updateStreamProcessors: (
     streamName: string,
@@ -108,6 +109,23 @@ export const getStreamsApiService = ({
             )
           );
         }
+      });
+    },
+    clearStreamMappings: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        if (!WiredStream.Definition.is(definition.stream)) {
+          throw new Error(`Stream ${streamName} is not a wired stream, cannot clear mappings.`);
+        }
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields: {},
+            },
+          },
+        });
       });
     },
     clearStreamProcessors: async (streamName: string) => {
