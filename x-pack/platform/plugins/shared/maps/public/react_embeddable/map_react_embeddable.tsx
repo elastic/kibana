@@ -87,12 +87,14 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
     const uiActionsEnhanced = getUiActionsEnhanced();
-    const dynamicActionsManager = uiActionsEnhanced ? initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState,
-      { embeddable: getEmbeddableService(), uiActionsEnhanced, }
-    ) : undefined;
+    const dynamicActionsManager = uiActionsEnhanced
+      ? initializeEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState,
+          { embeddable: getEmbeddableService(), uiActionsEnhanced }
+        )
+      : undefined;
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);

@@ -18,10 +18,10 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, map } from 'rxjs';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { DynamicActionStorage, type DynamicActionStorageApi } from './dynamic_action_storage';
 import { getDynamicActionsState } from './get_dynamic_actions_state';
 import { DynamicActionsSerializedState, EmbeddableDynamicActionsManager } from './types';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export interface EmbeddableDynamicActionsServices {
   embeddable: EmbeddableStart;

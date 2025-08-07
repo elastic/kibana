@@ -69,12 +69,14 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState.rawState;
 
-    const dynamicActionsManager = deps.uiActionsEnhanced ? initializeEmbeddableDynamicActions(
-      uuid,
-      () => titleManager.api.title$.getValue(),
-      initialState,
-      { embeddable: deps.embeddable, uiActionsEnhanced: deps.uiActionsEnhanced }
-    ) : undefined;
+    const dynamicActionsManager = deps.uiActionsEnhanced
+      ? initializeEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState,
+          { embeddable: deps.embeddable, uiActionsEnhanced: deps.uiActionsEnhanced }
+        )
+      : undefined;
 
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 

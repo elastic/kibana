@@ -39,12 +39,14 @@ export const getImageEmbeddableFactory = ({
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-      const dynamicActionsManager = uiActionsEnhanced ? initializeEmbeddableDynamicActions(
-        uuid,
-        () => titleManager.api.title$.getValue(),
-        initialState,
-        { embeddable: embeddableService, uiActionsEnhanced }
-      ) : undefined;
+      const dynamicActionsManager = uiActionsEnhanced
+        ? initializeEmbeddableDynamicActions(
+            uuid,
+            () => titleManager.api.title$.getValue(),
+            initialState,
+            { embeddable: embeddableService, uiActionsEnhanced }
+          )
+        : undefined;
       // if it is provided, start the dynamic actions manager
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 

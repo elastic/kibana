@@ -67,6 +67,7 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -78,7 +79,6 @@ import {
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;

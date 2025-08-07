@@ -43,6 +43,7 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -84,7 +85,6 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
 import { registerUiActions } from './trigger_actions/register_ui_actions';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;

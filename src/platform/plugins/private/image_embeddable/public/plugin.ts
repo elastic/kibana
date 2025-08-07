@@ -16,13 +16,13 @@ import {
 } from '@kbn/screenshot-mode-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { ADD_PANEL_TRIGGER, UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
 } from './image_embeddable/constants';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;

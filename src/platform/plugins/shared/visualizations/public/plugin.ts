@@ -66,6 +66,7 @@ import {
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -121,7 +122,6 @@ import {
 } from '../common/content_management';
 import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.

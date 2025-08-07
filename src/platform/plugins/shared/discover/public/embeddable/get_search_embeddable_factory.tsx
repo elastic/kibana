@@ -96,13 +96,17 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const titleManager = initializeTitleManager(initialState.rawState);
       const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const dynamicActionsManager = discoverServices.uiActionsEnhanced ?
-        initializeEmbeddableDynamicActions(
-          uuid,
-          () => titleManager.api.title$.getValue(),
-          initialState,
-          { embeddable: discoverServices.embeddable, uiActionsEnhanced: discoverServices.uiActionsEnhanced }
-        ) : undefined;
+      const dynamicActionsManager = discoverServices.uiActionsEnhanced
+        ? initializeEmbeddableDynamicActions(
+            uuid,
+            () => titleManager.api.title$.getValue(),
+            initialState,
+            {
+              embeddable: discoverServices.embeddable,
+              uiActionsEnhanced: discoverServices.uiActionsEnhanced,
+            }
+          )
+        : undefined;
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  apiHasDynamicActions,
-  type HasDynamicActions,
-} from '@kbn/embeddable-enhanced';
+import { apiHasDynamicActions, type HasDynamicActions } from '@kbn/embeddable-enhanced';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
