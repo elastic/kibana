@@ -33,7 +33,6 @@ test.describe(
 
     test('should handle network failures during a processor creation', async ({
       page,
-      context,
       pageObjects,
     }) => {
       await pageObjects.streams.clickAddProcessor();
@@ -42,17 +41,22 @@ test.describe(
       await pageObjects.streams.clickSaveProcessor();
 
       // Simulate network failure
-      await context.setOffline(true);
+      await page.route('**/streams/**/_ingest', (route) => {
+        // Abort the request to simulate a network failure
+        route.abort();
+      });
 
       await pageObjects.streams.saveProcessorsListChanges();
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
+      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
       await pageObjects.streams.closeToasts();
 
       // Restore network and retry
-      await context.setOffline(false);
+      await page.route('**/streams/**/_ingest', (route) => {
+        route.continue();
+      });
       await pageObjects.streams.saveProcessorsListChanges();
 
       // Should succeed
@@ -60,7 +64,6 @@ test.describe(
     });
 
     test('should recover from API errors during a processor updates', async ({
-      context,
       page,
       pageObjects,
     }) => {
@@ -78,17 +81,22 @@ test.describe(
       await pageObjects.streams.clickSaveProcessor();
 
       // Simulate network failure
-      await context.setOffline(true);
+      await page.route('**/streams/**/_ingest', (route) => {
+        // Abort the request to simulate a network failure
+        route.abort();
+      });
 
       await pageObjects.streams.saveProcessorsListChanges();
 
       // Should show error and return to editing state
       await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
+      await expect(page.getByText("An issue occurred saving processors' changes")).toBeVisible();
       await pageObjects.streams.closeToasts();
 
       // Restore network and retry
-      await context.setOffline(false);
+      await page.route('**/streams/**/_ingest', (route) => {
+        route.continue();
+      });
       await pageObjects.streams.saveProcessorsListChanges();
 
       // Should succeed
