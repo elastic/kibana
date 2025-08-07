@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-  const DIRECT_ACCESS_KEY_ID_TEST_ID = 'cloudSetupAwsDirectAccessKeyId';
+  const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
   const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
 
   describe('Agentless API Serverless', function () {
