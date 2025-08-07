@@ -79,7 +79,13 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.15.5]]
 == {kib} 8.15.5
 
-The 8.15.5 release includes the following bug fixes.
+The 8.15.5 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.5]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.5]]
@@ -100,7 +106,13 @@ Platform::
 [[release-notes-8.15.4]]
 == {kib} 8.15.4
 
-The 8.15.4 release includes the following bug fixes.
+The 8.15.4 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.4]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.4]]
@@ -128,7 +140,13 @@ Management::
 [[release-notes-8.15.3]]
 == {kib} 8.15.3
 
-The 8.15.3 release includes the following bug fixes.
+The 8.15.3 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.3]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[fixes-v8.15.3]]
@@ -165,7 +183,13 @@ Machine Learning::
 [[release-notes-8.15.2]]
 == {kib} 8.15.2
 
-The 8.15.2 release includes the following enhancements and bug fixes.
+The 8.15.2 release includes the following known issues, enhancements, and bug fixes.
+
+[float]
+[[known-issues-8.15.2]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 [float]
 [[enhancement-v8.15.2]]
@@ -211,7 +235,13 @@ Machine Learning::
 [[release-notes-8.15.1]]
 == {kib} 8.15.1
 
-The 8.15.1 release includes the following bug fixes.
+The 8.15.1 release includes the following known issues and bug fixes.
+
+[float]
+[[known-issues-8.15.1]]
+=== Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
 // [float]
 // [[enhancement-v8.15.1]]
@@ -293,6 +323,22 @@ If you used the *Incoming Webhook* app in Microsoft Teams to generate a webhook 
 Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as described in <<configuring-teams>>.
 Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
+
+// tag::known-issue-1991[]
+.PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
+[%collapsible]
+====
+*Details* +
+If you've changed the <<settings,`server.protocol`>> value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+
+*Workaround* +
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
+
+*Resolved* +
+This issue is resolved in 8.17.9, 8.18.4, 8.19.0 and later. 
+
+====
+// end::known-issue-1991[]
 
 [discrete]
 [[known-189283]]
