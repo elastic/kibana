@@ -186,17 +186,6 @@ EOF
   export SCOUT_REPORTER_ES_API_KEY
 }
 
-# Setup Bazel Remote/Local Cache Credentials
-{
-  BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
-  export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
-
-  BAZEL_REMOTE_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-gcs.json"
-  export BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
-  vault_get kibana-ci-bazel-remote-cache-sa-key key | base64 -d > "$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE"
-}
-
 # Setup GCS Service Account Proxy for CI
 {
   KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
