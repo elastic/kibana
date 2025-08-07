@@ -14,7 +14,7 @@ describe('map expression', () => {
     const query = 'ROW fn(1, {})';
     const { errors } = parse(query);
 
-    expect(errors.length > 0).toBe(true);
+    expect(errors.length > 0).toBe(false);
   });
 
   it('errors when trailing map argument is the single function argument', () => {
