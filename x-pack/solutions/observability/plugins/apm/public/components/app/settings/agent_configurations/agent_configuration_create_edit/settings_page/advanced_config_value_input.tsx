@@ -19,7 +19,7 @@ export function AdvancedConfigValueInput({
 }: {
   configValue: string;
   index: number;
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (newValue: string) => void;
   onDelete: () => void;
 }) {
@@ -32,10 +32,10 @@ export function AdvancedConfigValueInput({
   const handleValueChange = (newValue: string) => {
     setTouched(true);
     onChange(newValue);
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`value${index}`]: isInvalidInput(newValue),
-    }));
+
+    if (isInvalidInput(newValue)) {
+      setValidationErrors((prev) => [...prev, `value${index}`]);
+    }
   };
 
   return (

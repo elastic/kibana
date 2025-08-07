@@ -20,7 +20,7 @@ export function AdvancedConfigKeyInput({
 }: {
   configKey: string;
   index: number;
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (newKey: string) => void;
   checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
@@ -62,14 +62,10 @@ export function AdvancedConfigKeyInput({
 
   const handleKeyChange = (newKey: string) => {
     setLocalKey(newKey);
-    const isInvalid = isInvalidInput(newKey);
 
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`key${index}`]: isInvalid,
-    }));
-
-    if (!isInvalid) {
+    if (isInvalidInput(newKey)) {
+      setValidationErrors((prev) => [...prev, `key${index}`]);
+    } else {
       onChange(newKey);
     }
   };

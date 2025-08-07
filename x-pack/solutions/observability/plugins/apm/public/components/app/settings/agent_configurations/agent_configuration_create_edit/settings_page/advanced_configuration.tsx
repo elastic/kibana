@@ -31,7 +31,7 @@ export function AdvancedConfiguration({
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitionsByAgent: SettingDefinition[];
-  setValidationErrors: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  setValidationErrors: React.Dispatch<React.SetStateAction<string[]>>;
   onChange: (key: string, value: string, oldKey?: string) => void;
   onDelete: (key: string, index: number) => void;
 }) {

@@ -62,15 +62,12 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
-  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
-
-  const invalidAdvancedConfig: boolean = useMemo(() => {
-    return Object.values(validationErrors).some((error) => error);
-  }, [validationErrors]);
+  const invalidAdvancedConfig = validationErrors.length > 0;
 
   const settingsDefinitionsByAgent = useMemo(
     () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
@@ -154,11 +151,9 @@ export function SettingsPage({
     if (newConfig.settings[key] !== undefined) {
       setRemovedConfigCount((prev) => prev + 1);
     }
-    setValidationErrors((prev) => ({
-      ...prev,
-      [`key${index}`]: false,
-      [`value${index}`]: false,
-    }));
+    setValidationErrors((prev) =>
+      prev.filter((error) => !error.includes(`key${index}`) && !error.includes(`value${index}`))
+    );
     setNewConfig((prev) => {
       const { [key]: deleted, ...rest } = prev.settings;
       return {
