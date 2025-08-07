@@ -10,8 +10,8 @@ import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migr
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { StoredRuleMigration } from '../types';
 import type { getRuleMigrationAgent } from './agent';
-import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { ChatModel } from './util/actions_client_chat';
+import type { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
+import type { ChatModel } from '../../common/task/util/actions_client_chat';
 import type { RuleMigrationResources } from './retrievers/rule_resource_retriever';
 import type { RuleMigrationsRetriever } from './retrievers';
 import type { MigrateRuleGraphConfig } from './agent/types';
@@ -43,7 +43,7 @@ export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams
 export interface RuleMigrationTaskCreateAgentParams {
   connectorId: string;
   retriever: RuleMigrationsRetriever;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
   model: ChatModel;
 }
 

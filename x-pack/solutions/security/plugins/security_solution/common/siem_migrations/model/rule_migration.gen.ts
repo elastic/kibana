@@ -18,7 +18,12 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
-import { MigrationStatus, MigrationTaskStatus, MigrationLastExecution } from './common.gen';
+import {
+  MigrationTranslationResult,
+  MigrationStatus,
+  MigrationTaskStats,
+  MigrationLastExecution,
+} from './migration.gen';
 
 /**
  * The original rule vendor identifier.
@@ -146,14 +151,14 @@ export const PrebuiltRuleVersion = z.object({
  * The last execution of the rule migration task.
  */
 export type RuleMigrationLastExecution = z.infer<typeof RuleMigrationLastExecution>;
-export const RuleMigrationLastExecution = z
-  .object({
+export const RuleMigrationLastExecution = MigrationLastExecution.merge(
+  z.object({
     /**
      * Indicates if the last execution skipped matching prebuilt rules.
      */
     skip_prebuilt_rules_matching: z.boolean().optional(),
   })
-  .merge(MigrationLastExecution);
+);
 
 /**
  * The rule migration object ( without Id ) with its settings.
@@ -190,14 +195,6 @@ export const RuleMigration = z
     name: NonEmptyString,
   })
   .merge(RuleMigrationData);
-
-/**
- * The rule translation result.
- */
-export type RuleMigrationTranslationResult = z.infer<typeof RuleMigrationTranslationResult>;
-export const RuleMigrationTranslationResult = z.enum(['full', 'partial', 'untranslatable']);
-export type RuleMigrationTranslationResultEnum = typeof RuleMigrationTranslationResult.enum;
-export const RuleMigrationTranslationResultEnum = RuleMigrationTranslationResult.enum;
 
 /**
  * The comment for the migration
@@ -252,7 +249,7 @@ export const RuleMigrationRuleData = z.object({
   /**
    * The rule translation result.
    */
-  translation_result: RuleMigrationTranslationResult.optional(),
+  translation_result: MigrationTranslationResult.optional(),
   /**
    * The status of the rule migration process.
    */
@@ -288,57 +285,14 @@ export const RuleMigrationRule = z
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
-export const RuleMigrationTaskStats = z.object({
-  /**
-   * The migration id
-   */
-  id: NonEmptyString,
-  /**
-   * The migration name
-   */
-  name: NonEmptyString,
-  /**
-   * Indicates if the migration task status.
-   */
-  status: MigrationTaskStatus,
-  /**
-   * The rules migration stats.
-   */
-  rules: z.object({
+export const RuleMigrationTaskStats = MigrationTaskStats.merge(
+  z.object({
     /**
-     * The total number of rules to migrate.
+     * The last execution of the rule migration task.
      */
-    total: z.number().int(),
-    /**
-     * The number of rules that are pending migration.
-     */
-    pending: z.number().int(),
-    /**
-     * The number of rules that are being migrated.
-     */
-    processing: z.number().int(),
-    /**
-     * The number of rules that have been migrated successfully.
-     */
-    completed: z.number().int(),
-    /**
-     * The number of rules that have failed migration.
-     */
-    failed: z.number().int(),
-  }),
-  /**
-   * The moment the migration was created.
-   */
-  created_at: z.string(),
-  /**
-   * The moment of the last update.
-   */
-  last_updated_at: z.string(),
-  /**
-   * The last execution of the migration task.
-   */
-  last_execution: RuleMigrationLastExecution.optional(),
-});
+    last_execution: RuleMigrationLastExecution.optional(),
+  })
+);
 
 /**
  * The rule migration translation stats object.

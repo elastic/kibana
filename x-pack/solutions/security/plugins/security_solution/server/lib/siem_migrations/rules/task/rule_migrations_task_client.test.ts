@@ -71,11 +71,11 @@ describe('RuleMigrationsTaskClient', () => {
       );
       const result = await client.start(params);
       expect(result).toEqual({ exists: true, started: false });
-      expect(data.rules.updateStatus).not.toHaveBeenCalled();
+      expect(data.items.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should not start if there are no rules to migrate (total = 0)', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 0, pending: 0, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const client = new RuleMigrationsTaskClient(
@@ -86,7 +86,7 @@ describe('RuleMigrationsTaskClient', () => {
         dependencies
       );
       const result = await client.start(params);
-      expect(data.rules.updateStatus).toHaveBeenCalledWith(
+      expect(data.items.updateStatus).toHaveBeenCalledWith(
         migrationId,
         { status: SiemMigrationStatus.PROCESSING },
         SiemMigrationStatus.PENDING,
@@ -96,7 +96,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should not start if there are no pending rules', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 0, completed: 10, failed: 0 },
       } as RuleMigrationDataStats);
       const client = new RuleMigrationsTaskClient(
@@ -111,7 +111,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should start migration successfully', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const mockedRunnerInstance = {
@@ -144,7 +144,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should throw error if a race condition occurs after setup', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const mockedRunnerInstance = {
@@ -169,7 +169,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should mark migration as started by calling saveAsStarted', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
 
@@ -190,7 +190,7 @@ describe('RuleMigrationsTaskClient', () => {
 
     it('should mark migration as ended by calling saveAsEnded if run completes successfully', async () => {
       migrationsRunning = new Map();
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
 
@@ -222,7 +222,7 @@ describe('RuleMigrationsTaskClient', () => {
       const filter: RuleMigrationFilters = { fullyTranslated: true };
       const result = await client.updateToRetry(migrationId, filter);
       expect(result).toEqual({ updated: false });
-      expect(data.rules.updateStatus).not.toHaveBeenCalled();
+      expect(data.items.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should update to retry if migration is not running', async () => {
@@ -236,7 +236,7 @@ describe('RuleMigrationsTaskClient', () => {
       const filter: RuleMigrationFilters = { fullyTranslated: true };
       const result = await client.updateToRetry(migrationId, filter);
       expect(filter.installed).toBe(false);
-      expect(data.rules.updateStatus).toHaveBeenCalledWith(
+      expect(data.items.updateStatus).toHaveBeenCalledWith(
         migrationId,
         { fullyTranslated: true, installed: false },
         SiemMigrationStatus.PENDING,
@@ -249,7 +249,7 @@ describe('RuleMigrationsTaskClient', () => {
   describe('getStats', () => {
     it('should return RUNNING status if migration is running', async () => {
       migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner); // migration is running
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 5, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
 
@@ -269,7 +269,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should return READY status if pending equals total', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       data.migrations.get.mockResolvedValue({
@@ -288,7 +288,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should return FINISHED status if completed+failed equals total', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 0, completed: 5, failed: 5 },
       } as RuleMigrationDataStats);
 
@@ -307,7 +307,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should return STOPPED status for other cases', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
       const client = new RuleMigrationsTaskClient(
@@ -323,7 +323,7 @@ describe('RuleMigrationsTaskClient', () => {
 
     it('should include error if one exists', async () => {
       const errorMessage = 'Test error';
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         id: 'migration-1',
         rules: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as RuleMigrationDataStats);
@@ -370,7 +370,7 @@ describe('RuleMigrationsTaskClient', () => {
         } as RuleMigrationDataStats,
       ];
       const migrations = [{ id: 'm1' }, { id: 'm2' }] as unknown as StoredSiemMigration[];
-      data.rules.getAllStats.mockResolvedValue(statsArray);
+      data.items.getAllStats.mockResolvedValue(statsArray);
       data.migrations.getAll.mockResolvedValue(migrations);
       // Mark migration m1 as running.
       migrationsRunning.set('m1', {} as RuleMigrationTaskRunner);
@@ -409,7 +409,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should return stopped even if migration is already stopped', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const client = new RuleMigrationsTaskClient(
@@ -424,7 +424,7 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should return exists false if migration is not running and total equals 0', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 0, pending: 0, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const client = new RuleMigrationsTaskClient(
@@ -440,7 +440,7 @@ describe('RuleMigrationsTaskClient', () => {
 
     it('should catch errors and return exists true, stopped false', async () => {
       const error = new Error('Stop error');
-      data.rules.getStats.mockRejectedValue(error);
+      data.items.getStats.mockRejectedValue(error);
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
         logger,
@@ -477,7 +477,7 @@ describe('RuleMigrationsTaskClient', () => {
   });
   describe('task error', () => {
     it('should call saveAsFailed when there has been an error during the migration', async () => {
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         rules: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as RuleMigrationDataStats);
       const error = new Error('Migration error');

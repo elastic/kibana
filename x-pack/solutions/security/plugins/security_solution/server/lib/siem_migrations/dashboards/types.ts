@@ -10,6 +10,7 @@ import type { IndexPatternAdapter } from '@kbn/index-adapter';
 export interface DashboardMigrationAdapters {
   migrations: IndexPatternAdapter;
   dashboards: IndexPatternAdapter;
+  resources: IndexPatternAdapter;
 }
 
 export type DashboardMigrationAdapterId = keyof DashboardMigrationAdapters;
