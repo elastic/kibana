@@ -20,6 +20,8 @@ export type MetricsExporterConfig =
         url: string;
         /** HTTP headers to send to the OTLP gRPC endpoint. Typically, the `Authorization` header is one of them */
         headers?: Record<string, string>;
+        /** Frequency in which the exporter should collect the metrics */
+        exportIntervalMillis?: number | Duration;
       };
     }
   | {
@@ -29,6 +31,8 @@ export type MetricsExporterConfig =
         url: string;
         /** HTTP headers to send to the OTLP HTTP endpoint. Typically, the `Authorization` header is one of them */
         headers?: Record<string, string>;
+        /** Frequency in which the exporter should collect the metrics */
+        exportIntervalMillis?: number | Duration;
       };
     };
 

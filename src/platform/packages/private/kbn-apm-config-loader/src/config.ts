@@ -16,6 +16,7 @@ import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 import { getFlattenedObject } from '@kbn/std';
 import { type TelemetryConfig, telemetryConfigSchema } from '@kbn/telemetry-config';
+import { type MonitoringCollectionConfig, monitoringCollectionSchema } from '@kbn/metrics-config';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -53,7 +54,8 @@ const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
 };
 
 interface KibanaRawConfig {
-  telemetry?: TelemetryConfig;
+  monitoring_collection?: Partial<MonitoringCollectionConfig>;
+  telemetry?: Partial<TelemetryConfig>;
   elastic?: {
     apm?: ApmConfigSchema;
   };
@@ -101,6 +103,10 @@ export class ApmConfiguration {
   public getTelemetryConfig(): TelemetryConfig {
     const { enabled, metrics, tracing } = this.rawKibanaConfig.telemetry ?? {};
     return telemetryConfigSchema.validate({ enabled, metrics, tracing });
+  }
+
+  public getMonitoringCollectionConfig(): MonitoringCollectionConfig {
+    return monitoringCollectionSchema.validate(this.rawKibanaConfig.monitoring_collection);
   }
 
   public isUsersRedactionEnabled(): boolean {

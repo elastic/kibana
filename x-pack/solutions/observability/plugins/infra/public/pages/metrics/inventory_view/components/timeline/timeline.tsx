@@ -62,7 +62,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline({
-    kuery: filterQuery.expression,
+    kuery: filterQuery.query,
     metrics: [metric],
     nodeType,
     sourceId,
