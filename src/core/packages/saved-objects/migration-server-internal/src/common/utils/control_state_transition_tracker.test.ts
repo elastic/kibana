@@ -10,39 +10,39 @@
 import { ControlStateTransitionDiag } from './control_state_transition_tracker';
 
 describe('ControlStateTransitionTracker', () => {
-  let tracker: ControlStateTransitionDiag;
+  let cstDiag: ControlStateTransitionDiag;
   beforeEach(() => {
-    tracker = ControlStateTransitionDiag.create();
+    cstDiag = ControlStateTransitionDiag.create();
   });
   it('should observe transitions and update length', () => {
-    expect(tracker.length).toBe(0);
+    expect(cstDiag.length).toBe(0);
 
-    tracker.observeTransition('A', 'B', 10);
-    expect(tracker.length).toBe(1);
+    cstDiag.observeTransition('A', 'B', 10);
+    expect(cstDiag.length).toBe(1);
 
-    tracker.observeTransition('B', 'C', 20);
-    expect(tracker.length).toBe(2);
+    cstDiag.observeTransition('B', 'C', 20);
+    expect(cstDiag.length).toBe(2);
   });
 
   it('should format 1 transitions with pretty()', () => {
-    tracker.observeTransition('Init', 'Running', 5);
+    cstDiag.observeTransition('Init', 'Running', 5);
 
-    expect(tracker.prettyPrint()).toBe(`[
+    expect(cstDiag.prettyPrint()).toBe(`[
   Init -> Running (5ms)
 ]`);
   });
 
   it('should format >1 transitions with pretty()', () => {
-    tracker.observeTransition('Init', 'Running', 5);
-    tracker.observeTransition('Running', 'Done', 15);
+    cstDiag.observeTransition('Init', 'Running', 5);
+    cstDiag.observeTransition('Running', 'Done', 15);
 
-    expect(tracker.prettyPrint()).toBe(`[
+    expect(cstDiag.prettyPrint()).toBe(`[
   Init -> Running (5ms)
   Running -> Done (15ms)
 ]`);
   });
 
   it('should handle pretty() with no transitions', () => {
-    expect(tracker.prettyPrint()).toBe('[<No transitions observed>]');
+    expect(cstDiag.prettyPrint()).toBe('[<No transitions observed>]');
   });
 });
