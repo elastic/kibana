@@ -200,7 +200,12 @@ export const DiscoverSessionView = ({
           {...initializationState}
           onDataViewCreated={async (dataViewUnknown) => {
             await dispatch(internalStateActions.loadDataViewList());
-            internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true });
+            dispatch(
+              internalStateActions.setInitializationState({
+                hasESData: true,
+                hasUserDataView: true,
+              })
+            );
             const dataView = dataViewUnknown as DataView;
             initializeSession({
               defaultUrlState: dataView.id
