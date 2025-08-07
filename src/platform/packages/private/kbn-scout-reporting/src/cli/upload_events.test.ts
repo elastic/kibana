@@ -47,18 +47,18 @@ describe('uploadAllEventsFromPath', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if the provided eventLogPath does not exist', async () => {
+  it('should log a warning if the provided eventLogPath does not exist', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
-    await expect(
-      uploadAllEventsFromPath('non_existent_path', {
-        esURL: 'esURL',
-        esAPIKey: 'esAPIKey',
-        verifyTLSCerts: true,
-        log,
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"The provided event log path 'non_existent_path' does not exist."`
+    await uploadAllEventsFromPath('non_existent_path', {
+      esURL: 'esURL',
+      esAPIKey: 'esAPIKey',
+      verifyTLSCerts: true,
+      log,
+    });
+
+    expect(log.warning).toHaveBeenCalledWith(
+      `⚠️ The provided event log path 'non_existent_path' does not exist. Won't upload any events.`
     );
   });
 
