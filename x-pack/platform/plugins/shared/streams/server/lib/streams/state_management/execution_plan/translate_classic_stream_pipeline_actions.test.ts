@@ -404,7 +404,7 @@ describe('translateClassicStreamPipelineActions', () => {
   });
 
   describe('updateExistingStreamsManagedPipeline', () => {
-    it('deletes the pipeline if all processors are removed', async () => {
+    it('keeps the pipeline in an empty form if all processors are removed', async () => {
       const actionsByType = emptyActionsByType();
       actionsByType.delete_processor_from_ingest_pipeline.push({
         type: 'delete_processor_from_ingest_pipeline',
@@ -451,38 +451,16 @@ describe('translateClassicStreamPipelineActions', () => {
 
       expect(actionsByType).toEqual({
         ...emptyActionsByType(),
-        delete_ingest_pipeline: [
+        upsert_ingest_pipeline: [
           {
-            type: 'delete_ingest_pipeline',
+            type: 'upsert_ingest_pipeline',
+            stream: 'my-datastream',
             request: {
-              name: 'my-template-pipeline',
-            },
-          },
-        ],
-        upsert_index_template: [
-          {
-            type: 'upsert_index_template',
-            request: {
-              name: 'my-template',
-              composed_of: [],
-              index_patterns: 'my-*',
-              ignore_missing_component_templates: [],
-              template: {
-                settings: {
-                  index: {
-                    default_pipeline: undefined,
-                  },
-                },
+              id: 'my-template-pipeline',
+              processors: [],
+              _meta: {
+                managed_by: MANAGED_BY_STREAMS,
               },
-            },
-          },
-        ],
-        update_default_ingest_pipeline: [
-          {
-            type: 'update_default_ingest_pipeline',
-            request: {
-              name: 'my-datastream',
-              pipeline: undefined,
             },
           },
         ],
