@@ -54,6 +54,29 @@ const editFailureStoreFormSchema: FormSchema = {
   retentionPeriodValue: {
     type: FIELD_TYPES.NUMBER,
     defaultValue: 30,
+    validations: [
+      {
+        validator: ({ value, formData }) => {
+          // Only validate when failure store is enabled AND period type is custom
+          if (formData.failureStore && formData.periodType === 'custom') {
+            if (!value || value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.failureStoreModal.form.retentionPeriodValue.required',
+                  {
+                    defaultMessage:
+                      'Retention period value is required when failure store is enabled.',
+                  }
+                ),
+              };
+            }
+          }
+          // Explicitly return undefined when validation doesn't apply to clear any previous errors
+          return undefined;
+        },
+      },
+    ],
+    fieldsToValidateOnChange: ['failureStore', 'periodType', 'retentionPeriodValue'],
   },
   retentionPeriodUnit: {
     type: FIELD_TYPES.SELECT,
@@ -144,6 +167,15 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [periodType]);
 
+  // Clear validation errors when failureStore or periodType changes
+  useEffect(() => {
+    const retentionField = form.getFields().retentionPeriodValue;
+    if (retentionField) {
+      // Trigger validation to clear/set errors based on current state
+      retentionField.validate();
+    }
+  }, [failureStore, periodType, form]);
+
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
@@ -152,6 +184,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
       onClose={() => onCloseModal()}
       data-test-subj="editFailureStoreModal"
       aria-labelledby={modalTitleId}
+      style={{ width: 450 }}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
@@ -207,7 +240,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                         options: failureStorePeriodOptions,
                         disabled: !isCustomPeriod,
                         min: 0,
-                        placeholder: 30,
+                        placeholder: defaultRetentionPeriod.size,
                         'data-test-subj': 'selectFailureStorePeriodValue',
                       }}
                     />
@@ -219,7 +252,7 @@ export const FailureStoreModal: FunctionComponent<Props> = ({
                       euiFieldProps={{
                         options: timeUnits,
                         disabled: !isCustomPeriod,
-                        placeholder: 'd',
+                        placeholder: defaultRetentionPeriod.unit,
                         'data-test-subj': 'selectFailureStoreRetentionPeriodUnit',
                       }}
                     />
