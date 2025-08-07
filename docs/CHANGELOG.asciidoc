@@ -219,7 +219,6 @@ The 8.16.3 release includes the following known issues and bug fixes.
 
 include::CHANGELOG.asciidoc[tag=known-issue-1991]
 
->>>>>>> 34557d33828 ([DOCS][Known issue] Reporting failing in >= 8.15 when using server.protocol: http2 (#230894))
 [float]
 [[fixes-v8.16.3]]
 === Bug fixes
