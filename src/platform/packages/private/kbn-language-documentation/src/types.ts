@@ -45,7 +45,7 @@ export interface FunctionDefinition {
 }
 
 export interface LicenseInfo {
-  name: string;
+  name: LicenseType;
   isSignatureSpecific?: boolean;
   paramsWithLicense?: string[];
 }
