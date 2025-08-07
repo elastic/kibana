@@ -12,16 +12,16 @@ import { css } from '@emotion/react';
 export function Card({
   isDisabled,
   isSelected,
-  topContent,
-  middleContent,
-  bottomContent,
+  title,
+  kpiValue,
+  footer,
   onClick,
 }: {
   isDisabled?: boolean;
   isSelected?: boolean;
-  topContent: React.ReactNode;
-  middleContent: React.ReactNode;
-  bottomContent: React.ReactNode;
+  title: string;
+  kpiValue: string;
+  footer: React.ReactNode;
   onClick?: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -44,13 +44,13 @@ export function Card({
         `,
       }}
     >
-      <EuiText textAlign="left">{topContent}</EuiText>
+      <EuiText textAlign="left">{title}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiText textAlign="left">
-        <h2>{middleContent}</h2>
+      <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
+        <h2>{kpiValue}</h2>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiText textAlign="left">{bottomContent}</EuiText>
+      <EuiText textAlign="left">{footer}</EuiText>
     </EuiButtonEmpty>
   );
 }

@@ -61,9 +61,9 @@ export default function QualitySummaryCards({
         <Card
           isDisabled={false}
           isSelected={selectedCard === 'degraded'}
-          topContent={overviewPanelDatasetQualityIndicatorDegradedDocs}
-          middleContent={totalDegradedDocsCount}
-          bottomContent={
+          title={overviewPanelDatasetQualityIndicatorDegradedDocs}
+          kpiValue={totalDegradedDocsCount}
+          footer={
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <QualityPercentageIndicator
@@ -97,11 +97,11 @@ export default function QualitySummaryCards({
         {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
           <Card
             isDisabled={true}
-            topContent={overviewPanelDatasetQualityIndicatorFailedDocs}
-            middleContent={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
+            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
               defaultMessage: 'No failure store',
             })}
-            bottomContent={
+            footer={
               <EuiLink
                 href={locator?.getRedirectUrl(locatorParams)}
                 target="_blank"
@@ -117,9 +117,9 @@ export default function QualitySummaryCards({
           <Card
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
-            topContent={overviewPanelDatasetQualityIndicatorFailedDocs}
-            middleContent={totalFailedDocsCount}
-            bottomContent={
+            title={overviewPanelDatasetQualityIndicatorFailedDocs}
+            kpiValue={totalFailedDocsCount}
+            footer={
               <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <QualityPercentageIndicator
