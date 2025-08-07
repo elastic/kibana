@@ -17,7 +17,7 @@ import {
   type HasUniqueId,
   type HasParentApi,
 } from '@kbn/presentation-publishing';
-import { apiHasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import { apiHasDynamicActions } from '@kbn/embeddable-enhanced';
 import { UiActionsEnhancedDrilldownTemplate as DrilldownTemplate } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**

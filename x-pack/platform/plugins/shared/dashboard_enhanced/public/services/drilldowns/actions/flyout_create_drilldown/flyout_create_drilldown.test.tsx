@@ -15,7 +15,7 @@ import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishin
 import { flyoutCreateDrilldownAction } from './flyout_create_drilldown';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced';
 
 jest.mock('../../../kibana_services', () => {
   return {

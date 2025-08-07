@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced';
 import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
