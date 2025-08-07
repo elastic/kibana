@@ -47,7 +47,7 @@ import {
 } from './helpers';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID, metricStateDefaults } from './constants';
 
-export type SupportingVisType = 'none' | 'bar' | 'trendline';
+export type SupportingVisType = 'panel' | 'bar' | 'trendline';
 
 export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -953,11 +953,10 @@ export function DimensionEditorAdditionalSection({
             data-test-subj="lnsMetric_supporting_visualization_buttons"
             options={[
               {
-                id: `${buttonIdPrefix}none`,
-                label: i18n.translate('xpack.lens.metric.supportingVisualization.none', {
-                  defaultMessage: 'None',
+                id: `${buttonIdPrefix}panel`,
+                label: i18n.translate('xpack.lens.metric.supportingVisualization.panel', {
+                  defaultMessage: 'Panel',
                 }),
-                'data-test-subj': 'lnsMetric_supporting_visualization_none',
               },
               {
                 id: `${buttonIdPrefix}trendline`,
@@ -965,7 +964,6 @@ export function DimensionEditorAdditionalSection({
                   defaultMessage: 'Line',
                 }),
                 isDisabled: !supportsTrendline,
-                'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
               },
               {
                 id: `${buttonIdPrefix}bar`,
@@ -973,11 +971,10 @@ export function DimensionEditorAdditionalSection({
                   defaultMessage: 'Bar',
                 }),
                 isDisabled: !state.maxAccessor,
-                'data-test-subj': 'lnsMetric_supporting_visualization_bar',
               },
             ]}
             idSelected={`${buttonIdPrefix}${
-              state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'none'
+              state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel'
             }`}
             onChange={(id) => {
               const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
@@ -996,7 +993,7 @@ export function DimensionEditorAdditionalSection({
                   });
                   if (state.trendlineLayerId) removeLayer(state.trendlineLayerId);
                   break;
-                case 'none':
+                case 'panel':
                   setState({
                     ...state,
                     showBar: false,
