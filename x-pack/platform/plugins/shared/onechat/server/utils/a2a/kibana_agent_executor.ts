@@ -12,6 +12,7 @@ import type { Part, TextPart } from '@a2a-js/sdk';
 import { AgentMode, isRoundCompleteEvent } from '@kbn/onechat-common';
 import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 import type { InternalStartServices } from '../../services';
 import type { ConversationService } from '../../services/conversation';
@@ -130,7 +131,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
    * If it doesn't exist, creates a new one tagged as a2a
    */
   private async ensureConversationExists(
-    contextId: string,
+    conversationId: string,
     conversationService: ConversationService
   ): Promise<void> {
     try {
@@ -140,21 +141,25 @@ export class KibanaAgentExecutor implements AgentExecutor {
 
       // Try to get existing conversation
       try {
-        await conversationClient.get(contextId);
-        this.logger.debug(`A2A: Using existing conversation ${contextId}`);
+        await conversationClient.get(conversationId);
+        this.logger.debug(`A2A: Using existing conversation ${conversationId}`);
         return;
       } catch (error) {
-        this.logger.debug(`A2A: Creating new conversation ${contextId}`);
+        if (error instanceof esErrors.ResponseError && error.statusCode === 404) {
+          this.logger.debug(`A2A: Creating new conversation ${conversationId}`);
 
-        // For now just mark the conversation as a2a
-        await conversationClient.create({
-          id: contextId,
-          title: `[A2A] ${contextId}`,
-          agent_id: this.agentId,
-          rounds: [],
-        });
+          await conversationClient.create({
+            id: conversationId,
+            title: `[A2A] ${conversationId}`,
+            agent_id: this.agentId,
+            rounds: [],
+          });
 
-        this.logger.debug(`A2A: Created new conversation ${contextId}`);
+          this.logger.debug(`A2A: Created new conversation ${conversationId}`);
+        } else {
+          // Re-throw other errors (auth, network, etc.)
+          throw error;
+        }
       }
     } catch (error) {
       this.logger.error(`A2A: Failed to ensure conversation exists: ${error}`);
