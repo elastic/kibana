@@ -61,6 +61,7 @@ export interface RuleTaskRunResult {
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 }
 
 export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({

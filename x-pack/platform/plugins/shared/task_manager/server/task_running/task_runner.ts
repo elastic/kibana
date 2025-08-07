@@ -140,6 +140,8 @@ export enum TaskRunResult {
   Failed = 'Failed',
   // Task deleted
   Deleted = 'Deleted',
+  // Task disabled
+  Disabled = 'Disabled',
 }
 
 // A ConcreteTaskInstance which we *know* has a `startedAt` Date on it
@@ -675,10 +677,16 @@ export class TaskManagerRunner implements TaskRunner {
           state,
           attempts = 0,
           shouldDeleteTask,
+          shouldDisableTask,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
             return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
+          if (shouldDisableTask) {
+            // set the status to failed so task will get deleted
+            return asOk({ status: TaskStatus.ShouldDisable });
           }
 
           const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
@@ -713,9 +721,20 @@ export class TaskManagerRunner implements TaskRunner {
       await this.removeTask();
     } else {
       const { shouldValidate = true } = unwrap(result);
+      const enabled = fieldUpdates.status === TaskStatus.ShouldDisable ? false : true;
+      if (!enabled) {
+        const label = `${this.taskType}:${this.instance.task.id}`;
+        this.logger.warn(`disabling task ${label} as it indicated it should disable itself`);
+      }
 
       let shouldUpdateTask: boolean = false;
       let partialTask: PartialConcreteTaskInstance = {
+        ...fieldUpdates,
+        // reset fields that track the lifecycle of the concluded `task run`
+        enabled,
+        startedAt: null,
+        retryAt: null,
+        ownerId: null,
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
@@ -768,6 +787,8 @@ export class TaskManagerRunner implements TaskRunner {
       ? TaskRunResult.Failed
       : fieldUpdates.status === TaskStatus.ShouldDelete
       ? TaskRunResult.Deleted
+      : fieldUpdates.status === TaskStatus.ShouldDisable
+      ? TaskRunResult.Disabled
       : hasTaskRunFailed
       ? TaskRunResult.SuccessRescheduled
       : TaskRunResult.RetryScheduled;

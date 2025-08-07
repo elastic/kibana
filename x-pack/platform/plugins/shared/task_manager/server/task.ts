@@ -78,6 +78,7 @@ export type SuccessfulRunResult = {
   taskRunError?: DecoratedError;
   shouldValidate?: boolean;
   shouldDeleteTask?: boolean;
+  shouldDisableTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -243,6 +244,7 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
   ShouldDelete = 'should_delete',
+  ShouldDisable = 'should_disable',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
 }
