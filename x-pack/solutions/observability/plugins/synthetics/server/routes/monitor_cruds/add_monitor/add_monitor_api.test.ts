@@ -124,12 +124,13 @@ describe('AddNewMonitorsPublicAPI', () => {
     });
   });
 
+  const syntheticsService = new SyntheticsService({
+    config: {
+      enabled: true,
+    },
+  } as any);
+
   it('should normalize schedule', async function () {
-    const syntheticsService = new SyntheticsService({
-      config: {
-        enabled: true,
-      },
-    } as any);
     const api = new AddEditMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
@@ -165,10 +166,33 @@ describe('AddNewMonitorsPublicAPI', () => {
     expect(result.schedule).toEqual({ number: 3, unit: 'm' });
   });
 
-  describe('normalizeMonitor defaults', () => {
-    const syntheticsService = new SyntheticsService({
-      config: {},
+  it('should normalize namespace', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: {},
+      },
+      spaceId: 'default',
     } as any);
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+  });
+
+  it('should normalize namespace in test space', async function () {
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+        query: {},
+      },
+      spaceId: 'test',
+    } as any);
+
+    expect(api.getMonitorNamespace('testnamespace')).toEqual('testnamespace');
+    expect(api.getMonitorNamespace('default')).toEqual('default');
+  });
+
+  describe('normalizeMonitor defaults', () => {
     const api = new AddEditMonitorAPI({
       syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
       request: {
