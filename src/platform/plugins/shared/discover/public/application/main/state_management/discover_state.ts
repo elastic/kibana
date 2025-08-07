@@ -581,6 +581,8 @@ export function getDiscoverStateContainer({
 
     internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
     await appStateContainer.replaceUrlState(newAppState);
+
+    savedSearchContainer.getHasReset$().next(true);
     return nextSavedSearch;
   };
 

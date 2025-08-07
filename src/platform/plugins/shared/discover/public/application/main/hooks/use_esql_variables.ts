@@ -8,7 +8,9 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import {
@@ -27,14 +29,14 @@ import { useSavedSearch } from '../state_management/discover_state_provider';
  * If `panels` is null or empty, it returns an empty array.
  * @returns An array of ESQLControlVariable objects.
  */
-const getEsqlVariablesFromState = (
+const extractEsqlVariables = (
   panels: ControlPanelsState<ESQLControlState> | null
 ): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
-    if (panel.type === 'esqlControl') {
+    if (panel.type === ESQL_CONTROL) {
       acc.push({
         key: panel.variableName,
         type: panel.variableType,
@@ -45,6 +47,24 @@ const getEsqlVariablesFromState = (
   }, []);
 
   return variables;
+};
+
+/**
+ * Parses a JSON string into a ControlPanelsState object.
+ * If the JSON is invalid or null, it returns an empty object.
+ *
+ * @param jsonString - The JSON string to parse.
+ * @returns A ControlPanelsState object or an empty object if parsing fails.
+ */
+
+const parseControlGroupJson = (
+  jsonString?: string | null
+): ControlPanelsState<ESQLControlState> => {
+  try {
+    return jsonString ? JSON.parse(jsonString) : {};
+  } catch (e) {
+    return {};
+  }
 };
 
 /**
@@ -82,6 +102,7 @@ export const useESQLVariables = ({
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
   const currentTab = useCurrentTabSelector((tab) => tab);
+  const initialSavedSearch = useObservable(stateContainer.savedSearchState.getInitial$());
 
   const savedSearchState = useSavedSearch();
 
@@ -90,6 +111,20 @@ export const useESQLVariables = ({
     if (!controlGroupApi || !isEsqlMode) {
       return;
     }
+
+    // Handling the reset unsaved changes badge
+    const savedSearchResetSubsciption = stateContainer.savedSearchState
+      .getHasReset$()
+      .subscribe((hasReset) => {
+        if (hasReset) {
+          const savedControlGroupState = parseControlGroupJson(
+            initialSavedSearch?.controlGroupJson
+          );
+          controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
+          stateContainer.savedSearchState.getHasReset$().next(false);
+        }
+      });
+
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
         const currentTabControlState =
@@ -100,22 +135,24 @@ export const useESQLVariables = ({
             controlGroupState: currentTabControlState,
           })
         );
-        const newVariables = getEsqlVariablesFromState(currentTabControlState);
+        const newVariables = extractEsqlVariables(currentTabControlState);
         if (!isEqual(newVariables, currentEsqlVariables)) {
+          // Update the ESQL variables in the internal state
           dispatch(internalStateActions.setEsqlVariables(newVariables));
-          // handling the unsaved changes badge
+          stateContainer.dataState.fetch();
           stateContainer.savedSearchState.updateControlState({
             nextControlState: currentTabControlState,
           });
-          stateContainer.dataState.fetch();
         }
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
+      savedSearchResetSubsciption.unsubscribe();
     };
   }, [
+    initialSavedSearch?.controlGroupJson,
     controlGroupApi,
     setControlGroupState,
     currentEsqlVariables,
@@ -132,8 +169,8 @@ export const useESQLVariables = ({
         return;
       }
       // add a new control
-      controlGroupApi.addNewPanel?.({
-        panelType: 'esqlControl',
+      controlGroupApi.addNewPanel({
+        panelType: ESQL_CONTROL,
         serializedState: {
           rawState: {
             ...controlState,
@@ -151,15 +188,11 @@ export const useESQLVariables = ({
 
   // Getter function to retrieve the currently active control panels state for the current tab
   const getActivePanels = useCallback(() => {
-    const savedControlGroupState = JSON.parse(
-      savedSearchState?.controlGroupJson || '{}'
-    ) as ControlPanelsState<ESQLControlState>;
-    const currentControlGroupState =
-      currentTab.controlGroupState && Object.keys(currentTab.controlGroupState).length > 0
-        ? currentTab.controlGroupState
-        : savedControlGroupState;
-    return currentControlGroupState;
-  }, [currentTab, savedSearchState]);
+    if (currentTab.controlGroupState && Object.keys(currentTab.controlGroupState).length > 0) {
+      return currentTab.controlGroupState;
+    }
+    return parseControlGroupJson(savedSearchState?.controlGroupJson);
+  }, [currentTab.controlGroupState, savedSearchState?.controlGroupJson]);
 
   return {
     onSaveControl,

@@ -59,13 +59,13 @@ describe('useESQLVariables', () => {
   const renderUseESQLVariables = async ({
     stateContainer = getStateContainer(),
     isEsqlMode = true,
-    controlGroupAPI = mockControlGroupAPI as unknown as ControlGroupRendererApi,
+    controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
     onTextLangQueryChange = jest.fn(),
   }: {
     stateContainer?: DiscoverStateContainer;
     isEsqlMode?: boolean;
-    controlGroupAPI?: ControlGroupRendererApi;
+    controlGroupApi?: ControlGroupRendererApi;
     currentEsqlVariables?: ESQLControlVariable[];
     onTextLangQueryChange?: (query: string) => void;
   }) => {
@@ -78,7 +78,7 @@ describe('useESQLVariables', () => {
         useESQLVariables({
           stateContainer,
           isEsqlMode,
-          controlGroupAPI,
+          controlGroupApi,
           currentEsqlVariables,
           onTextLangQueryChange,
         }),
@@ -188,22 +188,91 @@ describe('useESQLVariables', () => {
     });
 
     it('should unsubscribe on unmount', async () => {
-      const mockUnsubscribe = jest.fn();
+      const mockUnsubscribeInput = jest.fn();
+      const mockUnsubscribeReset = jest.fn();
+
+      // Mock the getInput$ observable
       jest.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
         new Observable((subscriber) => {
-          return () => mockUnsubscribe();
+          return () => mockUnsubscribeInput();
         })
       );
 
+      // Mock the savedSearchState with getHasReset$ observable
+      const stateContainer = getStateContainer();
+      const mockGetHasReset = jest.fn().mockReturnValue(
+        new Observable((subscriber) => {
+          return () => mockUnsubscribeReset();
+        })
+      );
+
+      const mockedStateContainer = {
+        ...stateContainer,
+        savedSearchState: {
+          ...stateContainer.savedSearchState,
+          getHasReset$: mockGetHasReset,
+        },
+      };
+
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
+        stateContainer: mockedStateContainer,
       });
 
       act(() => {
         hook.unmount();
       });
 
-      expect(mockUnsubscribe).toHaveBeenCalledTimes(1);
+      // Both subscriptions should be unsubscribed
+      expect(mockUnsubscribeInput).toHaveBeenCalledTimes(1);
+      expect(mockUnsubscribeReset).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reset control panels from saved search state when getHasReset$ emits true', async () => {
+      const mockInitialSavedSearch = {
+        controlGroupJson: JSON.stringify(mockControlState),
+        // other saved search properties
+      };
+
+      const stateContainer = getStateContainer();
+      const hasReset$ = new BehaviorSubject(false);
+      const mockedStateContainer = {
+        ...stateContainer,
+        savedSearchState: {
+          ...stateContainer.savedSearchState,
+          getInitial$: jest
+            .fn()
+            .mockReturnValue(new BehaviorSubject(mockInitialSavedSearch).asObservable()),
+          getHasReset$: jest.fn().mockReturnValue(hasReset$),
+        },
+      };
+      // Create a mock control group API with a mock updateInput method
+      const mockUpdateInput = jest.fn();
+      const mockControlGroupApiWithUpdate = {
+        ...mockControlGroupAPI,
+        updateInput: mockUpdateInput,
+        getInput$: jest.fn().mockReturnValue(new Observable()),
+      };
+
+      // Render the hook
+      await renderUseESQLVariables({
+        stateContainer: mockedStateContainer,
+        controlGroupApi: mockControlGroupApiWithUpdate as unknown as ControlGroupRendererApi,
+      });
+
+      act(() => {
+        hasReset$.next(true);
+      });
+
+      await waitFor(() => {
+        // Assert that updateInput was called with the correct state
+        expect(mockUpdateInput).toHaveBeenCalledWith({
+          initialChildControlState: mockControlState,
+        });
+      });
+
+      // Assert that the hasReset$ observable was reset to false
+      expect(hasReset$.getValue()).toBe(false);
     });
   });
 

@@ -87,6 +87,8 @@ export interface DiscoverSavedSearchContainer {
    * Can be used to track if the saved search has been modified and displayed in the UI
    */
   getHasChanged$: () => BehaviorSubject<boolean>;
+
+  getHasReset$: () => BehaviorSubject<boolean>;
   /**
    * Get the current state of the saved search
    */
@@ -142,6 +144,7 @@ export function getSavedSearchContainer({
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
+  const hasReset$ = new BehaviorSubject(false);
   const set = (savedSearch: SavedSearch) => {
     addLog('[savedSearch] set', savedSearch);
     hasChanged$.next(false);
@@ -153,6 +156,7 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
   const getHasChanged$ = () => hasChanged$;
+  const getHasReset$ = () => hasReset$;
   const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
@@ -237,6 +241,8 @@ export function getSavedSearchContainer({
 
   const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    // console.log('initial', savedSearchInitial$.getValue());
+    // console.log('next', nextSavedSearch);
     hasChanged$.next(hasChanged);
     savedSearchCurrent$.next(nextSavedSearch);
   };
@@ -317,6 +323,7 @@ export function getSavedSearchContainer({
     initUrlTracking,
     getCurrent$,
     getHasChanged$,
+    getHasReset$,
     getId,
     getInitial$,
     getState,
