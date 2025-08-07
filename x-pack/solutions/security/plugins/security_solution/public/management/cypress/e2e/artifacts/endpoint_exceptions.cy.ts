@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as essSecurityHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/security_header';
-import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/serverless_security_header';
+import * as essSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
+import * as serverlessSecurityHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
 import { login, ROLE } from '../../tasks/login';
 
 describe(
