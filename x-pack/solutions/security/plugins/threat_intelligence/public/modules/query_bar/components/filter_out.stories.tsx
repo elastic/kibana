@@ -32,7 +32,9 @@ export const ButtonIcon: StoryFn = () => {
 export const ContextMenu: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
-  const items = [<FilterOutContextMenu data={mockIndicator} field={mockField} />];
+  const items = [
+    <FilterOutContextMenu onAnnounce={() => {}} data={mockIndicator} field={mockField} />,
+  ];
 
   return (
     <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>

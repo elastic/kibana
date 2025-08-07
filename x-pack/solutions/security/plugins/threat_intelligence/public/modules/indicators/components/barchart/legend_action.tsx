@@ -36,11 +36,13 @@ export interface IndicatorBarchartLegendActionProps {
    * Indicator field selected in the IndicatorFieldSelector component, passed to the {@link AddToTimelineContextMenu} to populate the timeline.
    */
   field: EuiComboBoxOptionOption<string>;
+  announceIndicatorActionChange: (filterMessage: string) => void;
 }
 
 export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionProps> = ({
   data,
   field,
+  announceIndicatorActionChange,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -50,12 +52,14 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
       key={FILTER_IN_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_IN_BUTTON_TEST_ID}
     />,
     <FilterOutContextMenu
       key={FILTER_OUT_BUTTON_TEST_ID}
       data={group}
       field={field.label}
+      onAnnounce={announceIndicatorActionChange}
       data-test-subj={FILTER_OUT_BUTTON_TEST_ID}
     />,
     <AddToTimelineContextMenu
