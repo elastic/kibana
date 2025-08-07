@@ -97,7 +97,7 @@ describe('metric visualization', () => {
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
-    secondaryValuePosition: 'after',
+    secondaryLabelPosition: 'before',
   };
 
   const fullStateWTrend: Required<
@@ -476,11 +476,11 @@ describe('metric visualization', () => {
                 "secondaryLabel": Array [
                   "extra-text",
                 ],
+                "secondaryLabelPosition": Array [
+                  "before",
+                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
-                ],
-                "secondaryValuePosition": Array [
-                  "after",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -564,11 +564,11 @@ describe('metric visualization', () => {
                 "secondaryLabel": Array [
                   "extra-text",
                 ],
+                "secondaryLabelPosition": Array [
+                  "before",
+                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
-                ],
-                "secondaryValuePosition": Array [
-                  "after",
                 ],
                 "subtitle": Array [
                   "subtitle",
@@ -886,8 +886,8 @@ describe('metric visualization', () => {
               "secondaryLabel": Array [
                 "extra-text",
               ],
-              "secondaryValuePosition": Array [
-                "after",
+              "secondaryLabelPosition": Array [
+                "before",
               ],
               "subtitle": Array [
                 "subtitle",
@@ -1131,7 +1131,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "secondaryValuePosition": "after",
         "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",

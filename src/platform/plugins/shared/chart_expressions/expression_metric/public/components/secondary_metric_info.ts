@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import type { VisParams } from '@kbn/visualizations-plugin/common';
 
+import type { DimensionsVisParam, MetricVisParam } from '../../common';
 import type { FormatOverrides } from './helpers';
 
 const TREND_UPWARD = '\u{2191}'; // ↑
@@ -29,14 +29,10 @@ export interface TrendConfig {
 }
 
 export interface SecondaryMetricInfoArgs {
-  columns: DatatableColumn[];
   row: DatatableRow;
-  config: Pick<VisParams, 'metric' | 'dimensions'>;
-  getMetricFormatter: (
-    accessor: string,
-    columns: DatatableColumn[],
-    formatOverrides?: FormatOverrides | undefined
-  ) => FieldFormatConvertFunction;
+  columns: DatatableColumn[];
+  secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
+  secondaryLabel: MetricVisParam['secondaryLabel'];
   trendConfig?: TrendConfig;
   staticColor?: string;
 }
@@ -64,25 +60,6 @@ function getEnhancedNumberSignFormatter(
     number: paramsOverride,
     percent: paramsOverride,
     bytes: paramsOverride,
-  };
-}
-
-function getMetricColumnAndFormatter(
-  columns: SecondaryMetricInfoArgs['columns'],
-  config: SecondaryMetricInfoArgs['config'],
-  getMetricFormatter: SecondaryMetricInfoArgs['getMetricFormatter'],
-  formatOverrides: FormatOverrides | undefined
-) {
-  if (!config.dimensions.secondaryMetric) {
-    return;
-  }
-  return {
-    metricColumn: getColumnByAccessor(config.dimensions.secondaryMetric, columns),
-    metricFormatter: getMetricFormatter(
-      config.dimensions.secondaryMetric,
-      columns,
-      formatOverrides
-    ),
   };
 }
 
@@ -214,21 +191,24 @@ function getDynamicColorInfo(
  * @returns An object with value, label, badgeColor and description for rendering.
  */
 export function getSecondaryMetricInfo({
-  columns,
   row,
-  config,
-  getMetricFormatter,
+  columns,
+  secondaryMetric,
+  secondaryLabel,
   trendConfig,
   staticColor,
 }: SecondaryMetricInfoArgs): SecondaryMetricInfo {
-  const formatOverrides = getEnhancedNumberSignFormatter(trendConfig);
-  const { metricFormatter, metricColumn } =
-    getMetricColumnAndFormatter(columns, config, getMetricFormatter, formatOverrides) || {};
+  const secondaryMetricColumn = getColumnByAccessor(secondaryMetric, columns);
+  const secondaryMetricFormatter = getMetricFormatter(
+    secondaryMetric,
+    columns,
+    getEnhancedNumberSignFormatter(trendConfig)
+  );
 
-  const label = config.metric.secondaryLabel ?? metricColumn?.name;
+  const label = secondaryLabel ?? secondaryMetricColumn?.name ?? '';
 
-  const rawValue = metricColumn ? row[metricColumn.id] : undefined;
-  const formattedValue = metricFormatter?.(rawValue);
+  const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
+  const formattedValue = secondaryMetricFormatter && secondaryMetricFormatter(rawValue);
   const safeFormattedValue = formattedValue ?? notAvailable;
 
   if (staticColor) {
@@ -237,7 +217,13 @@ export function getSecondaryMetricInfo({
 
   const hasDynamicColor = trendConfig && (typeof rawValue === 'number' || rawValue == null);
   if (hasDynamicColor) {
-    return getDynamicColorInfo(trendConfig, rawValue, safeFormattedValue, metricFormatter, label);
+    return getDynamicColorInfo(
+      trendConfig,
+      rawValue,
+      safeFormattedValue,
+      secondaryMetricFormatter,
+      label
+    );
   }
 
   return { value: formattedValue ?? '', label };

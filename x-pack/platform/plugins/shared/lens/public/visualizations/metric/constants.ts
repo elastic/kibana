@@ -39,7 +39,7 @@ export const metricStateDefaults: Required<
     | 'valueFontMode'
     | 'primaryPosition'
     | 'titleWeight'
-    | 'secondaryValuePosition'
+    | 'secondaryLabelPosition'
   >
 > = {
   titlesTextAlign: 'left',
@@ -49,7 +49,7 @@ export const metricStateDefaults: Required<
   valueFontMode: 'default',
   primaryPosition: 'bottom',
   titleWeight: 'bold',
-  secondaryValuePosition: 'after',
+  secondaryLabelPosition: 'before',
 };
 
 export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

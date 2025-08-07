@@ -51,7 +51,7 @@ describe('TitlesAndTextPopover', () => {
     iconAlign: 'left',
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
-    secondaryValuePosition: 'after',
+    secondaryLabelPosition: 'before',
   };
 
   const mockSetState = jest.fn();

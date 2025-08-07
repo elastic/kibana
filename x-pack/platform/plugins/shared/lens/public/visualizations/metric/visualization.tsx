@@ -331,6 +331,7 @@ const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
   delete state.secondaryLabel;
   delete state.secondaryTrend;
+  delete state.secondaryLabelPosition;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -579,6 +580,7 @@ export const getMetricVisualization = ({
           ...state,
           secondaryLabel: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
+          secondaryLabelPosition: 'before',
         },
         references: [],
       };

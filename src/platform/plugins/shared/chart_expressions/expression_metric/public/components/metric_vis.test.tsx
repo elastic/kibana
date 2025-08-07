@@ -28,6 +28,8 @@ import {
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
 
+import * as secondaryMetricInfoModule from './secondary_metric_info';
+
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
   return { getConverterFor: () => convertFn };
@@ -89,7 +91,7 @@ const defaultMetricParams: MetricVisParam = {
     baseline: undefined,
     palette: undefined,
   },
-  secondaryValuePosition: 'after',
+  secondaryLabelPosition: 'before',
 };
 
 const table: Datatable = {
@@ -297,14 +299,24 @@ describe('MetricVisComponent', function () {
       expect(screen.getByText(table.columns[1].name)).toBeInTheDocument();
     });
 
-    it('should display secondary metric', async () => {
-      const { rerender } = await renderMetricChart({
+    it('should not call getSecondaryMetricInfo if no secondaryMetric', async () => {
+      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
+      await renderChart({ config });
+      expect(spy).not.toHaveBeenCalled();
+      spy.mockRestore();
+    });
+
+    it('should call getSecondaryMetricInfo and display secondary metric', async () => {
+      const spy = jest.spyOn(secondaryMetricInfoModule, 'getSecondaryMetricInfo');
+      const { rerender } = await renderChart({
         config: {
           ...config,
           metric: { ...config.metric, subtitle: 'subtitle', secondaryLabel: undefined },
           dimensions: { ...config.dimensions, secondaryMetric: minPriceColumnId },
         },
       });
+
+      expect(spy).toHaveBeenCalled();
 
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
       expect(screen.getByText(secondaryLabel)).toBeInTheDocument();
@@ -1211,6 +1223,7 @@ describe('MetricVisComponent', function () {
               baseline: undefined,
               palette: undefined,
             },
+            secondaryLabelPosition: 'before',
           },
         },
       });

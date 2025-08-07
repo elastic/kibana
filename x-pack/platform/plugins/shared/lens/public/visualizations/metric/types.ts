@@ -47,7 +47,7 @@ export interface MetricVisualizationState {
   valueFontMode?: ValueFontMode;
   titleWeight?: MetricStyle['titleWeight'];
   primaryPosition?: MetricStyle['valuePosition'];
-  secondaryValuePosition?: SecondaryMetricProps['valuePosition'];
+  secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;

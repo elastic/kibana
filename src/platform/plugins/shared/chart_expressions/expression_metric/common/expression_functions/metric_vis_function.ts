@@ -187,11 +187,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
-    secondaryValuePosition: {
+    secondaryLabelPosition: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryValuePosition.help', {
-        defaultMessage:
-          'Specifies the position of the Secondary Metric value relative to its label (before or after)',
+      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
+        defaultMessage: 'Specifies the position of the Secondary Metric label',
       }),
       required: false,
     },
@@ -283,7 +282,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
             },
-            secondaryValuePosition: args.secondaryValuePosition,
+            secondaryLabelPosition: args.secondaryLabelPosition,
           },
           dimensions: {
             metric: args.metric,

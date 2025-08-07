@@ -66,7 +66,7 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  secondaryValuePosition: SecondaryMetricProps['valuePosition'];
+  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
 }
 
 export type MetricInput = Datatable;

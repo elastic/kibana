@@ -76,7 +76,7 @@ describe('dimension editor', () => {
     trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-    secondaryValuePosition: 'after',
+    secondaryLabelPosition: 'before',
   };
 
   let props: Props;
