@@ -17,5 +17,7 @@
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/data-plugin",
   ]
 }
