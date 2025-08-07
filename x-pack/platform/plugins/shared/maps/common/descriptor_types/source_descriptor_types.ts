@@ -8,7 +8,6 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { ESQLColumn } from '@kbn/es-types';
-import { MVT_FIELD_TYPE } from '../constants';
 
 export type AbstractSourceDescriptor = {
   id?: string;
@@ -38,31 +37,3 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   narrowByMapBounds: boolean;
   applyForceRefresh: boolean;
 };
-
-export type MVTFieldDescriptor = {
-  name: string;
-  type: MVT_FIELD_TYPE;
-};
-
-export type TiledSingleLayerVectorSourceSettings = {
-  urlTemplate: string;
-  layerName: string;
-
-  // These are the min/max zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.
-  // These are _not_ the visible zoom-range of the data on a map.
-  // These are important so mapbox does not issue invalid requests based on the zoom level.
-
-  // Tiled layer data cannot be displayed at lower levels of zoom than that they are stored in the tileset.
-  // e.g. building footprints at level 14 cannot be displayed at level 0.
-  minSourceZoom: number;
-  // Tiled layer data can be displayed at higher levels of zoom than that they are stored in the tileset.
-  // e.g. EMS basemap data from level 14 is at most detailed resolution and can be displayed at higher levels
-  maxSourceZoom: number;
-
-  fields: MVTFieldDescriptor[];
-};
-
-export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
-  TiledSingleLayerVectorSourceSettings & {
-    tooltipProperties: string[];
-  };

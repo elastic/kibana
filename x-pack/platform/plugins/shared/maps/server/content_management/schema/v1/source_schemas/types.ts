@@ -25,6 +25,8 @@ import {
   EMSFileSourceSchema,
   EMSTMSSourceSchema,
   kibanaTilemapSourceSchema,
+  MVTFieldSchema,
+  TiledSingleLayerVectorSourceSchema,
   WMSSourceSchema,
   XYZTMSSourceSchema,
 } from './source_schemas';
@@ -48,3 +50,7 @@ export type ESTermSourceDescriptor = TypeOf<typeof ESTermSourceSchema>;
 export type KibanaTilemapSourceDescriptor = TypeOf<typeof kibanaTilemapSourceSchema>;
 export type WMSSourceDescriptor = TypeOf<typeof WMSSourceSchema>;
 export type XYZTMSSourceDescriptor = TypeOf<typeof XYZTMSSourceSchema>;
+export type MVTFieldDescriptor = TypeOf<typeof MVTFieldSchema>;
+export type TiledSingleLayerVectorSourceDescriptor = TypeOf<
+  typeof TiledSingleLayerVectorSourceSchema
+>;

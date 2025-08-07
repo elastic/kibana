@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { SOURCE_TYPES } from '../../../../../common';
+import { MVT_FIELD_TYPE } from '../../../../../common/constants';
 
 export const EMSFileSourceSchema = schema.object(
   {
@@ -83,18 +84,18 @@ export const WMSSourceSchema = schema.object(
   {
     serviceUrl: schema.uri({
       meta: {
-        description: 'WMS URL'
-      }
+        description: 'WMS URL',
+      },
     }),
     layers: schema.string({
       meta: {
-        description: 'Comma separated list of layer names'
-      }
+        description: 'Comma separated list of layer names',
+      },
     }),
     styles: schema.string({
       meta: {
-        description: 'Comma separated list of style names'
-      }
+        description: 'Comma separated list of style names',
+      },
     }),
     type: schema.literal(SOURCE_TYPES.WMS),
   },
@@ -110,14 +111,72 @@ export const XYZTMSSourceSchema = schema.object(
   {
     urlTemplate: schema.uri({
       meta: {
-        description: 'TMS URL'
-      }
+        description: 'TMS URL',
+      },
     }),
     type: schema.literal(SOURCE_TYPES.EMS_XYZ),
   },
   {
     meta: {
       description: 'Raster source from Tile Map Service (TMS)',
+    },
+    unknowns: 'forbid',
+  }
+);
+
+export const MVTFieldSchema = schema.object({
+  name: schema.string(),
+  type: schema.oneOf([
+    schema.literal(MVT_FIELD_TYPE.NUMBER),
+    schema.literal(MVT_FIELD_TYPE.STRING),
+  ]),
+});
+
+export const TiledSingleLayerVectorSourceSchema = schema.object(
+  {
+    fields: schema.maybe(schema.arrayOf(MVTFieldSchema)),
+    layerName: schema.string({
+      meta: {
+        description: 'source layer name',
+      },
+    }),
+    maxSourceZoom: schema.maybe(
+      schema.number({
+        max: 24,
+        min: 0,
+        defaultValue: 24,
+        meta: {
+          description:
+            'Maximum zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.',
+        },
+      })
+    ),
+    minSourceZoom: schema.number({
+      max: 24,
+      min: 0,
+      defaultValue: 0,
+      meta: {
+        description:
+          'Minimum zoom levels of the availability of the a particular layerName in the tileset at urlTemplate.',
+      },
+    }),
+    urlTemplate: schema.uri({
+      meta: {
+        description: 'MVT URL',
+      },
+    }),
+    tooltipProperties: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        meta: {
+          description: 'Vector feature properties displayed in tooltip.',
+        },
+      })
+    ),
+    type: schema.literal(SOURCE_TYPES.MVT_SINGLE_LAYER),
+  },
+  {
+    meta: {
+      description: 'Vector tile source that displays a single source layer',
     },
     unknowns: 'forbid',
   }

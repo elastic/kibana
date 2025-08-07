@@ -30,4 +30,6 @@ export type {
   KibanaTilemapSourceDescriptor,
   WMSSourceDescriptor,
   XYZTMSSourceDescriptor,
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceDescriptor,
 } from '../../server';
