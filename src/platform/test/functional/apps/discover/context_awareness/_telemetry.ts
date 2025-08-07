@@ -264,6 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(event2.properties).to.eql({
           eventName: 'dataTableSelection',
+          fieldName: '<non-ecs>',
         });
       });
 

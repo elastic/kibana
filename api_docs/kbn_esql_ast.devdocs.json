@@ -2542,6 +2542,180 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.replace",
+            "type": "Function",
+            "tags": [],
+            "label": "replace",
+            "description": [],
+            "signature": [
+              "(tree: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.WalkerAstNode",
+                "text": "WalkerAstNode"
+              },
+              ", matcher: ",
+              "NodeMatchTemplate",
+              " | ((node: ",
+              "ESQLProperNode",
+              ") => boolean), newValue: ",
+              "ESQLProperNode",
+              ") => ",
+              "ESQLProperNode",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replace.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tree",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.WalkerAstNode",
+                    "text": "WalkerAstNode"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replace.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "matcher",
+                "description": [],
+                "signature": [
+                  "NodeMatchTemplate",
+                  " | ((node: ",
+                  "ESQLProperNode",
+                  ") => boolean)"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replace.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newValue",
+                "description": [],
+                "signature": [
+                  "ESQLProperNode"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.Walker.replaceAll",
+            "type": "Function",
+            "tags": [],
+            "label": "replaceAll",
+            "description": [],
+            "signature": [
+              "(tree: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.WalkerAstNode",
+                "text": "WalkerAstNode"
+              },
+              ", matcher: ",
+              "NodeMatchTemplate",
+              " | ((node: ",
+              "ESQLProperNode",
+              ") => boolean), newValue: ",
+              "ESQLProperNode",
+              ") => ",
+              "ESQLProperNode",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replaceAll.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tree",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.WalkerAstNode",
+                    "text": "WalkerAstNode"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replaceAll.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "matcher",
+                "description": [],
+                "signature": [
+                  "NodeMatchTemplate",
+                  " | ((node: ",
+                  "ESQLProperNode",
+                  ") => boolean)"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-ast",
+                "id": "def-common.Walker.replaceAll.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newValue",
+                "description": [],
+                "signature": [
+                  "ESQLProperNode"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.Walker.commands",
             "type": "Function",
             "tags": [],
@@ -3604,13 +3778,9 @@
                 "text": "ESQLColumn"
               },
               " | ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLTimeInterval",
-                "text": "ESQLTimeInterval"
-              },
+              "ESQLDatePeriodLiteral",
+              " | ",
+              "ESQLTimeDurationLiteral",
               " | ",
               "ESQLList",
               " | ",
@@ -3725,13 +3895,9 @@
                     "text": "ESQLColumn"
                   },
                   " | ",
-                  {
-                    "pluginId": "@kbn/esql-ast",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlAstPluginApi",
-                    "section": "def-common.ESQLTimeInterval",
-                    "text": "ESQLTimeInterval"
-                  },
+                  "ESQLDatePeriodLiteral",
+                  " | ",
+                  "ESQLTimeDurationLiteral",
                   " | ",
                   "ESQLList",
                   " | ",
@@ -5374,6 +5540,40 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.isDatePeriodLiteral",
+        "type": "Function",
+        "tags": [],
+        "label": "isDatePeriodLiteral",
+        "description": [],
+        "signature": [
+          "(node: unknown) => node is ",
+          "ESQLDatePeriodLiteral"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.isDatePeriodLiteral.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.isDoubleLiteral",
         "type": "Function",
         "tags": [],
@@ -6104,20 +6304,14 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.isTimeInterval",
+        "id": "def-common.isTimeDurationLiteral",
         "type": "Function",
         "tags": [],
-        "label": "isTimeInterval",
+        "label": "isTimeDurationLiteral",
         "description": [],
         "signature": [
           "(node: unknown) => node is ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          }
+          "ESQLTimeDurationLiteral"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/is.ts",
         "deprecated": false,
@@ -6125,7 +6319,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.isTimeInterval.$1",
+            "id": "def-common.isTimeDurationLiteral.$1",
             "type": "Unknown",
             "tags": [],
             "label": "node",
@@ -6353,10 +6547,6 @@
           },
           {
             "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
           },
           {
@@ -6518,6 +6708,22 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/assistant/tools/esql/graphs/generate_esql/nodes/validate_esql_in_last_message_node/utils.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.test.ts"
+          },
+          {
+            "plugin": "@kbn/esql-composer",
+            "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.test.ts"
           },
           {
             "plugin": "@kbn/esql-utils",
@@ -6791,13 +6997,9 @@
             "text": "ESQLColumn"
           },
           " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          },
+          "ESQLDatePeriodLiteral",
+          " | ",
+          "ESQLTimeDurationLiteral",
           " | ",
           "ESQLList",
           " | ",
@@ -6921,13 +7123,9 @@
                 "text": "ESQLColumn"
               },
               " | ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLTimeInterval",
-                "text": "ESQLTimeInterval"
-              },
+              "ESQLDatePeriodLiteral",
+              " | ",
+              "ESQLTimeDurationLiteral",
               " | ",
               "ESQLList",
               " | ",
@@ -7776,7 +7974,28 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": []
+            "references": [
+              {
+                "plugin": "@kbn/esql-composer",
+                "path": "src/platform/packages/shared/kbn-esql-composer/src/transformers/parameter_replacer.test.ts"
+              },
+              {
+                "plugin": "@kbn/esql-utils",
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+              },
+              {
+                "plugin": "@kbn/esql-utils",
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+              },
+              {
+                "plugin": "@kbn/esql-utils",
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+              },
+              {
+                "plugin": "@kbn/esql-utils",
+                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -8106,7 +8325,7 @@
             "label": "castType",
             "description": [],
             "signature": [
-              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\""
+              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -8436,76 +8655,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.ESQLTimeInterval",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESQLTimeInterval",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstBaseItem",
-            "text": "ESQLAstBaseItem"
-          },
-          "<string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLTimeInterval.type",
-            "type": "string",
-            "tags": [
-              "todo"
-            ],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"timeInterval\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLTimeInterval.unit",
-            "type": "string",
-            "tags": [],
-            "label": "unit",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLTimeInterval.quantity",
-            "type": "number",
-            "tags": [],
-            "label": "quantity",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.FunctionDefinition",
         "type": "Interface",
         "tags": [],
@@ -8651,65 +8800,6 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.FunctionDefinition.validate",
-            "type": "Function",
-            "tags": [],
-            "label": "validate",
-            "description": [],
-            "signature": [
-              "((fnDef: ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLFunction",
-                "text": "ESQLFunction"
-              },
-              "<",
-              "FunctionSubtype",
-              ", string>) => ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLMessage",
-                "text": "ESQLMessage"
-              },
-              "[]) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/esql-ast",
-                "id": "def-common.FunctionDefinition.validate.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "fnDef",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/esql-ast",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlAstPluginApi",
-                    "section": "def-common.ESQLFunction",
-                    "text": "ESQLFunction"
-                  },
-                  "<",
-                  "FunctionSubtype",
-                  ", string>"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.FunctionDefinition.operator",
             "type": "string",
             "tags": [],
@@ -8839,7 +8929,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+              "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9221,7 +9311,7 @@
             "label": "returnType",
             "description": [],
             "signature": [
-              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9411,20 +9501,6 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.shadowFieldType",
-            "type": "Object",
-            "tags": [],
-            "label": "shadowFieldType",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { field: string; fieldType: string; newType: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ValidationErrors.unsupportedColumnTypeForCommand",
             "type": "Object",
             "tags": [],
@@ -9516,34 +9592,6 @@
             "description": [],
             "signature": [
               "{ message: string; type: { type: string; value: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.wildcardNotSupportedForCommand",
-            "type": "Object",
-            "tags": [],
-            "label": "wildcardNotSupportedForCommand",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { command: string; value: string; }; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ValidationErrors.noWildcardSupportAsArg",
-            "type": "Object",
-            "tags": [],
-            "label": "noWildcardSupportAsArg",
-            "description": [],
-            "signature": [
-              "{ message: string; type: { name: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -9726,6 +9774,34 @@
             "description": [],
             "signature": [
               "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.licenseRequired",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseRequired",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { name: string; requiredLicense: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.licenseRequiredForSignature",
+            "type": "Object",
+            "tags": [],
+            "label": "licenseRequiredForSignature",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { name: string; signatureDescription: string; requiredLicense: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
             "deprecated": false,
@@ -10465,87 +10541,6 @@
               {
                 "parentPluginId": "@kbn/esql-ast",
                 "id": "def-common.WalkerOptions.visitListLiteral.$3",
-                "type": "Object",
-                "tags": [],
-                "label": "walker",
-                "description": [],
-                "signature": [
-                  "WalkerVisitorApi"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.WalkerOptions.visitTimeIntervalLiteral",
-            "type": "Function",
-            "tags": [],
-            "label": "visitTimeIntervalLiteral",
-            "description": [],
-            "signature": [
-              "((node: ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLTimeInterval",
-                "text": "ESQLTimeInterval"
-              },
-              ", parent: ",
-              "ESQLProperNode",
-              " | undefined, walker: ",
-              "WalkerVisitorApi",
-              ") => void) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/esql-ast",
-                "id": "def-common.WalkerOptions.visitTimeIntervalLiteral.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "node",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/esql-ast",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlAstPluginApi",
-                    "section": "def-common.ESQLTimeInterval",
-                    "text": "ESQLTimeInterval"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/esql-ast",
-                "id": "def-common.WalkerOptions.visitTimeIntervalLiteral.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "parent",
-                "description": [],
-                "signature": [
-                  "ESQLProperNode",
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "@kbn/esql-ast",
-                "id": "def-common.WalkerOptions.visitTimeIntervalLiteral.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "walker",
@@ -11628,13 +11623,9 @@
             "text": "ESQLColumn"
           },
           " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          },
+          "ESQLDatePeriodLiteral",
+          " | ",
+          "ESQLTimeDurationLiteral",
           " | ",
           "ESQLList",
           " | ",
@@ -11706,6 +11697,10 @@
         "label": "ESQLLiteral",
         "description": [],
         "signature": [
+          "ESQLDatePeriodLiteral",
+          " | ",
+          "ESQLTimeDurationLiteral",
+          " | ",
           "ESQLDecimalLiteral",
           " | ",
           "ESQLIntegerLiteral",
@@ -11782,14 +11777,6 @@
             "text": "ESQLColumn"
           },
           " | ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLTimeInterval",
-            "text": "ESQLTimeInterval"
-          },
-          " | ",
           "ESQLList",
           " | ",
           {
@@ -11825,6 +11812,23 @@
           "ESQLMap",
           " | ",
           "ESQLMapEntry"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLTimeSpanLiteral",
+        "type": "Type",
+        "tags": [],
+        "label": "ESQLTimeSpanLiteral",
+        "description": [],
+        "signature": [
+          "ESQLDatePeriodLiteral",
+          " | ",
+          "ESQLTimeDurationLiteral"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -11871,7 +11875,7 @@
           "\nThis is the type of a parameter in a function definition."
         ],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"double[]\" | \"unsigned_long[]\" | \"long[]\" | \"integer[]\" | \"counter_integer[]\" | \"counter_long[]\" | \"counter_double[]\" | \"keyword[]\" | \"text[]\" | \"boolean[]\" | \"any[]\" | \"date[]\" | \"date_period[]\" | \"ip[]\" | \"cartesian_point[]\" | \"cartesian_shape[]\" | \"geo_point[]\" | \"geo_shape[]\" | \"version[]\" | \"date_nanos[]\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -11888,7 +11892,7 @@
           "\nThis is the return type of a function definition.\n\nTODO: remove `any`"
         ],
         "signature": [
-          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"null\" | \"any\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -11933,9 +11937,24 @@
         "label": "SupportedDataType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
+          "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"param\" | \"unsupported\" | \"null\" | \"date_period\" | \"time_duration\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.TIME_SPAN_UNITS",
+        "type": "Array",
+        "tags": [],
+        "label": "TIME_SPAN_UNITS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11951,21 +11970,6 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/literals.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.timeUnits",
-        "type": "Array",
-        "tags": [],
-        "label": "timeUnits",
-        "description": [],
-        "signature": [
-          "string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12777,20 +12781,16 @@
           },
           {
             "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.LeafPrinter.timeInterval",
+            "id": "def-common.LeafPrinter.timespan",
             "type": "Function",
             "tags": [],
-            "label": "timeInterval",
+            "label": "timespan",
             "description": [],
             "signature": [
               "(node: ",
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLTimeInterval",
-                "text": "ESQLTimeInterval"
-              },
+              "ESQLDatePeriodLiteral",
+              " | ",
+              "ESQLTimeDurationLiteral",
               ") => string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
@@ -12799,19 +12799,15 @@
             "children": [
               {
                 "parentPluginId": "@kbn/esql-ast",
-                "id": "def-common.LeafPrinter.timeInterval.$1",
-                "type": "Object",
+                "id": "def-common.LeafPrinter.timespan.$1",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "node",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/esql-ast",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlAstPluginApi",
-                    "section": "def-common.ESQLTimeInterval",
-                    "text": "ESQLTimeInterval"
-                  }
+                  "ESQLDatePeriodLiteral",
+                  " | ",
+                  "ESQLTimeDurationLiteral"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,
@@ -13166,36 +13162,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.UNSUPPORTED_COMMANDS_BEFORE_MATCH",
-        "type": "Object",
-        "tags": [],
-        "label": "UNSUPPORTED_COMMANDS_BEFORE_MATCH",
-        "description": [],
-        "signature": [
-          "Set<string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.UNSUPPORTED_COMMANDS_BEFORE_QSTR",
-        "type": "Object",
-        "tags": [],
-        "label": "UNSUPPORTED_COMMANDS_BEFORE_QSTR",
-        "description": [],
-        "signature": [
-          "Set<string>"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

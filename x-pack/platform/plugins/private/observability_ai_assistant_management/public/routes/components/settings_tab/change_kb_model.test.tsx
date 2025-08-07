@@ -24,6 +24,8 @@ import {
   elserTitle,
 } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import { UseProductDoc } from '../../../hooks/use_product_doc';
 
 jest.mock('../../../hooks/use_install_product_doc', () => ({
   useInstallProductDoc: () => ({
@@ -94,6 +96,14 @@ const createMockKnowledgeBase = (
   ...overrides,
 });
 
+const createProductDoc = (overrides: Partial<UseProductDoc> = {}) => ({
+  status: 'uninstalled' as InstallationStatus,
+  isLoading: false,
+  installProductDoc: jest.fn().mockResolvedValue({} as any),
+  uninstallProductDoc: jest.fn().mockResolvedValue({} as any),
+  ...overrides,
+});
+
 const modelOptions = [
   {
     key: ELSER_ON_ML_NODE_INFERENCE_ID,
@@ -112,12 +122,16 @@ const setupMockGetModelOptions = (options = modelOptions) => {
   mockGetModelOptions.mockReturnValue(options);
 };
 
-const renderComponent = (mockKb: UseKnowledgeBaseResult) => {
+const renderComponent = (mockKb: UseKnowledgeBaseResult, mockProductDoc: UseProductDoc) => {
   const queryClient = new QueryClient();
 
   render(
     <QueryClientProvider client={queryClient}>
-      <ChangeKbModel knowledgeBase={mockKb} />{' '}
+      <ChangeKbModel
+        knowledgeBase={mockKb}
+        productDoc={mockProductDoc}
+        currentlyDeployedInferenceId={ELSER_ON_ML_NODE_INFERENCE_ID}
+      />
     </QueryClientProvider>
   );
 };
@@ -133,7 +147,8 @@ describe('ChangeKbModel', () => {
 
   it('disables the `Update` button when selected model is the same as current and no redeployment needed', () => {
     const mockKb = createMockKnowledgeBase();
-    renderComponent(mockKb);
+    const mockProductDoc = createProductDoc();
+    renderComponent(mockKb, mockProductDoc);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
@@ -141,7 +156,8 @@ describe('ChangeKbModel', () => {
 
   it('enables the `Update` button when a different model is selected', async () => {
     const mockKb = createMockKnowledgeBase();
-    renderComponent(mockKb);
+    const mockProductDoc = createProductDoc();
+    renderComponent(mockKb, mockProductDoc);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
@@ -159,7 +175,8 @@ describe('ChangeKbModel', () => {
 
   it('disables the `Update` button when knowledge base is installing', () => {
     const mockKb = createMockKnowledgeBase({ isInstalling: true });
-    renderComponent(mockKb);
+    const mockProductDoc = createProductDoc();
+    renderComponent(mockKb, mockProductDoc);
 
     const button = screen.getByTestId('observabilityAiAssistantKnowledgeBaseUpdateModelButton');
     expect(button).toBeDisabled();
@@ -180,7 +197,8 @@ describe('ChangeKbModel', () => {
           },
         }),
       });
-      renderComponent(mockKb);
+      const mockProductDoc = createProductDoc();
+      renderComponent(mockKb, mockProductDoc);
 
       const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
       expect(dropdown).toHaveTextContent(elserTitle);
@@ -198,7 +216,8 @@ describe('ChangeKbModel', () => {
           },
         }),
       });
-      renderComponent(mockKb);
+      const mockProductDoc = createProductDoc();
+      renderComponent(mockKb, mockProductDoc);
 
       const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
       dropdown.click();
@@ -226,7 +245,8 @@ describe('ChangeKbModel', () => {
           },
         }),
       });
-      renderComponent(mockKb);
+      const mockProductDoc = createProductDoc();
+      renderComponent(mockKb, mockProductDoc);
 
       const dropdown = screen.getByTestId('observabilityAiAssistantKnowledgeBaseModelDropdown');
       dropdown.click();

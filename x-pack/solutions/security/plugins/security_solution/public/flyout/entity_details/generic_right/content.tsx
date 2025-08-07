@@ -11,6 +11,7 @@ import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
@@ -23,6 +24,7 @@ import { FieldsTable, usePinnedFields } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 const defaultPinnedFields = [
   'entity.name',
@@ -44,6 +46,7 @@ interface GenericEntityFlyoutContentProps {
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
   insightsField: CloudPostureEntityIdentifier;
   insightsValue: string;
+  onAssetCriticalityChange: () => void;
 }
 
 export const GenericEntityFlyoutContent = ({
@@ -51,6 +54,7 @@ export const GenericEntityFlyoutContent = ({
   openGenericEntityDetailsPanelByPath,
   insightsField,
   insightsValue,
+  onAssetCriticalityChange,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -81,6 +85,10 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <AssetCriticalityAccordion
+        entity={{ name: insightsValue, type: EntityType.generic }}
+        onChange={onAssetCriticalityChange}
+      />
       <EntityInsight
         field={insightsField}
         value={insightsValue}

@@ -8,12 +8,17 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  logging: schema.object({
+    console: schema.boolean({ defaultValue: false }),
   }),
+});
+
+export type WorkflowsManagementConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<WorkflowsManagementConfig> = {
+  schema: configSchema,
 };
-export type MyPluginConfigType = TypeOf<typeof config.schema>;

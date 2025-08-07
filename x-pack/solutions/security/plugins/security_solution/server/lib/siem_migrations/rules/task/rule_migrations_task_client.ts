@@ -14,7 +14,7 @@ import type { RuleMigrationTaskStats } from '../../../../../common/siem_migratio
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
-import type { SiemRuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredSiemMigration } from '../types';
 import type {
   RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
@@ -32,7 +32,7 @@ export class RuleMigrationsTaskClient {
     private logger: Logger,
     private data: RuleMigrationsDataClient,
     private currentUser: AuthenticatedUser,
-    private dependencies: SiemRuleMigrationsClientDependencies
+    private dependencies: RuleMigrationsClientDependencies
   ) {}
 
   /** Starts a rule migration task */

@@ -203,21 +203,17 @@ describe('esql query helpers', () => {
 
   describe('prettifyQuery', function () {
     it('should return the code wrapped', function () {
-      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1', false);
+      const code = prettifyQuery('FROM index1 | KEEP field1, field2 | SORT field1');
       expect(code).toEqual('FROM index1\n  | KEEP field1, field2\n  | SORT field1');
     });
 
-    it('should return the code unwrapped', function () {
-      const code = prettifyQuery('FROM index1 \n| KEEP field1, field2 \n| SORT field1', true);
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
-    });
-
-    it('should return the code unwrapped and trimmed', function () {
+    it('should return the code wrapped with comments', function () {
       const code = prettifyQuery(
-        'FROM index1       \n| KEEP field1, field2     \n| SORT field1',
-        true
+        'FROM index1 /* cmt */ | KEEP field1, field2 /* cmt */ | SORT field1 /* cmt */'
       );
-      expect(code).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+      expect(code).toEqual(
+        'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
     });
   });
 

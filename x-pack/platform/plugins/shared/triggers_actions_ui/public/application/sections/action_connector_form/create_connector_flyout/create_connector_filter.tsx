@@ -28,6 +28,12 @@ export const CreateConnectorFilter: React.FC<CreateConnectorFilterProps> = ({
     <EuiFlexGroup gutterSize="s" wrap={false} responsive={false}>
       <EuiFlexItem grow={3}>
         <EuiFieldSearch
+          aria-label={i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorAdd.searchConnectorLabel',
+            {
+              defaultMessage: 'Filter available connector types',
+            }
+          )}
           fullWidth={true}
           placeholder={i18n.translate(
             'xpack.triggersActionsUI.sections.actionConnectorAdd.searchConnector',

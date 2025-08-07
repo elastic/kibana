@@ -77,8 +77,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Inventory Threshold Rule Executor', () => {
     describe('CPU per Host', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -142,8 +150,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Inbound network traffic per host', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -318,8 +334,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Custom rate metric per host', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -476,8 +500,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Log rate per host', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/hosts_only'
+        )
+      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
@@ -595,8 +627,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     describe('Network rate per pod', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/pods_only'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/pods_only'
+        )
+      );
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
