@@ -78,6 +78,7 @@ export class MapContainer extends Component<Props, State> {
   private _isInitalLoadRenderTimerStarted: boolean = false;
 
   private _flyoutRef: OverlayRef | null = null;
+  private _flyoutOpenTrigger: HTMLButtonElement | null = null;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -166,7 +167,9 @@ export class MapContainer extends Component<Props, State> {
 
     await untilPluginStartServicesReady();
 
-    const triggerElement = (document.activeElement as HTMLButtonElement) ?? null;
+    // If flyout is opening for the first time, remember the button used to open it
+    if (!this._flyoutOpenTrigger)
+      this._flyoutOpenTrigger = (document.activeElement as HTMLButtonElement) ?? null;
 
     this._flyoutRef = openLazyFlyout({
       core: coreStart,
@@ -203,6 +206,8 @@ export class MapContainer extends Component<Props, State> {
       // Check to make sure the flyout has actually closed, instead of switching from Add to Edit
       if (this.props.flyoutDisplay !== FLYOUT_STATE.NONE) return;
 
+      const triggerElement = this._flyoutOpenTrigger;
+      this._flyoutOpenTrigger = null;
       // Return focus to the button used to open this flyout
       if (triggerElement) {
         // If offsetParent is null, flyout was triggered by a hover action that's now hidden, so locate
