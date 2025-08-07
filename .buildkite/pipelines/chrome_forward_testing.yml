@@ -124,8 +124,8 @@ steps:
       preemptible: true
     depends_on:
       - build
-    timeout_in_minutes: 80
-    parallelism: 1
+    timeout_in_minutes: 60
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'
