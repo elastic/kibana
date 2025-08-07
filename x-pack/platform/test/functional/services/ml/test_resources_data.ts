@@ -11,6 +11,47 @@ export const savedSearches = {
       attributes: {
         title: 'ft_farequote_filter',
         description: '',
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({
+            highlightAll: true,
+            version: true,
+            query: {
+              query: '',
+              language: 'lucene',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrase',
+                  key: 'airline',
+                  value: 'ASA',
+                  params: {
+                    query: 'ASA',
+                    type: 'phrase',
+                  },
+                },
+                query: {
+                  match: {
+                    airline: {
+                      query: 'ASA',
+                      type: 'phrase',
+                    },
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          }),
+        },
         tabs: [
           {
             id: 'tab_0',
