@@ -59,7 +59,6 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const euiAmsterdam = process.env.EUI_AMSTERDAM === 'true';
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     const forceInstall = args.getBooleanValue('force-install');
@@ -113,12 +112,9 @@ export const command = {
           .concat(forceInstall ? ['--no-cache'] : []),
         {
           pipe: true,
-          env: {
-            ...process.env,
-            EUI_AMSTERDAM: euiAmsterdam ? 'true' : 'false',
-          },
         }
       );
+      log.success('shared webpack bundles built');
     });
 
     await time('sort package json', async () => {
