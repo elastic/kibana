@@ -8,32 +8,32 @@
  */
 
 import type {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/server';
 import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
 
-import { Client } from '@elastic/elasticsearch';
 import { graphlib } from '@dagrejs/dagre';
+import { Client } from '@elastic/elasticsearch';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
   WorkflowsExecutionEnginePluginSetup,
-  WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginSetupDeps,
+  WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
-import { ConnectorExecutor } from './connector_executor';
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
+import { ConnectorExecutor } from './connector_executor';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
+import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 
 export class WorkflowsExecutionEnginePlugin
@@ -118,15 +118,12 @@ export class WorkflowsExecutionEnginePlugin
       const contextManager = new WorkflowContextManager({
         workflowRunId,
         workflow: workflow as any,
-        stepResults: {},
         event: context.event,
-        esApiKey: context.esApiKey,
-        // Enable workflow event logging
         logger: this.logger,
         workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
         esClient: this.esClient,
         workflowExecutionGraph,
-        workflowState: workflowRuntime,
+        workflowExecutionRuntime: workflowRuntime,
       });
 
       // Log workflow execution start
