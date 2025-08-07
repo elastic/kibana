@@ -32,6 +32,24 @@ To mitigate the issue, set `xpack.alerting.rules.run.alerts.max` to a value equa
 
 ::::
 
+::::{dropdown} PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
+
+Applies to: {{stack}} 9.0.0
+
+**Details**
+
+If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+
+**Action**
+
+To temporarily resolve the issue, set `server.protocol` to `http1`. 
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.0.0, 9.0.4, 9.1.0.
+
+::::
+
 ::::{dropdown} Dashboard Copy link doesn't work when sharing from a space other than the default space
 
 Applies to: {{stack}} 9.0.3
