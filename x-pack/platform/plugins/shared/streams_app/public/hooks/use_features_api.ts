@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useAbortController } from '@kbn/react-hooks';
+import { useAbortController, type AbortableAsyncState } from '@kbn/react-hooks';
 import { type IdentifiedFeatureGenerateResponse, type StreamFeature } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
+import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 interface FeaturesApi {
+  listFeatures: () => AbortableAsyncState<Promise<StreamFeature[]>>;
   upsertFeature: (feature: StreamFeature) => Promise<void>;
   generate: (connectorId: string) => IdentifiedFeatureGenerateResponse;
 }
@@ -25,7 +27,22 @@ export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
 
   const { signal } = useAbortController();
 
+  const result = useStreamsAppFetch(
+    async (req): Promise<StreamFeature[]> => {
+      const response = await streamsRepositoryClient.fetch(
+        'GET /api/streams/{name}/features 2023-10-31',
+        {
+          params: { path: { name } },
+          signal: req.signal,
+        }
+      );
+      return response.features;
+    },
+    [name, streamsRepositoryClient]
+  );
+
   return {
+    listFeatures: () => result,
     upsertFeature: async ({ id, feature }) => {
       await streamsRepositoryClient.fetch(
         'PUT /api/streams/{name}/features/{featureId} 2023-10-31',

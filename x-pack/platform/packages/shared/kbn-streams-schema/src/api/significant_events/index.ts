@@ -51,15 +51,10 @@ type SignificantEventsGenerateResponse = Observable<
   ServerSentEventBase<'generated_query', { query: GeneratedSignificantEventQuery }>
 >;
 
-type IdentifiedFeatureGenerateResponse = Observable<
-  ServerSentEventBase<'identified_feature', { feature: string }>
->;
-
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
-  IdentifiedFeatureGenerateResponse,
 };

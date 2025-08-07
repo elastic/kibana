@@ -109,6 +109,8 @@ export {
   upsertStreamFeatureRequestSchema,
 } from './src/features';
 
+export type { IdentifiedFeatureGenerateResponse } from './src/api/features';
+
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
 export {
@@ -155,7 +157,6 @@ export type {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
-  IdentifiedFeatureGenerateResponse,
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
 

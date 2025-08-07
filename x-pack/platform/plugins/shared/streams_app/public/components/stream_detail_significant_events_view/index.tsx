@@ -52,7 +52,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
-  const { upsertFeature } = useFeaturesApi({ name: definition.stream.name });
+  const { upsertFeature, listFeatures } = useFeaturesApi({ name: definition.stream.name });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
@@ -149,6 +149,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
     <ManageFeaturesFlyout
       definition={definition.stream}
+      features={listFeatures().value}
       onSave={async (feature: string) => {
         await upsertFeature({ id: 'identified_system', feature }).then(
           () => {

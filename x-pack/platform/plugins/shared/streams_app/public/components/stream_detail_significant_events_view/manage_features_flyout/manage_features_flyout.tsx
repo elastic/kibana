@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import type { StreamFeature, Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useFeaturesApi } from '../../../hooks/use_features_api';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -28,11 +28,12 @@ import { useAIFeatures } from '../common/use_ai_features';
 
 interface Props {
   definition: Streams.all.Definition;
+  features?: StreamFeature[];
   onClose: () => void;
   onSave: (feature: string) => Promise<void>;
 }
 
-export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
+export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: Props) {
   const {
     core: { notifications, http },
   } = useKibana();
@@ -40,7 +41,9 @@ export function ManageFeaturesFlyout({ onClose, definition, onSave }: Props) {
   const { generate } = useFeaturesApi({ name: definition.name });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
-  const [identifiedSystem, setIdentifiedSystem] = React.useState<string>();
+  const [identifiedSystem, setIdentifiedSystem] = React.useState<string>(
+    features?.find((f) => f.id === 'identified_system')?.feature ?? ''
+  );
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setIdentifiedSystem(e.target.value);
