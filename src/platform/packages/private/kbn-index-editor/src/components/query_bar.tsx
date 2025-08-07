@@ -21,35 +21,35 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { FilePicker } from './file_picker';
 import { KibanaContextExtra } from '../types';
+import { isPlaceholderColumn } from '../utils';
 
 export const QueryBar = () => {
   const {
     services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
+  const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
   );
 
-  const esqlQuery = useObservable(indexUpdateService.esqlQuery$);
-
   const [queryError, setQueryError] = useState<string>('');
 
   const activeColumns = useMemo(() => {
-    return dataViewColumns?.map((c) => c.name);
+    return dataViewColumns?.map((c) => c.name).filter((c) => !isPlaceholderColumn(c));
   }, [dataViewColumns]);
 
   const discoverLocator = useMemo(() => {
     return share?.url.locators.get('DISCOVER_APP_LOCATOR');
   }, [share?.url.locators]);
 
-  const discoverLink = esqlQuery
+  const discoverLink = esqlDiscoverQuery
     ? discoverLocator?.getRedirectUrl({
         timeRange: data.query.timefilter.timefilter.getTime(),
         query: {
-          esql: esqlQuery,
+          esql: esqlDiscoverQuery,
         },
         ...(activeColumns ? { columns: activeColumns } : {}),
       })

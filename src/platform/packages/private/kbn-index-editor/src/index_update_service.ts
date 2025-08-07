@@ -139,44 +139,63 @@ export class IndexUpdateService {
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
     map(([indexCreated, indexName, qstr]) => {
-      // FROM
-      const fromCmd = Builder.command({
-        name: 'from',
-        args: [
-          Builder.expression.source.node(indexName!),
-          Builder.option({
-            name: 'metadata',
-            args: [
-              Builder.expression.column({
-                args: [Builder.identifier({ name: '_id' })],
-              }),
-            ],
-          }),
-        ],
-      });
-
-      // WHERE qstr("message: …")
-      const whereCmd = Builder.command({
-        name: 'where',
-        args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr)])],
-      });
-
-      // LIMIT 10
-      const limitCmd = Builder.command({
-        name: 'limit',
-        args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
-      });
-      // Combine the commands into a query node
-      const queryExpression = Builder.expression.query([
-        fromCmd,
-        ...(qstr ? [whereCmd] : []),
-        limitCmd,
-      ]);
-      const queryText: string = BasicPrettyPrinter.print(queryExpression);
-
-      return queryText;
+      return this._buildESQLQuery(indexName, qstr, true);
     })
   );
+
+  public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
+    this._indexName$,
+    this._qstr$,
+  ]).pipe(
+    map(([indexName, qstr]) => {
+      if (indexName) {
+        return this._buildESQLQuery(indexName, qstr, false);
+      }
+    })
+  );
+
+  private _buildESQLQuery(
+    indexName: string | null,
+    qstr: string | null,
+    includeMetadata: boolean
+  ): string {
+    // FROM
+    const fromCmd = Builder.command({
+      name: 'from',
+      args: [Builder.expression.source.node(indexName!)],
+    });
+
+    // METADATA _id
+    if (includeMetadata) {
+      fromCmd.args.push(
+        Builder.option({
+          name: 'metadata',
+          args: [Builder.expression.column({ args: [Builder.identifier({ name: '_id' })] })],
+        })
+      );
+    }
+
+    // WHERE qstr("message: …")
+    const whereCmd = Builder.command({
+      name: 'where',
+      args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr)])],
+    });
+
+    // LIMIT 10
+    const limitCmd = Builder.command({
+      name: 'limit',
+      args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
+    });
+    // Combine the commands into a query node
+    const queryExpression = Builder.expression.query([
+      fromCmd,
+      ...(qstr ? [whereCmd] : []),
+      limitCmd,
+    ]);
+    const queryText: string = BasicPrettyPrinter.print(queryExpression);
+
+    return queryText;
+  }
 
   // Accumulate updates in buffer with undo
   private bufferState$: Observable<DocUpdate[]> = this._actions$.pipe(
@@ -335,6 +354,7 @@ export class IndexUpdateService {
     }
 
     return await this.data.dataViews.create({
+      id: indexName,
       title: indexName,
       name: indexName,
       // The index might not exist yet
@@ -657,7 +677,16 @@ export class IndexUpdateService {
     this._totalHits$.complete();
     this._actions$.complete();
     this._pendingColumnsToBeSaved$.complete();
-    this.data.dataViews.clearInstanceCache();
+    this._indexCrated$.complete();
+    this._qstr$.complete();
+    this._refreshSubject$.complete();
+    this._exitAttemptWithUnsavedFields$.complete();
+
+    const indexName = this.getIndexName();
+    if (indexName) {
+      this.data.dataViews.clearInstanceCache(indexName);
+    }
+    this._indexName$.complete();
   }
 
   public async createIndex() {
