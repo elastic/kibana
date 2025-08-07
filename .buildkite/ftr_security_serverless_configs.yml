@@ -6,12 +6,13 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ai4dsoc.ts
   - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.base.ts
   - x-pack/solutions/security/test/osquery_cypress/serverless_config.base.ts
+  - x-pack/platform/test/serverless/functional/config.security.base.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/solutions/security/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/solutions/security/test/osquery_cypress/serverless_cli_config.ts
-  - x-pack/test/security_solution_cypress/serverless_config.ts
-  - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts
+  - x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts
+  - x-pack/solutions/security/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
   # Playwright
   - x-pack/solutions/security/test/security_solution_playwright/serverless_config.ts
@@ -31,27 +32,27 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.config_compat_mode.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group4.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group5.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group6.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group7.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group8.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group9.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group10.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group11.ts
-  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group12.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.config_compat_mode.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group1.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group2.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group3.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group4.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group6.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group7.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group8.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group10.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group11.ts
+  - x-pack/platform/test/serverless/functional/configs/security/config.group12.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/alerts/trial_license_complete_tier/configs/serverless.config.ts
