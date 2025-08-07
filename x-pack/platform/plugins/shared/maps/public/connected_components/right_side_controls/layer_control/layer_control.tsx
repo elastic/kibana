@@ -84,7 +84,6 @@ export function LayerControl({
         <EuiButton
           isDisabled={isFlyoutOpen}
           className="mapLayerControl__addLayerButton"
-          id="mapLayerControl__addLayerButton"
           fill
           fullWidth
           onClick={showAddLayerWizard}
