@@ -21,8 +21,8 @@ The default empty state uses any `pageHeader` info provided to populate an [**Eu
 <KibanaPageTemplate
   isEmptyState={true}
   pageHeader={{
-    pageTitle: 'Dashboards',
     iconType: 'dashboardApp',
+    pageTitle: 'Dashboards',
     description: "You don't have any dashboards yet.",
     rightSideItems: [
       <EuiButton fill iconType="plusInCircleFilled">
@@ -125,7 +125,7 @@ This is a built-in configuration that displays a very specific UI and requires v
 
 The `noDataConfig` is of type [`NoDataPageProps`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts):
 
-1. `pageTitle?: string`: Optionally replace the auto-generated page title (h1)
+1. `pageTitle?: string`: Optionally add page title (h2)
 2. `pageDescription?: string`: Optionally provide a custom description for the page
 3. `action: Record<string, NoDataPageActions>`: An object of `NoDataPageActions` configurations with a unique primary key _(required)_
 
@@ -167,8 +167,8 @@ const hasData = checkForData();
 
 // No data configuration with custom properties
 const noDataConfig: KibanaPageTemplateProps['noDataConfig'] = {
-  pageTitle: 'Welcome to Observability', // Custom page title
-  pageDescription: 'Start monitoring your applications and infrastructure', // Custom description
+  pageTitle: 'Custom page title',
+  pageDescription: 'Custom page description',
   action: {
     elasticAgent: {
       href: '/app/integrations/browse/elastic_agent', // Solution-specific URL

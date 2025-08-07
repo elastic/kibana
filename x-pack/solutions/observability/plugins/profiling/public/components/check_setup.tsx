@@ -92,7 +92,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     !!error;
 
   if (displaySetupScreen) {
-    const isButtonDisabled = postSetupLoading || data?.has_required_role === false; // doesn't work
+    const isButtonDisabled = postSetupLoading || data?.has_required_role === false;
     return (
       <ProfilingAppPageTemplate
         tabs={[]}
@@ -152,7 +152,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                   <EuiFlexItem>
                     <EuiToolTip
                       content={
-                        !data?.has_required_role
+                        isButtonDisabled
                           ? i18n.translate(
                               'xpack.profiling.noDataConfig.action.permissionsTooltip',
                               {
@@ -167,7 +167,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                         color="primary"
                         fill
                         data-test-subj="profilingCheckSetupButton"
-                        disabled={!data?.has_required_role}
+                        disabled={isButtonDisabled}
                         onClick={(event: React.MouseEvent<HTMLElement, MouseEvent>) => {
                           event.preventDefault();
 

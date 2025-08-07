@@ -170,7 +170,7 @@ export const NoDataViewsPrompt = ({
   return (
     <EuiFlexGroup
       alignItems="center"
-      justifyContent="center"
+      justifyContent="spaceEvenly"
       data-test-subj="noDataViewsPrompt"
       css={cssStyles}
     >
