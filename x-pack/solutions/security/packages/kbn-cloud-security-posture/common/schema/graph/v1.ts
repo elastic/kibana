@@ -137,8 +137,7 @@ export const labelNodeDataSchema = schema.allOf([
   schema.object({
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
-    color: nodeColorSchema, // TODO This is dummy now, color is inferred from documentsData
-    count: schema.maybe(schema.number()),
+    color: nodeColorSchema,
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),

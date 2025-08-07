@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { DocumentAnalysis } from './analyze_documents';
+import type { DocumentAnalysisOutput } from './analyze_documents';
 import { Badge } from './label_node_badges';
 
 const alertedEventsText = i18n.translate(
@@ -27,7 +27,7 @@ const defaultEventsText = i18n.translate(
 );
 
 interface LabelNodeTooltipProps {
-  analysis: DocumentAnalysis;
+  analysis: DocumentAnalysisOutput;
 }
 
 export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => {
@@ -42,7 +42,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
         margin-top: ${euiTheme.size.s};
       `}
     >
-      {analysis.totalAlerts > 0 && (
+      {analysis.alertsCount > 0 && (
         <div
           data-test-subj="label-node-tooltip-alert-section"
           css={css`
@@ -64,7 +64,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
               size="s"
               data-test-subj="label-node-tooltip-alert-icon"
             />
-            {analysis.totalAlerts > 1 && (
+            {analysis.alertsCount > 1 && (
               <EuiText
                 data-test-subj="label-node-tooltip-alert-count"
                 size="m"
@@ -73,7 +73,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
                   color: ${euiTheme.colors.textInverse};
                 `}
               >
-                {analysis.totalAlerts}
+                {analysis.alertsCount}
               </EuiText>
             )}
           </Badge>
@@ -88,7 +88,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
           </EuiText>
         </div>
       )}
-      {analysis.totalEvents > 0 && (
+      {analysis.eventsCount > 0 && (
         <div
           data-test-subj="label-node-tooltip-event-section"
           css={css`
@@ -106,7 +106,7 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
                 color: ${euiTheme.colors.textHeading};
               `}
             >
-              {analysis.totalEvents}
+              {analysis.eventsCount}
             </EuiText>
           </Badge>
           <EuiText

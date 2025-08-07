@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
 import { EuiText, EuiTextTruncate, EuiToolTip, useEuiShadow, useEuiTheme } from '@elastic/eui';
-import { NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -35,25 +34,33 @@ export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
 export const TEST_SUBJ_HOVER_OUTLINE = 'label-node-hover-outline';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
-  const { id, label, interactive, ips, countryCodes, nodeClick, expandButtonClick, documentsData } =
-    props.data as LabelNodeViewModel;
+  const {
+    id,
+    color,
+    eventsCount,
+    alertsCount,
+    label,
+    interactive,
+    ips,
+    countryCodes,
+    nodeClick,
+    expandButtonClick,
+  } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
 
   const text = label ? label : id;
 
-  const analysis = useMemo(
-    () => analyzeDocuments(documentsData as NodeDocumentDataModel[] | undefined),
-    [documentsData]
-  );
   const { backgroundColor, borderColor, textColor } = useMemo(
-    () => getLabelColors(analysis, euiTheme),
-    [analysis, euiTheme]
+    () => getLabelColors(color, euiTheme),
+    [color, euiTheme]
   );
 
-  const shouldShowTooltip =
-    analysis.totalEvents > BADGES_LIMIT || analysis.totalAlerts > BADGES_LIMIT;
+  const numEvents = eventsCount ?? 0;
+  const numAlerts = alertsCount ?? 0;
+  const analysis = analyzeDocuments({ eventsCount: numEvents, alertsCount: numAlerts });
+  const shouldShowTooltip = numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
 
   return (
     <>

@@ -23,12 +23,8 @@ const meta: Meta<LabelNodeViewModel> = {
     label: 'Mixed security activity',
     shape: 'label',
     interactive: true,
-    documentsData: [
-      { id: 'event1', type: 'event' },
-      { id: 'event2', type: 'event' },
-      { id: 'alert1', type: 'alert' },
-      { id: 'alert2', type: 'alert' },
-    ],
+    eventsCount: 2,
+    alertsCount: 2,
     ips: [
       '10.200.0.202',
       '192.14.29.80',

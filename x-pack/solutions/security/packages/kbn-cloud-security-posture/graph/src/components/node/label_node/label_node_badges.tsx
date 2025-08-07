@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import type { DocumentAnalysis } from './analyze_documents';
+import type { DocumentAnalysisOutput } from './analyze_documents';
 import { RoundedBadge } from '../styles';
 
 export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
@@ -33,7 +33,7 @@ export const Badge = styled.div<{ euiTheme: EuiThemeComputed; bgColor: string }>
 `;
 
 interface LabelNodeBadgesProps {
-  analysis: DocumentAnalysis;
+  analysis: DocumentAnalysisOutput;
 }
 
 export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
@@ -76,7 +76,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
               color: ${euiTheme.colors.textHeading};
             `}
           >
-            {displayCount(analysis.totalEvents)}
+            {displayCount(analysis.eventsCount)}
           </EuiText>
         </RoundedBadge>
       )}
@@ -103,7 +103,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
               color: ${euiTheme.colors.textHeading};
             `}
           >
-            {displayCount(analysis.totalAlerts)}
+            {displayCount(analysis.alertsCount)}
           </EuiText>
         </RoundedBadge>
       )}
@@ -121,7 +121,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
                 color: ${euiTheme.colors.textHeading};
               `}
             >
-              {displayCount(analysis.totalEvents)}
+              {displayCount(analysis.eventsCount)}
             </EuiText>
           </RoundedBadge>
 
@@ -133,7 +133,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
               color="ghost"
               size="s"
             />
-            {analysis.totalAlerts > 1 && (
+            {analysis.alertsCount > 1 && (
               <EuiText
                 data-test-subj={TEST_SUBJ_ALERT_COUNT}
                 size="xs"
@@ -142,7 +142,7 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
                   color: ${euiTheme.colors.textInverse};
                 `}
               >
-                {displayCount(analysis.totalAlerts)}
+                {displayCount(analysis.alertsCount)}
               </EuiText>
             )}
           </RoundedBadge>

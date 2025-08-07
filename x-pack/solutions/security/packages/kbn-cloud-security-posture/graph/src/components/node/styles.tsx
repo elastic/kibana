@@ -23,7 +23,6 @@ import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
-import { DocumentAnalysis } from './label_node/analyze_documents';
 
 /**
  * The total height of an entity node including the shape and details below, in pixels.
@@ -161,10 +160,10 @@ export const NodeContainer = styled.div`
  * Gets the background, border and text colors for the label based on document analysis
  */
 export const getLabelColors = (
-  analysis: DocumentAnalysis,
+  color: LabelNodeViewModel['color'],
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
-  if (analysis.totalAlerts > 0 && analysis.totalEvents === 0) {
+  if (color === 'danger') {
     return {
       backgroundColor: euiTheme.colors.danger,
       borderColor: euiTheme.colors.danger,

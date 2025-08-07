@@ -18,51 +18,29 @@ export default {
   decorators: [GlobalStylesStorybookDecorator],
 } satisfies Meta<typeof Graph>;
 
-const hundredsOfEvents = Array.from({ length: 120 }, (_, i) => ({
-  id: `event${i + 1}`,
-  type: 'event' as const,
-}));
-const hundredsOfAlerts = Array.from({ length: 120 }, (_, i) => ({
-  id: `alert${i + 1}`,
-  type: 'alert' as const,
-}));
-
-const nodeDocumentsData = {
-  'Single event': [{ id: 'event1', type: 'event' as const }],
-  'Single alert': [{ id: 'alert1', type: 'alert' as const }],
-  'Multiple events': [
-    { id: 'event1', type: 'event' as const },
-    { id: 'event2', type: 'event' as const },
-  ],
-  'Multiple alerts': [
-    { id: 'alert1', type: 'alert' as const },
-    { id: 'alert2', type: 'alert' as const },
-  ],
-  'Hundreds of events': hundredsOfEvents,
-  'Hundreds of alerts': hundredsOfAlerts,
-  'One event and one alert': [
-    { id: 'event1', type: 'event' as const },
-    { id: 'alert1', type: 'alert' as const },
-  ],
-  'Multiple events and alerts': [
-    { id: 'event1', type: 'event' as const },
-    { id: 'event2', type: 'event' as const },
-    { id: 'alert1', type: 'alert' as const },
-    { id: 'alert2', type: 'alert' as const },
-  ],
-  'Hundreds of events and alerts': [...hundredsOfEvents, ...hundredsOfAlerts],
+const useCases = {
+  'Single event': { eventsCount: 1, alertsCount: 0 },
+  'Single alert': { eventsCount: 0, alertsCount: 1 },
+  'Multiple events': { eventsCount: 2, alertsCount: 0 },
+  'Multiple alerts': { eventsCount: 0, alertsCount: 2 },
+  'Hundreds of events': { eventsCount: 120, alertsCount: 0 },
+  'Hundreds of alerts': { eventsCount: 0, alertsCount: 120 },
+  'One event and one alert': { eventsCount: 1, alertsCount: 1 },
+  'Multiple events and alerts': { eventsCount: 2, alertsCount: 2 },
+  'Hundreds of events and alerts': { eventsCount: 120, alertsCount: 120 },
 };
 
 const Template = () => {
   const nodes: LabelNodeViewModel[] = useMemo(
     () =>
-      Object.entries(nodeDocumentsData).map(([useCaseName, documentsData]) => ({
+      Object.entries(useCases).map(([useCaseName, { eventsCount, alertsCount }]) => ({
         id: useCaseName,
         label: useCaseName,
-        color: 'primary',
+        color: alertsCount >= 1 && eventsCount === 0 ? 'danger' : 'primary',
         interactive: true,
         shape: 'label',
-        documentsData,
+        eventsCount,
+        alertsCount,
       })),
     []
   );

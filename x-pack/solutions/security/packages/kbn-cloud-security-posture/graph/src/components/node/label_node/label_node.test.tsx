@@ -17,7 +17,6 @@ import {
   TEST_SUBJ_HOVER_OUTLINE,
   TEST_SUBJ_TOOLTIP,
 } from './label_node';
-import { analyzeDocuments } from './analyze_documents';
 import { getLabelColors } from '../styles';
 import { EuiThemeComputed } from '@elastic/eui';
 
@@ -131,10 +130,8 @@ describe('LabelNode', () => {
       },
     };
 
-    it('should return danger colors for a single alert', () => {
-      const analysis = analyzeDocuments([{ id: 'alert1', type: 'alert' as const }]);
-
-      const colors = getLabelColors(analysis, mockEuiTheme as EuiThemeComputed);
+    it('should return danger colors when color prop is "danger"', () => {
+      const colors = getLabelColors('danger', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.danger,
         borderColor: mockEuiTheme.colors.danger,
@@ -142,52 +139,8 @@ describe('LabelNode', () => {
       });
     });
 
-    it('should return danger colors for multiple alerts', () => {
-      const analysis = analyzeDocuments([
-        { id: 'alert1', type: 'alert' as const },
-        { id: 'alert2', type: 'alert' as const },
-      ]);
-
-      const colors = getLabelColors(analysis, mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.danger,
-        borderColor: mockEuiTheme.colors.danger,
-        textColor: mockEuiTheme.colors.textInverse,
-      });
-    });
-
-    it('should return primary colors for a single event', () => {
-      const analysis = analyzeDocuments([{ id: 'event1', type: 'event' as const }]);
-
-      const colors = getLabelColors(analysis, mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
-      });
-    });
-
-    it('should return primary colors for multiple events', () => {
-      const analysis = analyzeDocuments([
-        { id: 'event1', type: 'event' as const },
-        { id: 'event2', type: 'event' as const },
-      ]);
-
-      const colors = getLabelColors(analysis, mockEuiTheme as EuiThemeComputed);
-      expect(colors).toEqual({
-        backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
-        borderColor: mockEuiTheme.colors.borderStrongPrimary,
-        textColor: mockEuiTheme.colors.textPrimary,
-      });
-    });
-
-    it('should return primary colors for both events and alerts', () => {
-      const analysis = analyzeDocuments([
-        { id: 'event1', type: 'event' as const },
-        { id: 'alert1', type: 'alert' as const },
-      ]);
-
-      const colors = getLabelColors(analysis, mockEuiTheme as EuiThemeComputed);
+    it('should return primary colors when color prop is "primary"', () => {
+      const colors = getLabelColors('primary', mockEuiTheme as EuiThemeComputed);
       expect(colors).toEqual({
         backgroundColor: mockEuiTheme.colors.backgroundBasePrimary,
         borderColor: mockEuiTheme.colors.borderStrongPrimary,
@@ -221,11 +174,7 @@ describe('LabelNode', () => {
         ...baseProps,
         data: {
           ...baseProps.data,
-          documentsData: [
-            { id: 'event1', type: 'event' as const },
-            { id: 'event2', type: 'event' as const },
-            { id: 'event3', type: 'event' as const },
-          ],
+          eventsCount: 3,
         },
       };
 
@@ -243,11 +192,7 @@ describe('LabelNode', () => {
         ...baseProps,
         data: {
           ...baseProps.data,
-          documentsData: [
-            { id: 'alert1', type: 'alert' as const },
-            { id: 'alert2', type: 'alert' as const },
-            { id: 'alert3', type: 'alert' as const },
-          ],
+          alertsCount: 3,
         },
       };
 

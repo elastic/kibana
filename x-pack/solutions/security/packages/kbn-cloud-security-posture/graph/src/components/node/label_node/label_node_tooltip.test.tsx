@@ -18,8 +18,8 @@ const TEST_SUBJ_EVENT_SECTION = 'label-node-tooltip-event-section';
 const TEST_SUBJ_EVENT_COUNT = 'label-node-tooltip-event-count';
 
 describe('LabelNodeTooltipContent', () => {
-  test('renders nothing when no events or alerts', () => {
-    const analysis = analyzeDocuments([]);
+  test('renders nothing with no events or alerts', () => {
+    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 0 });
 
     const { container } = render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -28,7 +28,7 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with a single event', () => {
-    const analysis = analyzeDocuments([{ id: 'event1', type: 'event' }]);
+    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 0 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -39,7 +39,7 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with a single alert', () => {
-    const analysis = analyzeDocuments([{ id: 'alert1', type: 'alert' }]);
+    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 1 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -52,13 +52,8 @@ describe('LabelNodeTooltipContent', () => {
   });
 
   test('renders with multiple events', () => {
-    const eventCount = 120;
-    const analysis = analyzeDocuments(
-      Array.from({ length: eventCount }, (_, i) => ({
-        id: `event${i + 1}`,
-        type: 'event',
-      }))
-    );
+    const eventsCount = 120;
+    const analysis = analyzeDocuments({ eventsCount, alertsCount: 0 });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -66,17 +61,12 @@ describe('LabelNodeTooltipContent', () => {
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
 
     // Check that the event count badge is rendered for multiple events
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
   });
 
   test('renders with multiple alerts', () => {
-    const alertCount = 120;
-    const analysis = analyzeDocuments(
-      Array.from({ length: alertCount }, (_, i) => ({
-        id: `alert${i + 1}`,
-        type: 'alert',
-      }))
-    );
+    const alertsCount = 120;
+    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -85,24 +75,13 @@ describe('LabelNodeTooltipContent', () => {
 
     // Check that the alert icon and count are both present for multiple alerts
     expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
   });
 
   test('renders with multiple events and alerts', () => {
-    const eventCount = 120;
-    const alertCount = 120;
-
-    const events = Array.from({ length: eventCount }, (_, i) => ({
-      id: `event${i + 1}`,
-      type: 'event' as const,
-    }));
-
-    const alerts = Array.from({ length: alertCount }, (_, i) => ({
-      id: `alert${i + 1}`,
-      type: 'alert' as const,
-    }));
-
-    const analysis = analyzeDocuments([...events, ...alerts]);
+    const eventsCount = 120;
+    const alertsCount = 120;
+    const analysis = analyzeDocuments({ eventsCount, alertsCount });
 
     render(<LabelNodeTooltipContent analysis={analysis} />);
 
@@ -111,9 +90,9 @@ describe('LabelNodeTooltipContent', () => {
 
     // Check that the alert icon and count are both present for multiple alerts
     expect(screen.getByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
 
     // Check that the event count is present for multiple events
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventCount.toString());
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
   });
 });

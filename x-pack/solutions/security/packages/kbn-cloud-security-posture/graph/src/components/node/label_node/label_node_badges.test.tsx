@@ -17,12 +17,7 @@ import { analyzeDocuments } from './analyze_documents';
 
 describe('LabelNodeBadges', () => {
   test('renders nothing for single event', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'event1',
-        type: 'event' as const,
-      },
-    ]);
+    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 0 });
 
     const { container } = render(<LabelNodeBadges analysis={analysis} />);
 
@@ -33,12 +28,7 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders alert badge with icon only for single alert', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'alert1',
-        type: 'alert' as const,
-      },
-    ]);
+    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
@@ -48,62 +38,29 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders event badge with counter for multiple events', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'event1',
-        type: 'event' as const,
-      },
-      {
-        id: 'event2',
-        type: 'event' as const,
-      },
-      {
-        id: 'event3',
-        type: 'event' as const,
-      },
-    ]);
+    const eventsCount = 3;
+    const analysis = analyzeDocuments({ eventsCount, alertsCount: 0 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('3');
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_COUNT)).not.toBeInTheDocument();
   });
 
   test('renders alert badge with icon and counter for multiple alerts', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'alert1',
-        type: 'alert' as const,
-      },
-      {
-        id: 'alert2',
-        type: 'alert' as const,
-      },
-      {
-        id: 'alert3',
-        type: 'alert' as const,
-      },
-    ]);
+    const alertsCount = 3;
+    const analysis = analyzeDocuments({ eventsCount: 0, alertsCount });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_COUNT)).not.toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('3');
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
   });
 
   test('renders event badge with counter and alert badge with icon only for one event and one alert', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'event1',
-        type: 'event' as const,
-      },
-      {
-        id: 'alert1',
-        type: 'alert' as const,
-      },
-    ]);
+    const analysis = analyzeDocuments({ eventsCount: 1, alertsCount: 1 });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
@@ -113,43 +70,20 @@ describe('LabelNodeBadges', () => {
   });
 
   test('renders event badge with counter and alert badge with icon and counter for multiple events and alerts', () => {
-    const analysis = analyzeDocuments([
-      {
-        id: 'event1',
-        type: 'event' as const,
-      },
-      {
-        id: 'event2',
-        type: 'event' as const,
-      },
-      {
-        id: 'alert1',
-        type: 'alert' as const,
-      },
-      {
-        id: 'alert2',
-        type: 'alert' as const,
-      },
-    ]);
+    const eventsCount = 2;
+    const alertsCount = 2;
+    const analysis = analyzeDocuments({ eventsCount, alertsCount });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
-    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('2');
+    expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent(eventsCount.toString());
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('2');
+    expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent(alertsCount.toString());
   });
 
   test('renders event badge with limited counter and alert badge with icon and limited counter for multiple events and alerts', () => {
     const countOverLimit = 120;
-    const events = Array.from({ length: countOverLimit }, (_, i) => ({
-      id: `event${i}`,
-      type: 'event' as const,
-    }));
-    const alerts = Array.from({ length: countOverLimit }, (_, i) => ({
-      id: `alert${i}`,
-      type: 'alert' as const,
-    }));
-    const analysis = analyzeDocuments([...events, ...alerts]);
+    const analysis = analyzeDocuments({ eventsCount: countOverLimit, alertsCount: countOverLimit });
 
     render(<LabelNodeBadges analysis={analysis} />);
 
