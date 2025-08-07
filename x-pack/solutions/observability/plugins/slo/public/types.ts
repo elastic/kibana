@@ -51,7 +51,6 @@ import type {
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
-import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
 
