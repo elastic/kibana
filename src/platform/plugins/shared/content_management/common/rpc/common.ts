@@ -11,8 +11,10 @@ import { schema } from '@kbn/config-schema';
 
 export const itemResultSchema = schema.object(
   {
-    item: schema.object({}, { unknowns: 'allow' }),
+    data: schema.object({}, { unknowns: 'allow' }),
     meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    id: schema.string(),
+    type: schema.string(),
   },
   { unknowns: 'forbid' }
 );
