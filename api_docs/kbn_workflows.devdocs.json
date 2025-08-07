@@ -1707,6 +1707,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.AtomicGraphNode",
+        "type": "Type",
+        "tags": [],
+        "label": "AtomicGraphNode",
+        "description": [],
+        "signature": [
+          "{ id: string; type: \"atomic\"; configuration?: any; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/types/execution/nodes/base.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.BaseStep",
         "type": "Type",
         "tags": [],
@@ -1942,6 +1957,21 @@
           "; startedAt: string; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowSchema",
+        "description": [],
+        "signature": [
+          "{ name: string; enabled: boolean; steps: ({ type: \"foreach\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; foreach: string; timeout?: number | undefined; if?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"if\"; name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; condition: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; else?: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[] | undefined; } | { type: \"parallel\"; name: string; branches: { name: string; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: \"merge\"; name: string; sources: string[]; steps: { name: string; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; 'on-failure'?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; }[]; timeout?: number | undefined; if?: string | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; } | { type: string; name: string; timeout?: number | undefined; if?: string | undefined; with?: Record<string, any> | undefined; foreach?: string | undefined; \"on-failure\"?: { retry: { delay: number; 'max-attempts': number; }; 'fallback-step': string; continue?: boolean | undefined; } | undefined; 'connector-id'?: string | undefined; })[]; triggers: ({ type: \"triggers.elastic.detectionRule\"; enabled: boolean; with: { rule_id: string; } | { rule_name: string; }; } | { type: \"triggers.elastic.scheduled\"; enabled: boolean; with: { every: string; unit: \"year\" | \"month\" | \"week\" | \"day\" | \"hour\" | \"minute\" | \"second\"; } | { cron: string; }; } | { type: \"triggers.elastic.manual\"; enabled: boolean; })[]; tags?: string[] | undefined; description?: string | undefined; settings?: { timezone?: string | undefined; retry?: { 'max-attempts'?: number | undefined; 'timeout-seconds'?: number | undefined; } | undefined; templating?: { engine: \"mustache\" | \"nunjucks\"; } | undefined; } | undefined; inputs?: ({ type: \"string\"; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; } | { type: \"number\"; name: string; description?: string | undefined; default?: number | undefined; required?: boolean | undefined; } | { type: \"boolean\"; name: string; description?: string | undefined; default?: boolean | undefined; required?: boolean | undefined; } | { type: \"choice\"; options: string[]; name: string; description?: string | undefined; default?: string | undefined; required?: boolean | undefined; })[] | undefined; consts?: Record<string, string | number | boolean | any[] | Record<string, any> | {}> | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -3441,6 +3441,14 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
               {
+                "plugin": "reindexService",
+                "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/reindex_indices.ts"
+              },
+              {
+                "plugin": "reindexService",
+                "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/batch_reindex_indices.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
@@ -3699,14 +3707,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_indices/batch_reindex_indices.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -4079,18 +4079,6 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/cases_api_integration/common/plugins/cases/server/routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4491,6 +4479,18 @@
               {
                 "plugin": "dataViewManagement",
                 "path": "src/platform/plugins/shared/data_view_management/server/routes/resolve_index.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/guide_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/config_routes.ts"
               },
               {
                 "plugin": "savedObjectsManagement",
@@ -6265,6 +6265,18 @@
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/prompt.ts"
               },
               {
+                "plugin": "reindexService",
+                "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/reindex_indices.ts"
+              },
+              {
+                "plugin": "reindexService",
+                "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/reindex_indices.ts"
+              },
+              {
+                "plugin": "reindexService",
+                "path": "x-pack/platform/plugins/private/reindex_service/server/src/routes/batch_reindex_indices.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -6483,18 +6495,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/platform/plugins/private/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_indices/reindex_indices.ts"
-              },
-              {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_indices/batch_reindex_indices.ts"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -8159,6 +8159,22 @@
               {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/users/change_password.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/di/server-internal/src/modules/http.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/di/server-internal/src/modules/http.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/di/server-internal/src/modules/http.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/di/server-internal/src/modules/http.test.ts"
               }
             ],
             "returnComment": [],
@@ -8497,10 +8513,6 @@
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts"
               },
               {
-                "plugin": "guidedOnboarding",
-                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
-              },
-              {
                 "plugin": "workchatApp",
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
@@ -8595,6 +8607,10 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/platform/plugins/private/ftr_apis/server/routes/kbn_client_so/update.ts"
+              },
+              {
+                "plugin": "guidedOnboarding",
+                "path": "src/platform/plugins/shared/guided_onboarding/server/routes/plugin_state_routes.ts"
               },
               {
                 "plugin": "workflowsManagement",
