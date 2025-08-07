@@ -3,3 +3,4 @@ dom-to-image-more
 pdf-lib
 tree-dump
 @opentelemetry/exporter-metrics-otlp-http
+inversify
