@@ -853,7 +853,7 @@ describe('dimension editor', () => {
       );
 
       const supportingVisOptions = {
-        none: screen.queryByTitle(/none/i),
+        panel: screen.queryByTitle(/panel/i),
         // in eui when bar or line become disabled they change from input to button so we have to do this weird check
         bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
         trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
@@ -899,7 +899,7 @@ describe('dimension editor', () => {
           const { supportingVisOptions } = renderAdditionalSectionEditor({
             state: { ...stateWOTrend, showBar: false, maxAccessor: undefined },
           });
-          expect(supportingVisOptions.none).toHaveAttribute('aria-pressed', 'true');
+          expect(supportingVisOptions.panel).toHaveAttribute('aria-pressed', 'true');
         });
 
         it('when `showBar` is true and maximum value is not defined, bar should be selected', () => {
@@ -1000,17 +1000,17 @@ describe('dimension editor', () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: stateWOTrend,
           });
-          await clickOnSupportingVis('none');
+          await clickOnSupportingVis('panel');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...stateWOTrend, showBar: false });
           expect(props.removeLayer).not.toHaveBeenCalled();
         });
 
-        it('selects none from trendline', async () => {
+        it('selects panel from trendline', async () => {
           const { clickOnSupportingVis } = renderAdditionalSectionEditor({
             state: metricAccessorState,
           });
-          await clickOnSupportingVis('none');
+          await clickOnSupportingVis('panel');
 
           expect(mockSetState).toHaveBeenCalledWith({ ...metricAccessorState, showBar: false });
           expect(props.removeLayer).toHaveBeenCalledWith(metricAccessorState.trendlineLayerId);
