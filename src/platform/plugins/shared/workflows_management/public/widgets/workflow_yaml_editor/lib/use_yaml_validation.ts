@@ -97,9 +97,12 @@ export function useYamlValidation({
           const path = getCurrentPath(yamlDocument, matchStart);
           const context = getContextForPath(result.data, workflowGraph, path);
 
-          // TODO: validate mustache variable for YAML step
-          if (!_.get(context, match.groups?.key)) {
-            errorMessage = `Variable ${match.groups?.key} is not defined`;
+          if (match.groups?.key) {
+            if (!_.get(context, match.groups.key)) {
+              errorMessage = `Variable ${match.groups?.key} is not defined`;
+            }
+          } else {
+            errorMessage = `Variable is not defined`;
           }
 
           // Add marker for validation issues
