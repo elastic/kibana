@@ -39,7 +39,6 @@ export function extractDimensions(
           ? typeInfo.meta.description.join(', ')
           : typeInfo.meta?.description;
         const ecsDescription = ecsDescriptions.get(fieldName);
-        // const otelDescription = otelConventions.get(fieldName)?.brief;
         const description = fieldCapsDescription || ecsDescription;
 
         dims.push({
