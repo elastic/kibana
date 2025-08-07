@@ -19,6 +19,7 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
+import { CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { result } from '../utils';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
@@ -772,12 +773,6 @@ export default function (providerContext: FtrProviderContext) {
             .send({})
             .expect(200);
 
-          const data = await supertest
-            .get(`/api/fleet/epm/packages/cloud_asset_inventory`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({})
-            .expect(200);
-
           // although enrich policy is already create via 'api/asset_inventory/enable'
           // we still would like to replicate as if cloud asset discovery integration was fully installed
           await supertest
@@ -787,7 +782,7 @@ export default function (providerContext: FtrProviderContext) {
               packages: [
                 {
                   name: 'cloud_asset_inventory',
-                  version: data.body.item.version,
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
                 },
               ],
             })
@@ -882,12 +877,6 @@ export default function (providerContext: FtrProviderContext) {
             .send({})
             .expect(200);
 
-          const data = await supertest
-            .get(`/s/${customNamespaceId}/api/fleet/epm/packages/cloud_asset_inventory`)
-            .set('kbn-xsrf', 'xxxx')
-            .send({})
-            .expect(200);
-
           await supertest
             .post(`/s/${customNamespaceId}/api/fleet/epm/packages/_bulk`)
             .set('kbn-xsrf', 'xxxx')
@@ -895,7 +884,7 @@ export default function (providerContext: FtrProviderContext) {
               packages: [
                 {
                   name: 'cloud_asset_inventory',
-                  version: data.body.item.version,
+                  version: CLOUD_ASSET_DISCOVERY_PACKAGE_VERSION,
                 },
               ],
             })
