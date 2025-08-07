@@ -21,6 +21,12 @@ import { XYChart, type XYChartRenderProps } from './xy_chart';
 import { XYProps } from '../../common/types';
 import { DataLayers } from './data_layers';
 import type { LayerCellValueActions } from '../types';
+import {
+  setupResizeObserverMock,
+  cleanResizeObserverMock,
+  renderChart,
+} from '@kbn/chart-test-jest-helpers';
+import { XScaleTypes } from '../../common/constants';
 
 const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
@@ -94,26 +100,37 @@ describe('provides correct series naming', () => {
     splitAccessors: new Map(),
   };
 
-  test('simplest xy chart without human-readable name', () => {
+  beforeAll(() => {
+    setupResizeObserverMock();
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    cleanResizeObserverMock();
+    jest.useRealTimers();
+  });
+
+  test('simplest xy chart without human-readable name', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
       layers: [
         {
           ...args.layers[0],
+          xAccessor: 'c',
           accessors: ['a'],
-          splitAccessor: undefined,
+          splitAccessors: [],
           columnToLabel: '',
+          xScaleType: XScaleTypes.ORDINAL,
           table: dataWithoutFormats,
         },
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
-    const nameFn = component.find(DataLayers).dive().find(LineSeries).prop('name') as SeriesNameFn;
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
-    expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
+    expect(debugState?.lines).toHaveLength(1);
+    expect(debugState?.lines?.[0]?.name).toBe('a');
   });
 
   test('simplest xy chart with empty name', () => {
