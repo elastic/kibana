@@ -24,7 +24,6 @@ interface FindOptions {
   sortField?: string;
   sortOrder?: estypes.SortOrder;
   esClient: ElasticsearchClient;
-  esFilter?: Filter | Filter[];
   index: string;
   runtimeMappings?: MappingRuntimeFields | undefined;
   logger: Logger;
@@ -45,7 +44,6 @@ export interface FindResponse<T> {
 
 export const findDocuments = async <TSearchSchema>({
   esClient,
-  esFilter,
   filter,
   page,
   perPage,
@@ -57,7 +55,7 @@ export const findDocuments = async <TSearchSchema>({
   aggs,
   mSearch,
 }: FindOptions): Promise<FindResponse<TSearchSchema>> => {
-  let query = getQueryFilter({ filter, esFilter });
+  const query = getQueryFilter({ filter });
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {
@@ -71,27 +69,6 @@ export const findDocuments = async <TSearchSchema>({
   }
   try {
     if (mSearch == null) {
-      if (index.includes('.kibana-elastic-ai-assistant-conversations')) {
-        // buildEsQuery returns filters as a flat list under `bool.filter`, but we need to group them
-        // in a `bool.should` clause with `minimum_should_match: 1` to support logic like:
-        // "users.name is 'elastic' OR there are no users at all".
-        // This manual wrapping is necessary to match the intended query semantics for nested fields.
-        query = {
-          bool: {
-            must: [],
-            filter: [
-              {
-                bool: {
-                  should: [...(query.bool.filter ?? [])],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-            should: [],
-            must_not: [],
-          },
-        };
-      }
       const response = await esClient.search<TSearchSchema>({
         query,
         track_total_hits: true,
