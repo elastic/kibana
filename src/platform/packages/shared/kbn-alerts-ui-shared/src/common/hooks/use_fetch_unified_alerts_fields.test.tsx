@@ -11,7 +11,7 @@ import React, { FC } from 'react';
 import * as ReactQuery from '@tanstack/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
-import { useFetchAlertsFieldsWithNewApi } from './use_fetch_alerts_fields_with_new_api';
+import { useFetchUnifiedAlertsFields } from './use_fetch_unified_alerts_fields';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
@@ -51,7 +51,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should return all fields when empty rule types', async () => {
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsWithNewApi({
+        useFetchUnifiedAlertsFields({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: [],
@@ -80,7 +80,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should fetch for single rule types', () => {
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsWithNewApi({
+        useFetchUnifiedAlertsFields({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: ['logs', 'siem.esqlRule', 'siem.eqlRule'],
@@ -103,7 +103,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
         ruleTypeIds,
         enabled,
       }: React.PropsWithChildren<{ ruleTypeIds: string[]; enabled?: boolean }>) =>
-        useFetchAlertsFieldsWithNewApi(
+        useFetchUnifiedAlertsFields(
           { http: mockHttpClient, toasts: mockToasts, ruleTypeIds },
           { enabled }
         ),
@@ -126,7 +126,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
   it('should call the api only once', async () => {
     const { result, rerender } = renderHook(
       () =>
-        useFetchAlertsFieldsWithNewApi({
+        useFetchUnifiedAlertsFields({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: ['apm'],
@@ -166,7 +166,7 @@ describe('useFetchAlertsFieldsNewApi', () => {
 
     const { result } = renderHook(
       () =>
-        useFetchAlertsFieldsWithNewApi({
+        useFetchUnifiedAlertsFields({
           http: mockHttpClient,
           toasts: mockToasts,
           ruleTypeIds: [],

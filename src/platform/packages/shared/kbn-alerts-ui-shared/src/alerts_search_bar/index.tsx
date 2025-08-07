@@ -14,7 +14,7 @@ import { isSiemRuleType } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
-import { useAlertsDataView, useFetchAlertsFieldsWithNewApi } from '../common/hooks';
+import { useAlertsDataView, useFetchUnifiedAlertsFields } from '../common/hooks';
 
 export type { AlertsSearchBarProps } from './types';
 
@@ -41,7 +41,7 @@ export const AlertsSearchBar = ({
   toasts,
   unifiedSearchBar,
   dataService,
-  enableNewAPIForFields = false,
+  fetchUnifiedAlertsFields = false,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
@@ -49,13 +49,13 @@ export const AlertsSearchBar = ({
     http,
     toasts,
     dataViewsService: dataService.dataViews,
-    enableNewAPIForFields,
+    fetchUnifiedAlertsFields,
   });
 
-  const { data: { fields: alertFields } = {} } = useFetchAlertsFieldsWithNewApi(
+  const { data: { fields: alertFields } = {} } = useFetchUnifiedAlertsFields(
     { http, ruleTypeIds, toasts },
     {
-      enabled: enableNewAPIForFields,
+      enabled: fetchUnifiedAlertsFields,
     }
   );
 
@@ -133,7 +133,7 @@ export const AlertsSearchBar = ({
     showSubmitButton,
     submitOnBlur,
     onQueryChange: onSearchQueryChange,
-    suggestionsAbstraction: isSecurity && !enableNewAPIForFields ? undefined : SA_ALERTS,
+    suggestionsAbstraction: isSecurity && !fetchUnifiedAlertsFields ? undefined : SA_ALERTS,
   });
 };
 

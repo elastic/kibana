@@ -90,7 +90,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               toasts={toasts}
               unifiedSearchBar={SearchBar}
               dataService={data}
-              enableNewAPIForFields={true}
+              fetchUnifiedAlertsFields={true}
             />
           </EuiFormRow>
         </EuiFlexItem>

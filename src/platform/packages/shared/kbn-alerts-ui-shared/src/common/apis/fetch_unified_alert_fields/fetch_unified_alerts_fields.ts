@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { GetAlertFieldsResponse } from '@kbn/alerting-types';
+import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
+import type { FetchUnifiedAlertsFieldsParams } from './types';
 
-export interface FetchAlertsFieldsWithNewApiParams {
-  // Dependencies
-  http: HttpSetup;
-
-  // Params
-  /**
-   * Array of rule type ids used for authorization and area-based filtering
-   */
-  ruleTypeIds: string[];
-}
+export const fetchUnifiedAlertsFields = ({ http, ruleTypeIds }: FetchUnifiedAlertsFieldsParams) => {
+  return http.get<GetAlertFieldsResponse>(`${BASE_RAC_ALERTS_API_PATH}/fields`, {
+    query: { rule_type_ids: ruleTypeIds },
+  });
+};

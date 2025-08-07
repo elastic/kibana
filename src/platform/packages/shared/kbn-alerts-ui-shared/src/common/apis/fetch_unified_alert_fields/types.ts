@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './types';
-export * from './fetch_alerts_fields_with_new_api';
+import type { HttpSetup } from '@kbn/core-http-browser';
+
+export interface FetchUnifiedAlertsFieldsParams {
+  // Dependencies
+  http: HttpSetup;
+
+  // Params
+  /**
+   * Array of rule type ids used for authorization and area-based filtering
+   */
+  ruleTypeIds: string[];
+}

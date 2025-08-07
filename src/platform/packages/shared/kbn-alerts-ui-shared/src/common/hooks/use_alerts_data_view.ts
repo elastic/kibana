@@ -25,7 +25,7 @@ export interface UseAlertsDataViewParams {
   http: HttpStart;
   dataViewsService: DataViewsContract;
   toasts: ToastsStart;
-  enableNewAPIForFields?: boolean;
+  fetchUnifiedAlertsFields?: boolean;
 
   // Params
   /**
@@ -98,7 +98,7 @@ export const useAlertsDataView = ({
   dataViewsService,
   toasts,
   ruleTypeIds,
-  enableNewAPIForFields = false,
+  fetchUnifiedAlertsFields = false,
 }: UseAlertsDataViewParams): UseAlertsDataViewResult => {
   const includesSecurity = ruleTypeIds.some(isSiemRuleType);
   const isOnlySecurity = ruleTypeIds.length > 0 && ruleTypeIds.every(isSiemRuleType);
@@ -114,7 +114,7 @@ export const useAlertsDataView = ({
     {
       // Don't fetch index names when ruleTypeIds includes both Security Solution and other features or using new api to fetch fields
       enabled:
-        !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity) && !enableNewAPIForFields,
+        !!ruleTypeIds.length && (isOnlySecurity || !includesSecurity) && !fetchUnifiedAlertsFields,
     }
   );
 
@@ -127,7 +127,7 @@ export const useAlertsDataView = ({
     { http, ruleTypeIds },
     {
       // Don't fetch fields when ruleTypeIds includes Security Solution or using new api to fetch fields
-      enabled: !!ruleTypeIds.length && !includesSecurity && !enableNewAPIForFields,
+      enabled: !!ruleTypeIds.length && !includesSecurity && !fetchUnifiedAlertsFields,
     }
   );
 
@@ -173,7 +173,7 @@ export const useAlertsDataView = ({
 
   return useMemo(() => {
     let isLoading: boolean;
-    if (!ruleTypeIds.length || hasMixedFeatureIds || enableNewAPIForFields) {
+    if (!ruleTypeIds.length || hasMixedFeatureIds || fetchUnifiedAlertsFields) {
       isLoading = false;
     } else {
       if (isOnlySecurity) {
@@ -200,6 +200,6 @@ export const useAlertsDataView = ({
     isLoadingFields,
     isLoadingIndexNames,
     isOnlySecurity,
-    enableNewAPIForFields,
+    fetchUnifiedAlertsFields,
   ]);
 };

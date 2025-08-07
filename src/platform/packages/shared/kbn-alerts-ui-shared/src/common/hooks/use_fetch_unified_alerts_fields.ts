@@ -11,24 +11,23 @@ import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import type { QueryOptionsOverrides } from '../types/tanstack_query_utility_types';
-import type { FetchAlertsFieldsWithNewApiParams } from '../apis/fetch_alert_fields_with_new_api';
-import { fetchAlertsFieldsWithNewApi } from '../apis/fetch_alert_fields_with_new_api';
+import type { FetchUnifiedAlertsFieldsParams } from '../apis/fetch_unified_alert_fields';
+import { fetchUnifiedAlertsFields } from '../apis/fetch_unified_alert_fields/fetch_unified_alerts_fields';
 
-export type UseFetchAlertsFieldsWithNewApiQueryParams = FetchAlertsFieldsWithNewApiParams & {
+export type UseFetchUnifiedAlertsFieldsQueryParams = FetchUnifiedAlertsFieldsParams & {
   toasts: ToastsStart;
 };
 
 // Query key prefix MUST contain explicit strings, not fetchAlertsFieldsViaNewApi.name
 // Production builds cannot guarantee a unique function name
-const queryKeyPrefix = ['alerts', 'fetchAlertsFieldsViaNewApi'];
-
+const queryKeyPrefix = ['alerts', 'fetchUnifiedAlertsFields'];
 /**
  * Fetch fields for the given rule type ids
  */
-export const useFetchAlertsFieldsWithNewApi = (
-  { http, ...params }: UseFetchAlertsFieldsWithNewApiQueryParams,
+export const useFetchUnifiedAlertsFields = (
+  { http, ...params }: UseFetchUnifiedAlertsFieldsQueryParams,
   options?: Pick<
-    QueryOptionsOverrides<typeof fetchAlertsFieldsWithNewApi>,
+    QueryOptionsOverrides<typeof fetchUnifiedAlertsFields>,
     'placeholderData' | 'context' | 'onError' | 'refetchOnWindowFocus' | 'staleTime' | 'enabled'
   >
 ) => {
@@ -36,7 +35,7 @@ export const useFetchAlertsFieldsWithNewApi = (
 
   return useQuery({
     queryKey: queryKeyPrefix.concat(ruleTypeIds),
-    queryFn: () => fetchAlertsFieldsWithNewApi({ http, ruleTypeIds }),
+    queryFn: () => fetchUnifiedAlertsFields({ http, ruleTypeIds }),
     placeholderData: { fields: [] },
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -44,7 +43,7 @@ export const useFetchAlertsFieldsWithNewApi = (
     enabled: options?.enabled == null || options.enabled,
     onError: () => {
       toasts.addDanger(
-        i18n.translate('alertsUIShared.hooks.useFetchAlertsFieldsNewApi.fetchErrorMessage', {
+        i18n.translate('alertsUIShared.hooks.useFetchUnifiedAlertsFields.fetchErrorMessage', {
           defaultMessage: 'Unable to load alert fields',
         })
       );

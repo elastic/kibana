@@ -12,7 +12,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { Filter, FilterStateStore } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { useAlertsDataView, useFetchAlertsFieldsWithNewApi } from '../common/hooks';
+import { useAlertsDataView, useFetchUnifiedAlertsFields } from '../common/hooks';
 import { AlertsSearchBar } from '.';
 import { HttpStart } from '@kbn/core-http-browser';
 
@@ -22,7 +22,7 @@ jest.mock('../common/hooks');
 
 const mockUseAlertsDataView = jest.mocked(useAlertsDataView);
 
-const mockUseFetchAlertsFieldsWithNewApi = jest.mocked(useFetchAlertsFieldsWithNewApi);
+const mockUseFetchUnifiedAlertsFields = jest.mocked(useFetchUnifiedAlertsFields);
 
 const unifiedSearchBarMock = jest.fn().mockImplementation((props) => (
   <button
@@ -74,7 +74,7 @@ describe('AlertsSearchBar', () => {
     });
 
     // @ts-expect-error: mocking only necessary attributes
-    mockUseFetchAlertsFieldsWithNewApi.mockReturnValue({
+    mockUseFetchUnifiedAlertsFields.mockReturnValue({
       isLoading: false,
       data: {
         fields: [],
@@ -299,7 +299,7 @@ describe('AlertsSearchBar', () => {
     });
   });
 
-  describe('With enableNewAPIForFields', () => {
+  describe('With fetchUnifiedAlertsFields', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       mockUseAlertsDataView.mockReturnValue({
@@ -307,7 +307,7 @@ describe('AlertsSearchBar', () => {
         dataView: undefined,
       });
 
-      mockUseFetchAlertsFieldsWithNewApi.mockReturnValue({
+      mockUseFetchUnifiedAlertsFields.mockReturnValue({
         isLoading: false,
         data: {
           fields: [
@@ -337,7 +337,7 @@ describe('AlertsSearchBar', () => {
       });
     });
 
-    it('calls mockUseFetchAlertsFieldsWithNewApi correctly with enabled true', async () => {
+    it('calls mockUseFetchUnifiedAlertsFields correctly with enabled true', async () => {
       render(
         <AlertsSearchBar
           rangeFrom="now/d"
@@ -350,7 +350,7 @@ describe('AlertsSearchBar', () => {
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -358,11 +358,11 @@ describe('AlertsSearchBar', () => {
         http: httpMock,
         ruleTypeIds: [],
         toasts: toastsMock,
-        enableNewAPIForFields: true,
+        fetchUnifiedAlertsFields: true,
         dataViewsService: mockDataPlugin.dataViews,
       });
 
-      expect(mockUseFetchAlertsFieldsWithNewApi).toHaveBeenCalledWith(
+      expect(mockUseFetchUnifiedAlertsFields).toHaveBeenCalledWith(
         { http: httpMock, ruleTypeIds: [], toasts: toastsMock },
         { enabled: true }
       );
@@ -381,7 +381,7 @@ describe('AlertsSearchBar', () => {
           http={httpMock}
           dataService={mockDataPlugin}
           appName={'test'}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -407,7 +407,7 @@ describe('AlertsSearchBar', () => {
           onFiltersUpdated={jest.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['siem.esqlRuleType', '.esQuery']}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -434,7 +434,7 @@ describe('AlertsSearchBar', () => {
           onFiltersUpdated={jest.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery']}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -461,7 +461,7 @@ describe('AlertsSearchBar', () => {
           onFiltersUpdated={jest.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
           ruleTypeIds={['.esQuery', 'apm.anomaly', 'siem.esqlRuleType']}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -506,7 +506,7 @@ describe('AlertsSearchBar', () => {
           appName={'test'}
           onFiltersUpdated={jest.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 
@@ -540,7 +540,7 @@ describe('AlertsSearchBar', () => {
 
     it('calls the unifiedSearchBar with correct index patters without data views', async () => {
       // @ts-expect-error: mocking only necessary attributes
-      jest.mocked(mockUseFetchAlertsFieldsWithNewApi).mockReturnValue({
+      jest.mocked(mockUseFetchUnifiedAlertsFields).mockReturnValue({
         isLoading: false,
         data: {
           fields: [],
@@ -559,7 +559,7 @@ describe('AlertsSearchBar', () => {
           appName={'test'}
           onFiltersUpdated={jest.fn()}
           unifiedSearchBar={unifiedSearchBarMock}
-          enableNewAPIForFields={true}
+          fetchUnifiedAlertsFields={true}
         />
       );
 

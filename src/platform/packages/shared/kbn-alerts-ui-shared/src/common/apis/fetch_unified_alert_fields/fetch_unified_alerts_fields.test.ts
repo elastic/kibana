@@ -8,9 +8,9 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { fetchAlertsFieldsWithNewApi } from './fetch_alerts_fields_with_new_api';
+import { fetchUnifiedAlertsFields } from './fetch_unified_alerts_fields';
 
-describe('fetchAlertsFieldsWithNewApi', () => {
+describe('fetchUnifiedAlertsFields', () => {
   const http = httpServiceMock.createStartContract();
   const ruleTypeIds = ['.es-query'];
   test('should call the alerts fields API with the correct parameters', async () => {
@@ -22,7 +22,7 @@ describe('fetchAlertsFieldsWithNewApi', () => {
       ],
     });
 
-    await fetchAlertsFieldsWithNewApi({ http, ruleTypeIds });
+    await fetchUnifiedAlertsFields({ http, ruleTypeIds });
 
     expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/fields', {
       query: { rule_type_ids: ruleTypeIds },
@@ -37,7 +37,7 @@ describe('fetchAlertsFieldsWithNewApi', () => {
         },
       ],
     });
-    const result = await fetchAlertsFieldsWithNewApi({ http, ruleTypeIds });
+    const result = await fetchUnifiedAlertsFields({ http, ruleTypeIds });
 
     expect(result).toEqual({
       fields: [
@@ -51,7 +51,7 @@ describe('fetchAlertsFieldsWithNewApi', () => {
   test('should not return alerts fields when error', async () => {
     http.get.mockRejectedValueOnce(new Error('Failed to fetch'));
 
-    await expect(fetchAlertsFieldsWithNewApi({ http, ruleTypeIds })).rejects.toThrow(
+    await expect(fetchUnifiedAlertsFields({ http, ruleTypeIds })).rejects.toThrow(
       'Failed to fetch'
     );
   });

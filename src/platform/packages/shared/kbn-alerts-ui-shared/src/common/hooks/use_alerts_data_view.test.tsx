@@ -131,13 +131,13 @@ describe('useAlertsDataView', () => {
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(0);
   });
 
-  it('does not fetch anything if enableNewAPIForFields is true', async () => {
+  it('does not fetch anything if fetchUnifiedAlertsFields is true', async () => {
     const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
           ruleTypeIds: ['apm', 'logs'],
-          enableNewAPIForFields: true,
+          fetchUnifiedAlertsFields: true,
         }),
       {
         wrapper,
