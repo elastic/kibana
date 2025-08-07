@@ -159,15 +159,16 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       ? new Date(workflowExecution.finishedAt)
       : new Date();
 
-    // Expand time range to include task transaction which starts before workflow execution
-    // Task transaction can start up to 1 second before workflow execution begins
-    const expandedStartTime = new Date(startedAt.getTime() - 1000); // 1 second before
-    const expandedEndTime = new Date(finishedAt.getTime() + 1000); // 1 second after
+    // Expand time range to include parent transaction (task manager, alerting, etc.)
+    // For alerting-triggered workflows, the parent trace can start much earlier
+    // Use a generous time range to ensure we capture the full trace
+    const expandedStartTime = new Date(startedAt.getTime() - 30000); // 30 seconds before
+    const expandedEndTime = new Date(finishedAt.getTime() + 30000); // 30 seconds after
 
     // eslint-disable-next-line no-console
     console.log('🎯 Using STORED trace ID for embeddable:', foundTraceId);
     // eslint-disable-next-line no-console
-    console.log('🎯 Time range expanded for task transaction:', {
+    console.log('🎯 Time range expanded for parent trace (alerting/task):', {
       originalStart: startedAt.toISOString(),
       expandedStart: expandedStartTime.toISOString(),
       originalEnd: finishedAt.toISOString(),
@@ -178,7 +179,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       traceId: foundTraceId, // 🔥 KEY CHANGE: Use the stored trace ID from workflow execution
       rangeFrom: expandedStartTime.toISOString(),
       rangeTo: expandedEndTime.toISOString(),
-      serviceName: 'workflow-engine',
       entryTransactionId:
         foundEntryTransactionId ||
         workflowExecution.stepExecutions?.[0]?.id ||
@@ -301,6 +301,19 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           {/* Show embeddable when trace is found */}
           {hasApmTrace && !traceSearchLoading && traceId && (
             <>
+              {/* Debug logging for embeddable parameters */}
+              {(() => {
+                // eslint-disable-next-line no-console
+                console.log('🔍 Embeddable parameters:', {
+                  traceId,
+                  rangeFrom,
+                  rangeTo,
+                  entryTransactionId,
+                  workflowExecutionId,
+                  hasApmTrace,
+                });
+                return null;
+              })()}
               <div
                 style={{
                   minHeight: '300px', // Minimum height but allows growth

@@ -285,101 +285,150 @@ export class WorkflowExecutionRuntimeManager {
     // eslint-disable-next-line no-console
     console.log('🚀 Starting workflow execution with APM tracing:', this.workflowExecution.id);
 
-    // Reuse the existing Task Manager transaction for workflow execution
-    // This keeps things simple with just one transaction for the entire flow
     const existingTransaction = agent.currentTransaction;
 
     if (existingTransaction) {
-      // Store the task transaction as our workflow transaction
-      this.workflowTransaction = existingTransaction;
+      // Check if this is triggered by alerting (has alerting labels) or task manager directly
+      const isTriggeredByAlerting = !!(existingTransaction as any)._labels?.alerting_rule_id;
 
-      // Add workflow-specific labels to the existing transaction
-      existingTransaction.addLabels({
-        workflow_execution_id: this.workflowExecution.id,
-        workflow_id: this.workflowExecution.workflowId,
-        service_name: 'kibana',
-        transaction_hierarchy: 'task->steps',
-      });
-
-      // Debug: Check if the task transaction has a parent (this might be the issue)
       // eslint-disable-next-line no-console
-      console.log('🔍 Task transaction parent debug:', {
-        hasParentId: !!(existingTransaction as any).parentId,
-        parentId: (existingTransaction as any).parentId,
-        transactionId: existingTransaction.ids?.['transaction.id'],
+      console.log('🔍 Transaction context:', {
         transactionName: existingTransaction.name,
         transactionType: existingTransaction.type,
-        traceId: (existingTransaction as any).trace?.id || this.traceId,
+        isTriggeredByAlerting,
+        alertingRuleId: (existingTransaction as any)._labels?.alerting_rule_id,
+        transactionId: existingTransaction.ids?.['transaction.id'],
       });
 
-      // Store the task transaction ID in the workflow execution
-      // This will be used as the entryTransactionId for the trace embeddable
-      const taskTransactionId = existingTransaction.ids?.['transaction.id'];
-      if (taskTransactionId) {
+      if (isTriggeredByAlerting) {
+        // For alerting-triggered workflows, create a dedicated workflow transaction
+        // This provides a focused view for the embeddable instead of the entire alerting trace
         // eslint-disable-next-line no-console
-        console.log('💾 Storing task transaction ID:', taskTransactionId);
+        console.log('📊 Creating dedicated workflow transaction within alerting trace');
 
-        // Update the workflow execution with the task transaction ID
-        await this.workflowExecutionRepository.updateWorkflowExecution({
-          id: this.workflowExecution.id,
-          entryTransactionId: taskTransactionId,
+        const workflowTransaction = agent.startTransaction(
+          `workflow.execution.${this.workflowExecution.workflowId}`,
+          'workflow_execution'
+        );
+
+        this.workflowTransaction = workflowTransaction;
+
+        // Add workflow-specific labels
+        workflowTransaction.addLabels({
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: 'alerting->workflow->steps',
+          triggered_by: 'alerting',
+          parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
         });
 
-        // Update our local copy
-        this.workflowExecution = {
-          ...this.workflowExecution,
-          entryTransactionId: taskTransactionId,
-        };
+        // Make the workflow transaction the current transaction for subsequent spans
+        (agent as any).setCurrentTransaction(workflowTransaction);
 
-        // eslint-disable-next-line no-console
-        console.log('✅ Task transaction ID stored in workflow execution');
-      }
+        // Store the workflow transaction ID (not the alerting transaction ID)
+        const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
+        if (workflowTransactionId) {
+          // eslint-disable-next-line no-console
+          console.log('💾 Storing workflow transaction ID:', workflowTransactionId);
 
-      // Capture the real APM trace ID from the transaction
-      let realTraceId: string | undefined;
-      // eslint-disable-next-line no-console
-      console.log('🔍 Reusing task transaction for workflow execution');
-      // eslint-disable-next-line no-console
-      console.log('🔍 Transaction object keys:', Object.keys(existingTransaction));
-      // eslint-disable-next-line no-console
-      console.log('🔍 Transaction object ids:', existingTransaction.ids);
-      // eslint-disable-next-line no-console
-      console.log('🔍 Transaction object trace info:', {
-        traceId: (existingTransaction as any)?.traceId,
-        trace: (existingTransaction as any)?.trace,
-        ids: existingTransaction.ids,
-      });
+          await this.workflowExecutionRepository.updateWorkflowExecution({
+            id: this.workflowExecution.id,
+            entryTransactionId: workflowTransactionId,
+          });
 
-      if ((existingTransaction as any)?.traceId) {
-        realTraceId = (existingTransaction as any).traceId;
-        // eslint-disable-next-line no-console
-        console.log('🎯 Captured APM trace ID from existingTransaction.traceId:', realTraceId);
-      } else if (existingTransaction.ids?.['trace.id']) {
-        realTraceId = existingTransaction.ids['trace.id'];
-        // eslint-disable-next-line no-console
-        console.log(
-          '🎯 Captured APM trace ID from existingTransaction.ids[trace.id]:',
-          realTraceId
-        );
-      } else if ((existingTransaction as any)?.trace?.id) {
-        realTraceId = (existingTransaction as any).trace.id;
-        // eslint-disable-next-line no-console
-        console.log('🎯 Captured APM trace ID from existingTransaction.trace.id:', realTraceId);
+          this.workflowExecution = {
+            ...this.workflowExecution,
+            entryTransactionId: workflowTransactionId,
+          };
+
+          // eslint-disable-next-line no-console
+          console.log('✅ Workflow transaction ID stored in workflow execution');
+        }
+
+        // Capture trace ID from the workflow transaction
+        let realTraceId: string | undefined;
+        if ((workflowTransaction as any)?.traceId) {
+          realTraceId = (workflowTransaction as any).traceId;
+        } else if (workflowTransaction.ids?.['trace.id']) {
+          realTraceId = workflowTransaction.ids['trace.id'];
+        } else if ((workflowTransaction as any)?.trace?.id) {
+          realTraceId = (workflowTransaction as any).trace.id;
+        }
+
+        if (realTraceId) {
+          // eslint-disable-next-line no-console
+          console.log('🎯 Captured APM trace ID from workflow transaction:', realTraceId);
+          await this.workflowExecutionRepository.updateWorkflowExecution({
+            id: this.workflowExecution.id,
+            traceId: realTraceId,
+          });
+
+          this.workflowExecution = {
+            ...this.workflowExecution,
+            traceId: realTraceId,
+          };
+        }
       } else {
+        // For task manager triggered workflows, reuse the existing transaction
         // eslint-disable-next-line no-console
-        console.log('⚠️ Could not capture APM trace ID, using this.traceId as fallback');
-        realTraceId = this.traceId;
-      }
+        console.log('📊 Reusing task manager transaction for workflow execution');
 
-      // eslint-disable-next-line no-console
-      console.log('🚀 Task transaction with workflow labels:', {
-        workflow_execution_id: this.workflowExecution.id,
-        workflow_id: this.workflowExecution.workflowId,
-        trace_id: realTraceId,
-        service_name: 'kibana',
-        transaction_type: 'task-run',
-        workflow_reused: true,
-      });
+        this.workflowTransaction = existingTransaction;
+
+        // Add workflow-specific labels to the existing transaction
+        existingTransaction.addLabels({
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: 'task->steps',
+          triggered_by: 'task_manager',
+        });
+
+        // Store the task transaction ID in the workflow execution
+        const taskTransactionId = existingTransaction.ids?.['transaction.id'];
+        if (taskTransactionId) {
+          // eslint-disable-next-line no-console
+          console.log('💾 Storing task transaction ID:', taskTransactionId);
+
+          await this.workflowExecutionRepository.updateWorkflowExecution({
+            id: this.workflowExecution.id,
+            entryTransactionId: taskTransactionId,
+          });
+
+          this.workflowExecution = {
+            ...this.workflowExecution,
+            entryTransactionId: taskTransactionId,
+          };
+
+          // eslint-disable-next-line no-console
+          console.log('✅ Task transaction ID stored in workflow execution');
+        }
+
+        // Capture trace ID from the task transaction
+        let realTraceId: string | undefined;
+        if ((existingTransaction as any)?.traceId) {
+          realTraceId = (existingTransaction as any).traceId;
+        } else if (existingTransaction.ids?.['trace.id']) {
+          realTraceId = existingTransaction.ids['trace.id'];
+        } else if ((existingTransaction as any)?.trace?.id) {
+          realTraceId = (existingTransaction as any).trace.id;
+        }
+
+        if (realTraceId) {
+          // eslint-disable-next-line no-console
+          console.log('🎯 Captured APM trace ID from task transaction:', realTraceId);
+          await this.workflowExecutionRepository.updateWorkflowExecution({
+            id: this.workflowExecution.id,
+            traceId: realTraceId,
+          });
+
+          this.workflowExecution = {
+            ...this.workflowExecution,
+            traceId: realTraceId,
+          };
+        }
+      }
 
       const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
         id: this.workflowExecution.id,
@@ -387,7 +436,6 @@ export class WorkflowExecutionRuntimeManager {
         startedAt: new Date().toISOString(),
         workflowId: this.workflowExecution.workflowId,
         triggeredBy: this.workflowExecution.triggeredBy,
-        traceId: realTraceId, // Store the real APM trace ID
       };
       await this.workflowExecutionRepository.updateWorkflowExecution(updatedWorkflowExecution);
       this.workflowExecution = {
@@ -455,13 +503,21 @@ export class WorkflowExecutionRuntimeManager {
           ...workflowExecutionUpdate,
         };
 
-        // Update the task transaction outcome on failure
-        // Task Manager will handle ending the transaction
+        // Update the workflow transaction outcome on failure
         if (this.workflowTransaction) {
           this.workflowTransaction.outcome = 'failure';
-          // eslint-disable-next-line no-console
-          console.log('🏁 Task transaction outcome updated: failure (explicit fail)');
-          // Note: Task Manager will end the transaction when the task completes
+
+          // For alerting-triggered workflows, we created a dedicated transaction and need to end it
+          const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
+          if (isTriggeredByAlerting) {
+            this.workflowTransaction.end();
+            // eslint-disable-next-line no-console
+            console.log('🏁 Workflow transaction ended: failure (alerting-triggered)');
+          } else {
+            // For task manager triggered workflows, Task Manager will handle ending
+            // eslint-disable-next-line no-console
+            console.log('🏁 Task transaction outcome updated: failure (task manager will end)');
+          }
         }
       }
     );
@@ -496,14 +552,26 @@ export class WorkflowExecutionRuntimeManager {
       workflowExecutionUpdate.finishedAt = completeDate.toISOString();
       workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
 
-      // Update the task transaction outcome when workflow completes
-      // Task Manager will handle ending the transaction
+      // Update the workflow transaction outcome when workflow completes
       if (this.workflowTransaction) {
         const isSuccess = workflowExecutionUpdate.status === ExecutionStatus.COMPLETED;
         this.workflowTransaction.outcome = isSuccess ? 'success' : 'failure';
-        // eslint-disable-next-line no-console
-        console.log(`🏁 Task transaction outcome updated: ${this.workflowTransaction.outcome}`);
-        // Note: Task Manager will end the transaction when the task completes
+
+        // For alerting-triggered workflows, we created a dedicated transaction and need to end it
+        const isTriggeredByAlerting = this.workflowTransaction.type === 'workflow_execution';
+        if (isTriggeredByAlerting) {
+          this.workflowTransaction.end();
+          // eslint-disable-next-line no-console
+          console.log(
+            `🏁 Workflow transaction ended: ${this.workflowTransaction.outcome} (alerting-triggered)`
+          );
+        } else {
+          // For task manager triggered workflows, Task Manager will handle ending
+          // eslint-disable-next-line no-console
+          console.log(
+            `🏁 Task transaction outcome updated: ${this.workflowTransaction.outcome} (task manager will end)`
+          );
+        }
       }
     }
 

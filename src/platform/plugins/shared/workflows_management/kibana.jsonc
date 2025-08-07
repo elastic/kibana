@@ -23,7 +23,6 @@
       "embeddable"
     ],
     "optionalPlugins": [
-      "apm",
       "alerting"
     ]
   }

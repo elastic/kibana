@@ -15,6 +15,9 @@ interface WorkflowTraceSearchResult {
   entryTransactionId: string | null;
   loading: boolean;
   error: Error | null;
+  isTraceComplete: boolean;
+  expectedSpanCount: number | null;
+  actualSpanCount: number | null;
 }
 
 // APM API response structure for root transaction
@@ -36,6 +39,9 @@ export function useWorkflowTraceSearch({
     entryTransactionId: null,
     loading: false,
     error: null,
+    isTraceComplete: false,
+    expectedSpanCount: null,
+    actualSpanCount: null,
   });
 
   const { services } = useKibana();
@@ -49,6 +55,9 @@ export function useWorkflowTraceSearch({
         entryTransactionId: null,
         loading: false,
         error: new Error('No trace ID found for this workflow execution'),
+        isTraceComplete: false,
+        expectedSpanCount: null,
+        actualSpanCount: null,
       });
       return;
     }
@@ -65,6 +74,9 @@ export function useWorkflowTraceSearch({
         entryTransactionId: workflowExecution.entryTransactionId,
         loading: false,
         error: null,
+        isTraceComplete: true, // Assume complete if we have stored data
+        expectedSpanCount: null,
+        actualSpanCount: null,
       });
       return;
     }
@@ -79,14 +91,14 @@ export function useWorkflowTraceSearch({
         // eslint-disable-next-line no-console
         console.log('🔍 Fetching root transaction for trace:', workflowExecution.traceId);
 
-        // Calculate time range for the search (expanded to include task transaction)
+        // Calculate time range for the search (expanded to include parent transaction)
         const startedAt = new Date(workflowExecution.startedAt);
         const finishedAt = workflowExecution.finishedAt
           ? new Date(workflowExecution.finishedAt)
           : new Date();
 
-        const expandedStartTime = new Date(startedAt.getTime() - 1000);
-        const expandedEndTime = new Date(finishedAt.getTime() + 1000);
+        const expandedStartTime = new Date(startedAt.getTime() - 30000); // 30 seconds before
+        const expandedEndTime = new Date(finishedAt.getTime() + 30000); // 30 seconds after
 
         const response = (await services.http?.get(
           `/internal/apm/traces/${workflowExecution.traceId}/root_transaction`,
@@ -106,6 +118,9 @@ export function useWorkflowTraceSearch({
             entryTransactionId: response.transaction.id,
             loading: false,
             error: null,
+            isTraceComplete: true,
+            expectedSpanCount: null,
+            actualSpanCount: null,
           });
         } else {
           // eslint-disable-next-line no-console
@@ -115,6 +130,9 @@ export function useWorkflowTraceSearch({
             entryTransactionId: workflowExecution.traceId, // Fallback to trace ID
             loading: false,
             error: null,
+            isTraceComplete: true,
+            expectedSpanCount: null,
+            actualSpanCount: null,
           });
         }
       } catch (error) {
@@ -126,6 +144,9 @@ export function useWorkflowTraceSearch({
           entryTransactionId: workflowExecution.traceId, // Fallback to trace ID
           loading: false,
           error: null, // Don't treat this as an error since we have the trace ID
+          isTraceComplete: true,
+          expectedSpanCount: null,
+          actualSpanCount: null,
         });
       }
     };
