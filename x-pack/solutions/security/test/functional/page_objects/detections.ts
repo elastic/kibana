@@ -48,7 +48,7 @@ export class DetectionsPageObject extends FtrService {
 
   async replaceIndexPattern(): Promise<void> {
     const buttons = await this.find.allByCssSelector('[data-test-subj="comboBoxInput"] button');
-    await buttons.map(async (button: WebElementWrapper) => await button.click());
+    await Promise.all(buttons.map((button: WebElementWrapper) => button.click()));
     await this.testSubjects.setValue('comboBoxSearchInput', '*');
   }
 
