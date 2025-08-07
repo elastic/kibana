@@ -9,9 +9,9 @@
 
 import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 
 const getExpectedError = (fnName: string, givenTypes: string[]) => {
   const definition = buildFunctionLookup().get(fnName)!;
@@ -836,6 +836,51 @@ describe('function validation', () => {
         'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
         []
       );
+    });
+
+    it('should allow ambiguous invocation when it could match an available signature', async () => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.SCALAR,
+          name: 'test',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'integer',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM', // licensed signature
+              returnType: 'keyword',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              license: undefined, // no license required
+              returnType: 'keyword',
+            },
+          ],
+          locationsAvailable: [Location.EVAL],
+        },
+      ]);
+
+      const { expectErrors, callbacks } = await setup();
+
+      // make license unavailable
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: () => false,
+      }));
+
+      // make ambiguous call using a parameter "?param" that could match either signature
+      await expectErrors('FROM index | EVAL extent = TEST(?param)', []);
     });
 
     it('should disallow licensed signature when license NOT available', async () => {

@@ -21,7 +21,6 @@ import {
   isOptionNode,
   isParamLiteral,
   isParametrized,
-  isStringLiteral,
   isTimeInterval,
 } from '../../../ast/is';
 import {
@@ -132,7 +131,54 @@ class FunctionValidator {
   }
 
   /**
-   * Checks if the function is valid for the current license
+   * Validates the function arguments against the function definition
+   */
+  private validateArguments(): ESQLMessage[] {
+    if (!this.definition) {
+      return [];
+    }
+
+    // Begin validation
+    const A = getSignaturesWithMatchingArity(this.definition, this.fn);
+
+    if (!A.length) {
+      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+    }
+
+    const S = getSignaturesMatchingTypes(this.definition, this.argTypes, this.argLiteralsMask);
+
+    if (!S.length) {
+      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+    }
+
+    if (!S.some((sig) => this.licenseOk(sig.license))) {
+      return [errors.licenseRequiredForSignature(this.fn, S[0])];
+    }
+
+    return [];
+  }
+
+  /**
+   * Validates the nested functions within the current function
+   */
+  private validateNestedFunctions(): ESQLMessage[] {
+    const nestedErrors: ESQLMessage[] = [];
+    for (const arg of this.fn.args.flat()) {
+      if (isFunctionExpression(arg)) {
+        nestedErrors.push(
+          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
+        );
+      }
+
+      if (nestedErrors.length) {
+        return nestedErrors;
+      }
+    }
+    return nestedErrors;
+  }
+
+  /**
+   * Checks if the current license level is sufficient the given license requirement
    */
   private licenseOk(license: ESQLSignatureLicenseType | undefined): boolean {
     const hasMinimumLicenseRequired = this.callbacks.hasMinimumLicenseRequired;
@@ -158,53 +204,6 @@ class FunctionValidator {
     const arity = this.fn.args.length;
     return arity >= min && arity <= max;
   }
-
-  /**
-   * Validates the function arguments against the function definition
-   */
-  private validateArguments(): ESQLMessage[] {
-    if (!this.definition) {
-      return [];
-    }
-
-    // Begin validation
-    const A = getSignaturesWithMatchingArity(this.definition, this.fn);
-
-    if (!A.length) {
-      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
-    }
-
-    const S = getSignatureWithMatchingTypes(this.definition, this.argTypes, this.argLiteralsMask);
-
-    if (!S) {
-      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
-    }
-
-    if (!this.licenseOk(S.license)) {
-      return [errors.licenseRequiredForSignature(this.fn, S)];
-    }
-
-    return [];
-  }
-
-  /**
-   * Validates the nested functions within the current function
-   */
-  private validateNestedFunctions(): ESQLMessage[] {
-    const nestedErrors: ESQLMessage[] = [];
-    for (const arg of this.fn.args.flat()) {
-      if (isFunctionExpression(arg)) {
-        nestedErrors.push(
-          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
-        );
-      }
-
-      if (nestedErrors.length) {
-        return nestedErrors;
-      }
-    }
-    return nestedErrors;
-  }
 }
 
 const FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FieldType[] = ['date', 'date_nanos'];
@@ -213,16 +212,14 @@ const FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FieldType[] = ['date', '
  * Returns a signature matching the given types if it exists
  * @param definition
  * @param types
- *
- * @TODO handle variadic etc.
  */
-function getSignatureWithMatchingTypes(
+function getSignaturesMatchingTypes(
   definition: FunctionDefinition,
   givenTypes: Array<SupportedDataType | 'unknown'>,
-  // a boolean array indicating if the argument is a literal
+  // a boolean array indicating which args are literals
   literalMask: boolean[]
-): FunctionDefinition['signatures'][number] | undefined {
-  return definition.signatures.find((sig) => {
+): FunctionDefinition['signatures'] {
+  return definition.signatures.filter((sig) => {
     // TODO check this - it may not be correct
     if (givenTypes.length < sig.params.filter(({ optional }) => !optional).length) {
       return false;
@@ -231,30 +228,44 @@ function getSignatureWithMatchingTypes(
     return givenTypes.every((givenType, index) => {
       // safe to assume the param is there, because we checked the length above
       const expectedType = unwrapArrayOneLevel(getParamAtPosition(sig, index)!.type);
-
-      if (givenType === expectedType) return true;
-
-      if (expectedType === 'any') return true;
-
-      if (givenType === 'param') return true;
-
-      if (givenType === 'null') return true;
-
-      if (givenType === 'unknown') return true;
-
-      if (bothStringTypes(givenType, expectedType)) return true;
-
-      if (
-        literalMask[index] &&
-        givenType === 'keyword' &&
-        isFieldType(expectedType) &&
-        FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
-      )
-        return true;
-
-      return false;
+      return argMatchesParamType(givenType, expectedType, literalMask[index]);
     });
   });
+}
+
+/**
+ * Checks if the given type matches the expected parameter type
+ *
+ * @param givenType
+ * @param expectedType
+ * @param givenIsLiteral
+ */
+function argMatchesParamType(
+  givenType: SupportedDataType | 'unknown',
+  expectedType: FunctionParameterType,
+  givenIsLiteral: boolean
+): boolean {
+  if (givenType === expectedType) return true;
+
+  if (expectedType === 'any') return true;
+
+  if (givenType === 'param') return true;
+
+  if (givenType === 'null') return true;
+
+  if (givenType === 'unknown') return true;
+
+  if (bothStringTypes(givenType, expectedType)) return true;
+
+  if (
+    givenIsLiteral &&
+    givenType === 'keyword' &&
+    isFieldType(expectedType) &&
+    FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
+  )
+    return true;
+
+  return false;
 }
 
 /**
