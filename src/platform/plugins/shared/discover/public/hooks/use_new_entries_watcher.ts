@@ -28,6 +28,11 @@ interface UseNewEntriesWatcherProps {
   esqlQuery?: string;
 }
 
+interface EsqlResponse {
+  values?: Array<Array<string | number | boolean | null>>;
+  columns?: Array<{ name: string; type: string }>;
+}
+
 function shouldSkipEsqlPolling(esqlQuery: string): boolean {
   const expensivePatterns = [
     /\bJOIN\b/i, // Joins are expensive
@@ -81,11 +86,22 @@ export function useNewEntriesWatcher({
   // KQL/Lucene polling logic
   const checkForUpdatesKql = useCallback(
     async (abortSignal: AbortSignal) => {
-      // Query for latest timestamp
       const searchBody = {
         size: 0,
-        query,
-        aggs: { max_ts: { max: { field: timeField } } },
+        query: {
+          bool: {
+            must: [query, { range: { [timeField]: { gt: lastLoadedTimestamp } } }],
+          },
+        },
+        aggs: {
+          max_ts: { max: { field: timeField } },
+          new_docs_count: {
+            filter: {
+              range: { [timeField]: { gt: lastLoadedTimestamp } },
+            },
+          },
+        },
+        track_total_hits: true,
       };
 
       const response = await data.search
@@ -99,36 +115,17 @@ export function useNewEntriesWatcher({
         .toPromise();
 
       const maxTsAgg = response?.rawResponse?.aggregations?.max_ts as
-        | { value?: number; value_as_string?: string }
+        | { value?: number }
         | undefined;
+      const newDocsAgg = response?.rawResponse?.aggregations?.new_docs_count as
+        | { doc_count?: number }
+        | undefined;
+
       const maxTs = maxTsAgg?.value ?? 0;
+      const newDocsCount = newDocsAgg?.doc_count ?? 0;
 
       if (maxTs > lastLoadedTimestamp) {
-        // Optionally count new docs
-        const countResp = await data.search
-          .search({
-            params: {
-              index: dataView.getIndexPattern(),
-              body: {
-                query: {
-                  bool: {
-                    must: [
-                      query,
-                      { range: { [timeField]: { gt: lastLoadedTimestamp, lte: maxTs } } },
-                    ],
-                  },
-                },
-                track_total_hits: true,
-                size: 0,
-              },
-            },
-            abortSignal,
-          })
-          .toPromise();
-
-        const totalHits = countResp?.rawResponse.hits.total;
-        const totalHitsValue = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
-        setCount(totalHitsValue);
+        setCount(newDocsCount);
       } else {
         setCount(0);
       }
@@ -154,7 +151,8 @@ export function useNewEntriesWatcher({
       const countResponse = await executeEsqlQuery(countQuery, abortSignal);
 
       // Parse ES|QL response - it returns values array (rows/columns)
-      const currentTotal = countResponse?.rawResponse?.values?.[0]?.[0] || 0;
+      const rawValue = (countResponse?.rawResponse as EsqlResponse)?.values?.[0]?.[0];
+      const currentTotal = typeof rawValue === 'number' ? rawValue : 0;
 
       // Compare with last known total
       if (lastKnownTotal === 0) {
@@ -209,17 +207,14 @@ export function useNewEntriesWatcher({
 
         setConsecutiveFailures(0);
       } catch (error) {
-        console.error('Polling failed:', error);
-
         if (error.name === 'AbortError') {
-          console.error('Polling request timed out');
+          // 'Polling request timed out'
         }
         setConsecutiveFailures((prev) => prev + 1);
 
         // Disable polling after 3 consecutive failures
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
           setPollingDisabled(true);
-          console.error('Polling disabled due to repeated failures');
         }
       } finally {
         clearTimeout(timeoutId);
@@ -241,6 +236,7 @@ export function useNewEntriesWatcher({
     checkForUpdatesEsql,
     checkForUpdatesKql,
     consecutiveFailures,
+    isPageVisible,
   ]);
 
   // Reset function
