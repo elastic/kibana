@@ -312,7 +312,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
       }}
       css={{ maxHeight: height }}
       singleSelection={singleSelection}
-      // searchable can only be true
+      // searchable can only be true per EuiSelectable type
       {...(searchable ? { searchable: true } : {})}
       searchProps={{
         placeholder:
