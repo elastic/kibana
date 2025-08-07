@@ -70,6 +70,7 @@ export const QueryBar = () => {
             defaultQuery={''}
             box={{
               disabled: !isIndexCreated,
+              compressed: true,
             }}
             onChange={({ queryText, error }) => {
               if (error) {
@@ -87,7 +88,7 @@ export const QueryBar = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
-          size={'m'}
+          size={'s'}
           color={'text'}
           isDisabled={isDiscoverButtonDisabled}
           href={discoverLink ?? undefined}
