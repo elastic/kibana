@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import Fs from 'fs';
+import execa, { StdioOption } from 'execa';
 
 import { REPO_ROOT } from '@kbn/repo-info';
+import { TaskContext } from '../task_context';
 
-const localBundles = Path.resolve(__dirname, './target_workers');
-const builtBundles = Path.resolve(
-  REPO_ROOT,
-  'target',
-  'build',
-  Path.relative(REPO_ROOT, localBundles)
-);
+export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
+  log.info('building required artifacts for the optimizer');
 
-// extracted const vars
-export const bundleDir = Fs.existsSync(localBundles) ? localBundles : builtBundles;
+  const stdio: StdioOption[] = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
+
+  const args = ['kbn', 'build-shared'];
+  if (quiet) args.push('--quiet');
+  if (dist) args.push('--dist');
+
+  await execa('yarn', args, { cwd: REPO_ROOT, stdio });
+}
