@@ -57,7 +57,7 @@ describe('AiAssistantSelectionPage', () => {
     renderComponent(testCapabilities);
     expect(setBreadcrumbs).toHaveBeenCalledWith([
       {
-        text: 'AI Assistant',
+        text: 'AI Assistants',
       },
     ]);
   });
@@ -95,7 +95,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/observabilityAiAssistantManagement',
+          path: 'ai/observabilityAiAssistantManagement',
         });
       });
 
@@ -139,7 +139,7 @@ describe('AiAssistantSelectionPage', () => {
         renderComponent(testCapabilities);
         fireEvent.click(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton'));
         expect(navigateToApp).toHaveBeenCalledWith('management', {
-          path: 'kibana/securityAiAssistantManagement',
+          path: 'ai/securityAiAssistantManagement',
         });
       });
 
