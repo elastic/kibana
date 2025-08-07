@@ -92,5 +92,6 @@
     "@kbn/uptime-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-server",
+    "@kbn/inference-common",
   ]
 }

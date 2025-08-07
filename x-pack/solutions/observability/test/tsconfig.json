@@ -92,5 +92,6 @@
     "@kbn/dev-utils",
     "@kbn/observability-onboarding-plugin",
     "@kbn/data-quality-plugin",
+    "@kbn/observability-logs-explorer-plugin",
   ]
 }
