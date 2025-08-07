@@ -402,7 +402,6 @@ Sharing::
 The 8.17.2 release includes the following bug fixes.
 =======
 The 8.17.2 release includes the following known issues and bug fixes.
->>>>>>> 34557d33828 ([DOCS][Known issue] Reporting failing in >= 8.15 when using server.protocol: http2 (#230894))
 
 [float]
 [[known-issues-8.17.2]]
