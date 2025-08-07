@@ -51,10 +51,22 @@ export const NODE_HEIGHT = 100;
 export const NODE_LABEL_WIDTH = 200;
 
 /**
+ * The total height of a label node including the shape and details below, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_TOTAL_HEIGHT = 72;
+
+/**
  * The height of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const NODE_LABEL_HEIGHT = 20;
+
+/**
+ * The height of the details below a label node shape, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_DETAILS = NODE_LABEL_TOTAL_HEIGHT - NODE_LABEL_HEIGHT;
 
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
@@ -316,7 +328,7 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size: {
+export const getStackNodeStyle = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({

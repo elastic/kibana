@@ -503,6 +503,8 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'user.authentication.sso',
     color: 'primary',
     shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(user)-b(oktauser)',
@@ -511,6 +513,16 @@ const baseGraph: EnhancedNodeViewModel[] = [
     label: 'AssumeRoleWithSAML',
     color: 'primary',
     shape: 'label',
+  },
+  {
+    id: 'a(user)-b(oktauser)',
+    source: 'user',
+    target: 'oktauser',
+    label: 'AssumeRoleWithSAML2',
+    color: 'primary',
+    shape: 'label',
+    ips: ['85.43.21.73'],
+    countryCodes: ['es', 'il', 'it'],
   },
   {
     id: 'a(oktauser)-b(hackeruser)',
