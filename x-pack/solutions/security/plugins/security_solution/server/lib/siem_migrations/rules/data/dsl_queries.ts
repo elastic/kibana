@@ -6,7 +6,6 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
@@ -30,11 +29,5 @@ export const dsl = {
   },
   isNotInstallable(): QueryDslQueryContainer[] {
     return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
-  },
-  isFailed(): QueryDslQueryContainer {
-    return { term: { status: SiemMigrationStatus.FAILED } };
-  },
-  isNotFailed(): QueryDslQueryContainer {
-    return { bool: { must_not: dsl.isFailed() } };
   },
 };
