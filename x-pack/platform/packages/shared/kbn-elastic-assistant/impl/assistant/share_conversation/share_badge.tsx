@@ -34,8 +34,11 @@ const ShareBadgeComponent: React.FC<Props> = ({
   refetchCurrentConversation,
   selectedConversation,
 }) => {
-  const isShared = useMemo(
-    () => selectedConversation?.users.length !== 1,
+  const { isShared, isSharedGlobal } = useMemo(
+    () => ({
+      isShared: selectedConversation?.users.length !== 1,
+      isSharedGlobal: selectedConversation?.users.length === 0,
+    }),
     [selectedConversation?.users]
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,14 +57,14 @@ const ShareBadgeComponent: React.FC<Props> = ({
       {
         checked: isShared ? 'on' : undefined,
         data: {
-          description: i18n.VISIBLE_TO_YOUR_TEAM,
+          description: isSharedGlobal ? i18n.VISIBLE_GLOBAL : i18n.VISIBLE_SELECTED,
         },
         'data-test-subj': 'shared',
         disabled: !isConversationOwner,
         label: i18n.SHARED,
       },
     ],
-    [isConversationOwner, isShared]
+    [isConversationOwner, isShared, isSharedGlobal]
   );
   const onSharedChange = () => {
     setIsModalOpen(true);
@@ -174,6 +177,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
       </EuiPopover>
       {isModalOpen && (
         <ShareModal
+          isSharedGlobal={isSharedGlobal}
           selectedConversation={selectedConversation}
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}

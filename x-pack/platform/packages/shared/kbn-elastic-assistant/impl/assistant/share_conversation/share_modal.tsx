@@ -27,6 +27,7 @@ import { Conversation, useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
 
 interface Props {
+  isSharedGlobal: boolean;
   selectedConversation: Conversation | undefined;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -45,19 +46,18 @@ const shareOptions = [
   },
 ];
 const ShareModalComponent: React.FC<Props> = ({
+  isSharedGlobal,
   isModalOpen,
   refetchCurrentConversation,
   setIsModalOpen,
   selectedConversation,
 }) => {
   const { updateConversationUsers } = useConversation();
-  const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>('everyone');
+  const [sharingOption, setSharingOption] = useState<'everyone' | 'selected'>(
+    isSharedGlobal ? 'everyone' : 'selected'
+  );
   const { currentUser } = useAssistantContext();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  useEffect(() => {
-    // Reset sharing option when modal opens
-    setSharingOption(selectedUsers.length === 0 ? 'everyone' : 'selected');
-  }, [selectedUsers.length]);
   const [nextSelectedUsers, setNextSelectedUsers] = useState<UserProfile[]>([]);
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
@@ -98,18 +98,21 @@ const ShareModalComponent: React.FC<Props> = ({
     if (selectedConversation && selectedConversation?.id !== '') {
       await updateConversationUsers({
         conversationId: selectedConversation.id,
-        updatedUsers: [
-          ...nextUsers.map((user) => ({
-            id: user?.uid ?? '',
-            name: user?.user?.username ?? '',
-          })),
-          ...nextSelectedUsers.map((user) => ({
-            id: user?.uid ?? '',
-            name: user?.user?.username ?? '',
-          })),
-          // readd current user
-          ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
-        ],
+        updatedUsers:
+          sharingOption === 'everyone'
+            ? []
+            : [
+                ...nextUsers.map((user) => ({
+                  id: user?.uid ?? '',
+                  name: user?.user?.username ?? '',
+                })),
+                ...nextSelectedUsers.map((user) => ({
+                  id: user?.uid ?? '',
+                  name: user?.user?.username ?? '',
+                })),
+                // readd current user
+                ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
+              ],
       });
       refetchCurrentConversation({});
     }
@@ -120,6 +123,7 @@ const ShareModalComponent: React.FC<Props> = ({
     refetchCurrentConversation,
     selectedConversation,
     setIsModalOpen,
+    sharingOption,
     updateConversationUsers,
   ]);
 

@@ -18,10 +18,17 @@ export const ONLY_VISIBLE_TO_YOU = i18n.translate(
   }
 );
 
-export const VISIBLE_TO_YOUR_TEAM = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.visibleToYourTeam',
+export const VISIBLE_GLOBAL = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.visibleGlobal',
   {
-    defaultMessage: 'Team members can view this conversation.',
+    defaultMessage: 'All team members can view this conversation.',
+  }
+);
+
+export const VISIBLE_SELECTED = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.visibleSelected',
+  {
+    defaultMessage: 'Selected team members can view this conversation.',
   }
 );
 
