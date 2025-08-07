@@ -40,10 +40,10 @@ describe('RENAME Validation', () => {
       userDefinedColumns: newUserDefinedColumns,
     };
     renameExpectErrors('from a_index | rename textField as', [
-      'Error: [as] function expects exactly 2 arguments, got 1.',
+      '[as] expected 2 arguments, but got 1.',
     ]);
     renameExpectErrors('from a_index | rename missingField as', [
-      'Error: [as] function expects exactly 2 arguments, got 1.',
+      '[as] expected 2 arguments, but got 1.',
     ]);
     renameExpectErrors('from a_index | rename textField as col0', []);
     renameExpectErrors('from a_index | rename textField AS col0', []);
@@ -63,7 +63,7 @@ describe('RENAME Validation', () => {
       context
     );
     renameExpectErrors('from a_index |eval doubleField + 1 | rename `doubleField + 1` as ', [
-      'Error: [as] function expects exactly 2 arguments, got 1.',
+      '[as] expected 2 arguments, but got 1.',
     ]);
     renameExpectErrors('from a_index | rename key* as keywords', ['Unknown column [keywords]']);
   });

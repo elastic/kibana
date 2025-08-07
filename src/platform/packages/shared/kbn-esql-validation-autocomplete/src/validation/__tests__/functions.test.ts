@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import {
+  FunctionDefinition,
+  FunctionDefinitionTypes,
+  getNoValidCallSignatureError,
+} from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
-import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation/function';
-
-const getExpectedError = (fnName: string, givenTypes: string[]) => {
-  const definition = buildFunctionLookup().get(fnName)!;
-  return `The arguments to [${fnName}] don't match a valid call signature.\n\nReceived [${givenTypes.join(
-    ', '
-  )}].\n\nExpected one of:\n  ${definition.signatures
-    .map((sig) => `- [${sig.params.map((p) => p.type).join(', ')}]`)
-    .join('\n  ')}`;
-};
 
 describe('function validation', () => {
   afterEach(() => {
@@ -112,38 +106,38 @@ describe('function validation', () => {
 
           // straight call
           await expectErrors('FROM a_index | EVAL TEST(1.1)', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // assignment
           await expectErrors('FROM a_index | EVAL var = TEST(1.1)', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // nested function
           await expectErrors('FROM a_index | EVAL TEST(RETURNS_DOUBLE())', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // inline cast
           await expectErrors('FROM a_index | EVAL TEST(1::DOUBLE)', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // field
           await expectErrors('FROM a_index | EVAL TEST(doubleField)', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // userDefinedColumns
           await expectErrors('FROM a_index | EVAL col1 = 1. | EVAL TEST(col1)', [
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1.1) | EVAL TEST(1.1)', [
-            getExpectedError('test', ['double']),
-            getExpectedError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
+            getNoValidCallSignatureError('test', ['double']),
           ]);
         });
 
@@ -202,7 +196,7 @@ describe('function validation', () => {
 
           await expectErrors('ROW "a" IN ("a", "b", "c")', []);
           await expectErrors('ROW "a" IN (1, 2)', [
-            getExpectedError('in', ['keyword', 'integer']), // @TODO look at reporting array type
+            getNoValidCallSignatureError('in', ['keyword', 'integer']), // @TODO look at reporting array type
           ]);
         });
 
@@ -307,6 +301,8 @@ describe('function validation', () => {
           expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
             'Unknown column [missingColumn]',
           ]);
+
+          expectErrors('FROM a_index | EVAL foo=missingColumn', ['Unknown column [missingColumn]']);
         });
 
         describe('inline casts', () => {
@@ -329,11 +325,11 @@ describe('function validation', () => {
             const { expectErrors } = await setup();
 
             await expectErrors('FROM a_index | EVAL TEST(TEST("")::integer)', [
-              getExpectedError('test', ['keyword']),
+              getNoValidCallSignatureError('test', ['keyword']),
             ]);
             // deep nesting
             await expectErrors('FROM a_index | EVAL TEST(TEST("")::double::keyword::integer)', [
-              getExpectedError('test', ['keyword']),
+              getNoValidCallSignatureError('test', ['keyword']),
             ]);
           });
 
@@ -356,7 +352,7 @@ describe('function validation', () => {
             const { expectErrors } = await setup();
 
             await expectErrors('FROM a_index | EVAL TEST("")::cartesian_point', [
-              getExpectedError('test', ['keyword']),
+              getNoValidCallSignatureError('test', ['keyword']),
             ]);
           });
         });

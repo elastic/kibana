@@ -75,3 +75,5 @@ export * from './src/definitions/constants';
 export * from './src/definitions/types';
 export { METADATA_FIELDS } from './src/commands_registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './src/definitions/utils/literals';
+
+export { getNoValidCallSignatureError } from './src/__tests__/validation';

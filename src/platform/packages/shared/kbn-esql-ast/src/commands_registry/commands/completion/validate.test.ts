@@ -138,7 +138,7 @@ describe('COMPLETION Validation', () => {
           `FROM index | COMPLETION AVG(integerField) WITH { "inference_id": "inferenceId"}`,
           [
             '[COMPLETION] prompt must be of type [text] but is [double]',
-            'COMPLETION does not support function avg',
+            'Function [avg] not allowed in [completion]',
           ]
         );
       });
