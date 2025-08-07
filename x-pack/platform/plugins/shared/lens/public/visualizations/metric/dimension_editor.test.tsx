@@ -77,6 +77,7 @@ describe('dimension editor', () => {
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
     secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   let props: Props;

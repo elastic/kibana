@@ -59,4 +59,6 @@ export interface MetricVisualizationState {
   trendlineMetricAccessor?: string;
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
+
+  applyColorTo?: 'background' | 'value'; // Used for coordination between dimension editor sections
 }

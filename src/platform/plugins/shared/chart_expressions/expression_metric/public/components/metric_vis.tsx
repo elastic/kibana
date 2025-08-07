@@ -255,7 +255,12 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
-    return baseMetric;
+    return {
+      ...baseMetric,
+      ...(config.metric.applyColorTo === 'value'
+        ? { color: defaultColor, valueColor: tileColor }
+        : { color: tileColor, valueColor: undefined }),
+    };
   });
 
   if (config.metric.minTiles) {

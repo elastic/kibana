@@ -52,6 +52,7 @@ describe('TitlesAndTextPopover', () => {
     valueFontMode: 'default',
     secondaryTrend: { type: 'none' },
     secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   const mockSetState = jest.fn();

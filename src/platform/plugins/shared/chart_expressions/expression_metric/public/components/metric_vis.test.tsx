@@ -92,6 +92,7 @@ const defaultMetricParams: MetricVisParam = {
     palette: undefined,
   },
   secondaryLabelPosition: 'before',
+  applyColorTo: 'background',
 };
 
 const table: Datatable = {
@@ -1224,6 +1225,7 @@ describe('MetricVisComponent', function () {
               palette: undefined,
             },
             secondaryLabelPosition: 'before',
+            applyColorTo: 'background',
           },
         },
       });

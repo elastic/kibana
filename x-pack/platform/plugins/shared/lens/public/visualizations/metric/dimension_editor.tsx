@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiButtonGroup,
   EuiFieldNumber,
   htmlIdGenerator,
   EuiColorPicker,
-  euiPaletteColorBlind,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -29,25 +29,24 @@ import {
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
+
+import { css } from '@emotion/react';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { metricIconsSet } from '../../shared_components/icon_set';
 import type { VisualizationDimensionEditorProps } from '../../types';
+import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
-import { metricIconsSet } from '../../shared_components/icon_set';
-import {
-  getColorMode,
-  getDefaultConfigForMode,
-  getSecondaryLabelSelected as getSecondaryLabelSelected,
-} from './helpers';
+import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID, metricStateDefaults } from './constants';
 
 export type SupportingVisType = 'panel' | 'bar' | 'trendline';
+
+export type ApplyColor = 'background' | 'value';
 
 export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -598,14 +597,12 @@ function SecondaryMetricEditor({
               label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.static', {
                 defaultMessage: 'Static',
               }),
-              'data-test-subj': 'lnsMetric_color_mode_static',
             },
             {
               id: `${idPrefix}dynamic`,
               label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.dynamic', {
                 defaultMessage: 'Dynamic',
               }),
-              'data-test-subj': 'lnsMetric_color_mode_dynamic',
               isDisabled: !isNumericType,
               toolTipContent: isNumericType
                 ? undefined
@@ -639,7 +636,7 @@ function SecondaryMetricEditor({
         />
       </EuiFormRow>
       {colorMode === 'static' ? (
-        <StaticColorControls getColor={getColor} setColor={setColor} />
+        <StaticColorControl getColor={getColor} setColor={setColor} />
       ) : null}
       {colorMode === 'dynamic' ? (
         <TrendEditor
@@ -654,9 +651,14 @@ function SecondaryMetricEditor({
   );
 }
 
+const supportingVisualization = (state: MetricVisualizationState) =>
+  state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel';
+
 function PrimaryMetricEditor(props: SubProps) {
   const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
   const { isNumeric: isMetricNumeric } = getAccessorType(props.datasource, accessor);
+
+  const euiTheme = useEuiTheme();
 
   const setColor = useCallback(
     (color: string) => {
@@ -705,6 +707,11 @@ function PrimaryMetricEditor(props: SubProps) {
     max: currentMinMax.max ?? DEFAULT_MAX_STOP,
   });
 
+  const showVisTextColorSwatches =
+    supportingVisualization(state) === 'panel' && state.applyColorTo === 'value';
+
+  const colorByValue = state.palette ? 'dynamic' : 'static';
+
   return (
     <>
       {isMetricNumeric && (
@@ -728,22 +735,23 @@ function PrimaryMetricEditor(props: SubProps) {
                 label: i18n.translate('xpack.lens.metric.colorMode.static', {
                   defaultMessage: 'Static',
                 }),
-                'data-test-subj': 'lnsMetric_color_mode_static',
+                value: 'static',
               },
               {
                 id: `${idPrefix}dynamic`,
                 label: i18n.translate('xpack.lens.metric.colorMode.dynamic', {
                   defaultMessage: 'Dynamic',
                 }),
-                'data-test-subj': 'lnsMetric_color_mode_dynamic',
+                value: 'dynamic',
               },
             ]}
-            idSelected={`${idPrefix}${state.palette ? 'dynamic' : 'static'}`}
-            onChange={(id) => {
-              const colorMode = id.replace(idPrefix, '') as 'static' | 'dynamic';
+            idSelected={`${idPrefix}${colorByValue}`}
+            onChange={(_id, newColorByValue) => {
+              if (newColorByValue === colorByValue) return;
 
-              const params =
-                colorMode === 'dynamic'
+              setState({
+                ...state,
+                ...(newColorByValue === 'dynamic'
                   ? {
                       palette: {
                         ...activePalette,
@@ -757,10 +765,7 @@ function PrimaryMetricEditor(props: SubProps) {
                   : {
                       palette: undefined,
                       color: undefined,
-                    };
-              setState({
-                ...state,
-                ...params,
+                    }),
               });
             }}
           />
@@ -794,7 +799,11 @@ function PrimaryMetricEditor(props: SubProps) {
           </PalettePanelContainer>
         </EuiFormRow>
       ) : (
-        <StaticColorControls getColor={getColor} setColor={setColor} />
+        <StaticColorControl
+          getColor={getColor}
+          setColor={setColor}
+          {...(showVisTextColorSwatches ? { swatches: visTextColorSwatches(euiTheme) } : undefined)}
+        />
       )}
       <EuiFormRow
         display="columnCompressed"
@@ -818,12 +827,31 @@ function PrimaryMetricEditor(props: SubProps) {
   );
 }
 
-function StaticColorControls({
+const visTextColorSwatches = ({
+  euiTheme: {
+    colors: { vis },
+  },
+}: UseEuiTheme) => [
+  vis.euiColorVisText0,
+  vis.euiColorVisText1,
+  vis.euiColorVisText2,
+  vis.euiColorVisText3,
+  vis.euiColorVisText4,
+  vis.euiColorVisText5,
+  vis.euiColorVisText6,
+  vis.euiColorVisText7,
+  vis.euiColorVisText8,
+  vis.euiColorVisText9,
+];
+
+function StaticColorControl({
   getColor,
   setColor,
+  swatches,
 }: {
   getColor: () => string;
   setColor: (color: string) => void;
+  swatches?: string[];
 }) {
   const colorLabel = i18n.translate('xpack.lens.metric.color', {
     defaultMessage: 'Color',
@@ -844,11 +872,11 @@ function StaticColorControls({
         fullWidth
         compressed
         isClearable={false}
-        onChange={(color: string) => handleColorChange(color)}
+        onChange={handleColorChange}
         color={currentColor}
         aria-label={colorLabel}
         showAlpha
-        swatches={euiPaletteColorBlind()}
+        swatches={swatches}
       />
     </EuiFormRow>
   );
@@ -918,6 +946,8 @@ export function DimensionEditorAdditionalSection({
 
   const buttonIdPrefix = `${idPrefix}--`;
 
+  const selectedSupportingVisualization = supportingVisualization(state);
+
   return (
     <div className="lnsIndexPatternDimensionEditor--padded lnsIndexPatternDimensionEditor--collapseNext">
       <EuiText
@@ -973,9 +1003,7 @@ export function DimensionEditorAdditionalSection({
                 isDisabled: !state.maxAccessor,
               },
             ]}
-            idSelected={`${buttonIdPrefix}${
-              state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'panel'
-            }`}
+            idSelected={`${buttonIdPrefix}${selectedSupportingVisualization}`}
             onChange={(id) => {
               const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
               switch (supportingVisualizationType) {
@@ -1041,6 +1069,70 @@ export function DimensionEditorAdditionalSection({
                 setState({
                   ...state,
                   progressDirection: newDirection,
+                });
+              }}
+            />
+          </EuiFormRow>
+        )}
+        {selectedSupportingVisualization === 'panel' && (
+          <EuiFormRow
+            display="columnCompressed"
+            fullWidth
+            label={i18n.translate('xpack.lens.metric.supportingVis.applyColorTo', {
+              defaultMessage: 'Apply color to',
+            })}
+            helpText={
+              state.applyColorTo === 'value' && !state.palette ? (
+                <div>
+                  {i18n.translate(
+                    'xpack.lens.metric.supportingVis.applyColorTo.staticColorValueHelp',
+                    {
+                      defaultMessage:
+                        'Color palette has been automatically adjusted for provide the required contrast for text elements.',
+                    }
+                  )}
+                </div>
+              ) : state.applyColorTo === 'value' && state.palette ? (
+                <div>
+                  {i18n.translate(
+                    'xpack.lens.metric.supportingVis.applyColorTo.dynamicColorvalueHelp',
+                    {
+                      defaultMessage: 'Color scales might cause accessibility issues.',
+                    }
+                  )}
+                </div>
+              ) : undefined
+            }
+          >
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="compressed"
+              legend={i18n.translate('xpack.lens.metric.supportingVis.applyColorTo', {
+                defaultMessage: 'Apply color to',
+              })}
+              options={[
+                {
+                  id: `${buttonIdPrefix}background`,
+                  label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.background', {
+                    defaultMessage: 'Background',
+                  }),
+                  value: 'background',
+                },
+                {
+                  id: `${buttonIdPrefix}value`,
+                  label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.value', {
+                    defaultMessage: 'Value',
+                  }),
+                  value: 'value',
+                },
+              ]}
+              idSelected={`${buttonIdPrefix}${
+                state.applyColorTo ?? metricStateDefaults.applyColorTo
+              }`}
+              onChange={(_id, newApplyColorTo) => {
+                setState({
+                  ...state,
+                  applyColorTo: newApplyColorTo,
                 });
               }}
             />

@@ -216,6 +216,7 @@ export const toExpression = (
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition,
+    applyColorTo: state.applyColorTo ?? metricStateDefaults.applyColorTo,
   });
 
   return {

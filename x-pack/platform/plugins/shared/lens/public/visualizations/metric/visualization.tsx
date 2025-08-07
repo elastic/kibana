@@ -55,9 +55,13 @@ export const showingBar = (
   Boolean(state.showBar && state.maxAccessor);
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
-  return showingBar(state) && isMetricNumeric
-    ? euiLightVars.euiColorPrimary
-    : euiThemeVars.euiColorEmptyShade;
+  if (showingBar(state) && isMetricNumeric) {
+    return euiLightVars.euiColorPrimary;
+  }
+  if (state.applyColorTo === 'value') {
+    return euiThemeVars.euiColorVisText0;
+  }
+  return euiThemeVars.euiColorEmptyShade;
 };
 
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);

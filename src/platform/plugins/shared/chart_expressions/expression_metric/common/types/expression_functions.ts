@@ -67,6 +67,7 @@ export interface MetricArguments {
   minTiles?: number;
   inspectorTableId: string;
   secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
+  applyColorTo: 'background' | 'value';
 }
 
 export type MetricInput = Datatable;
