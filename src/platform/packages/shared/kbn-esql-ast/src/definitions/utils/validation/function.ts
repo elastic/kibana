@@ -21,7 +21,6 @@ import {
   isOptionNode,
   isParamLiteral,
   isParametrized,
-  isTimeInterval,
 } from '../../../ast/is';
 import {
   ICommandCallbacks,
@@ -102,6 +101,12 @@ class FunctionValidator {
     if (nestedErrors.length) {
       // if one or more child functions produced errors, stop validation and report
       return nestedErrors;
+    }
+
+    if (isParamLiteral(this.fn.operator)) {
+      // skip validation for functions with names defined by a parameter
+      // e.g. "... | EVAL ??param(..args)"
+      return [];
     }
 
     if (!this.definition) {
