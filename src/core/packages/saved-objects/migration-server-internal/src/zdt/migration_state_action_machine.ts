@@ -117,14 +117,6 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
-    if (cstDiag.length) {
-      logger.error(
-        logMessagePrefix + `Failed with ${e} after transitioning through: ${cstDiag.prettyPrint()}`
-      );
-    } else {
-      logger.error(logMessagePrefix + `Failed with ${e} at INIT`);
-    }
-
     try {
       await cleanup(context.elasticsearchClient, lastState);
     } catch (err) {
