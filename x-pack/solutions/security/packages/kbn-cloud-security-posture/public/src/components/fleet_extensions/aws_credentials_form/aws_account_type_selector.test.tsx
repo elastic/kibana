@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AwsAccountTypeSelect } from './aws_account_type_selector';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
@@ -32,7 +33,10 @@ const defaultInput: NewPackagePolicyInput = {
   ],
 };
 
-const defaultNewPolicy = {} as NewPackagePolicy;
+const defaultNewPolicy = {
+  inputs: [defaultInput],
+} as NewPackagePolicy;
+
 const defaultPackageInfo = { version: '1.5.0' } as PackageInfo;
 
 const renderComponent = (props = {}) => {
@@ -55,7 +59,7 @@ const renderComponent = (props = {}) => {
   );
 };
 
-describe.skip('AwsAccountTypeSelect', () => {
+describe('AwsAccountTypeSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -72,14 +76,19 @@ describe.skip('AwsAccountTypeSelect', () => {
     expect(singleRadio).toBeChecked();
   });
 
-  it('calls updatePolicy when radio is changed', () => {
+  it('calls updatePolicy when radio is changed', async () => {
     renderComponent();
+    const singleRadio = screen.getByLabelText('Single Account');
+    expect(singleRadio).toBeChecked();
     const orgRadio = screen.getByLabelText('AWS Organization');
-    orgRadio.click();
-    expect(mockUpdatePolicy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        updatedPolicy: expect.anything(),
-      })
+    expect(orgRadio).not.toBeChecked();
+    await userEvent.click(orgRadio);
+    await waitFor(() =>
+      expect(mockUpdatePolicy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          updatedPolicy: expect.anything(),
+        })
+      )
     );
   });
 

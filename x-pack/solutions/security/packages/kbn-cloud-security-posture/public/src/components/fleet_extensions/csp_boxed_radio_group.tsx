@@ -35,7 +35,6 @@ export const RadioGroup = ({
   onChange,
 }: CspRadioGroupProps) => {
   const { euiTheme } = useEuiTheme();
-  console.log('RadioGroup', { idSelected, size, options, disabled, onChange });
   return (
     <div
       css={css`
