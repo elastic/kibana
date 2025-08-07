@@ -2489,7 +2489,7 @@ Update your Microsoft Teams connector to use the new URL before the end of Decem
 ====
 
 [discrete]
-[[known-1991]]
+[[known-issue-1991]]
 .PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
 [%collapsible]
 ====
