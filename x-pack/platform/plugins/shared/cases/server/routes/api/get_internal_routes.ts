@@ -26,8 +26,9 @@ import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findSuggestionsRoute } from './suggestions/find_suggestions';
+import type { ConfigType } from '../../config';
 
-export const getInternalRoutes = (userProfileService: UserProfileService) =>
+export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -47,5 +48,6 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
-    findSuggestionsRoute,
-  ] as CaseRoute[];
+  ].concat(
+    config.unsafe?.enableCaseSuggestions ? [findSuggestionsRoute as CaseRoute] : []
+  ) as CaseRoute[];
