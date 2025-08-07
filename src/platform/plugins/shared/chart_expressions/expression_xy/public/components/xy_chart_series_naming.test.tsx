@@ -179,32 +179,28 @@ describe('provides correct series naming', () => {
     expect(debugState?.lines?.[0]?.name).toBe('Column A');
   });
 
-  test('multiple y accessors', () => {
+  test('multiple y accessors', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
       layers: [
         {
           ...args.layers[0],
+          xAccessor: 'c',
           accessors: ['a', 'b'],
-          splitAccessor: undefined,
+          splitAccessors: [],
           columnToLabel: '{"a": "Label A"}',
+          xScaleType: XScaleTypes.ORDINAL,
           table: dataWithoutFormats,
         },
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-    const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-    const nameFn2 = lineSeries.at(1).prop('name') as SeriesNameFn;
-
-    // This accessor has a human-readable name
-    expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
-    // This accessor does not
-    expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
-    expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
+    expect(debugState?.lines).toHaveLength(2);
+    expect(debugState?.lines?.[0]?.name).toBe('Label A');
+    expect(debugState?.lines?.[1]?.name).toBe('b');
   });
 
   test('split series without formatting and single y accessor', () => {
