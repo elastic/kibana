@@ -2211,9 +2211,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.2.1.tgz#91af7c9fba0603211b44d81497c72d0824c7de90"
   integrity sha512-pHbdrGzGTL/CWDBzfstjaOhwjZlABXUiqtuOPNmWkpue70zROqsO3fAPB18SvP4ev6J7RrtioknXFKkX8AD3Pw==
 
-"@elastic/eui-amsterdam@file:./eui_106.2.0_shadow_floating_border_005.tgz", "@elastic/eui@file:./eui_106.2.0_shadow_floating_border_005.tgz":
+"@elastic/eui-amsterdam@file:./eui_106.2.0_shadow_floating_border_006.tgz", "@elastic/eui@file:./eui_106.2.0_shadow_floating_border_006.tgz":
   version "106.2.0"
-  resolved "file:./eui_106.2.0_shadow_floating_border_005.tgz#6506ee41d3c0c2f0fca651d9e3567c1ecf770409"
+  resolved "file:./eui_106.2.0_shadow_floating_border_006.tgz#770919f5e3fb363dd034561c34fe5e7fe258ecf7"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -2250,13 +2250,13 @@
     uuid "^8.3.0"
     vfile "^4.2.1"
 
-"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.0_shadow_floating_border_002.tgz":
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.3.0_shadow_floating_border_003.tgz":
   version "3.3.0"
-  resolved "file:./eui_theme_borealis_3.3.0_shadow_floating_border_002.tgz#65a205df018f55f561d39eaddc56555805ccf5af"
+  resolved "file:./eui_theme_borealis_3.3.0_shadow_floating_border_003.tgz#17f47dcbd78a6dfacd4931003122e468acbf6e58"
 
-"@elastic/eui-theme-common@file:./eui_theme_common_3.1.0_shadow_floating_border_002.tgz":
+"@elastic/eui-theme-common@file:./eui_theme_common_3.1.0_shadow_floating_border_003.tgz":
   version "3.1.0"
-  resolved "file:./eui_theme_common_3.1.0_shadow_floating_border_002.tgz#21422b85b2dd57745ba369b2c93a11507064bb5a"
+  resolved "file:./eui_theme_common_3.1.0_shadow_floating_border_003.tgz#2959bec9adf0c7fc3eaca3b12cd580216b129e73"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
