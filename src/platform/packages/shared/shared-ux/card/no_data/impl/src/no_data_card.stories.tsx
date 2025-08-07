@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiFlexGrid, EuiText, EuiCallOut, EuiLink, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
@@ -92,20 +92,19 @@ export const WithComplexDescription = {
         <EuiText size="xs">
           <ul>
             <li>
-              <FormattedMessage
-                id="example.dataRetention"
-                defaultMessage="Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about {dataRetentionLink}."
-                values={{
-                  dataRetentionLink: (
-                    <EuiLink
-                      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/set-up-lifecycle-policy.html"
-                      target="_blank"
-                    >
-                      controlling data retention
-                    </EuiLink>
-                  ),
-                }}
-              />
+              {i18n.translate('sharedUXPackages.noDataCard.examples.dataRetention.prefix', {
+                defaultMessage:
+                  'Normal data storage costs apply for profiling data stored in Elasticsearch. Learn more about',
+              })}{' '}
+              <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/set-up-lifecycle-policy.html"
+                target="_blank"
+              >
+                {i18n.translate('sharedUXPackages.noDataCard.examples.dataRetentionLink', {
+                  defaultMessage: 'controlling data retention',
+                })}
+              </EuiLink>
+              .
             </li>
           </ul>
         </EuiText>
