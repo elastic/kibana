@@ -39,10 +39,6 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   applyForceRefresh: boolean;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
-  urlTemplate: string;
-};
-
 export type MVTFieldDescriptor = {
   name: string;
   type: MVT_FIELD_TYPE;

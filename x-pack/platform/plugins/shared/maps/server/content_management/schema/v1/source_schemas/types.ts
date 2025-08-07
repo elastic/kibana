@@ -26,6 +26,7 @@ import {
   EMSTMSSourceSchema,
   kibanaTilemapSourceSchema,
   WMSSourceSchema,
+  XYZTMSSourceSchema,
 } from './source_schemas';
 
 export type CountAggDescriptor = TypeOf<typeof countAggSchema>;
@@ -46,3 +47,4 @@ export type ESDistanceSourceDescriptor = TypeOf<typeof ESDistanceSourceSchema>;
 export type ESTermSourceDescriptor = TypeOf<typeof ESTermSourceSchema>;
 export type KibanaTilemapSourceDescriptor = TypeOf<typeof kibanaTilemapSourceSchema>;
 export type WMSSourceDescriptor = TypeOf<typeof WMSSourceSchema>;
+export type XYZTMSSourceDescriptor = TypeOf<typeof XYZTMSSourceSchema>;

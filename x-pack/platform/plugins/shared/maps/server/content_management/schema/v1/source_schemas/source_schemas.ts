@@ -83,7 +83,7 @@ export const WMSSourceSchema = schema.object(
   {
     serviceUrl: schema.uri({
       meta: {
-        description: 'WMS base URL'
+        description: 'WMS URL'
       }
     }),
     layers: schema.string({
@@ -101,6 +101,23 @@ export const WMSSourceSchema = schema.object(
   {
     meta: {
       description: 'Raster source from Web Map Service (WMS)',
+    },
+    unknowns: 'forbid',
+  }
+);
+
+export const XYZTMSSourceSchema = schema.object(
+  {
+    urlTemplate: schema.uri({
+      meta: {
+        description: 'TMS URL'
+      }
+    }),
+    type: schema.literal(SOURCE_TYPES.EMS_XYZ),
+  },
+  {
+    meta: {
+      description: 'Raster source from Tile Map Service (TMS)',
     },
     unknowns: 'forbid',
   }

@@ -29,4 +29,5 @@ export type {
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
   WMSSourceDescriptor,
+  XYZTMSSourceDescriptor,
 } from '../../server';
