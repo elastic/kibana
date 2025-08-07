@@ -26,6 +26,7 @@ import {
 import { BehaviorSubject, merge } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
 import type { MapApi, MapSerializedState } from './types';
@@ -36,7 +37,7 @@ import {
   getByValueState,
   initializeLibraryTransforms,
 } from './library_transforms';
-import { getEmbeddableEnhanced, getSpacesApi } from '../kibana_services';
+import { getEmbeddableService, getSpacesApi, getUiActionsEnhanced } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
@@ -85,11 +86,13 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
-    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
+    const uiActionsEnhanced = getUiActionsEnhanced();
+    const dynamicActionsManager = uiActionsEnhanced ? initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      initialState
-    );
+      initialState,
+      { embeddable: getEmbeddableService(), uiActionsEnhanced, }
+    ) : undefined;
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
