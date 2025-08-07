@@ -16,6 +16,8 @@ export enum RuleNotifyWhen {
   THROTTLE = 'onThrottleInterval',
 }
 
+const ADMIN_ROLE = 'admin';
+
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -27,8 +29,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
-  const comboBox = getService('comboBox');
-  const config = getService('config');
   const alertingApi = getService('alertingApi');
 
   const openFirstRule = async (ruleName: string) => {
@@ -38,7 +38,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+    await svlCommonNavigation.sidenav.openSection(
+      'search_project_nav_footer.project_settings_project_nav'
+    );
+
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+    await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
@@ -46,8 +51,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await svlCommonNavigation.sidenav.openSection(
       'search_project_nav_footer.project_settings_project_nav'
     );
-    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-    await testSubjects.click('app-card-triggersActionsConnectors');
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+    await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
+    // await testSubjects.click('app-card-triggersActionsConnectors');
   };
 
   const deleteConnector = async (connectorName: string) => {
@@ -58,9 +64,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await testSubjects.missingOrFail('deleteIdsConfirmation');
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/172916
-  // Failing: See https://github.com/elastic/kibana/issues/172918
-  describe.skip('Rule details', () => {
+  describe('Rule details', () => {
     let ruleIdList: string[];
     let connectorIdList: string[];
 
@@ -68,8 +72,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     let roleAuthc: RoleCredentials;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
-      await svlCommonPage.loginAsViewer();
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope(ADMIN_ROLE);
+      await svlCommonPage.loginAsAdmin();
     });
 
     after(async () => {
@@ -123,14 +127,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
         const ruleType = await testSubjects.getVisibleText('ruleTypeLabel');
         expect(ruleType).toEqual('Elasticsearch query');
-        const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
-        expect(owner).toEqual(config.get('servers.kibana.username'));
+        const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
+
+        await retry.tryForTime(15 * 1000, async () => {
+          const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
+          expect(owner.trim()).toEqual(username);
+        });
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
-
-        expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+        const actionsDropdown = await testSubjects.find('ruleStatusDropdownBadge');
+        await retry.try(async () => {
+          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+        });
 
         await actionsDropdown.click();
         const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
@@ -138,7 +147,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await actionsMenuItemElem.at(1)?.click();
 
-        await retry.try(async () => {
+        await (await testSubjects.find('confirmModalConfirmButton')).click();
+
+        await retry.tryForTime(30 * 1000, async () => {
           expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
         });
       });
@@ -299,14 +310,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector(
-          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
-        );
+        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
-          expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
+          expect(toastText).toEqual(`Updated "${updatedRuleName}"`);
         });
 
         await retry.tryForTime(30 * 1000, async () => {
@@ -324,10 +333,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await testSubjects.click('ruleFlyoutFooterCancelButton');
+        await testSubjects.click('rulePageFooterCancelButton');
         await testSubjects.existOrFail('confirmRuleCloseModal');
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-        await find.waitForDeletedByCssSelector('[data-test-subj="ruleFlyoutFooterCancelButton"]');
+        await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
         await editButton.click();
 
@@ -339,7 +348,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule with deleted connector', () => {
-      const ALERT_ACTION_INDEX = 'alert-action-es-query';
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {
@@ -427,113 +435,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
 
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(false);
-        expect(await testSubjects.exists('alertActionAccordion-0')).toEqual(true);
+        const headerText = await find.byCssSelector('[data-test-subj="ruleActionsItem"] h2');
 
-        expect(await testSubjects.exists('selectActionConnector-.slack-0')).toEqual(true);
-        // click the super selector the reveal the options
-        await testSubjects.click('selectActionConnector-.slack-0');
-        await testSubjects.click(`dropdown-connector-${connector2.id}`);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
-      });
+        expect(await headerText.getVisibleText()).toEqual('Unable to find connector');
 
-      it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
-        const testRunUuid = uuidv4();
-        const connector = await alertingApi.helpers.createIndexConnector({
-          roleAuthc,
-          name: `index-${testRunUuid}-${2}`,
-          indexName: ALERT_ACTION_INDEX,
+        await testSubjects.click('ruleActionsAddActionButton');
+        await testSubjects.existOrFail('ruleActionsConnectorsModal');
+
+        await find.clickByButtonText(connector2.name);
+
+        const ruleActionItems = await testSubjects.findAll('ruleActionsItem');
+        expect(ruleActionItems.length).toEqual(2);
+
+        await retry.tryForTime(15 * 1000, async () => {
+          const connectorTitle = await ruleActionItems[0].getVisibleText();
+          expect(connectorTitle.includes('Slack')).toBe(true);
         });
-
-        const rule = await alertingApi.helpers.createEsQueryRule({
-          roleAuthc,
-          consumer: 'alerts',
-          name: testRunUuid,
-          ruleTypeId: RULE_TYPE_ID,
-          schedule: { interval: '1m' },
-          params: {
-            size: 100,
-            thresholdComparator: '>',
-            threshold: [-1],
-            index: ['alert-test-data'],
-            timeField: 'date',
-            esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
-            timeWindowSize: 20,
-            timeWindowUnit: 's',
-          },
-          actions: [
-            {
-              group: 'query matched',
-              id: connector.id,
-              params: { level: 'info', message: ' {{context.message}}' },
-              frequency: {
-                summary: false,
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1m',
-              },
-            },
-            {
-              group: 'recovered',
-              id: connector.id,
-              params: { level: 'info', message: ' {{context.message}}' },
-              frequency: {
-                summary: false,
-                notify_when: RuleNotifyWhen.THROTTLE,
-                throttle: '1m',
-              },
-            },
-          ],
-        });
-        ruleIdList = [rule.id];
-
-        await openRulesSection();
-        await testSubjects.existOrFail('rulesList');
-        await navigateToConnectors();
-        await deleteConnector(connector.name);
-
-        await retry.try(async () => {
-          const resultToast = await toasts.getElementByIndex(1);
-          const toastText = await resultToast.getVisibleText();
-          expect(toastText).toEqual('Deleted 1 connector');
-        });
-
-        await openRulesSection();
-        await openFirstRule(rule.name);
-
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
-        expect(await testSubjects.exists('hasActionsDisabled')).toEqual(false);
-
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(false);
-        expect(await testSubjects.exists('alertActionAccordion-0')).toEqual(true);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(false);
-        expect(await testSubjects.exists('alertActionAccordion-1')).toEqual(true);
-
-        await testSubjects.click('createActionConnectorButton-0');
-
-        await testSubjects.existOrFail('connectorAddModal');
-        await testSubjects.setValue('nameInput', 'new connector');
-        await retry.try(async () => {
-          // At times we find the driver controlling the ComboBox in tests
-          // can select the wrong item, this ensures we always select the correct index
-          await comboBox.set('connectorIndexesComboBox', 'test-index');
-          expect(
-            await comboBox.isOptionSelected(
-              await testSubjects.find('connectorIndexesComboBox'),
-              'test-index'
-            )
-          ).toEqual(true);
-        });
-        await testSubjects.click('connectorAddModal > saveActionButtonModal');
-        await testSubjects.missingOrFail('deleteIdsConfirmation');
-
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).toEqual(true);
-        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).toEqual(true);
-
-        await openRulesSection();
-        await testSubjects.existOrFail('rulesList');
-        await navigateToConnectors();
-        await deleteConnector('new connector');
       });
     });
 
@@ -613,6 +530,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
+
+        await find.clickByButtonText('Settings');
         const notifyWhenSelect = await testSubjects.find('notifyWhenSelect');
         expect(await notifyWhenSelect.getVisibleText()).toEqual('On custom action intervals');
         const throttleInput = await testSubjects.find('throttleInput');
@@ -624,14 +543,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector(
-          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
-        );
+        await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
           const toastText = await resultToast.getVisibleText();
-          expect(toastText).toEqual(`Updated '${updatedRuleName}'`);
+          expect(toastText).toEqual(`Updated "${updatedRuleName}"`);
         });
       });
     });

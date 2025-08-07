@@ -216,6 +216,7 @@ const StepSchema = z.lazy(() =>
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
+  version: z.literal('1').default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),
@@ -227,10 +228,4 @@ export const WorkflowSchema = z.object({
   steps: z.array(StepSchema).min(1),
 });
 
-export const WorkflowYamlSchema = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
-  workflow: WorkflowSchema,
-});
-
-export type WorkflowYaml = z.infer<typeof WorkflowYamlSchema>;
-export type WorkflowSchema = z.infer<typeof WorkflowSchema>;
+export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
