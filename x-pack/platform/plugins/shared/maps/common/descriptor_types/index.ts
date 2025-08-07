@@ -25,6 +25,7 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  ESQLSourceDescriptor,
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,

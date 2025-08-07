@@ -20,7 +20,7 @@ import {
   ESJoinSourceSchema,
   ESTermSourceSchema,
 } from './es_join_source_schemas';
-import { BaseESSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
+import { BaseESSourceSchema, ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
 import {
   EMSFileSourceSchema,
   EMSTMSSourceSchema,
@@ -45,6 +45,7 @@ export type ESGeoGridSourceDescriptor = TypeOf<typeof ESGeoGridSourceSchema>;
 export type ESGeoLineSourceDescriptor = TypeOf<typeof ESGeoLineSourceSchema>;
 export type ESPewPewSourceDescriptor = TypeOf<typeof ESPewPewSourceSchema>;
 export type ESSearchSourceDescriptor = TypeOf<typeof ESSearchSourceSchema>;
+export type ESQLSourceDescriptor = TypeOf<typeof ESQLSourceSchema>;
 export type ESDistanceSourceDescriptor = TypeOf<typeof ESDistanceSourceSchema>;
 export type ESTermSourceDescriptor = TypeOf<typeof ESTermSourceSchema>;
 export type KibanaTilemapSourceDescriptor = TypeOf<typeof kibanaTilemapSourceSchema>;

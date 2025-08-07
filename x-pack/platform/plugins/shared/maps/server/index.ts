@@ -23,6 +23,7 @@ export type {
   ESGeoLineSourceDescriptor,
   ESPewPewSourceDescriptor,
   ESSearchSourceDescriptor,
+  ESQLSourceDescriptor,
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
@@ -31,7 +32,6 @@ export type {
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
 } from './content_management';
-export { MapsStorage } from './content_management';
 export { MapsStorage } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {

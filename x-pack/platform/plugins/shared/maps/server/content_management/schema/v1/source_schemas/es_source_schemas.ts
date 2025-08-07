@@ -9,29 +9,35 @@ import { schema } from '@kbn/config-schema';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
 
+const applyForceRefreshSchema = schema.maybe(
+  schema.boolean({
+    defaultValue: true,
+    meta: {
+      description: `When true, results are re-fetched when page's automatic refresh fires or user clicks 'Refresh'.`,
+    },
+  })
+);
+
+const narrowByGlobalSearch = schema.maybe(
+  schema.boolean({
+    defaultValue: true,
+    meta: { description: `When true, results narrowed by page's search bar.` },
+  })
+);
+
+const narrowByGlobalTime = schema.maybe(
+  schema.boolean({
+    defaultValue: true,
+    meta: { description: `When true, results narrowed by page's time range.` },
+  })
+);
+
 // base schema for Elasticsearch DSL sources
 export const BaseESSourceSchema = schema.object(
   {
-    applyForceRefresh: schema.maybe(
-      schema.boolean({
-        defaultValue: true,
-        meta: {
-          description: `When true, results are re-fetched when page's automatic refresh fires or user clicks 'Refresh'.`,
-        },
-      })
-    ),
-    applyGlobalQuery: schema.maybe(
-      schema.boolean({
-        defaultValue: true,
-        meta: { description: `When true, results narrowed by page's search bar.` },
-      })
-    ),
-    applyGlobalTime: schema.maybe(
-      schema.boolean({
-        defaultValue: true,
-        meta: { description: `When true, results narrowed by page's time range.` },
-      })
-    ),
+    applyForceRefresh: applyForceRefreshSchema,
+    applyGlobalQuery: narrowByGlobalSearch,
+    applyGlobalTime: narrowByGlobalTime,
     id: schema.string({
       meta: { description: 'uuid.' },
     }),
@@ -116,6 +122,61 @@ export const ESSearchSourceSchema = BaseESSourceSchema.extends(
     meta: {
       description:
         'Vector tile or vector feature source returning points, lines, and polygons from Elasticsearch documents.',
+    },
+    unknowns: 'forbid',
+  }
+);
+
+export const ESQLSourceSchema = schema.object(
+  {
+    applyForceRefresh: applyForceRefreshSchema,
+    // TODO columns are derived from request, remove from stored state
+    columns: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        type: schema.string(),
+        original_types: schema.maybe(schema.arrayOf(schema.string())),
+      })
+    ),
+    // TODO dataViewId is derived from esql statement, remove from stored state
+    dataViewId: schema.string(),
+    dateField: schema.maybe(
+      schema.string({
+        meta: {
+          description: `Date field used to narrow ES|QL requests by global time range. Required when 'narrowByGlobalTime' is true.`,
+        },
+      })
+    ),
+    esql: schema.string({
+      meta: {
+        description: 'ES|QL statement returning at least one geo_point or geo_shape column.',
+      },
+    }),
+    geoField: schema.maybe(
+      schema.string({
+        meta: {
+          description: `Geo field used to narrow ES|QL requests by visible map area and spatial filters drawn on map. Required when 'narrowByMapBounds' is true.`,
+        },
+      })
+    ),
+    id: schema.string({
+      meta: { description: 'uuid.' },
+    }),
+    narrowByMapBounds: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: `When true, results narrowed by visible map area.`,
+        },
+      })
+    ),
+    narrowByGlobalSearch,
+    narrowByGlobalTime,
+    type: schema.literal(SOURCE_TYPES.ESQL),
+  },
+  {
+    meta: {
+      description:
+        'Vector feature source returning points, lines, and polygons from Elasticsearch ES|QL request. One feature is returned per response row. Feature geometry is provided from first geo_point or geo_shape column.',
     },
     unknowns: 'forbid',
   }
