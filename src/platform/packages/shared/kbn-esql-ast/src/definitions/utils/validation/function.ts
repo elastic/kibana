@@ -162,7 +162,8 @@ class FunctionValidator {
    */
   private validateNestedFunctions(): ESQLMessage[] {
     const nestedErrors: ESQLMessage[] = [];
-    for (const arg of this.fn.args.flat()) {
+    for (const _arg of this.fn.args.flat()) {
+      const arg = removeInlineCasts(_arg);
       if (isFunctionExpression(arg)) {
         nestedErrors.push(
           ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
@@ -316,6 +317,13 @@ function getMaxMinNumberOfParams(definition: FunctionDefinition) {
     max = Math.max(max, minParams ? Infinity : params.length);
   });
   return { min, max };
+}
+
+function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
+  if (isInlineCast(arg)) {
+    return removeInlineCasts(arg.value);
+  }
+  return arg;
 }
 
 // #endregion New stuff
@@ -1034,13 +1042,6 @@ function validateFunctionColumnArg(
   }
 
   return messages;
-}
-
-function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
-  if (isInlineCast(arg)) {
-    return removeInlineCasts(arg.value);
-  }
-  return arg;
 }
 
 export function isSupportedFunction(

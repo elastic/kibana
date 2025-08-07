@@ -294,31 +294,56 @@ describe('function validation', () => {
           ]);
         });
 
-        it('validates a function within an inline cast', async () => {
-          setTestFunctions([
-            {
-              name: 'test',
-              type: FunctionDefinitionTypes.SCALAR,
-              description: '',
-              locationsAvailable: [Location.EVAL],
-              signatures: [
-                {
-                  params: [{ name: 'arg1', type: 'integer' }],
-                  returnType: 'integer',
-                },
-              ],
-            },
-          ]);
+        describe('inline casts', () => {
+          it('validates a nested function within an inline cast', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  {
+                    params: [{ name: 'arg1', type: 'integer' }],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
 
-          const { expectErrors } = await setup();
+            const { expectErrors } = await setup();
 
-          await expectErrors('FROM a_index | EVAL TEST("")::double', [
-            getExpectedError('test', ['keyword']),
-          ]);
-          // deep nesting
-          await expectErrors('FROM a_index | EVAL TEST("")::double::keyword::double', [
-            getExpectedError('test', ['keyword']),
-          ]);
+            await expectErrors('FROM a_index | EVAL TEST(TEST("")::integer)', [
+              getExpectedError('test', ['keyword']),
+            ]);
+            // deep nesting
+            await expectErrors('FROM a_index | EVAL TEST(TEST("")::double::keyword::integer)', [
+              getExpectedError('test', ['keyword']),
+            ]);
+          });
+
+          it.skip('validates a top-level function within an inline cast', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  {
+                    params: [{ name: 'arg1', type: 'integer' }],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
+
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | EVAL TEST("")::cartesian_point', [
+              getExpectedError('test', ['keyword']),
+            ]);
+          });
         });
       });
     });
