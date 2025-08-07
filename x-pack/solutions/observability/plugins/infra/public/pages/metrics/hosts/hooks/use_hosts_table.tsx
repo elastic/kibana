@@ -158,13 +158,14 @@ export const useHostsTable = () => {
 
   const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
   const showApmHostTroubleshooting = hostNodes.some((item) => !item.hasSystemMetrics);
+  const schema = searchCriteria.preferredSchema ?? DataSchemaFormat.ECS;
 
   const { value: formulas } = useAsync(
     () =>
       inventoryModel.metrics.getFormulas({
-        schema: searchCriteria.preferredSchema ?? DataSchemaFormat.ECS,
+        schema,
       }),
-    [inventoryModel.metrics, searchCriteria.preferredSchema]
+    [inventoryModel.metrics, schema]
   );
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();

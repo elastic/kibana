@@ -8,7 +8,6 @@
  */
 import {
   isLiteral,
-  isTimeInterval,
   isInlineCast,
   isColumn,
   isParamLiteral,
@@ -140,10 +139,6 @@ export function getExpressionType(
 
   if (isLiteral(root)) {
     return root.literalType;
-  }
-
-  if (isTimeInterval(root)) {
-    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
