@@ -83,7 +83,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
   const [selectedElement, setSelectedElement] = useState<
     cytoscape.NodeSingular | cytoscape.EdgeSingular | undefined
   >(undefined);
-  const isDiagnosticModeEnabled = core.settings.client.get(enableDiagnosticMode);
+  const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
   const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
   const deselect = useCallback(() => {
     if (cy) {
