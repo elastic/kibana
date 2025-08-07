@@ -125,6 +125,7 @@ export function getRootItemOrFallback(
   const rootItem = traceParentChildrenMap.root?.[0];
 
   const parentIds = new Set(traceItems.map(({ id }) => id));
+  // TODO: Reuse waterfall util methods where possible or if logic is the same
   const orphans = traceItems.filter((item) => item.parentId && !parentIds.has(item.parentId));
 
   if (rootItem) {
@@ -144,6 +145,7 @@ export function getRootItemOrFallback(
   };
 }
 
+// TODO: Reuse waterfall util methods where possible or if logic is the same
 function reparentOrphansToRoot(
   rootItem: TraceItem,
   parentChildMap: Record<string, TraceItem[]>,
