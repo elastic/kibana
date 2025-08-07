@@ -59,7 +59,7 @@ run(
       }
     }
 
-    log.info(`Writing file to ${absPath}`);
+    log.info(`Writing file with spaces promoted to ${absPath}`);
     fs.writeFileSync(absPath, yaml.dump(oasDoc, { noRefs: true, lineWidth: -1 }), 'utf8');
   },
   {
