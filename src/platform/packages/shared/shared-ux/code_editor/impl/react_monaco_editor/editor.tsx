@@ -37,6 +37,12 @@ import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
+if (process.env.NODE_ENV !== 'production') {
+  import(
+    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
+  );
+}
+
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
 
 export type EditorWillMount = (monaco: typeof monacoEditor) => void | EditorConstructionOptions;
@@ -162,8 +168,6 @@ export function MonacoEditor({
     }),
     [fixedWidth, fixedHeight]
   );
-
-  const isDevMode = process.env.NODE_ENV !== 'production';
 
   const handleEditorWillMount = () => {
     const finalOptions = editorWillMount?.(monaco);
@@ -315,15 +319,6 @@ export function MonacoEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
-  useEffect(() => {
-    if (isDevMode) {
-      import(
-        'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return <div ref={containerElement} style={style} className="react-monaco-editor-container" />;
 }
