@@ -64,7 +64,6 @@ import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -79,6 +78,7 @@ import {
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -103,7 +103,7 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
