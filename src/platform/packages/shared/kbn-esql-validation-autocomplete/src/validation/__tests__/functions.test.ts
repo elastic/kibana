@@ -287,10 +287,25 @@ describe('function validation', () => {
         });
 
         it('detects a missing column', async () => {
+          setTestFunctions([
+            {
+              name: 'test',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'keyword' }],
+                  returnType: 'keyword',
+                },
+              ],
+            },
+          ]);
+
           const { expectErrors } = await setup();
 
           expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
-            'Column [missingColumn] does not exist.',
+            'Unknown column [missingColumn]',
           ]);
         });
 

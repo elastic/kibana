@@ -17,14 +17,32 @@ export function validateColumnForCommand(
   commandName: string,
   context: ICommandContext
 ): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  if (commandName === 'row') {
-    if (!context.userDefinedColumns.has(column.name) && !isParametrized(column)) {
-      messages.push(errors.unknownColumn(column));
+  return new ColumnValidator(column, context, commandName).validate();
+}
+
+export class ColumnValidator {
+  constructor(
+    private readonly column: ESQLColumn | ESQLIdentifier,
+    private readonly context: ICommandContext,
+    private readonly commandName: string
+  ) {}
+
+  validate(): ESQLMessage[] {
+    if (!this.exists) {
+      return [errors.unknownColumn(this.column)];
     }
-  } else if (!getColumnExists(column, context) && !isParametrized(column)) {
-    messages.push(errors.unknownColumn(column));
+
+    return [];
   }
 
-  return messages;
+  private get exists(): boolean {
+    if (this.commandName === 'row') {
+      if (!this.context.userDefinedColumns.has(this.column.name) && !isParametrized(this.column)) {
+        return false;
+      }
+    } else if (!getColumnExists(this.column, this.context) && !isParametrized(this.column)) {
+      return false;
+    }
+    return true;
+  }
 }

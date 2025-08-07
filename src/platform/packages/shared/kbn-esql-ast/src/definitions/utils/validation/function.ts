@@ -54,6 +54,7 @@ import {
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import { doesLiteralMatchParameterType } from '../literals';
 import { isArrayType } from '../operators';
+import { ColumnValidator } from './column';
 
 export const USE_NEW_VALIDATION = true;
 const validateFunction = USE_NEW_VALIDATION ? validateFunctionNew : validateFunctionOld;
@@ -154,7 +155,14 @@ class FunctionValidator {
       return [errors.licenseRequiredForSignature(this.fn, S[0])];
     }
 
-    return [];
+    const columnMessages = this.fn.args.flatMap((arg) => {
+      if (isColumn(arg) || isIdentifier(arg)) {
+        return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
+      }
+      return [];
+    });
+
+    return columnMessages;
   }
 
   /**

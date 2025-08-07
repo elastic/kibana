@@ -612,4 +612,13 @@ export const errors = {
       });
     }
   },
+
+  columnHasConflict: (column: ESQLColumn, commandName: string): ESQLMessage => {
+    return errors.byId('wrongArgumentType', column.location, {
+      name: astFunction.name,
+      argType: parameterDefinition.type as string,
+      value: actualArg.name,
+      givenType: columnHit!.type,
+    });
+  },
 };
