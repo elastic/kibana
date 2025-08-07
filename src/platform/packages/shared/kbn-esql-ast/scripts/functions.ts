@@ -11,7 +11,6 @@ import { FunctionDefinition, FunctionDefinitionTypes } from '../src/definitions/
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
-  dateDiffOptions,
   dateExtractOptions,
 } from './constants';
 
@@ -50,14 +49,14 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   date_diff: {
     signatures: [
       {
-        params: [{ acceptedValues: dateDiffOptions, literalSuggestions: dateDiffSuggestions }],
+        params: [{ suggestedValues: dateDiffSuggestions }],
       },
     ],
   },
   date_extract: {
     signatures: [
       {
-        params: [{ acceptedValues: dateExtractOptions }],
+        params: [{ suggestedValues: dateExtractOptions }],
       },
     ],
   },
@@ -71,7 +70,7 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   },
   mv_sort: {
     signatures: new Array(10).fill({
-      params: [{}, { acceptedValues: ['asc', 'desc'] }],
+      params: [{}, { suggestedValues: ['asc', 'desc'] }],
     }),
   },
   percentile: {
@@ -81,7 +80,11 @@ export const functionEnrichments: Record<string, RecursivePartial<FunctionDefini
   },
   top: {
     signatures: new Array(6).fill({
-      params: [{}, { constantOnly: true }, { constantOnly: true, acceptedValues: ['asc', 'desc'] }],
+      params: [
+        {},
+        { constantOnly: true },
+        { constantOnly: true, suggestedValues: ['asc', 'desc'] },
+      ],
     }),
   },
   count: {

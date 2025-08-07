@@ -491,8 +491,8 @@ export function isValidLiteralOption(arg: ESQLLiteral, argDef: FunctionParameter
   const unwrapStringLiteralQuotes = (value: string) => value.slice(1, -1);
   return (
     arg.literalType === 'keyword' &&
-    argDef.acceptedValues &&
-    !argDef.acceptedValues
+    argDef.suggestedValues &&
+    !argDef.suggestedValues
       .map((option) => option.toLowerCase())
       .includes(unwrapStringLiteralQuotes(arg.value).toLowerCase())
   );
@@ -856,7 +856,7 @@ function validateFunctionLiteralArg(
   if (isLiteral(argument)) {
     if (
       argument.literalType === 'keyword' &&
-      parameter.acceptedValues &&
+      parameter.suggestedValues &&
       isValidLiteralOption(argument, parameter)
     ) {
       messages.push(
@@ -865,7 +865,7 @@ function validateFunctionLiteralArg(
           values: {
             name: astFunction.name,
             value: argument.value,
-            supportedOptions: parameter.acceptedValues?.map((option) => `"${option}"`).join(', '),
+            supportedOptions: parameter.suggestedValues?.map((option) => `"${option}"`).join(', '),
           },
           locations: argument.location,
         })
