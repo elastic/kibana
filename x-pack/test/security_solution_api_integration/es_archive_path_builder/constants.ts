@@ -8,4 +8,4 @@
 export const SERVERLESS_ES_ARCHIVE_PATH =
   'x-pack/test/security_solution_api_integration/es_archive/serverless';
 
-export const ESS_ES_ARCHIVE_PATH = 'x-pack/test/functional/es_archives';
+export const ESS_ES_ARCHIVE_PATH = 'x-pack/solutions/security/test/fixtures/es_archives';

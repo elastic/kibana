@@ -14,6 +14,7 @@ import { z } from '@kbn/zod';
 import { listPackages } from '../tools/list_packages';
 import { generatePackage } from '../tools/generate_package';
 import { listTeams } from '../tools/list_teams';
+import { runUnitTests } from '../tools/run_unit_tests';
 
 run(async () => {
   const server = new McpServer({ name: 'demo-server', version: '1.0.0' });
@@ -92,6 +93,23 @@ run(async () => {
           {
             type: 'text',
             text: JSON.stringify(listTeams()),
+          },
+        ],
+      };
+    }
+  );
+
+  server.registerTool(
+    'run_unit_tests',
+    {
+      description: 'Run unit tests for changed files',
+    },
+    async () => {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(await runUnitTests()),
           },
         ],
       };

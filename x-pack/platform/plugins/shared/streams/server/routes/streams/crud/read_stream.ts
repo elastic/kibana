@@ -33,9 +33,9 @@ export async function readStream({
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<Streams.all.GetResponse> {
-  const [streamDefinition, dashboardsAndQueries] = await Promise.all([
+  const [streamDefinition, { [name]: dashboardsAndQueries }] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetLinks(name, ['dashboard', 'query']),
+    assetClient.getAssetLinks([name], ['dashboard', 'query']),
   ]);
 
   const [dashboardLinks, queryLinks] = partition(
