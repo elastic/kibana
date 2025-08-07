@@ -12,6 +12,7 @@ import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
+import { FeedbackButton } from '../../pages/slos/components/common/feedback_button';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme, docLinks } = useKibana().services;
@@ -25,6 +26,7 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks gutterSize="xs">
+            <FeedbackButton />
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observability/annotations')}

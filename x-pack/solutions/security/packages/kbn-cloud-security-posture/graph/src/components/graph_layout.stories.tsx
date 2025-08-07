@@ -418,6 +418,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'hexagon',
     icon: 'storage',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: '213.180.204.3',
@@ -432,6 +436,10 @@ const baseGraph: EnhancedNodeViewModel[] = [
     color: 'danger',
     shape: 'ellipse',
     icon: 'user',
+    ips: ['213.180.204.3'],
+    countryCodes: ['RU'],
+    tag: 'Host',
+    count: 3,
   },
   {
     id: 'oktauser',
