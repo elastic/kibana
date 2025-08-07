@@ -524,10 +524,21 @@ export const errors = {
     definition: FunctionDefinition,
     argTypes: string[]
   ): ESQLMessage => {
-    const validSignatures = [...definition.signatures]
-      .sort((a, b) => a.params.length - b.params.length)
+    const validSignatures = definition.signatures
+      .toSorted((a, b) => a.params.length - b.params.length)
       .map((sig) => {
-        const definitionArgTypes = sig.params.map((param) => param.type).join(', ');
+        const definitionArgTypes = sig.params
+          .map((param) => {
+            let ret = param.type as string;
+            if (sig.minParams) {
+              ret = '...' + ret;
+            }
+            if (param.optional) {
+              ret = `[${ret}]`;
+            }
+            return ret;
+          })
+          .join(', ');
         return `${definitionArgTypes}`;
         // return `${definitionArgTypes} => ${sig.returnType}`;
       });
