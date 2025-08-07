@@ -42,7 +42,7 @@ export interface UseFetchCurrentUserConversationsParams {
   isAssistantEnabled: boolean;
   setTotalItemCount?: (total: number) => void;
 }
-interface ConversationWithOwner extends Conversation {
+export interface ConversationWithOwner extends Conversation {
   isConversationOwner?: boolean;
 }
 export interface FetchCurrentUserConversations {

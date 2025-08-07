@@ -24,6 +24,7 @@ import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import { ConversationWithOwner } from '../../api';
 import { useConversationsByDate } from './use_conversations_by_date';
 import { DataStreamApis } from '../../use_data_stream_apis';
 import { Conversation } from '../../../..';
@@ -37,7 +38,7 @@ interface Props {
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   isFetchingCurrentUserConversations: boolean;
-  conversations: Record<string, Conversation>;
+  conversations: Record<string, ConversationWithOwner>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
