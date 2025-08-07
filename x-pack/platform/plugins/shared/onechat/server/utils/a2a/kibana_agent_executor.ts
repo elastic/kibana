@@ -18,6 +18,10 @@ import type { ConversationService } from '../../services/conversation';
 
 const generateMessageId = () => `msg-${uuidv4()}`;
 
+const A2A_CONVERSATION_ID_PREFIX = 'a2a-';
+
+const generateA2AConversationId = (id: string) => `${A2A_CONVERSATION_ID_PREFIX}${id}`;
+
 /**
  * Agent executor that bridges A2A requests to Kibana's onechat system
  */
@@ -44,16 +48,18 @@ export class KibanaAgentExecutor implements AgentExecutor {
       // Get services
       const { chat, conversations } = this.getInternalServices();
 
-      // Ensure conversation exists with contextId
-      await this.ensureConversationExists(contextId, conversations);
+      // Prefix conversation id with a2a- to avoid conflicts with existing conversations
+      const a2aConversationId = generateA2AConversationId(contextId);
 
-      // Execute chat with onechat service using contextId as conversationId
+      // Ensure conversation exists with contextId
+      await this.ensureConversationExists(a2aConversationId, conversations);
+
       const chatEvents$ = chat.converse({
         agentId: this.agentId,
         mode: AgentMode.normal,
         nextInput: { message: userText },
         request: this.kibanaRequest,
-        conversationId: contextId,
+        conversationId: a2aConversationId,
       });
 
       // Process chat response
