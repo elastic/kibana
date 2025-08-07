@@ -47,7 +47,7 @@ describe('uploadAllEventsFromPath', () => {
     jest.clearAllMocks();
   });
 
-  it('should throw an error if the provided eventLogPath does not exist and --dontFailOnMissingEventLogPath is not provided', async () => {
+  it('should throw an error if the provided eventLogPath does not exist dontFailOnMissingEventLogPath is false', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     await expect(
@@ -64,7 +64,7 @@ describe('uploadAllEventsFromPath', () => {
     );
   });
 
-  it('should log a warning if the provided eventLogPath does not exist and --dontFailOnMissingEventLogPath is provided', async () => {
+  it('should log a warning if the provided eventLogPath does not exist and dontFailOnMissingEventLogPath is true', async () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     await uploadAllEventsFromPath('non_existent_path', {
