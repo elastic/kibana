@@ -112,7 +112,8 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor",
     "@kbn/controls-plugin",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/controls-constants"
   ],
   "exclude": ["target/**/*"]
 }
