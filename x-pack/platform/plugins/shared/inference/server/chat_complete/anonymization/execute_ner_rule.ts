@@ -9,8 +9,7 @@ import { Anonymization, NamedEntityRecognitionRule } from '@kbn/inference-common
 import { ElasticsearchClient } from '@kbn/core/server';
 import { chunk, mapValues } from 'lodash';
 import pLimit from 'p-limit';
-import { withInferenceSpan } from '@kbn/inference-tracing';
-import { ElasticGenAIAttributes, GenAISemanticConventions } from '@kbn/inference-tracing/src/types';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
@@ -85,37 +84,33 @@ export async function executeNerRule({
     await Promise.all(
       batched.map(async (batch) => {
         return await limiter(() =>
-          withInferenceSpan(
+          withActiveInferenceSpan(
+            'InferTrainedModel',
             {
-              name: 'inferTrainedModel',
-              [GenAISemanticConventions.GenAIResponseModel]: rule.modelId,
-              [ElasticGenAIAttributes.InferenceSpanKind]: 'LLM',
+              attributes: {},
             },
             async (span) => {
-              try {
-                const docs = batch.map((text) => ({ text_field: text }));
+              const docs = batch.map((text) => ({ text_field: text }));
 
-                span?.setAttribute('input.value', JSON.stringify(docs));
-                const response = await esClient.ml.inferTrainedModel({
-                  model_id: rule.modelId,
-                  docs,
-                  timeout: `${rule.timeoutSeconds ?? 30}s`,
-                });
+              span?.setAttribute('input.value', JSON.stringify(docs));
 
-                span?.setAttribute('output.value', JSON.stringify(response.inference_results));
+              const response = await esClient.ml.inferTrainedModel({
+                model_id: rule.modelId,
+                docs,
+                timeout: `${rule.timeoutSeconds ?? 30}s`,
+              });
 
-                return response.inference_results;
-              } catch (error) {
-                span?.recordException(error);
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                throw new Error(
-                  `Inference failed for NER model '${rule.modelId}': ${errorMessage}`,
-                  { cause: error }
-                );
-              }
+              span?.setAttribute('output.value', JSON.stringify(response.inference_results));
+
+              return response.inference_results;
             }
           )
-        );
+        ).catch((error) => {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          throw new Error(`Inference failed for NER model '${rule.modelId}': ${errorMessage}`, {
+            cause: error,
+          });
+        });
       })
     )
   ).flat();
