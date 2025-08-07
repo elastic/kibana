@@ -17,7 +17,7 @@ import {
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../helpers';
+import { skipIfNoDockerRegistry, waitForAgents } from '../helpers';
 
 const secretVar = (id: string) => `$co.elastic.secret{${id}}`;
 
@@ -140,6 +140,8 @@ export default function (providerContext: FtrProviderContext) {
       } catch (err) {
         // index doesn't exist
       }
+
+      await waitForAgents(supertest, 0, 10);
     };
 
     const cleanupSecrets = async () => {

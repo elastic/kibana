@@ -15,7 +15,10 @@ import {
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { KbnClient } from '@kbn/test';
-import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import {
+  type GetAgentsResponse,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
@@ -229,3 +232,32 @@ export const addUninstallTokenToPolicy = async (
 
   return savedObject.id;
 };
+
+export async function waitForAgents(
+  supertest: SuperTestAgent,
+  expectedAgentCount: number,
+  attempts: number,
+  _attemptsMade = 0
+): Promise<GetAgentsResponse> {
+  const { body: apiResponse } = await supertest
+    .get(`/api/fleet/agents?showInactive=true`)
+    .set('kbn-xsrf', 'xxxx')
+    .expect(200);
+
+  if (apiResponse.items.length === expectedAgentCount) {
+    return apiResponse;
+  }
+
+  if (_attemptsMade >= attempts) {
+    throw new Error(
+      `Agents not loaded correctly, failing test. All agents: \n: ${JSON.stringify(
+        apiResponse.items,
+        null,
+        2
+      )}`
+    );
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  return waitForAgents(supertest, expectedAgentCount, attempts, _attemptsMade + 1);
+}
