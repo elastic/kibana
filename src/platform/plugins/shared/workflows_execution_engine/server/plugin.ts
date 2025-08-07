@@ -140,7 +140,8 @@ export class WorkflowsExecutionEnginePlugin
             currentNode as any,
             contextManager,
             connectorExecutor,
-            workflowRuntime
+            workflowRuntime,
+            workflowLogger
           );
 
           await step.run();

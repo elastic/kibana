@@ -35,7 +35,7 @@ export class StepFactory {
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     workflowState: WorkflowExecutionRuntimeManager,
-    logger: IWorkflowEventLogger // Assuming you have a logger interface
+    workflowLogger: IWorkflowEventLogger // Assuming you have a logger interface
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -49,7 +49,7 @@ export class StepFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState, contextManager, logger);
+        return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'enter-condition-branch':
         return new EnterConditionBranchNodeImpl(workflowState);
       case 'exit-condition-branch':
@@ -57,7 +57,13 @@ export class StepFactory {
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
       case 'atomic':
-        return new AtomicStepImpl(step as any, contextManager, connectorExecutor, workflowState);
+        return new AtomicStepImpl(
+          step as any,
+          contextManager,
+          connectorExecutor,
+          workflowState,
+          workflowLogger
+        );
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':

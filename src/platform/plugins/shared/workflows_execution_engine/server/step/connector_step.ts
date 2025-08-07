@@ -10,6 +10,7 @@
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { RunStepResult, StepBase, BaseStep } from './step_base';
 
 // Extend BaseStep for connector-specific properties
@@ -24,6 +25,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor,
     workflowState: WorkflowExecutionRuntimeManager,
+    private workflowLogger: IWorkflowEventLogger,
     templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
   ) {
     super(step, contextManager, connectorExecutor, workflowState, templatingEngineType);
@@ -73,6 +75,13 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
 
       // TODO: remove this once we have a proper connector executor/step for console
       if (step.type === 'console.log' || step.type === 'console') {
+        this.workflowLogger.logInfo(
+          `Console log from step ${step.name}: \n${renderedInputs.message}`,
+          {
+            event: { action: 'log', outcome: 'success' },
+            tags: ['console', 'log'],
+          }
+        );
         // eslint-disable-next-line no-console
         console.log(step.with?.message);
         return { output: step.with?.message, error: undefined };
