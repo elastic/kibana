@@ -175,6 +175,7 @@
     {
       "groupName": "@elastic/appex-ai-infra dependencies",
       "matchDepNames": [
+        "@langtrase/trace-attributes",
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
         "@smithy/node-http-handler",
