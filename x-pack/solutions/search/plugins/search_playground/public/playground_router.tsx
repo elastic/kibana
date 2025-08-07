@@ -27,16 +27,10 @@ export const PlaygroundRouter: React.FC = () => {
 
   return (
     <Routes>
-      {isSearchModeEnabled ? (
-        <Route exact path={ROOT_PATH} component={PlaygroundsListPage} />
-      ) : (
-        <Redirect exact from={ROOT_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
-      )}
+      <Route exact path={ROOT_PATH} component={PlaygroundsListPage} />
+      <Route path={SAVED_PLAYGROUND_PATH} component={SavedPlaygroundPage} />
       {!isSearchModeEnabled && (
         <Redirect from={SEARCH_PLAYGROUND_SEARCH_PATH} to={SEARCH_PLAYGROUND_CHAT_PATH} />
-      )}
-      {isSearchModeEnabled && (
-        <Route path={SAVED_PLAYGROUND_PATH} component={SavedPlaygroundPage} />
       )}
       <Route exact path={SEARCH_PLAYGROUND_NOT_FOUND} component={PlaygroundRouteNotFound} />
       <Route path={`/:pageMode/:viewMode?`} component={PlaygroundOverview} />

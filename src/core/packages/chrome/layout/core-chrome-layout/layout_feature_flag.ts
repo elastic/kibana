@@ -10,3 +10,5 @@
 export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
 export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
 export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';
+export type LayoutProjectSideNavVersion = 'v1' | 'v2';
+export const LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY = 'core.chrome.projectSideNav';

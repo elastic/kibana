@@ -20,6 +20,7 @@ import { IndexManagementProvider } from './index_management';
 import { AlertingApiProvider } from './alerting_api';
 import { MachineLearningProvider } from './ml';
 import { SynthtraceClientProvider } from './synthtrace';
+import { IngestManagerProvider } from './ingest_manager';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -36,4 +37,5 @@ export const services = {
   transform: TransformProvider,
   usageAPI: UsageAPIProvider,
   synthtrace: SynthtraceClientProvider,
+  ingestManager: IngestManagerProvider,
 };

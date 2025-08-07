@@ -14,6 +14,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
 import { DISCOVER_APP_LOCATOR } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
@@ -24,6 +25,7 @@ import { getUiSettings } from './ui_settings';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import { TRACES_PRODUCT_FEATURE_ID } from '../common/constants';
+import { searchEmbeddableTransforms } from '../common/embeddable';
 
 export class DiscoverServerPlugin
   implements Plugin<object, DiscoverServerPluginStart, object, DiscoverServerPluginStartDeps>
@@ -60,6 +62,7 @@ export class DiscoverServerPlugin
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, searchEmbeddableTransforms);
 
     core.pricing.registerProductFeatures([
       {

@@ -7,7 +7,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('playground', () => {
+  describe('Search Playground - hosted', () => {
+    // Shared test file to close the global solution tour
+    loadTestFile(require.resolve('../shared/solution_tour'));
     loadTestFile(require.resolve('./playground_overview.ess.ts'));
+    loadTestFile(require.resolve('./saved_playgrounds.ts'));
   });
 }

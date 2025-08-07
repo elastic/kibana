@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { WorkflowsService } from '../workflows_management/workflows_management_service';
+import type { Logger } from '@kbn/core/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import {
+  convertToSerializableGraph,
+  convertToWorkflowGraph,
+} from '../../common/lib/build_execution_graph/build_execution_graph';
 import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
   workflowId: string;
@@ -54,18 +59,17 @@ export function createWorkflowTaskRunner({
           }
 
           // Convert to execution model
-          const workflowExecutionModel = {
+          const executionGraph = convertToWorkflowGraph(workflow.definition);
+          const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
             status: workflow.status,
             definition: workflow.definition,
+            executionGraph: convertToSerializableGraph(executionGraph),
           };
 
           // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(
-            workflowExecutionModel,
-            actionsClient
-          );
+          const connectorCredentials = await extractConnectorIds(actionsClient);
 
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(

@@ -9,16 +9,20 @@
 
 import {
   CreateWorkflowCommand,
-  WorkflowListDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowDetailDto,
   EsWorkflow,
-  WorkflowExecutionEngineModel,
+  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+  WorkflowExecutionListDto,
+  WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
-import { WorkflowsService } from './workflows_management_service';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { SchedulerService } from '../scheduler/scheduler_service';
+import { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -97,6 +101,31 @@ export class WorkflowsManagementApi {
     return await this.schedulerService.runWorkflow(workflow, inputs);
   }
 
+  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
+    if (!this.schedulerService) {
+      throw new Error('Scheduler service not set');
+    }
+    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+
+    if (parsedYaml.error) {
+      // TODO: handle error properly
+      // It should throw BadRequestError in the API
+      throw parsedYaml.error;
+    }
+
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+
+    return await this.schedulerService.runWorkflow(
+      {
+        id: 'test-workflow',
+        name: workflowToCreate.name,
+        status: workflowToCreate.status,
+        definition: workflowToCreate.definition,
+      },
+      inputs
+    );
+  }
+
   public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
     return await this.workflowsService.searchWorkflowExecutions({
       workflowId,
@@ -116,18 +145,31 @@ export class WorkflowsManagementApi {
 
     // Transform the logs to match our API format
     return {
-      logs: result.logs.map((log: any) => ({
-        id: log.id,
-        timestamp: log.source['@timestamp'],
-        level: log.source.level,
-        message: log.source.message,
-        stepId: log.source.workflow?.step_id,
-        stepName: log.source.workflow?.step_name,
-        connectorType: log.source.workflow?.step_type,
-        duration: log.source.duration,
-        additionalData: log.source.additionalData,
-      })),
-      total: typeof result.total === 'number' ? result.total : result.total?.value || 0,
+      logs: result.logs
+        .filter((log: any) => log) // Filter out undefined/null logs
+        .map((log: any) => ({
+          id:
+            log.id ||
+            `${log['@timestamp']}-${log.workflow?.execution_id}-${
+              log.workflow?.step_id || 'workflow'
+            }`,
+          timestamp: log['@timestamp'],
+          level: log.level,
+          message: log.message,
+          stepId: log.workflow?.step_id,
+          stepName: log.workflow?.step_name,
+          connectorType: log.workflow?.step_type,
+          duration: log.event?.duration,
+          additionalData: {
+            workflowId: log.workflow?.id,
+            workflowName: log.workflow?.name,
+            executionId: log.workflow?.execution_id,
+            event: log.event,
+            tags: log.tags,
+            error: log.error,
+          },
+        })),
+      total: result.total,
       limit: params.limit || 100,
       offset: params.offset || 0,
     };

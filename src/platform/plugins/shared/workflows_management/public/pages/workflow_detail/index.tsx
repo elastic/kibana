@@ -20,22 +20,33 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { WorkflowYaml } from '@kbn/workflows';
 import React, { useEffect, useMemo, useState } from 'react';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
+import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
-import { WorkflowVisualEditor } from '../../features/workflow_visual_editor/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
+
+const WorkflowVisualEditor = React.lazy(() =>
+  import('../../features/workflow_visual_editor/ui').then((module) => ({
+    default: module.WorkflowVisualEditor,
+  }))
+);
 
 export function WorkflowDetailPage({ id }: { id: string }) {
   const { application, chrome, notifications } = useKibana().services;
-  const { data: workflow, isLoading: isLoadingWorkflow, error } = useWorkflowDetail(id);
-
+  const {
+    data: workflow,
+    isLoading: isLoadingWorkflow,
+    error: workflowError,
+  } = useWorkflowDetail(id);
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
+  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   chrome!.setBreadcrumbs([
     {
@@ -131,16 +142,21 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <WorkflowEditor
-            workflowId={workflow?.id ?? ''}
-            value={workflowYaml}
-            onChange={handleChange}
-            hasChanges={hasChanges}
-          />
+          {workflow && (
+            <WorkflowEditor
+              workflowId={workflow?.id ?? ''}
+              value={workflowYaml}
+              onChange={handleChange}
+              hasChanges={hasChanges}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
-          {/* @ts-expect-error - TODO: fix this */}
-          {workflowYamlObject?.data && <WorkflowVisualEditor workflow={workflowYamlObject.data} />}
+          {workflowYamlObject?.data && (
+            <React.Suspense fallback={<EuiLoadingSpinner />}>
+              <WorkflowVisualEditor workflow={workflowYamlObject.data as WorkflowYaml} />
+            </React.Suspense>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -149,14 +165,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (workflow === undefined) {
       return <EuiText>Failed to load workflow</EuiText>;
     }
-    return <WorkflowExecutionList workflowId={workflow?.id} />;
+    return <WorkflowExecutionList workflow={workflow} />;
   };
 
   if (isLoadingWorkflow) {
     return <EuiLoadingSpinner />;
   }
 
-  if (error) {
+  if (workflowError) {
     return <EuiText>Error loading workflow</EuiText>;
   }
 
@@ -168,6 +184,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         rightSideItems={[
           <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
+          </EuiButton>,
+          <EuiButton iconType="beaker" size="s" onClick={() => setTestWorkflowModalOpen(true)}>
+            <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
           </EuiButton>,
           <EuiButton iconType="play" size="s" onClick={handleRunClick}>
             <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
@@ -194,6 +213,12 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         <WorkflowEventModal
           onClose={() => setWorkflowEventModalOpen(false)}
           onSubmit={handleRunWorkflow}
+        />
+      )}
+      {testWorkflowModalOpen && (
+        <TestWorkflowModal
+          workflowYaml={workflowYaml}
+          onClose={() => setTestWorkflowModalOpen(false)}
         />
       )}
     </EuiPageTemplate>

@@ -100,7 +100,7 @@ describe('add_prepackaged_rules_route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    installPrebuiltRulesAndTimelinesRoute(server.router);
+    installPrebuiltRulesAndTimelinesRoute(server.router, clients.logger);
   });
 
   describe('status codes', () => {
@@ -238,6 +238,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        clients.logger,
         mockExceptionsClient
       );
 
@@ -251,6 +252,7 @@ describe('add_prepackaged_rules_route', () => {
       await legacyCreatePrepackagedRules(
         context.securitySolution,
         clients.rulesClient,
+        clients.logger,
         mockExceptionsClient
       );
 

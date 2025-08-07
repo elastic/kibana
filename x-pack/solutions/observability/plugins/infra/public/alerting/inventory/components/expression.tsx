@@ -26,24 +26,17 @@ import type {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { debounce, omit } from 'lodash';
+import { omit } from 'lodash';
 import type { ChangeEvent, FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import {
-  findInventoryModel,
-  awsEC2SnapshotMetricTypes,
-  awsRDSSnapshotMetricTypes,
-  awsS3SnapshotMetricTypes,
-  awsSQSSnapshotMetricTypes,
-  containerSnapshotMetricTypes,
-  hostSnapshotMetricTypes,
-  podSnapshotMetricTypes,
-  SnapshotMetricTypeRT,
-} from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel, SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import useAsync from 'react-use/lib/useAsync';
+import type { Query } from '@kbn/es-query';
+import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { FilterQuery, InventoryMetricConditions } from '../../../../common/alerting/metrics';
@@ -55,13 +48,10 @@ import {
   withSourceProvider,
 } from '../../../containers/metrics_source';
 import type { InfraWaffleMapOptions } from '../../../common/inventory/types';
-import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metric';
 import { NodeTypeExpression } from './node_type';
-
-const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -144,12 +134,13 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const onFilterChange = useCallback(
-    (filter: string) => {
-      setRuleParams('filterQueryText', filter ?? '');
+    (payload: { query?: Query }) => {
+      const kuery = payload.query?.query as string;
+      setRuleParams('filterQueryText', kuery ?? '');
       try {
         setRuleParams(
           'filterQuery',
-          convertKueryToElasticSearchQuery(filter, metricsView?.dataViewReference, false) || ''
+          convertKueryToElasticSearchQuery(kuery, metricsView?.dataViewReference, false) || ''
         );
       } catch (e) {
         setRuleParams('filterQuery', QUERY_INVALID);
@@ -157,11 +148,6 @@ export const Expressions: React.FC<Props> = (props) => {
     },
     [metricsView?.dataViewReference, setRuleParams]
   );
-
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
-    onFilterChange,
-  ]);
 
   const emptyError = useMemo(() => {
     return {
@@ -203,7 +189,8 @@ export const Expressions: React.FC<Props> = (props) => {
   );
 
   const handleFieldSearchChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onFilterChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) =>
+      onFilterChange({ query: { query: e.target.value, language: 'kuery' } }),
     [onFilterChange]
   );
 
@@ -300,7 +287,7 @@ export const Expressions: React.FC<Props> = (props) => {
             >
               <ExpressionChart
                 expression={e}
-                filterQuery={ruleParams.filterQuery}
+                kuery={ruleParams.filterQueryText}
                 nodeType={ruleParams.nodeType}
                 sourceId={ruleParams.sourceId}
                 accountId={ruleParams.accountId}
@@ -323,6 +310,9 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
+          aria-label={i18n.translate('xpack.infra.expressions.addconditionButton.ariaLabel', {
+            defaultMessage: 'Add condition',
+          })}
           data-test-subj="infraExpressionsAddConditionButton"
           color="primary"
           iconSide="left"
@@ -372,10 +362,13 @@ export const Expressions: React.FC<Props> = (props) => {
         display="rowCompressed"
       >
         {metadata ? (
-          <MetricsExplorerKueryBar
-            onSubmit={onFilterChange}
-            onChange={debouncedOnFilterChange}
-            value={ruleParams.filterQueryText}
+          <UnifiedSearchBar
+            onQuerySubmit={onFilterChange}
+            useDefaultBehaviors={false}
+            query={{
+              query: ruleParams.filterQueryText || '',
+              language: 'kuery',
+            }}
           />
         ) : (
           <EuiFieldSearch
@@ -538,34 +531,17 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     />
   );
 
-  const ofFields = useMemo(() => {
-    let myMetrics: SnapshotMetricType[] = hostSnapshotMetricTypes;
+  const inventoryModels = findInventoryModel(nodeType);
+  const { value: aggregations } = useAsync(
+    () => inventoryModels.metrics.getAggregations(),
+    [inventoryModels]
+  );
 
-    switch (nodeType) {
-      case 'awsEC2':
-        myMetrics = awsEC2SnapshotMetricTypes;
-        break;
-      case 'awsRDS':
-        myMetrics = awsRDSSnapshotMetricTypes;
-        break;
-      case 'awsS3':
-        myMetrics = awsS3SnapshotMetricTypes;
-        break;
-      case 'awsSQS':
-        myMetrics = awsSQSSnapshotMetricTypes;
-        break;
-      case 'host':
-        myMetrics = hostSnapshotMetricTypes;
-        break;
-      case 'pod':
-        myMetrics = podSnapshotMetricTypes;
-        break;
-      case 'container':
-        myMetrics = containerSnapshotMetricTypes;
-        break;
-    }
-    return myMetrics.map((myMetric) => toMetricOpt(myMetric, nodeType));
-  }, [nodeType]);
+  const ofFields = useMemo(() => {
+    return (Object.keys(aggregations?.getAll() ?? {}) as SnapshotMetricType[]).map((key) =>
+      toMetricOpt(key, nodeType)
+    );
+  }, [aggregations, nodeType]);
 
   return (
     <>
@@ -645,6 +621,10 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
               <EuiSpacer size="xs" />
               <EuiFlexGroup css={StyledExpressionRowCss}>
                 <EuiButtonEmpty
+                  aria-label={i18n.translate(
+                    'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',
+                    { defaultMessage: 'Add warning threshold' }
+                  )}
                   data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color="primary"
                   flush="left"

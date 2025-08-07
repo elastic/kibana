@@ -9,7 +9,7 @@ import React from 'react';
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryTsvbType, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { OnboardingFlow } from '../../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../../components/shared/templates/infra_page_template';
@@ -28,7 +28,7 @@ import { MetadataContext } from '../containers/metadata_context';
 
 interface Props {
   name: string;
-  requiredMetrics: InventoryMetric[];
+  requiredTsvb: InventoryTsvbType[];
   nodeId: string;
   cloudId: string;
   nodeType: InventoryItemType;
@@ -64,7 +64,7 @@ export const NodeDetailsPage = (props: Props) => {
       const response = await callApi('/api/metrics/node_details', {
         method: 'POST',
         body: JSON.stringify({
-          metrics: props.requiredMetrics,
+          metrics: props.requiredTsvb,
           nodeId: props.nodeId,
           nodeType: props.nodeType,
           timerange: parseRange(props.timeRange),
@@ -79,7 +79,7 @@ export const NodeDetailsPage = (props: Props) => {
       props.cloudId,
       props.nodeId,
       props.nodeType,
-      props.requiredMetrics,
+      props.requiredTsvb,
       props.sourceId,
       props.timeRange,
     ]
