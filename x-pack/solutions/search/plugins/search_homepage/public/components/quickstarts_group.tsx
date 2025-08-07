@@ -6,15 +6,7 @@
  */
 import { quickstartExamples } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import {
-  EuiButton,
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  IconType,
-} from '@elastic/eui';
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
@@ -27,46 +19,39 @@ export const QuickstartsGroup = () => {
     {
       title: 'Search Basics',
       description: 'Learn the basics of creating and searching an index.',
-      icon: 'inspect',
       request: quickstartExamples.basics,
     },
     {
       title: 'Query DSL',
       description: 'Learn how to use the Query DSL to build complex queries.',
-      icon: 'code',
       request: quickstartExamples.queryDSL,
     },
     {
       title: 'ES|QL',
       description: 'Learn how to use ES|QL to query your data in a SQL-like syntax.',
-      icon: 'database',
       request: quickstartExamples.esql,
     },
     {
       title: 'Aggregations',
       description: 'Learn how to use aggregations to analyze and summarize your data.',
-      icon: 'stats',
       request: quickstartExamples.aggregations,
     },
     {
       title: 'Semantic Search',
       description:
         'Learn how to use semantic search to find relevant documents using natural language queries.',
-      icon: 'lettering',
       request: quickstartExamples.semanticSearch,
     },
     {
       title: 'Hybrid Search',
       description:
         'Learn how to use hybrid search to combine traditional keyword search with semantic search capabilities.',
-      icon: 'merge',
       request: quickstartExamples.hybridSearch,
     },
     {
       title: 'Vector Search',
       description:
         'Learn how to use vector search to find similar documents based on vector embeddings.',
-      icon: 'graphApp',
       request: quickstartExamples.vectorSearch,
     },
   ];
@@ -88,7 +73,6 @@ export const QuickstartsGroup = () => {
             <EuiFlexItem key={index} grow={false} style={{ minWidth: 300, maxWidth: 300 }}>
               <EuiCard
                 paddingSize="l"
-                icon={<EuiIcon size="xxl" type={quickstart.icon as IconType} color={'accent'} />}
                 title={quickstart.title}
                 description={i18n.translate(
                   `xpack.searchHomepage.connectToElasticsearch.quickstart${quickstart.title
