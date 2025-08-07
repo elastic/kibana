@@ -165,7 +165,8 @@ export async function autocomplete(
             userDefinedColumns: context?.userDefinedColumns,
           },
           {},
-          callbacks?.hasMinimumLicenseRequired
+          callbacks?.hasMinimumLicenseRequired,
+          context?.activeProduct
         ),
         'label'
       );
