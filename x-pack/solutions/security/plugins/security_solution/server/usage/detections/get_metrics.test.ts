@@ -1271,7 +1271,7 @@ describe('Detections Usage and Metrics', () => {
         };
       });
 
-      it('returns information on does not match condition for threat match rule', async () => {
+      it('returns information on does not match condition', async () => {
         // response has 5 threat match rules, 3 of them have negate threat mapping: 1 Elastic, 2 custom
         savedObjectsClient.find.mockResolvedValueOnce(
           getMockThreatMatchRuleSearchResponse([
@@ -1306,6 +1306,19 @@ describe('Detections Usage and Metrics', () => {
         expect(result).toHaveProperty(
           'detection_rules.detection_rule_usage.threat_match_custom.has_does_not_match_condition',
           2
+        );
+        // Elastic rules details
+        expect(result).toHaveProperty('detection_rules.detection_rule_detail.length', 2);
+        expect(result).toHaveProperty(
+          'detection_rules.detection_rule_detail',
+          expect.arrayContaining([
+            expect.objectContaining({
+              has_does_not_match_condition: true,
+            }),
+            expect.objectContaining({
+              has_does_not_match_condition: false,
+            }),
+          ])
         );
       });
 
