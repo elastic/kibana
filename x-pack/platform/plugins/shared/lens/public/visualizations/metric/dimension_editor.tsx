@@ -38,14 +38,14 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
+import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
 import {
   getColorMode,
   getDefaultConfigForMode,
   getSecondaryLabelSelected as getSecondaryLabelSelected,
 } from './helpers';
-import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
+import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID, metricStateDefaults } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -54,10 +54,6 @@ export type Props = VisualizationDimensionEditorProps<MetricVisualizationState> 
 };
 
 type SubProps = Props & { idPrefix: string };
-
-function invertPosition(position: 'before' | 'after'): 'before' | 'after' {
-  return position === 'before' ? 'after' : 'before';
-}
 
 export function DimensionEditor(props: Props) {
   const { state, accessor } = props;
@@ -563,13 +559,12 @@ function SecondaryMetricEditor({
               },
             ]}
             idSelected={`${idPrefix}${
-              state.secondaryValuePosition && invertPosition(state.secondaryValuePosition)
+              state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition
             }`}
-            onChange={(_id, labelPosition) => {
-              // Note: Invert the position because the button updates the label's position relative to the value
+            onChange={(_id, secondaryLabelPosition) => {
               setState({
                 ...state,
-                secondaryValuePosition: invertPosition(labelPosition),
+                secondaryLabelPosition,
               });
             }}
           />

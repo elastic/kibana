@@ -45,7 +45,7 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
-  secondaryValuePosition?: SecondaryMetricProps['valuePosition'];
+  secondaryLabelPosition: SecondaryMetricProps['labelPosition'];
 }
 
 export interface VisParams {

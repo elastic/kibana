@@ -180,23 +180,27 @@ export const MetricVis = ({
           ) ?? defaultColor
         : config.metric.color ?? defaultColor;
 
-    const secondaryMetricInfo = getSecondaryMetricInfo({
-      columns: data.columns,
-      row,
-      config,
-      getMetricFormatter,
-      trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
-      staticColor: config.metric.secondaryColor,
-    });
+    let secondaryMetricProps: SecondaryMetricProps | undefined;
+    const secondaryMetric = config.dimensions.secondaryMetric;
+    if (secondaryMetric) {
+      const secondaryMetricInfo = getSecondaryMetricInfo({
+        row,
+        columns: data.columns,
+        secondaryMetric,
+        secondaryLabel: config.metric.secondaryLabel,
+        trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
+        staticColor: config.metric.secondaryColor,
+      });
 
-    const secondaryMetricProps: SecondaryMetricProps = {
-      value: secondaryMetricInfo.value,
-      label: secondaryMetricInfo.label,
-      badgeColor: secondaryMetricInfo.badgeColor,
-      ariaDescription: secondaryMetricInfo.description,
-      icon: secondaryMetricInfo.icon,
-      valuePosition: config.metric.secondaryValuePosition,
-    };
+      secondaryMetricProps = {
+        value: secondaryMetricInfo.value,
+        label: secondaryMetricInfo.label,
+        badgeColor: secondaryMetricInfo.badgeColor,
+        ariaDescription: secondaryMetricInfo.description,
+        icon: secondaryMetricInfo.icon,
+        labelPosition: config.metric.secondaryLabelPosition,
+      };
+    }
 
     if (typeof value !== 'number') {
       const nonNumericMetricBase: Omit<MetricWText, 'value'> = {

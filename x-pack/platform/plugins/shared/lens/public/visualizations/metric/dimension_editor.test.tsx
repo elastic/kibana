@@ -13,7 +13,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { euiLightVars } from '@kbn/ui-theme';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType } from '../../types';
-import { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
@@ -77,7 +77,7 @@ describe('dimension editor', () => {
     trendlineSecondaryMetricAccessor: 'trendline-secondary-metric-accessor',
     trendlineTimeAccessor: 'trendline-time-col-id',
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
-    secondaryValuePosition: 'after',
+    secondaryLabelPosition: 'before',
   };
 
   let props: Props;

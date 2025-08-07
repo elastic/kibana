@@ -162,7 +162,7 @@ export const toExpression = (
 
   const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
 
-  // replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
+  // Replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
   const secondaryLabelConfig = getSecondaryLabelSelected(state, {
     defaultSecondaryLabel: '',
     colorMode: secondaryDynamicColorMode,
@@ -219,8 +219,8 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
-    secondaryValuePosition:
-      state.secondaryValuePosition ?? metricStateDefaults.secondaryValuePosition,
+    secondaryLabelPosition:
+      state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition,
   });
 
   return {

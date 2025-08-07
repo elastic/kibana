@@ -34,7 +34,7 @@ describe('interpreter/functions#metricVis', () => {
     valueFontSize: 'default',
     primaryPosition: 'bottom',
     titleWeight: 'bold',
-    secondaryValuePosition: 'after',
+    secondaryLabelPosition: 'before',
   };
 
   it('should pass over overrides from variables', async () => {
