@@ -663,6 +663,7 @@
     "@kbn/license-api-guard-plugin": "link:x-pack/platform/plugins/private/license_api_guard",
     "@kbn/license-management-plugin": "link:x-pack/platform/plugins/shared/license_management",
     "@kbn/licensing-plugin": "link:x-pack/platform/plugins/shared/licensing",
+    "@kbn/licensing-types": "link:src/platform/packages/shared/kbn-licensing-types",
     "@kbn/links-plugin": "link:src/platform/plugins/private/links",
     "@kbn/lists-plugin": "link:x-pack/solutions/security/plugins/lists",
     "@kbn/llm-tasks-plugin": "link:x-pack/platform/plugins/shared/ai_infra/llm_tasks",

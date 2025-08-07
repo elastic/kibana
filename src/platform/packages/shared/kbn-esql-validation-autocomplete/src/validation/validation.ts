@@ -21,7 +21,7 @@ import type {
   ESQLFieldWithMetadata,
   ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import { LicenseType } from '@kbn/licensing-types';
 
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
@@ -214,7 +214,7 @@ function validateCommand(
   if (callbacks?.hasMinimumLicenseRequired) {
     const license = commandDefinition.metadata.license;
 
-    if (license && !callbacks.hasMinimumLicenseRequired(license.toLowerCase() as ESQLLicenseType)) {
+    if (license && !callbacks.hasMinimumLicenseRequired(license.toLowerCase() as LicenseType)) {
       messages.push(
         getMessageFromId({
           messageId: 'licenseRequired',

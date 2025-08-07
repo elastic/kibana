@@ -6463,6 +6463,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/licensing-types@link:src/platform/packages/shared/kbn-licensing-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/links-plugin@link:src/platform/plugins/private/links":
   version "0.0.0"
   uid ""

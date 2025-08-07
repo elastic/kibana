@@ -11,7 +11,6 @@ import { LicensingPlugin } from './plugin';
 
 export type {
   LicenseCheckState,
-  LicenseType,
   LicenseStatus,
   LicenseFeature,
   PublicLicense,

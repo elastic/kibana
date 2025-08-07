@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, ESQLControlVariable, ESQLLicenseType } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import type {
   ESQLSingleAstItem,
@@ -189,7 +190,7 @@ export async function getFieldsOrFunctionsSuggestions(
     ignoreFn?: string[];
     ignoreColumns?: string[];
   } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): Promise<ISuggestionItem[]> {
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
@@ -362,7 +363,7 @@ export async function suggestForExpression({
   context?: ICommandContext;
   advanceCursorAfterInitialColumn?: boolean;
   // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   // a set of columns not to suggest when the expression is empty
   ignoredColumnsForEmptyExpression?: string[];
 }): Promise<ISuggestionItem[]> {

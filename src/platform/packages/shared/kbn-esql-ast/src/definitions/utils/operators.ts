@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLLicenseType } from '@kbn/esql-types';
+import { LicenseType } from '@kbn/licensing-types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
@@ -55,7 +55,7 @@ export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType },
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ): ISuggestionItem[] => {
   const filteredDefinitions = filterFunctionDefinitions(
     getTestFunctions().length
@@ -125,7 +125,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }) {
   const suggestions = [];
   const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);

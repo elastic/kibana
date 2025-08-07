@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ESQLLicenseType = 'basic' | 'gold' | 'platinum' | 'enterprise' | 'trial';
-export type ESQLSignatureLicenseType = 'PLATINUM'; // TODO: add new license types as needed
+export type {
+  LicenseType,
+  ILicense,
+  LicenseStatus,
+  LicenseCheck,
+  PublicLicenseJSON,
+  PublicLicense,
+  PublicFeatures,
+  LicenseFeature,
+  LicenseCheckState,
+} from './src';
 
-export interface ESQLLicenseResult {
-  hasAtLeast: (minimumLicenseRequired: ESQLLicenseType) => boolean;
-}
+export { LICENSE_TYPE } from './src';
