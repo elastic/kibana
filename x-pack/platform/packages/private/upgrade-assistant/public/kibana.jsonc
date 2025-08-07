@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/upgrade-assistant-pkg-public",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}
