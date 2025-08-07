@@ -9,6 +9,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { useFeaturesApi } from '../../hooks/use_features_api';
+import { useFeaturesFetch } from '../../hooks/use_features_fetch';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
@@ -19,11 +21,11 @@ import { AddSignificantEventFlyout } from './add_significant_event_flyout/add_si
 import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
+import { ManageFeaturesFlyout } from './manage_features_flyout/manage_features_flyout';
+import { FEATURE_IDENTIFIED_SYSTEM_ID } from './manage_features_flyout/types';
 import { SignificantEventsTable } from './significant_events_table';
 import { Timeline, TimelineEvent } from './timeline';
 import { formatChangePoint } from './utils/change_point';
-import { ManageFeaturesFlyout } from './manage_features_flyout/manage_features_flyout';
-import { useFeaturesApi } from '../../hooks/use_features_api';
 
 interface Props {
   definition: Streams.all.GetResponse;
@@ -52,7 +54,10 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const { upsertQuery, removeQuery, bulk } = useSignificantEventsApi({
     name: definition.stream.name,
   });
-  const { upsertFeature, listFeatures } = useFeaturesApi({ name: definition.stream.name });
+  const { upsertFeature } = useFeaturesApi({ name: definition.stream.name });
+  const featuresFetch = useFeaturesFetch({
+    name: definition.stream.name,
+  });
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [isIdentifySystemFlyoutOpen, setIsIdentifySystemFlyoutOpen] = useState(false);
@@ -149,9 +154,9 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
   const identifySystemFlyout = isIdentifySystemFlyoutOpen ? (
     <ManageFeaturesFlyout
       definition={definition.stream}
-      features={listFeatures().value}
+      features={featuresFetch.value}
       onSave={async (feature: string) => {
-        await upsertFeature({ id: 'identified_system', feature }).then(
+        await upsertFeature({ id: FEATURE_IDENTIFIED_SYSTEM_ID, feature }).then(
           () => {
             notifications.toasts.addSuccess({
               title: i18n.translate(
@@ -172,6 +177,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           }
         );
         setIsIdentifySystemFlyoutOpen(false);
+        featuresFetch.refresh();
       }}
       onClose={() => {
         setIsIdentifySystemFlyoutOpen(false);

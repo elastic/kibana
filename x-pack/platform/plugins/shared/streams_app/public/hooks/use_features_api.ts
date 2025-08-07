@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useAbortController, type AbortableAsyncState } from '@kbn/react-hooks';
+import { useAbortController } from '@kbn/react-hooks';
 import { type IdentifiedFeatureGenerateResponse, type StreamFeature } from '@kbn/streams-schema';
+import { useCallback } from 'react';
 import { useKibana } from './use_kibana';
-import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 interface FeaturesApi {
-  listFeatures: () => AbortableAsyncState<Promise<StreamFeature[]>>;
   upsertFeature: (feature: StreamFeature) => Promise<void>;
   generate: (connectorId: string) => IdentifiedFeatureGenerateResponse;
 }
@@ -27,35 +26,24 @@ export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
 
   const { signal } = useAbortController();
 
-  const result = useStreamsAppFetch(
-    async (req): Promise<StreamFeature[]> => {
-      const response = await streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/features 2023-10-31',
-        {
-          params: { path: { name } },
-          signal: req.signal,
-        }
-      );
-      return response.features;
-    },
-    [name, streamsRepositoryClient]
-  );
-
-  return {
-    listFeatures: () => result,
-    upsertFeature: async ({ id, feature }) => {
+  const upsertFeature = useCallback(
+    async (feature: StreamFeature) => {
       await streamsRepositoryClient.fetch(
         'PUT /api/streams/{name}/features/{featureId} 2023-10-31',
         {
           signal,
           params: {
-            path: { name, featureId: id },
-            body: { feature },
+            path: { name, featureId: feature.id },
+            body: { feature: feature.feature },
           },
         }
       );
     },
-    generate: (connectorId: string) => {
+    [name, streamsRepositoryClient, signal]
+  );
+
+  const generate = useCallback(
+    (connectorId: string) => {
       return streamsRepositoryClient.stream(
         `GET /api/streams/{name}/features/_generate 2023-10-31`,
         {
@@ -64,5 +52,11 @@ export function useFeaturesApi({ name }: { name: string }): FeaturesApi {
         }
       );
     },
+    [name, streamsRepositoryClient, signal]
+  );
+
+  return {
+    upsertFeature,
+    generate,
   };
 }

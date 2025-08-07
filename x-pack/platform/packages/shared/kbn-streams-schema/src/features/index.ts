@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 
 export interface StreamFeature {
-  id: string; // e.g. "general", "system", "application", etc... Used to categorize features. For now we will only use "default" id.
+  id: string; // e.g. "identified_system", "system", "application", etc... Used to categorize features. For now we will only use "identified_system" id.
   feature: string;
 }
 

@@ -25,6 +25,7 @@ import React from 'react';
 import { useFeaturesApi } from '../../../hooks/use_features_api';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAIFeatures } from '../common/use_ai_features';
+import { FEATURE_IDENTIFIED_SYSTEM_ID } from './types';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -42,7 +43,7 @@ export function ManageFeaturesFlyout({ features, onClose, definition, onSave }: 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [identifiedSystem, setIdentifiedSystem] = React.useState<string>(
-    features?.find((f) => f.id === 'identified_system')?.feature ?? ''
+    features?.find((f) => f.id === FEATURE_IDENTIFIED_SYSTEM_ID)?.feature ?? ''
   );
 
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

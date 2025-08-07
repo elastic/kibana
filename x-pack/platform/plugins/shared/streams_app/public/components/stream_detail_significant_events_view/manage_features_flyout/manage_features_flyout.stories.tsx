@@ -9,6 +9,7 @@ import { Streams } from '@kbn/streams-schema';
 import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { ManageFeaturesFlyout } from './manage_features_flyout';
+import { FEATURE_IDENTIFIED_SYSTEM_ID } from './types';
 
 const stories: Meta<{}> = {
   title: 'Streams/ManageFeaturesFlyout',
@@ -36,6 +37,23 @@ export const Default: StoryFn<{}> = () => {
   return (
     <ManageFeaturesFlyout
       definition={logsStreamDefinition}
+      features={[]}
+      onClose={() => {}}
+      onSave={async () => {}}
+    />
+  );
+};
+
+export const WithExisting: StoryFn<{}> = () => {
+  return (
+    <ManageFeaturesFlyout
+      definition={logsStreamDefinition}
+      features={[
+        {
+          id: FEATURE_IDENTIFIED_SYSTEM_ID,
+          feature: 'This is a SpringBoot application running Java 91',
+        },
+      ]}
       onClose={() => {}}
       onSave={async () => {}}
     />
