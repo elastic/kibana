@@ -24,6 +24,30 @@
           "ignore_malformed": false,
           "type": "date"
         },
+        "actor": {
+          "properties": {
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "target": {
+          "properties": {
+            "entity": {
+              "properties": {
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
         "agent": {
           "properties": {
             "build": {

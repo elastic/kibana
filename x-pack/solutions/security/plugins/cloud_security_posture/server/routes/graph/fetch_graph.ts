@@ -75,15 +75,6 @@ export const fetchGraph = async ({
     ",\\"type\\":\\"", docType, "\\"",
     ",\\"index\\":\\"", _index, "\\"",
     ${
-      // Incase we don't fetch from alerts index, ESQL will complain about missing field's mapping
-      alertsMappingsIncluded
-        ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
-      "\\"ruleName\\":\\"", kibana.alert.rule.name, "\\"",
-    "}"), ""),`
-        : ''
-    }
-  "}")
-    ${
       // ESQL complains about missing field's mapping when we don't fetch from alerts index
       alertsMappingsIncluded
         ? `CASE (isAlert, CONCAT(",\\"alert\\":", "{",
@@ -91,6 +82,7 @@ export const fetchGraph = async ({
     "}"), ""),`
         : ''
     }
+  "}")
 | STATS badge = COUNT(*),
   docs = VALUES(docData),
   ips = VALUES(related.ip),
