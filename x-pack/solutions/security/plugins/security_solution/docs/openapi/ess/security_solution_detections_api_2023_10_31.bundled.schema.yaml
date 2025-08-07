@@ -423,10 +423,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys/serverless-project-api-keys)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1415,10 +1414,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys/serverless-project-api-keys)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1632,11 +1630,10 @@ paths:
 
         > warn
 
-        > When used with  [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys/serverless-project-api-keys)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        > When used with [API
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -3167,10 +3164,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/docs/deploy-manage/api-keys/serverless-project-api-keys)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
