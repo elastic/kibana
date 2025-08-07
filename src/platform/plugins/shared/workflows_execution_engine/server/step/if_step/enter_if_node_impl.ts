@@ -57,19 +57,19 @@ export class EnterIfNodeImpl implements StepImplementation {
     }
 
     if (evaluatedConditionResult) {
-      this.workflowContextLogger.logInfo(
+      this.workflowContextLogger.logDebug(
         `Condition "${thenNode.condition}" evaluated to true for step ${this.step.id}. Going to then branch.`
       );
       this.wfExecutionRuntimeManager.goToStep(thenNode.id);
     } else if (elseNode) {
-      this.workflowContextLogger.logInfo(
+      this.workflowContextLogger.logDebug(
         `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. Going to else branch.`
       );
       this.wfExecutionRuntimeManager.goToStep(elseNode.id);
     } else {
       // in the case when the condition evaluates to false and no else branch is defined
       // we go straight to the exit node skipping "then" branch
-      this.workflowContextLogger.logInfo(
+      this.workflowContextLogger.logDebug(
         `Condition "${thenNode.condition}" evaluated to false for step ${this.step.id}. No else branch defined. Exiting if condition.`
       );
       this.wfExecutionRuntimeManager.goToStep(this.step.exitNodeId);
