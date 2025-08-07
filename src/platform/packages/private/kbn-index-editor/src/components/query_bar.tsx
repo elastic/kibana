@@ -28,6 +28,7 @@ export const QueryBar = () => {
     services: { share, data, indexUpdateService },
   } = useKibana<KibanaContextExtra>();
 
+  const dataView = useObservable(indexUpdateService.dataView$);
   const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
   const dataViewColumns = useObservable(indexUpdateService.dataTableColumns$);
   const isIndexCreated = useObservable(
@@ -56,6 +57,10 @@ export const QueryBar = () => {
     : null;
 
   const isDiscoverButtonDisabled = !discoverLink;
+
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup alignItems={'flexStart'} gutterSize={'s'}>
