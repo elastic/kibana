@@ -46,10 +46,14 @@ components:
         add:
           type: array
           items:
-            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: A list of users ids to assign.
+            type: string
+            format: nonempty
+            minLength: 1
+            description: A list of user profile `uid`s to assign. Users need to activate their user profile by logging into Kibana at least once.
         remove:
           type: array
           items:
-            $ref: '../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: A list of users ids to unassign.
+            type: string
+            format: nonempty
+            minLength: 1
+            description: A list of user profile `uid`s to unassign. Users need to activate their user profile by logging into Kibana at least once.
