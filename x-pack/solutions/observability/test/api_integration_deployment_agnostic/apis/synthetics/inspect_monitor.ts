@@ -16,7 +16,7 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe.only('inspectSyntheticsMonitor', function () {
+  describe('inspectSyntheticsMonitor', function () {
     this.tags(['skipCloud', 'skipMKI']);
 
     const supertest = getService('supertestWithoutAuth');
