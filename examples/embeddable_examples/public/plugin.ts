@@ -31,10 +31,10 @@ import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
 import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
 import { ADD_FIELD_LIST_ACTION_ID } from './react_embeddables/field_list/constants';
 import { registerFieldListPanelPlacementSetting } from './react_embeddables/field_list/register_field_list_embeddable';
-import { registerAddSearchPanelAction } from './react_embeddables/search/register_add_search_panel_action';
 import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
 import { setKibanaServices } from './kibana_services';
 import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
+import { registerSearchPanelAction } from './react_embeddables/search/register_search_panel_action';
 
 export interface SetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -107,6 +107,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerFieldListPanelPlacementSetting(deps.dashboard);
 
+    registerSearchPanelAction(deps.uiActions);
+
     deps.uiActions.registerActionAsync(ADD_EUI_MARKDOWN_ACTION_ID, async () => {
       const { createEuiMarkdownAction } = await import(
         './react_embeddables/eui_markdown/create_eui_markdown_action'
@@ -114,13 +116,12 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       return createEuiMarkdownAction();
     });
     deps.uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_EUI_MARKDOWN_ACTION_ID);
+
     if (deps.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
       // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
       // the create action if the Canvas-specific trigger does indeed exist.
       deps.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
     }
-
-    registerAddSearchPanelAction(deps.uiActions);
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
       const { createDataTableAction } = await import(
