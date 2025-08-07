@@ -9,7 +9,7 @@
 
 import type { monaco } from '@kbn/monaco';
 import { useCallback, useState } from 'react';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml-utils';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { YamlValidationError, YamlValidationErrorSeverity } from '../model/types';
 import { MUSTACHE_REGEX } from './mustache';
 import { MarkerSeverity, getSeverityString } from './utils';
