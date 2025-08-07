@@ -299,7 +299,6 @@ For information about the {kib} 8.16.1 release, review the following information
 The 8.16.1 release includes the following known issues.
 =======
 The 8.16.1 release includes the following known issues and bug fixes.
->>>>>>> 34557d33828 ([DOCS][Known issue] Reporting failing in >= 8.15 when using server.protocol: http2 (#230894))
 
 [float]
 [[known-issues-8.16.1]]
