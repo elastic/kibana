@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.1>>
 * <<release-notes-8.19.0>>
 * <<release-notes-8.18.4>>
 * <<release-notes-8.18.3>>
@@ -130,7 +131,7 @@ Elastic Observability solution::
 * Fixes an error in Uptime occurring when filters are missing in the parameters of a rule created using the API ({kibana-pull}229422[#229422]).
 
 Elastic Security solution::
-For the Elastic Security 8.19.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+For the Elastic Security 8.19.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 
 Kibana platform::
 * Fixes a display issue with counter indicators on toast messages ({kibana-pull}229300[#229300]).
