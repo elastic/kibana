@@ -9,7 +9,7 @@ import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { IStorageClient } from '@kbn/storage-adapter';
-import { keyBy, partition } from 'lodash';
+import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -17,15 +17,20 @@ import {
   Asset,
   AssetLink,
   AssetLinkRequest,
-  AssetUnlinkRequest,
   AssetType,
+  AssetUnlinkRequest,
   AssetWithoutUuid,
   DashboardLink,
   QueryAsset,
   QueryLink,
   RuleLink,
   SloLink,
+  isFeatureLink,
+  isQueryLink,
+  type FeatureAsset,
+  type FeatureLink,
 } from '../../../../common/assets';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -33,9 +38,9 @@ import {
   QUERY_KQL_BODY,
   QUERY_TITLE,
   STREAM_NAME,
+  type FEATURE_BODY,
 } from './fields';
 import { AssetStorageSettings } from './storage_settings';
-import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
@@ -128,7 +133,17 @@ type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_KQL_BODY]: string;
 };
 
-export type StoredAssetLink = (SloLink | RuleLink | DashboardLink | StoredQueryLink) & {
+type StoredFeatureLink = Omit<FeatureLink, 'feature'> & {
+  [FEATURE_BODY]: string;
+};
+
+export type StoredAssetLink = (
+  | SloLink
+  | RuleLink
+  | DashboardLink
+  | StoredQueryLink
+  | StoredFeatureLink
+) & {
   [STREAM_NAME]: string;
 };
 
@@ -152,6 +167,16 @@ function fromStorage(link: StoredAssetLink): AssetLink {
       },
     } satisfies QueryLink;
   }
+
+  if (link[ASSET_TYPE] === 'feature') {
+    return {
+      ...link,
+      feature: {
+        id: link['asset.id'],
+        feature: link['feature.feature'],
+      },
+    } satisfies FeatureLink;
+  }
   return link;
 }
 
@@ -164,6 +189,15 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
       [STREAM_NAME]: name,
       'query.title': query.title,
       'query.kql.query': query.kql.query,
+    };
+  }
+
+  if (link[ASSET_TYPE] === 'feature') {
+    const { feature, ...rest } = link;
+    return {
+      ...rest,
+      [STREAM_NAME]: name,
+      'feature.feature': feature.feature,
     };
   }
 
@@ -330,9 +364,11 @@ export class AssetClient {
       return [];
     }
 
-    const [queryAssetLinks, savedObjectAssetLinks] = partition(
-      assetLinks,
-      (link): link is QueryLink => link[ASSET_TYPE] === 'query'
+    // TODO Kevin: fix perf
+    const queryAssetLinks = assetLinks.filter(isQueryLink);
+    const featureAssetLinks = assetLinks.filter(isFeatureLink);
+    const savedObjectAssetLinks = assetLinks.filter(
+      (link) => !isQueryLink(link) && !isFeatureLink(link)
     );
 
     const idsByType = Object.fromEntries(
@@ -413,6 +449,14 @@ export class AssetClient {
           [ASSET_TYPE]: link[ASSET_TYPE],
           query: link.query,
           title: link.query.title,
+        };
+      }),
+      ...featureAssetLinks.map((link): FeatureAsset => {
+        return {
+          [ASSET_ID]: link[ASSET_ID],
+          [ASSET_UUID]: link[ASSET_UUID],
+          [ASSET_TYPE]: link[ASSET_TYPE],
+          feature: link.feature,
         };
       }),
     ];

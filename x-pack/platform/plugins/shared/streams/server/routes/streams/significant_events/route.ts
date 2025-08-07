@@ -12,7 +12,6 @@ import type {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
-import type { IdentifiedFeatureEventsGenerateResponse } from '@kbn/streams-schema/src/api/significant_events';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import moment from 'moment';
@@ -22,7 +21,6 @@ import {
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
-import { identifySystemFeatures } from '../../../lib/significant_events/identify_system_features';
 import { previewSignificantEvents } from '../../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { generateUsingZeroShot } from '../../../lib/significant_events/zero_shot';
@@ -46,8 +44,8 @@ async function assertLicenseAndPricingTier(
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
-const dateFromString = z.string().transform((input) => new Date(input));
-const durationSchema = z.string().transform((value) => {
+export const dateFromString = z.string().transform((input) => new Date(input));
+export const durationSchema = z.string().transform((value) => {
   const match = value.match(/^(\d+)([mhd])$/);
   if (!match) {
     throw new Error('Duration must follow format: {number}{unit} where unit is m, h, or d');
@@ -265,76 +263,8 @@ const generateSignificantEventsRoute = createServerRoute({
   },
 });
 
-const generateSystemFeaturesRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/features/_generate 2023-10-31',
-  params: z.object({
-    path: z.object({ name: z.string() }),
-    query: z.object({
-      connectorId: z.string(),
-      currentDate: dateFromString.optional(),
-      shortLookback: durationSchema.optional(),
-    }),
-  }),
-  options: {
-    access: 'public',
-    summary: 'identify the system features using LLM',
-    description: 'identify the system features using LLM',
-    availability: {
-      since: '9.2.0',
-      stability: 'experimental',
-    },
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<IdentifiedFeatureEventsGenerateResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, inferenceClient } =
-      await getScopedClients({ request });
-    await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
-
-    return fromRxjs(
-      identifySystemFeatures(
-        {
-          name: params.path.name,
-          connectorId: params.query.connectorId,
-          currentDate: params.query.currentDate,
-          shortLookback: params.query.shortLookback,
-        },
-        {
-          inferenceClient,
-          esClient: createTracedEsClient({
-            client: scopedClusterClient.asCurrentUser,
-            logger,
-            plugin: 'streams',
-          }),
-          logger,
-        }
-      )
-    ).pipe(
-      map((feature) => ({
-        feature,
-        type: 'identified_feature' as const,
-      }))
-    );
-  },
-});
-
 export const significantEventsRoutes = {
   ...readSignificantEventsRoute,
   ...previewSignificantEventsRoute,
   ...generateSignificantEventsRoute,
-  ...generateSystemFeaturesRoute,
 };

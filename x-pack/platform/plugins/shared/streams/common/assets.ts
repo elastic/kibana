@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { StreamQuery, type StreamFeature } from '@kbn/streams-schema';
 import { ValuesType } from 'utility-types';
-import { StreamQuery } from '@kbn/streams-schema';
 
 export const ASSET_TYPES = {
   Dashboard: 'dashboard' as const,
   Rule: 'rule' as const,
   Slo: 'slo' as const,
   Query: 'query' as const,
+  Feature: 'feature' as const,
 };
 
 export type AssetType = ValuesType<typeof ASSET_TYPES>;
@@ -29,17 +30,21 @@ export type RuleLink = AssetLinkBase<'rule'>;
 export type QueryLink = AssetLinkBase<'query'> & {
   query: StreamQuery;
 };
+export type FeatureLink = AssetLinkBase<'feature'> & { feature: StreamFeature };
 
-export type AssetLink = DashboardLink | SloLink | RuleLink | QueryLink;
+export type AssetLink = DashboardLink | SloLink | RuleLink | QueryLink | FeatureLink;
 
 export function isQueryLink(item: AssetLink): item is QueryLink {
   return item['asset.type'] === 'query';
 }
 
+export function isFeatureLink(item: AssetLink): item is FeatureLink {
+  return item['asset.type'] === 'feature';
+}
+
 type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
 
 export type AssetLinkRequest = OmitFrom<AssetLink, 'asset.uuid'>;
-
 export type AssetUnlinkRequest = Pick<AssetLink, 'asset.type' | 'asset.id'>;
 
 interface AssetBase<TAssetType extends AssetType> extends AssetLinkBase<TAssetType> {
@@ -57,8 +62,9 @@ export type RuleAsset = SavedObjectAssetBase<'rule'>;
 export type QueryAsset = AssetBase<'query'> & {
   query: StreamQuery;
 };
+export type FeatureAsset = AssetLinkBase<'feature'> & { feature: StreamFeature };
 
-export type Asset = DashboardAsset | SloAsset | RuleAsset | QueryAsset;
+export type Asset = DashboardAsset | SloAsset | RuleAsset | QueryAsset | FeatureAsset;
 export type AssetWithoutUuid = Omit<AssetLink, 'asset.uuid'>;
 
 export interface AssetTypeToAssetMap {
@@ -66,4 +72,5 @@ export interface AssetTypeToAssetMap {
   [ASSET_TYPES.Slo]: SloAsset;
   [ASSET_TYPES.Rule]: RuleAsset;
   [ASSET_TYPES.Query]: QueryAsset;
+  [ASSET_TYPES.Feature]: FeatureAsset;
 }
