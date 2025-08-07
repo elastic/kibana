@@ -21,7 +21,7 @@ import {
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -123,16 +123,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     return preservedOrder;
   }, [props.columns, activeColumns]);
 
-  // This effect is needed to ensure that the activeColumns state is always in sync with the rendered columns
-  // This is necessary because DataTable onSetColumns method is not updated when new columns are added.
-  useEffect(
-    function syncActiveColumns() {
-      if (!isEqual(activeColumns, renderedColumns)) {
-        setActiveColumns(renderedColumns);
-      }
-    },
-    [renderedColumns, activeColumns]
-  );
+  // We need to keep active columns in sync with rendered columns to not lose the user defined order.
+  if (!isEqual(activeColumns, renderedColumns)) {
+    setActiveColumns(renderedColumns);
+  }
 
   const columnsMeta = useMemo(() => {
     return props.columns.reduce((acc, column) => {
