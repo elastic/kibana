@@ -316,15 +316,46 @@ const getSuggestions = (
   if (lineContentAfterPosition.startsWith('"')) {
     endColumn = endColumn + 1;
   }
+  // Check if we're typing a field name with a trailing dot
+  const lineContentBeforePosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
+  
+  // Check if we're in the middle of typing a field name with a dot for nested fields
+  const fieldWithDotMatch = lineContentBeforePosition.match(/"([^"]+)\.$/);
+  const parentFieldName = fieldWithDotMatch ? fieldWithDotMatch[1] + '.' : null;
+  
+  // Adjust the range start column if we have a field with a dot
+  let startColumn = wordUntilPosition.startColumn;
+  if (parentFieldName) {
+    // Find where the parent field name starts
+    const parentFieldIndex = lineContentBeforePosition.lastIndexOf('"' + parentFieldName);
+    if (parentFieldIndex >= 0) {
+      startColumn = parentFieldIndex + 2; // +2 to skip the quote and start at the field name
+    }
+  }
+  
   const range = {
     startLineNumber: position.lineNumber,
     // replace the whole word with the suggestion
-    startColumn: wordUntilPosition.startColumn,
+    startColumn,
     endLineNumber: position.lineNumber,
     endColumn,
   };
+  
   return (
     filterTermsWithoutName(autocompleteSet)
+      // Filter suggestions to only show nested fields when there's a parent field with a dot
+      .filter((item) => {
+        if (parentFieldName) {
+          // Only show fields that start with the parent field name
+          return typeof item.name === 'string' && item.name.startsWith(parentFieldName);
+        }
+        return true;
+      })
       // map autocomplete items to completion items
       .map((item) => {
         const suggestion = {

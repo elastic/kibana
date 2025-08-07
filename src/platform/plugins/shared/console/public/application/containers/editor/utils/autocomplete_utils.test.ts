@@ -121,9 +121,25 @@ describe('autocomplete_utils', () => {
       const actual = shouldTriggerSuggestions(' "');
       expect(actual).toBe(true);
     });
-    it('triggers no suggestions for the property name when the property name is typed', () => {
+    it('triggers suggestions for the property name when the property name is typed', () => {
       const actual = shouldTriggerSuggestions('"propertyName');
-      expect(actual).toBe(false);
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions when typing a single character field name', () => {
+      const actual = shouldTriggerSuggestions('"c');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions when typing a field name with dot', () => {
+      const actual = shouldTriggerSuggestions('"category.');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions for nested field names', () => {
+      const actual = shouldTriggerSuggestions('"category.keyword');
+      expect(actual).toBe(true);
+    });
+    it('triggers suggestions with whitespace before quote', () => {
+      const actual = shouldTriggerSuggestions('  "field');
+      expect(actual).toBe(true);
     });
     it('triggers suggestions for the property value', () => {
       const actual = shouldTriggerSuggestions(' "propertyName": ');

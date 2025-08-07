@@ -111,6 +111,10 @@ export class MonacoEditorActionsProvider {
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
       }
+      // trigger autocomplete on dot (period) for nested field suggestions
+      if (event.keyCode === monaco.KeyCode.Period) {
+        debouncedTriggerSuggestions();
+      }
       if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
         this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
