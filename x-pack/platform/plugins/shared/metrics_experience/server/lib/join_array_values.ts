@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-export function joinArrayValues(record: Record<string, string[]>, delimiter: string = ',') {
+import { isArray } from 'lodash';
+
+export function joinArrayValues(record: Record<string, any> | undefined, delimiter: string = ',') {
   const results: Record<string, string> = {};
+  if (!record) return results;
   for (const [key, value] of Object.entries(record)) {
-    results[key] = value.join(delimiter);
+    results[key] = isArray(value) ? value.join(delimiter) : value;
   }
   return results;
 }

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { getMetricFields } from '../../lib/get_metric_fields';
+import { fetchMetricFields } from '../../lib/fetch_metric_fields';
 import { createRoute } from '../create_route';
 
 export const fieldsApi = createRoute({
@@ -18,18 +18,24 @@ export const fieldsApi = createRoute({
       to: z.string().default('now'),
       from: z.string().default('now-15m'),
       fields: z.string().default('*'),
+      page: z.string().default('1'),
+      size: z.string().default('100'),
     }),
   }),
   handler: async ({ context, params, logger }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const fields = await getMetricFields({
+    const page = parseInt(params.query.page, 10);
+    const size = parseInt(params.query.size, 10);
+    const { fields, total } = await fetchMetricFields({
       esClient,
       indexPattern: params.query.index,
       from: params.query.from,
       to: params.query.to,
       fields: params.query.fields,
+      page,
+      size,
       logger,
     });
-    return { fields };
+    return { fields, total, page };
   },
 });
