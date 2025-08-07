@@ -31,7 +31,7 @@ export class CaseSuggestionRegistryExamplePlugin
     const { cases } = dependencies;
 
     /* example of providing depdencies you may need to your suggestion handler */
-    getStartServices().then(([coreStart, pluginsStart]) => {
+    void getStartServices().then(([coreStart, pluginsStart]) => {
       const savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository(['synthetics-monitor'])
       );
