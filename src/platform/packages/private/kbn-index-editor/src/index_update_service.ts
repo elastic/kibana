@@ -174,7 +174,7 @@ export class IndexUpdateService {
         }),
         Builder.expression.column({
           args: [Builder.identifier({ name: '_source' })],
-        }),
+        })
       );
     }
 
