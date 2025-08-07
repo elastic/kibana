@@ -9,6 +9,7 @@
 
 import { createSelector } from '@reduxjs/toolkit';
 import type { DiscoverInternalState, RecentlyClosedTabState } from './types';
+import { TabsBarVisibility } from './types';
 
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
 
@@ -32,7 +33,6 @@ export const selectRecentlyClosedTabs = createSelector(
 );
 
 export const selectIsTabsBarHidden = createSelector(
-  (state: DiscoverInternalState) => state.initializationState,
-  (initializationState) =>
-    !initializationState.hasUserDataView && !initializationState.hasEnteredViaESQL
+  (state: DiscoverInternalState) => state.tabsBarVisibility,
+  (tabsBarVisibility) => tabsBarVisibility === TabsBarVisibility.hidden
 );

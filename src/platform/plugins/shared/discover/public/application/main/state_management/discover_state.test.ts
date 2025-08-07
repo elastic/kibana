@@ -75,7 +75,6 @@ async function getState(
     internalStateActions.setInitializationState({
       hasESData: true,
       hasUserDataView: true,
-      hasEnteredViaESQL: undefined,
     })
   );
   if (savedSearch) {

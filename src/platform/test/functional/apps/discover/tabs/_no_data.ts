@@ -22,50 +22,64 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const monacoEditor = getService('monacoEditor');
 
-  describe('has ES data but no data view', function () {
-    before(async () => {
-      await spaceSettings.switchSpaceSolutionType({
-        spaceName: 'default',
-        solution: 'search',
-      });
-    });
-
+  describe('has ES data but no custom data view', function () {
     beforeEach(async () => {
       await common.navigateToApp('home');
       await kibanaServer.savedObjects.cleanStandardList();
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('noDataViewsPrompt');
     });
 
     after(async () => {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
-      await spaceSettings.switchSpaceSolutionType({
-        spaceName: 'default',
-        solution: 'classic',
+    });
+
+    it('shows tabs bar by default in classic solution type', async () => {
+      await testSubjects.missingOrFail('noDataViewsPrompt');
+      await dataViews.waitForSwitcherToBe('All logs');
+      expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
+    });
+
+    describe('non-classic solution type', function () {
+      before(async () => {
+        await spaceSettings.switchSpaceSolutionType({
+          spaceName: 'default',
+          solution: 'search',
+        });
       });
-    });
 
-    it('can create a new data view', async () => {
-      expect(await unifiedTabs.isTabsBarVisible()).to.be(false);
-      const dataViewToCreate = 'logstash';
-      await dataViews.createFromPrompt({ name: dataViewToCreate });
-      await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
-      expect((await dataGrid.getDocTableRows()).length).to.be.above(0);
-      expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
-    });
+      beforeEach(async () => {
+        await testSubjects.existOrFail('noDataViewsPrompt');
+      });
 
-    it('can try ES|QL', async () => {
-      expect(await unifiedTabs.isTabsBarVisible()).to.be(false);
-      await testSubjects.click('tryESQLLink');
-      await discover.waitUntilTabIsLoaded();
-      await testSubjects.existOrFail('ESQLEditor');
-      await testSubjects.existOrFail('unifiedHistogramChart');
-      expect((await dataGrid.getDocTableRows()).length).to.be.above(0);
-      expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
+      after(async () => {
+        await spaceSettings.switchSpaceSolutionType({
+          spaceName: 'default',
+          solution: 'classic',
+        });
+      });
+
+      it('can create a new data view', async () => {
+        expect(await unifiedTabs.isTabsBarVisible()).to.be(false);
+        const dataViewToCreate = 'logstash';
+        await dataViews.createFromPrompt({ name: dataViewToCreate });
+        await dataViews.waitForSwitcherToBe(`${dataViewToCreate}*`);
+        expect((await dataGrid.getDocTableRows()).length).to.be.above(0);
+        expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
+      });
+
+      it('can enter ES|QL mode', async () => {
+        expect(await unifiedTabs.isTabsBarVisible()).to.be(false);
+        await testSubjects.click('tryESQLLink');
+        await discover.waitUntilTabIsLoaded();
+        expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logs* | LIMIT 10');
+        expect((await dataGrid.getDocTableRows()).length).to.be.above(0);
+        expect(await unifiedTabs.isTabsBarVisible()).to.be(true);
+      });
     });
   });
 }
