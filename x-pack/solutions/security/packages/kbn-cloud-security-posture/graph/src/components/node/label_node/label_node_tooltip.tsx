@@ -13,14 +13,14 @@ import type { DocumentAnalysis } from './analyze_documents';
 import { Badge } from './label_node_badges';
 
 const alertedEventsText = i18n.translate(
-  'securitySolutionsPackage.csp.graph.labelNode.tooltip.alertedEvents',
+  'securitySolutionPackages.csp.graph.labelNode.tooltip.alertedEvents',
   {
     defaultMessage: 'Alerted events',
   }
 );
 
 const defaultEventsText = i18n.translate(
-  'securitySolutionsPackage.csp.graph.labelNode.tooltip.defaultEvents',
+  'securitySolutionPackages.csp.graph.labelNode.tooltip.defaultEvents',
   {
     defaultMessage: 'Default events',
   }
