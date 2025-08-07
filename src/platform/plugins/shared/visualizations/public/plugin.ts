@@ -64,7 +64,6 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import { css, injectGlobal } from '@emotion/css';
 import type { TypesSetup, TypesStart } from './vis_types';
@@ -122,6 +121,7 @@ import {
 } from '../common/content_management';
 import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -173,7 +173,7 @@ export interface VisualizationsStartDeps {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
 }
 
 const styles = {
@@ -462,11 +462,11 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
       const {
-        plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
+        plugins: { embeddable: embeddableStart, uiActionsEnhanced: uiActionsEnhancedStart },
       } = start();
 
       const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
-      return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
+      return getVisualizeEmbeddableFactory({ embeddableStart, uiActionsEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {

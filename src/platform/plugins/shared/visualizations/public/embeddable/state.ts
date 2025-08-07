@@ -16,7 +16,7 @@ import {
   SAVED_OBJECT_REF_NAME,
 } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced';
 import type { Reference } from '@kbn/content-management-utils';
 import {
   getAnalytics,

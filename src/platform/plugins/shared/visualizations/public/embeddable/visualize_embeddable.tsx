@@ -11,7 +11,6 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   EmbeddableStart,
   EmbeddableFactory,
@@ -37,6 +36,8 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
+import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
@@ -56,10 +57,10 @@ import { checkForDuplicateTitle } from '../utils/saved_objects_utils';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
-  embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhancedStart?: AdvancedUiActionsStart;
 }) => EmbeddableFactory<VisualizeSerializedState, VisualizeApi> = ({
   embeddableStart,
-  embeddableEnhancedStart,
+  uiActionsEnhancedStart,
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
@@ -69,11 +70,12 @@ export const getVisualizeEmbeddableFactory: (deps: {
     const titleManager = initializeTitleManager(initialState.rawState);
 
     // Initialize dynamic actions
-    const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = uiActionsEnhancedStart ? initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      initialState
-    );
+      initialState,
+      { embeddable: embeddableStart, uiActionsEnhanced: uiActionsEnhancedStart }
+    ) : undefined;
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
