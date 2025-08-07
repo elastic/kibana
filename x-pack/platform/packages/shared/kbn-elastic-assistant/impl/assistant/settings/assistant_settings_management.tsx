@@ -55,7 +55,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       selectedSettingsTab: contextSettingsTab,
       setSelectedSettingsTab,
       navigateToApp,
-      assistantAvailability: { isAssistantManagementEnabled },
+      assistantAvailability: { isAssistantManagementEnabled, hasConnectorsAllPrivilege },
     } = useAssistantContext();
 
     useEffect(() => {
@@ -143,14 +143,18 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             </>
           }
           rightSideItems={[
-            <EuiButtonEmpty
-              iconType="gear"
-              size="m"
-              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
-              data-test-subj="genAiSettingsButton"
-            >
-              {i18n.GEN_AI_SETTINGS_BUTTON}
-            </EuiButtonEmpty>,
+            ...(hasConnectorsAllPrivilege
+              ? [
+                  <EuiButtonEmpty
+                    iconType="gear"
+                    size="m"
+                    onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+                    data-test-subj="genAiSettingsButton"
+                  >
+                    {i18n.GEN_AI_SETTINGS_BUTTON}
+                  </EuiButtonEmpty>,
+                ]
+              : []),
           ]}
           tabs={tabs}
           paddingSize="none"

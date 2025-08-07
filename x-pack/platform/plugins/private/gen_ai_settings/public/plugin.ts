@@ -46,10 +46,14 @@ export class GenAiSettingsPlugin
     { management }: GenAiSettingsSetupDeps
   ): Promise<GenAiSettingsPluginSetup> {
     const [coreStart] = await core.getStartServices();
-
+    const capabilities = coreStart.application.capabilities;
     // This section depends mainly on Connectors feature, but should have its own Kibana feature setting in the future.
     if (
-      coreStart.application.capabilities.management.insightsAndAlerting.triggersActionsConnectors
+      // Connectors 'all' privilege
+      capabilities.actions?.show === true &&
+      capabilities.actions?.execute === true &&
+      capabilities.actions?.delete === true &&
+      capabilities.actions?.save === true
     ) {
       management.sections.section.ai.registerApp({
         id: 'genAiSettings',

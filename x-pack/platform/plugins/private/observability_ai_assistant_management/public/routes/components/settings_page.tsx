@@ -35,13 +35,19 @@ export function SettingsPage() {
   const { setBreadcrumbs } = useAppContext();
   const {
     services: {
-      application: { navigateToApp, isAppRegistered },
+      application: { navigateToApp, isAppRegistered, capabilities },
       serverless,
     },
   } = useKibana();
 
   const router = useObservabilityAIAssistantManagementRouter();
   const knowledgeBase = useKnowledgeBase();
+
+  const hasConnectorsAllPrivilege =
+    capabilities.actions?.show === true &&
+    capabilities.actions?.execute === true &&
+    capabilities.actions?.delete === true &&
+    capabilities.actions?.save === true;
 
   const {
     query: { tab },
@@ -178,19 +184,21 @@ export function SettingsPage() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="gear"
-            size="m"
-            onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
-            data-test-subj="genAiSettingsButton"
-          >
-            <FormattedMessage
-              id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
-              defaultMessage="GenAI Settings"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {hasConnectorsAllPrivilege ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="gear"
+              size="m"
+              onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+              data-test-subj="genAiSettingsButton"
+            >
+              <FormattedMessage
+                id="xpack.observabilityAiAssistantManagement.settingsPage.genAiSettingsButton"
+                defaultMessage="GenAI Settings"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
