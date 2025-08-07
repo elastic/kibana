@@ -34,6 +34,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
+import { useWaffleOptionsContext } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_options';
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
@@ -52,8 +53,8 @@ import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
 import { useMetricsDataViewContext, useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
-import type { WaffleViewState } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
-import { useWaffleViewState } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
+import { useWaffleFiltersContext } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_filters';
+import { useWaffleTimeContext } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_time';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';
@@ -87,7 +88,9 @@ const AnomalyActionMenu = ({
   const [isOpen, setIsOpen] = useState(false);
   const close = useCallback(() => setIsOpen(false), [setIsOpen]);
   const handleToggleMenu = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-  const { onViewChange } = useWaffleViewState();
+  const { setWaffleOptionsState } = useWaffleOptionsContext();
+  const { setWaffleFiltersState } = useWaffleFiltersContext();
+  const { setWaffleTimeState } = useWaffleTimeContext();
   const { metricsView } = useMetricsDataViewContext();
   const {
     services: { share },
@@ -104,7 +107,8 @@ const AnomalyActionMenu = ({
     const jobIdParts = jobId.split('-');
     const jobIdMetric = jobIdParts[jobIdParts.length - 1];
     const metricType = metricTypeMap[jobIdMetric.replace(/hosts_|k8s_/, '') as Metric];
-    const anomalyViewParams: WaffleViewState = {
+
+    setWaffleOptionsState({
       metric: { type: metricType },
       sort: { by: 'name', direction: 'desc' },
       groupBy: [],
@@ -116,22 +120,37 @@ const AnomalyActionMenu = ({
       autoBounds: true,
       accountId: '',
       region: '',
-      autoReload: false,
-      filterQuery: {
-        expression: influencers.reduce((query, i) => {
+    });
+
+    setWaffleTimeState({
+      currentTime: startTime,
+      isAutoReloading: false,
+    });
+
+    setWaffleFiltersState({
+      query: {
+        query: influencers.reduce((query, i) => {
           if (query) {
             query = `${query} or `;
           }
           return `${query} ${influencerField}: "${i}"`;
         }, ''),
-        kind: 'kuery',
+        language: 'kuery',
       },
-      legend: { palette: 'cool', reverseColors: false, steps: 10 },
-      time: startTime,
-    };
-    onViewChange({ attributes: anomalyViewParams });
+    });
+
     if (closeFlyout) closeFlyout();
-  }, [jobId, onViewChange, startTime, type, influencers, influencerField, closeFlyout]);
+  }, [
+    closeFlyout,
+    influencerField,
+    influencers,
+    jobId,
+    setWaffleFiltersState,
+    setWaffleOptionsState,
+    setWaffleTimeState,
+    startTime,
+    type,
+  ]);
 
   const anomaliesUrl = useLinkProps({
     app: 'ml',
@@ -566,6 +585,10 @@ export const AnomaliesTable = ({
             {!hideSelectGroup && (
               <EuiFlexItem grow={1}>
                 <EuiComboBox
+                  aria-label={i18n.translate(
+                    'xpack.infra.anomaliesTable.selectgroupComboBox.ariaLabel',
+                    { defaultMessage: 'Select group' }
+                  )}
                   placeholder={i18n.translate('xpack.infra.ml.anomalyFlyout.jobTypeSelect', {
                     defaultMessage: 'Select group',
                   })}
