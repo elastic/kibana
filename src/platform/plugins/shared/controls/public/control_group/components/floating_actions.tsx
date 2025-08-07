@@ -170,7 +170,7 @@ const floatingActionsStyles = {
       transition: `opacity ${euiTheme.animation.slow}`,
       position: 'absolute',
       right: euiTheme.size.xs,
-      top: `-${euiTheme.size.l}`,
+      top: `${euiTheme.size.l}`,
       zIndex: euiTheme.levels.toast,
       '&.controlFrameFloatingActions--oneLine': {
         padding: euiTheme.size.xs,
