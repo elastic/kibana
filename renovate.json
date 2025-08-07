@@ -4471,7 +4471,8 @@
     {
       "groupName": "Kibana ES|QL Team",
       "matchDepNames": [
-        "recast"
+        "recast",
+        "tree-dump"
       ],
       "reviewers": [
         "team:kibana-esql"
