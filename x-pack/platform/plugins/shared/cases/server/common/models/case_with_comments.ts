@@ -41,6 +41,7 @@ import {
   isCommentRequestTypeAlert,
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
+  isCommentRequestTypeEvent,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
@@ -307,41 +308,54 @@ export class CaseCommentModel {
     );
 
     attachments.forEach((attachment) => {
-      if (!isCommentRequestTypeAlert(attachment)) {
-        dedupedAlertAttachments.push(attachment);
+      if (isCommentRequestTypeAlert(attachment)) {
+        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+        const idPositionsThatAlreadyExistInCase: number[] = [];
+
+        ids.forEach((id, index) => {
+          if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+            idPositionsThatAlreadyExistInCase.push(index);
+          }
+
+          idsAlreadySeen.add(id);
+        });
+
+        const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
+          ids,
+          idPositionsThatAlreadyExistInCase
+        );
+        const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
+          indices,
+          idPositionsThatAlreadyExistInCase
+        );
+
+        if (
+          alertIdsNotAlreadyAttachedToCase.length > 0 &&
+          alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
+        ) {
+          dedupedAlertAttachments.push({
+            ...attachment,
+            alertId: alertIdsNotAlreadyAttachedToCase,
+            index: alertIndicesNotAlreadyAttachedToCase,
+          });
+
+          return;
+        }
+      }
+
+      if (isCommentRequestTypeEvent(attachment)) {
+        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+
+        dedupedAlertAttachments.push({
+          ...attachment,
+          eventId: ids,
+          index: indices,
+        });
+
         return;
       }
 
-      const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-      const idPositionsThatAlreadyExistInCase: number[] = [];
-
-      ids.forEach((id, index) => {
-        if (alertsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
-          idPositionsThatAlreadyExistInCase.push(index);
-        }
-
-        idsAlreadySeen.add(id);
-      });
-
-      const alertIdsNotAlreadyAttachedToCase = removeItemsByPosition(
-        ids,
-        idPositionsThatAlreadyExistInCase
-      );
-      const alertIndicesNotAlreadyAttachedToCase = removeItemsByPosition(
-        indices,
-        idPositionsThatAlreadyExistInCase
-      );
-
-      if (
-        alertIdsNotAlreadyAttachedToCase.length > 0 &&
-        alertIdsNotAlreadyAttachedToCase.length === alertIndicesNotAlreadyAttachedToCase.length
-      ) {
-        dedupedAlertAttachments.push({
-          ...attachment,
-          alertId: alertIdsNotAlreadyAttachedToCase,
-          index: alertIndicesNotAlreadyAttachedToCase,
-        });
-      }
+      dedupedAlertAttachments.push(attachment);
     });
 
     return dedupedAlertAttachments;

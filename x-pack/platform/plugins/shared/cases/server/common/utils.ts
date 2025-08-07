@@ -21,6 +21,7 @@ import type {
   Attachment,
   AttachmentAttributes,
   Case,
+  EventAttachmentPayload,
   User,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
@@ -163,10 +164,17 @@ export const flattenCommentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload
+  comment: AlertAttachmentPayload | EventAttachmentPayload
 ): { ids: string[]; indices: string[] } => {
+  if (comment.type === AttachmentType.alert) {
+    return {
+      ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId],
+    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
     indices: Array.isArray(comment.index) ? comment.index : [comment.index],
   };
 };
@@ -257,6 +265,15 @@ export const isCommentRequestTypeAlert = (
   context: AttachmentRequest
 ): context is AlertAttachmentPayload => {
   return context.type === AttachmentType.alert;
+};
+
+/**
+ * A type narrowing function for event comments.
+ */
+export const isCommentRequestTypeEvent = (
+  context: AttachmentRequest
+): context is EventAttachmentPayload => {
+  return context.type === AttachmentType.event;
 };
 
 /**

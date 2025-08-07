@@ -44,6 +44,18 @@ export const useAddToCaseActions = ({
   }, [ecsData]);
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
+    if (!isAlert) {
+      return ecsData?._id
+        ? [
+            {
+              eventId: ecsData?._id ?? '',
+              index: ecsData?._index ?? '',
+              type: AttachmentType.event,
+            },
+          ]
+        : [];
+    }
+
     return ecsData?._id
       ? [
           {
@@ -54,7 +66,7 @@ export const useAddToCaseActions = ({
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
+  }, [casesUi.helpers, ecsData, isAlert, nonEcsData]);
 
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
@@ -102,8 +114,7 @@ export const useAddToCaseActions = ({
     if (
       (isActiveTimelines || isInDetections) &&
       userCasesPermissions.createComment &&
-      userCasesPermissions.read &&
-      isAlert
+      userCasesPermissions.read
     ) {
       return [
         // add to existing case menu item
@@ -132,7 +143,6 @@ export const useAddToCaseActions = ({
     isInDetections,
     userCasesPermissions.createComment,
     userCasesPermissions.read,
-    isAlert,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,

@@ -31,6 +31,7 @@ import {
   AttachmentType,
   AttachmentRt,
   AttachmentsRt,
+  EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
 /**
@@ -67,11 +68,12 @@ export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentReque
  */
 
 const BasicAttachmentRequestRt = rt.union([
-  UserCommentAttachmentPayloadRt,
-  AlertAttachmentPayloadRt,
   ActionsAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   PersistableStateAttachmentPayloadRt,
+  UserCommentAttachmentPayloadRt,
+  EventAttachmentPayloadRt,
 ]);
 
 export const AttachmentRequestRt = rt.union([
@@ -80,6 +82,7 @@ export const AttachmentRequestRt = rt.union([
     type: rt.literal(AttachmentType.user),
     owner: rt.string,
   }),
+  EventAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
   rt.strict({
     type: rt.literal(AttachmentType.actions),
