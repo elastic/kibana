@@ -34,7 +34,6 @@ function evaluateRecursive(node: KueryNode, context: Record<string, any>): boole
         return visitRange(functionNode, context);
       case 'is':
         return visitIs(functionNode, context);
-      // Add more cases for other functions as needed
       default:
         return false;
     }
@@ -45,7 +44,7 @@ function evaluateRecursive(node: KueryNode, context: Record<string, any>): boole
 
 function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
   const [leftLiteral, rightLiteral] = node.arguments as [KqlLiteralNode, KqlLiteralNode];
-  const { value: contextValue, pathExists } = readValue(leftLiteral.value, context);
+  const { value: contextValue, pathExists } = readContextPath(leftLiteral.value, context);
 
   if (!pathExists) {
     return false; // Path does not exist in context
@@ -72,7 +71,7 @@ function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>)
     KqlLiteralNode
   ];
 
-  const { value: leftRangeValue, pathExists } = readValue(leftRangeLiteral.value, context);
+  const { value: leftRangeValue, pathExists } = readContextPath(leftRangeLiteral.value, context);
 
   if (!pathExists) {
     return false; // Path does not exist in context
@@ -100,22 +99,25 @@ function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>)
   }
 }
 
-function readValue(key: any, context: Record<string, any>): { pathExists: boolean; value: any } {
-  const strKey = String(key);
-  const splittedKey = strKey.split('.');
+function readContextPath(
+  propertyPath: any,
+  context: Record<string, any>
+): { pathExists: boolean; value: any } {
+  const strPropertyPath = String(propertyPath); // sometimes it could be boolean or number
+  const propertyPathSegments = strPropertyPath.split('.');
   let result: any = context;
 
-  for (const part of splittedKey) {
-    if (!(part in result)) {
+  for (const segment of propertyPathSegments) {
+    if (!(segment in result)) {
       return { pathExists: false, value: undefined }; // Path not found in context
     }
 
-    if (result[part] === undefined) {
+    if (result[segment] === undefined) {
       // Path found, but value is undefined
       result = undefined;
       break;
     }
-    result = result[part];
+    result = result[segment];
   }
 
   return { pathExists: true, value: result };
