@@ -107,6 +107,7 @@
     "pkce-challenge": "3.1.0"
   },
   "dependencies": {
+    "@a2a-js/sdk": "^0.3.0",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
@@ -1469,6 +1470,7 @@
     "@kbn/bazel-runner": "link:packages/kbn-bazel-runner",
     "@kbn/cache-cli": "link:src/platform/packages/shared/kbn-cache-cli",
     "@kbn/capture-oas-snapshot-cli": "link:packages/kbn-capture-oas-snapshot-cli",
+    "@kbn/chart-test-jest-helpers": "link:src/platform/packages/shared/chart-test-jest-helpers",
     "@kbn/check-mappings-update-cli": "link:packages/kbn-check-mappings-update-cli",
     "@kbn/check-prod-native-modules-cli": "link:packages/kbn-check-prod-native-modules-cli",
     "@kbn/ci-stats-core": "link:src/platform/packages/private/kbn-ci-stats-core",
