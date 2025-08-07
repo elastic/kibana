@@ -51,7 +51,6 @@ export class StorybookMock extends AbstractStorybookMock<
             title: 'Add Integrations',
           },
         },
-        docsLink: this.getArgumentValue('docsLink', params),
         pageTitle: this.getArgumentValue('pageTitle', params),
       },
       solutionNav: {
