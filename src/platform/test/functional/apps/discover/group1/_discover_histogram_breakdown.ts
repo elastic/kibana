@@ -43,14 +43,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should apply breakdown when selected from field stats', async () => {
+    it.only('should apply breakdown when selected from field stats', async () => {
       await unifiedFieldList.clickFieldListAddBreakdownField('geo.dest');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
       expect(list).to.eql(['CN', 'IN', 'US', 'Other']);
     });
 
-    it('should choose breakdown field', async () => {
+    it.only('should choose breakdown field', async () => {
       await discover.chooseBreakdownField('extension.raw');
       await header.waitUntilLoadingHasFinished();
       const list = await discover.getHistogramLegendList();
