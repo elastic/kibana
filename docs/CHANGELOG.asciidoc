@@ -294,7 +294,6 @@ Machine Learning::
 [[release-notes-8.16.1]]
 == {kib} 8.16.1
 
-<<<<<<< HEAD
 For information about the {kib} 8.16.1 release, review the following information.
 
 The 8.16.1 release includes the following known issues.
