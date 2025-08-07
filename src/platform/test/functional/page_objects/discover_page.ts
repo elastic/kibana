@@ -227,12 +227,12 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
     const optionValue = value ?? field;
 
     await this.find.clickDisplayedByCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem:first-child[value="${optionValue}"]`
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
 
     await this.retry.waitFor('the value to be selected', async () => {
