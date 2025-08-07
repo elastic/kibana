@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { JsonObject } from '@kbn/utility-types';
 import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
@@ -14,10 +13,8 @@ import type { SnapshotRequest } from '../../../../common/http_api';
 import { SnapshotCustomMetricInputRT } from '../../../../common/http_api';
 import type { InfraSourceConfiguration } from '../../../lib/sources';
 
-export interface InfraSnapshotRequestOptions
-  extends Omit<SnapshotRequest, 'sourceId' | 'filterQuery'> {
+export interface InfraSnapshotRequestOptions extends Omit<SnapshotRequest, 'sourceId'> {
   sourceConfiguration: InfraSourceConfiguration;
-  filterQuery: JsonObject | undefined;
 }
 
 export const getMetricsAggregations = async (
@@ -26,7 +23,9 @@ export const getMetricsAggregations = async (
   const { metrics, nodeType } = options;
 
   const inventoryModel = findInventoryModel(nodeType);
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations({
+    schema: options.schema,
+  });
 
   return metrics.reduce<MetricsUIAggregation>((aggs, metric, index) => {
     if (SnapshotCustomMetricInputRT.is(metric)) {

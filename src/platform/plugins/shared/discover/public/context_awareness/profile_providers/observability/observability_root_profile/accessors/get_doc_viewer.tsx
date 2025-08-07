@@ -19,6 +19,9 @@ const hasAnyAttributesField = hasAnyFieldWithPrefixes(attributesPrefixes);
 export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocViewer'] =
   (prev) => (params) => {
     const prevDocViewer = prev(params);
+    const tabTitle = i18n.translate('discover.docViews.observability.attributesOverview.title', {
+      defaultMessage: 'Attributes',
+    });
 
     return {
       ...prevDocViewer,
@@ -26,9 +29,7 @@ export const getDocViewer: ObservabilityRootProfileProvider['profile']['getDocVi
         if (hasAnyAttributesField(params.record)) {
           registry.add({
             id: 'doc_view_obs_attributes_overview',
-            title: i18n.translate('discover.docViews.observability.attributesOverview.title', {
-              defaultMessage: 'Attributes',
-            }),
+            title: tabTitle,
             order: 9,
             component: (props) => {
               return <UnifiedDocViewerObservabilityAttributesOverview {...props} />;

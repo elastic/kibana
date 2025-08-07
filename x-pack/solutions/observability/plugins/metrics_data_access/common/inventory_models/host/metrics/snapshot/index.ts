@@ -7,13 +7,11 @@
 
 import { cpuV2 } from './cpu_v2';
 import { cpu } from './cpu';
-import { diskLatency } from './disk_latency';
 import { diskSpaceUsage } from './disk_space_usage';
 import { load } from './load';
 import { logRate } from './log_rate';
 import { memory } from './memory';
 import { memoryFree } from './memory_free';
-import { memoryTotal } from './memory_total';
 import { normalizedLoad1m } from './normalized_load_1m';
 import { rx } from './rx';
 import { tx } from './tx';
@@ -23,13 +21,11 @@ import type { MetricConfigMap } from '../../../shared/metrics/types';
 
 export const snapshot = {
   cpuV2,
-  diskLatency,
   diskSpaceUsage,
   load,
   logRate,
   memory,
   memoryFree,
-  memoryTotal,
   normalizedLoad1m,
   rxV2,
   txV2,

@@ -18,9 +18,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import { METRIC_SCHEMA_ECS, METRIC_SCHEMA_SEMCONV } from '../../common/constants';
-import type { SchemaTypes } from '../../common/http_api/shared/schema_type';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -96,15 +95,15 @@ const InvalidDisplay = ({ value }: { value: string }) => {
   );
 };
 const schemaTranslationMap = {
-  [METRIC_SCHEMA_ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
+  [DataSchemaFormat.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
     defaultMessage: 'Elastic System Integration',
   }),
-  [METRIC_SCHEMA_SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
+  [DataSchemaFormat.SEMCONV]: i18n.translate('xpack.infra.schemaSelector.semconvDisplay', {
     defaultMessage: 'OpenTelemetry',
   }),
 };
 
-const getInputDisplay = (schema: SchemaTypes) => {
+const getInputDisplay = (schema: DataSchemaFormat) => {
   const translation = schemaTranslationMap[schema];
   if (translation) {
     return translation;
@@ -121,8 +120,8 @@ export const SchemaSelector = ({
   isLoading,
 }: {
   onChange: (selected: HostsState['preferredSchema']) => void;
-  schemas: SchemaTypes[];
-  value: SchemaTypes | null;
+  schemas: DataSchemaFormat[];
+  value: DataSchemaFormat | null;
   isLoading: boolean;
 }) => {
   const options = useMemo(

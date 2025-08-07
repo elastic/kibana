@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 
 export class ConnectorExecutor {
@@ -19,24 +20,19 @@ export class ConnectorExecutor {
     connectorType: string,
     connectorName: string,
     inputs: Record<string, any>
-  ): Promise<any> {
+  ): Promise<ActionTypeExecutorResult<unknown>> {
     if (!connectorType) {
       throw new Error('Connector type is required');
     }
 
-    if (connectorType.endsWith('connector')) {
-      await this.runConnector(connectorName, inputs);
-      return;
-    }
-
-    return;
+    return await this.runConnector(connectorName, inputs);
   }
 
   private async runConnector(
     connectorName: string,
     connectorParams: Record<string, any>
-  ): Promise<void> {
-    const connectorCredentials = this.connectorCredentials['connector.' + connectorName];
+  ): Promise<ActionTypeExecutorResult<unknown>> {
+    const connectorCredentials = this.connectorCredentials[connectorName];
 
     if (!connectorCredentials) {
       throw new Error(`Connector credentials for "${connectorName}" not found`);
@@ -44,10 +40,10 @@ export class ConnectorExecutor {
 
     const connectorId = connectorCredentials.id;
 
-    await this.actionsClient.execute({
+    return await this.actionsClient.execute({
       id: connectorId,
       params: connectorParams,
-      spaceId: 'default',
+      spaceId: 'default', // Should be space aware
       requesterId: 'background_task', // This is a custom ID for testing purposes
     });
   }

@@ -93,7 +93,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('job on data set with date_nanos time field', function () {
     this.tags(['ml']);
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/event_rate_nanos'
+      );
       await ml.testResources.createDataViewIfNeeded('ft_event_rate_gen_trend_nanos', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();

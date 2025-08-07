@@ -7,6 +7,9 @@
 
 import type { NodeViewModel, NodeDocumentDataViewModel } from './types';
 
+export const isStackNode = (node: NodeViewModel) => node.shape === 'group';
+export const isLabelNode = (node: NodeViewModel) => node.shape === 'label';
+
 export const isEntityNode = (node: NodeViewModel) =>
   node.shape === 'ellipse' ||
   node.shape === 'pentagon' ||

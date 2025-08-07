@@ -39,15 +39,18 @@ export const severityOrder: LogLevelCoalescedValue[] = [
 
 export const logLevelSynonyms: Record<string, LogLevelCoalescedValue> = {
   emerg: LogLevelCoalescedValue.emergency,
+  panic: LogLevelCoalescedValue.emergency,
+  fat: LogLevelCoalescedValue.fatal,
   crit: LogLevelCoalescedValue.critical,
   err: LogLevelCoalescedValue.error,
   eror: LogLevelCoalescedValue.error,
   warn: LogLevelCoalescedValue.warning,
   information: LogLevelCoalescedValue.info,
   informational: LogLevelCoalescedValue.info,
+  inf: LogLevelCoalescedValue.info,
   dbg: LogLevelCoalescedValue.debug,
   dbug: LogLevelCoalescedValue.debug,
-  panic: LogLevelCoalescedValue.emergency,
+  trac: LogLevelCoalescedValue.trace,
 };
 
 export const getLogLevelCoalescedValue = (

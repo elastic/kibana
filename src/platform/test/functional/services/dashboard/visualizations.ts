@@ -16,7 +16,6 @@ export class DashboardVisualizationsService extends FtrService {
   private readonly dashboardAddPanel = this.ctx.getService('dashboardAddPanel');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visualize = this.ctx.getPageObject('visualize');
-  private readonly visEditor = this.ctx.getPageObject('visEditor');
   private readonly header = this.ctx.getPageObject('header');
   private readonly discover = this.ctx.getPageObject('discover');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
@@ -87,15 +86,13 @@ export class DashboardVisualizationsService extends FtrService {
     await this.dashboard.waitForRenderComplete();
   }
 
-  async createAndAddMarkdown({ name, markdown }: { name: string; markdown: string }) {
-    this.log.debug(`createAndAddMarkdown(${markdown})`);
+  async createAndAddVega(name: string) {
+    this.log.debug(`createAndAddVega`);
     const inViewMode = await this.dashboard.getIsInViewMode();
     if (inViewMode) {
       await this.dashboard.switchToEditMode();
     }
-    await this.dashboardAddPanel.clickAddMarkdownPanel();
-    await this.visEditor.setMarkdownTxt(markdown);
-    await this.visEditor.clickGo();
+    await this.dashboardAddPanel.clickAddCustomVisualization();
     await this.visualize.saveVisualizationExpectSuccess(name, {
       saveAsNew: false,
       redirectToOrigin: true,

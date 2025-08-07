@@ -11,12 +11,11 @@ import { z } from '@kbn/zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
-  WorkflowSchema,
   getForEachStepSchema,
   getIfStepSchema,
-  getParallelStepSchema,
   getMergeStepSchema,
-  WorkflowYamlSchema,
+  getParallelStepSchema,
+  WorkflowSchema,
 } from '../schema';
 
 export interface ConnectorContract {
@@ -25,7 +24,6 @@ export interface ConnectorContract {
     name: string;
     type: 'string' | 'number' | 'boolean' | 'object';
   }>;
-  availableConnectorIds?: string[];
 }
 
 function getZodTypeForParam(param: ConnectorContract['params'][number]) {
@@ -52,9 +50,6 @@ function generateStepSchemaForConnector(connector: ConnectorContract) {
   return BaseConnectorStepSchema.extend({
     type: z.literal(connector.type),
     with: z.object(paramSchema),
-    ...(connector.availableConnectorIds
-      ? { 'connector-id': z.enum(connector.availableConnectorIds as [string, ...string[]]) }
-      : {}),
   });
 }
 
@@ -88,19 +83,13 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors);
 
   if (loose) {
-    return z.object({
-      version: WorkflowYamlSchema.shape.version,
-      workflow: WorkflowSchema.partial().extend({
-        steps: z.array(recursiveStepSchema).optional(),
-      }),
+    return WorkflowSchema.partial().extend({
+      steps: z.array(recursiveStepSchema).optional(),
     });
   }
 
-  return z.object({
-    version: WorkflowYamlSchema.shape.version,
-    workflow: WorkflowSchema.extend({
-      steps: z.array(recursiveStepSchema),
-    }),
+  return WorkflowSchema.extend({
+    steps: z.array(recursiveStepSchema),
   });
 }
 
