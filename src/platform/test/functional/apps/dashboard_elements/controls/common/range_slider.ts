@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // use arrow key to set lower bound to the next step up
-        await browser.pressKeys(browser.keys.ARROW_UP,browser.keys.ARROW_UP);
+        await browser.pressKeys(browser.keys.ARROW_UP, browser.keys.ARROW_UP);
         await dashboardControls.validateRange('value', secondId, '200', '');
 
         // use arrow key to set lower bound to the next step up
