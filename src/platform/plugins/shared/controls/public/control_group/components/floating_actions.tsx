@@ -8,9 +8,8 @@
  */
 
 import classNames from 'classnames';
-import React, { FC, ReactElement, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { type UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
@@ -47,10 +46,6 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   isTwoLine,
 }) => {
   const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [portalPosition, setPortalPosition] = useState<{ top: number; left: number } | null>(null);
-
-  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (!api) return;
@@ -124,78 +119,59 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
   }, [api, viewMode, disabledActions]);
 
-  const updatePortalPosition = () => {
-    if (wrapperRef.current) {
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const offset = Number(euiTheme.size.l.replace('px', ''));
-      setPortalPosition({
-        top: rect.top - offset, // Offset for floating actions height
-        left: rect.right - offset, // Align to right side with small offset
-      });
-    }
-  };
-
   const styles = useMemoCss(floatingActionsStyles);
 
-  const FloatingActionsPortal = () => {
-    if (!isEnabled || floatingActions.length === 0 || !portalPosition) return null;
-
-    return createPortal(
-      <div
-        data-test-subj={`presentationUtil__floatingActions__${
-          apiHasUniqueId(api) ? api.uuid : v4()
-        }`}
-        className={classNames(
-          'presentationUtil__floatingActions',
-          `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
-          className
-        )}
-        css={styles.floatingActionsPortal}
-        style={{
-          top: portalPosition.top,
-          left: portalPosition.left,
-        }}
-      >
-        <>
-          {floatingActions.map((action) =>
-            React.createElement(action.MenuItem, {
-              key: action.id,
-              context: { embeddable: api },
-            })
-          )}
-        </>
-      </div>,
-      document.body
-    );
-  };
-
   return (
-    <div
-      css={styles.wrapper}
-      ref={wrapperRef}
-      onMouseEnter={updatePortalPosition}
-      onMouseLeave={() => setPortalPosition(null)}
-    >
+    <div css={styles.wrapper}>
       {children}
-      <FloatingActionsPortal />
+      {isEnabled && floatingActions.length > 0 && (
+        <div
+          data-test-subj={`presentationUtil__floatingActions__${
+            apiHasUniqueId(api) ? api.uuid : v4()
+          }`}
+          className={classNames(
+            'presentationUtil__floatingActions',
+            `controlFrameFloatingActions--${isTwoLine ? 'twoLine' : 'oneLine'}`,
+            className
+          )}
+          css={styles.floatingActions}
+        >
+          <>
+            {floatingActions.map((action) =>
+              React.createElement(action.MenuItem, {
+                key: action.id,
+                context: { embeddable: api },
+              })
+            )}
+          </>
+        </div>
+      )}
     </div>
   );
 };
 
 const floatingActionsStyles = {
-  wrapper: () =>
+  wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
+      '&:hover, &:focus-within': {
+        '.presentationUtil__floatingActions': {
+          opacity: 1,
+          visibility: 'visible',
+          transition: `visibility ${euiTheme.animation.fast}, opacity ${euiTheme.animation.fast}`,
+        },
+      },
     }),
-  floatingActionsPortal: ({ euiTheme }: UseEuiTheme) =>
+  floatingActions: ({ euiTheme }: UseEuiTheme) =>
     css({
-      position: 'fixed',
+      opacity: 0,
+      visibility: 'hidden',
+      // slower transition on hover leave in case the user accidentally stops hover
+      transition: `opacity ${euiTheme.animation.slow}`,
+      position: 'absolute',
+      right: euiTheme.size.xs,
+      top: `-${euiTheme.size.l}`,
       zIndex: euiTheme.levels.toast,
-      opacity: 1,
-      visibility: 'visible',
-      transition: `opacity ${euiTheme.animation.fast}`,
-      minWidth: 'max-content',
-      pointerEvents: 'auto',
       '&.controlFrameFloatingActions--oneLine': {
         padding: euiTheme.size.xs,
         borderRadius: euiTheme.border.radius.medium,
