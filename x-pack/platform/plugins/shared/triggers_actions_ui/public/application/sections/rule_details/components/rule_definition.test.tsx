@@ -13,6 +13,7 @@ import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as capabilities from '../../../lib/capabilities';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -32,9 +33,9 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
-const mockUseGetRuleTypesPermissions = jest.fn();
+
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  useGetRuleTypesPermissions: mockUseGetRuleTypesPermissions,
+  useGetRuleTypesPermissions: jest.fn(),
 }));
 
 const mockedRuleTypeIndex = new Map(
@@ -127,7 +128,7 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    mockUseGetRuleTypesPermissions.mockReturnValue({
+    (useGetRuleTypesPermissions as jest.Mock).mockReturnValue({
       ruleTypesState: { data: mockedRuleTypeIndex },
     });
 
@@ -155,8 +156,8 @@ describe('Rule Definition', () => {
 
   it('show rule type name from "useGetRuleTypesPermissions"', async () => {
     await setup();
-    // The hook might be called multiple times due to React's rendering behavior
-    expect(mockUseGetRuleTypesPermissions).toHaveBeenCalled();
+
+    expect(useGetRuleTypesPermissions).toHaveBeenCalled();
     const ruleType = screen.getByTestId('ruleSummaryRuleType');
     expect(ruleType).toBeInTheDocument();
     expect(ruleType).toHaveTextContent(mockedRuleTypeIndex.get(mockRule().ruleTypeId)?.name || '');
