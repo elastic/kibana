@@ -204,9 +204,6 @@ export default function (providerContext: FtrProviderContext) {
           conflicts: 'proceed',
         });
         await esArchiver.unload(
-          'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts'
-        );
-        await esArchiver.unload(
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
         await spacesService.delete('foo');
