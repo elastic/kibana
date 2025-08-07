@@ -178,7 +178,7 @@ export class IndexUpdateService {
     // WHERE qstr("message: …")
     const whereCmd = Builder.command({
       name: 'where',
-      args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr)])],
+      args: [Builder.expression.func.call('qstr', [Builder.expression.literal.string(qstr ?? '')])],
     });
 
     // LIMIT 10
