@@ -24,7 +24,7 @@ describe('rules_summary_route', () => {
     render(<RuleRoute readOnly={false} rule={rule} ruleType={ruleType} {...mockApis()} />);
 
     await waitFor(() => {
-       expect(screen.getByRole('progressbar')).toBeInTheDocument();
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
     });
   });
 });
