@@ -12,25 +12,24 @@ import { getWorkflowGraph } from './get_workflow_graph';
 describe('getWorkflowGraph', () => {
   it('should return the correct graph', () => {
     const definition = {
-      version: '1',
-      workflow: {
-        name: 'test-workflow',
-        triggers: [
-          {
-            id: 'manual-trigger',
-            type: 'triggers.elastic.manual',
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'triggers.elastic.manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'first-step',
+          type: 'console.log',
+          with: {
+            message: 'Hello, world!',
           },
-        ],
-        steps: [
-          {
-            name: 'first-step',
-            type: 'console.log',
-            with: {
-              message: 'Hello, world!',
-            },
-          },
-        ],
-      },
+        },
+      ],
     };
     const workflowGraph = getWorkflowGraph(definition);
 
@@ -45,48 +44,47 @@ describe('getWorkflowGraph', () => {
 
   it('should return the correct graph with a nested step', () => {
     const definition = {
-      version: '1',
-      workflow: {
-        name: 'test-workflow',
-        triggers: [
-          {
-            id: 'manual-trigger',
-            type: 'triggers.elastic.manual',
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [
+        {
+          type: 'triggers.elastic.manual' as const,
+          enabled: true,
+        },
+      ],
+      steps: [
+        {
+          name: 'first-step',
+          type: 'console.log',
+          with: {
+            message: 'Hello, world!',
           },
-        ],
-        steps: [
-          {
-            name: 'first-step',
-            type: 'console.log',
-            with: {
-              message: 'Hello, world!',
+        },
+        {
+          name: 'if-split',
+          type: 'if',
+          condition: '1 > 0',
+          steps: [
+            {
+              name: 'if-true',
+              type: 'console.log',
+              with: {
+                message: 'If true',
+              },
             },
-          },
-          {
-            name: 'if-split',
-            type: 'if',
-            condition: '1 > 0',
-            steps: [
-              {
-                name: 'if-true',
-                type: 'console.log',
-                with: {
-                  message: 'If true',
-                },
+          ],
+          else: [
+            {
+              name: 'if-false',
+              type: 'console.log',
+              with: {
+                message: 'If false',
               },
-            ],
-            else: [
-              {
-                name: 'if-false',
-                type: 'console.log',
-                with: {
-                  message: 'If false',
-                },
-              },
-            ],
-          },
-        ],
-      },
+            },
+          ],
+        },
+      ],
     };
     const workflowGraph = getWorkflowGraph(definition);
 

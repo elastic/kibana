@@ -215,7 +215,7 @@ function transformYamlToNodesAndEdges(
   };
 }
 
-export function getWorkflowGraph(workflow: WorkflowYaml) {
+export function getWorkflowGraph<T extends WorkflowYaml>(workflow: T) {
   const { nodes, edges } = transformYamlToNodesAndEdges(
     workflow.triggers ?? [],
     workflow.steps ?? []

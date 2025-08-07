@@ -68,15 +68,14 @@ describe('getCompletionItemProvider', () => {
     it('should provide basic completions', () => {
       const yamlContent = `
 version: "1"
-workflow:
-  name: "test"
-  consts:
-    apiUrl: "https://api.example.com"
-  steps:
-    - name: "step1"
-      type: "console.log"  
-      with:
-        message: "{{ }}"
+name: "test"
+consts:
+  apiUrl: "https://api.example.com"
+steps:
+  - name: "step1"
+    type: "console.log"  
+    with:
+      message: "{{ }}"
 `.trim();
 
       // Position cursor inside the mustache template
