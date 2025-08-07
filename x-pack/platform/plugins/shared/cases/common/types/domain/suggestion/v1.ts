@@ -9,7 +9,7 @@ import type { CaseAttachmentWithoutOwner } from '../attachment/v1';
 
 const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
 
-export const suggestionContextSchema = z.object({
+export const suggestionContextRt = z.object({
   'service.name': z.string().optional(),
   timeRange: z
     .object({
@@ -19,13 +19,13 @@ export const suggestionContextSchema = z.object({
     .optional(),
 });
 
-export const suggestionRequestSchema = z.object({
+export const suggestionRequestRt = z.object({
   owners: z.array(suggestionOwnerSchema),
-  context: suggestionContextSchema,
+  context: suggestionContextRt,
 });
 
-export type SuggestionContext = z.infer<typeof suggestionContextSchema>;
-export type SuggestionRequest = z.infer<typeof suggestionRequestSchema>;
+export type SuggestionContext = z.infer<typeof suggestionContextRt>;
+export type SuggestionRequest = z.infer<typeof suggestionRequestRt>;
 
 export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];

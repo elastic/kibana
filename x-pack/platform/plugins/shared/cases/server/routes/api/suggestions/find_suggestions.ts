@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IKibanaResponse } from '@kbn/core/server';
-import { suggestionRequestSchema, type SuggestionResponse } from '../../../../common/types/domain';
+import { suggestionRequestRt, type SuggestionResponse } from '../../../../common/types/domain';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
@@ -15,7 +15,7 @@ export const findSuggestionsRoute = createCasesRoute({
   path: `/internal/case_suggestions/_find`,
   security: DEFAULT_CASES_ROUTE_SECURITY,
   params: {
-    body: suggestionRequestSchema,
+    body: suggestionRequestRt,
   },
   routerOptions: {
     access: 'internal',
