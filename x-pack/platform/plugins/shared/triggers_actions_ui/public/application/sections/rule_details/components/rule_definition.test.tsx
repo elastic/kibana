@@ -127,7 +127,9 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    mockUseGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+    mockUseGetRuleTypesPermissions.mockReturnValue({
+      ruleTypesState: { data: mockedRuleTypeIndex },
+    });
 
     return render(
       <QueryClientProvider client={new QueryClient()}>
