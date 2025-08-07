@@ -31,5 +31,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/custom_role_access'));
     loadTestFile(require.resolve('../test_suites/inference_management'));
     loadTestFile(require.resolve('../test_suites/search_query_rules/search_query_rules_overview'));
+    loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonyms_overview'));
+    loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonym_detail'));
   });
 }

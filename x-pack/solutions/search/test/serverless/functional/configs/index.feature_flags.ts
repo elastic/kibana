@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless search UI - feature flags', function () {
     // add tests that require feature flags, defined in config.feature_flags.ts
-    loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonyms_overview'));
-    loadTestFile(require.resolve('../test_suites/search_synonyms/search_synonym_detail'));
     loadTestFile(require.resolve('../test_suites/search_playground/search_relevance'));
     loadTestFile(require.resolve('../test_suites/search_playground/saved_playgrounds'));
   });

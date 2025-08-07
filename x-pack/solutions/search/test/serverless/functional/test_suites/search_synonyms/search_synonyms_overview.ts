@@ -19,11 +19,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const browser = getService('browser');
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('Serverless Synonyms Overview', function () {
     before(async () => {
-      await kibanaServer.uiSettings.update({ 'searchSynonyms:synonymsEnabled': 'true' });
       await pageObjects.svlCommonPage.loginWithRole('developer');
     });
     beforeEach(async () => {
@@ -31,8 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         deepLinkId: 'searchSynonyms',
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/216661
-    describe.skip('Synonyms get started Page', () => {
+    describe('Synonyms get started Page', () => {
       it('is loaded successfully', async () => {
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.expectSynonymsGetStartedPageComponentsToExist();
       });
@@ -40,7 +38,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickCreateSynonymsSetButton();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.setSynonymsSetName('test-synonyms');
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();
-        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+        // Verify that the synonyms set detail page is displayed
+        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectSynonymsSetDetailPageNavigated(
+          'test-synonyms'
+        );
         await es.transport.request({
           path: '_synonyms/test-synonyms',
           method: 'DELETE',
@@ -60,10 +61,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
         });
 
-        await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickCreateSynonymsSetButton();
+        await retry.tryForTime(5000, async () => {
+          await browser.refresh();
+          await pageObjects.searchSynonyms.SynonymsSetsListPage.clickCreateSynonymsSetButton();
+        });
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.setSynonymsSetName(
           'overwrite-test'
         );
+
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickOverwriteCheckbox();
         await pageObjects.searchSynonyms.SynonymsGetStartedPage.clickSaveButton();
@@ -75,7 +80,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           method: 'GET',
         });
         expect(overwrittenSet.synonyms_set).to.eql([]);
-        await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+
+        await retry.tryForTime(5000, async () => {
+          await pageObjects.searchSynonyms.SynonymsSetDetailPage.expectEmptyPromptToExist();
+          await browser.refresh();
+        });
 
         await es.transport.request({
           path: '_synonyms/overwrite-test',
