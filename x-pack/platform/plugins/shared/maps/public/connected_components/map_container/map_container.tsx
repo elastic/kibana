@@ -165,6 +165,7 @@ export class MapContainer extends Component<Props, State> {
       return;
     }
 
+    // Ensure coreStart is defined
     await untilPluginStartServicesReady();
 
     // If flyout is opening for the first time, remember the button used to open it
