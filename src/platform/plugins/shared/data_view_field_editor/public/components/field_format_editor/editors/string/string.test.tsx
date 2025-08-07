@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { StringFormatEditor } from './string';
@@ -34,13 +35,21 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
+
 describe('StringFormatEditor', () => {
   it('should have a formatId', () => {
     expect(StringFormatEditor.formatId).toEqual('string');
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntl(
       <StringFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}

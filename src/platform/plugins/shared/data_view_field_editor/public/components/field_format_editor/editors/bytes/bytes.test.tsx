@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -32,22 +33,30 @@ const KibanaReactContext = createKibanaReactContext(
   coreMock.createStart({ basePath: 'my-base-path' })
 );
 
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        {component}
+      </KibanaReactContext.Provider>
+    </IntlProvider>
+  );
+};
+
 describe('BytesFormatEditor', () => {
   it('should have a formatId', () => {
     expect(BytesFormatEditor.formatId).toEqual('bytes');
   });
 
   it('should render normally', async () => {
-    const { container } = render(
-      <KibanaReactContext.Provider>
-        <BytesFormatEditor
-          fieldType={fieldType}
-          format={format as unknown as FieldFormat}
-          formatParams={formatParams}
-          onChange={onChange}
-          onError={onError}
-        />
-      </KibanaReactContext.Provider>
+    const { container } = renderWithProviders(
+      <BytesFormatEditor
+        fieldType={fieldType}
+        format={format as unknown as FieldFormat}
+        formatParams={formatParams}
+        onChange={onChange}
+        onError={onError}
+      />
     );
     
     // Verify the component renders without errors

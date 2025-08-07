@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { render } from '@testing-library/react';
 import { FormatEditor } from './format_editor';
 
-class TestEditor extends PureComponent {
-  render() {
-    if (this.props) {
-      return null;
-    }
-    return <div>Test editor</div>;
-  }
-}
+const TestEditor = () => {
+  return <div>Test editor</div>;
+};
+TestEditor.formatId = 'test';
+
+const TestEditorFactory = () => Promise.resolve(TestEditor);
+TestEditorFactory.formatId = 'test';
 
 const formatEditors = {
   byFormatId: {
-    ip: TestEditor,
-    number: TestEditor,
+    ip: TestEditorFactory,
+    number: TestEditorFactory,
   },
-  getById: jest.fn(() => TestEditor as any),
+  getById: jest.fn(() => TestEditorFactory),
   getAll: jest.fn(),
 };
 

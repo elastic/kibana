@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { DateFormatEditor } from './date';
@@ -26,13 +27,20 @@ const formatParams = { pattern: '' };
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
 describe('DateFormatEditor', () => {
   it('should have a formatId', () => {
     expect(DateFormatEditor.formatId).toEqual('date');
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntl(
       <DateFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -42,14 +50,6 @@ describe('DateFormatEditor', () => {
       />
     );
 
-    // Date editor samples uses changing values - Date.now() - so we
-    // hardcode samples to avoid ever-changing snapshots
-    component.setState({
-      sampleInputs: [1529097045190, 1514793600000, 1546329599999],
-    });
-
-    component.instance().forceUpdate();
-    component.update();
     expect(container).toBeInTheDocument();
     expect(container.firstChild).toBeTruthy();
   });

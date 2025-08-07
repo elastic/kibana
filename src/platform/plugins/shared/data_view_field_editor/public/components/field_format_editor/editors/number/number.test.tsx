@@ -9,13 +9,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { NumberFormatEditor } from './number';
-
-type NumberFormatEditorProps = React.ComponentProps<typeof NumberFormatEditor>;
 
 const fieldType = 'number';
 const format = {
@@ -34,30 +33,30 @@ const KibanaReactContext = createKibanaReactContext(
   coreMock.createStart({ basePath: 'my-base-path' })
 );
 
-describe('NumberFormatEditor', () => {
-  beforeAll(() => {
-    // Enzyme does not support the new Context API in shallow rendering.
-    // @see https://github.com/enzymejs/enzyme/issues/2189
-    (NumberFormatEditor as React.ComponentType<NumberFormatEditorProps>).contextTypes = {
-      services: () => null,
-    };
-    delete (NumberFormatEditor as Partial<typeof NumberFormatEditor>).contextType;
-  });
+const renderWithIntlAndContext = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        {component}
+      </KibanaReactContext.Provider>
+    </IntlProvider>
+  );
+};
 
+describe('NumberFormatEditor', () => {
   it('should have a formatId', () => {
     expect(NumberFormatEditor.formatId).toEqual('number');
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntlAndContext(
       <NumberFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
-      />,
-      { context: KibanaReactContext.value }
+      />
     );
     expect(container).toBeInTheDocument();
     expect(container.firstChild).toBeTruthy();

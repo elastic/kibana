@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
+import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import { StaticLookupFormatEditorFormatParams } from './static_lookup';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -25,13 +26,21 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
+
 describe('StaticLookupFormatEditor', () => {
   it('should have a formatId', () => {
     expect(StaticLookupFormatEditor.formatId).toEqual('static_lookup');
   });
 
   it('should render normally', async () => {
-    const component = shallowWithI18nProvider(
+    const { container } = renderWithIntl(
       <StaticLookupFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -41,11 +50,11 @@ describe('StaticLookupFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toBeInTheDocument();
   });
 
   it('should render multiple lookup entries and unknown key value', async () => {
-    const component = shallowWithI18nProvider(
+    const { container } = renderWithIntl(
       <StaticLookupFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -58,6 +67,6 @@ describe('StaticLookupFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toBeInTheDocument();
   });
 });

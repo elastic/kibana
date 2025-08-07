@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { DateNanosFormatEditor } from './date_nanos';
@@ -28,13 +29,20 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
 describe('DateFormatEditor', () => {
   it('should have a formatId', () => {
     expect(DateNanosFormatEditor.formatId).toEqual('date_nanos');
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntl(
       <DateNanosFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}

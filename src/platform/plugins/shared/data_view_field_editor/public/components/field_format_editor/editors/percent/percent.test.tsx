@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import { coreMock } from '@kbn/core/public/mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -30,6 +31,13 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
 const KibanaReactContext = createKibanaReactContext(
   coreMock.createStart({ basePath: 'my-base-path' })
 );
@@ -49,7 +57,7 @@ describe('PercentFormatEditor', () => {
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntl(
       <PercentFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}

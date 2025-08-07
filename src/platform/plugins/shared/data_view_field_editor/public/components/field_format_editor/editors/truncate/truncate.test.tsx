@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import userEvent from '@testing-library/user-event';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
@@ -27,6 +28,14 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const renderWithIntl = (component: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en">
+      {component}
+    </IntlProvider>
+  );
+};
+
 describe('TruncateFormatEditor', () => {
   beforeEach(() => {
     onChange.mockClear();
@@ -38,7 +47,7 @@ describe('TruncateFormatEditor', () => {
   });
 
   it('should render normally', async () => {
-    const { container } = render(
+    const { container } = renderWithIntl(
       <TruncateFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -52,7 +61,7 @@ describe('TruncateFormatEditor', () => {
   });
 
   it('should fire error, when input is invalid', async () => {
-    render(
+    renderWithIntl(
       <TruncateFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
@@ -75,7 +84,7 @@ describe('TruncateFormatEditor', () => {
   });
 
   it('should fire change, when input changed and is valid', async () => {
-    render(
+    renderWithIntl(
       <TruncateFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}

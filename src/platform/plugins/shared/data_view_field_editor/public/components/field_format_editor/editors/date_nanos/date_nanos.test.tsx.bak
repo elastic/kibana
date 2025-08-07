@@ -9,27 +9,21 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { IntlProvider } from 'react-intl';import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-import { HistogramFormatEditor } from './histogram';
+import { DateNanosFormatEditor } from './date_nanos';
 
-const fieldType = 'histogram';
+const fieldType = 'date_nanos';
 const format = {
   getConverterFor: jest
     .fn()
-    .mockImplementation(
-      () => (input: number | Record<string, number[]>) =>
-        typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)
-    ),
+    .mockImplementation(() => (input: string) => `converted date for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
-    return { id: 'number', params: {} };
+    return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
   }),
 };
 const formatParams = {
-  type: 'histogram',
-  id: 'number' as const,
-  params: {},
+  pattern: '',
 };
 const onChange = jest.fn();
 const onError = jest.fn();
@@ -41,14 +35,14 @@ const renderWithIntl = (component: React.ReactElement) => {
     </IntlProvider>
   );
 };
-describe('HistogramFormatEditor', () => {
+describe('DateFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(HistogramFormatEditor.formatId).toEqual('histogram');
+    expect(DateNanosFormatEditor.formatId).toEqual('date_nanos');
   });
 
   it('should render normally', async () => {
     const { container } = renderWithIntl(
-      <HistogramFormatEditor
+      <DateNanosFormatEditor
         fieldType={fieldType}
         format={format as unknown as FieldFormat}
         formatParams={formatParams}
@@ -56,6 +50,7 @@ describe('HistogramFormatEditor', () => {
         onError={onError}
       />
     );
+
     expect(container).toBeInTheDocument();
     expect(container.firstChild).toBeTruthy();
   });
