@@ -22,7 +22,7 @@ export const fieldsApi = createRoute({
       size: z.string().default('100'),
     }),
   }),
-  handler: async ({ context, params, logger }) => {
+  handler: async ({ context, params, logger, response }) => {
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const page = parseInt(params.query.page, 10);
     const size = parseInt(params.query.size, 10);
@@ -36,6 +36,11 @@ export const fieldsApi = createRoute({
       size,
       logger,
     });
-    return { fields, total, page };
+
+    return {
+      fields,
+      total,
+      page,
+    };
   },
 });
