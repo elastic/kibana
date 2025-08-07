@@ -241,8 +241,6 @@ export function getSavedSearchContainer({
 
   const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    // console.log('initial', savedSearchInitial$.getValue());
-    // console.log('next', nextSavedSearch);
     hasChanged$.next(hasChanged);
     savedSearchCurrent$.next(nextSavedSearch);
   };
