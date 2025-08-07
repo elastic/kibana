@@ -47,7 +47,7 @@
       "aiops",
       "fieldsMetadata",
       "logsDataAccess",
-      "embeddableEnhanced",
+      "uiActionsEnhanced",
       "apmSourcesAccess"
     ],
     "requiredBundles": [

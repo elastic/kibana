@@ -9,6 +9,7 @@
 
 import type { ComponentType } from 'react';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -43,7 +44,6 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
 import type { DiscoverAppLocator } from '../common';
@@ -173,10 +173,10 @@ export interface DiscoverStartPlugins {
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiActions: UiActionsStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   unifiedDocViewer: UnifiedDocViewerStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionSetup;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }

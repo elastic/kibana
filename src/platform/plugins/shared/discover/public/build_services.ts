@@ -50,6 +50,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-action
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -63,7 +64,6 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -135,6 +135,7 @@ export interface DiscoverServices {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   lens: LensPublicStart;
   uiActions: UiActionsStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
@@ -142,7 +143,6 @@ export interface DiscoverServices {
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
 }
 
@@ -229,6 +229,7 @@ export const buildServices = ({
     unifiedSearch: plugins.unifiedSearch,
     lens: plugins.lens,
     uiActions: plugins.uiActions,
+    uiActionsEnhanced: plugins.uiActionsEnhanced,
     contentClient: plugins.contentManagement.client,
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
@@ -236,7 +237,6 @@ export const buildServices = ({
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
-    embeddableEnhanced: plugins.embeddableEnhanced,
     apmSourcesAccess: plugins.apmSourcesAccess,
   };
 };

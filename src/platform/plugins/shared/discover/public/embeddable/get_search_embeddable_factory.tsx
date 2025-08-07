@@ -25,6 +25,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
@@ -95,12 +96,13 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const titleManager = initializeTitleManager(initialState.rawState);
       const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const dynamicActionsManager =
-        discoverServices.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = discoverServices.uiActionsEnhanced ?
+        initializeEmbeddableDynamicActions(
           uuid,
           () => titleManager.api.title$.getValue(),
-          initialState
-        );
+          initialState,
+          { embeddable: discoverServices.embeddable, uiActionsEnhanced: discoverServices.uiActionsEnhanced }
+        ) : undefined;
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
