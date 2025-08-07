@@ -44,6 +44,7 @@ export const esqlFunctionNames = [
   'CIDR_MATCH',
   'COALESCE',
   'CONCAT',
+  'COPY_SIGN',
   'COS',
   'COSH',
   'COUNT',

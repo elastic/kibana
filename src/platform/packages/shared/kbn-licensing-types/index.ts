@@ -17,6 +17,6 @@ export type {
   PublicFeatures,
   LicenseFeature,
   LicenseCheckState,
-} from './src';
+} from './src/types';
 
-export { LICENSE_TYPE } from './src';
+export { LICENSE_TYPE } from './src/types';

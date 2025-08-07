@@ -11,6 +11,7 @@ import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
+import { ILicense } from '@kbn/licensing-types';
 
 describe('function validation', () => {
   afterEach(() => {
@@ -797,7 +798,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
             {
@@ -808,12 +809,12 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'keyword',
             },
           ],
           locationsAvailable: [Location.STATS, Location.STATS_BY],
-          license: 'PLATINUM',
+          license: 'platinum',
         },
         {
           type: FunctionDefinitionTypes.AGG,
@@ -838,7 +839,7 @@ describe('function validation', () => {
                   optional: false,
                 },
               ],
-              license: 'PLATINUM',
+              license: 'platinum',
               returnType: 'cartesian_shape',
             },
           ],
@@ -850,9 +851,12 @@ describe('function validation', () => {
     it('Should Validate Platinum Functions With Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-      }));
+      callbacks.getLicense = jest.fn(
+        async () =>
+          ({
+            hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+          } as ILicense)
+      );
 
       await expectErrors(
         'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
@@ -863,9 +867,12 @@ describe('function validation', () => {
     it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
+      callbacks.getLicense = jest.fn(
+        async () =>
+          ({
+            hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+          } as ILicense)
+      );
 
       await expectErrors(
         'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
@@ -894,9 +901,12 @@ describe('function validation', () => {
     it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
-      }));
+      callbacks.getLicense = jest.fn(
+        async () =>
+          ({
+            hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+          } as ILicense)
+      );
 
       await expectErrors(
         'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
@@ -907,9 +917,12 @@ describe('function validation', () => {
     it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
+      callbacks.getLicense = jest.fn(
+        async () =>
+          ({
+            hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+          } as ILicense)
+      );
 
       await expectErrors(
         'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
@@ -938,9 +951,12 @@ describe('function validation', () => {
     it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
       const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
-      }));
+      callbacks.getLicense = jest.fn(
+        async () =>
+          ({
+            hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+          } as ILicense)
+      );
 
       await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
         'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
