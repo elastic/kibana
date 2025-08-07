@@ -37,6 +37,9 @@ export const CanCreateDataView = {
       </NoDataViewsPromptProvider>
     );
   },
+  args: {
+    canCreateNewDataView: true, // Enable data view creation button
+  },
 
   argTypes: mock.getArgumentTypes(),
 };
@@ -48,10 +51,6 @@ export const CannotCreateDataView = {
         <Component {...mock.getProps()} />
       </NoDataViewsPromptProvider>
     );
-  },
-
-  args: {
-    canCreateNewDataView: true, // Enable data view creation button
   },
 
   argTypes: mock.getArgumentTypes(),

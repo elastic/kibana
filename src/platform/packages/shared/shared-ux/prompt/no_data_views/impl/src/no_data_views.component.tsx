@@ -54,7 +54,7 @@ const PromptAddDataViews = ({
   return (
     <EuiPageTemplate.EmptyPrompt
       data-test-subj="noDataViewsPromptCreateDataView"
-      className="NoDataViewsPromptCreate"
+      className="NoDataViewsPromptCreateDataView"
       style={{ maxWidth: 400 }}
       title={
         <EuiTitle size="m">
@@ -174,7 +174,7 @@ export const NoDataViewsPrompt = ({
       data-test-subj="noDataViewsPrompt"
       css={cssStyles}
     >
-      <EuiFlexItem>
+      <EuiFlexItem grow={0}>
         <EuiTitle size="l">
           <EuiTextAlign textAlign="center">
             <h2>
