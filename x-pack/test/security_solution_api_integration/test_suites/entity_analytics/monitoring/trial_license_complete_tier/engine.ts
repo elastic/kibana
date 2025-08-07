@@ -258,6 +258,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const soStatusAfterReInit = await getPrivMonSoStatus(customSpace);
         expect(soStatusAfterReInit.saved_objects[0].attributes.status).to.eql('started');
+      });
+    });
 
     describe('init', () => {
       it('should be able to be called multiple times', async () => {
@@ -279,7 +281,6 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res2.status).eql(200);
-
       });
     });
   });
