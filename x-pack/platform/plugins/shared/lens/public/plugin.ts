@@ -16,7 +16,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -59,7 +58,10 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import type {
+  AdvancedUiActionsSetup,
+  AdvancedUiActionsStart,
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import {
@@ -190,7 +192,7 @@ export interface LensPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  uiActionsEnhanced?: AdvancedUiActionsStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 

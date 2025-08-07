@@ -24,7 +24,7 @@ import {
   DynamicActionsSerializedState,
   EmbeddableDynamicActionsManager,
   HasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
+} from '@kbn/embeddable-enhanced';
 import { partition } from 'lodash';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Visualization } from '../..';

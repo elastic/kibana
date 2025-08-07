@@ -9,6 +9,7 @@ import React from 'react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeEmbeddableDynamicActions } from '@kbn/embeddable-enhanced';
 import { merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
 import {
@@ -59,11 +60,12 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const dynamicActionsManager = services.uiActionsEnhanced ? initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
-        initialState
-      );
+        initialState,
+        { embeddable: services.embeddable, uiActionsEnhanced: services.uiActionsEnhanced }
+      ) : undefined;
 
       const initialRuntimeState = await deserializeState(
         services,

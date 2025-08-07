@@ -32,7 +32,7 @@ import type {
   SerializedTitles,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced';
 import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
