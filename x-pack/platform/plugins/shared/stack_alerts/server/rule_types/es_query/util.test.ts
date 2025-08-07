@@ -268,7 +268,7 @@ describe('es_query utils', () => {
       expect(containerName).toMatchInlineSnapshot(`
         Object {
           "label": "container.name",
-          "searchPath": "container.name.keyword",
+          "searchPath": "container.name",
         }
       `);
     });

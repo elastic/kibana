@@ -168,7 +168,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ruleId,
         });
 
-        expect(resp.hits.hits[0]._source).property('host.name', 'host-0');
+        expect(resp.hits.hits[0]._source).property('host.name');
+        expect(resp.hits.hits[0]._source['host.name'] as string[]).eql([
+          'host-0',
+          'host-0',
+          'host-0',
+        ]);
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', expectedConsumer);
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.reason',
