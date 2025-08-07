@@ -14,6 +14,7 @@ import { firstValueFrom, toArray } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { InternalStartServices } from '../../services';
+import type { ConversationService } from '../../services/conversation';
 
 const generateMessageId = () => `msg-${uuidv4()}`;
 
@@ -29,10 +30,10 @@ export class KibanaAgentExecutor implements AgentExecutor {
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
-    const { taskId, userMessage } = requestContext;
+    const { taskId, userMessage, contextId } = requestContext;
 
     try {
-      this.logger.debug(`A2A: Starting task ${taskId}`);
+      this.logger.debug(`A2A: Starting task ${taskId} with contextId ${contextId}`);
 
       // Extract text from message parts
       const userText = userMessage.parts
@@ -40,14 +41,19 @@ export class KibanaAgentExecutor implements AgentExecutor {
         .map((part: TextPart) => part.text)
         .join(' ');
 
-      // Execute chat with onechat service
-      const { chat } = this.getInternalServices();
+      // Get services
+      const { chat, conversations } = this.getInternalServices();
 
+      // Ensure conversation exists with contextId
+      await this.ensureConversationExists(contextId, conversations);
+
+      // Execute chat with onechat service using contextId as conversationId
       const chatEvents$ = chat.converse({
         agentId: this.agentId,
         mode: AgentMode.normal,
         nextInput: { message: userText },
         request: this.kibanaRequest,
+        conversationId: contextId,
       });
 
       // Process chat response
@@ -111,5 +117,42 @@ export class KibanaAgentExecutor implements AgentExecutor {
     });
 
     eventBus.finished();
+  }
+
+  /**
+   * Ensures a conversation exists with the given contextId
+   * If it doesn't exist, creates a new one tagged as a2a
+   */
+  private async ensureConversationExists(
+    contextId: string,
+    conversationService: ConversationService
+  ): Promise<void> {
+    try {
+      const conversationClient = await conversationService.getScopedClient({
+        request: this.kibanaRequest,
+      });
+
+      // Try to get existing conversation
+      try {
+        await conversationClient.get(contextId);
+        this.logger.debug(`A2A: Using existing conversation ${contextId}`);
+        return;
+      } catch (error) {
+        this.logger.debug(`A2A: Creating new conversation ${contextId}`);
+
+        // For now just mark the conversation as a2a
+        await conversationClient.create({
+          id: contextId,
+          title: `[A2A] ${contextId}`,
+          agent_id: this.agentId,
+          rounds: [],
+        });
+
+        this.logger.debug(`A2A: Created new conversation ${contextId}`);
+      }
+    } catch (error) {
+      this.logger.error(`A2A: Failed to ensure conversation exists: ${error}`);
+      throw error;
+    }
   }
 }
