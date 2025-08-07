@@ -40,11 +40,11 @@ disabled:
   - x-pack/platform/test/scalability/config.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test/fleet_cypress/cli_config.ts
-  - x-pack/test/fleet_cypress/cli_config.space_awareness.ts
-  - x-pack/test/fleet_cypress/config.ts
-  - x-pack/test/fleet_cypress/config.space_awareness.ts
-  - x-pack/test/fleet_cypress/visual_config.ts
+  - x-pack/platform/test/fleet_cypress/cli_config.ts
+  - x-pack/platform/test/fleet_cypress/cli_config.space_awareness.ts
+  - x-pack/platform/test/fleet_cypress/config.ts
+  - x-pack/platform/test/fleet_cypress/config.space_awareness.ts
+  - x-pack/platform/test/fleet_cypress/visual_config.ts
 
   # Default http2 config to use for performance journeys
   - x-pack/performance/configs/http2_config.ts
@@ -267,7 +267,7 @@ enabled:
   - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
-  - x-pack/test/plugin_functional/config.ts
+  - x-pack/platform/test/plugin_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
   - x-pack/platform/test/reporting_functional/reporting_and_deprecated_security.config.ts

@@ -646,7 +646,6 @@ module.exports = {
         'src/platform/test/*/*.config.ts',
         'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
         'src/platform/test/server_integration/**/*.ts',
-        'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
@@ -2196,7 +2195,7 @@ module.exports = {
         // Ideally, we need to classify the solution specific ones to reduce CI times
         'x-pack/test_serverless/**',
         'x-pack/test/**',
-        'x-pack/test/plugin_functional/plugins/resolver_test/**',
+        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
       ],
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "../../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,10 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/security-solution-plugin",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
-    "@kbn/shared-ux-router",
+    "@kbn/global-search-plugin",
   ]
 }

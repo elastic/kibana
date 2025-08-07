@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import path from 'path';
-import { cypressTestRunner } from './runner';
 
-const kibanaYamlFilePath = path.join(__dirname, './ftr_kibana.yml');
-
-async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('../functional/config.base.ts')
   );
 
   return {
@@ -30,6 +26,7 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
         // define custom es server here
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
+        'http.host=0.0.0.0',
       ],
     },
 
@@ -37,16 +34,29 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--home.disableWelcomeScreen=true',
-        '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-        `--config=${kibanaYamlFilePath}`,
+
+        // add feature flags here
+        `--xpack.fleet.enableExperimental=${JSON.stringify([
+          'agentTamperProtectionEnabled',
+          'subfeaturePrivileges',
+          'useSpaceAwareness',
+        ])}`,
+
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
+
+          // Enable debug fleet logs by default
+          {
+            name: 'plugins.fleet',
+            level: 'debug',
+            appenders: ['default'],
+          },
+        ])}`,
       ],
     },
-    testRunner: cypressTestRunner,
   };
 }
-
-export default ftrConfig;
