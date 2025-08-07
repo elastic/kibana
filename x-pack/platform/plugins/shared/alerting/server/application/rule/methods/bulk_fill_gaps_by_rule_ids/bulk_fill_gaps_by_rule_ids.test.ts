@@ -47,7 +47,10 @@ const buildRule = (id: number): BulkFillGapsByRuleIdsParams['rules'][0] => {
   };
 };
 const now = new Date();
-const backfillRange = { start: new Date(now.getTime() - 10 * 60 * 1000).toISOString(), end: now.toISOString() }; // 10 minutes range
+const backfillRange = {
+  start: new Date(now.getTime() - 10 * 60 * 1000).toISOString(),
+  end: now.toISOString(),
+}; // 10 minutes range
 const successfulRules = Array.from({ length: 3 }, (_, idx) =>
   buildRule(idx)
 ) as BulkFillGapsByRuleIdsParams['rules'];
