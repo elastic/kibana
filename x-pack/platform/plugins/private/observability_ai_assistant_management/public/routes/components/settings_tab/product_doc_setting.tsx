@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UseProductDoc } from '../../../hooks/use_product_doc';
@@ -58,7 +58,7 @@ export function ProductDocSetting({
   const canInstallProductDoc =
     currentlyDeployedInferenceId !== undefined &&
     !(knowledgeBase.isInstalling || knowledgeBase.isWarmingUpModel || knowledgeBase.isPolling) &&
-    knowledgeBase.status?.value?.inferenceModelState === KnowledgeBaseState.READY;
+    knowledgeBase.status?.value?.inferenceModelState === InferenceModelState.READY;
 
   const { status, isLoading: isStatusLoading, installProductDoc, uninstallProductDoc } = productDoc;
 
