@@ -12,6 +12,7 @@ import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { buildFunctionLookup } from '@kbn/esql-ast/src/definitions/utils/functions';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '@kbn/esql-ast/src/definitions/utils/validation/function';
 
 const getExpectedError = (fnName: string, givenTypes: string[]) => {
   const definition = buildFunctionLookup().get(fnName)!;
@@ -205,35 +206,30 @@ describe('function validation', () => {
           ]);
         });
 
-        it('casts string arguments to dates', async () => {
-          setTestFunctions([
-            {
-              name: 'test',
-              type: FunctionDefinitionTypes.SCALAR,
-              description: '',
-              locationsAvailable: [Location.EVAL],
-              signatures: [
+        describe('implicit string casting', () => {
+          it.each(PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING)(
+            'accepts string arguments for %s',
+            async (paramType) => {
+              setTestFunctions([
                 {
-                  params: [
-                    { name: 'arg1', type: 'date' },
-                    { name: 'arg2', type: 'date' },
+                  name: 'test',
+                  type: FunctionDefinitionTypes.SCALAR,
+                  description: '',
+                  locationsAvailable: [Location.EVAL],
+                  signatures: [
+                    {
+                      params: [{ name: 'arg1', type: paramType }],
+                      returnType: 'date',
+                    },
                   ],
-                  returnType: 'date',
                 },
-                {
-                  params: [
-                    { name: 'arg1', type: 'integer' },
-                    { name: 'arg2', type: 'integer' },
-                  ],
-                  returnType: 'date',
-                },
-              ],
-            },
-          ]);
+              ]);
 
-          const { expectErrors } = await setup();
+              const { expectErrors } = await setup();
 
-          await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
+              await expectErrors('FROM a_index | EVAL TEST("")', []);
+            }
+          );
         });
 
         it('treats text and keyword as interchangeable', async () => {
@@ -638,6 +634,12 @@ describe('function validation', () => {
 
       // @TODO — test function aliases
     });
+  });
+
+  it('should ignore a function whose name is defined by a parameter', async () => {
+    const { expectErrors } = await setup();
+
+    await expectErrors('FROM a_index | EVAL ??param(arg1)', []);
   });
 
   describe('License-based validation', () => {

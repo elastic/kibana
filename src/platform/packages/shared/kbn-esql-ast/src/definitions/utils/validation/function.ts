@@ -39,14 +39,12 @@ import {
 } from '../../../types';
 import { Walker } from '../../../walker';
 import {
-  FieldType,
   FunctionDefinition,
   FunctionDefinitionTypes,
   FunctionParameter,
   FunctionParameterType,
   ReasonTypes,
   SupportedDataType,
-  isFieldType,
 } from '../../types';
 import { getColumnExists, getQuotedColumnName } from '../columns';
 import {
@@ -206,7 +204,15 @@ class FunctionValidator {
   }
 }
 
-const FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FieldType[] = ['date', 'date_nanos'];
+export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameterType[] = [
+  'date',
+  'date_nanos',
+  'date_period',
+  'time_duration',
+  'version',
+  'ip',
+  'boolean',
+];
 
 /**
  * Returns a signature matching the given types if it exists
@@ -260,8 +266,7 @@ function argMatchesParamType(
   if (
     givenIsLiteral &&
     givenType === 'keyword' &&
-    isFieldType(expectedType) &&
-    FIELD_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
+    PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING.includes(expectedType)
   )
     return true;
 
