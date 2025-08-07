@@ -16,7 +16,7 @@ import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css } from '@emotion/react';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { Provider, ReactReduxContext } from 'react-redux';
+import { Provider, ReactReduxContext, ReactReduxContextValue } from 'react-redux';
 import { OverlayRef } from '@kbn/core/public';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
@@ -28,7 +28,8 @@ import { FLYOUT_STATE } from '../../reducers/ui';
 import { MapSettings } from '../../../common/descriptor_types';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
-import { updateFlyout } from '../../actions';
+import { setSelectedLayer, updateFlyout } from '../../actions';
+import { MapStoreState } from '../../reducers/store';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -71,7 +72,7 @@ const mapWrapperStyles = css({ position: 'relative' });
 
 export class MapContainer extends Component<Props, State> {
   static contextType = ReactReduxContext;
-  declare context: React.ContextType<typeof ReactReduxContext>;
+  declare context: React.ContextType<React.Context<ReactReduxContextValue<MapStoreState, any>>>;
 
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
@@ -164,6 +165,9 @@ export class MapContainer extends Component<Props, State> {
     }
 
     await untilPluginStartServicesReady();
+
+    const triggerElement = (document.activeElement as HTMLButtonElement) ?? null;
+
     this._flyoutRef = openLazyFlyout({
       core: coreStart,
       loadContent: async () => {
@@ -186,15 +190,38 @@ export class MapContainer extends Component<Props, State> {
       },
       flyoutProps: {
         outsideClickCloses: false,
-        ownFocus: true,
+        onClose: () => {
+          // When X button is pressed
+          const { dispatch } = this.context.store;
+          dispatch(updateFlyout(FLYOUT_STATE.NONE));
+          dispatch(setSelectedLayer(null));
+        },
       },
     });
 
-    // Ensure the built-in close buttons from openLazyFlyout correctly update the Redux state
     this._flyoutRef.onClose.then(() => {
-      // If the flyout has closed because of something other than a Redux state change
-      if (this.props.flyoutDisplay === flyoutDisplay)
-        this.context.store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      // Check to make sure the flyout has actually closed, instead of switching from Add to Edit
+      if (this.props.flyoutDisplay !== FLYOUT_STATE.NONE) return;
+
+      // Return focus to the button used to open this flyout
+      if (triggerElement) {
+        // If offsetParent is null, flyout was triggered by a hover action that's now hidden, so locate
+        // its enclosing layerName and focus the popover button
+        const nextTarget = triggerElement.offsetParent
+          ? triggerElement
+          : (triggerElement
+              .closest('[data-layerid]')
+              ?.querySelector('button.mapTocEntry__layerName') as HTMLButtonElement) ?? null;
+
+        if (nextTarget === triggerElement) {
+          triggerElement?.focus();
+        } else {
+          // First focus the enclosing layerName
+          nextTarget?.focus();
+          // Wait for the original edit button to reappear, then shift focus to it
+          requestAnimationFrame(() => triggerElement?.focus());
+        }
+      }
     });
   };
 
