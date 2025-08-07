@@ -21,6 +21,7 @@ import {
 } from './if_step';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
+import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -33,7 +34,8 @@ export class StepFactory {
     step: TStep, // Use z.infer<typeof StepSchema> when fully defined
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
-    workflowState: WorkflowExecutionRuntimeManager
+    workflowState: WorkflowExecutionRuntimeManager,
+    logger: IWorkflowEventLogger // Assuming you have a logger interface
   ): StepImplementation {
     const stepType = (step as any).type; // Use a more type-safe way to determine step type if possible
 
@@ -47,7 +49,7 @@ export class StepFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, workflowState);
       case 'enter-if':
-        return new EnterIfNodeImpl(step as any, workflowState);
+        return new EnterIfNodeImpl(step as any, workflowState, contextManager, logger);
       case 'enter-condition-branch':
         return new EnterConditionBranchNodeImpl(workflowState);
       case 'exit-condition-branch':
