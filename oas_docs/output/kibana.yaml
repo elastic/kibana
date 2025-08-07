@@ -8185,12 +8185,6 @@ paths:
   /api/cases/reporters:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/reporters</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Returns information about the users who opened cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
       operationId: getCaseReportersDefaultSpace
       parameters:
@@ -12889,12 +12883,6 @@ paths:
   /api/encrypted_saved_objects/_rotate_key:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/encrypted_saved_objects/_rotate_key</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Superuser role required.
 
         If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
@@ -17438,12 +17426,6 @@ paths:
   /api/features:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/features</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
       operationId: get-features
       responses:
@@ -44572,12 +44554,6 @@ paths:
   /api/logstash/pipeline/{id}:
     delete:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Delete a centrally-managed Logstash pipeline.
         If your Elasticsearch cluster is protected with basic authentication, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
@@ -44600,12 +44576,6 @@ paths:
       x-state: Technical Preview
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get information for a centrally-managed Logstash pipeline.
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
       externalDocs:
@@ -44644,12 +44614,6 @@ paths:
       x-state: Technical Preview
     put:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipeline/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Create a centrally-managed Logstash pipeline or update a pipeline.
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash writer role.
       externalDocs:
@@ -44710,12 +44674,6 @@ paths:
   /api/logstash/pipelines:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/logstash/pipelines</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get a list of all centrally-managed Logstash pipelines.
 
         To use this API, you must have either the `logstash_admin` built-in role or a customized Logstash reader role.
@@ -49255,12 +49213,6 @@ paths:
       summary: Get all roles
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/role/_query:
     post:
       operationId: post-security-role-query
@@ -49310,12 +49262,6 @@ paths:
           description: Indicates a successful call.
       summary: Query roles
       tags: []
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/_query</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/role/{name}:
     delete:
       operationId: delete-security-role-name
@@ -49339,12 +49285,6 @@ paths:
       summary: Delete a role
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     get:
       operationId: get-security-role-name
       parameters:
@@ -49372,21 +49312,8 @@ paths:
       summary: Get a role
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     put:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/role/{name}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
+      description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49799,21 +49726,9 @@ paths:
       summary: Create or update roles
       tags:
         - roles
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/roles</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security/session/_invalidate:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/session/_invalidate</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Invalidate user sessions that match a query. To use this API, you must be a superuser.
       operationId: post-security-session-invalidate
       parameters:
@@ -49920,12 +49835,6 @@ paths:
   /api/short_url:
     post:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
         Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
       operationId: post-url
@@ -49970,12 +49879,6 @@ paths:
   /api/short_url/_slug/{slug}:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/_slug/{slug}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Resolve a Kibana short URL by its slug.
       operationId: resolve-url
       parameters:
@@ -49999,12 +49902,6 @@ paths:
   /api/short_url/{id}:
     delete:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Delete a Kibana short URL.
       operationId: delete-url
       parameters:
@@ -50018,12 +49915,6 @@ paths:
       x-state: Technical Preview
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/short_url/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get a single Kibana short URL.
       operationId: get-url
       parameters:
@@ -50041,14 +49932,7 @@ paths:
       x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_copy_saved_objects</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50171,22 +50055,9 @@ paths:
       summary: Disable legacy URL aliases
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_disable_legacy_url_aliases</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/spaces/_get_shareable_references:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_get_shareable_references</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Collect references and space contexts for saved objects.
+      description: Collect references and space contexts for saved objects.
       operationId: post-spaces-get-shareable-references
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50224,14 +50095,7 @@ paths:
         - spaces
   /api/spaces/_resolve_copy_saved_objects_errors:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_resolve_copy_saved_objects_errors</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.
+      description: 'Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50321,14 +50185,7 @@ paths:
       tags: []
   /api/spaces/_update_objects_spaces:
     post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/_update_objects_spaces</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Update one or more saved objects to add or remove them from some spaces.
+      description: Update one or more saved objects to add or remove them from some spaces.
       operationId: post-spaces-update-objects-spaces
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50434,12 +50291,6 @@ paths:
       summary: Get all spaces
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     post:
       operationId: post-spaces-space
       parameters:
@@ -50504,22 +50355,9 @@ paths:
       summary: Create a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/spaces/space/{id}:
     delete:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
+      description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
       operationId: delete-spaces-space-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50563,12 +50401,6 @@ paths:
       summary: Get a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     put:
       operationId: put-spaces-space-id
       parameters:
@@ -50639,12 +50471,6 @@ paths:
       summary: Update a space
       tags:
         - spaces
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/spaces/space/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/status:
     get:
       operationId: get-status
@@ -50683,12 +50509,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/streams:
     get:
       description: |-
@@ -60421,12 +60241,6 @@ paths:
   /api/task_manager/_health:
     get:
       description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/task_manager/_health</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
         Get the health status of the Kibana task manager.
       operationId: task-manager-health
       responses:
@@ -61186,14 +61000,7 @@ paths:
         - Security Timeline API
   /api/upgrade_assistant/status:
     get:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/upgrade_assistant/status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Check the status of your cluster.
+      description: Check the status of your cluster.
       operationId: get-upgrade-status
       responses:
         '200':
