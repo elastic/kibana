@@ -391,7 +391,7 @@ export const RuleMigrationTranslationStats = z.object({
        */
       prebuilt: z.number().int(),
       /**
-       * The number of rules that have a placeholder in the query.
+       * The number of rules that have the placeholder for the missing index pattern in the query.
        */
       missingIndex: z.number().int(),
     }),
