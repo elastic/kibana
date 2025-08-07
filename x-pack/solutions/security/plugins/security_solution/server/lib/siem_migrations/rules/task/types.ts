@@ -11,7 +11,7 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { StoredRuleMigration } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 import type { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { ChatModel } from './util/actions_client_chat';
+import type { ChatModel } from '../../common/task/util/actions_client_chat';
 import type { RuleMigrationResources } from './retrievers/rule_resource_retriever';
 import type { RuleMigrationsRetriever } from './retrievers';
 import type { MigrateRuleGraphConfig } from './agent/types';

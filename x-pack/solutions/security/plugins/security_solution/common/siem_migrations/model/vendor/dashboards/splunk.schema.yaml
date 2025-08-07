@@ -21,6 +21,10 @@ components:
     SplunkOriginalDashboardExportProperties:
       type: object
       description: Properties of the original dashboard
+      required:
+        - id
+        - title
+        - eai:data
       properties:
         id:
           type: string

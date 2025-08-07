@@ -22,7 +22,7 @@ import {
   type RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
-import { conditions as searchConditions } from './search';
+import { dsl } from './dsl_queries';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
 import type {
   CreateMigrationItemInput,
@@ -54,8 +54,8 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
         filter: { term: { status: SiemMigrationStatus.COMPLETED } },
         aggs: {
           result: { terms: { field: 'translation_result' } },
-          installable: { filter: { bool: { must: searchConditions.isInstallable() } } },
-          prebuilt: { filter: searchConditions.isPrebuilt() },
+          installable: { filter: { bool: { must: dsl.isInstallable() } } },
+          prebuilt: { filter: dsl.isPrebuilt() },
         },
       },
       failed: { filter: { term: { status: SiemMigrationStatus.FAILED } } },
@@ -117,56 +117,23 @@ export class RuleMigrationsDataRulesClient extends SiemMigrationsDataItemClient<
   protected getFilterQuery(
     migrationId: string,
     filters: RuleMigrationFilters = {}
-  ): QueryDslQueryContainer {
-    const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
-    if (filters.status) {
-      if (Array.isArray(filters.status)) {
-        filter.push({ terms: { status: filters.status } });
-      } else {
-        filter.push({ term: { status: filters.status } });
-      }
-    }
-    if (filters.ids) {
-      filter.push({ terms: { _id: filters.ids } });
-    }
+  ): { bool: { filter: QueryDslQueryContainer[] } } {
+    const { filter } = super.getFilterQuery(migrationId, filters).bool;
+
+    // Rules specific filters
     if (filters.searchTerm?.length) {
-      filter.push(searchConditions.matchTitle(filters.searchTerm));
+      filter.push(dsl.matchTitle(filters.searchTerm));
     }
-    if (filters.installed === true) {
-      filter.push(searchConditions.isInstalled());
-    } else if (filters.installed === false) {
-      filter.push(searchConditions.isNotInstalled());
+    if (filters.installed != null) {
+      filter.push(filters.installed ? dsl.isInstalled() : dsl.isNotInstalled());
     }
-    if (filters.installable === true) {
-      filter.push(...searchConditions.isInstallable());
-    } else if (filters.installable === false) {
-      filter.push(...searchConditions.isNotInstallable());
+    if (filters.installable != null) {
+      filter.push(...(filters.installable ? dsl.isInstallable() : dsl.isNotInstallable()));
     }
-    if (filters.prebuilt === true) {
-      filter.push(searchConditions.isPrebuilt());
-    } else if (filters.prebuilt === false) {
-      filter.push(searchConditions.isCustom());
+    if (filters.prebuilt != null) {
+      filter.push(filters.prebuilt ? dsl.isPrebuilt() : dsl.isCustom());
     }
-    if (filters.failed === true) {
-      filter.push(searchConditions.isFailed());
-    } else if (filters.failed === false) {
-      filter.push(searchConditions.isNotFailed());
-    }
-    if (filters.fullyTranslated === true) {
-      filter.push(searchConditions.isFullyTranslated());
-    } else if (filters.fullyTranslated === false) {
-      filter.push(searchConditions.isNotFullyTranslated());
-    }
-    if (filters.partiallyTranslated === true) {
-      filter.push(searchConditions.isPartiallyTranslated());
-    } else if (filters.partiallyTranslated === false) {
-      filter.push(searchConditions.isNotPartiallyTranslated());
-    }
-    if (filters.untranslatable === true) {
-      filter.push(searchConditions.isUntranslatable());
-    } else if (filters.untranslatable === false) {
-      filter.push(searchConditions.isNotUntranslatable());
-    }
+
     return { bool: { filter } };
   }
 

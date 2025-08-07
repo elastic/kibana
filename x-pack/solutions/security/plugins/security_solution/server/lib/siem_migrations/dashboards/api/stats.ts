@@ -46,26 +46,12 @@ export const registerSiemDashboardMigrationsStatsRoute = (
               const dashboardMigrationClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();
 
-              const [stats, migration] = await Promise.all([
-                dashboardMigrationClient.data.dashboards.getStats(migrationId),
-                dashboardMigrationClient.data.migrations.get(migrationId),
-              ]);
+              const stats = await dashboardMigrationClient.task.getStats(migrationId);
 
-              if (!migration) {
-                return res.notFound({
-                  body: MIGRATION_ID_NOT_FOUND(migrationId),
-                });
-              }
-
-              if (stats.dashboards?.total === 0) {
+              if (stats.items.total === 0) {
                 return res.noContent();
               }
-              return res.ok({
-                body: {
-                  ...stats,
-                  name: migration.name,
-                },
-              });
+              return res.ok({ body: stats });
             } catch (err) {
               logger.error(err);
               return res.badRequest({ body: err.message });

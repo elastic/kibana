@@ -89,7 +89,7 @@ export const OriginalDashboard = z.object({
   /**
    * The last updated timestamp of the dashboard
    */
-  last_updated: z.string(),
+  last_updated: z.string().optional(),
   /**
    * The format of the dashboard (e.g., 'json', 'xml')
    */
