@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { RadioGroup } from './csp_boxed_radio_group';
+import { RadioGroup } from '../csp_boxed_radio_group';
 import { CloudProviders } from './types';
 import { useCloudSetup } from './hooks/use_cloud_setup_context';
 

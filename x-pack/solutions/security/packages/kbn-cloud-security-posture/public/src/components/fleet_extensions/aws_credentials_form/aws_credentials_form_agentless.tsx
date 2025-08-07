@@ -69,7 +69,7 @@ export const AwsCredentialsFormAgentless = ({
   showCloudConnectors,
   cloud,
 }: AwsAgentlessFormProps) => {
-  const { awsOverviewPath, awsShowCloudConnectors, awsPolicyType, templateName } = useCloudSetup();
+  const { awsOverviewPath, awsPolicyType, templateName } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
@@ -98,7 +98,7 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const showCloudCredentialsButton = awsShowCloudConnectors;
+  const showCloudCredentialsButton = showCloudConnectors;
 
   const cloudConnectorRemoteRoleTemplate = cloud
     ? getCloudConnectorRemoteRoleTemplate({

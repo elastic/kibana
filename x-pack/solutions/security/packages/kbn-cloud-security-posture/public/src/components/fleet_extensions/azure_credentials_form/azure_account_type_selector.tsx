@@ -11,7 +11,7 @@ import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { updatePolicyWithInputs, isBelowMinVersion } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioGroupProps, RadioGroup } from '../../csp_boxed_radio_group';
 import { AzureAccountType, UpdatePolicy } from '../types';
 import {
   AZURE_CREDENTIALS_TYPE,

@@ -17,7 +17,7 @@ import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { updatePolicyWithInputs } from '../utils';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
   AZURE_SETUP_FORMAT_TEST_SUBJECTS,

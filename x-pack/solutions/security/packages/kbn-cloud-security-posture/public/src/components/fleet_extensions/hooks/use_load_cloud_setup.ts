@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import semverGte from 'semver/functions/gte';
 import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/common/types';
@@ -47,6 +46,7 @@ interface UseLoadCloudSetupProps {
   defaultProviderType: string;
   templateName: string;
   config: CloudSetupConfig;
+  showCloudConnectorsConfig: boolean;
   getCloudSetupProviderByInputType: (inputType: string) => CloudProviders;
 }
 
@@ -65,6 +65,7 @@ export const useLoadCloudSetup = ({
   templateName,
   config,
   getCloudSetupProviderByInputType,
+  showCloudConnectorsConfig,
 }: UseLoadCloudSetupProps) => {
   const isServerless = !!cloud.serverless.projectType;
   const input = getSelectedInput(newPolicy.inputs, defaultProviderType);
@@ -73,7 +74,6 @@ export const useLoadCloudSetup = ({
   const hasInvalidRequiredVars = !!hasErrors(validationResults);
   const cloudConnectorsEnabled =
     uiSettings.get(SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING) || false;
-  const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
 
   const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
     input,
@@ -95,9 +95,7 @@ export const useLoadCloudSetup = ({
   });
 
   const showCloudConnectors =
-    cloudConnectorsEnabled &&
-    !!cloudConnectorRemoteRoleTemplate &&
-    semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
+    cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate && showCloudConnectorsConfig;
 
   const setEnabledPolicyInput = useCallback(
     (provider: CloudProviders) => {
@@ -109,6 +107,7 @@ export const useLoadCloudSetup = ({
         setupTechnology,
         showCloudConnectors
       );
+
       const policy = updatePolicyWithInputs(newPolicy, inputType, inputVars);
       updatePolicy({ updatedPolicy: policy });
     },

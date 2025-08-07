@@ -20,6 +20,7 @@ export { encodeQuery, decodeQuery } from './src/utils/query_utils';
 export { CloudSetup } from './src/components/fleet_extensions/cloud_setup';
 export { AwsInputVarFields } from './src/components/fleet_extensions/aws_credentials_form/aws_input_var_fields';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
+export { RadioGroup } from './src/components/csp_boxed_radio_group';
 export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_finding_colors';
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';

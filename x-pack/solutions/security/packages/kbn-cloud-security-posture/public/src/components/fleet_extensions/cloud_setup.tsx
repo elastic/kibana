@@ -81,8 +81,13 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
     validationResults,
     uiSettings,
   }: CloudIntegrationSetupProps) => {
-    const { templateName, config, defaultProviderType, getCloudSetupProviderByInputType } =
-      useCloudSetup();
+    const {
+      templateName,
+      config,
+      defaultProviderType,
+      getCloudSetupProviderByInputType,
+      showCloudConnectors: showCloudConnectorsConfig,
+    } = useCloudSetup();
     const {
       input,
       setEnabledPolicyInput,
@@ -91,8 +96,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
       isServerless,
-      showCloudConnectors,
       hasInvalidRequiredVars,
+      showCloudConnectors,
     } = useLoadCloudSetup({
       newPolicy,
       updatePolicy,
@@ -108,6 +113,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       defaultProviderType,
       config,
       getCloudSetupProviderByInputType,
+      showCloudConnectorsConfig,
     });
 
     const namespaceSupportEnabled = config.namespaceSupportEnabled;
