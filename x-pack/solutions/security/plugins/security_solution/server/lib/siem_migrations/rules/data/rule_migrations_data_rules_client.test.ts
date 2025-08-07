@@ -18,7 +18,8 @@ import type { RuleMigrationRule } from '../../../../../common/siem_migrations/mo
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
 import type { StoredRuleMigration } from '../types';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY } from '../constants';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
+import { conditions } from './search';
 
 describe('RuleMigrationsDataRulesClient', () => {
   let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
@@ -771,9 +772,12 @@ describe('RuleMigrationsDataRulesClient', () => {
       expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
         script: {
-          source: expect.stringContaining('def originalQuery = ctx._source.elastic_rule.query'),
+          source: expect.stringContaining(
+            `def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                ctx._source.elastic_rule.query = newQuery;`
+          ),
           lang: 'painless',
-          params: { new_index: indexPattern },
         },
         query: {
           bool: {
@@ -788,11 +792,7 @@ describe('RuleMigrationsDataRulesClient', () => {
                   _id: ['rule1', 'rule2'],
                 },
               },
-              {
-                query_string: {
-                  query: SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY,
-                },
-              },
+              conditions.isMissingIndex(),
             ],
           },
         },
@@ -812,9 +812,12 @@ describe('RuleMigrationsDataRulesClient', () => {
       expect(esClient.asInternalUser.updateByQuery).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
         script: {
-          source: expect.stringContaining('def originalQuery = ctx._source.elastic_rule.query'),
+          source: expect.stringContaining(
+            `def originalQuery = ctx._source.elastic_rule.query;
+                def newQuery = originalQuery.replace('${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}', '${indexPattern}');
+                ctx._source.elastic_rule.query = newQuery;`
+          ),
           lang: 'painless',
-          params: { new_index: indexPattern },
         },
         query: {
           bool: {
@@ -824,11 +827,7 @@ describe('RuleMigrationsDataRulesClient', () => {
                   migration_id: 'migration1',
                 },
               },
-              {
-                query_string: {
-                  query: SIEM_RULE_MIGRATION_INDEX_PATTERN_QUERY,
-                },
-              },
+              conditions.isMissingIndex(),
             ],
           },
         },

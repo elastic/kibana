@@ -320,7 +320,7 @@ components:
                   description: The number of rules that have been successfully translated and matched Elastic prebuilt rules.
                 missingIndex:
                   type: integer
-                  description: The number of rules that have a placeholder in the query.
+                  description: The number of rules that have the placeholder for the missing index pattern in the query.
             failed:
               type: integer
               description: The number of rules that have failed translation.
