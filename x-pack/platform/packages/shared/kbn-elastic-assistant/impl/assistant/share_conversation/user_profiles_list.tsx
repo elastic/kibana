@@ -17,8 +17,8 @@ interface Props {
 }
 
 const UserProfilesListComponent: React.FC<Props> = ({ allUsers, onUsersSelect, selectedUsers }) => {
-  const { data: userProfiles, isLoading } = useUserProfiles(allUsers);
-  console.log('userProfiles', userProfiles);
+  const { data: userProfiles } = useUserProfiles(allUsers);
+
   const onChange = useCallback(
     (nextSelectedOptions: UserProfileWithAvatar[]) => {
       const nextUsers: UserProfile[] = nextSelectedOptions.filter(

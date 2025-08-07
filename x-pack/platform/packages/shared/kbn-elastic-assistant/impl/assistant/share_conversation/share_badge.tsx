@@ -17,8 +17,10 @@ import {
   useGeneratedHtmlId,
   EuiIcon,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import { useConversation } from '../use_conversation';
 import { ShareModal } from './share_modal';
-import { Conversation } from '../../..';
+import { Conversation, useAssistantContext } from '../../..';
 import * as i18n from './translations';
 
 interface Props {
@@ -26,6 +28,7 @@ interface Props {
   isConversationOwner: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
 }
+
 interface ShareBadgeOptionData {
   description?: string;
 }
@@ -34,6 +37,8 @@ const ShareBadgeComponent: React.FC<Props> = ({
   refetchCurrentConversation,
   selectedConversation,
 }) => {
+  const { updateConversationUsers } = useConversation();
+  const { currentUser } = useAssistantContext();
   const { isShared, isSharedGlobal } = useMemo(
     () => ({
       isShared: selectedConversation?.users.length !== 1,
@@ -47,29 +52,58 @@ const ShareBadgeComponent: React.FC<Props> = ({
     () => [
       {
         checked: !isShared ? 'on' : undefined,
+        key: 'not-shared',
         data: {
           description: i18n.ONLY_VISIBLE_TO_YOU,
         },
         'data-test-subj': 'notShared',
         disabled: !isConversationOwner,
-        label: i18n.PRIVATE,
+        label: i18n.NOT_SHARED,
+        isGroupLabel: false,
       },
       {
         checked: isShared ? 'on' : undefined,
+        key: 'shared',
         data: {
           description: isSharedGlobal ? i18n.VISIBLE_GLOBAL : i18n.VISIBLE_SELECTED,
         },
         'data-test-subj': 'shared',
         disabled: !isConversationOwner,
         label: i18n.SHARED,
+        isGroupLabel: false,
       },
     ],
     [isConversationOwner, isShared, isSharedGlobal]
   );
-  const onSharedChange = () => {
-    setIsModalOpen(true);
-    setIsPopoverOpen(false);
-  };
+
+  const unshareConversation = useCallback(async () => {
+    if (currentUser && selectedConversation && selectedConversation.id !== '') {
+      await updateConversationUsers({
+        conversationId: selectedConversation.id,
+        updatedUsers: [{ id: currentUser.id, name: currentUser.name }],
+      });
+      refetchCurrentConversation({});
+    }
+  }, [currentUser, refetchCurrentConversation, selectedConversation, updateConversationUsers]);
+
+  const onSharedChange = useCallback<
+    (
+      options: Array<EuiSelectableOption<ShareBadgeOptionData>>,
+      event: EuiSelectableOnChangeEvent,
+      changedOption: EuiSelectableOption<ShareBadgeOptionData>
+    ) => void
+  >(
+    (_options, _event, selectedOption) => {
+      if (selectedOption.key === 'not-shared') {
+        if (isShared) unshareConversation();
+      } else {
+        setIsModalOpen(true);
+      }
+      setIsPopoverOpen(false);
+    },
+    [isShared, unshareConversation]
+  );
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((isOpen) => !isOpen);
@@ -142,6 +176,13 @@ const ShareBadgeComponent: React.FC<Props> = ({
     ),
     []
   );
+
+  const showGlobalModalOnOpen = useMemo(
+    // if the conversation is private opening sharing modal for the first time, default it to global view
+    () => !isShared || isSharedGlobal,
+    [isShared, isSharedGlobal]
+  );
+
   return (
     <>
       <EuiPopover
@@ -177,7 +218,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
       </EuiPopover>
       {isModalOpen && (
         <ShareModal
-          isSharedGlobal={isSharedGlobal}
+          isSharedGlobal={showGlobalModalOnOpen}
           selectedConversation={selectedConversation}
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}

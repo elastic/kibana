@@ -22,7 +22,6 @@ const UserProfilesSearchComponent: React.FC<Props> = ({
   selectedUsers,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-
   const { data: userProfiles, isLoading } = useSuggestUserProfiles({
     forbiddenUsers,
     searchTerm,

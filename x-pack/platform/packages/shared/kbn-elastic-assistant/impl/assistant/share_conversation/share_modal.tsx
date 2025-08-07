@@ -161,14 +161,14 @@ const ShareModalComponent: React.FC<Props> = ({
         <EuiText size="s">
           <strong>{i18n.WHO_HAS_ACCESS}</strong>
           <p>{accessText}</p>
-          {sharingOption === 'selected' && (
-            <UserProfilesList
-              onUsersSelect={onNextSelectedUsersSelect}
-              allUsers={selectedUsers}
-              selectedUsers={nextSelectedUsers}
-            />
-          )}
         </EuiText>
+        {sharingOption === 'selected' && (
+          <UserProfilesList
+            onUsersSelect={onNextSelectedUsersSelect}
+            allUsers={selectedUsers}
+            selectedUsers={nextSelectedUsers}
+          />
+        )}
 
         <EuiSpacer size="m" />
 

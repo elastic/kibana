@@ -135,17 +135,6 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
         >
           {i18n.COPY_URL}
         </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          aria-label={'archive'}
-          key={'archive'}
-          onClick={() => {
-            console.log('archive');
-          }}
-          icon={'eye'}
-          data-test-subj={'archive'}
-        >
-          {i18n.ARCHIVE}
-        </EuiContextMenuItem>,
         <EuiPanel color="transparent" paddingSize="none" key={'chat-options-panel'}>
           <EuiTitle
             size="xxxs"

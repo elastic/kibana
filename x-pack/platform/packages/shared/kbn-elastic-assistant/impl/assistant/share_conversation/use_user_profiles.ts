@@ -17,6 +17,7 @@ export const useUserProfiles = (uids: string[]) => {
         uids: new Set(uids),
         dataPath: 'avatar',
       }),
+    enabled: uids.length > 0,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });

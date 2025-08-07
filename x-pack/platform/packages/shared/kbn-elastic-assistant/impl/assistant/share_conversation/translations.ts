@@ -40,8 +40,8 @@ export const SHARE = i18n.translate('xpack.elasticAssistant.assistant.visibility
   defaultMessage: 'Share',
 });
 
-export const PRIVATE = i18n.translate('xpack.elasticAssistant.assistant.visibility.private', {
-  defaultMessage: 'Private',
+export const NOT_SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibility.notShared', {
+  defaultMessage: 'Not shared',
 });
 export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.selectVisibilityAriaLabel',

@@ -42,6 +42,7 @@ const createUser = async (username, fullName) => {
         password: 'changeme',
         roles: ['superuser'],
         full_name: fullName,
+        email: `${username}@elastic.co`,
       },
       {
         auth: elasticAuth,

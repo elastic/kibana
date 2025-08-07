@@ -18,7 +18,6 @@ import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-ht
 import { useAssistantContext } from '../../..';
 
 type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & {
-  enabled?: boolean;
   onDebounce?: () => void;
   forbiddenUsers?: string[];
 };
@@ -33,7 +32,6 @@ const STALE_TIME = 1000 * 60;
 const SEARCH_DEBOUNCE_MS = 250;
 const DEFAULT_USER_SIZE = 5;
 export const useSuggestUserProfiles = ({
-  enabled = true,
   forbiddenUsers = [],
   searchTerm,
   size = DEFAULT_USER_SIZE,
@@ -51,7 +49,7 @@ export const useSuggestUserProfiles = ({
   );
 
   return useQuery<SuggestUsersResponse, IHttpFetchError<ResponseErrorBody>, SuggestUsersResponse>(
-    ['users', 'suggest', debouncedSearchTerm, size, enabled],
+    ['users', 'suggest', debouncedSearchTerm, size],
     ({ signal }) =>
       suggestUserProfiles({
         http,
@@ -60,7 +58,6 @@ export const useSuggestUserProfiles = ({
         signal,
       }),
     {
-      enabled,
       retry: false,
       keepPreviousData: true,
       staleTime: STALE_TIME,
