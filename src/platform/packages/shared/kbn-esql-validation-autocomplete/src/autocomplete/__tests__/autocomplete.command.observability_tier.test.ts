@@ -18,7 +18,7 @@ export function getLicenseMock(level: string) {
 
 describe('autocomplete.suggest', () => {
   describe('observability tier-based command suggestions', () => {
-    test('should suggest change_point command with observability complete feature and platinum license', async () => {
+    test('suggests CHANGE_POINT when observability tier is complete', async () => {
       const { suggest } = await setup();
 
       const suggestions = await suggest('FROM a | /', {
@@ -33,13 +33,14 @@ describe('autocomplete.suggest', () => {
       expect(changePointSuggestion).toBeDefined();
     });
 
-    test('should not suggest change_point command when observability complete feature is unavailable', async () => {
+    test('filters out CHANGE_POINT when observability tier is logs_essentials', async () => {
       const { suggest } = await setup();
 
       const suggestions = await suggest('FROM a | /', {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
+          getActiveProduct: () => ({ type: 'observability', tier: 'logs_essentials' }),
         },
       });
 
@@ -47,21 +48,26 @@ describe('autocomplete.suggest', () => {
       expect(changePointSuggestion).toBeUndefined();
     });
 
-    test('should suggest change_point command with different type', async () => {
+    test('suggests CHANGE_POINT when activeProduct type is not observability', async () => {
       const { suggest } = await setup();
 
       const suggestions = await suggest('FROM a | /', {
         callbacks: {
           ...getCallbackMocks(),
           getLicense: async () => getLicenseMock('platinum'),
+          getActiveProduct: () => ({
+            type: 'security',
+            tier: 'complete',
+            product_lines: ['ai_soc'],
+          }),
         },
       });
 
       const changePointSuggestion = suggestions.find((s) => s.text === 'CHANGE_POINT ');
-      expect(changePointSuggestion).toBeUndefined();
+      expect(changePointSuggestion).toBeDefined();
     });
 
-    test('should not suggest change_point command when no pricing callback is provided', async () => {
+    test('suggests CHANGE_POINT when activeProduct is undefined', async () => {
       const { suggest } = await setup();
 
       const suggestions = await suggest('FROM a | /', {
@@ -72,7 +78,7 @@ describe('autocomplete.suggest', () => {
       });
 
       const changePointSuggestion = suggestions.find((s) => s.text === 'CHANGE_POINT ');
-      expect(changePointSuggestion).toBeUndefined();
+      expect(changePointSuggestion).toBeDefined();
     });
   });
 });

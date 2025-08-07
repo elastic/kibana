@@ -125,10 +125,9 @@ export const filterFunctionDefinitions = (
 
       if (
         observabilityTier &&
-        !(
-          activeProduct?.type === 'observability' &&
-          activeProduct.tier === observabilityTier.toLowerCase()
-        )
+        activeProduct &&
+        activeProduct.type === 'observability' &&
+        activeProduct.tier !== observabilityTier.toLowerCase()
       ) {
         return false;
       }

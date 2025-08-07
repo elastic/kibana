@@ -27,6 +27,7 @@ import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/gener
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
 import { ESQLLicenseType } from '@kbn/esql-types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -140,7 +141,7 @@ export function getFunctionSignaturesByReturnType(
   option?: string,
   hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
     license === 'platinum',
-  activeProduct = { type: 'observability', tier: 'complete' }
+  activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -185,10 +186,12 @@ export function getFunctionSignaturesByReturnType(
           }
         }
 
-        const hasObservabilityAccess =
-          !license ||
-          (activeProduct?.type === 'observability' &&
-            activeProduct?.tier === observabilityTier?.toLocaleLowerCase());
+        const hasObservabilityAccess = !(
+          observabilityTier &&
+          activeProduct &&
+          activeProduct.type === 'observability' &&
+          activeProduct.tier !== observabilityTier.toLowerCase()
+        );
 
         if (!hasObservabilityAccess) {
           return false;
@@ -287,7 +290,7 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>,
   customLicenseType = 'platinum',
-  customActiveProduct = { type: 'observability', tier: 'complete' } as const
+  customActiveProduct?: PricingProduct
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||

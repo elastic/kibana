@@ -90,8 +90,9 @@ export async function suggest(
         // Check observability tier requirements
         const hasObservabilityAccess =
           !observabilityTier ||
-          (activeProduct?.type === 'observability' &&
-            activeProduct?.tier === observabilityTier.toLocaleLowerCase());
+          !activeProduct ||
+          activeProduct.type !== 'observability' ||
+          activeProduct.tier === observabilityTier.toLocaleLowerCase();
 
         return hasLicenseAccess && hasObservabilityAccess;
       })
