@@ -22,11 +22,17 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';
-import type { MigrationType, SiemMigrationAllDataStats, SiemMigrationDataStats } from './types';
+import type {
+  MigrationType,
+  SiemMigrationAllDataStats,
+  SiemMigrationDataStats,
+  SiemMigrationFilters,
+} from './types';
+import { dsl } from './dsl_queries';
 
 export type CreateMigrationItemInput<I extends ItemDocument> = Omit<
   I,
-  '@timestamp' | 'id' | 'status' | 'created_by'
+  '@timestamp' | 'id' | 'status' | 'created_by' | 'updated_by' | 'updated_at'
 >;
 
 export interface SiemMigrationItemSort {
@@ -332,10 +338,38 @@ export abstract class SiemMigrationsDataItemClient<
     };
   }
 
-  protected abstract getFilterQuery<F extends object = object>(
+  protected getFilterQuery(
     migrationId: string,
-    filters?: F
-  ): QueryDslQueryContainer;
+    filters: SiemMigrationFilters = {}
+  ): { bool: { filter: QueryDslQueryContainer[] } } {
+    const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
+
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        filter.push({ terms: { status: filters.status } });
+      } else {
+        filter.push({ term: { status: filters.status } });
+      }
+    }
+    if (filters.ids) {
+      filter.push({ terms: { _id: filters.ids } });
+    }
+    if (filters.failed != null) {
+      filter.push(filters.failed ? dsl.isFailed() : dsl.isNotFailed());
+    }
+    if (filters.fullyTranslated != null) {
+      filter.push(filters.fullyTranslated ? dsl.isFullyTranslated() : dsl.isNotFullyTranslated());
+    }
+    if (filters.partiallyTranslated != null) {
+      filter.push(
+        filters.partiallyTranslated ? dsl.isPartiallyTranslated() : dsl.isNotPartiallyTranslated()
+      );
+    }
+    if (filters.untranslatable != null) {
+      filter.push(filters.untranslatable ? dsl.isUntranslatable() : dsl.isNotUntranslatable());
+    }
+    return { bool: { filter } };
+  }
 
   protected abstract getSortOptions(sort?: SiemMigrationItemSort): estypes.Sort;
 }

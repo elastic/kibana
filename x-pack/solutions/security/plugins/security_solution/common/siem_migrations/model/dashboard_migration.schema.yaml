@@ -95,7 +95,6 @@ components:
         - title
         - description
         - data
-        - last_updated
         - format
       description: The raw dashboard object from different vendors
       properties:

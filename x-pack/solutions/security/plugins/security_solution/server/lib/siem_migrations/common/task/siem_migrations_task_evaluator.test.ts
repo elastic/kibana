@@ -6,12 +6,13 @@
  */
 
 import type { CustomEvaluator } from './siem_migrations_task_evaluator';
-import { RuleMigrationTaskEvaluator } from './siem_migrations_task_evaluator';
+import { SiemMigrationTaskEvaluable } from './siem_migrations_task_evaluator';
 import type { Run, Example } from 'langsmith/schemas';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { SiemMigrationsClientDependencies } from '../../common/types';
+import type { SiemMigrationsClientDependencies } from '../types';
+import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 
 // Mock dependencies
 jest.mock('langsmith/evaluation', () => ({
@@ -28,8 +29,17 @@ jest.mock('langsmith', () => ({
   })),
 }));
 
-describe('RuleMigrationTaskEvaluator', () => {
-  let taskEvaluator: RuleMigrationTaskEvaluator;
+// Create generic task evaluator class using the generic task runner
+class SiemMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(SiemMigrationTaskRunner) {
+  protected evaluators: Record<string, CustomEvaluator> = {
+    custom_query_accuracy: () => {
+      return { score: 50, comment: 'this is a mock evaluation' };
+    },
+  };
+}
+
+describe('SiemMigrationTaskEvaluator', () => {
+  let taskEvaluator: SiemMigrationTaskEvaluator;
   let mockRuleMigrationsDataClient: ReturnType<typeof createRuleMigrationsDataClientMock>;
   let abortController: AbortController;
 
@@ -50,7 +60,7 @@ describe('RuleMigrationTaskEvaluator', () => {
     mockRuleMigrationsDataClient = createRuleMigrationsDataClientMock();
     abortController = new AbortController();
 
-    taskEvaluator = new RuleMigrationTaskEvaluator(
+    taskEvaluator = new SiemMigrationTaskEvaluator(
       'test-migration-id',
       mockUser,
       abortController,
@@ -68,7 +78,7 @@ describe('RuleMigrationTaskEvaluator', () => {
     let evaluator: CustomEvaluator;
     // Helper to access private evaluator methods
     const setEvaluator = (name: string) => {
-      // @ts-expect-error (accessing private property)
+      // @ts-expect-error accessing protected property
       evaluator = taskEvaluator.evaluators[name];
     };
 
