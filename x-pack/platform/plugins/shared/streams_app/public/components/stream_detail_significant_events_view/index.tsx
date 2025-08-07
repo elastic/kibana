@@ -212,18 +212,34 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
               <StreamsAppSearchBar showQueryInput={false} showDatePicker />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={() => {
-                  setIsEditFlyoutOpen(true);
-                  setQueryToEdit(undefined);
-                }}
-                iconType="plus"
-              >
-                {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
-                  defaultMessage: 'Significant events',
-                })}
-              </EuiButton>
+              <EuiFlexGroup direction="row" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={() => {
+                      setIsIdentifySystemFlyoutOpen(true);
+                    }}
+                    iconType="sparkles"
+                  >
+                    {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
+                      defaultMessage: 'Identify system',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color="primary"
+                    onClick={() => {
+                      setIsEditFlyoutOpen(true);
+                      setQueryToEdit(undefined);
+                    }}
+                    iconType="plus"
+                  >
+                    {i18n.translate('xpack.streams.significantEvents.addSignificantEventButton', {
+                      defaultMessage: 'Significant events',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
