@@ -52,6 +52,78 @@ interface UseAwsCredentialsFormProps {
   isValid: boolean;
 }
 
+const getAwsCloudFormationTemplate = (newPolicy: NewPackagePolicy, awsPolicyType?: string) => {
+  if (!newPolicy?.inputs) {
+    return undefined;
+  }
+  if (!awsPolicyType) {
+    return undefined;
+  }
+  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === awsPolicyType)
+    ?.config?.cloud_formation_template_url?.value;
+
+  return template || undefined;
+};
+
+const updateCloudFormationPolicyTemplate = (
+  newPolicy: NewPackagePolicy,
+  updatePolicy: UpdatePolicy,
+  templateUrl: string | undefined,
+  awsPolicyType?: string
+) => {
+  if (!awsPolicyType) {
+    return;
+  }
+
+  updatePolicy?.({
+    updatedPolicy: {
+      ...newPolicy,
+      inputs: newPolicy.inputs.map((input) => {
+        if (input.type === awsPolicyType) {
+          return {
+            ...input,
+            config: { cloud_formation_template_url: { value: templateUrl } },
+          };
+        }
+        return input;
+      }),
+    },
+  });
+};
+
+const useCloudFormationTemplate = ({
+  packageInfo,
+  newPolicy,
+  updatePolicy,
+  setupFormat,
+  awsPolicyType,
+  templateName,
+}: {
+  packageInfo: PackageInfo;
+  newPolicy: NewPackagePolicy;
+  updatePolicy: UpdatePolicy;
+  setupFormat: AwsSetupFormat;
+  awsPolicyType?: string;
+  templateName: string;
+}) => {
+  const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy, awsPolicyType);
+
+  if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
+    if (policyInputCloudFormationTemplate) {
+      updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined, awsPolicyType);
+    }
+    return;
+  }
+  const templateUrl = getCloudFormationDefaultValue(packageInfo, templateName);
+
+  // If the template is not available, do not update the policy
+  if (templateUrl === '') return;
+
+  // If the template is already set, do not update the policy
+  if (policyInputCloudFormationTemplate === templateUrl) return;
+  updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl, awsPolicyType);
+};
+
 export const useAwsCredentialsForm = ({
   newPolicy,
   input,
@@ -152,76 +224,4 @@ export const useAwsCredentialsForm = ({
     hasCloudFormationTemplate,
     onSetupFormatChange,
   };
-};
-
-const getAwsCloudFormationTemplate = (newPolicy: NewPackagePolicy, awsPolicyType?: string) => {
-  if (!newPolicy?.inputs) {
-    return undefined;
-  }
-  if (!awsPolicyType) {
-    return undefined;
-  }
-  const template: string | undefined = newPolicy?.inputs?.find((i) => i.type === awsPolicyType)
-    ?.config?.cloud_formation_template_url?.value;
-
-  return template || undefined;
-};
-
-const updateCloudFormationPolicyTemplate = (
-  newPolicy: NewPackagePolicy,
-  updatePolicy: UpdatePolicy,
-  templateUrl: string | undefined,
-  awsPolicyType?: string
-) => {
-  if (!awsPolicyType) {
-    return;
-  }
-
-  updatePolicy?.({
-    updatedPolicy: {
-      ...newPolicy,
-      inputs: newPolicy.inputs.map((input) => {
-        if (input.type === awsPolicyType) {
-          return {
-            ...input,
-            config: { cloud_formation_template_url: { value: templateUrl } },
-          };
-        }
-        return input;
-      }),
-    },
-  });
-};
-
-const useCloudFormationTemplate = ({
-  packageInfo,
-  newPolicy,
-  updatePolicy,
-  setupFormat,
-  awsPolicyType,
-  templateName,
-}: {
-  packageInfo: PackageInfo;
-  newPolicy: NewPackagePolicy;
-  updatePolicy: UpdatePolicy;
-  setupFormat: AwsSetupFormat;
-  awsPolicyType?: string;
-  templateName: string;
-}) => {
-  const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy, awsPolicyType);
-
-  if (setupFormat === AWS_SETUP_FORMAT.MANUAL) {
-    if (policyInputCloudFormationTemplate) {
-      updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, undefined, awsPolicyType);
-    }
-    return;
-  }
-  const templateUrl = getCloudFormationDefaultValue(packageInfo, templateName);
-
-  // If the template is not available, do not update the policy
-  if (templateUrl === '') return;
-
-  // If the template is already set, do not update the policy
-  if (policyInputCloudFormationTemplate === templateUrl) return;
-  updateCloudFormationPolicyTemplate(newPolicy, updatePolicy, templateUrl, awsPolicyType);
 };

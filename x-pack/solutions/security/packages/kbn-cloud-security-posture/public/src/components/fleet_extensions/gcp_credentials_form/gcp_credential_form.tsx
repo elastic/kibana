@@ -15,7 +15,7 @@ import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
 import {
   fieldIsInvalid,
   getCloudShellDefaultValue,

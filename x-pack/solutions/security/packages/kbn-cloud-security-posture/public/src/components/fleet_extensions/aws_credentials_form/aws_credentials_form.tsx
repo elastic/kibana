@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
 import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';

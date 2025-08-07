@@ -38,10 +38,6 @@ import type {
 } from '../../../common/types_old';
 import { CloudPostureIntegrations } from '../../common/constants';
 import eksLogo from '../../assets/icons/cis_eks_logo.svg';
-import googleCloudLogo from '../../assets/icons/google_cloud_logo.svg';
-
-// Posture policies only support the default namespace
-export const POSTURE_NAMESPACE = 'default';
 
 const cloudPostureIntegrations: CloudPostureIntegrations = {
   cspm: {
@@ -52,41 +48,6 @@ const cloudPostureIntegrations: CloudPostureIntegrations = {
     shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
       defaultMessage: 'CSPM',
     }),
-    options: [
-      {
-        type: CLOUDBEAT_AWS,
-        name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'AWS',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
-          defaultMessage: 'CIS AWS',
-        }),
-        icon: 'logoAWS',
-        testId: 'cisAwsTestId',
-      },
-      {
-        type: CLOUDBEAT_GCP,
-        name: i18n.translate('xpack.csp.cspmIntegration.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
-          defaultMessage: 'CIS GCP',
-        }),
-        icon: googleCloudLogo,
-        testId: 'cisGcpTestId',
-      },
-      {
-        type: CLOUDBEAT_AZURE,
-        name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
-          defaultMessage: 'CIS Azure',
-        }),
-        icon: 'logoAzure',
-        testId: 'cisAzureTestId',
-      },
-    ],
   },
   kspm: {
     policyTemplate: KSPM_POLICY_TEMPLATE,
@@ -295,7 +256,7 @@ export const hasErrors = (validationResults: PackagePolicyValidationResults | un
 };
 
 export const getPolicyTemplateInputOptions = (policyTemplate: CloudSecurityPolicyTemplate) =>
-  cloudPostureIntegrations[policyTemplate].options.map((o) => ({
+  cloudPostureIntegrations[policyTemplate].options?.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,
@@ -325,28 +286,4 @@ export const getMaxPackageName = (
 
 export const POLICY_TEMPLATE_FORM_DTS = {
   LOADER: 'policy-template-form-loader',
-};
-
-export const getCloudProviderFromCloudHost = (
-  cloudHost: string | undefined
-): string | undefined => {
-  if (!cloudHost) return undefined;
-  const match = cloudHost.match(/\b(aws|gcp|azure)\b/)?.[1];
-  return match;
-};
-
-export const getDeploymentIdFromUrl = (url: string | undefined): string | undefined => {
-  if (!url) return undefined;
-  const match = url.match(/\/deployments\/([^/?#]+)/);
-  return match?.[1];
-};
-
-export const getKibanaComponentId = (cloudId: string | undefined): string | undefined => {
-  if (!cloudId) return undefined;
-
-  const base64Part = cloudId.split(':')[1];
-  const decoded = atob(base64Part);
-  const [, , kibanaComponentId] = decoded.split('$');
-
-  return kibanaComponentId || undefined;
 };

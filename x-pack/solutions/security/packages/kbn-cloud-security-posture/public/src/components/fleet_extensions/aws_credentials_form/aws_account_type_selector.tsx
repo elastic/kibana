@@ -14,7 +14,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { updatePolicyWithInputs } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../csp_boxed_radio_group';
+import { CspRadioGroupProps, RadioGroup } from '../../csp_boxed_radio_group';
 import { AwsAccountType, UpdatePolicy } from '../types';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';

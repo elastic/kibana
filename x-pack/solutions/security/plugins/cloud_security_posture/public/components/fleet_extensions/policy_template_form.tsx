@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import semverGte from 'semver/functions/gte';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
@@ -70,6 +71,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     integrationToEnable,
     setIntegrationToEnable,
   }) => {
+    const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '2.0.0-preview01';
+    const showCloudConnectors = semverGte(packageInfo.version, CLOUD_CONNECTOR_VERSION_ENABLED_ESS);
     const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
       policyTemplate: CSPM_POLICY_TEMPLATE,
       defaultProvider: 'aws',
@@ -82,17 +85,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }),
       overviewPath: `https://ela.st/cspm-overview`,
       getStartedPath: `https://ela.st/cspm-get-started`,
+      showCloudConnectors,
       providers: {
         aws: {
           type: CLOUDBEAT_AWS,
-          showCloudConnectors: true,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.5.0-preview20',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started.html`,
         },
         gcp: {
           type: CLOUDBEAT_GCP,
-          showCloudConnectors: false,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.6.0',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-gcp.html`,
@@ -100,7 +102,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         },
         azure: {
           type: CLOUDBEAT_AZURE,
-          showCloudConnectors: false,
           showCloudTemplate: true, // this should be checking the package version and set in CSPM
           organizationMinimumVersion: '1.7.0',
           getStartedPath: `https://www.elastic.co/guide/en/security/current/cspm-get-started-azure.html`,
