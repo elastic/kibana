@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlyoutResizable, EuiFlyoutResizableProps, EuiLoadingElastic } from '@elastic/eui';
 import React, { Suspense, lazy, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { RuleFormProps } from '../src/rule_form';
@@ -22,9 +22,15 @@ const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy((
   import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
-const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
-  props: RuleFormProps<MetaData>
-) => {
+interface RuleFormFlyoutRendererProps<MetaData extends RuleTypeMetaData> {
+  ruleFormProps: RuleFormProps<MetaData>;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+}
+
+const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
+  ruleFormProps,
+  focusTrapProps,
+}: RuleFormFlyoutRendererProps<MetaData>) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
 
   const inLineContainerCss = css`
@@ -41,9 +47,9 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
     } else {
       // ONLY call props.onCancel directly from this level of the component hierarcht if onClickClose has not yet been initialized.
       // This will only occur if the user tries to close the flyout while the Suspense fallback is still visible
-      props.onCancel?.();
+      ruleFormProps.onCancel?.();
     }
-  }, [onClickClose, props]);
+  }, [onClickClose, ruleFormProps]);
   return (
     <EuiFlyoutResizable
       ownFocus
@@ -53,6 +59,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
       size={620}
       minWidth={500}
       hideCloseButton={hideCloseButton}
+      focusTrapProps={focusTrapProps}
     >
       <Suspense
         fallback={
@@ -61,18 +68,23 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
           </RuleFormErrorPromptWrapper>
         }
       >
-        <RuleForm {...props} isFlyout />
+        <RuleForm {...ruleFormProps} isFlyout />
       </Suspense>
     </EuiFlyoutResizable>
   );
 };
 
-export const RuleFormFlyout = <MetaData extends RuleTypeMetaData>(
-  props: RuleFormProps<MetaData>
-) => {
+interface RuleFormFlyoutProps<MetaData extends RuleTypeMetaData> extends RuleFormProps<MetaData> {
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
+}
+
+export const RuleFormFlyout = <MetaData extends RuleTypeMetaData>({
+  focusTrapProps,
+  ...ruleFormProps
+}: RuleFormFlyoutProps<MetaData>) => {
   return (
     <RuleFlyoutUIContextProvider>
-      <RuleFormFlyoutRenderer {...props} />
+      <RuleFormFlyoutRenderer ruleFormProps={ruleFormProps} focusTrapProps={focusTrapProps} />
     </RuleFlyoutUIContextProvider>
   );
 };
