@@ -40,8 +40,6 @@ export const logStateTransition = (
           return logger.warn(logPrefix + message);
         case 'info':
           return logger.info(logPrefix + message);
-        case 'debug':
-          return logger.debug(logPrefix + message);
         default:
           throw new Error(`unexpected log level ${level}`);
       }
@@ -49,18 +47,14 @@ export const logStateTransition = (
   }
 
   const logMessage = `${logPrefix}${prevState.controlState} -> ${currState.controlState}. took: ${tookMs}ms.`;
-  if (logger.isLevelEnabled('debug')) {
-    logger.debug<StateTransitionLogMeta>(logMessage, {
-      kibana: {
-        migrations: {
-          state: currState,
-          duration: tookMs,
-        },
+  logger.debug<StateTransitionLogMeta>(logMessage, {
+    kibana: {
+      migrations: {
+        state: currState,
+        duration: tookMs,
       },
-    });
-  } else {
-    logger.info(logMessage);
-  }
+    },
+  });
 };
 
 export const logActionResponse = (

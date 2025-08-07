@@ -14,7 +14,11 @@ import {
   getRequestDebugMeta,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
-import { logStateTransition, logActionResponse } from '../common/utils';
+import {
+  logStateTransition,
+  logActionResponse,
+  createControlStateTransitionTracker,
+} from '../common/utils';
 import { type Next, stateActionMachine } from '../state_action_machine';
 import { cleanup } from '../migrations_state_machine_cleanup';
 import type {
@@ -53,12 +57,14 @@ export async function migrationStateActionMachine({
   // indicate which messages come from which index upgrade.
   const logMessagePrefix = `[${context.indexPrefix}] `;
   let prevTimestamp = startTime;
-  let lastState: State | undefined;
+  const cstTracker = createControlStateTransitionTracker();
+  let lastState: State = initialState;
   try {
     const finalState = await stateActionMachine<State>(
       initialState,
       (state) => next(state),
       (state, res) => {
+        const previousState = lastState.controlState;
         lastState = state;
         logActionResponse(logger, logMessagePrefix, state, res);
         const newState = model(state, res, context);
@@ -76,13 +82,11 @@ export async function migrationStateActionMachine({
         };
 
         const now = Date.now();
-        logStateTransition(
-          logger,
-          logMessagePrefix,
-          state,
-          redactedNewState as State,
-          now - prevTimestamp
-        );
+        const tookMs = now - prevTimestamp;
+        logStateTransition(logger, logMessagePrefix, state, redactedNewState as State, tookMs);
+
+        cstTracker.observeTransition(previousState, newState.controlState, tookMs);
+
         prevTimestamp = now;
         return newState;
       }
@@ -112,6 +116,14 @@ export async function migrationStateActionMachine({
       throw new Error('Invalid terminating control state');
     }
   } catch (e) {
+    if (cstTracker.length) {
+      logger.error(
+        logMessagePrefix + `Failed with ${e} after transitioning through: ${cstTracker.pretty()}`
+      );
+    } else {
+      logger.error(logMessagePrefix + `Failed with ${e} at INIT`);
+    }
+
     try {
       await cleanup(context.elasticsearchClient, lastState);
     } catch (err) {

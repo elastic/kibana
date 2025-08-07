@@ -9,3 +9,4 @@
 
 export { logActionResponse, logStateTransition, type LogAwareState } from './logs';
 export { createDelayFn, type RetryableState } from './delay';
+export { createControlStateTransitionTracker } from './control_state_transition_tracker';
