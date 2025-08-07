@@ -21,6 +21,7 @@ import {
   createSlice,
   createListenerMiddleware,
   createAction,
+  isAnyOf,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
@@ -253,12 +254,9 @@ export const internalStateSlice = createSlice({
       }
     });
 
-    builder.addMatcher(
-      (action) => initializeTabs.fulfilled.match(action) || initializeTabs.rejected.match(action),
-      (state) => {
-        state.tabs.areInitializing = false;
-      }
-    );
+    builder.addMatcher(isAnyOf(initializeTabs.fulfilled, initializeTabs.rejected), (state) => {
+      state.tabs.areInitializing = false;
+    });
   },
 });
 
@@ -316,6 +314,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS
     ),
+  });
+
+  startListening({
+    predicate: (_, currentState, previousState) => {
+      return (
+        currentState.persistedDiscoverSession?.id !== previousState.persistedDiscoverSession?.id
+      );
+    },
+    effect: (_, listenerApi) => {
+      const { tabsStorageManager } = listenerApi.extra;
+      const { persistedDiscoverSession } = listenerApi.getState();
+      tabsStorageManager.updateDiscoverSessionIdLocally(persistedDiscoverSession?.id);
+    },
   });
 
   return listenerMiddleware.middleware;

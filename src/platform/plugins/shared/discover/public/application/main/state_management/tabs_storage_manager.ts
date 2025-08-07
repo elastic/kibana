@@ -37,7 +37,7 @@ type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
 interface TabsStateInLocalStorage {
   userId: string;
   spaceId: string;
-  persistedDiscoverSessionId: string | undefined;
+  discoverSessionId: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
@@ -45,7 +45,7 @@ interface TabsStateInLocalStorage {
 const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
   userId: '',
   spaceId: '',
-  persistedDiscoverSessionId: undefined,
+  discoverSessionId: undefined,
   openTabs: [],
   closedTabs: [],
 };
@@ -74,6 +74,7 @@ export interface TabsStorageManager {
     tabId: string,
     tabState: Pick<TabStateInLocalStorage, 'internalState' | 'appState' | 'globalState'>
   ) => void;
+  updateDiscoverSessionIdLocally: (discoverSessionId: string | undefined) => void;
   loadLocally: (props: {
     userId: string;
     spaceId: string;
@@ -96,10 +97,11 @@ export const createTabsStorageManager = ({
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
-  const sessionInfo: Pick<
-    TabsStateInLocalStorage,
-    'userId' | 'spaceId' | 'persistedDiscoverSessionId'
-  > = { userId: '', spaceId: '', persistedDiscoverSessionId: undefined };
+  const sessionInfo: Pick<TabsStateInLocalStorage, 'userId' | 'spaceId' | 'discoverSessionId'> = {
+    userId: '',
+    spaceId: '',
+    discoverSessionId: undefined,
+  };
 
   const startUrlSync: TabsStorageManager['startUrlSync'] = ({
     onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
@@ -220,7 +222,7 @@ export const createTabsStorageManager = ({
     return {
       userId: storedTabsState?.userId || '',
       spaceId: storedTabsState?.spaceId || '',
-      persistedDiscoverSessionId: storedTabsState?.persistedDiscoverSessionId || undefined,
+      discoverSessionId: storedTabsState?.discoverSessionId || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
     };
@@ -295,7 +297,7 @@ export const createTabsStorageManager = ({
     const nextTabsInStorage: TabsStateInLocalStorage = {
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
-      persistedDiscoverSessionId: sessionInfo.persistedDiscoverSessionId,
+      discoverSessionId: sessionInfo.discoverSessionId,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -333,6 +335,24 @@ export const createTabsStorageManager = ({
     }
   };
 
+  const updateDiscoverSessionIdLocally: TabsStorageManager['updateDiscoverSessionIdLocally'] = (
+    discoverSessionId
+  ) => {
+    if (!enabled) {
+      return;
+    }
+
+    sessionInfo.discoverSessionId = discoverSessionId;
+
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      discoverSessionId,
+    };
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, updatedTabsState);
+  };
+
   const loadLocally: TabsStorageManager['loadLocally'] = ({
     userId,
     spaceId,
@@ -355,13 +375,13 @@ export const createTabsStorageManager = ({
 
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
-    sessionInfo.persistedDiscoverSessionId = persistedDiscoverSession?.id;
+    sessionInfo.discoverSessionId = persistedDiscoverSession?.id;
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
       fromSavedObjectTabToTabState({ tab })
     );
     const openTabs =
-      persistedDiscoverSession?.id === storedTabsState.persistedDiscoverSessionId
+      persistedDiscoverSession?.id === storedTabsState.discoverSessionId
         ? storedTabsState.openTabs.map((tab) => toTabState(tab, defaultTabState))
         : persistedTabs ?? [];
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
@@ -413,6 +433,7 @@ export const createTabsStorageManager = ({
     startUrlSync,
     persistLocally,
     updateTabStateLocally,
+    updateDiscoverSessionIdLocally,
     loadLocally,
     getNRecentlyClosedTabs,
   };
