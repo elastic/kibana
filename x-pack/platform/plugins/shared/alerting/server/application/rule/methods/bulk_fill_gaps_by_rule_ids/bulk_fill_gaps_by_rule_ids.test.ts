@@ -219,7 +219,6 @@ describe('validation', () => {
     ).rejects.toThrow();
   });
   it('should throw an error if the end date is not strictly greater than the start date', async () => {
-    const now = new Date();
     await expect(
       getCallBulkFillGaps({
         start: now.toISOString(),
