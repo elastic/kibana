@@ -401,12 +401,12 @@ export const mockConfig: CloudSetupConfig = {
   shortName: 'Test',
   overviewPath: '/overview',
   getStartedPath: '/get-started',
+  showCloudConnectors: true,
   providers: {
     aws: {
       type: 'aws-input-type',
       organizationMinimumVersion: '1.0.0',
       getStartedPath: '/aws/start',
-      showCloudConnectors: true,
       showCloudTemplate: true,
     },
     gcp: {
@@ -414,14 +414,12 @@ export const mockConfig: CloudSetupConfig = {
       minShowVersion: '2.0.0',
       organizationMinimumVersion: '2.1.0',
       getStartedPath: '/gcp/start',
-      showCloudConnectors: false,
       showCloudTemplate: true,
     },
     azure: {
       type: 'azure-input-type',
       organizationMinimumVersion: '3.0.0',
       getStartedPath: '/azure/start',
-      showCloudConnectors: true,
       showCloudTemplate: false,
     },
   },
