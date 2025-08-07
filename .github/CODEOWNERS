@@ -46,7 +46,6 @@ examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
 examples/workflows @elastic/workflows-eng
 packages/kbn-babel-preset @elastic/kibana-operations
-packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -396,6 +395,7 @@ src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @el
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
+src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
 src/platform/packages/shared/cloud @elastic/kibana-core
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
@@ -1070,6 +1070,7 @@ x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/w
 x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
@@ -1707,7 +1708,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /src/platform/test/functional/services/dashboard/  @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/canvas/ @elastic/kibana-presentation
-/x-pack/test_serverless/functional/test_suites/search/dashboards/ @elastic/kibana-presentation
+/x-pack/solutions/search/test/serverless/functional/test_suites/dashboards/ @elastic/kibana-presentation
 /src/platform/test/plugin_functional/test_suites/panel_actions @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/canvas/logstash_lens @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
@@ -1779,12 +1780,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/cli_keystore/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
-/.bazelignore @elastic/kibana-operations
-/.bazeliskversion @elastic/kibana-operations
-/.bazelrc @elastic/kibana-operations
-/.bazelrc.common @elastic/kibana-operations
-/.bazelversion @elastic/kibana-operations
-/WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
 /.buildkite/scripts/steps/esql_generate_function_metadata.sh @elastic/kibana-esql
@@ -2264,12 +2259,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/solutions/observability/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/solutions/security/test/api_integration/apis/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/observability/cases @elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/solutions/search/test/serverless/functional/test_suites/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/functional/test_suites/security/ftr/cases/ @elastic/kibana-cases
-/x-pack/test_serverless/api_integration/test_suites/search/cases/ @elastic/kibana-cases
+/x-pack/solutions/search/test/serverless/api_integration/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/api_integration/test_suites/observability/cases/ @elastic/kibana-cases
 /x-pack/test_serverless/api_integration/test_suites/security/cases/ @elastic/kibana-cases
-/x-pack/test_serverless/functional/test_suites/search/screenshot_creation/response_ops_docs @elastic/response-ops
+/x-pack/solutions/search/test/serverless/functional/test_suites/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/security/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/test_serverless/functional/test_suites/observability/screenshot_creation/response_ops_docs @elastic/response-ops
 /x-pack/platform/test/serverless/api_integration/test_suites/alerting/ @elastic/response-ops
@@ -2283,6 +2278,8 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users @elastic/kibana-cases
+/x-pack/test_serverless/functional/test_suites/search/rules/ @elastic/response-ops
+
 
 # Enterprise Search
 # search
@@ -2302,11 +2299,11 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /x-pack/test/functional_enterprise_search/ @elastic/search-kibana
 /x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
-/x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/search/config.ts @elastic/search-kibana  @elastic/appex-qa
+/x-pack/solutions/search/test/serverless/api_integration/serverless_search @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/functional/test_suites/ @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/functional/configs/config.ts @elastic/search-kibana  @elastic/appex-qa
 /x-pack/platform/test/api_integration/apis/management/index_management/inference_endpoints.ts @elastic/search-kibana
-/x-pack/test_serverless/api_integration/test_suites/search @elastic/search-kibana
+/x-pack/solutions/search/test/serverless/api_integration @elastic/search-kibana
 /x-pack/platform/test/serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/solutions/search/test/functional_search/ @elastic/search-kibana
@@ -2314,9 +2311,9 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 
 # workchat
 /x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana @elastic/workchat-eng
-/x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/solutions/chat/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/solutions/chat/test/serverless/functional/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
 
 
