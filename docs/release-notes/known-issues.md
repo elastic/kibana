@@ -14,7 +14,7 @@ Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
 **Details**
 
-Starting in  9.0.0, the default value of `server.protocol` is `http2`.  PDF and PNG reports will fail when this setting is used in 9.0.3, 9.0.4, 9.1.0 and when a maintenance window is active.
+If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
 
 **Action**
 
@@ -28,7 +28,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`.  PDF and PNG reports will fail when this setting is used in 9.0.3, 9.0.4, 9.1.0 and when a maintenance window is active.
 
 **Action**
 
