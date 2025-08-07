@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-export * from './cloud';
-export * from './container';
-export * from './event_outcome';
-export * from './faas';
-export * from './host';
-export * from './http';
-export * from './kubernetes';
-export * from './observer';
-export * from './page';
-export * from './process';
-export * from './service';
-export * from './span_links';
-export * from './stackframe';
-export * from './timestamp_us';
-export * from './url';
-export * from './user_agent';
-export * from './user';
-export * from './otel';
+export type * from './cloud';
+export type * from './container';
+export type * from './event_outcome';
+export type * from './faas';
+export type * from './host';
+export type * from './http';
+export type * from './kubernetes';
+export type * from './observer';
+export type * from './page';
+export type * from './process';
+export type * from './service';
+export type * from './span_links';
+export type * from './stackframe';
+export type * from './timestamp_us';
+export type * from './url';
+export type * from './user_agent';
+export type * from './user';
+export type * from './otel';
