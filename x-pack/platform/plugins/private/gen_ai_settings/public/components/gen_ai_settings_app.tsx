@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiButton,
   useEuiTheme,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,11 +36,51 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks } = services;
+  console.log('services', services);
+  const { application, http, docLinks, uiSettings, notifications } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
 
   const canManageSpaces = application.capabilities.management.kibana.spaces;
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [defaultGenAiConnector, setDefaultGenAiConnector] = useState('gpt-4o-mini');
+
+  useEffect(
+    function fetchDefaultConnectorId() {
+      let unmounted = false;
+      async function getConnectorId() {
+        const defaultConnectorId = await uiSettings.get('genAI:defaultConnectorId');
+        console.log('defaultConnectorId', defaultConnectorId);
+        if (!unmounted) {
+          setDefaultGenAiConnector(defaultConnectorId);
+        }
+      }
+      getConnectorId();
+      return () => {
+        unmounted = true;
+      };
+    },
+    [uiSettings]
+  );
+
+  const updateDefaultConnectorIdUiSetting = useCallback(
+    async (id: string) => {
+      setIsSaving(true);
+      try {
+        const result = await uiSettings.set('genAI:defaultConnectorId', id);
+        notifications.toasts.addSuccess(
+          i18n.translate('genAiSettings.defaultConnectorIdSaved', {
+            defaultMessage: 'Default Connector ID for Gen AI features updated',
+          })
+        );
+      } catch (error) {
+        notifications.toasts.addError(error);
+      }
+      setIsSaving(false);
+    },
+    [uiSettings]
+  );
 
   useEffect(() => {
     const breadcrumbs = [
@@ -171,6 +212,57 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       id="genAiSettings.goToConnectorsButtonLabel"
                       defaultMessage="Manage connectors"
                     />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+
+          <EuiDescribedFormGroup
+            data-test-subj="connectorsSection"
+            fullWidth
+            title={
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="sparkles" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3 data-test-subj="connectorsTitle">
+                      <FormattedMessage
+                        id="genAiSettings.aiConnectorLabel"
+                        defaultMessage="Default Gen AI Connector"
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            description={
+              <p>
+                <FormattedMessage
+                  id="genAiSettings.aiConnectorDescriptionWithLink"
+                  defaultMessage={`Set the default Gen AI Connector to use for any Gen AI features within Kibana, outside of the AI Assistant.`}
+                />
+              </p>
+            }
+          >
+            <EuiFormRow fullWidth>
+              <EuiFlexGroup gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiFieldText
+                    placeholder="Set a connector ID"
+                    value={defaultGenAiConnector}
+                    onChange={(e) => setDefaultGenAiConnector(e.target.value)}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    isLoading={isSaving}
+                    onClick={() => updateDefaultConnectorIdUiSetting(defaultGenAiConnector)}
+                    disabled={isSaving}
+                  >
+                    <FormattedMessage id="genAiSettings.saveButtonLabel" defaultMessage="Save" />
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

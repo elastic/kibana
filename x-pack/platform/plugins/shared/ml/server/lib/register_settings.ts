@@ -56,8 +56,8 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
       name: i18n.translate('xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeName', {
         defaultMessage: 'Set default genai connector',
       }),
-      type: 'json',
-      value: JSON.stringify('gpt-4o-mini', null, 2),
+      type: 'string',
+      value: 'gpt-4o-mini',
       description: i18n.translate(
         'xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeDesc',
         {

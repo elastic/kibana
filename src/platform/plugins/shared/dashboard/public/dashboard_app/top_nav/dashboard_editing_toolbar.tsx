@@ -21,7 +21,7 @@ import { ControlsToolbarButton } from './controls_toolbar_button';
 import { AddPanelButton } from './add_panel_button/components/add_panel_button';
 import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
 import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
-import { createLensWithAI } from '../hooks/use_observability_ai_assistant_context';
+import { createLensWithAI } from '../poc_add_lens/create_lens_with_ai';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
