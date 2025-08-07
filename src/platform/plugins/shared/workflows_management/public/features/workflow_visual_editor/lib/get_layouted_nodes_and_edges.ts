@@ -29,8 +29,8 @@ function getTriggerLabel(triggerType: string) {
 }
 
 export function transformYamlToNodesAndEdges(
-  triggers: WorkflowYaml['workflow']['triggers'],
-  steps: WorkflowYaml['workflow']['steps']
+  triggers: WorkflowYaml['triggers'],
+  steps: WorkflowYaml['steps']
 ) {
   const nodes: any[] = [];
   const edges: any[] = [];
@@ -219,8 +219,8 @@ export function transformYamlToNodesAndEdges(
 
 export function getLayoutedNodesAndEdges(workflowDefinition: WorkflowYaml) {
   const { nodes, edges } = transformYamlToNodesAndEdges(
-    workflowDefinition.workflow?.triggers ?? [],
-    workflowDefinition.workflow?.steps ?? []
+    workflowDefinition?.triggers ?? [],
+    workflowDefinition?.steps ?? []
   );
 
   const dagreGraph = new graphlib.Graph();
