@@ -47,6 +47,8 @@ export const uploadAllEventsFromPath = async (
 ) => {
   // Validate CLI options
   if (!fs.existsSync(eventLogPath)) {
+    // there are situations where the event log path doesn't exist because the FTR test run failed
+    // logging a warning instead of throwing an error results in easier-to-debug CI logs
     options.log.warning(
       `⚠️ The provided event log path '${eventLogPath}' does not exist. Won't upload any events.`
     );
