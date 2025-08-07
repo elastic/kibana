@@ -1070,6 +1070,7 @@ x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana @elastic/w
 x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana @elastic/workchat-eng
 x-pack/solutions/chat/plugins/workchat-framework @elastic/search-kibana @elastic/workchat-eng
+x-pack/solutions/chat/test @elastic/workchat-eng
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
@@ -2315,9 +2316,9 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 
 # workchat
 /x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana @elastic/workchat-eng
-/x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/solutions/chat/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
-/x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/solutions/chat/test/serverless/functional/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
 
 
