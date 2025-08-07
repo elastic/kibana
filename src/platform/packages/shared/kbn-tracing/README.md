@@ -49,6 +49,6 @@ See those types for a full list of allowed fields.
    - creates a `NodeTracerProvider` with resource attributes derived from the Elastic APM config,
    - for each entry under `telemetry.tracing.exporters` instantiates the corresponding span processor from `@kbn/inference-tracing` and registers it.
 
-After this, any code using the helpers from `@kbn/inference-tracing` (`withInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse.
+After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse.
 
 No additional application code is needed—configuration alone enables exporting.

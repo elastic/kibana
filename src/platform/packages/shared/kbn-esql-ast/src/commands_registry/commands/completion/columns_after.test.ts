@@ -25,7 +25,7 @@ describe('COMPLETION', () => {
     ] as ESQLFieldWithMetadata[];
 
     const result = columnsAfter(
-      synth.cmd`COMPLETION "prompt" WITH inferenceId`,
+      synth.cmd`COMPLETION "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandFields,
       context
     );
@@ -44,7 +44,7 @@ describe('COMPLETION', () => {
     ] as ESQLFieldWithMetadata[];
 
     const result = columnsAfter(
-      synth.cmd`COMPLETION customField = "prompt" WITH inferenceId`,
+      synth.cmd`COMPLETION customField = "prompt" WITH {"inference_id": "my-inference-id"}`,
       previousCommandFields,
       context
     );
