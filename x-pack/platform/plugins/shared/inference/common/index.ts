@@ -15,6 +15,3 @@ export type {
 } from './http_apis';
 
 export { createRestClient } from './rest/create_client';
-
-export { getDefaultConnector } from './utils/get_default_connector';
-export { getConnectorList } from './utils/get_connector_list';
