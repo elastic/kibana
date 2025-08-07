@@ -58,7 +58,11 @@ function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
     return true;
   }
 
-  return contextValue === convertLiteralToValue(rightLiteral, typeof contextValue as any);
+  try {
+    return contextValue === convertLiteralToValue(rightLiteral, typeof contextValue as any);
+  } catch (error) {
+    return false;
+  }
 }
 
 function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>): boolean {
@@ -74,7 +78,13 @@ function visitRange(functionNode: KqlFunctionNode, context: Record<string, any>)
     return false; // Path does not exist in context
   }
 
-  const rightRangeValue = convertLiteralToValue(rightRangeLiteral, typeof leftRangeValue as any);
+  let rightRangeValue;
+
+  try {
+    rightRangeValue = convertLiteralToValue(rightRangeLiteral, typeof leftRangeValue as any);
+  } catch (error) {
+    return false;
+  }
 
   switch (operator) {
     case 'gte':

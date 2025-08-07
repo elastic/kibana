@@ -11,10 +11,15 @@ import { evaluateKql } from '../eval_kql';
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {
-    expect(() => evaluateKql('invalid kql', {})).toThrowError();
+    expect(() => evaluateKql('invalid "kql', {})).toThrowError();
   });
 
-  describe('simple expressions', () => {
+  describe('"is" expressions', () => {
+    it('should return false when field refers to object in property', () => {
+      const kql = 'user: "John Doe"';
+      expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
+    });
+
     it('should correctly evaluate a simple "is" KQL expression', () => {
       const kql = 'status: active';
       expect(evaluateKql(kql, { status: 'active' })).toBe(true);
@@ -66,6 +71,11 @@ describe('evaluateKql', () => {
         expect(evaluateKql(kql, { matchesCount: 999 })).toBe(true);
         expect(evaluateKql(kql, { matchesCount: 1000 })).toBe(false);
         expect(evaluateKql(kql, { matchesCount: 1001 })).toBe(false);
+      });
+
+      it('should return false when field refers to object in property', () => {
+        const kql = 'user < 90';
+        expect(evaluateKql(kql, { user: { name: 'Jane Doe' } })).toBe(false);
       });
     });
 
