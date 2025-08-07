@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.settings.navigateTo();
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/discover'
       );
       await security.testUser.restoreDefaults();
     });
