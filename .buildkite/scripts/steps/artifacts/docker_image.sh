@@ -29,7 +29,7 @@ export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
 export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
-retag_image_by_architecture() {
+retag_image_with_architecture() {
   local image="$1"
   local artifact="$2"
 
@@ -76,11 +76,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  retag_image_by_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_CHAT_IMAGE" "kibana-serverless-chat-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
-  retag_image_by_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_CHAT_IMAGE" "kibana-serverless-chat-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
