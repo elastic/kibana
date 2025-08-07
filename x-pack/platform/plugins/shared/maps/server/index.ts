@@ -10,10 +10,10 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
 export type {
-  AggDescriptor,
   CountAggDescriptor,
   FieldedAggDescriptor,
   PercentileAggDescriptor,
+  AggDescriptor,
   AbstractESAggSourceDescriptor,
   AbstractESJoinSourceDescriptor,
   AbstractESSourceDescriptor,
@@ -27,6 +27,7 @@ export type {
   ESTermSourceDescriptor,
   KibanaTilemapSourceDescriptor,
 } from './content_management';
+export { MapsStorage } from './content_management';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
