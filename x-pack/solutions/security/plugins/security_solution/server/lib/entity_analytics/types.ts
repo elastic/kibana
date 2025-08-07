@@ -18,7 +18,6 @@ import type { ConfigType } from '../../config';
 import type { StartPlugins } from '../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../types';
 export type EntityAnalyticsConfig = ConfigType['entityAnalytics'];
-export type MonitoringSyncIntervalConfig = ConfigType['entityAnalytics']['monitoring'];
 export interface EntityAnalyticsRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;

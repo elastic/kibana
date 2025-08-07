@@ -154,7 +154,6 @@ export class PrivilegeMonitoringDataClient {
         logger: this.opts.logger,
         namespace: this.opts.namespace,
         taskManager: this.opts.taskManager,
-        interval: this.opts.config?.privileges.developer.syncInterval,
       });
 
       const setupEndTime = moment().utc().toISOString();

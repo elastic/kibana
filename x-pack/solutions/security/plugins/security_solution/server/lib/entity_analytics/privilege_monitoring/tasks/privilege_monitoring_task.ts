@@ -27,7 +27,6 @@ import {
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
-import type { SyncIntervalConfig } from '../types';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -54,7 +53,6 @@ interface StartParams {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
-  interval?: SyncIntervalConfig;
 }
 
 const getTaskName = (): string => TYPE;
@@ -194,7 +192,6 @@ export const startPrivilegeMonitoringTask = async ({
   logger,
   namespace,
   taskManager,
-  interval = INTERVAL,
 }: StartParams) => {
   const taskId = getTaskId(namespace);
   try {
