@@ -1641,6 +1641,237 @@ describe('Fleet - validatePackagePolicyConfig', () => {
     });
   });
 
+  describe('Duration', () => {
+    it('should validate a valid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m45s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with milliseconds', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '2h15m30s500ms',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should validate a valid duration with a single unit', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '60s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid duration format', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: 'invalid',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid duration format. Expected format like "1h30m45s"');
+    });
+
+    it('should return error for duration with duplicate units', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m45s30s',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Each time unit can appear at most once in a duration');
+    });
+
+    it('should return error for duration with incorrect unit order', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '30m1h',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Time units must appear in descending order (h->m->s->ms)');
+    });
+
+    it('should validate duration with min_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration below min_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Duration is below the minimum allowed value of 1h');
+    });
+
+    it('should validate duration with max_duration constraint (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for duration above max_duration', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '3h',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Duration is above the maximum allowed value of 2h');
+    });
+
+    it('should validate duration with both min and max constraints (valid)', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: '1h',
+          max_duration: '2h',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toEqual(null);
+    });
+
+    it('should return error for invalid min_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          min_duration: 'invalid',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid min_duration specification');
+    });
+
+    it('should return error for invalid max_duration specification', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'duration',
+          value: '1h30m',
+        },
+        {
+          name: 'timeout',
+          type: 'duration',
+          max_duration: 'invalid',
+        },
+        'timeout',
+        load
+      );
+
+      expect(res).toContain('Invalid max_duration specification');
+    });
+  });
+
   describe('Dataset', () => {
     const datasetError = 'Dataset contains invalid characters';
 
