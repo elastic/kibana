@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
@@ -17,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Moment } from 'moment';
 import moment from 'moment';
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
