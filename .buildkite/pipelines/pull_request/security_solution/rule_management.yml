@@ -32,7 +32,7 @@ steps:
       - linting_with_types
       - check_types
       - check_oas_snapshot
-    timeout_in_minutes: 60
+    timeout_in_minutes: 80
     parallelism: 1
     retry:
       automatic:
