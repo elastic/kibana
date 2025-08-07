@@ -10,9 +10,11 @@ import {
   EuiFlexGroup,
   EuiLink,
   EuiLoadingSpinner,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql, Streams } from '@kbn/streams-schema';
@@ -20,8 +22,8 @@ import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
-import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from '../../common/use_ai_features';
+import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -37,6 +39,9 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
 
+  const toggleMethodSwitchId = useGeneratedHtmlId();
+
+  const [method, setMethod] = useState<'log_patterns' | 'zero_shot'>('log_patterns');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
@@ -99,7 +104,18 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
 
       {!aiFeatures.loading && aiFeatures.enabled && (
         <>
-          <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiSwitch
+              label={
+                method === 'log_patterns'
+                  ? 'Use log patterns'
+                  : 'Use zero shot based on identified system features'
+              }
+              checked={method === 'log_patterns'}
+              onChange={() => setMethod(method === 'log_patterns' ? 'zero_shot' : 'log_patterns')}
+              aria-describedby={toggleMethodSwitchId}
+              compressed
+            />
             <EuiButton
               isLoading={isGenerating}
               disabled={
@@ -115,7 +131,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                 setGeneratedQueries([]);
                 setSelectedQueries([]);
 
-                const generation$ = generate(aiFeatures?.selectedConnector!);
+                const generation$ = generate(aiFeatures?.selectedConnector!, method);
                 generation$.subscribe({
                   next: (result) => {
                     setGeneratedQueries((prev) => [

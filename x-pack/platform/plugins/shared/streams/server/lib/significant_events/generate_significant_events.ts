@@ -16,6 +16,7 @@ import { v4 } from 'uuid';
 import { verifyQueries } from './helpers/verify_queries';
 import INSTRUCTION from './prompts/generate_queries_instruction.text';
 import KQL_GUIDE from './prompts/kql_guide.text';
+import type { AssetClient } from '../streams/assets/asset_client';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 const DEFAULT_LONG_LOOKBACK = moment.duration(7, 'days');
@@ -32,6 +33,7 @@ interface Dependencies {
   inferenceClient: InferenceClient;
   esClient: TracedElasticsearchClient;
   logger: Logger;
+  assetClient: AssetClient;
 }
 
 export function generateSignificantEventDefinitions(
