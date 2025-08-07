@@ -22,7 +22,6 @@ export interface OverlayModalConfirmOptions {
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
-  'aria-labelledby'?: EuiConfirmModalProps['aria-labelledby'];
   /**
    * Sets the max-width of the modal.
    * Set to `true` to use the default (`euiBreakpoints 'm'`),
