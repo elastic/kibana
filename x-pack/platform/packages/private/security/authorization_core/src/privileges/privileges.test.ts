@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApiOperation } from '@kbn/core-security-server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { ApiOperation } from '@kbn/core-security-server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
