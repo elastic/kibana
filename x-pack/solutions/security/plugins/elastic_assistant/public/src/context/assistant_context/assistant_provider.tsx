@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   ClientMessage,
@@ -14,6 +14,7 @@ import {
 import type { IToasts } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import { DashboardApi, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { getComments } from '../../components/get_comments';
 import { useKibana } from '../typed_kibana_context/typed_kibana_context';
 import { useInferenceEnabled } from '../../hooks/inference_enabled/use_inference_enabled';
@@ -41,8 +42,9 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    data,
   } = useKibana().services;
-
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
@@ -97,6 +99,8 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     basePromptContexts: Object.values(promptContext),
     getComments: memoizedGetComments,
     http,
+    data,
+    dashboard,
     inferenceEnabled,
     navigateToApp,
     productDocBase,
@@ -119,6 +123,16 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
   }
 
   return (
-    <ElasticAssistantProvider value={assistantContextValue}>{children}</ElasticAssistantProvider>
+    <ElasticAssistantProvider value={assistantContextValue}>
+      <>
+        <DashboardRenderer
+          onApiAvailable={(api) => {
+            setDashboard(api);
+          }}
+          show={false}
+        />
+        {children}
+      </>
+    </ElasticAssistantProvider>
   );
 }

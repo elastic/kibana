@@ -1,5 +1,15 @@
-import { z } from 'zod';
-import { DashboardApi } from '../../dashboard_api/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+// EXAMPLE OF CLIENT-SIDE TOOL REGISTERED BY DASHBOARD PLUGIN
+
+import { z } from '@kbn/zod';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import {
   LensConfigBuilder,
@@ -19,6 +29,7 @@ import {
 import { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DashboardApi } from '../../dashboard_api/types';
 
 const chartTypes = [
   'bar',
@@ -101,7 +112,7 @@ const NO_ACTIONS = [];
 const executeAddToDashboard =
   (dependencies: { dashboardApi: DashboardApi | undefined }) =>
   async ({ args, signal }: { args: z.infer<typeof schema>; signal: AbortSignal }) => {
-    const { dashboardApi, dataService} = dependencies;
+    const { dashboardApi, dataService } = dependencies;
     const {
       title = '',
       type: chartType = 'xy',
@@ -286,12 +297,13 @@ const executeAddToDashboard =
       });
   };
 
-  interface AddToDashboardClientToolDependencies {
-    dashboardApi: DashboardApi | undefined;
-    dataService: DataPublicPluginStart;
-  }
+interface AddToDashboardClientToolDependencies {
+  dashboardApi: DashboardApi | undefined;
+  dataService: DataPublicPluginStart;
+}
 
-  export const addToDashboardTool: OneChatToolWithClientCallback<AddToDashboardClientToolDependencies> = {
+export const addToDashboardTool: OneChatToolWithClientCallback<AddToDashboardClientToolDependencies> =
+  {
     toolId: '.add_to_dashboard',
     name: 'add_to_dashboard',
     description:

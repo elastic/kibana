@@ -46,6 +46,7 @@ export function DashboardRenderer({
   showPlainSpinner,
   locator,
   onApiAvailable,
+  show = true,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -149,7 +150,7 @@ export function DashboardRenderer({
     );
   };
 
-  return (
+  return show ? (
     <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
       {dashboardViewport?.current && dashboardApi && (
         <ParentClassController
@@ -159,7 +160,7 @@ export function DashboardRenderer({
       )}
       {renderDashboardContents()}
     </div>
-  );
+  ) : null;
 }
 
 const styles = {

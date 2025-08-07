@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import { clientSideTools } from '@kbn/elastic-assistant/impl/assistant/registered_ai_client_tools';
+import { useAssistantContext } from '@kbn/elastic-assistant/impl/assistant_context';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface ClientSideToolCall {
@@ -75,12 +76,13 @@ export const useStream = ({
   http,
   connectorId,
 }: UseStreamProps): UseStream => {
+  const { dashboard, data } = useAssistantContext();
+
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [subscription, setSubscription] = useState<Subscription | undefined>();
   const [toolCallsSubscription, setToolCallsSubscription] = useState<Subscription | undefined>();
-  const [clientSideToolCalls, setClientSideToolCalls] = useState<ClientSideToolCall | undefined>();
   const [pendingToolCalls, setPendingToolCalls] = useState<ClientSideToolCall[]>([]);
   const [toolCallsToProcess, setToolCallsToProcess] = useState<ClientSideToolCall[]>([]);
 
@@ -91,7 +93,7 @@ export const useStream = ({
       // Find tools with postAction
       for (const toolCall of toolCallsToProcess) {
         const toolDetails = clientSideTools.find((tool) => tool.name === toolCall.name);
-        if (toolDetails) return;
+        if (!toolDetails) return;
 
         if (toolDetails.getPostToolClientActions) {
           const metadata = await fetchToolCallMetadata({
@@ -100,18 +102,23 @@ export const useStream = ({
             http,
           });
 
-          const args = metadata.result;
-          // const postToolClientActions = await toolDetails.getPostToolClientActions({dashboardApi: dashboard});
+          const inputFromLLM = metadata.result;
+          const postToolClientActions = await toolDetails.getPostToolClientActions({
+            dashboardApi: dashboard,
+            dataService: data,
+          });
 
-          // for (const action of postToolClientActions) {
-          //   await action({ args, signal: controller.signal });
-          // }
+          // @TODO: remove
+          console.log(`--@@postToolClientActions`, postToolClientActions);
+          for (const action of postToolClientActions) {
+            await action({ args: inputFromLLM, signal: controller.signal });
+          }
         }
       }
     }
 
     processToolCalls();
-  }, [toolCallsToProcess, connectorId, http]);
+  }, [toolCallsToProcess, connectorId, http, dashboard, data]);
 
   const observer$ = useMemo(
     () =>

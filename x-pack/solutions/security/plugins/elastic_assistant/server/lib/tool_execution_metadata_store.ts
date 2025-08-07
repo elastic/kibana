@@ -22,7 +22,7 @@ export class ToolExecutionMetadataStore {
   private readonly maxEntries: number;
   private readonly metadataCache: Map<string, ToolExecutionMetadata> = new Map();
 
-  constructor( maxEntries: number = 10) {
+  constructor(maxEntries: number = 10) {
     this.maxEntries = maxEntries;
   }
 
@@ -37,10 +37,9 @@ export class ToolExecutionMetadataStore {
         this.metadataCache.delete(oldestKey);
       }
 
-      //@TODO: remove
-      console.log(`--@@storeMetadata toolExecutionId`,metadata.toolExecutionId, "\n", JSON.stringify(metadata));
       this.metadataCache.set(metadata.toolExecutionId, metadata);
     } catch (error) {
+      console.log(`--@@storeMetadata error`, error);
     }
   }
 
@@ -50,14 +49,10 @@ export class ToolExecutionMetadataStore {
   public getMetadata(toolExecutionId: string): ToolExecutionMetadata | undefined {
     try {
       const metadata = this.metadataCache.get(toolExecutionId);
-      if (metadata) {
-        console.log(`--@@getMetadata toolExecutionId`, toolExecutionId, "\n", JSON.stringify(metadata));
-      } else {
-        console.log(`--@@getMetadata toolExecutionId`, toolExecutionId, "\n", JSON.stringify(metadata));
-      }
       return metadata;
     } catch (error) {
       console.log(`--@@getMetadata error`, error);
+      console.log(`--@@getMetadata toolExecutionId`, toolExecutionId);
       return undefined;
     }
   }

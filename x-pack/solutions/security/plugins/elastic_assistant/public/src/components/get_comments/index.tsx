@@ -14,9 +14,9 @@ import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
+import type { HttpSetup } from '@kbn/core/public';
 import { StreamComment } from './stream';
 import * as i18n from './translations';
-import type { HttpSetup } from '@kbn/core/public';
 
 // Matches EuiAvatar L
 const SpinnerWrapper = styled.div`
@@ -86,6 +86,7 @@ export const getComments: GetComments =
     contentReferencesVisible,
     http,
     connectorId,
+    dashboard,
   }) => {
     if (!currentConversation) return [];
 
@@ -251,6 +252,7 @@ export const getComments: GetComments =
               messageRole={message.role}
               http={http}
               connectorId={connectorId}
+              dashboard={dashboard}
             />
           ),
         };

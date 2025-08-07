@@ -18,3 +18,6 @@ const getToolDetailsForSecurityAssistant = (tool: Tool) => {
 export const clientSideToolsForSecurityAssistant = clientSideTools.map(
   getToolDetailsForSecurityAssistant
 );
+
+// @TODO: remove
+console.log(`--@@clientSideToolsForSecurityAssistant`, clientSideToolsForSecurityAssistant);
