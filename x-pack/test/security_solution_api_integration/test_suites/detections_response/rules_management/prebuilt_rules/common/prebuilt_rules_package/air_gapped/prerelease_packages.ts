@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
@@ -14,9 +15,15 @@ import {
   getPrebuiltRulesFleetPackage,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
-  installPrebuiltRulesPackageViaFleetAPI,
+  installFleetPackage,
 } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
+import {
+  MOCK_BETA_PKG_VERSION,
+  MOCK_PKG_VERSION,
+  PREBUILT_RULE_ID_A,
+  PREBUILT_RULE_ID_B,
+} from '../../configs/edge_cases/ess_air_gapped_with_bundled_packages.config';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
@@ -46,29 +53,28 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
       // Install package without specifying version to check if latest stable version is installed
-      const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
-        es,
-        supertest,
-        retryService
-      );
+      const fleetPackageInstallationResponse = await installFleetPackage({
+        getService,
+        packageName: PREBUILT_RULES_PACKAGE_NAME,
+      });
 
       expect(fleetPackageInstallationResponse.items.length).toBe(2);
       expect(fleetPackageInstallationResponse.items).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: 'test-prebuilt-rule-a' }),
-          expect.objectContaining({ id: 'test-prebuilt-rule-b' }),
+          expect.objectContaining({ id: PREBUILT_RULE_ID_A }),
+          expect.objectContaining({ id: PREBUILT_RULE_ID_B }),
         ])
-      ); // Name of the rule in package 99.0.0
+      );
 
-      // Get the installed package and check if the version is 99.0.0
+      // Get the installed package and check the version
       const prebuiltRulesFleetPackage = await getPrebuiltRulesFleetPackage(supertest);
-      expect(prebuiltRulesFleetPackage.body.item.version).toBe('99.0.0');
+      expect(prebuiltRulesFleetPackage.body.item.version).toBe(MOCK_PKG_VERSION);
       expect(prebuiltRulesFleetPackage.status).toBe(200);
 
-      // Get status of our prebuilt rules (nothing should be instaled yet)
+      // Get status of our prebuilt rules (nothing should be installed yet)
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
-      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(2); // 1 rule in package 99.0.0
+      expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(2); // 1 rule in the package
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
       // Install prebuilt rules
@@ -76,17 +82,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Verify that status is updated after package installation
       const statusAfterRulesInstallation = await getPrebuiltRulesStatus(es, supertest);
-      expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(2); // 1 rule in package 99.0.0
+      expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(2); // 1 rule in the package
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
       // Get installed rules
       const rulesResponse = await getInstalledRules(supertest);
 
-      // Assert that installed rules are from package 99.0.0 and not from prerelease (beta) package
+      // Assert that installed rules aren't from the prerelease (beta) package
       expect(rulesResponse.data.length).toBe(2);
-      expect(rulesResponse.data[0].name).not.toContain('beta');
-      expect(rulesResponse.data[0].name).toContain('99.0.0');
+      expect(rulesResponse.data[0].name).not.toContain(MOCK_BETA_PKG_VERSION);
+      expect(rulesResponse.data[0].name).toContain(MOCK_PKG_VERSION);
     });
   });
 };
