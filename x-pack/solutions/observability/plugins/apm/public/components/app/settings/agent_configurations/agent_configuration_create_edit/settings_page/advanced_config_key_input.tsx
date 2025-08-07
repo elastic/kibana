@@ -62,10 +62,12 @@ export function AdvancedConfigKeyInput({
 
   const handleKeyChange = (newKey: string) => {
     setLocalKey(newKey);
+    const errorKey = `key${index}`;
 
     if (isInvalidInput(newKey)) {
-      setValidationErrors((prev) => [...prev, `key${index}`]);
+      setValidationErrors((prev) => (prev.includes(errorKey) ? prev : [...prev, errorKey]));
     } else {
+      setValidationErrors((prev) => prev.filter((error) => error !== errorKey));
       onChange(newKey);
     }
   };

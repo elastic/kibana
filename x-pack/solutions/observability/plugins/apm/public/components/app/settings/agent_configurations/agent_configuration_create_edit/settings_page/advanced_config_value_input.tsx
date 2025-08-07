@@ -32,9 +32,12 @@ export function AdvancedConfigValueInput({
   const handleValueChange = (newValue: string) => {
     setTouched(true);
     onChange(newValue);
+    const errorKey = `value${index}`;
 
     if (isInvalidInput(newValue)) {
-      setValidationErrors((prev) => [...prev, `value${index}`]);
+      setValidationErrors((prev) => [...prev, errorKey]);
+    } else {
+      setValidationErrors((prev) => prev.filter((error) => error !== errorKey));
     }
   };
 
