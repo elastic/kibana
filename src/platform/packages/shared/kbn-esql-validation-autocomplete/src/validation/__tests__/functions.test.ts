@@ -285,6 +285,41 @@ describe('function validation', () => {
           // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
           await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
         });
+
+        it('detects a missing column', async () => {
+          const { expectErrors } = await setup();
+
+          expectErrors('FROM a_index | EVAL TEST(missingColumn)', [
+            'Column [missingColumn] does not exist.',
+          ]);
+        });
+
+        it('validates a function within an inline cast', async () => {
+          setTestFunctions([
+            {
+              name: 'test',
+              type: FunctionDefinitionTypes.SCALAR,
+              description: '',
+              locationsAvailable: [Location.EVAL],
+              signatures: [
+                {
+                  params: [{ name: 'arg1', type: 'integer' }],
+                  returnType: 'integer',
+                },
+              ],
+            },
+          ]);
+
+          const { expectErrors } = await setup();
+
+          await expectErrors('FROM a_index | EVAL TEST("")::double', [
+            getExpectedError('test', ['keyword']),
+          ]);
+          // deep nesting
+          await expectErrors('FROM a_index | EVAL TEST("")::double::keyword::double', [
+            getExpectedError('test', ['keyword']),
+          ]);
+        });
       });
     });
 
