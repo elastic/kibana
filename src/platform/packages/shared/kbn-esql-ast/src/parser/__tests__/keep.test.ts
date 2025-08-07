@@ -26,5 +26,28 @@ describe('KEEP', () => {
         args: [{}, {}, {}, {}],
       });
     });
+
+    it('parses double param as argument', () => {
+      const src = `
+        FROM employees
+        | KEEP ??keep`;
+      const { ast, errors } = EsqlQuery.fromSrc(src);
+      const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+      console.log(JSON.stringify(keep, null, 2));
+
+      expect(errors.length).toBe(0);
+      expect(keep).toMatchObject({
+        type: 'command',
+        name: 'keep',
+        args: [
+          {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'named',
+          },
+        ],
+      });
+    });
   });
 });

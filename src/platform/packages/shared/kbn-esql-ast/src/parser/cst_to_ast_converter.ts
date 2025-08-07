@@ -566,12 +566,25 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- KEEP
 
   private fromKeepCommand(ctx: cst.KeepCommandContext): ast.ESQLCommand<'keep'> {
-    const command = this.createCommand('keep', ctx);
-    const identifiers = this.toColumnsFromCommand(ctx);
-
-    command.args.push(...identifiers);
+    const args = this.fromQualifiedNamePatterns(ctx.qualifiedNamePatterns());
+    const command = this.createCommand('keep', ctx, { args });
 
     return command;
+  }
+
+  private fromQualifiedNamePatterns(
+    ctx: cst.QualifiedNamePatternsContext
+  ): ast.ESQLAstExpression[] {
+    const itemCtxs = ctx.qualifiedNamePattern_list();
+    const result: ast.ESQLAstExpression[] = [];
+
+    for (const itemCtx of itemCtxs) {
+      const node = this.fromQualifiedNamePattern(itemCtx);
+
+      result.push(node);
+    }
+
+    return result;
   }
 
   // -------------------------------------------------------------------- STATS
@@ -1302,6 +1315,10 @@ export class CstToAstConverter {
 
   // -------------------------------------------------------------- expressions
 
+  private toExpression(): ast.ESQLAstExpression {
+    throw new Error('Method not implemented.');
+  }
+
   private toColumnsFromCommand(
     ctx:
       | cst.KeepCommandContext
@@ -1886,7 +1903,13 @@ export class CstToAstConverter {
 
   // ----------------------------------------------------- expression: "column"
 
-  private toColumn(ctx: antlr.ParserRuleContext): ast.ESQLColumn {
+  private fromQualifiedNamePattern(ctx: cst.QualifiedNamePatternContext): ast.ESQLColumn {
+    return this.toColumn(ctx);
+  }
+
+  private toColumn(
+    ctx: antlr.ParserRuleContext | cst.QualifiedNamePatternContext | cst.QualifiedNameContext
+  ): ast.ESQLColumn {
     const args: ast.ESQLColumn['args'] = [];
 
     if (ctx instanceof cst.QualifiedNamePatternContext) {
