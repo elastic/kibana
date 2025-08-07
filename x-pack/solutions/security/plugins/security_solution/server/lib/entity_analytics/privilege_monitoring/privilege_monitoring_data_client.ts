@@ -80,7 +80,6 @@ import {
   PRIVMON_EVENT_INGEST_PIPELINE_ID,
   eventIngestPipeline,
 } from './elasticsearch/pipelines/event_ingested';
-import type { MonitoringSyncIntervalConfig } from '../types';
 import type { BulkProcessingResults } from './users/bulk/types';
 import { ignoreSONotFoundError } from './saved_objects/helpers';
 
@@ -94,7 +93,6 @@ interface PrivilegeMonitoringClientOpts {
   kibanaVersion: string;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
-  config?: MonitoringSyncIntervalConfig;
 }
 
 export class PrivilegeMonitoringDataClient {
