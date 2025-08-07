@@ -26,6 +26,7 @@ import {
 } from './run_resilient_migrator.fixtures';
 import type { InitState, State } from './state';
 import type { Next } from './state_action_machine';
+import { ControlStateTransitionDiag } from './common/utils';
 
 const SOME_MIGRATION_RESULT: MigrationResult = {
   sourceIndex: '.my_index_pre8.2.3_001',
@@ -116,6 +117,7 @@ describe('runResilientMigrator', () => {
 
 const mockOptions = (): RunResilientMigratorParams => {
   const logger = loggingSystemMock.create().get();
+  const cstDiag = ControlStateTransitionDiag.create();
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 
@@ -143,6 +145,7 @@ const mockOptions = (): RunResilientMigratorParams => {
     doneReindexing: waitGroup(),
     updateRelocationAliases: waitGroup(),
     logger,
+    cstDiag,
     transformRawDocs: jest.fn(),
     preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
     migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
