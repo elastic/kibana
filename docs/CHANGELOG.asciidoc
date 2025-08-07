@@ -2488,8 +2488,7 @@ Use the *Workflows* app in Microsoft Teams to create a new webhook URL, as descr
 Update your Microsoft Teams connector to use the new URL before the end of December 2024.
 ====
 
-[discrete]
-[[known-issue-1991]]
+// tag::known-issue-1991[]
 .PDF and PNG reports time out and fail with an invalid header error if server.protocol is set to http2
 [%collapsible]
 ====
@@ -2503,6 +2502,7 @@ To temporarily resolve the issue, set `server.protocol` to `http1`.
 This issue is resolved in 8.17.9, 8.18.4, 8.19.0 and later. 
 
 ====
+// end::known-issue-1991[]
 
 [discrete]
 [[known-189283]]
