@@ -69,7 +69,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     engine: [
       {},
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
       },
@@ -77,7 +76,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     engineName: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setEngineName: (_, { engineName }) => engineName,
         clearEngine: () => '',
       },
@@ -85,7 +83,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     engineNotFound: [
       false,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setEngineNotFound: (_, { notFound }) => notFound,
         clearEngine: () => false,
       },
@@ -93,7 +90,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     intervalId: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onPollStart: (_, { intervalId }) => intervalId,
         onPollStop: () => null,
       },

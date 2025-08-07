@@ -5,20 +5,30 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { EnsurePackageResult } from '@kbn/fleet-plugin/server/services/epm/packages/install';
 import { SECURITY_AI_PROMPTS_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../types';
+import { ensureInstalledPackage } from './ensure_installed_package';
 import { findLatestPackageVersion } from './find_latest_package_version';
 
 export async function installSecurityAiPromptsPackage(
-  context: SecuritySolutionApiRequestHandlerContext
-) {
+  context: SecuritySolutionApiRequestHandlerContext,
+  logger: Logger
+): Promise<EnsurePackageResult | null> {
   try {
-    const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
+    const pkgVersion = await findLatestPackageVersion(
+      context,
+      SECURITY_AI_PROMPTS_PACKAGE_NAME,
+      logger
+    );
 
-    return context.getInternalFleetServices().packages.ensureInstalledPackage({
-      pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,
+    return await ensureInstalledPackage(
+      context,
+      SECURITY_AI_PROMPTS_PACKAGE_NAME,
       pkgVersion,
-    });
+      logger
+    );
   } catch (e) {
     // fail silently
     return null;

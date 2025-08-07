@@ -48,7 +48,6 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
     fields: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setFields: (_, { fields }) => fields,
       },
     ],
