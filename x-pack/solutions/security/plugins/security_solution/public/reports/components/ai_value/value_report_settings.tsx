@@ -29,7 +29,7 @@ const ValueReportSettingsComponent: React.FC<Props> = ({ minutesPerAlert, analys
       <h3>{i18n.COST_CALCULATIONS}</h3>
       <p>
         {i18n.COST_CALCULATION({ minutesPerAlert, analystHourlyRate })}{' '}
-        <EuiLink onClick={goToKibanaSettings} external target="_blank">
+        <EuiLink onClick={goToKibanaSettings}>
           {i18n.CHANGE_RATE}
           <EuiIcon
             type="popout"
