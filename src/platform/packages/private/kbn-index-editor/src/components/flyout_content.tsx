@@ -58,17 +58,9 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     coreStart.notifications,
     // On upload complete callback
     (res) => {
-      deps.indexUpdateService.setIndexName(res!.index);
-      deps.indexUpdateService.setIndexCreated(true);
-
-      deps.indexUpdateService.setIsFetching(true);
-
-      // temp fix to fetch docs when the index is ready
-      setTimeout(() => {
-        if (res?.files.some((v) => v.docCount > 0)) {
-          deps.indexUpdateService.refresh();
-        }
-      }, 3000);
+      if (res?.files.some((v) => v.docCount > 0)) {
+        deps.indexUpdateService.fileImported(res.index!);
+      }
     }
   );
 

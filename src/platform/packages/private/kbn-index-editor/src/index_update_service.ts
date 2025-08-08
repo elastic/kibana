@@ -716,8 +716,9 @@ export class IndexUpdateService {
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedFields$.complete();
     this._fileImported$.complete();
-    this.data.dataViews.clearInstanceCache();
     this._indexName$.complete();
+
+    this.data.dataViews.clearInstanceCache();
   }
 
   public async createIndex() {
