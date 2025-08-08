@@ -8,18 +8,12 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { JsonEditor } from './json_editor';
-import { FieldsAccordion } from '../optional_fields_accordion';
-import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
 
 export const ManualIngestPipelineProcessorForm = () => {
   return (
     <>
       <JsonEditor />
-      <EuiSpacer size="m" />
-      <FieldsAccordion>
-        <ProcessorConditionEditor />
-      </FieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
     </>

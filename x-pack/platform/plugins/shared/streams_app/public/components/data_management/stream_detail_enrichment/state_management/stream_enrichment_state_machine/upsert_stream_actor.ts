@@ -12,7 +12,7 @@ import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { StreamEnrichmentServiceDependencies } from './types';
-import { processorConverter } from '../../utils';
+import { processorsWithUIAttributesToApiDefinition } from '../../utils';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest 2023-10-31'>;
@@ -37,7 +37,7 @@ export function createUpsertStreamActor({
           ? {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: processorsWithUIAttributesToApiDefinition(input.processors),
                 ...(input.fields && {
                   wired: { ...input.definition.stream.ingest.wired, fields: input.fields },
                 }),
@@ -46,7 +46,7 @@ export function createUpsertStreamActor({
           : {
               ingest: {
                 ...input.definition.stream.ingest,
-                processing: input.processors.map(processorConverter.toAPIDefinition),
+                processing: processorsWithUIAttributesToApiDefinition(input.processors),
               },
             },
       },

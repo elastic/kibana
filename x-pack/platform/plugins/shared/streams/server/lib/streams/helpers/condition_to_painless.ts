@@ -21,10 +21,9 @@ import {
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `relevant_fields['${conditionOrField}']`;
+    return `\$('${conditionOrField}', null)`;
   }
-
-  return `relevant_fields['${conditionOrField.field}']`;
+  return `\$('${conditionOrField.field}', null)`;
 }
 
 function encodeValue(value: string | number | boolean) {
@@ -166,28 +165,13 @@ export function conditionToStatement(condition: Condition, nested = false): stri
 
 export function conditionToPainless(condition: Condition): string {
   if (isNeverCondition(condition)) {
-    return `return false`;
+    return `false`;
   }
 
   if (isAlwaysCondition(condition)) {
-    return `return true`;
+    return `true`;
   }
 
-  const fields = extractAllFields(condition);
-  let fieldDefinitions = '';
-  if (fields.length !== 0) {
-    fieldDefinitions = generateFieldDefinitions(fields);
-  }
   return `
-  def relevant_fields = [:];
-  ${fieldDefinitions}
-  try {
-  if (${conditionToStatement(condition)}) {
-    return true;
-  }
-  return false;
-} catch (Exception e) {
-  return false;
-}
-`;
+  (${conditionToStatement(condition)}) `;
 }

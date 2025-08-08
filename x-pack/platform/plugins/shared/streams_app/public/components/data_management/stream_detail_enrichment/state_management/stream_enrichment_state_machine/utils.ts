@@ -147,10 +147,16 @@ export const spawnProcessor = <
 >(
   processor: ProcessorDefinition,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
-  options?: { isNew: boolean }
+  options?: { isNew?: boolean; whereParentId?: string; id?: string; shouldSkipDraft?: boolean }
 ) => {
   const { spawn, self } = assignArgs;
   const processorWithUIAttributes = processorConverter.toUIDefinition(processor);
+  if (options?.whereParentId) {
+    processorWithUIAttributes.whereParentId = options.whereParentId;
+  }
+  if (options?.id) {
+    processorWithUIAttributes.id = options.id;
+  }
 
   return spawn('processorMachine', {
     id: processorWithUIAttributes.id,
@@ -158,6 +164,7 @@ export const spawnProcessor = <
       parentRef: self,
       processor: processorWithUIAttributes,
       isNew: options?.isNew ?? false,
+      shouldSkipDraft: options?.shouldSkipDraft ?? false,
     },
   });
 };
