@@ -31,7 +31,7 @@ export const NEXT_STEP_LABEL = i18n.translate(
 export const IM_DOES_NOT_MATCH_TOUR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.imDoesNotMatchTourTitle',
   {
-    defaultMessage: 'New Indicator Match rule capabilities.',
+    defaultMessage: 'New indicator match rule capabilities',
   }
 );
 
