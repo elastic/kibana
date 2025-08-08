@@ -106,7 +106,13 @@ include::upgrade-notes.asciidoc[]
 [[release-notes-8.19.1]]
 == {kib} 8.19.1
 
-The 8.19.1 release includes the following fixes.
+The 8.19.1 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.1]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-230275]
+include::CHANGELOG.asciidoc[tag=known-issue-2462]
 
 [float]
 [[fixes-v8.19.1]]
@@ -147,6 +153,17 @@ Review the following information about the {kib} 8.19.0 release.
 [[known-issues-8.19.0]]
 === Known issues
 include::CHANGELOG.asciidoc[tag=known-issue-230275]
+
+// tag::known-issue-2462[]
+.Reports created in non-default Kibana spaces aren't shown in the Reporting UI.
+[%collapsible]
+====
+*Details* +
+
+After creating a report in a non-default {kib} space, the document exists in the `.kibana-reporting` index but isn't shown in the Reporting UI.
+
+====
+// end::known-issue-2462[]
 
 [float]
 [[breaking-changes-8.19.0]]
