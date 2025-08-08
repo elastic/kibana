@@ -189,7 +189,6 @@ export const RangeSliderControl: FC<Props> = ({
       placeholder: String(max ?? Infinity),
       ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
       id: `${uuid}-upperBound`,
-
     });
   }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
@@ -252,8 +251,8 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string],_,ev) => {
-          const originatingInputId = ev?.currentTarget.getAttribute('id')
+        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
+          const originatingInputId = ev?.currentTarget.getAttribute('id');
 
           if (originatingInputId?.includes('lowerBound')) {
             // preserve original upper bound selection if only lower bound number field changed

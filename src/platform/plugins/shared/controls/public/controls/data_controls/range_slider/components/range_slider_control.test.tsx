@@ -125,8 +125,8 @@ describe('RangeSliderControl', () => {
   });
 
   it('updates selection when upper bound input changes', async () => {
-    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);  
-    
+    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);
+
     const upperBoundInput = rangeSliderControl.getByTestId(
       'rangeSlider__upperBoundFieldNumber'
     ) as HTMLInputElement;
