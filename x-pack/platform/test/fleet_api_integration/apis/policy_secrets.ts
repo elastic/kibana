@@ -130,31 +130,22 @@ export default function (providerContext: FtrProviderContext) {
 
     const cleanupAgents = async (attempt: number = 0) => {
       const maxAttempts = 3;
-      const { body: agentsResponse } = await supertest
-        .get(`/api/fleet/agents?showInactive=true`)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
-      console.log(`Agents before deletion`, JSON.stringify(agentsResponse, null, 2));
 
       try {
-        const response = await es.deleteByQuery({
+        await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
           query: {
             match_all: {},
           },
         });
-
-        console.log(`Cleanup agents deleteByQuery response:`, JSON.stringify(response, null, 2));
       } catch (err) {
-        // index doesn't exist
-        console.log(`Cleanup agents deleteByQuery error:`, JSON.stringify(err, null, 2));
-
         // agent_status_change task may apply conflicting update during deletion
         if (attempt < maxAttempts && err?.meta?.statusCode === 409) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           await cleanupAgents(attempt + 1);
         }
+        // index doesn't exist
       }
     };
 
