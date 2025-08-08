@@ -47,7 +47,10 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
             const { migration_id: migrationId } = req.params;
             const originalRules = req.body;
             const rulesCount = originalRules.length;
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const [firstOriginalRule] = originalRules;
               if (!firstOriginalRule) {

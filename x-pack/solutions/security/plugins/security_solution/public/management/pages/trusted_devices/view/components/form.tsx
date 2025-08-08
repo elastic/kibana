@@ -572,7 +572,6 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         <EuiHorizontalRule />
 
-        {/* Assignment Section */}
         <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
           <EffectedPolicySelect
             item={initialItem}
