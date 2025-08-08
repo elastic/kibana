@@ -24,9 +24,12 @@ describe('AiAssistantSelectionPage', () => {
     ({
       observabilityAIAssistant: { show: hasPermission },
       management: {
-        kibana: {
+        ai: {
           aiAssistantManagementSelection: hasPermission,
         },
+      },
+      securitySolutionAssistant: {
+        'ai-assistant': hasPermission,
       },
     } as unknown as CoreStart['application']['capabilities']);
 
@@ -116,7 +119,9 @@ describe('AiAssistantSelectionPage', () => {
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).toBeInTheDocument();
-        expect(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton')).toBeDisabled();
+        expect(
+          screen.queryByTestId('pluginsAiAssistantSelectionSecurityPageButton')
+        ).not.toBeInTheDocument();
       });
     });
 
