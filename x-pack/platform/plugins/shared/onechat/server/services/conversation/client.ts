@@ -66,7 +66,7 @@ class ConversationClientImpl implements ConversationClient {
         bool: {
           must: [
             {
-              match: this.user.username
+              term: this.user.username
                 ? { user_name: this.user.username }
                 : { user_id: this.user.id },
             },
