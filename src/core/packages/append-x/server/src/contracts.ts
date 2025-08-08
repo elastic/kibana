@@ -7,71 +7,77 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObjectType, TypeOf, schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type api from '@elastic/elasticsearch/lib/api/types';
 
 type StrictDynamic = false | 'strict';
 
-type StrictMappingProperty<O> = api.MappingProperty & {
+type ToStrictMappingProperty<P extends api.MappingProperty> = Omit<P, 'properties'> & {
   dynamic?: StrictDynamic;
-  properties?: {
-    [K in keyof O]: StrictMappingProperty<O[K] extends object ? StrictMappingProperty<O> : O[K]>;
-  };
 };
 
-interface StrictMappingTypeMapping<O extends object = object> extends api.MappingTypeMapping {
-  dynamic: StrictDynamic;
-  properties?: {
-    [K in keyof O]: StrictMappingProperty<O[K] extends object ? StrictMappingProperty<O> : O[K]>;
-  };
+type Strict<P extends api.MappingProperty> = ToStrictMappingProperty<P>;
+
+type KeywordMapping = Strict<api.MappingKeywordProperty>;
+type TextMapping = Stritt<api.MappingTextProperty>;
+
+type StringMapping = KeywordMapping | TextMapping;
+
+interface MappingsHelpers {
+  keyword: () => KeywordMapping;
+  text: () => TextMapping;
 }
 
-interface BaseSchema {
-  '@timestamp': string;
+interface Field<T> {
+  type: T;
 }
 
-interface MappingsHelper {
-  keyword: () => StrictMappingProperty<string>;
-  text: () => StrictMappingProperty<string>;
-  long: () => StrictMappingProperty<number>;
-  object: <O extends object>(o: O) => StrictMappingProperty<O>;
+type AnyField = Field<unknown>;
+
+interface StringField extends Field<'string'> {
+  type: 'string';
+  mapping?: KeywordMapping | TextMapping;
+  validate: Type<string>;
+}
+
+type Props = Record<string, AnyField>;
+
+interface ObjectField<O extends Props> extends Field<'object'> {
+  type: 'object';
+  mapping?: { dynamic?: StrictDynamic };
+  properties: O;
+}
+
+interface FieldHelperOptions<Mapping extends Strict<api.MappingProperty>> {
+  mapping?: Mapping;
+}
+
+interface FieldsHelpers {
+  string: (opts?: FieldHelperOptions<StringMapping>) => StringField;
+  object: <P extends Props>(props: P) => ObjectField<P>;
 }
 
 interface CreateDataStreamHelpers {
-  mappings: MappingsHelper;
+  mappings: MappingsHelpers;
+  fields: FieldsHelpers;
 }
 
-type WithTimestamp<T extends ObjectType> = TypeOf<T>['@timestamp'] extends string ? T : never;
-
 export interface AppendXServiceSetup {
-  dataStream: <DocSchema extends ObjectType>(
-    fn: (helpers: CreateDataStreamHelpers) => {
+  dataStream: (
+    fn: <O extends Props>(
+      helpers: CreateDataStreamHelpers
+    ) => {
       name: string;
-      schema: WithTimestamp<DocSchema>;
-      mappings: StrictMappingTypeMapping<TypeOf<DocSchema>>;
+      fields: ObjectField<O>;
     }
   ) => void;
 }
 
 const appendXSetup: AppendXServiceSetup = {} as any;
 
-appendXSetup.dataStream(({ mappings }) => ({
+appendXSetup.dataStream(({ fields, mappings }) => ({
   name: 'my-data-stream',
-  schema: schema.object({
-    '@timestamp': schema.string(),
-    test: schema.object({
-      test1: schema.string(),
-      test2: schema.string(),
-    }),
+  fields: fields.object({
+    '@timestamp': fields.string({ mapping: mappings.keyword() }),
   }),
-  mappings: {
-    dynamic: false,
-    properties: {
-      '@timestamp': mappings.keyword(),
-      test: mappings.object({
-        test1: mappings.text(),
-        test2: mappings.text(),
-      }),
-    },
-  },
 }));
