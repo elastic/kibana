@@ -49,7 +49,7 @@ interface DurationParseResult {
  * @param durationStr - The duration string to parse (e.g., "1h30m45s")
  * @returns An object with parsing results
  */
-const parseDuration = (durationStr: string): DurationParseResult => {
+export const parseDuration = (durationStr: string): DurationParseResult => {
   const result: DurationParseResult = {
     isValid: true,
     valueNs: 0,

@@ -20,6 +20,7 @@ import {
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
+  parseDuration,
 } from './validate_package_policy';
 import { AWS_PACKAGE, INVALID_AWS_POLICY, VALID_AWS_POLICY } from './fixtures/aws_package';
 
@@ -2010,5 +2011,30 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toEqual(['Dataset contains invalid characters']);
     });
+  });
+});
+
+describe('Fleet - parseDuration()', () => {
+  it('correctly calculates nanoseconds for a valid duration string', () => {
+    const result = parseDuration('1h30m45s500ms');
+
+    const expectedNs =
+      3_600_000_000_000 + // 1 hour
+      1_800_000_000_000 + // 30 minutes
+      45_000_000_000 +  // 45 seconds
+      500_000_000; // 500 milliseconds
+
+    expect(result.isValid).toBe(true);
+    expect(result.valueNs).toBe(expectedNs);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('produces an error when given an invalid duration', () => {
+    // Test with an invalid duration format
+    const result = parseDuration('invalid');
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('Invalid duration format');
   });
 });
