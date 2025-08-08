@@ -64,6 +64,6 @@ describe('aggregateLicensesFromSignatures', () => {
       },
     ];
     const result = aggregateLicensesFromSignatures(signatures);
-    expect(result.get('GOLD')).toEqual(new Set());
+    expect(result.get('gold')).toEqual(new Set());
   });
 });
