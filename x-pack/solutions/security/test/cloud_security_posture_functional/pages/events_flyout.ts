@@ -31,8 +31,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
+      // security_alerts_modified_mappings - contains mappings for actor and target
+      // security_alerts - does not contain mappings for actor and target
       await esArchiver.load(
-        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts'
+        'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_modified_mappings'
       );
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
