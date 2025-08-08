@@ -293,6 +293,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           return response.ok({
             body: getTimeRangeMetadataResponseRT.encode({
               schemas: [DataSchemaFormat.SEMCONV],
+              preferredSchema: DataSchemaFormat.SEMCONV,
             }),
           });
         }
@@ -333,16 +334,23 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const hasEcsData = ecsResponse.hits.total.value !== 0;
         const hasOtelData = otelResponse.hits.total.value !== 0;
 
+        const allSchemas = [DataSchemaFormat.ECS, DataSchemaFormat.SEMCONV] as DataSchemaFormat[];
+        const availableSchemas = allSchemas.filter(
+          (key) =>
+            (key === DataSchemaFormat.ECS && hasEcsData) ||
+            (key === DataSchemaFormat.SEMCONV && hasOtelData)
+        );
+        const preferredSchema =
+          availableSchemas.length > 0
+            ? availableSchemas.includes(DataSchemaFormat.SEMCONV)
+              ? DataSchemaFormat.SEMCONV
+              : availableSchemas[0]
+            : null;
+
         return response.ok({
           body: getTimeRangeMetadataResponseRT.encode({
-            schemas: (
-              [DataSchemaFormat.ECS, DataSchemaFormat.SEMCONV] as DataSchemaFormat[]
-            ).filter((key) => {
-              return (
-                (key === DataSchemaFormat.ECS && hasEcsData) ||
-                (key === DataSchemaFormat.SEMCONV && hasOtelData)
-              );
-            }),
+            schemas: availableSchemas,
+            preferredSchema,
           }),
         });
       } catch (err) {

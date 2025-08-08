@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import { isEmpty } from 'lodash';
@@ -110,6 +110,15 @@ export function AgentConfigurationCreateEdit({
       </EuiText>
 
       <EuiSpacer size="m" />
+
+      {isEditMode && existingConfigResult?.data?.error ? (
+        <>
+          <EuiCallOut title="Error applying configuration" color="danger" iconType="error">
+            <p>{existingConfigResult.data.error}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiTitle size="s">
         <h2>
