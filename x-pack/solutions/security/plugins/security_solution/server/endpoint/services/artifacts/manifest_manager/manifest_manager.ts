@@ -784,7 +784,7 @@ export class ManifestManager {
             );
 
             if (
-              isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest.manifest_version)
+              isNewManifestVersionGreaterThanPolicyManifestVersion(oldManifest?.manifest_version)
             ) {
               const serializedManifest = manifest.toPackagePolicyManifest(policyId);
 
