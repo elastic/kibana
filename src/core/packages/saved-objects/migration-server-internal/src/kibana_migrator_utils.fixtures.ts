@@ -63,28 +63,6 @@ export const INDEX_MAP_BEFORE_SPLIT: IndexMap = {
           },
         },
       },
-      'guided-onboarding-guide-state': {
-        dynamic: false,
-        properties: {
-          guideId: {
-            type: 'keyword',
-          },
-          isActive: {
-            type: 'boolean',
-          },
-        },
-      },
-      'guided-onboarding-plugin-state': {
-        dynamic: false,
-        properties: {},
-      },
-      'ui-metric': {
-        properties: {
-          count: {
-            type: 'integer',
-          },
-        },
-      },
       application_usage_totals: {
         dynamic: false,
         properties: {},

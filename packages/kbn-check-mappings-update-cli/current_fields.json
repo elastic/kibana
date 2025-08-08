@@ -602,16 +602,6 @@
     "version",
     "wsState"
   ],
-  "guided-onboarding-guide-state": [
-    "guideId",
-    "isActive"
-  ],
-  "guided-onboarding-plugin-state": [],
-  "index-pattern": [
-    "name",
-    "title",
-    "type"
-  ],
   "infra-custom-dashboards": [
     "assetType",
     "dashboardFilterAssetIdEnabled",
