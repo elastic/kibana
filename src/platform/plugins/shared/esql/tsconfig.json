@@ -23,7 +23,6 @@
     "@kbn/es-query",
     "@kbn/fields-metadata-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
     "@kbn/search-types",
