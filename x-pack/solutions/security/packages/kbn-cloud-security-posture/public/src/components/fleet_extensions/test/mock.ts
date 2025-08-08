@@ -406,18 +406,18 @@ export const mockConfig: CloudSetupConfig = {
   providers: {
     aws: {
       type: 'aws-input-type',
-      organizationMinimumVersion: '1.0.0',
+      enableOrganization: true,
       getStartedPath: '/aws/start',
     },
     gcp: {
       type: 'gcp-input-type',
-      minShowVersion: '2.0.0',
-      organizationMinimumVersion: '2.1.0',
+      enabled: true,
+      enableOrganization: true,
       getStartedPath: '/gcp/start',
     },
     azure: {
       type: 'azure-input-type',
-      organizationMinimumVersion: '3.0.0',
+      enableOrganization: true,
       getStartedPath: '/azure/start',
     },
   },

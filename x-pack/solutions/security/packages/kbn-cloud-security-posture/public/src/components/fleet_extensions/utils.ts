@@ -385,7 +385,7 @@ export const getCloudShellDefaultValue = (
   return cloudShellUrl;
 };
 
-export const getArmTemplateUrlFromCspmPackage = (
+export const getArmTemplateUrlFromPackage = (
   packageInfo: PackageInfo,
   templateName: string
 ): string => {
@@ -415,7 +415,7 @@ export const getDefaultAzureCredentialsType = (
     return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
   }
 
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromPackage(packageInfo, templateName);
   if (hasArmTemplateUrl) {
     return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
   }

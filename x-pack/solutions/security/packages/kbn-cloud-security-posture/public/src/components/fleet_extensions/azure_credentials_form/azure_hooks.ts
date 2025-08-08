@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { updatePolicyWithInputs, getArmTemplateUrlFromCspmPackage } from '../utils';
+import { updatePolicyWithInputs, getArmTemplateUrlFromPackage } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
@@ -86,7 +86,7 @@ const useUpdateAzureArmTemplate = ({
     }
     return;
   }
-  const templateUrl = getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
+  const templateUrl = getArmTemplateUrlFromPackage(packageInfo, templateName);
 
   if (templateUrl === '') return;
 
@@ -114,7 +114,7 @@ export const useAzureCredentialsForm = ({
 
   const options = getAzureCredentialsFormOptions();
 
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo, templateName);
+  const hasArmTemplateUrl = !!getArmTemplateUrlFromPackage(packageInfo, templateName);
 
   const setupFormat = getSetupFormatFromInput(input, hasArmTemplateUrl);
 
