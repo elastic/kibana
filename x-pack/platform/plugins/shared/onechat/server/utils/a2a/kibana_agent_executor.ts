@@ -53,7 +53,7 @@ export class KibanaAgentExecutor implements AgentExecutor {
         nextInput: { message: userText },
         request: this.kibanaRequest,
         conversationId: a2aConversationId,
-        createConversationIfNotFound: true,
+        autoCreateConversationWithId: true,
       });
 
       // Process chat response

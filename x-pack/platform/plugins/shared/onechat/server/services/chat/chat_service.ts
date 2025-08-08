@@ -84,7 +84,7 @@ export interface ChatConverseParams {
    * Create conversation with specified ID if not found.
    * Defaults to false. Has no effect when conversationId is not provided.
    */
-  createConversationIfNotFound?: boolean;
+  autoCreateConversationWithId?: boolean;
   /**
    * Optional abort signal to handle cancellation.
    * Canceled rounds will not be persisted.
@@ -133,7 +133,7 @@ class ChatServiceImpl implements ChatService {
     request,
     abortSignal,
     nextInput,
-    createConversationIfNotFound = false,
+    autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference, actions } = this;
 
@@ -154,7 +154,7 @@ class ChatServiceImpl implements ChatService {
               return of(true);
             }
 
-            if (!createConversationIfNotFound) {
+            if (!autoCreateConversationWithId) {
               return of(false);
             }
 
