@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { kbnServerArgs } from '../../../services/default_fleet_setup';
 import { createTestConfig } from '../../../config.base';
-import { kbnServerArgs } from '../../common/fleet/default_setup';
 
 export default createTestConfig({
   serverlessProject: 'security',

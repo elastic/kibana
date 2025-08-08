@@ -1511,7 +1511,6 @@ const bucketDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
-  validate: undefined,
   examples: [
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
     'FROM employees\n| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"\n| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")\n| SORT month',
@@ -1560,7 +1559,8 @@ const categorizeDefinition: FunctionDefinition = {
     },
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
-  validate: undefined,
+  license: 'PLATINUM',
+  observabilityTier: 'COMPLETE',
   examples: ['FROM sample_data\n| STATS count=COUNT() BY category=CATEGORIZE(message)'],
 };
 export const groupingFunctionDefinitions = [bucketDefinition, categorizeDefinition];

@@ -34,13 +34,13 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
 import { GapEvent, generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
-import { getGapsByRuleId } from '../../../../../../common/utils/security_solution/detections_response/rules/get_gaps_by_rule_id';
+import { getGapsByRuleId } from '../../../../../config/services/detections_response/rules/get_gaps_by_rule_id';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -95,11 +95,11 @@ export default ({ getService }: FtrProviderContext): void => {
   describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {

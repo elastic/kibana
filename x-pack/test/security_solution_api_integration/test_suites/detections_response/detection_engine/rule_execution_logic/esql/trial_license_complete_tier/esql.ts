@@ -44,7 +44,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   createRule,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
@@ -70,11 +70,15 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless ES|QL rule type', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -1569,13 +1573,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('identical document ids across multiple indices', () => {
         before(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/ecs_compliant_synthetic_source'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant_synthetic_source'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/ecs_compliant_synthetic_source'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant_synthetic_source'
           );
         });
 
@@ -1790,11 +1794,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -1828,11 +1832,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -1952,13 +1960,13 @@ export default ({ getService }: FtrProviderContext) => {
       describe('non-ecs', () => {
         before(async () => {
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
           );
         });
 
         after(async () => {
           await esArchiver.unload(
-            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+            'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_non_compliant'
           );
         });
 
@@ -2058,13 +2066,15 @@ export default ({ getService }: FtrProviderContext) => {
     describe('manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
       });
 
       afterEach(async () => {
         await stopAllManualRuns(supertest);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
       });
 

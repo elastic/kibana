@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -38,6 +39,7 @@ export interface HostsViewQuerySubmittedParams {
   interval: string;
   with_query: boolean;
   limit: number;
+  preferred_schema?: DataSchemaFormat;
 }
 
 export interface HostEntryClickedParams {

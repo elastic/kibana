@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobIdSpace1);
       await ml.api.createAnomalyDetectionJob(jobConfig, idSpace1);

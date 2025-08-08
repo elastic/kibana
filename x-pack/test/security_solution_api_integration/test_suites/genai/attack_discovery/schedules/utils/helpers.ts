@@ -16,7 +16,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   countDownTest,
   routeWithNamespace,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 import { getAttackDiscoverySchedulesApis } from './apis';
 import { getSimpleAttackDiscoverySchedule } from '../mocks';
 
@@ -115,5 +115,17 @@ export const getScheduleBadRequestError = (attributeName: string) => {
     error: 'Bad Request',
     message: `[request body]: ${attributeName}: Required`,
     statusCode: 400,
+  };
+};
+
+export const getMissingAssistantKibanaPrivilegesError = ({
+  routeDetails,
+}: {
+  routeDetails: string;
+}) => {
+  return {
+    error: 'Forbidden',
+    message: `API [${routeDetails}] is unauthorized for user, this action is granted by the Kibana privileges [elasticAssistant]`,
+    statusCode: 403,
   };
 };

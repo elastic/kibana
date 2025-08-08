@@ -60,8 +60,12 @@ export const createModelProvider = ({
       connectorId,
       chatModelOptions: {},
     });
+
     const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+    const connector = await inferenceClient.getConnectorById(connectorId);
+
     return {
+      connector,
       chatModel,
       inferenceClient,
     };

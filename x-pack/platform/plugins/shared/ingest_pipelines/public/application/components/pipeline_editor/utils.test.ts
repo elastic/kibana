@@ -95,4 +95,53 @@ describe('convert processors to json', () => {
       customProcessor: "aaa\"bbb"
     });
   });
+
+  it('preserves empty string values', () => {
+    const obj = {
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+      customOptions: '',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      field1: 'normalString',
+      value: '',
+      inference_config: '',
+      field_map: '',
+      params: '',
+      pattern_definitions: '',
+      processor: '',
+    });
+
+    // Explicitly check that empty strings are preserved and not converted to undefined
+    expect(result.value).toBe('');
+    expect(result.inference_config).toBe('');
+    expect(result.field_map).toBe('');
+    expect(result.params).toBe('');
+    expect(result.pattern_definitions).toBe('');
+    expect(result.processor).toBe('');
+  });
+
+  it('handles null and undefined values correctly', () => {
+    const obj = {
+      value: null,
+      inference_config: undefined,
+      field_map: 'normalString',
+    };
+
+    const result = convertProccesorsToJson(obj);
+
+    expect(result).toEqual({
+      value: undefined,
+      inference_config: undefined,
+      field_map: 'normalString',
+    });
+  });
 });

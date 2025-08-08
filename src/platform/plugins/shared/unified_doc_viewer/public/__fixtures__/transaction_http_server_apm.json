@@ -1,0 +1,439 @@
+{
+  "_index": ".ds-traces-apm-default-2025.07.26-000250",
+  "_id": "I8A8SpgBcLxTBRhYJZUf",
+  "_version": 1,
+  "_source": {
+    "container": {
+      "id": "2f68713213594aef4ca33dce8b8d69d58a1414567fd122bdcf57bcf9c58ac709"
+    },
+    "kubernetes": {
+      "pod": {
+        "uid": "d2212fe7-26bb-4d7c-8ea0-55974bb12fc0",
+        "name": "productcatalogservice-d954dc548-nft8k"
+      }
+    },
+    "parent": {
+      "id": "c3f570fb431a4994"
+    },
+    "agent": {
+      "name": "go",
+      "version": "1.15.0"
+    },
+    "process": {
+      "args": [
+        "/productcatalogservice/server"
+      ],
+      "pid": 1,
+      "title": "server"
+    },
+    "source": {
+      "ip": "10.12.0.39"
+    },
+    "processor": {
+      "event": "transaction"
+    },
+    "url": {
+      "path": "/hipstershop.ProductCatalogService/GetProduct",
+      "scheme": "http",
+      "port": 9000,
+      "domain": "productcatalogservice",
+      "full": "http://productcatalogservice:9000/hipstershop.ProductCatalogService/GetProduct"
+    },
+    "labels": {
+      "statement": "SELECT * FROM products",
+      "userId": "synthetic-new-york"
+    },
+    "cloud": {
+      "availability_zone": "us-central1-a",
+      "instance": {
+        "name": "gke-demo-elastic-co-pool-5-29a9d3db-fli4",
+        "id": "4571435516433234211"
+      },
+      "provider": "gcp",
+      "machine": {
+        "type": "n2d-custom-8-16384"
+      },
+      "project": {
+        "name": "elastic-product",
+        "id": "150691754250"
+      },
+      "region": "us-central1"
+    },
+    "observer": {
+      "hostname": "d3a0ff3cdb57",
+      "type": "apm-server",
+      "version": "8.18.0"
+    },
+    "trace": {
+      "id": "479dd6a42cec26a4319652822be4d92c"
+    },
+    "@timestamp": "2025-07-27T04:55:12.080Z",
+    "data_stream": {
+      "namespace": "default",
+      "type": "traces",
+      "dataset": "apm"
+    },
+    "service": {
+      "node": {
+        "name": "2f68713213594aef4ca33dce8b8d69d58a1414567fd122bdcf57bcf9c58ac709"
+      },
+      "environment": "ecommerce",
+      "framework": {
+        "name": "grpc",
+        "version": "1.29.0"
+      },
+      "name": "productCatalogService",
+      "runtime": {
+        "name": "gc",
+        "version": "go1.12.17"
+      },
+      "language": {
+        "name": "go",
+        "version": "go1.12.17"
+      },
+      "version": "2.2"
+    },
+    "host": {
+      "os": {
+        "platform": "linux"
+      },
+      "ip": [
+        "34.122.45.26"
+      ],
+      "architecture": "amd64"
+    },
+    "client": {
+      "ip": "10.12.0.39"
+    },
+    "http": {
+      "request": {
+        "headers": {
+          "Grpc-Accept-Encoding": [
+            "identity,deflate,gzip"
+          ],
+          "User-Agent": [
+            "grpc-node/1.24.4 grpc-c/8.0.0 (linux; chttp2; ganges)"
+          ],
+          "Accept-Encoding": [
+            "identity,gzip"
+          ],
+          "Elastic-Apm-Traceparent": [
+            "00-479dd6a42cec26a4319652822be4d92c-c3f570fb431a4994-01"
+          ],
+          "Tracestate": [
+            "es=s:1"
+          ],
+          "Traceparent": [
+            "00-479dd6a42cec26a4319652822be4d92c-c3f570fb431a4994-01"
+          ],
+          ":authority": [
+            "productcatalogservice:9000"
+          ],
+          "Content-Type": [
+            "application/grpc"
+          ]
+        },
+        "method": "POST"
+      },
+      "version": "2.0"
+    },
+    "event": {
+      "success_count": 1,
+      "outcome": "success"
+    },
+    "transaction": {
+      "result": "OK",
+      "duration": {
+        "us": 7530
+      },
+      "representative_count": 1,
+      "name": "/hipstershop.ProductCatalogService/GetProduct",
+      "id": "3c68e90ebc8e1da0",
+      "span_count": {
+        "dropped": 0,
+        "started": 3
+      },
+      "type": "request",
+      "sampled": true
+    },
+    "user_agent": {
+      "original": "grpc-node/1.24.4 grpc-c/8.0.0 (linux; chttp2; ganges)",
+      "os": {
+        "name": "Linux"
+      },
+      "name": "Other",
+      "device": {
+        "name": "Other"
+      }
+    },
+    "span": {
+      "id": "3c68e90ebc8e1da0"
+    },
+    "timestamp": {
+      "us": 1753592112080623
+    }
+  },
+  "fields": {
+    "transaction.name.text": [
+      "/hipstershop.ProductCatalogService/GetProduct"
+    ],
+    "transaction.representative_count": [
+      1
+    ],
+    "user_agent.original.text": [
+      "grpc-node/1.24.4 grpc-c/8.0.0 (linux; chttp2; ganges)"
+    ],
+    "process.pid": [
+      1
+    ],
+    "service.language.name": [
+      "go"
+    ],
+    "transaction.result": [
+      "OK"
+    ],
+    "cloud.availability_zone": [
+      "us-central1-a"
+    ],
+    "container.id": [
+      "2f68713213594aef4ca33dce8b8d69d58a1414567fd122bdcf57bcf9c58ac709"
+    ],
+    "process.title.text": [
+      "server"
+    ],
+    "transaction.id": [
+      "3c68e90ebc8e1da0"
+    ],
+    "http.request.method": [
+      "POST"
+    ],
+    "agent.name.text": [
+      "go"
+    ],
+    "processor.event": [
+      "transaction"
+    ],
+    "source.ip": [
+      "10.12.0.39"
+    ],
+    "agent.name": [
+      "go"
+    ],
+    "http.version": [
+      "2.0"
+    ],
+    "labels.statement": [
+      "SELECT * FROM products"
+    ],
+    "event.outcome": [
+      "success"
+    ],
+    "user_agent.original": [
+      "grpc-node/1.24.4 grpc-c/8.0.0 (linux; chttp2; ganges)"
+    ],
+    "cloud.region": [
+      "us-central1"
+    ],
+    "cloud.instance.name.text": [
+      "gke-demo-elastic-co-pool-5-29a9d3db-fli4"
+    ],
+    "service.language.name.text": [
+      "go"
+    ],
+    "http.request.headers": [
+      {
+        "Grpc-Accept-Encoding": "identity,deflate,gzip",
+        "User-Agent": "grpc-node/1.24.4 grpc-c/8.0.0 (linux; chttp2; ganges)",
+        "Accept-Encoding": "identity,gzip",
+        "Elastic-Apm-Traceparent": "00-479dd6a42cec26a4319652822be4d92c-c3f570fb431a4994-01",
+        "Tracestate": "es=s:1",
+        "Traceparent": "00-479dd6a42cec26a4319652822be4d92c-c3f570fb431a4994-01",
+        ":authority": "productcatalogservice:9000",
+        "Content-Type": "application/grpc"
+      }
+    ],
+    "service.runtime.name.text": [
+      "gc"
+    ],
+    "transaction.duration.us": [
+      7530
+    ],
+    "service.runtime.version": [
+      "go1.12.17"
+    ],
+    "span.id": [
+      "3c68e90ebc8e1da0"
+    ],
+    "client.ip": [
+      "10.12.0.39"
+    ],
+    "user_agent.name": [
+      "Other"
+    ],
+    "data_stream.type": [
+      "traces"
+    ],
+    "host.architecture": [
+      "amd64"
+    ],
+    "cloud.machine.type": [
+      "n2d-custom-8-16384"
+    ],
+    "cloud.provider": [
+      "gcp"
+    ],
+    "timestamp.us": [
+      1753592112080623
+    ],
+    "url.path": [
+      "/hipstershop.ProductCatalogService/GetProduct"
+    ],
+    "observer.type": [
+      "apm-server"
+    ],
+    "observer.version": [
+      "8.18.0"
+    ],
+    "service.name.text": [
+      "productCatalogService"
+    ],
+    "labels.userId": [
+      "synthetic-new-york"
+    ],
+    "agent.version": [
+      "1.15.0"
+    ],
+    "parent.id": [
+      "c3f570fb431a4994"
+    ],
+    "transaction.name": [
+      "/hipstershop.ProductCatalogService/GetProduct"
+    ],
+    "process.title": [
+      "server"
+    ],
+    "kubernetes.pod.name.text": [
+      "productcatalogservice-d954dc548-nft8k"
+    ],
+    "service.framework.version": [
+      "1.29.0"
+    ],
+    "service.node.name": [
+      "2f68713213594aef4ca33dce8b8d69d58a1414567fd122bdcf57bcf9c58ac709"
+    ],
+    "kubernetes.pod.uid": [
+      "d2212fe7-26bb-4d7c-8ea0-55974bb12fc0"
+    ],
+    "url.scheme": [
+      "http"
+    ],
+    "cloud.project.name": [
+      "elastic-product"
+    ],
+    "user_agent.os.name.text": [
+      "Linux"
+    ],
+    "transaction.sampled": [
+      true
+    ],
+    "user_agent.os.name": [
+      "Linux"
+    ],
+    "service.node.name.text": [
+      "2f68713213594aef4ca33dce8b8d69d58a1414567fd122bdcf57bcf9c58ac709"
+    ],
+    "cloud.instance.id": [
+      "4571435516433234211"
+    ],
+    "host.ip": [
+      "34.122.45.26"
+    ],
+    "trace.id": [
+      "479dd6a42cec26a4319652822be4d92c"
+    ],
+    "cloud.project.name.text": [
+      "elastic-product"
+    ],
+    "event.success_count": [
+      1
+    ],
+    "transaction.span_count.dropped": [
+      0
+    ],
+    "url.port": [
+      9000
+    ],
+    "kubernetes.pod.name": [
+      "productcatalogservice-d954dc548-nft8k"
+    ],
+    "url.full": [
+      "http://productcatalogservice:9000/hipstershop.ProductCatalogService/GetProduct"
+    ],
+    "service.environment": [
+      "ecommerce"
+    ],
+    "service.name": [
+      "productCatalogService"
+    ],
+    "service.framework.name": [
+      "grpc"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "service.runtime.name": [
+      "gc"
+    ],
+    "process.args": [
+      "/productcatalogservice/server"
+    ],
+    "observer.hostname": [
+      "d3a0ff3cdb57"
+    ],
+    "user_agent.device.name.text": [
+      "Other"
+    ],
+    "url.full.text": [
+      "http://productcatalogservice:9000/hipstershop.ProductCatalogService/GetProduct"
+    ],
+    "service.framework.name.text": [
+      "grpc"
+    ],
+    "transaction.type": [
+      "request"
+    ],
+    "transaction.span_count.started": [
+      3
+    ],
+    "@timestamp": [
+      "2025-07-27T04:55:12.080Z"
+    ],
+    "service.version": [
+      "2.2"
+    ],
+    "user_agent.name.text": [
+      "Other"
+    ],
+    "host.os.platform": [
+      "linux"
+    ],
+    "data_stream.dataset": [
+      "apm"
+    ],
+    "service.language.version": [
+      "go1.12.17"
+    ],
+    "url.domain": [
+      "productcatalogservice"
+    ],
+    "user_agent.device.name": [
+      "Other"
+    ],
+    "cloud.instance.name": [
+      "gke-demo-elastic-co-pool-5-29a9d3db-fli4"
+    ],
+    "cloud.project.id": [
+      "150691754250"
+    ]
+  }
+}

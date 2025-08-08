@@ -8,7 +8,6 @@
  */
 import {
   isLiteral,
-  isTimeInterval,
   isInlineCast,
   isColumn,
   isParamLiteral,
@@ -89,11 +88,11 @@ export function buildPartialMatcher(str: string) {
   }
 
   // Return the final regex pattern
-  return new RegExp(pattern + '$', 'i');
+  return pattern;
 }
 
-const isNullMatcher = buildPartialMatcher('is nul');
-const isNotNullMatcher = buildPartialMatcher('is not nul');
+const isNullMatcher = new RegExp('is ' + buildPartialMatcher('nul') + '$', 'i');
+const isNotNullMatcher = new RegExp('is ' + buildPartialMatcher('not nul') + '$', 'i');
 
 // --- Expression types helpers ---
 
@@ -139,10 +138,6 @@ export function getExpressionType(
 
   if (isLiteral(root)) {
     return root.literalType;
-  }
-
-  if (isTimeInterval(root)) {
-    return 'time_duration';
   }
 
   // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json

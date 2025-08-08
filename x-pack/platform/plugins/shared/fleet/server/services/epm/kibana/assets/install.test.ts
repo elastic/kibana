@@ -46,6 +46,11 @@ const createImportResponse = (
     successCount: successResults.length,
   } as SavedObjectsImportResponse);
 
+const mockInstallAssetContext = {
+  pkgName: 'Mock package',
+  spaceId: 'default',
+};
+
 describe('installKibanaSavedObjects', () => {
   beforeEach(() => {
     mockImporter.import.mockReset();
@@ -65,6 +70,7 @@ describe('installKibanaSavedObjects', () => {
       savedObjectsImporter: mockImporter,
       logger: mockLogger,
       kibanaAssets: [asset],
+      context: mockInstallAssetContext,
     });
 
     expect(mockImporter.import).toHaveBeenCalledTimes(2);
@@ -81,6 +87,7 @@ describe('installKibanaSavedObjects', () => {
         savedObjectsImporter: mockImporter,
         logger: mockLogger,
         kibanaAssets: [asset],
+        context: mockInstallAssetContext,
       })
     ).rejects.toEqual(expect.any(Error));
     expect(mockImporter.import).toHaveBeenCalledTimes(51);
@@ -97,6 +104,7 @@ describe('installKibanaSavedObjects', () => {
         savedObjectsImporter: mockImporter,
         logger: mockLogger,
         kibanaAssets: [asset],
+        context: mockInstallAssetContext,
       })
     ).rejects.toEqual(expect.any(Error));
   });
@@ -115,6 +123,7 @@ describe('installKibanaSavedObjects', () => {
       savedObjectsImporter: mockImporter,
       logger: mockLogger,
       kibanaAssets: [asset],
+      context: mockInstallAssetContext,
     });
 
     expect(mockImporter.import).toHaveBeenCalledTimes(1);
@@ -128,7 +137,7 @@ describe('createSavedObjectKibanaAsset', () => {
       attributes: { hello: 'world' },
       migrationVersion: { dashboard: '8.6.0' },
     });
-    const result = createSavedObjectKibanaAsset(asset);
+    const result = createSavedObjectKibanaAsset(asset, mockInstallAssetContext);
 
     expect(result.typeMigrationVersion).toEqual('8.6.0');
   });
@@ -139,7 +148,7 @@ describe('createSavedObjectKibanaAsset', () => {
       typeMigrationVersion: '8.6.0',
       coreMigrationVersion: '8.7.0',
     });
-    const result = createSavedObjectKibanaAsset(asset);
+    const result = createSavedObjectKibanaAsset(asset, mockInstallAssetContext);
 
     expect(result.typeMigrationVersion).toEqual('8.6.0');
     expect(result.coreMigrationVersion).toEqual('8.7.0');

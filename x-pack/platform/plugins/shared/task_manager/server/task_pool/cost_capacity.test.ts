@@ -130,6 +130,26 @@ describe('CostCapacity', () => {
     ).toBe(4);
   });
 
+  test('availableCapacity returns 0 for the task type when task type with maxConcurrency is 0', () => {
+    const pool = new CostCapacity({ capacity$: of(10), logger });
+
+    const tasksInPool = new Map([
+      ['1', { ...mockTask({}, { type: 'type1' }) }],
+      ['2', { ...mockTask({}, { cost: TaskCost.Tiny }) }],
+      ['3', { ...mockTask() }],
+    ]);
+
+    expect(
+      pool.availableCapacity(tasksInPool, {
+        type: 'type1',
+        maxConcurrency: 0,
+        cost: TaskCost.Normal,
+        createTaskRunner: jest.fn(),
+        timeout: '5m',
+      })
+    ).toBe(0);
+  });
+
   describe('determineTasksToRunBasedOnCapacity', () => {
     test('runs all tasks if there is capacity', () => {
       const pool = new CostCapacity({ capacity$: of(10), logger });

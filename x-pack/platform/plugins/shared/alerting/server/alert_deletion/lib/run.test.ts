@@ -165,8 +165,17 @@ describe('runTask', () => {
     // @ts-ignore - accessing private function for testing
     await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
 
-    expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(3);
-    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(0);
+    expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(0);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(3);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenNthCalledWith(1, {
+      excludeInternallyManaged: true,
+    });
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenNthCalledWith(2, {
+      excludeInternallyManaged: true,
+    });
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenNthCalledWith(3, {
+      excludeInternallyManaged: true,
+    });
 
     // 3 inactive alert queries
     expect(esClient.openPointInTime).toHaveBeenCalledTimes(3);
@@ -397,7 +406,10 @@ describe('runTask', () => {
       new AbortController()
     );
 
-    expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledWith({
+      excludeInternallyManaged: true,
+    });
 
     expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);
     expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
@@ -579,7 +591,11 @@ describe('runTask', () => {
       new AbortController()
     );
 
-    expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(1);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledTimes(1);
+    expect(ruleTypeRegistry.getFilteredTypes).toHaveBeenCalledWith({
+      categories: ['observability'],
+      excludeInternallyManaged: true,
+    });
 
     expect(esClient.openPointInTime).toHaveBeenCalledTimes(2);
     expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
-import type { ESQLFunction, ESQLMessage, ESQLNumericLiteralType } from '../types';
+import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { ESQLNumericLiteralType } from '../types';
 import { Location } from '../commands_registry/types';
 
 /**
@@ -187,6 +188,13 @@ export interface FunctionParameter {
   mapParams?: string;
 }
 
+export interface ElasticsearchCommandDefinition {
+  type: string;
+  name: string;
+  license?: ESQLSignatureLicenseType;
+  observability_tier?: string;
+}
+
 /**
  * This is the return type of a function definition.
  *
@@ -211,10 +219,10 @@ export interface FunctionDefinition {
   locationsAvailable: Location[];
   signatures: Signature[];
   examples?: string[];
-  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
   customParametersSnippet?: string;
   license?: ESQLSignatureLicenseType;
+  observabilityTier?: Uppercase<Extract<PricingProduct, { type: 'observability' }>['tier']>;
 }
 
 export interface FunctionFilterPredicates {
@@ -292,10 +300,6 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; value: string; supportedOptions: string };
   };
-  shadowFieldType: {
-    message: string;
-    type: { field: string; fieldType: string; newType: string };
-  };
   unsupportedColumnTypeForCommand: {
     message: string;
     type: { command: string; type: string; givenType: string; column: string };
@@ -323,14 +327,6 @@ export interface ValidationErrors {
   unknownAggregateFunction: {
     message: string;
     type: { type: string; value: string };
-  };
-  wildcardNotSupportedForCommand: {
-    message: string;
-    type: { command: string; value: string };
-  };
-  noWildcardSupportAsArg: {
-    message: string;
-    type: { name: string };
   };
   unsupportedFieldType: {
     message: string;
@@ -391,6 +387,21 @@ export interface ValidationErrors {
   tooManyForks: {
     message: string;
     type: {};
+  };
+  licenseRequired: {
+    message: string;
+    type: {
+      name: string;
+      requiredLicense: string;
+    };
+  };
+  licenseRequiredForSignature: {
+    message: string;
+    type: {
+      name: string;
+      signatureDescription: string;
+      requiredLicense: string;
+    };
   };
 }
 

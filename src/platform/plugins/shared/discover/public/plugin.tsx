@@ -451,6 +451,11 @@ export class DiscoverPlugin
         discoverServices,
       });
     });
+
+    plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, async () => {
+      const { searchEmbeddableTransforms } = await getEmbeddableServices();
+      return searchEmbeddableTransforms;
+    });
   }
 }
 
