@@ -15,9 +15,9 @@ import {
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
 } from './tabs_storage_manager';
-import { defaultTabState } from './redux/internal_state';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { DEFAULT_TAB_STATE } from './redux/constants';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -42,11 +42,13 @@ const mockGetAppState = (tabId: string) => {
   }
 };
 
+const mockGetInternalState = () => ({});
+
 const mockTab1: TabState = {
-  ...defaultTabState,
+  ...DEFAULT_TAB_STATE,
   id: 'tab1',
   label: 'Tab 1',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-16T14:07:55.127Z', to: '2025-04-16T14:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -54,10 +56,10 @@ const mockTab1: TabState = {
 };
 
 const mockTab2: TabState = {
-  ...defaultTabState,
+  ...DEFAULT_TAB_STATE,
   id: 'tab2',
   label: 'Tab 2',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-17T03:07:55.127Z', to: '2025-04-17T03:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -65,10 +67,10 @@ const mockTab2: TabState = {
 };
 
 const mockRecentlyClosedTab: RecentlyClosedTabState = {
-  ...defaultTabState,
+  ...DEFAULT_TAB_STATE,
   id: 'closedTab1',
   label: 'Closed tab 1',
-  lastPersistedGlobalState: {
+  globalState: {
     timeRange: { from: '2025-04-07T03:07:55.127Z', to: '2025-04-07T03:12:55.127Z' },
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
@@ -110,17 +112,16 @@ describe('TabsStorageManager', () => {
     id: tab.id,
     label: tab.label,
     appState: mockGetAppState(tab.id),
-    globalState: tab.lastPersistedGlobalState,
+    globalState: tab.globalState,
     ...('closedAt' in tab ? { closedAt: tab.closedAt } : {}),
   });
 
   const toRestoredTab = (storedTab: TabState | RecentlyClosedTabState) => ({
-    ...defaultTabState,
+    ...DEFAULT_TAB_STATE,
     id: storedTab.id,
     label: storedTab.label,
     initialAppState: mockGetAppState(storedTab.id),
-    initialGlobalState: storedTab.lastPersistedGlobalState,
-    lastPersistedGlobalState: storedTab.lastPersistedGlobalState,
+    globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
   });
 
@@ -134,7 +135,7 @@ describe('TabsStorageManager', () => {
     tabsStorageManager.loadLocally({
       userId: mockUserId, // register userId and spaceId in tabsStorageManager
       spaceId: mockSpaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     jest.spyOn(urlStateStorage, 'set');
@@ -146,7 +147,7 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props, mockGetAppState);
+    await tabsStorageManager.persistLocally(props, mockGetAppState, mockGetInternalState);
 
     expect(urlStateStorage.set).toHaveBeenCalledWith(TABS_STATE_URL_KEY, { tabId: 'tab1' });
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
@@ -183,7 +184,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     expect(loadedProps).toEqual({
@@ -230,7 +231,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     expect(loadedProps).toEqual({
@@ -285,7 +286,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: 'different',
       spaceId: mockSpaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     expect(loadedProps.recentlyClosedTabs).toHaveLength(0);
@@ -329,7 +330,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState,
+      defaultTabState: DEFAULT_TAB_STATE,
     });
 
     expect(loadedProps).toEqual(
@@ -368,6 +369,7 @@ describe('TabsStorageManager', () => {
     jest.spyOn(storage, 'set');
 
     const updatedTabState = {
+      internalState: {},
       appState: {
         columns: ['a', 'b', 'c'],
       },

@@ -34,15 +34,19 @@ import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import { getDiscoverAppStateContainer, getInitialState } from './discover_app_state_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
-import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
-import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
   createDataViewDataSource,
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import type {
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+  TabStateGlobalState,
+} from './redux';
 import {
   createTabActionInjector,
   internalStateActions,
@@ -104,10 +108,6 @@ export interface LoadParams {
 
 export interface DiscoverStateContainer {
   /**
-   * Global State, the _g part of the URL
-   */
-  globalState: DiscoverGlobalStateContainer;
-  /**
    * App state, the _a part of the URL
    */
   appState: DiscoverAppStateContainer;
@@ -119,6 +119,11 @@ export interface DiscoverStateContainer {
    * Internal shared state that's used at several places in the UI
    */
   internalState: InternalStateStore;
+  /**
+   * @deprecated Do not use, this only exists to support
+   * Timeline which accesses the internal state directly
+   */
+  internalStateActions: typeof internalStateActions;
   /**
    * Injects the current tab into a given internalState action
    */
@@ -255,17 +260,12 @@ export function getDiscoverStateContainer({
   });
 
   /**
-   * Global State Container, synced with the _g part URL
-   */
-  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
-
-  /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
-    globalStateContainer,
     internalState,
+    getCurrentTab,
   });
 
   /**
@@ -282,12 +282,16 @@ export function getDiscoverStateContainer({
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = globalStateContainer.get();
+      const state = selectTab(internalState.getState(), tabId).globalState;
       if (state?.refreshInterval && !state.refreshInterval.pause) {
-        await globalStateContainer.set({
-          ...state,
-          refreshInterval: { ...state?.refreshInterval, pause: true },
-        });
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.setGlobalState)({
+            globalState: {
+              ...state,
+              refreshInterval: { ...state.refreshInterval, pause: true },
+            },
+          })
+        );
       }
     }
   };
@@ -392,9 +396,17 @@ export function getDiscoverStateContainer({
       },
       columns: [],
     });
+
     // clears pinned filters
-    const globalState = globalStateContainer.get();
-    globalStateContainer.set({ ...globalState, filters: [] });
+    const globalState = selectTab(internalState.getState(), tabId).globalState;
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.setGlobalState)({
+        globalState: {
+          ...globalState,
+          filters: [],
+        },
+      })
+    );
   };
 
   const onDataViewCreated = async (nextDataView: DataView) => {
@@ -433,10 +445,8 @@ export function getDiscoverStateContainer({
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
   const initializeAndSync = () => {
-    const updateTabAppStateAndGlobalState = () =>
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.updateTabAppStateAndGlobalState)()
-      );
+    const syncLocallyPersistedTabState = () =>
+      internalState.dispatch(injectCurrentTab(internalStateActions.syncLocallyPersistedTabState)());
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
@@ -444,7 +454,7 @@ export function getDiscoverStateContainer({
       services.timefilter.getRefreshIntervalUpdate$()
     ).subscribe(() => {
       savedSearchContainer.updateTimeRange();
-      updateTabAppStateAndGlobalState();
+      syncLocallyPersistedTabState();
     });
 
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
@@ -468,7 +478,7 @@ export function getDiscoverStateContainer({
 
     const savedSearchChangesSubscription = savedSearchContainer
       .getCurrent$()
-      .subscribe(updateTabAppStateAndGlobalState);
+      .subscribe(syncLocallyPersistedTabState);
 
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
@@ -558,29 +568,44 @@ export function getDiscoverStateContainer({
    */
   const undoSavedSearchChanges = async () => {
     addLog('undoSavedSearchChanges');
+
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    savedSearchContainer.set(nextSavedSearch);
+    const globalState = selectTab(internalState.getState(), tabId).globalState;
+    let globalStateUpdate: Partial<TabStateGlobalState> = {};
+
     restoreStateFromSavedSearch({
       savedSearch: nextSavedSearch,
-      timefilter: services.timefilter,
+      updateGlobalState: (update) => {
+        globalStateUpdate = { ...globalStateUpdate, ...update };
+      },
     });
+
+    // a saved search can't have global (pinned) filters so we can reset global filters state
+    if (globalState.filters) {
+      globalStateUpdate.filters = [];
+    }
+
+    if (Object.keys(globalStateUpdate).length > 0) {
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setGlobalState)({
+          globalState: {
+            ...globalState,
+            ...globalStateUpdate,
+          },
+        })
+      );
+    }
+
     const newAppState = getInitialState({
       initialUrlState: undefined,
       savedSearch: nextSavedSearch,
       services,
     });
 
-    // a saved search can't have global (pinned) filters so we can reset global filters state
-    const globalFilters = globalStateContainer.get()?.filters;
-    if (globalFilters) {
-      await globalStateContainer.set({
-        ...globalStateContainer.get(),
-        filters: [],
-      });
-    }
-
     internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
+    savedSearchContainer.set(nextSavedSearch);
     await appStateContainer.replaceUrlState(newAppState);
+
     return nextSavedSearch;
   };
 
@@ -608,9 +633,9 @@ export function getDiscoverStateContainer({
   };
 
   return {
-    globalState: globalStateContainer,
     appState: appStateContainer,
     internalState,
+    internalStateActions,
     injectCurrentTab,
     getCurrentTab,
     runtimeStateManager,

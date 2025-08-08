@@ -17,6 +17,7 @@ import type { RuntimeStateManager } from '../application/main/state_management/r
 import {
   createInternalStateStore,
   createRuntimeStateManager,
+  fromSavedSearchToSavedObjectTab,
   selectTabRuntimeState,
 } from '../application/main/state_management/redux';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
@@ -27,6 +28,7 @@ import type { DiscoverCustomizationContext } from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import { internalStateActions } from '../application/main/state_management/redux';
+import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux/constants';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -72,8 +74,49 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
+  const finalSavedSearch =
+    savedSearch === false
+      ? undefined
+      : savedSearch
+      ? savedSearch
+      : isTimeBased
+      ? savedSearchMockWithTimeField
+      : savedSearchMock;
+  const mockUserId = 'mockUserId';
+  const mockSpaceId = 'mockSpaceId';
+  const initialTabsState = tabsStorageManager.loadLocally({
+    userId: mockUserId,
+    spaceId: mockSpaceId,
+    defaultTabState: DEFAULT_TAB_STATE,
+  });
+  internalState.dispatch(internalStateActions.setTabs(initialTabsState));
   internalState.dispatch(
-    internalStateActions.initializeTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    internalStateActions.initializeTabs.fulfilled(
+      {
+        userId: mockUserId,
+        spaceId: mockSpaceId,
+        persistedDiscoverSession: finalSavedSearch
+          ? {
+              ...finalSavedSearch,
+              id: finalSavedSearch.id ?? '',
+              title: finalSavedSearch.title ?? '',
+              description: finalSavedSearch.description ?? '',
+              tabs: [
+                fromSavedSearchToSavedObjectTab({
+                  tab: {
+                    id: finalSavedSearch.id ?? '',
+                    label: finalSavedSearch.title ?? '',
+                  },
+                  savedSearch: finalSavedSearch,
+                  services,
+                }),
+              ],
+            }
+          : undefined,
+      },
+      'requestId',
+      { discoverSessionId: finalSavedSearch?.id }
+    )
   );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
@@ -92,10 +135,8 @@ export function getDiscoverStateMock({
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
-  if (savedSearch !== false) {
-    container.savedSearchState.set(
-      savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
-    );
+  if (finalSavedSearch) {
+    container.savedSearchState.set(finalSavedSearch);
   }
 
   return container;
