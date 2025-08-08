@@ -73,6 +73,10 @@ class FunctionValidator {
   }
 
   private validate(): void {
+    if (this.definition && !this.licenseOk(this.definition.license)) {
+      this.report(errors.licenseRequired(this.fn, this.definition.license!));
+    }
+
     const nestedErrors = this.validateNestedFunctions();
 
     if (nestedErrors.length) {
@@ -90,10 +94,6 @@ class FunctionValidator {
     if (!this.definition) {
       this.report(errors.unknownFunction(this.fn));
       return;
-    }
-
-    if (!this.licenseOk(this.definition.license)) {
-      this.report(errors.licenseRequired(this.fn, this.definition.license!));
     }
 
     if (!this.allowedHere) {
@@ -132,7 +132,8 @@ class FunctionValidator {
       return;
     }
 
-    if (!S.some((sig) => this.licenseOk(sig.license))) {
+    if (this.licenseOk(this.definition.license) && !S.some((sig) => this.licenseOk(sig.license))) {
+      // The function itself is allowed at this license level, but none of the matching signatures are
       this.report(errors.licenseRequiredForSignature(this.fn, S[0]));
     }
 

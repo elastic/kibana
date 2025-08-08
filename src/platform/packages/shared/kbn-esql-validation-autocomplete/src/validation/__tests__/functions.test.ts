@@ -781,132 +781,153 @@ describe('function validation', () => {
       ]);
     });
 
-    it('should allow licensed function when license IS available', async () => {
-      const { expectErrors, callbacks } = await setup();
+    describe('function-level licensing', () => {
+      it('should allow licensed function when license IS available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => true,
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => true,
+        }));
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
-        []
-      );
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+          []
+        );
+      });
+
+      it('should disallow licensed function when license NOT available', async () => {
+        const { expectErrors, callbacks } = await setup();
+
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
+
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
+          [
+            'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+            '[platinum_function_mock] expected one argument, but got 0.',
+          ]
+        );
+
+        await expectErrors(
+          'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+          ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+        );
+
+        await expectErrors('FROM a_index | STATS col0 = PLATINUM_FUNCTION_MOCK(keywordField)', [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+        ]);
+      });
+
+      it('should show license error even when nested functions also have errors', async () => {
+        const { expectErrors, callbacks } = await setup();
+
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
+
+        await expectErrors('FROM index | STATS extent = PLATINUM_FUNCTION_MOCK(FLOOR(""))', [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          getNoValidCallSignatureError('floor', ['keyword']),
+        ]);
+      });
     });
 
-    it('should disallow licensed function when license NOT available', async () => {
-      const { expectErrors, callbacks } = await setup();
+    describe('signature-level licensing', () => {
+      it('should allow licensed signature when license IS available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => false,
-      }));
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => true,
+        }));
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
-      );
+        await expectErrors(
+          'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
+          []
+        );
+      });
 
-      await expectErrors(
-        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
-        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
-      );
+      it('should allow ambiguous invocation when it could match an available signature', async () => {
+        setTestFunctions([
+          {
+            type: FunctionDefinitionTypes.SCALAR,
+            name: 'test',
+            description: '',
+            signatures: [
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'integer',
+                    optional: false,
+                  },
+                ],
+                license: 'PLATINUM', // licensed signature
+                returnType: 'keyword',
+              },
+              {
+                params: [
+                  {
+                    name: 'field',
+                    type: 'keyword',
+                    optional: false,
+                  },
+                ],
+                license: undefined, // no license required
+                returnType: 'keyword',
+              },
+            ],
+            locationsAvailable: [Location.EVAL],
+          },
+        ]);
 
-      await expectErrors('FROM a_index | STATS col0 = PLATINUM_FUNCTION_MOCK(keywordField)', [
-        'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
-      ]);
-    });
+        const { expectErrors, callbacks } = await setup();
 
-    it('should allow licensed signature when license IS available', async () => {
-      const { expectErrors, callbacks } = await setup();
+        // make license unavailable
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => true,
-      }));
+        // make ambiguous call using a parameter "?param" that could match either signature
+        await expectErrors('FROM index | EVAL extent = TEST(?param)', []);
+      });
 
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
-        []
-      );
-    });
+      it('should disallow licensed signature when license NOT available', async () => {
+        const { expectErrors, callbacks } = await setup();
 
-    it('should allow ambiguous invocation when it could match an available signature', async () => {
-      setTestFunctions([
-        {
-          type: FunctionDefinitionTypes.SCALAR,
-          name: 'test',
-          description: '',
-          signatures: [
-            {
-              params: [
-                {
-                  name: 'field',
-                  type: 'integer',
-                  optional: false,
-                },
-              ],
-              license: 'PLATINUM', // licensed signature
-              returnType: 'keyword',
-            },
-            {
-              params: [
-                {
-                  name: 'field',
-                  type: 'keyword',
-                  optional: false,
-                },
-              ],
-              license: undefined, // no license required
-              returnType: 'keyword',
-            },
-          ],
-          locationsAvailable: [Location.EVAL],
-        },
-      ]);
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
 
-      const { expectErrors, callbacks } = await setup();
+        await expectErrors(
+          'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
+          [
+            "platinum_partial_function_mock with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+          ]
+        );
+      });
 
-      // make license unavailable
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => false,
-      }));
+      it("Should report various non-license errors even when the function isn't allowed", async () => {
+        const { expectErrors, callbacks } = await setup();
 
-      // make ambiguous call using a parameter "?param" that could match either signature
-      await expectErrors('FROM index | EVAL extent = TEST(?param)', []);
-    });
+        callbacks.getLicense = jest.fn(async () => ({
+          hasAtLeast: () => false,
+        }));
 
-    it('should disallow licensed signature when license NOT available', async () => {
-      const { expectErrors, callbacks } = await setup();
+        await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
+          '[platinum_partial_function_mock] expected one argument, but got 0.',
+        ]);
 
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => false,
-      }));
+        await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
+          getNoValidCallSignatureError('platinum_partial_function_mock', ['integer']),
+        ]);
 
-      await expectErrors(
-        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE("0,0"))',
-        [
-          "platinum_partial_function_mock with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
-        ]
-      );
-    });
-
-    it("Should report various non-license errors even when the function isn't allowed", async () => {
-      const { expectErrors, callbacks } = await setup();
-
-      callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: () => false,
-      }));
-
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
-        '[platinum_partial_function_mock] expected one argument, but got 0.',
-      ]);
-
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
-        getNoValidCallSignatureError('platinum_partial_function_mock', ['integer']),
-      ]);
-
-      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [
-        'Unknown column [WrongField]',
-      ]);
+        await expectErrors(
+          'FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)',
+          ['Unknown column [WrongField]']
+        );
+      });
     });
   });
 });
