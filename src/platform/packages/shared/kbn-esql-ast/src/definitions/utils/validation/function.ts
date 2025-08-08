@@ -46,13 +46,14 @@ export function validateFunction({
   context: ICommandContext;
   callbacks: ICommandCallbacks;
 }): ESQLMessage[] {
-  return new FunctionValidator(fn, parentCommand, context, callbacks).validate();
+  return new FunctionValidator(fn, parentCommand, context, callbacks).messages;
 }
 
 class FunctionValidator {
   private definition: FunctionDefinition | undefined;
   private argTypes: (SupportedDataType | 'unknown')[] = [];
   private argLiteralsMask: boolean[] = [];
+  private _messages: ESQLMessage[] = [];
 
   constructor(
     private fn: ESQLFunction,
@@ -67,67 +68,75 @@ class FunctionValidator {
       );
       this.argLiteralsMask.push(isLiteral(arg));
     }
+
+    this.validate();
   }
 
-  validate(): ESQLMessage[] {
+  private validate(): void {
     const nestedErrors = this.validateNestedFunctions();
 
     if (nestedErrors.length) {
-      // if one or more child functions produced errors, stop validation and report
-      return nestedErrors;
+      // if one or more child functions produced errors, report and stop validation
+      this.report(...nestedErrors);
+      return;
     }
 
     if (isParamLiteral(this.fn.operator)) {
       // skip validation for functions with names defined by a parameter
       // e.g. "... | EVAL ??param(..args)"
-      return [];
+      return;
     }
 
     if (!this.definition) {
-      return [errors.unknownFunction(this.fn)];
+      this.report(errors.unknownFunction(this.fn));
+      return;
     }
 
     if (!this.licenseOk(this.definition.license)) {
-      return [errors.licenseRequired(this.fn, this.definition.license!)]; // TODO - maybe don't end validation here
+      this.report(errors.licenseRequired(this.fn, this.definition.license!));
     }
 
-    if (!this.availableHere) {
+    if (!this.allowedHere) {
       const { displayName } = getFunctionLocation(this.fn, this.parentCommand);
-      return [errors.functionNotAllowedHere(this.fn, displayName)];
+      this.report(errors.functionNotAllowedHere(this.fn, displayName));
     }
 
     if (!this.hasValidArity) {
-      return [errors.wrongNumberArgs(this.fn, this.definition)];
+      this.report(errors.wrongNumberArgs(this.fn, this.definition));
+      return;
     }
 
-    return this.validateArguments();
+    this.validateArguments();
   }
 
   /**
    * Validates the function arguments against the function definition
    */
-  private validateArguments(): ESQLMessage[] {
+  private validateArguments(): void {
     if (!this.definition) {
-      return [];
+      return;
     }
 
-    // Begin validation
+    // Begin signature validation
     const A = getSignaturesWithMatchingArity(this.definition, this.fn);
 
     if (!A.length) {
-      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+      this.report(errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes));
+      return;
     }
 
     const S = getSignaturesMatchingTypes(this.definition, this.argTypes, this.argLiteralsMask);
 
     if (!S.length) {
-      return [errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes)];
+      this.report(errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes));
+      return;
     }
 
     if (!S.some((sig) => this.licenseOk(sig.license))) {
-      return [errors.licenseRequiredForSignature(this.fn, S[0])];
+      this.report(errors.licenseRequiredForSignature(this.fn, S[0]));
     }
 
+    // Validate column arguments
     const columnMessages = this.fn.args.flat().flatMap((arg) => {
       if (isColumn(arg) || isIdentifier(arg)) {
         return new ColumnValidator(arg, this.context, this.parentCommand.name).validate();
@@ -135,12 +144,24 @@ class FunctionValidator {
       return [];
     });
 
-    // @TODO - remove this approach when align field availability detection with autocomplete
-    // (start using columnsAfter instead of collectUserDefinedColumns)
+    // uniqBy is used to cover a special case in ENRICH where an implicit assignment is possible
+    // so the AST actually stores an explicit "columnX = columnX" which duplicates the message
     //
-    // This is due to a special case in enrich where an implicit assignment is possible
-    // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
-    return uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`);
+    // @TODO - we will no longer need to store an assignment in the AST approach when we
+    // align field availability detection with the system used by autocomplete
+    // (start using columnsAfter instead of collectUserDefinedColumns)
+    this.report(...uniqBy(columnMessages, ({ location }) => `${location.min}-${location.max}`));
+  }
+
+  /**
+   * Reports one or more validation messages
+   */
+  private report(...messages: ESQLMessage[]): void {
+    this._messages.push(...messages);
+  }
+
+  public get messages(): ESQLMessage[] {
+    return this._messages;
   }
 
   /**
@@ -152,7 +173,7 @@ class FunctionValidator {
       const arg = removeInlineCasts(_arg);
       if (isFunctionExpression(arg)) {
         nestedErrors.push(
-          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).validate()
+          ...new FunctionValidator(arg, this.parentCommand, this.context, this.callbacks).messages
         );
       }
 
@@ -177,7 +198,7 @@ class FunctionValidator {
   /**
    * Checks if the function is available in the current context
    */
-  private get availableHere(): boolean {
+  private get allowedHere(): boolean {
     const { location } = getFunctionLocation(this.fn, this.parentCommand);
     return this.definition?.locationsAvailable.includes(location) ?? false;
   }

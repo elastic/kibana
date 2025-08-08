@@ -889,19 +889,19 @@ describe('function validation', () => {
       );
     });
 
-    it.skip('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
+    it("Should report various non-license errors even when the function isn't allowed", async () => {
       const { expectErrors, callbacks } = await setup();
 
       callbacks.getLicense = jest.fn(async () => ({
-        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+        hasAtLeast: () => false,
       }));
 
       await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
-        'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
+        '[platinum_partial_function_mock] expected one argument, but got 0.',
       ]);
 
       await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
-        'Argument of [platinum_partial_function_mock] must be [cartesian_point], found value [0] type [integer]',
+        getNoValidCallSignatureError('platinum_partial_function_mock', ['integer']),
       ]);
 
       await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [

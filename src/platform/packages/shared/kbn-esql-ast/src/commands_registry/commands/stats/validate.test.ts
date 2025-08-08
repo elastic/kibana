@@ -134,11 +134,11 @@ describe('STATS Validation', () => {
       });
 
       test('various errors', () => {
-        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField)', [
+        statsExpectErrors('from a_index | stats avg(doubleField) by percentile(doubleField, 20)', [
           'Function [percentile] not allowed in [by]',
         ]);
         statsExpectErrors(
-          'from a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
+          'from a_index | stats avg(doubleField) by textField, percentile(doubleField, 50) by ipField',
           ['Function [percentile] not allowed in [by]']
         );
       });
