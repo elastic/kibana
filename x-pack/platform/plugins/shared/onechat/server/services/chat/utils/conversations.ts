@@ -17,11 +17,13 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 export const createConversation$ = ({
   agentId,
   conversationClient,
+  conversationId,
   title$,
   roundCompletedEvents$,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
+  conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -31,6 +33,7 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
+        id: conversationId,
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
@@ -74,6 +77,22 @@ export const updateConversation$ = ({
   );
 };
 
+/**
+ * Check if a conversation exists
+ */
+export const conversationExists$ = ({
+  conversationId,
+  conversationClient,
+}: {
+  conversationId: string;
+  conversationClient: ConversationClient;
+}): Observable<boolean> => {
+  return defer(() => conversationClient.exists(conversationId));
+};
+
+/**
+ * Get an existing conversation or return a placeholder for new conversations
+ */
 export const getConversation$ = ({
   agentId,
   conversationId,
@@ -92,9 +111,28 @@ export const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+/**
+ * Create a placeholder conversation
+ */
+export const createPlaceholderConversation$ = ({
+  agentId,
+  conversationId,
+}: {
+  agentId: string;
+  conversationId?: string;
+}): Observable<Conversation> => {
+  return of(placeholderConversation({ agentId, conversationId }));
+};
+
+const placeholderConversation = ({
+  agentId,
+  conversationId,
+}: {
+  agentId: string;
+  conversationId?: string;
+}): Conversation => {
   return {
-    id: uuidv4(),
+    id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
     rounds: [],
