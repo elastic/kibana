@@ -23,6 +23,7 @@ import type {
   MigrationResult,
   IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Histogram } from '@opentelemetry/api/build/src/metrics/Metric';
 import type { MigrationLog } from '../types';
 import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
@@ -50,6 +51,8 @@ export interface RunZeroDowntimeMigrationOpts {
   nodeRoles: NodeRoles;
   /** Capabilities of the ES cluster we're using */
   esCapabilities: ElasticsearchCapabilities;
+
+  meter: Histogram;
 }
 
 export const runZeroDowntimeMigration = async (
@@ -78,6 +81,8 @@ export const runZeroDowntimeMigration = async (
         throw error;
       } finally {
         process.removeListener('uncaughtExceptionMonitor', dumpLogs);
+        const duration = 0; // TODO: Calculate duration
+        options.meter.record(duration, { scope: migratorConfig.indexPrefix }); // TODO: find better naming for scope
       }
     })
   );
