@@ -2025,7 +2025,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     ) {
       return supertest
         .post(
-          routeWithNamespace(
+          getRouteUrlForSpace(
             replaceParams(
               '/internal/siem_migrations/rules/{migration_id}/update_index_pattern',
               props.params
