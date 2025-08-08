@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
+import type { JiraServiceManagementCreateAlertParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
-import type { CreateAlertProps } from '.';
+import { CreateAlertProps } from '.';
 import { decodeCreateAlert } from './schema';
 import { isDecodeError } from '../../lib/schema_utils';
 
@@ -107,7 +107,7 @@ const parseJson = (jsonValue: string): Record<string, unknown> | undefined => {
   }
 };
 
-const getJsonEditorValue = (subActionParams?: Partial<OpsgenieCreateAlertParams>) => {
+const getJsonEditorValue = (subActionParams?: Partial<JiraServiceManagementCreateAlertParams>) => {
   const defaultValue = '{}';
   try {
     const value = JSON.stringify(subActionParams, null, 2);
