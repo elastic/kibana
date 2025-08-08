@@ -9,8 +9,7 @@ import { ScoutTestOptions, createPlaywrightConfig } from '@kbn/scout';
 import { PlaywrightTestConfig, defineConfig } from '@playwright/test';
 import { AvailableConnectorWithId, getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import { ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
-import * as fs from 'fs';
-import * as path from 'path';
+import { createDevModeConfig } from './dev_mode_config';
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
@@ -41,7 +40,6 @@ export function createPlaywrightEvalsConfig({
 
   const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({ testDir });
 
-  log.info(`Use details: ${JSON.stringify(use, null, 2)}`);
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
   const connectors = getAvailableConnectors();
 
@@ -94,34 +92,14 @@ export function createPlaywrightEvalsConfig({
 
   if (process.env.DEV_MODE) {
     try {
-      const evalsDir = path.join(baseServersConfigDir, 'evals');
-      fs.mkdirSync(evalsDir, { recursive: true });
-
-      const localJsonPath = path.join(evalsDir, 'local.json');
-      if (!fs.existsSync(localJsonPath)) {
-        const localConfig = {
-          serverless: false,
-          isCloud: false,
-          hosts: {
-            kibana: 'http://elastic:changeme@localhost:5601/nry',
-            elasticsearch: 'http://elastic:changeme@localhost:9200',
-          },
-          auth: {
-            username: 'elastic',
-            password: 'changeme',
-          },
-        };
-        fs.writeFileSync(localJsonPath, JSON.stringify(localConfig, null, 2));
-      }
-
-      serversConfigDirOverride = evalsDir;
+      serversConfigDirOverride = createDevModeConfig(baseServersConfigDir);
       log.info(`DEV_MODE active: serversConfigDir overridden to ${serversConfigDirOverride}`);
     } catch (err) {
       log.warning(`DEV_MODE setup failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
-  const definedConfig = defineConfig<{}, EvaluationTestOptions>({
+  return defineConfig<{}, EvaluationTestOptions>({
     ...config,
     // some reports write to disk, which we don't need
     reporter: Array.isArray(reporter)
@@ -136,6 +114,4 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     timeout: 5 * 60_000,
   });
-  log.info(`Full playwright evals config: ${JSON.stringify(definedConfig, null, 2)}`);
-  return definedConfig;
 }
