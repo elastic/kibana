@@ -18,6 +18,7 @@ import {
   ESDistanceSourceDescriptor,
   ESTermSourceDescriptor,
   JoinDescriptor,
+  JoinSourceDescriptor,
 } from '../../../common/descriptor_types';
 import { IVectorSource } from '../sources/vector_source';
 import { IField } from '../fields/field';
@@ -33,7 +34,7 @@ import {
 import { TableSourceDescriptor } from '../sources/join_sources/table_source/table_source';
 
 export function createJoinSource(
-  descriptor: JoinDescriptor['right'] | undefined
+  descriptor: Partial<JoinSourceDescriptor> | undefined
 ): IJoinSource | undefined {
   if (!descriptor) {
     return;

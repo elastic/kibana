@@ -45,18 +45,27 @@ export function getSourceTitle() {
   }
 }
 
+type NormalizedEMSTMSSourceDescriptor = EMSTMSSourceDescriptor &
+  Required<Pick<EMSTMSSourceDescriptor, 'isAutoSelect' | 'lightModeDefault'>>;
+
 export class EMSTMSSource extends AbstractSource implements ITMSSource {
-  static createDescriptor(descriptor: Partial<EMSTMSSourceDescriptor>): EMSTMSSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<EMSTMSSourceDescriptor>
+  ): NormalizedEMSTMSSourceDescriptor {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
       isAutoSelect:
         typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
-      lightModeDefault: descriptor.lightModeDefault,
+      lightModeDefault:
+        descriptor.lightModeDefault === undefined ||
+        descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
+          ? getEmsTileLayerId().desaturated
+          : DEFAULT_EMS_ROADMAP_ID,
     };
   }
 
-  readonly _descriptor: EMSTMSSourceDescriptor;
+  readonly _descriptor: NormalizedEMSTMSSourceDescriptor;
 
   constructor(descriptor: Partial<EMSTMSSourceDescriptor>) {
     const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);
@@ -162,18 +171,11 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
   }
 
   getTileLayerId() {
-    if (!this._descriptor.isAutoSelect) {
-      return this._descriptor.id ?? getEmsTileLayerId().desaturated;
+    if (!this._descriptor.isAutoSelect && this._descriptor.id) {
+      return this._descriptor.id;
     }
 
-    if (getIsDarkMode()) {
-      return getEmsTileLayerId().dark;
-    }
-
-    return this._descriptor.lightModeDefault === undefined ||
-      this._descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
-      ? getEmsTileLayerId().desaturated
-      : getEmsTileLayerId().bright;
+    return getIsDarkMode() ? getEmsTileLayerId().dark : this._descriptor.lightModeDefault;
   }
 
   async getLicensedFeatures() {
