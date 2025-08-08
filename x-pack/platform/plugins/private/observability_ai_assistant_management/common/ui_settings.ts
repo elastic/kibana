@@ -67,7 +67,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel',
       { defaultMessage: 'Search connector index pattern' }
     ),
-    value: '',
+    value: '.integration_knowledge*',
     description: i18n.translate(
       'xpack.observabilityAiAssistantManagement.settingsPage.searchConnectorIndexPatternDescription',
       {
