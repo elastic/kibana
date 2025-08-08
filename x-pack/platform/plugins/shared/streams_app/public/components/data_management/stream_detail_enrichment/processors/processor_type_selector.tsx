@@ -63,6 +63,7 @@ export const ProcessorTypeSelector = ({
       helpText={getProcessorDescription(core.docLinks)(processorType)}
     >
       <EuiSuperSelect
+        data-test-subj="streamsAppProcessorTypeSelector"
         disabled={disabled}
         options={processorTypeSelectorOptions}
         isInvalid={fieldState.invalid}
