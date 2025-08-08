@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 
 import { EuiButton, EuiSpacer, EuiText, EuiModalBody, EuiLink, EuiSwitch } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 
@@ -69,28 +69,32 @@ export const HelloWorldExample = ({
           onChange={(e) => {
             setIsChecked(e.target.checked);
             if (e.target.checked) {
-              const dynamicAction = createAction({
-                id: DYNAMIC_ACTION_ID,
-                type: ACTION_HELLO_WORLD,
-                getDisplayName: () => 'Say hello to Waldo',
-                execute: async () => {
-                  const overlay = overlays.openModal(
-                    toMountPoint(
-                      <EuiModalBody>
-                        <EuiText data-test-subj="dynamicHelloWorldActionText">Hello Waldo</EuiText>{' '}
-                        <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
-                          Close
-                        </EuiButton>
-                      </EuiModalBody>,
-                      rendering
-                    )
-                  );
-                },
-              });
               uiActionsStartService.addTriggerActionAsync(
                 HELLO_WORLD_TRIGGER_ID,
                 DYNAMIC_ACTION_ID,
-                async () => dynamicAction
+                async () => {
+                  const { createAction } = await import('@kbn/ui-actions-plugin/public');
+                  return createAction({
+                    id: DYNAMIC_ACTION_ID,
+                    type: ACTION_HELLO_WORLD,
+                    getDisplayName: () => 'Say hello to Waldo',
+                    execute: async () => {
+                      const overlay = overlays.openModal(
+                        toMountPoint(
+                          <EuiModalBody>
+                            <EuiText data-test-subj="dynamicHelloWorldActionText">
+                              Hello Waldo
+                            </EuiText>{' '}
+                            <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
+                              Close
+                            </EuiButton>
+                          </EuiModalBody>,
+                          rendering
+                        )
+                      );
+                    },
+                  });
+                }
               );
             } else {
               uiActionsStartService.detachAction(HELLO_WORLD_TRIGGER_ID, DYNAMIC_ACTION_ID);

@@ -31,6 +31,14 @@ interface SetupDeps {
   uiActions: UiActionsSetup;
   developerExamples: DeveloperExamplesSetup;
 }
+export const TRIGGER_PHONE_TRIGGER_ACTION = 'TRIGGER_PHONE_TRIGGER_ACTION';
+export const EDIT_USER_ACTION = 'EDIT_USER_ACTION';
+export const VIEW_IN_MAPS_ACTION = 'VIEW_IN_MAPS_ACTION';
+export const LOOK_UP_WEATHER_ACTION = 'LOOK_UP_WEATHER_ACTION';
+export const SHOWCASE_PLUGGABILITY_ACTION_COUNTRY = 'SHOWCASE_PLUGGABILITY_ACTION_COUNTRY';
+export const MAKE_PHONE_CALL_ACTION = 'MAKE_PHONE_CALL_ACTION';
+export const SHOWCASE_PLUGGABILITY_ACTION_PHONE = 'SHOWCASE_PLUGGABILITY_ACTION_PHONE';
+export const SHOWCASE_PLUGGABILITY_ACTION_USER = 'SHOWCASE_PLUGGABILITY_ACTION_USER';
 
 export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
   public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
@@ -46,41 +54,41 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     const startServices = core.getStartServices();
 
-    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, 'TRIGGER_PHONE_TRIGGER_ACTION', async () =>
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, TRIGGER_PHONE_TRIGGER_ACTION, async () =>
       createTriggerPhoneTriggerAction(async () => (await startServices)[1].uiActions)
     );
-    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, 'EDIT_USER_ACTION', async () =>
+    deps.uiActions.addTriggerActionAsync(USER_TRIGGER, EDIT_USER_ACTION, async () =>
       createEditUserAction(async () => (await startServices)[0])
     );
 
     deps.uiActions.addTriggerActionAsync(
       COUNTRY_TRIGGER,
-      'VIEW_IN_MAPS_ACTION',
+      VIEW_IN_MAPS_ACTION,
       async () => viewInMapsAction
     );
     deps.uiActions.addTriggerActionAsync(
       COUNTRY_TRIGGER,
-      'LOOK_UP_WEATHER_ACTION',
+      LOOK_UP_WEATHER_ACTION,
       async () => lookUpWeatherAction
     );
     deps.uiActions.addTriggerActionAsync(
       COUNTRY_TRIGGER,
-      'SHOWCASE_PLUGGABILITY_ACTION_COUNTRY',
+      SHOWCASE_PLUGGABILITY_ACTION_COUNTRY,
       async () => showcasePluggability
     );
     deps.uiActions.addTriggerActionAsync(
       PHONE_TRIGGER,
-      'MAKE_PHONE_CALL_ACTION',
+      MAKE_PHONE_CALL_ACTION,
       async () => makePhoneCallAction
     );
     deps.uiActions.addTriggerActionAsync(
       PHONE_TRIGGER,
-      'SHOWCASE_PLUGGABILITY_ACTION_PHONE',
+      SHOWCASE_PLUGGABILITY_ACTION_PHONE,
       async () => showcasePluggability
     );
     deps.uiActions.addTriggerActionAsync(
       USER_TRIGGER,
-      'SHOWCASE_PLUGGABILITY_ACTION_USER',
+      SHOWCASE_PLUGGABILITY_ACTION_USER,
       async () => showcasePluggability
     );
 

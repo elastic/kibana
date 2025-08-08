@@ -60,7 +60,10 @@ export interface UiActionsEnhancedExamplesStart {
   managerWithoutEmbeddableSingleButton: UiActionsEnhancedDynamicActionManager;
   managerWithEmbeddable: UiActionsEnhancedDynamicActionManager;
 }
-
+export const SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE =
+  'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE';
+export const SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE =
+  'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE';
 export class UiActionsEnhancedExamplesPlugin
   implements Plugin<void, UiActionsEnhancedExamplesStart, SetupDependencies, StartDependencies>
 {
@@ -82,9 +85,9 @@ export class UiActionsEnhancedExamplesPlugin
 
     uiActions.addTriggerActionAsync(
       SAMPLE_APP2_CLICK_TRIGGER,
-      'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
+      SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE,
       async () => ({
-        id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE',
+        id: SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_CREATE,
         order: 2,
         getDisplayName: () => 'Add drilldown now',
         getIconType: () => 'plusInCircle',
@@ -112,9 +115,9 @@ export class UiActionsEnhancedExamplesPlugin
     );
     uiActions.addTriggerActionAsync(
       SAMPLE_APP2_CLICK_TRIGGER,
-      'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
+      SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE,
       async () => ({
-        id: 'SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE',
+        id: SINGLE_ELEMENT_EXAMPLE_OPEN_FLYOUT_AT_MANAGE,
         order: 1,
         getDisplayName: () => 'Manage drilldowns',
         getIconType: () => 'list',

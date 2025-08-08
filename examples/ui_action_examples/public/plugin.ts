@@ -9,7 +9,6 @@
 
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { createHelloWorldActionDefinition } from './hello_world_action';
 import { helloWorldTrigger } from './hello_world_trigger';
 
 export interface UiActionExamplesSetupDependencies {
@@ -19,7 +18,7 @@ export interface UiActionExamplesSetupDependencies {
 export interface UiActionExamplesStartDependencies {
   uiActions: UiActionsStart;
 }
-
+export const HELLO_WORLD_ACTION = 'HELLO_WORLD_ACTION';
 export class UiActionExamplesPlugin
   implements
     Plugin<void, void, UiActionExamplesSetupDependencies, UiActionExamplesStartDependencies>
@@ -30,9 +29,10 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    uiActions.addTriggerActionAsync(helloWorldTrigger.id, 'HELLO_WORLD_ACTION', async () =>
-      createHelloWorldActionDefinition(async () => (await core.getStartServices())[0])
-    );
+    uiActions.addTriggerActionAsync(helloWorldTrigger.id, HELLO_WORLD_ACTION, async () => {
+      const { createHelloWorldActionDefinition } = await import('./hello_world_action');
+      return createHelloWorldActionDefinition(async () => (await core.getStartServices())[0]);
+    });
   }
 
   public start(_core: CoreStart, _plugins: UiActionExamplesStartDependencies) {}

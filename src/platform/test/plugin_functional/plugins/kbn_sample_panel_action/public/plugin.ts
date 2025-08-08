@@ -10,26 +10,22 @@
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { createSamplePanelAction } from './sample_panel_action';
-import { createSamplePanelLink } from './sample_panel_link';
 
-export class SampelPanelActionTestPlugin
-  implements Plugin<SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart>
+export const SAMPLE_PANEL_ACTION = 'SAMPLE_PANEL_ACTION';
+export const SAMPLE_PANEL_LINK = 'SAMPLE_PANEL_LINK';
+
+export class SamplePanelActionTestPlugin
+  implements Plugin<SamplePanelActionTestPluginSetup, SamplePanelActionTestPluginStart>
 {
   public setup(core: CoreSetup, { uiActions }: { uiActions: UiActionsSetup }) {
-    const samplePanelAction = createSamplePanelAction(core.getStartServices);
-    const samplePanelLink = createSamplePanelLink();
-
-    uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
-      'SAMPLE_PANEL_ACTION',
-      async () => samplePanelAction
-    );
-    uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
-      'SAMPLE_PANEL_LINK',
-      async () => samplePanelLink
-    );
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, SAMPLE_PANEL_ACTION, async () => {
+      const { createSamplePanelAction } = await import('./sample_panel_action');
+      return createSamplePanelAction(core.getStartServices);
+    });
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, SAMPLE_PANEL_LINK, async () => {
+      const { createSamplePanelLink } = await import('./sample_panel_link');
+      return createSamplePanelLink();
+    });
 
     return {};
   }
@@ -38,5 +34,5 @@ export class SampelPanelActionTestPlugin
   public stop() {}
 }
 
-export type SampelPanelActionTestPluginSetup = ReturnType<SampelPanelActionTestPlugin['setup']>;
-export type SampelPanelActionTestPluginStart = ReturnType<SampelPanelActionTestPlugin['start']>;
+export type SamplePanelActionTestPluginSetup = ReturnType<SamplePanelActionTestPlugin['setup']>;
+export type SamplePanelActionTestPluginStart = ReturnType<SamplePanelActionTestPlugin['start']>;
