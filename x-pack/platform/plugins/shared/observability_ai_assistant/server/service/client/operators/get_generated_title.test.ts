@@ -87,6 +87,7 @@ describe('getGeneratedTitle', () => {
 
     expect(title).toEqual('My title');
   });
+
   it('calls chat with the user message', async () => {
     const { chatSpy, title$ } = callGenerateTitle(
       ['observability'],
