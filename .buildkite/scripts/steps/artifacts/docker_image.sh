@@ -103,11 +103,11 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    create_and_push_manifest "$KIBANA_BASE_IMAGE:latest"
-    create_and_push_manifest "$KIBANA_CHAT_BASE_IMAGE:latest"
-    create_and_push_manifest "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest"
-    create_and_push_manifest "$KIBANA_SEARCH_BASE_IMAGE:latest"
-    create_and_push_manifest "$KIBANA_SECURITY_BASE_IMAGE:latest"
+    docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_CHAT_BASE_IMAGE:latest" "$KIBANA_CHAT_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest" "$KIBANA_OBSERVABILITY_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SEARCH_BASE_IMAGE:latest" "$KIBANA_SEARCH_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SECURITY_BASE_IMAGE:latest" "$KIBANA_SECURITY_IMAGE"
   fi
 
   echo "--- Build dependencies report"
