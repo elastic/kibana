@@ -19,7 +19,7 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useCallback } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';
-import { useToolsActions } from '../../../context/tools_provider';
+import { useToolsActions } from '../../../context/tools_table_provider';
 import { labels } from '../../../utils/i18n';
 
 export interface ToolsTableHeaderProps {

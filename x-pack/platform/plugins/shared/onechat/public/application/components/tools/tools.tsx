@@ -9,7 +9,7 @@ import { EuiButton, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-import { useToolsActions } from '../../context/tools_provider';
+import { useToolsActions } from '../../context/tools_table_provider';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 

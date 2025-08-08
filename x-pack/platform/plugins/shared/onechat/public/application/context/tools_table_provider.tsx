@@ -29,9 +29,11 @@ export interface ToolsActionsContextType {
   testTool: (toolId: string) => void;
 }
 
-export const ToolsActionsContext = createContext<ToolsActionsContextType | undefined>(undefined);
+export const ToolsTableActionsContext = createContext<ToolsActionsContextType | undefined>(
+  undefined
+);
 
-export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
+export const ToolsTableProvider = ({ children }: { children: React.ReactNode }) => {
   const {
     isOpen: isDeleteModalOpen,
     isLoading: isDeletingTool,
@@ -110,7 +112,7 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   return (
-    <ToolsActionsContext.Provider
+    <ToolsTableActionsContext.Provider
       value={{
         deleteTool,
         bulkDeleteTools,
@@ -152,12 +154,12 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           <EuiText>{labels.tools.bulkDeleteEsqlToolsConfirmationText}</EuiText>
         </EuiConfirmModal>
       )}
-    </ToolsActionsContext.Provider>
+    </ToolsTableActionsContext.Provider>
   );
 };
 
 export const useToolsActions = () => {
-  const context = useContext(ToolsActionsContext);
+  const context = useContext(ToolsTableActionsContext);
   if (!context) {
     throw new Error('useToolsActions must be used within a ToolsProvider');
   }

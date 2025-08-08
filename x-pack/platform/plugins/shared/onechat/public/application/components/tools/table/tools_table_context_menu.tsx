@@ -17,7 +17,7 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
-import { useToolsActions } from '../../../context/tools_provider';
+import { useToolsActions } from '../../../context/tools_table_provider';
 
 export interface ToolContextMenuProps {
   tool: ToolDefinitionWithSchema;

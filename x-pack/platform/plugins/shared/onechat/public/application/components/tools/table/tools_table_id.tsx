@@ -11,7 +11,7 @@ import { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import { isEsqlTool } from '@kbn/onechat-common/tools';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
-import { useToolsActions } from '../../../context/tools_provider';
+import { useToolsActions } from '../../../context/tools_table_provider';
 
 export interface ToolIdWithDescriptionProps {
   tool: ToolDefinitionWithSchema;
