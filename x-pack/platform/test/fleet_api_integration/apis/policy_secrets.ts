@@ -139,6 +139,7 @@ export default function (providerContext: FtrProviderContext) {
         const response = await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
+          conflicts: 'proceed',
           query: {
             match_all: {},
           },
