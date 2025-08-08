@@ -40,7 +40,6 @@ export function validateOption(
         ...validateFunction({
           fn: arg,
           parentCommand: command,
-          parentOption: option.name,
           context,
           callbacks,
         })

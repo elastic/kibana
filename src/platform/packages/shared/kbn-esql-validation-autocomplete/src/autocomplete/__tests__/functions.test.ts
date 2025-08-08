@@ -146,7 +146,6 @@ describe('functions arg suggestions', () => {
                 name: 'arg',
                 type: 'keyword',
                 suggestedValues: ['value1', 'value2', 'value3'],
-                literalSuggestions: ['value1'],
               },
             ],
             returnType: 'double',
