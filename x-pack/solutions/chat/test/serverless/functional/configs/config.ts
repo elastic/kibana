@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
+import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
+import { services } from '../services';
 
 export default createTestConfig({
   serverlessProject: 'chat',
+  services,
   testFiles: [require.resolve('.')],
   junit: {
-    reportName: 'Serverless Chat API Integration Tests',
+    reportName: 'Serverless Chat Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlChat'] },
 
   // include settings from project controller
   esServerArgs: [],
   kbnServerArgs: [],
+
+  apps: {},
 });

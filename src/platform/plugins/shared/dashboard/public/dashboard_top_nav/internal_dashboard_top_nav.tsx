@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopover,
+  EuiScreenReaderOnly,
   EuiToolTipProps,
   UseEuiTheme,
 } from '@elastic/eui';
@@ -353,12 +354,12 @@ export function InternalDashboardTopNav({
 
   return (
     <div css={styles.container}>
-      <h1
-        id="dashboardTitle"
-        className="euiScreenReaderOnly"
-        ref={dashboardTitleRef}
-        tabIndex={-1}
-      >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      <EuiScreenReaderOnly>
+        <h1
+          id="dashboardTitle"
+          ref={dashboardTitleRef}
+        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      </EuiScreenReaderOnly>
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
