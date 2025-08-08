@@ -51,5 +51,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const serverStatus = await testSubjects.getAttribute('serverStatusTitleBadge', 'aria-label');
       expect(serverStatus).to.be('Green');
     });
+
+    it('should display the core status section', async () => {
+      const coreStatusSection = await testSubjects.getVisibleText('coreStatusSection');
+      expect(coreStatusSection).to.contain('Core status');
+    });
+
+    it('should display the plugins status section', async () => {
+      const pluginStatusSection = await testSubjects.getVisibleText('pluginStatusSection');
+      expect(pluginStatusSection).to.contain('Plugin status');
+    });
   });
 }

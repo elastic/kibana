@@ -23,7 +23,7 @@ export const StatusSection: FC<StatusSectionProps> = ({ id, title, statuses }) =
   const highestStatus = useMemo(() => getHighestStatus(statuses), [statuses]);
 
   return (
-    <EuiPanel grow={false}>
+    <EuiPanel grow={false} data-test-subj={`${id}StatusSection`}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
