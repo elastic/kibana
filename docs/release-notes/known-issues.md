@@ -8,7 +8,7 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
-::::{dropdown} Reports created in alternative Kibana spaces aren't retrieved by the lists or job API
+::::{dropdown} Reports created in non-default Kibana spaces aren't shown in the Reporting UI
 
 Applies to: {{stack}} 9.1.0, 9.1.1
 
