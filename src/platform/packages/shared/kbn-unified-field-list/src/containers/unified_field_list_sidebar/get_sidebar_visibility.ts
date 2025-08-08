@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface SidebarVisibility {
   isCollapsed$: BehaviorSubject<boolean>;
-  toggle: (isCollapsed: boolean) => void;
+  toggle: (isCollapsed: boolean, shouldPersist?: boolean) => void;
   initialValue: boolean;
 }
 
@@ -40,9 +40,9 @@ export const getSidebarVisibility = ({
   return {
     initialValue,
     isCollapsed$,
-    toggle: (isCollapsed) => {
+    toggle: (isCollapsed, shouldPersist = true) => {
       isCollapsed$.next(isCollapsed);
-      if (localStorageKey) {
+      if (localStorageKey && shouldPersist) {
         setIsCollapsed(localStorageKey, isCollapsed);
       }
     },

@@ -70,6 +70,7 @@ export function getStateDefaults({
     interval: 'auto',
     filters: cloneDeep(searchSource?.getOwnField('filter')) as DiscoverAppState['filters'],
     hideChart: chartHidden,
+    hideSidebar: undefined, // TODO: do we want to start saving it in Discover Session SO?
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
@@ -88,6 +89,9 @@ export function getStateDefaults({
   if (savedSearch?.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
   }
+  // if (savedSearch?.hideSidebar !== undefined) {
+  //   defaultState.hideSidebar = savedSearch.hideSidebar;
+  // }
   if (savedSearch?.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
