@@ -17,7 +17,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRulePartialFailure,
-} from '../../../../../../common/utils/security_solution';
+} from '../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';

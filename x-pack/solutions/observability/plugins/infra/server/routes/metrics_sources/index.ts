@@ -9,8 +9,8 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { kqlQuery, rangeQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
-  DataSchemaFormat,
   DATASTREAM_DATASET,
   EVENT_MODULE,
   findInventoryModel,
@@ -292,8 +292,8 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         ) {
           return response.ok({
             body: getTimeRangeMetadataResponseRT.encode({
-              schemas: [DataSchemaFormat.SEMCONV],
-              preferredSchema: DataSchemaFormat.SEMCONV,
+              schemas: ['semconv'],
+              preferredSchema: 'semconv',
             }),
           });
         }
@@ -334,16 +334,14 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
         const hasEcsData = ecsResponse.hits.total.value !== 0;
         const hasOtelData = otelResponse.hits.total.value !== 0;
 
-        const allSchemas = [DataSchemaFormat.ECS, DataSchemaFormat.SEMCONV] as DataSchemaFormat[];
+        const allSchemas: DataSchemaFormat[] = ['ecs', 'semconv'];
         const availableSchemas = allSchemas.filter(
-          (key) =>
-            (key === DataSchemaFormat.ECS && hasEcsData) ||
-            (key === DataSchemaFormat.SEMCONV && hasOtelData)
+          (key) => (key === 'ecs' && hasEcsData) || (key === 'semconv' && hasOtelData)
         );
         const preferredSchema =
           availableSchemas.length > 0
-            ? availableSchemas.includes(DataSchemaFormat.SEMCONV)
-              ? DataSchemaFormat.SEMCONV
+            ? availableSchemas.includes('semconv')
+              ? 'semconv'
               : availableSchemas[0]
             : null;
 

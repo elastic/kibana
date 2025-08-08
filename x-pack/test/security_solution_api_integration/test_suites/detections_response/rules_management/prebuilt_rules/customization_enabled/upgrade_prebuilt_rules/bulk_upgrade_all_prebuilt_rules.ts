@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets, performUpgradePrebuiltRules } from '../../../../utils';

@@ -137,7 +137,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
         css={{
           width: '100%',
           height: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: euiTheme.colors.backgroundBasePlain,
           borderRadius: '8px',
           padding: '8px 12px',
           boxShadow:
@@ -163,7 +163,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                   css={{
                     fontSize: '14px',
                     fontWeight: 'bold',
-                    color: '#374151',
+                    color: euiTheme.colors.textHeading,
                     lineHeight: '1.25',
                     display: 'flex',
                     alignItems: 'center',
@@ -182,7 +182,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                 <div
                   css={{
                     fontSize: '12px',
-                    color: '#6b7280',
+                    color: euiTheme.colors.textSubdued,
                   }}
                 >
                   {node.data.stepType}

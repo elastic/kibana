@@ -23,7 +23,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
   });
 
   test('should create a new routing rule successfully', async ({ page, pageObjects }) => {
-    await page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
+    await pageObjects.streams.clickCreateRoutingRule();
 
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();

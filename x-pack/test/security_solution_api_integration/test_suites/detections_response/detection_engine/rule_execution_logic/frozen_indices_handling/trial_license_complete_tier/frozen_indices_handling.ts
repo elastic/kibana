@@ -13,7 +13,7 @@ import { dataGeneratorFactory } from '../../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { moveIndexToFrozenDataTier } from '../../../../utils/frozen_data_tier';
 

@@ -64,9 +64,9 @@ export const monitoringEntitySourceRoute = (
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
+          const body = await client.init(request.body);
           const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
           const engineStatus = await privMonDataClient.getEngineStatus();
-
           try {
             if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
               await privMonDataClient.scheduleNow();
@@ -74,9 +74,6 @@ export const monitoringEntitySourceRoute = (
           } catch (e) {
             logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
           }
-
-          const body = await client.init(request.body);
-
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
@@ -88,7 +85,6 @@ export const monitoringEntitySourceRoute = (
         }
       }
     );
-
   router.versioned
     .get({
       access: 'public',

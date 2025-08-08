@@ -71,6 +71,7 @@ export const CustomSamplesDataSourceCard = ({
         fullWidth
       >
         <CodeEditor
+          dataTestSubj="streamsAppCustomSamplesDataSourceEditor"
           height={200}
           value={editorValue}
           onChange={handleEditorChange}

@@ -14,7 +14,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   performUpgradePrebuiltRules,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 

@@ -65,7 +65,11 @@ class ConversationClientImpl implements ConversationClient {
       query: {
         bool: {
           must: [
-            { term: { user_id: this.user.id } },
+            {
+              term: this.user.username
+                ? { user_name: this.user.username }
+                : { user_id: this.user.id },
+            },
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
         },
@@ -135,5 +139,7 @@ const hasAccess = ({
   conversation: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
-  return conversation._source!.user_id === user.id;
+  return (
+    conversation._source!.user_id === user.id || conversation._source!.user_name === user.username
+  );
 };

@@ -3704,6 +3704,20 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.timeoutSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "timeoutSeconds",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.NamedEntityRecognitionRule.allowedEntityClasses",
             "type": "Array",
             "tags": [],

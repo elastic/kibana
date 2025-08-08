@@ -29,6 +29,7 @@ import * as i18n from './translations';
 import { RuleSnoozeSection } from './rule_snooze_section';
 import { NotificationAction } from './notification_action';
 import { ResponseAction } from './response_action';
+import { transformRuleInterval } from './utils';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
@@ -36,6 +37,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
   form: FormHook<ActionsStepRule>;
+  ruleInterval: string | undefined;
 }
 
 interface StepRuleActionsReadOnlyProps {
@@ -75,6 +77,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   actionMessageParams,
   summaryActionMessageParams,
   form,
+  ruleInterval,
 }) => {
   const {
     services: { application },
@@ -90,11 +93,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
             messageVariables: actionMessageParams,
             summaryMessageVariables: summaryActionMessageParams,
             ruleTypeId,
+            minimumThrottleInterval: transformRuleInterval(ruleInterval),
           }}
         />
       </>
     ),
-    [actionMessageParams, ruleTypeId, summaryActionMessageParams]
+    [actionMessageParams, ruleTypeId, summaryActionMessageParams, ruleInterval]
   );
   const displayResponseActionsOptions = useMemo(() => {
     return (
