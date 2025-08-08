@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { termQuery, rangeQuery, termsQuery, existsQuery } from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
