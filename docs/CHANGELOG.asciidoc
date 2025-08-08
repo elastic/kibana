@@ -155,7 +155,7 @@ Review the following information about the {kib} 8.19.0 release.
 include::CHANGELOG.asciidoc[tag=known-issue-230275]
 
 // tag::known-issue-2462[]
-.Reports created in alternative Kibana spaces aren't retrieved by the lists or job API.
+.Reports created in non-default Kibana spaces aren't shown in the Reporting UI.
 [%collapsible]
 ====
 *Details* +
