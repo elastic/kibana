@@ -28,16 +28,17 @@ export const NEXT_STEP_LABEL = i18n.translate(
   }
 );
 
-export const UPDATE_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle',
+export const IM_DOES_NOT_MATCH_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.imDoesNotMatchTourTitle',
   {
-    defaultMessage: 'New field view of updates',
+    defaultMessage: 'New Indicator Match rule capabilities.',
   }
 );
 
-export const UPDATE_TOUR_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription',
+export const IM_DOES_NOT_MATCH_TOUR_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.imDoesNotMatchTourDescription',
   {
-    defaultMessage: "Click on a rule's name to view the latest changes.",
+    defaultMessage:
+      'Use new DOES NOT MATCH condition in Indicator Match rule to find events that are not matching values in indicator index.',
   }
 );

@@ -33,6 +33,11 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  CREATE_NEW_RULE_TOUR_ANCHOR,
+  RuleFeatureTour,
+} from '../../components/rules_table/feature_tour/rules_feature_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -57,6 +62,10 @@ const RulesPageComponent: React.FC = () => {
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
+
+  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
 
   if (
     redirectToDetections(
@@ -128,7 +137,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
                 <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
                   fill
@@ -139,6 +148,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.ADD_NEW_RULE}
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
+              {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
