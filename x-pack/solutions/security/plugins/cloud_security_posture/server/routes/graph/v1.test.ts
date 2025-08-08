@@ -92,7 +92,7 @@ describe('getGraph', () => {
 
     expect(fetchGraph).toHaveBeenCalledWith(
       expect.objectContaining({
-        indexPatterns: [`*.alerts-security.alerts-defaultSpace`, 'logs-*'],
+        indexPatterns: [`.alerts-security.alerts-defaultSpace`, 'logs-*'],
       })
     );
   });

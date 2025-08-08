@@ -876,16 +876,29 @@ export default function (providerContext: FtrProviderContext) {
             // Verify other nodes
             response.body.nodes.forEach((node: EntityNodeDataModel | LabelNodeDataModel) => {
               expect(node).to.have.property('color');
-              expect(node.color).equal(
-                'primary',
-                `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
-              );
 
               if (node.shape === 'label') {
-                expect(node.documentsData).to.have.length(1);
-                expect(node.documentsData?.[0]).to.have.property(
-                  'type',
-                  node.shape === 'label' ? 'event' : 'entity'
+                expect(node.color).equal(
+                  'danger',
+                  `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
+                );
+                expect(node.documentsData).to.have.length(2);
+                expect(node.documentsData).to.contain(
+                  {
+                    type: 'event',
+                  },
+                  `node documentsData missing event details [node: ${node.id}]`
+                );
+                expect(node.documentsData).to.contain(
+                  {
+                    type: 'alert',
+                  },
+                  `node documentsData missing alert details [node: ${node.id}]`
+                );
+              } else {
+                expect(node.color).equal(
+                  'primary',
+                  `node color mismatched [node: ${node.id}] [actual: ${node.color}]`
                 );
               }
             });

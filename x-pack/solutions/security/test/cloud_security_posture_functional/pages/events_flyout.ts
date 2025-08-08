@@ -169,7 +169,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         `${networkEventsPage.getAbsoluteTimerangeFilter(
           '2024-09-01T00:00:00.000Z',
           '2024-09-02T00:00:00.000Z'
-        )}&${networkEventsPage.getFlyoutFilter('1')}`
+        )}&${networkEventsPage.getFlyoutFilter('5')}`
       );
       await networkEventsPage.waitForListToHaveEvents();
 
@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
+        'a(admin4@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)'
       );
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('event');
     });
