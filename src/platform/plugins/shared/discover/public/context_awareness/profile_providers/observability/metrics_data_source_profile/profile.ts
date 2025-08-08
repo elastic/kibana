@@ -20,6 +20,10 @@ export const createMetricsDataSourceProfileProvider = (
 ): MetricsDataSourceProfileProvider => ({
   profileId: 'metrics-data-source-profile',
   profile: {
+    getDefaultAppState: (prev) => (params) => ({
+      ...(prev ? prev(params) : {}),
+      hideSidebar: true,
+    }),
     getChartConfig: (prev) => () => ({
       ...(prev ? prev() : {}),
       mode: UnifiedHistogramMode.metrics,

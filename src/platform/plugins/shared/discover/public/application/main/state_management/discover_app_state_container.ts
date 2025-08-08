@@ -107,6 +107,10 @@ export interface DiscoverAppState {
    */
   hideChart?: boolean;
   /**
+   * Hide sidebar
+   */
+  hideSidebar?: boolean;
+  /**
    * The current data source
    */
   dataSource?: DiscoverDataSource;
@@ -284,6 +288,7 @@ export const getDiscoverAppStateContainer = ({
             rowHeight: rowHeight === undefined,
             breakdownField: breakdownField === undefined,
             hideChart: hideChart === undefined,
+            hideSidebar: true,
           },
         })
       );
@@ -388,6 +393,10 @@ export function getInitialState({
   // https://github.com/elastic/kibana/issues/122555
   if (typeof mergedState.hideChart !== 'boolean') {
     mergedState.hideChart = undefined;
+  }
+
+  if (typeof mergedState.hideSidebar !== 'boolean') {
+    mergedState.hideSidebar = undefined;
   }
 
   // Don't allow URL state to overwrite the data source if there's an ES|QL query

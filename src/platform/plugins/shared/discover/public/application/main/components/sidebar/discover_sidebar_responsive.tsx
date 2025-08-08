@@ -46,6 +46,7 @@ import {
   useDataViewsForPicker,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -400,6 +401,19 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     [dispatch, setFieldListUiState]
   );
+
+  const isSidebarHidden = useAppStateSelector((state) => state.hideSidebar);
+
+  useEffect(() => {
+    const currentState = sidebarToggleState$.getValue();
+    if (isSidebarHidden && currentState.isCollapsed === false) {
+      currentState.toggle?.(true, false);
+      return;
+    }
+    if (isSidebarHidden === undefined && currentState.isCollapsed === true) {
+      currentState.toggle?.(false, false);
+    }
+  }, [sidebarToggleState$, isSidebarHidden]);
 
   return (
     <EuiFlexGroup
