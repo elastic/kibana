@@ -260,7 +260,7 @@ describe('provides correct series naming', () => {
     expect(getFormatSpy).toHaveBeenCalledWith({ id: 'custom' });
   });
 
-  test('split series without formatting with multiple y accessors', () => {
+  test('split series without formatting with multiple y accessors', async () => {
     const args = createArgsWithLayers();
     const newArgs = {
       ...args,
@@ -275,32 +275,13 @@ describe('provides correct series naming', () => {
       ],
     };
 
-    const component = getRenderedComponent(newArgs);
+    const { debugState } = await renderChart({ ...defaultProps, args: newArgs }, XYChart, true);
 
-    const lineSeries = component.find(DataLayers).dive().find(LineSeries);
-    const nameFn1 = lineSeries.at(0).prop('name') as SeriesNameFn;
-    const nameFn2 = lineSeries.at(0).prop('name') as SeriesNameFn;
-
-    expect(
-      nameFn1(
-        {
-          ...nameFnArgs,
-          seriesKeys: ['split1', 'a'],
-          splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-        },
-        false
-      )
-    ).toEqual('split1 - Label A');
-    expect(
-      nameFn2(
-        {
-          ...nameFnArgs,
-          seriesKeys: ['split1', 'b'],
-          splitAccessors: nameFnArgs.splitAccessors.set('d', 'split1'),
-        },
-        false
-      )
-    ).toEqual('split1 - Label B');
+    expect(debugState?.lines).toHaveLength(4);
+    expect(debugState?.lines?.[0]?.name).toBe('Row 1 - Label A');
+    expect(debugState?.lines?.[1]?.name).toBe('Row 2 - Label A');
+    expect(debugState?.lines?.[2]?.name).toBe('Row 1 - Label B');
+    expect(debugState?.lines?.[3]?.name).toBe('Row 2 - Label B');
   });
 
   test('split series with formatting with multiple y accessors', () => {
