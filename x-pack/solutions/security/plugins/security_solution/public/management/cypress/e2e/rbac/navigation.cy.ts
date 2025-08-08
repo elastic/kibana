@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as ServerlessHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/serverless_security_header';
-import * as EssHeaders from '@kbn/test-suites-xpack/security_solution_cypress/cypress/screens/security_header';
+import * as ServerlessHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/serverless_security_header';
+import * as EssHeaders from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/screens/security_header';
 import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import { SIEM_VERSIONS } from '../../common/constants';
