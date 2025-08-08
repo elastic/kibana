@@ -53,6 +53,10 @@ export async function getDataStreamDetails({
       ).dataStreams[0]
     : undefined;
 
+  if (!esDataStream && dataStreamPrivileges.monitor) {
+    return {};
+  }
+
   try {
     const dataStreamSummaryStats = await getDataStreamSummaryStats(
       esClientAsCurrentUser,

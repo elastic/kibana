@@ -49,7 +49,7 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
       }) as Promise<any>;
     },
     fieldCaps(params: FieldCapsRequest): Promise<FieldCapsResponse> {
-      return esClient.fieldCaps({ ...params, ignore_unavailable: true });
+      return esClient.fieldCaps({ ...params });
     },
     mappings(params: { index: string }): Promise<IndicesGetMappingResponse> {
       return esClient.indices.getMapping(params);
