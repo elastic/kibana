@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiAutoSizer,
   EuiAutoSize,
+  EuiProgress,
 } from '@elastic/eui';
 import { MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
@@ -57,7 +58,7 @@ interface ListItem {
 
 export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
-    const { status, allConfigs, loaded } = useOverviewStatus({
+    const { status, allConfigs, loaded, loading } = useOverviewStatus({
       scopeStatusByLocation: true,
     });
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
@@ -152,6 +153,12 @@ export const OverviewGrid = memo(
         {view === 'cardView' ? (
           <>
             <div style={groupField === 'none' ? { height: listHeight } : undefined}>
+              {loading && (
+                <>
+                  <EuiProgress size="xs" color="accent" />
+                  <EuiSpacer size="xs" />
+                </>
+              )}
               {groupField === 'none' ? (
                 loaded && monitorsSortedByStatus.length ? (
                   <EuiAutoSizer>
