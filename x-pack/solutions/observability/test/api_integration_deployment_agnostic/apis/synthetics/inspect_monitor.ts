@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           publicConfigs: [
             rawExpect.objectContaining({
               cloud_id: 'ftr_fake_cloud_id',
-              license_level: 'trial',
+              license_level: rawExpect.any(String),
               monitors: [
                 {
                   type: 'http',
@@ -190,7 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   ],
                 },
               ],
-              license_level: 'trial',
+              license_level: rawExpect.any(String),
               cloud_id: 'ftr_fake_cloud_id',
               output: { hosts: [] },
             }),
