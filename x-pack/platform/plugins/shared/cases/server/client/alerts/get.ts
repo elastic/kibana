@@ -55,24 +55,26 @@ export const getAlertMetadataFromComments = async (
     return [];
   });
 
-  const metadata: { tags: string[]; [key: string]: unknown } = { tags: [] };
+  const metadata: { tags: Set<string>; [key: string]: Set<unknown> } = { tags: new Set() };
 
   const alertsDocs = await getAlerts(alertInfo, clientArgs);
 
   for (const alert of alertsDocs) {
-    metadata.tags.push(...(alert[TAGS] ?? []));
+    (alert[TAGS] ?? []).forEach((tag) => metadata.tags.add(tag));
     const grouping = alert[ALERT_GROUPING];
     if (grouping) {
       const flat = flattenObject(grouping);
       for (const [key, value] of Object.entries(flat)) {
         if (!(key in metadata)) {
-          metadata[key] = [value];
-        } else if (Array.isArray(metadata[key]) && typeof value === 'string') {
-          (metadata[key] as string[]).push(value);
+          metadata[key] = new Set([value]);
+        } else {
+          metadata[key].add(value);
         }
       }
     }
   }
 
-  return metadata;
+  return Object.fromEntries(
+    Object.entries(metadata).map(([key, value]) => [key, Array.from(value)])
+  );
 };
