@@ -28,4 +28,5 @@ export { AttachmentActionType } from './client/attachment_framework/types';
 
 export { DeleteAttachmentConfirmationModal } from './components/user_actions/delete_attachment_confirmation_modal';
 export { useDeletePropertyAction } from './components/user_actions/property_actions/use_delete_property_action';
+export { useUpdateAlertComment } from './containers/use_update_alert_comment';
 export { useDeleteComment } from './containers/use_delete_comment';

@@ -20,7 +20,6 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { useDeleteComment } from '@kbn/cases-plugin/public';
 import {
   useDeletePropertyAction,
   DeleteAttachmentConfirmationModal,
@@ -60,27 +59,17 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
-  const { mutateAsync: deleteComment } = useDeleteComment();
-
-  const commentId = useMemo(() => {
-    return caseData?.comments?.find(
-      (comment) => 'alertId' in comment && comment.alertId[0] === alert._id
-    )?.id;
+  const alertAttachment = useMemo(() => {
+    return caseData?.comments?.find((comment) => {
+      if ('alertId' in comment && comment.alertId.includes(alert._id)) {
+        return comment.alertId.includes(alert._id);
+      }
+    });
   }, [caseData, alert._id]);
 
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete: () => {
-      if (caseData?.id && commentId)
-        deleteComment({
-          caseId: caseData.id,
-          commentId,
-          successToasterTitle: i18n.translate(
-            'xpack.observability.alerts.actions.removeFromCaseSuccess',
-            {
-              defaultMessage: 'Alert removed from case',
-            }
-          ),
-        });
+      removeAlertsFromCase();
     },
   });
 
@@ -110,14 +99,21 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
 
-  const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
-    useCaseActions({
-      refresh,
-      alerts: [alert],
-      services: {
-        cases,
-      },
-    });
+  const {
+    isPopoverOpen,
+    setIsPopoverOpen,
+    handleAddToExistingCaseClick,
+    handleAddToNewCaseClick,
+    removeAlertsFromCase,
+  } = useCaseActions({
+    refresh,
+    alerts: [alert],
+    services: {
+      cases,
+    },
+    caseData,
+    alertAttachment,
+  });
 
   const closeActionsPopover = useCallback(() => {
     setIsPopoverOpen(false);
@@ -128,7 +124,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   };
 
   const removeFromCaseAction = [
-    ...(commentId
+    ...(alertAttachment
       ? [
           <EuiContextMenuItem
             data-test-subj="remove-from-case-action"

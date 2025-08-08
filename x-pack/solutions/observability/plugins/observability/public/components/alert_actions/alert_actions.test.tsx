@@ -214,6 +214,17 @@ describe('ObservabilityActions component', () => {
     });
   });
 
+  it('should refresh when removing an alert from a case', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(1);
+
+      wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().simulate('click');
+      expect(refresh).toHaveBeenCalled();
+    });
+  });
+
   it('should refresh when adding an alert to a new case', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
@@ -266,6 +277,7 @@ describe('ObservabilityActions component', () => {
     expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
       0
     );
+    expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(0);
   });
 
   it('should show a valid url when clicking  "View in app"', async () => {

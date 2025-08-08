@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, User } from '../../common/types/domain';
+import type { AlertAttachment, CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -425,6 +425,29 @@ export const patchComment = async ({
     }),
     signal,
   });
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const patchAlertComment = async ({
+  caseId,
+  commentUpdate,
+  signal,
+}: {
+  caseId: string;
+  commentUpdate: Pick<AlertAttachment, 'alertId' | 'index' | 'rule' | 'owner' | 'type'> & {
+    id: string;
+    version: string;
+  };
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
+    method: 'PATCH',
+    body: JSON.stringify({
+      ...commentUpdate,
+    }),
+    signal,
+  });
+
   return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
