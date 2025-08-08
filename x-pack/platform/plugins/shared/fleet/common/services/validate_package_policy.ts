@@ -43,8 +43,6 @@ interface DurationParseResult {
 /**
  * Parses a duration string into nanoseconds and validates the format.
  * Valid time units are "ms", "s", "m", "h".
- * Units must appear in descending order (h->m->s->ms).
- * Each unit can appear at most once in a duration value.
  *
  * @param durationStr - The duration string to parse (e.g., "1h30m45s")
  * @returns An object with parsing results
@@ -87,41 +85,6 @@ export const parseDuration = (durationStr: string): DurationParseResult => {
     result.errors.push(
       i18n.translate('xpack.fleet.packagePolicyValidation.invalidDurationCharactersErrorMessage', {
         defaultMessage: 'Duration contains invalid characters',
-      })
-    );
-  }
-
-  // Check for duplicate units
-  const units = matches.map(match => match[2]);
-  const uniqueUnits = new Set(units);
-  if (units.length !== uniqueUnits.size) {
-    result.isValid = false;
-    result.errors.push(
-      i18n.translate('xpack.fleet.packagePolicyValidation.duplicateUnitsErrorMessage', {
-        defaultMessage: 'Each time unit can appear at most once in a duration',
-      })
-    );
-  }
-
-  // Check for correct order of units (h->m->s->ms)
-  const expectedOrder = ['h', 'm', 's', 'ms'];
-  let lastUnitIndex = -1;
-  let orderValid = true;
-
-  for (const unit of units) {
-    const currentUnitIndex = expectedOrder.indexOf(unit);
-    if (currentUnitIndex <= lastUnitIndex) {
-      orderValid = false;
-      break;
-    }
-    lastUnitIndex = currentUnitIndex;
-  }
-
-  if (!orderValid) {
-    result.isValid = false;
-    result.errors.push(
-      i18n.translate('xpack.fleet.packagePolicyValidation.incorrectUnitOrderErrorMessage', {
-        defaultMessage: 'Time units must appear in descending order (h->m->s->ms)',
       })
     );
   }

@@ -1711,40 +1711,6 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toContain('Invalid duration format. Expected format like "1h30m45s"');
     });
 
-    it('should return error for duration with duplicate units', () => {
-      const res = validatePackagePolicyConfig(
-        {
-          type: 'duration',
-          value: '1h30m45s30s',
-        },
-        {
-          name: 'timeout',
-          type: 'duration',
-        },
-        'timeout',
-        load
-      );
-
-      expect(res).toContain('Each time unit can appear at most once in a duration');
-    });
-
-    it('should return error for duration with incorrect unit order', () => {
-      const res = validatePackagePolicyConfig(
-        {
-          type: 'duration',
-          value: '30m1h',
-        },
-        {
-          name: 'timeout',
-          type: 'duration',
-        },
-        'timeout',
-        load
-      );
-
-      expect(res).toContain('Time units must appear in descending order (h->m->s->ms)');
-    });
-
     it('should validate duration with min_duration constraint (valid)', () => {
       const res = validatePackagePolicyConfig(
         {
@@ -2021,7 +1987,7 @@ describe('Fleet - parseDuration()', () => {
     const expectedNs =
       3_600_000_000_000 + // 1 hour
       1_800_000_000_000 + // 30 minutes
-      45_000_000_000 +  // 45 seconds
+      45_000_000_000 + // 45 seconds
       500_000_000; // 500 milliseconds
 
     expect(result.isValid).toBe(true);
