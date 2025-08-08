@@ -14,6 +14,10 @@ import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 
 jest.mock('../hooks/use_cloud_setup_context');
+(useCloudSetup as jest.Mock).mockReturnValue({
+  awsOrganizationEnabled: true,
+  awsPolicyType: 'aws-policy-type',
+});
 
 const mockUpdatePolicy = jest.fn();
 
@@ -40,11 +44,6 @@ const defaultNewPolicy = {
 const defaultPackageInfo = { version: '1.5.0' } as PackageInfo;
 
 const renderComponent = (props = {}) => {
-  (useCloudSetup as jest.Mock).mockReturnValue({
-    awsOrganizationMinimumVersion: '1.5.0',
-    awsPolicyType: 'aws-policy-type',
-  });
-
   return render(
     <I18nProvider>
       <AwsAccountTypeSelect
@@ -92,22 +91,16 @@ describe('AwsAccountTypeSelect', () => {
     );
   });
 
-  it('disables AWS Organization radio if version is below minimum', () => {
+  it('disables AWS Organization radio if awsOrganizationEnabled is false', () => {
     (useCloudSetup as jest.Mock).mockReturnValue({
-      awsOrganizationMinimumVersion: '1.5.0',
+      awsOrganizationEnabled: false,
       awsPolicyType: 'aws',
     });
     renderComponent({
-      packageInfo: { version: '1.4.0' },
+      packageInfo: { version: '3.0.0' },
     });
     const orgRadio = screen.getByLabelText('AWS Organization');
     expect(orgRadio).toBeDisabled();
-  });
-
-  it('shows warning callout if AWS Organization is disabled', () => {
-    renderComponent({
-      packageInfo: { version: '1.4.0' },
-    });
     expect(
       screen.getByText(/AWS Organization not supported in current integration version/)
     ).toBeInTheDocument();

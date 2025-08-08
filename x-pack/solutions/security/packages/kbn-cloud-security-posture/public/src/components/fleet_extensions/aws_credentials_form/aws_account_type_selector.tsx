@@ -72,8 +72,10 @@ export const AwsAccountTypeSelect = ({
     [awsOrganizationEnabled]
   );
 
+  const awsAccountType = useMemo(() => getAwsAccountType(input), [input]);
+
   useEffect(() => {
-    if (!getAwsAccountType(input)) {
+    if (!awsAccountType) {
       updatePolicy({
         updatedPolicy: updatePolicyWithInputs(
           newPolicy,
@@ -81,15 +83,14 @@ export const AwsAccountTypeSelect = ({
 
           {
             'aws.account_type': {
-              value: awsOrganizationEnabled ? AWS_SINGLE_ACCOUNT : AWS_ORGANIZATION_ACCOUNT,
+              value: awsOrganizationEnabled ? AWS_ORGANIZATION_ACCOUNT : AWS_SINGLE_ACCOUNT,
               type: 'text',
             },
           }
         ),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, updatePolicy]);
+  }, [awsAccountType, awsOrganizationEnabled, awsPolicyType, input, newPolicy, updatePolicy]);
 
   return (
     <>
