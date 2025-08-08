@@ -202,6 +202,7 @@ export const executeUpdate = async <T>(
       refresh,
       document: rawUpsert._source,
       ...(version ? decodeRequestVersion(version) : {}),
+      // @ts-expect-error
       require_alias: true,
     };
 
