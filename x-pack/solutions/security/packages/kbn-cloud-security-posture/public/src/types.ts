@@ -29,8 +29,8 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-
 import type { BoolQuery } from '@kbn/es-query';
+import type { GenericBuckets } from '@kbn/grouping/src';
 export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
@@ -184,3 +184,85 @@ export type FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = FlyoutPanel
 export type FindingsVulnerabilityPanelExpandableFlyoutProps =
   | FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview
   | FindingsVulnerabilityPanelExpandableFlyoutPropsPreview;
+
+// Elasticsearch returns `null` when a sub-aggregation cannot be computed
+export type NumberOrNull = number | null;
+export interface FindingsGroupingAggregation {
+  unitsCount?: {
+    value?: NumberOrNull;
+  };
+  groupsCount?: {
+    value?: NumberOrNull;
+  };
+  failedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  passedFindings?: {
+    doc_count?: NumberOrNull;
+  };
+  groupByFields?: {
+    buckets?: GenericBuckets[];
+  };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceName?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceSubType?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkName?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkVersion?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkId?: {
+    buckets?: GenericBuckets[];
+  };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  clusterName?: {
+    buckets?: GenericBuckets[];
+  };
+  isLoading?: boolean;
+}
+
+export interface VulnerabilitiesGroupingAggregation {
+  unitsCount?: {
+    value?: NumberOrNull;
+  };
+  groupsCount?: {
+    value?: NumberOrNull;
+  };
+  groupByFields?: {
+    buckets?: GenericBuckets[];
+  };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceName?: {
+    buckets?: GenericBuckets[];
+  };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  isLoading?: boolean;
+  critical?: {
+    doc_count?: NumberOrNull;
+  };
+  high?: {
+    doc_count?: NumberOrNull;
+  };
+  medium?: {
+    doc_count?: NumberOrNull;
+  };
+  low?: {
+    doc_count?: NumberOrNull;
+  };
+  cloudProvider?: {
+    buckets?: GenericBuckets[];
+  };
+}

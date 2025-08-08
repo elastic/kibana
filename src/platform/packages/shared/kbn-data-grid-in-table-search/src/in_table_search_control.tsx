@@ -20,6 +20,10 @@ import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
 
 const innerCss = css`
+  /* ensure nested search input borders are visible */
+  position: relative;
+  z-index: 1;
+
   .dataGridInTableSearch__matchesCounter {
     font-variant-numeric: tabular-nums;
   }
@@ -30,7 +34,7 @@ const innerCss = css`
   }
 
   .euiFormControlLayout__append {
-    padding-inline: 0 !important;
+    padding-inline-end: 0 !important;
     background: none;
   }
 
@@ -40,6 +44,10 @@ const innerCss = css`
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-right: 0;
+
+    &::after {
+      border-right: 0;
+    }
   }
 `;
 

@@ -18,7 +18,7 @@ import { RuleMigrationsRetriever } from './retrievers';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { MigrationAgent, RuleMigrationInput } from './types';
 import { generateAssistantComment } from './util/comments';
-import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
 import { nullifyElasticRule } from './util/nullify_missing_properties';
@@ -71,7 +71,7 @@ export class RuleMigrationTaskRunner {
     public readonly abortController: AbortController,
     private readonly data: RuleMigrationsDataClient,
     protected readonly logger: Logger,
-    protected readonly dependencies: SiemRuleMigrationsClientDependencies
+    protected readonly dependencies: RuleMigrationsClientDependencies
   ) {
     this.actionsClientChat = new ActionsClientChat(this.dependencies.actionsClient, this.logger);
     this.retriever = new RuleMigrationsRetriever(this.migrationId, {

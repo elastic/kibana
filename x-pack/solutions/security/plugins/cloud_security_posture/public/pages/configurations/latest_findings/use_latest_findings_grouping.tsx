@@ -19,6 +19,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
   buildMutedRulesFilter,
 } from '@kbn/cloud-security-posture-common';
+import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
   CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
@@ -27,11 +28,7 @@ import {
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import {
-  FindingsGroupingAggregation,
-  FindingsRootGroupingAggregation,
-  useGroupedFindings,
-} from './use_grouped_findings';
+import { FindingsRootGroupingAggregation, useGroupedFindings } from './use_grouped_findings';
 import {
   FINDINGS_UNIT,
   groupingTitle,

@@ -94,8 +94,6 @@ const AlertSelectionComponent: React.FC<Props> = ({
     <EuiForm data-test-subj="alertSelection" fullWidth>
       {showConnectorSelector && spaceId && (
         <AssistantSpaceIdProvider spaceId={spaceId}>
-          <EuiSpacer size="s" />
-
           <EuiText data-test-subj="customizeAlerts" size="s">
             <p>{i18n.CUSTOMIZE_THE_CONNECTOR_AND_ALERTS}</p>
           </EuiText>

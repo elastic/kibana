@@ -83,6 +83,13 @@ export class SynchronizationTaskRunner implements CancellableTask {
     const esClient = await this.getESClient();
 
     try {
+      const destIndexExists = await esClient.indices.exists({ index: this.destIndex });
+
+      if (!destIndexExists) {
+        this.logDebug('Destination index does not exist, skipping synchronization task.');
+        return;
+      }
+
       const previousReindexStatus = await this.getPreviousReindexStatus(esClient);
       this.logDebug(`Previous synchronization task status: "${previousReindexStatus}".`);
 
@@ -285,8 +292,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
-      timeout: '300ms', // this is probably too much
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
   }
 

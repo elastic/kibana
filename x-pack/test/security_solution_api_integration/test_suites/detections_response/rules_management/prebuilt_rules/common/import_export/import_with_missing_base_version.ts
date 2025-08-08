@@ -9,12 +9,11 @@ import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
   deleteAllPrebuiltRuleAssets,
-  installMockPrebuiltRulesPackage,
   installPrebuiltRules,
   importRulesWithSuccess,
   assertImportedRule,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -32,19 +31,10 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 
   describe('@ess @serverless @skipInServerlessMKI Import prebuilt rule with missing base version', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     describe('without override (prebuilt rule is not installed)', () => {

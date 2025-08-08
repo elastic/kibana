@@ -35,6 +35,9 @@ export const SPAN_DESTINATION_SERVICE_RESOURCE_FIELD = 'span.destination.service
 export const PROCESSOR_EVENT_FIELD = 'processor.event';
 export const OTEL_SPAN_KIND = 'kind';
 export const OTEL_DURATION = 'duration';
+export const OTEL_STATUS_CODE = 'status.code';
+export const OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE =
+  'resource.attributes.telemetry.sdk.language';
 
 export const LOG_FILE_PATH_FIELD = 'log.file.path';
 export const DATASTREAM_NAMESPACE_FIELD = 'data_stream.namespace';

@@ -25,7 +25,7 @@ import {
   getRuleForAlertTesting,
   getAlertsByIds,
   waitForRulePartialFailure,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
@@ -49,10 +49,10 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_in_seconds'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_5'
         );
       });
 
@@ -60,10 +60,10 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_in_seconds'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_in_seconds'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_5'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_5'
         );
       });
 
@@ -129,16 +129,16 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await createAlertsIndex(supertest, log);
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
         );
       });
 
@@ -146,16 +146,16 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_1'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_2'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_4'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
         );
       });
 

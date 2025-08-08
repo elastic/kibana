@@ -474,13 +474,13 @@ describe('buildEnrichments', () => {
 });
 
 describe('enrichSignalThreatMatchesFromSignalsMap', () => {
-  let getMatchedThreats: () => Promise<ThreatListItem[]>;
+  let matchedThreats: ThreatListItem[];
   let indicatorPath: string;
   let signalsMap = new Map();
 
   beforeEach(() => {
     indicatorPath = 'threat.indicator';
-    getMatchedThreats = async () => [
+    matchedThreats = [
       getThreatListItemMock({
         _id: '123',
         _source: {
@@ -510,7 +510,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       new Map()
     );
@@ -529,7 +529,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       new Map()
     );
@@ -549,7 +549,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       signalsMap
     );
@@ -577,14 +577,14 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
   });
 
   it('provides only match data if the matched threat cannot be found', async () => {
-    getMatchedThreats = async () => [];
+    matchedThreats = [];
     const signalHit = getSignalHitMock({
       _id: 'source-id',
     });
     const signals: SignalSourceHit[] = [signalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       signalsMap
     );
@@ -623,7 +623,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       signalsMap
     );
@@ -661,7 +661,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     });
     const signals: SignalSourceHit[] = [signalHit];
     await expect(() =>
-      enrichSignalThreatMatchesFromSignalsMap(signals, getMatchedThreats, indicatorPath, signalsMap)
+      enrichSignalThreatMatchesFromSignalsMap(signals, matchedThreats, indicatorPath, signalsMap)
     ).rejects.toThrowError('Expected threat field to be an object, but found: whoops');
   });
 
@@ -680,7 +680,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
       ],
     ]);
 
-    getMatchedThreats = async () => [
+    matchedThreats = [
       getThreatListItemMock({
         _id: '123',
         _source: {
@@ -705,7 +705,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       'custom_threat.custom_indicator',
       signalsMap
     );
@@ -752,7 +752,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
       ],
     ]);
 
-    getMatchedThreats = async () => [
+    matchedThreats = [
       getThreatListItemMock({
         _id: '123',
         _source: {
@@ -789,7 +789,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit, otherSignalHit];
     const enrichedSignals = await enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      getMatchedThreats,
+      matchedThreats,
       indicatorPath,
       signalsMap
     );

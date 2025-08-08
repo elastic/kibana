@@ -12,13 +12,12 @@ import {
   deleteAllPrebuiltRuleAssets,
   installPrebuiltRules,
   getCustomQueryRuleParams,
-  installMockPrebuiltRulesPackage,
   reviewPrebuiltRulesToUpgrade,
   performUpgradePrebuiltRules,
   importRulesWithSuccess,
   assertImportedRule,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -36,19 +35,10 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 
   describe('@ess @serverless @skipInServerlessMKI Import single prebuilt rule', () => {
-    before(async () => {
-      await installMockPrebuiltRulesPackage(es, supertest);
-    });
-
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
       await createHistoricalPrebuiltRuleAssetSavedObjects(es, [PREBUILT_RULE_ASSET]);
-    });
-
-    after(async () => {
-      await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllRules(supertest, log);
     });
 
     describe('importing a single non-customized prebuilt rule', () => {

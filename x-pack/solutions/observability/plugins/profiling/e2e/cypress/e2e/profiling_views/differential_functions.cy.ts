@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// Failing: See https://github.com/elastic/kibana/issues/225941
-describe.skip('Differential Functions page', () => {
+describe('Differential Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
   const rangeTo = '2023-04-18T00:00:30.000Z';
 
@@ -25,15 +24,24 @@ describe.skip('Differential Functions page', () => {
 
   describe('summary', () => {
     it('shows only the baseline values when comparison data is not available', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', `/internal/profiling/topn/functions?*`, (req) => {
+        const { timeFrom } = req.query;
+
+        if (Number(timeFrom) === new Date(rangeFrom).getTime()) {
+          req.reply({ fixture: 'topn_functions.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions_empty_data.json' });
+        }
+      }).as('getTopNFunctions');
+
       cy.visitKibana('/app/profiling/functions/differential', { rangeFrom, rangeTo });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '78.48 lbs / 35.6 kg' },
-        { id: 'annualizedCost', value: '$335.07' },
-        { id: 'totalNumberOfSamples', value: '513' },
+        { id: 'annualizedCo2', value: '76.06 lbs / 34.5 kg' },
+        { id: 'annualizedCost', value: '$325.27' },
+        { id: 'totalNumberOfSamples', value: '498' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         cy.get(`[data-test-subj="${item.id}_comparison_value"]`).should('not.exist');
@@ -41,7 +49,15 @@ describe.skip('Differential Functions page', () => {
     });
 
     it('shows empty baseline values when data is not available', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+        const { timeFrom } = req.query;
+
+        if (Number(timeFrom) === new Date(rangeFrom).getTime()) {
+          req.reply({ fixture: 'topn_functions.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions_empty_data.json' });
+        }
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         comparisonRangeFrom: rangeFrom,
         comparisonRangeTo: rangeTo,
@@ -50,9 +66,9 @@ describe.skip('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       [
         { id: 'overallPerformance', value: '0%' },
-        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '78.48 lbs / 35.6 kg' },
-        { id: 'annualizedCost', value: '$0', comparisonValue: '$335.07' },
-        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '15,390' },
+        { id: 'annualizedCo2', value: '0 lbs / 0 kg', comparisonValue: '76.06 lbs / 34.5 kg' },
+        { id: 'annualizedCost', value: '$0', comparisonValue: '$325.27' },
+        { id: 'totalNumberOfSamples', value: '0', comparisonValue: '14,940' },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
         if (item.comparisonValue) {
@@ -62,7 +78,15 @@ describe.skip('Differential Functions page', () => {
     });
 
     it('show gained performance when comparison data has less samples than baseline', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+        const { timeFrom } = req.query;
+
+        if (Number(timeFrom) === new Date(rangeFrom).getTime()) {
+          req.reply({ fixture: 'topn_functions.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions_less_samples_than_baseline.json' });
+        }
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom,
         rangeTo,
@@ -72,21 +96,21 @@ describe.skip('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '65.89%' },
+        { id: 'overallPerformance', value: '66.06%' },
         {
           id: 'annualizedCo2',
-          value: '78.48 lbs / 35.6 kg',
-          comparisonValue: '26.68 lbs / 12.1 kg (66.01%)',
+          value: '76.06 lbs / 34.5 kg',
+          comparisonValue: '25.79 lbs / 11.7 kg (66.09%)',
         },
         {
           id: 'annualizedCost',
-          value: '$335.07',
-          comparisonValue: '$114.3 (65.89%)',
+          value: '$325.27',
+          comparisonValue: '$110.38 (66.06%)',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '513',
-          comparisonValue: '175 (65.89%)',
+          value: '498',
+          comparisonValue: '169 (66.06%)',
         },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -97,7 +121,14 @@ describe.skip('Differential Functions page', () => {
     });
 
     it('show lost performance when comparison data has more samples than baseline', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+        const { timeFrom } = req.query;
+        if (Number(timeFrom) === new Date(comparisonRangeFrom).getTime()) {
+          req.reply({ fixture: 'topn_functions_less_samples_than_baseline.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions.json' });
+        }
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom: comparisonRangeFrom,
         rangeTo: comparisonRangeTo,
@@ -107,21 +138,21 @@ describe.skip('Differential Functions page', () => {
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
       [
-        { id: 'overallPerformance', value: '193.14%' },
+        { id: 'overallPerformance', value: '194.67%' },
         {
           id: 'annualizedCo2',
-          value: '26.68 lbs / 12.1 kg',
-          comparisonValue: '78.48 lbs / 35.6 kg (194.21%)',
+          value: '25.79 lbs / 11.7 kg',
+          comparisonValue: '76.06 lbs / 34.5 kg (194.87%)',
         },
         {
           id: 'annualizedCost',
-          value: '$114.3',
-          comparisonValue: '$335.07 (193.14%)',
+          value: '$110.38',
+          comparisonValue: '$325.27 (194.67%)',
         },
         {
           id: 'totalNumberOfSamples',
-          value: '175',
-          comparisonValue: '513 (193.14%)',
+          value: '169',
+          comparisonValue: '498 (194.67%)',
         },
       ].forEach((item) => {
         cy.get(`[data-test-subj="${item.id}_value"]`).contains(item.value);
@@ -131,7 +162,9 @@ describe.skip('Differential Functions page', () => {
       });
     });
     it('show empty summary when no data is availble', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', {
+        fixture: 'topn_functions_empty_data.json',
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential');
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
@@ -147,7 +180,15 @@ describe.skip('Differential Functions page', () => {
     });
 
     it('adds kql filter', () => {
-      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.intercept('GET', '/internal/profiling/topn/functions?*', (req) => {
+        if (req.url.includes('kuery=Stacktrace.id')) {
+          req.reply({ fixture: 'topn_functions_stacktrace_filtered.json' });
+        } else if (req.url.includes('kuery=process.thread.name')) {
+          req.reply({ fixture: 'topn_functions_process_thread_name_filtered.json' });
+        } else {
+          req.reply({ fixture: 'topn_functions.json' });
+        }
+      }).as('getTopNFunctions');
       cy.visitKibana('/app/profiling/functions/differential', {
         rangeFrom: comparisonRangeFrom,
         rangeTo: comparisonRangeTo,

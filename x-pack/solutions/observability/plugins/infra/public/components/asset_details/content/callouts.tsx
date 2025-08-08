@@ -5,12 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   type SnapshotMetricType,
   findInventoryModel,
-  type InventoryModels,
+  SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
 import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
@@ -19,11 +17,8 @@ import { ContentTabIds } from '../types';
 
 const INCOMING_ALERT_CALLOUT_VISIBLE_FOR = [ContentTabIds.OVERVIEW, ContentTabIds.METRICS];
 
-const isSnapshotMetricType = <T extends InventoryItemType>(
-  inventoryModel: InventoryModels<T>,
-  value?: string
-): value is SnapshotMetricType => {
-  return !!value && !!inventoryModel.metrics.snapshot[value];
+export const isSnapshotMetricType = (value?: string): value is SnapshotMetricType => {
+  return value != null && value in SnapshotMetricTypeKeys;
 };
 
 export const Callouts = () => {
@@ -31,11 +26,13 @@ export const Callouts = () => {
   const [state] = useAssetDetailsUrlState();
 
   const entityConfig = findInventoryModel(entity.type);
-  const alertMetric = isSnapshotMetricType(entityConfig, state?.alertMetric)
-    ? state?.alertMetric
-    : undefined;
+  const alertMetric = isSnapshotMetricType(state?.alertMetric) ? state?.alertMetric : undefined;
 
-  if (entity.type === 'host' && alertMetric && entityConfig.legacyMetrics?.includes(alertMetric)) {
+  if (
+    entity.type === 'host' &&
+    alertMetric &&
+    entityConfig.metrics.legacyMetrics?.includes(alertMetric)
+  ) {
     return (
       <LegacyAlertMetricCallout
         visibleFor={INCOMING_ALERT_CALLOUT_VISIBLE_FOR}

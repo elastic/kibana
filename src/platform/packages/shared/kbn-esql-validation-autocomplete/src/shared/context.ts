@@ -21,10 +21,10 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import { EDITOR_MARKER } from '@kbn/esql-ast/src/parser/constants';
+import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
+import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
 import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
-import { within } from './helpers';
 
 function findCommand(ast: ESQLAst, offset: number) {
   const commandIndex = ast.findIndex(

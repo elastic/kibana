@@ -36,11 +36,8 @@ import {
   waitForAlertsToBePresent,
   waitForRulePartialFailure,
   deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-} from '../../../../../../common/services/security_solution';
+} from '../../../../../config/services/detections_response';
+import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -385,12 +382,12 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('returns HTTP 400 error when there are more than 3 threshold fields provided', async () => {
+        it('returns HTTP 400 error when there are more than 5 threshold fields provided', async () => {
           const { body } = await securitySolutionApi
             .createRule({
               body: getThresholdRuleParams({
                 threshold: {
-                  field: ['field-1', 'field-2', 'field-3', 'field-4'],
+                  field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
                   value: 1,
                 },
               }),
@@ -398,8 +395,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body).toEqual({
-            message: ['Number of fields must be 3 or less'],
-            status_code: 400,
+            error: 'Bad Request',
+            message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
+            statusCode: 400,
           });
         });
 

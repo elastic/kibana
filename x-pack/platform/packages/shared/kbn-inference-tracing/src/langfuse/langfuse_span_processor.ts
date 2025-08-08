@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { tracing } from '@elastic/opentelemetry-node/sdk';
 import { InferenceTracingLangfuseExportConfig } from '@kbn/inference-tracing-config';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { ReadableSpan } from '@opentelemetry/sdk-trace-node';
 import { memoize, omit, partition } from 'lodash';
 import { diag } from '@opentelemetry/api';
 import { BaseInferenceSpanProcessor } from '../base_inference_span_processor';
@@ -48,7 +48,7 @@ export class LangfuseSpanProcessor extends BaseInferenceSpanProcessor {
     };
   }
 
-  override processInferenceSpan(span: ReadableSpan): ReadableSpan {
+  override processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan {
     // Langfuse doesn't understand fully semconv-compliant span events
     // yet, so we translate to a format it does understand. see
     // https://github.com/langfuse/langfuse/blob/c1c22a9b9b684bd45ca9436556c2599d5a23271d/web/src/features/otel/server/index.ts#L476

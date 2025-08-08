@@ -8,8 +8,8 @@
  */
 
 import { isEqual } from 'lodash';
-import { IPricingTiersClient } from './types';
-import { PricingProduct, TiersConfig } from './pricing_tiers_config';
+import type { IPricingTiersClient, PricingProduct, PricingProductSecurity } from './types';
+import type { IPricingProduct, TiersConfig } from './pricing_tiers_config';
 import { ProductFeaturesRegistry } from './product_features_registry';
 
 /**
@@ -58,7 +58,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @returns True if the product is active, false otherwise
    * @internal
    */
-  private isActiveProduct = (product: PricingProduct) => {
+  private isActiveProduct = (product: IPricingProduct) => {
     return Boolean(this.tiers.products?.some((currentProduct) => isEqual(currentProduct, product)));
   };
 
@@ -70,7 +70,7 @@ export class PricingTiersClient implements IPricingTiersClient {
    * @param featureId - The identifier of the feature to check
    * @returns True if the feature is available in the current pricing tier, false otherwise
    */
-  isFeatureAvailable = <TFeatureId extends string>(featureId: TFeatureId): boolean => {
+  public isFeatureAvailable = <TFeatureId extends string>(featureId: TFeatureId): boolean => {
     /**
      * We assume that when the pricing tiers are disabled, features are available globally
      * and not constrained by any product tier.
@@ -86,5 +86,29 @@ export class PricingTiersClient implements IPricingTiersClient {
     }
 
     return false;
+  };
+
+  public getActiveProduct = (): PricingProduct | undefined => {
+    if (this.tiers.enabled === false || this.tiers.products == null) {
+      return undefined;
+    }
+
+    if (this.tiers.products[0].name === 'observability') {
+      return {
+        type: 'observability' as const,
+        tier: this.tiers.products[0].tier,
+      };
+    } else {
+      // Security product type - schema validation guarantees all products are security-related
+      // and have the same tier
+      return {
+        type: 'security' as const,
+        tier: this.tiers.products[0].tier,
+        // 'security' is not a real product line / addon, it's only used to be able to define the tier when no addons are active
+        product_lines: this.tiers.products
+          .map((p) => p.name)
+          .filter((name) => name !== 'security') as PricingProductSecurity['product_lines'],
+      };
+    }
   };
 }

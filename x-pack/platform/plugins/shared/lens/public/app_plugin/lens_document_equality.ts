@@ -7,7 +7,7 @@
 
 import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { LensDocument } from '../persistence/saved_object_store';
+import type { LensDocument } from '../persistence';
 import { AnnotationGroups, DatasourceMap, VisualizationMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';
 

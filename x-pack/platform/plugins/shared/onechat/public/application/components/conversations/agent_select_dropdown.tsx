@@ -29,6 +29,10 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   const agentDropdownClass = css`
     min-width: 200px;
   `;
+  const selectClass = css`
+    border: none;
+    box-shadow: none;
+  `;
 
   const agentOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
     const options = agents.map((agent: AgentDefinition) => ({
@@ -50,6 +54,7 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
   return (
     <div className={agentDropdownClass}>
       <EuiSuperSelect
+        className={selectClass}
         options={agentOptions}
         valueOfSelected={selectedAgentId}
         onChange={onAgentChange}
@@ -59,7 +64,6 @@ export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
         placeholder={i18n.translate('xpack.onechat.agentDropdown.placeholder', {
           defaultMessage: 'Select an agent...',
         })}
-        compressed
       />
     </div>
   );

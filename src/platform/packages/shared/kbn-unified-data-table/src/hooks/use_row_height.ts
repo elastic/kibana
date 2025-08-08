@@ -9,6 +9,8 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
+import useLatest from 'react-use/lib/useLatest';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
@@ -18,11 +20,12 @@ import {
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
 import { RowHeightMode, RowHeightSettingsProps } from '../components/row_height_settings';
 
-interface UseRowHeightProps {
+export interface UseRowHeightProps {
   storage: Storage;
   consumer: string;
   key: string;
-  configRowHeight: number;
+  defaultRowHeight: number;
+  configRowHeight?: number;
   rowHeightState?: number;
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
@@ -84,7 +87,8 @@ export const useRowHeight = ({
   storage,
   consumer,
   key,
-  configRowHeight,
+  defaultRowHeight,
+  configRowHeight = defaultRowHeight,
   rowHeightState,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
@@ -98,38 +102,70 @@ export const useRowHeight = ({
     });
   }, [configRowHeight, consumer, key, rowHeightState, storage]);
 
-  const [lineCountInput, setLineCountInput] = useState(
-    rowHeightLines < 0 ? configRowHeight : rowHeightLines
+  const getAdjustedLineCount = useCallback(
+    (lineCount: number | undefined) => {
+      return lineCount !== undefined && lineCount > 0
+        ? lineCount
+        : configRowHeight > 0
+        ? configRowHeight
+        : defaultRowHeight;
+    },
+    [configRowHeight, defaultRowHeight]
   );
 
-  const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
+  const [lineCountInput, setLineCountInput] = useState<number | undefined>(
+    getAdjustedLineCount(rowHeightLines)
+  );
+
+  const rowHeight = useMemo(() => {
     return rowHeightLines === ROWS_HEIGHT_OPTIONS.auto ? RowHeightMode.auto : RowHeightMode.custom;
   }, [rowHeightLines]);
 
   const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
       const newRowHeightLines =
-        newRowHeight === RowHeightMode.auto ? ROWS_HEIGHT_OPTIONS.auto : lineCountInput;
+        newRowHeight === RowHeightMode.auto
+          ? ROWS_HEIGHT_OPTIONS.auto
+          : getAdjustedLineCount(lineCountInput);
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
       onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onUpdateRowHeight, storage, lineCountInput]
+    [
+      configRowHeight,
+      consumer,
+      getAdjustedLineCount,
+      key,
+      lineCountInput,
+      onUpdateRowHeight,
+      storage,
+    ]
   );
 
   const onChangeRowHeightLines = useCallback(
-    (newRowHeightLines: number) => {
-      updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
-      onUpdateRowHeight?.(newRowHeightLines);
+    (newRowHeightLines: number, isValid: boolean) => {
+      if (isValid) {
+        updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
+        onUpdateRowHeight?.(newRowHeightLines);
+      }
+
+      setLineCountInput(newRowHeightLines === 0 ? undefined : newRowHeightLines);
     },
     [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
 
+  const prevRowHeight = useLatest(usePrevious(rowHeight) ?? rowHeight);
+  const prevRowHeightLines = useLatest(usePrevious(rowHeightLines) ?? rowHeightLines);
+
   useEffect(() => {
-    if (rowHeight === RowHeightMode.custom) {
-      setLineCountInput(rowHeightLines > 0 ? rowHeightLines : configRowHeight);
+    if (rowHeight === RowHeightMode.auto && prevRowHeight.current === RowHeightMode.custom) {
+      // If switching from custom to auto, reset the line count input to the last valid line count
+      setLineCountInput(getAdjustedLineCount(prevRowHeightLines.current));
+    } else if (rowHeight === RowHeightMode.custom) {
+      // If row height lines change while in custom mode (e.g. by consumer), sync the line count input
+      setLineCountInput(getAdjustedLineCount(rowHeightLines));
     }
-  }, [rowHeightLines, configRowHeight, rowHeight]);
+  }, [getAdjustedLineCount, prevRowHeight, prevRowHeightLines, rowHeight, rowHeightLines]);
 
   return {
     rowHeight,

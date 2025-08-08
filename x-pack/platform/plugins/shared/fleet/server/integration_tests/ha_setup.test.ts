@@ -23,6 +23,8 @@ import type {
   OutputSOAttributes,
   PackagePolicySOAttributes,
 } from '../types';
+import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+import { getPackagePolicySavedObjectType } from '../services/package_policy';
 
 import { useDockerRegistry } from './helpers';
 
@@ -253,8 +255,10 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
 
   async function expectFleetSetupState(soClient: ISavedObjectsRepository) {
     // Assert setup state
+    const agentPolicyType = await getAgentPolicySavedObjectType();
+    const packagePolicyType = await getPackagePolicySavedObjectType();
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: 'ingest-agent-policies',
+      type: agentPolicyType,
       perPage: 10000,
     });
     expect(agentPolicies.saved_objects).toHaveLength(2);
@@ -274,7 +278,7 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     );
 
     const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
-      type: 'ingest-package-policies',
+      type: packagePolicyType,
       perPage: 10000,
     });
     expect(packagePolicies.saved_objects).toHaveLength(2);

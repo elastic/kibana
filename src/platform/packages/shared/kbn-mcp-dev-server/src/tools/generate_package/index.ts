@@ -22,7 +22,9 @@ export async function generatePackage({
   const { stdout } = await execa.command(
     `node scripts/generate.js package ${name} \\
       --owner ${owner} \\
-      --group ${group} \\`,
+      --group ${group} \\
+      --visibility shared \\
+      --license x-pack`,
     {
       cwd: REPO_ROOT,
     }

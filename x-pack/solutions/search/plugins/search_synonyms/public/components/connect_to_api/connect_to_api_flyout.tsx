@@ -20,6 +20,7 @@ import {
   EuiText,
   EuiThemeProvider,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -32,13 +33,15 @@ interface ConnectToApiFlyoutProps {
 }
 
 export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose, rulesetId }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" direction="column">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.title', {
                   defaultMessage: 'Connect with the API',
                 })}

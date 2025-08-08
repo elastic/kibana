@@ -8,6 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 import { styles } from './layout_header.styles';
 
 export interface LayoutHeaderProps {
@@ -21,5 +22,14 @@ export interface LayoutHeaderProps {
  * @returns The rendered LayoutHeader component.
  */
 export const LayoutHeader = ({ children }: LayoutHeaderProps) => {
-  return <header css={styles.root}>{children}</header>;
+  return (
+    <div
+      css={styles.root}
+      className="kbnChromeLayoutHeader"
+      data-test-subj="kbnChromeLayoutHeader"
+      {...euiIncludeSelectorInFocusTrap.prop}
+    >
+      {children}
+    </div>
+  );
 };

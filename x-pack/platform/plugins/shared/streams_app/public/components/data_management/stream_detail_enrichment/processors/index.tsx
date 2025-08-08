@@ -20,13 +20,16 @@ import {
   EuiIcon,
   EuiText,
   EuiBadge,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useCallback } from 'react';
+import { isEmpty, isEqual } from 'lodash';
+import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
@@ -37,15 +40,12 @@ import {
   convertFormStateToProcessor,
   isGrokProcessor,
   isDissectProcessor,
-  getDefaultFormStateByType,
   isDateProcessor,
   SPECIALISED_TYPES,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
-  useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
-  useSimulatorSelector,
   StreamEnrichmentContextType,
   useGetStreamEnrichmentState,
 } from '../state_management/stream_enrichment_state_machine';
@@ -55,229 +55,133 @@ import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
+import { isProcessorUnderEdit } from '../state_management/processor_state_machine';
 
-export function AddProcessorPanel() {
-  const { euiTheme } = useEuiTheme();
-
-  const { addProcessor } = useStreamEnrichmentEvents();
-
-  const processorRef = useStreamEnrichmentSelector((state) =>
-    state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'))
-  );
-  const processorMetrics = useSimulatorSelector(
-    (state) => processorRef && state.context.simulation?.processors_metrics[processorRef.id]
-  );
-  const getEnrichmentState = useGetStreamEnrichmentState();
-
-  const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
-
-  const isOpen = Boolean(processorRef);
-  const defaultValuesGetter = useCallback(
-    () =>
-      getDefaultFormStateByType(
-        'grok',
-        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
-        { grokCollection }
-      ),
-    [getEnrichmentState, grokCollection]
-  );
-  const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
-
-  const methods = useForm<ProcessorFormState>({
-    // cast necessary because DeepPartial does not work with `unknown`
-    defaultValues: initialDefaultValues as DeepPartial<ProcessorFormState>,
-    mode: 'onChange',
-  });
-
-  const type = useWatch({ control: methods.control, name: 'type' });
-
-  useEffect(() => {
-    if (!processorRef) {
-      methods.reset(defaultValuesGetter());
-    }
-  }, [defaultValuesGetter, methods, processorRef]);
-
-  useEffect(() => {
-    if (processorRef) {
-      const { unsubscribe } = methods.watch((value) => {
-        const { processorDefinition, processorResources } = convertFormStateToProcessor(
-          value as ProcessorFormState
-        );
-        processorRef.send({
-          type: 'processor.change',
-          processor: processorDefinition,
-          resources: processorResources,
-        });
-      });
-
-      return () => unsubscribe();
-    }
-  }, [methods, processorRef]);
-
-  const handleCancel = useDiscardConfirm(
-    () => processorRef?.send({ type: 'processor.cancel' }),
-    discardChangesPromptOptions
-  );
-
-  const handleSubmit: SubmitHandler<ProcessorFormState> = async () => {
-    processorRef?.send({ type: 'processor.stage' });
-  };
-
-  const handleOpen = () => {
-    const defaultValues = defaultValuesGetter();
-    methods.reset(defaultValues);
-    const draftProcessor = createDraftProcessorFromForm(defaultValues);
-    addProcessor(draftProcessor);
-  };
-
-  if (!isOpen) {
-    return (
-      <EuiPanel
-        hasBorder
-        css={css`
-          border: ${euiTheme.border.thin};
-          box-shadow: none !important; // override default EuiPanel shadow on hover
-          transform: none !important; // override default EuiPanel transform on hover
-        `}
-        onClick={handleOpen}
-        type="button"
-        paddingSize="m"
-      >
-        <EuiPanel hasShadow={false} color="transparent" paddingSize="xs">
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-            <EuiIcon type="plus" />
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorAction',
-              { defaultMessage: 'Add a processor' }
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPanel>
-    );
-  }
-
-  return (
-    <EuiPanel
-      color={isOpen ? 'subdued' : undefined}
-      hasBorder
-      css={css`
-        border: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.m};
-      `}
-      type="button"
-    >
-      <EuiAccordion
-        id="add-processor-accordion"
-        arrowDisplay="none"
-        buttonContent={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.addingProcessor',
-          { defaultMessage: 'Adding processor' }
-        )}
-        forceState="open"
-        extraAction={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiButtonEmpty
-              data-test-subj="streamsAppAddProcessorPanelCancelButton"
-              onClick={handleCancel}
-              size="s"
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
-                { defaultMessage: 'Cancel' }
-              )}
-            </EuiButtonEmpty>
-            <EuiButton
-              data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
-              size="s"
-              fill
-              onClick={methods.handleSubmit(handleSubmit)}
-              disabled={!methods.formState.isValid && methods.formState.isSubmitted}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmAddProcessor',
-                { defaultMessage: 'Add processor' }
-              )}
-            </EuiButton>
-          </EuiFlexGroup>
-        }
-      >
-        <EuiSpacer size="s" />
-        <FormProvider {...methods}>
-          <ProcessorMetricsHeader metrics={processorMetrics} />
-          <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-            <ProcessorTypeSelector />
-            <EuiSpacer size="m" />
-            {type === 'date' && <DateProcessorForm />}
-            {type === 'dissect' && <DissectProcessorForm />}
-            {type === 'grok' && <GrokProcessorForm />}
-            {type === 'manual_ingest_pipeline' && <ManualIngestPipelineProcessorForm />}
-            {!SPECIALISED_TYPES.includes(type) && (
-              <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
-            )}
-          </EuiForm>
-          {processorMetrics && !isEmpty(processorMetrics.errors) && (
-            <ProcessorErrors metrics={processorMetrics} />
-          )}
-        </FormProvider>
-      </EuiAccordion>
-    </EuiPanel>
-  );
-}
-
-const createDraftProcessorFromForm = (
-  formState: ProcessorFormState
-): ProcessorDefinitionWithUIAttributes => {
-  const { processorDefinition } = convertFormStateToProcessor(formState);
-
-  return {
-    id: 'draft',
-    type: formState.type,
-    ...processorDefinition,
-  };
-};
-
-export interface EditProcessorPanelProps {
+export interface ProcessorConfigurationProps {
   dragHandleProps: DraggableProvidedDragHandleProps | null;
   processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
-export function EditProcessorPanel({
+export function ProcessorConfiguration({
   dragHandleProps,
   processorRef,
   processorMetrics,
-}: EditProcessorPanelProps) {
-  const { euiTheme } = useEuiTheme();
-  const state = useSelector(processorRef, (s) => s);
-  const getEnrichmentState = useGetStreamEnrichmentState();
+}: ProcessorConfigurationProps) {
+  const isOpen = useSelector(processorRef, isProcessorUnderEdit);
 
-  const canEdit = useStreamEnrichmentSelector((s) => s.context.definition.privileges.simulate);
-  const grokCollection = useStreamEnrichmentSelector((_state) => _state.context.grokCollection);
-  const previousProcessor = state.context.previousProcessor;
-  const processor = state.context.processor;
+  if (!isOpen) {
+    return (
+      <ProcessorConfigurationListItem
+        dragHandleProps={dragHandleProps}
+        processorMetrics={processorMetrics}
+        processorRef={processorRef}
+      />
+    );
+  }
+
+  return (
+    <ProcessorConfigurationEditor processorMetrics={processorMetrics} processorRef={processorRef} />
+  );
+}
+
+const ProcessorConfigurationListItem = ({
+  dragHandleProps,
+  processorMetrics,
+  processorRef,
+}: ProcessorConfigurationProps) => {
+  const canEdit = useStreamEnrichmentSelector((snapshot) =>
+    snapshot.can({ type: 'processor.edit' })
+  );
+  const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
+
+  const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
+  const isUnsaved = useSelector(
+    processorRef,
+    (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
+  );
+  const canDragAndDrop = isConfigured && dragHandleProps;
 
   const processorDescription = getProcessorDescription(processor);
 
-  const isOpen = state.matches({ configured: 'edit' });
-  const isNew = state.context.isNew;
-  const isUnsaved = isNew || state.context.isUpdated;
+  const handleOpen = () => {
+    processorRef.send({ type: 'processor.edit' });
+  };
 
-  const defaultValues = useMemo(
-    () =>
-      getFormStateFrom(
-        selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
-        { grokCollection },
-        processor
-      ),
-    [getEnrichmentState, grokCollection, processor]
+  return (
+    <ProcessorPanel>
+      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        {canDragAndDrop && (
+          <EuiPanel
+            data-test-subj="streamsAppProcessorDragHandle"
+            grow={false}
+            hasShadow={false}
+            color="transparent"
+            paddingSize="none"
+            {...dragHandleProps}
+          >
+            <EuiIcon type="grab" size="m" />
+          </EuiPanel>
+        )}
+        <strong data-test-subj="streamsAppProcessorLegend">{processor.type.toUpperCase()}</strong>
+        <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
+          {processorDescription}
+        </EuiText>
+        <EuiFlexItem grow={1} />
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
+            {isUnsaved && (
+              <EuiBadge>
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.unsavedBadge',
+                  { defaultMessage: 'Unsaved' }
+                )}
+              </EuiBadge>
+            )}
+            <EuiButtonIcon
+              data-test-subj="streamsAppProcessorConfigurationButton"
+              onClick={handleOpen}
+              iconType="pencil"
+              disabled={!canEdit}
+              color="text"
+              size="xs"
+              aria-label={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
+                { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
+              )}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ProcessorPanel>
+  );
+};
+
+const ProcessorConfigurationEditor = ({
+  processorMetrics,
+  processorRef,
+}: Omit<ProcessorConfigurationProps, 'dragHandleProps'>) => {
+  const { appParams, core } = useKibana();
+
+  const getEnrichmentState = useGetStreamEnrichmentState();
+
+  const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
+
+  const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
+
+  const [defaultValues] = useState(() =>
+    getFormStateFrom(
+      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
+      { grokCollection },
+      processor
+    )
   );
 
   const methods = useForm<ProcessorFormState>({
     defaultValues: defaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });
-
-  const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
@@ -293,138 +197,104 @@ export function EditProcessorPanel({
     return () => unsubscribe();
   }, [methods, processorRef]);
 
-  useEffect(() => {
-    const subscription = processorRef.on('processor.changesDiscarded', () => {
-      methods.reset(
-        getFormStateFrom(
-          selectPreviewRecords(getEnrichmentState().context.simulatorRef?.getSnapshot().context),
-          { grokCollection },
-          previousProcessor
-        )
-      );
-    });
+  const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
+  const canDelete = useSelector(processorRef, (snapshot) =>
+    snapshot.can({ type: 'processor.delete' })
+  );
+  const canSave = useSelector(processorRef, (snapshot) => snapshot.can({ type: 'processor.save' }));
 
-    return () => subscription.unsubscribe();
-  }, [getEnrichmentState, grokCollection, methods, previousProcessor, processorRef]);
-
-  const handleCancel = useDiscardConfirm(
-    () => processorRef?.send({ type: 'processor.cancel' }),
-    discardChangesPromptOptions
+  const hasStreamChanges = useStreamEnrichmentSelector((state) =>
+    state.can({ type: 'stream.reset' })
+  );
+  const hasProcessorChanges = useSelector(
+    processorRef,
+    (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
   );
 
-  const handleProcessorDelete = useDiscardConfirm(
-    () => processorRef?.send({ type: 'processor.delete' }),
-    deleteProcessorPromptOptions
-  );
+  const type = useWatch({ control: methods.control, name: 'type' });
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: hasStreamChanges || hasProcessorChanges,
+    history: appParams.history,
+    http: core.http,
+    navigateToUrl: core.application.navigateToUrl,
+    openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
+  });
+
+  const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
+    enabled: hasProcessorChanges,
+    ...discardChangesPromptOptions,
+  });
+
+  const handleDelete = useDiscardConfirm(() => processorRef.send({ type: 'processor.delete' }), {
+    enabled: canDelete,
+    ...deleteProcessorPromptOptions,
+  });
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = () => {
-    processorRef.send({ type: 'processor.update' });
+    processorRef.send({ type: 'processor.save' });
   };
-
-  const handleOpen = () => {
-    processorRef.send({ type: 'processor.edit' });
-  };
-
-  const buttonContent = isOpen ? (
-    <strong>{processor.type.toUpperCase()}</strong>
-  ) : (
-    <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiPanel hasShadow={false} color="transparent" paddingSize="xs" {...dragHandleProps}>
-        <EuiIcon type="grab" />
-      </EuiPanel>
-      <strong>{processor.type.toUpperCase()}</strong>
-      <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
-        {processorDescription}
-      </EuiText>
-    </EuiFlexGroup>
-  );
 
   return (
-    <EuiPanel
-      hasBorder
-      color={isNew ? 'subdued' : undefined}
-      css={css`
-        border: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.m};
-      `}
-    >
+    <ProcessorPanel>
       <EuiAccordion
-        id="edit-processor-accordion"
+        id="processor-accordion"
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={buttonContent}
-        buttonContentClassName="eui-textTruncate"
-        buttonElement="div"
+        buttonContent={<strong>{processor.type.toUpperCase()}</strong>}
+        buttonElement="legend"
         buttonProps={{
-          /* Allow text ellipsis in flex child nodes */
           css: css`
-            min-width: 0;
-            &:is(:hover, :focus) {
-              cursor: grab;
+            &:hover {
               text-decoration: none;
             }
           `,
         }}
-        forceState={isOpen ? 'open' : 'closed'}
+        forceState="open"
         extraAction={
-          isOpen ? (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty
-                data-test-subj="streamsAppEditProcessorPanelCancelButton"
-                onClick={handleCancel}
-                size="s"
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
-                  { defaultMessage: 'Cancel' }
-                )}
-              </EuiButtonEmpty>
-              <EuiButton
-                data-test-subj="streamsAppEditProcessorPanelUpdateProcessorButton"
-                size="s"
-                fill
-                onClick={methods.handleSubmit(handleSubmit)}
-                disabled={!methods.formState.isValid || !state.can({ type: 'processor.update' })}
-              >
-                {i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.confirmEditProcessor',
-                  { defaultMessage: 'Update processor' }
-                )}
-              </EuiButton>
-            </EuiFlexGroup>
-          ) : (
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
-              {isUnsaved && (
-                <EuiBadge>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.unsavedBadge',
-                    { defaultMessage: 'Unsaved' }
-                  )}
-                </EuiBadge>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiButtonEmpty
+              data-test-subj="streamsAppProcessorConfigurationCancelButton"
+              onClick={handleCancel}
+              size="s"
+            >
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.cancel',
+                { defaultMessage: 'Cancel' }
               )}
-              <EuiButtonIcon
-                data-test-subj="streamsAppEditProcessorPanelButton"
-                onClick={handleOpen}
-                iconType="pencil"
-                disabled={!canEdit}
-                color="text"
-                size="xs"
-                aria-label={i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction',
-                  { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
-                )}
-              />
-            </EuiFlexGroup>
-          )
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="streamsAppProcessorConfigurationSaveProcessorButton"
+              size="s"
+              fill
+              onClick={methods.handleSubmit(handleSubmit)}
+              disabled={!canSave}
+            >
+              {isConfigured
+                ? i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmProcessor',
+                    { defaultMessage: 'Update processor' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorConfiguration.confirmCreateProcessor',
+                    { defaultMessage: 'Create processor' }
+                  )}
+            </EuiButton>
+          </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
-          <ProcessorMetricsHeader metrics={processorMetrics} />
+          {processorMetrics && (
+            <>
+              <ProcessorMetricBadges {...processorMetrics} />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-            <ProcessorTypeSelector disabled />
+            <ProcessorTypeSelector disabled={isConfigured} />
             <EuiSpacer size="m" />
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
@@ -434,38 +304,45 @@ export function EditProcessorPanel({
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
           </EuiForm>
-          <EuiHorizontalRule margin="m" />
-          <EuiButton
-            data-test-subj="streamsAppEditProcessorPanelButton"
-            color="danger"
-            onClick={handleProcessorDelete}
-          >
-            {deleteProcessorLabel}
-          </EuiButton>
+          {canDelete && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              <EuiButton
+                data-test-subj="streamsAppProcessorConfigurationButton"
+                color="danger"
+                onClick={handleDelete}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
+                  { defaultMessage: 'Delete processor' }
+                )}
+              </EuiButton>
+            </>
+          )}
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
           )}
         </FormProvider>
       </EuiAccordion>
-    </EuiPanel>
-  );
-}
-
-const ProcessorMetricsHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
-  if (!metrics) return null;
-
-  return (
-    <>
-      <ProcessorMetricBadges {...metrics} />
-      <EuiSpacer size="m" />
-    </>
+    </ProcessorPanel>
   );
 };
 
-const deleteProcessorLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
-  { defaultMessage: 'Delete processor' }
-);
+const ProcessorPanel = (props: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasBorder
+      data-test-subj="streamsAppProcessorConfigurationListItem"
+      css={css`
+        border: ${euiTheme.border.thin};
+        padding: ${euiTheme.size.m};
+      `}
+      {...props}
+    />
+  );
+};
 
 const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes) => {
   if (isGrokProcessor(processor)) {

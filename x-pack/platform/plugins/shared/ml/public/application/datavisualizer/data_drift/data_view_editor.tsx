@@ -136,6 +136,7 @@ export function DataViewEditor({
           data-test-subj={`mlDataDriftIndexPatternFormRow-${id ?? ''}`}
         >
           <EuiFieldText
+            isInvalid={errorMessage !== undefined}
             value={indexPattern}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               let query = e.target.value;

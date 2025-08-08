@@ -134,7 +134,7 @@ import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_dril
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
-import type { LensDocument } from './persistence/saved_object_store';
+import type { LensDocument } from './persistence';
 import {
   CONTENT_ID,
   LATEST_VERSION,
@@ -363,7 +363,7 @@ export class LensPlugin {
 
       return {
         ...plugins,
-        attributeService: getLensAttributeService(coreStart, plugins),
+        attributeService: getLensAttributeService(plugins),
         capabilities: coreStart.application.capabilities,
         coreHttp: coreStart.http,
         coreStart,
@@ -400,14 +400,20 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
+          const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
           container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {
-                  savedObjectId: savedObject.id,
-                },
-                references: savedObject.references,
+                rawState: {},
+                references: [
+                  ...savedObject.references,
+                  {
+                    name: SAVED_OBJECT_REF_NAME,
+                    type: LENS_EMBEDDABLE_TYPE,
+                    id: savedObject.id,
+                  },
+                ],
               },
             },
             true
@@ -510,7 +516,7 @@ export class LensPlugin {
         const frameStart = this.editorFrameService!.start(coreStart, deps);
         return mountApp(core, params, {
           createEditorFrame: frameStart.createInstance,
-          attributeService: getLensAttributeService(coreStart, deps),
+          attributeService: getLensAttributeService(deps),
           topNavMenuEntryGenerators: this.topNavMenuEntries,
           locator: this.locator,
         });

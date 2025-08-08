@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
 import { registerControlFactory } from '../../../control_factory_registry';
 

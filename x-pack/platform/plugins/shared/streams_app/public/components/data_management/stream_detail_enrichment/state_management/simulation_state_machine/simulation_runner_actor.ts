@@ -10,6 +10,8 @@ import { FlattenRecord } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
+import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import { getFormattedError } from '../../../../../util/errors';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { processorConverter } from '../../utils';
 import { Simulation, SimulationMachineDeps } from './types';
@@ -28,36 +30,52 @@ export function createSimulationRunnerActor({
   streamsRepositoryClient,
 }: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
   return fromPromise<Simulation, SimulationRunnerInput>(({ input, signal }) =>
-    streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+    simulateProcessing({
+      streamsRepositoryClient,
+      input,
       signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          documents: input.documents,
-          processing: input.processors.map(processorConverter.toSimulateDefinition),
-          detected_fields:
-            input.detectedFields && !isEmpty(input.detectedFields)
-              ? getMappedSchemaFields(input.detectedFields).map((field) => ({
-                  name: field.name,
-                  ...convertToFieldDefinitionConfig(field),
-                }))
-              : undefined,
-        },
-      },
     })
   );
 }
+
+export const simulateProcessing = ({
+  streamsRepositoryClient,
+  input,
+  signal = null,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+  input: SimulationRunnerInput;
+  signal?: AbortSignal | null;
+}) =>
+  streamsRepositoryClient.fetch('POST /internal/streams/{name}/processing/_simulate', {
+    signal,
+    params: {
+      path: { name: input.streamName },
+      body: {
+        documents: input.documents,
+        processing: input.processors.map(processorConverter.toSimulateDefinition),
+        detected_fields:
+          input.detectedFields && !isEmpty(input.detectedFields)
+            ? getMappedSchemaFields(input.detectedFields).map((field) => ({
+                name: field.name,
+                ...convertToFieldDefinitionConfig(field),
+              }))
+            : undefined,
+      },
+    },
+  });
 
 export function createSimulationRunFailureNofitier({
   toasts,
 }: Pick<SimulationMachineDeps, 'toasts'>) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    toasts.addError(new Error(event.error.body.message), {
+    const formattedError = getFormattedError(event.error);
+    toasts.addError(formattedError, {
       title: i18n.translate('xpack.streams.enrichment.simulation.simulationRunError', {
         defaultMessage: 'An issue occurred running the simulation.',
       }),
-      toastMessage: event.error.body.message,
+      toastMessage: formattedError.message,
     });
   };
 }

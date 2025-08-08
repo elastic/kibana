@@ -124,5 +124,81 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.body).to.have.property('id');
       expect(resp.body.name).to.equal(rule.name);
     });
+
+    it('can create a degraded docs rule', async () => {
+      const rule = {
+        tags: [],
+        params: {
+          comparator: '>',
+          threshold: [3],
+          timeSize: 5,
+          timeUnit: 'm',
+          groupBy: ['_index'],
+          searchConfiguration: {
+            index: 'demo-employees',
+          },
+        },
+        schedule: {
+          interval: '1m',
+        },
+        consumer: 'alerts',
+        name: 'Degraded docs rule',
+        rule_type_id: 'datasetQuality.degradedDocs',
+        actions: [],
+        alert_delay: {
+          active: 1,
+        },
+      };
+
+      const resp = await supertestAdminWithCookieCredentials
+        .post('/api/alerting/rule')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send(rule);
+
+      expect(resp.status).to.equal(200);
+      expect(resp.body).to.have.property('id');
+      expect(resp.body.name).to.equal(rule.name);
+    });
+
+    it('can create an es query dsl rule', async () => {
+      const rule = {
+        tags: [],
+        params: {
+          searchType: 'esQuery',
+          timeWindowSize: 5,
+          timeWindowUnit: 'm',
+          threshold: [1000],
+          thresholdComparator: '>',
+          size: 10,
+          esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
+          aggType: 'count',
+          groupBy: 'all',
+          termSize: 5,
+          excludeHitsFromPreviousRun: false,
+          sourceFields: [],
+          index: ['demo-employees'],
+          timeField: 'join_date',
+        },
+        schedule: {
+          interval: '1m',
+        },
+        consumer: 'logs',
+        name: 'Elasticsearch query rule',
+        rule_type_id: '.es-query',
+        actions: [],
+        alert_delay: {
+          active: 1,
+        },
+      };
+
+      const resp = await supertestAdminWithCookieCredentials
+        .post('/api/alerting/rule')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .send(rule);
+
+      expect(resp.status).to.equal(200);
+      expect(resp.body).to.have.property('id');
+      expect(resp.body.name).to.equal(rule.name);
+    });
   });
 }

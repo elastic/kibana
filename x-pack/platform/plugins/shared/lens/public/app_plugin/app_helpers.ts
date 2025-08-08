@@ -95,7 +95,7 @@ export function setBreadcrumbsTitle(
         e.preventDefault();
       },
       text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-        defaultMessage: 'Visualize Library',
+        defaultMessage: 'Visualize library',
       }),
     });
   }

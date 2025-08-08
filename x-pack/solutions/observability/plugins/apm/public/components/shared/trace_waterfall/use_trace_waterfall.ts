@@ -7,9 +7,9 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { useMemo } from 'react';
+import type { IWaterfallLegend } from '../../../../common/waterfall/legend';
+import { WaterfallLegendType } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { IWaterfallLegend } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
-import { WaterfallLegendType } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 export interface TraceWaterfallItem extends TraceItem {
   depth: number;
@@ -20,11 +20,16 @@ export interface TraceWaterfallItem extends TraceItem {
 
 export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
   const waterfall = useMemo(() => {
-    const serviceColors = getServiceColors(traceItems);
+    const legends = getLegends(traceItems);
+    const colorBy =
+      legends.filter(({ type }) => type === WaterfallLegendType.ServiceName).length > 1
+        ? WaterfallLegendType.ServiceName
+        : WaterfallLegendType.SpanType;
+    const colorMap = createColorLookupMap(legends);
     const traceParentChildrenMap = getTraceParentChildrenMap(traceItems);
     const rootItem = traceParentChildrenMap.root?.[0];
     const traceWaterfall = rootItem
-      ? getTraceWaterfall(rootItem, traceParentChildrenMap, serviceColors)
+      ? getTraceWaterfall(rootItem, traceParentChildrenMap, colorMap, colorBy)
       : [];
 
     return {
@@ -32,34 +37,46 @@ export function useTraceWaterfall({ traceItems }: { traceItems: TraceItem[] }) {
       traceWaterfall,
       duration: getTraceWaterfallDuration(traceWaterfall),
       maxDepth: Math.max(...traceWaterfall.map((item) => item.depth)),
+      legends,
+      colorBy,
     };
   }, [traceItems]);
 
   return waterfall;
 }
 
-export function getServiceColors(traceItems: TraceItem[]) {
-  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
+export function getLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
+  const serviceNames = Array.from(new Set(traceItems.map((item) => item.serviceName)));
+  const spanTypes = Array.from(new Set(traceItems.map((item) => item.spanType ?? '')));
+
   const palette = euiPaletteColorBlind({
-    rotations: Math.ceil(allServiceNames.size / 10),
+    rotations: Math.ceil((serviceNames.length + spanTypes.length) / 10),
   });
-  return Array.from(allServiceNames).reduce<Record<string, string>>((acc, serviceName, idx) => {
-    acc[serviceName] = palette[idx];
-    return acc;
-  }, {});
+
+  let colorIndex = 0;
+  const legends: IWaterfallLegend[] = [];
+
+  serviceNames.forEach((serviceName) => {
+    legends.push({
+      type: WaterfallLegendType.ServiceName,
+      value: serviceName,
+      color: palette[colorIndex++],
+    });
+  });
+
+  spanTypes.forEach((spanType) => {
+    legends.push({
+      type: WaterfallLegendType.SpanType,
+      value: spanType || '',
+      color: palette[colorIndex++],
+    });
+  });
+
+  return legends;
 }
 
-export function getServiceLegends(traceItems: TraceItem[]): IWaterfallLegend[] {
-  const allServiceNames = new Set(traceItems.map((item) => item.serviceName));
-  const palette = euiPaletteColorBlind({
-    rotations: Math.ceil(allServiceNames.size / 10),
-  });
-
-  return Array.from(allServiceNames).map((serviceName, index) => ({
-    type: WaterfallLegendType.ServiceName,
-    value: serviceName,
-    color: palette[index],
-  }));
+export function createColorLookupMap(legends: IWaterfallLegend[]): Map<string, string> {
+  return new Map(legends.map((legend) => [`${legend.type}:${legend.value}`, legend.color]));
 }
 
 export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
@@ -81,18 +98,23 @@ export function getTraceParentChildrenMap(traceItems: TraceItem[]) {
 export function getTraceWaterfall(
   rootItem: TraceItem,
   parentChildMap: Record<string, TraceItem[]>,
-  serviceColorsMap: Record<string, string>
+  colorMap: Map<string, string>,
+  colorBy: WaterfallLegendType
 ): TraceWaterfallItem[] {
   const rootStartMicroseconds = rootItem.timestampUs;
 
   function getTraceWaterfallItem(item: TraceItem, depth: number, parent?: TraceWaterfallItem) {
     const startMicroseconds = item.timestampUs;
+    const color =
+      colorBy === WaterfallLegendType.ServiceName
+        ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`)!
+        : colorMap.get(`${WaterfallLegendType.SpanType}:${item.spanType ?? ''}`)!;
     const traceWaterfallItem: TraceWaterfallItem = {
       ...item,
       depth,
       offset: startMicroseconds - rootStartMicroseconds,
       skew: getClockSkew({ itemTimestamp: startMicroseconds, itemDuration: item.duration, parent }),
-      color: serviceColorsMap[item.serviceName],
+      color,
     };
     const result = [traceWaterfallItem];
     const sortedChildren =

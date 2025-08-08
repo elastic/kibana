@@ -8,6 +8,7 @@
  */
 
 import React, { type ReactNode } from 'react';
+import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 import { styles } from './layout_navigation.styles';
 
 export interface LayoutNavigationProps {
@@ -21,5 +22,14 @@ export interface LayoutNavigationProps {
  * @returns The rendered LayoutNavigation component.
  */
 export const LayoutNavigation = ({ children }: LayoutNavigationProps) => {
-  return <nav css={styles.root}>{children}</nav>;
+  return (
+    <div
+      css={styles.root}
+      className="kbnChromeLayoutNavigation"
+      data-test-subj="kbnChromeLayoutNavigation"
+      {...euiIncludeSelectorInFocusTrap.prop}
+    >
+      {children}
+    </div>
+  );
 };

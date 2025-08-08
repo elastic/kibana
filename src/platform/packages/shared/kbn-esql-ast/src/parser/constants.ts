@@ -9,15 +9,47 @@
 
 import { Token } from 'antlr4';
 
-/**
- * The root ANTLR rule to start parsing from.
- */
-export const GRAMMAR_ROOT_RULE = 'singleStatement';
-
-/**
- * @todo Move this out of the parser/ folder.
- */
-export const EDITOR_MARKER = 'marker_esql_editor';
-
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
+
+export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
+
+// FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
+export const TIME_DURATION_UNITS = new Set([
+  'millisecond',
+  'milliseconds',
+  'ms',
+  'second',
+  'seconds',
+  'sec',
+  's',
+  'minute',
+  'minutes',
+  'min',
+  'm',
+  'hour',
+  'hours',
+  'h',
+]);
+
+// FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
+export const DATE_PERIOD_UNITS = new Set([
+  'year',
+  'years',
+  'yr',
+  'y',
+  'quarter',
+  'quarters',
+  'q',
+  'month',
+  'months',
+  'mo',
+  'week',
+  'weeks',
+  'w',
+  'day',
+  'days',
+  'd',
+]);
+
+export const TIME_SPAN_UNITS = [...DATE_PERIOD_UNITS, ...TIME_DURATION_UNITS];

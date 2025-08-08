@@ -9575,6 +9575,16 @@
               }
             }
           }
+        },
+        "sections": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Collection of telemetry metrics that count the number of collapsible sections on all dashboards"
+              }
+            }
+          }
         }
       }
     },
@@ -10189,6 +10199,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "securitySolution:enablePrivilegedUserMonitoring": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "securitySolution:defaultAnomalyScore": {
           "type": "long",
           "_meta": {
@@ -10744,12 +10760,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:apmEnableServiceMapApiV2": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:aiAssistantSimulatedFunctionCalling": {
           "type": "boolean",
           "_meta": {
@@ -10757,6 +10767,12 @@
           }
         },
         "observability:aiAssistantSearchConnectorIndexPattern": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "ai:anonymizationSettings": {
           "type": "text",
           "_meta": {
             "description": "Non-default value of setting."
@@ -10772,6 +10788,12 @@
           }
         },
         "onechat:mcp:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "onechat:a2a:enabled": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

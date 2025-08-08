@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import pRetry from 'p-retry';
 import { Subject } from 'rxjs';
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -29,6 +30,15 @@ import { appContextService } from './app_context';
 jest.mock('./agent_policy');
 const agentPolicySvcMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
+jest.mock('p-retry', () => {
+  const originalPRetry = jest.requireActual('p-retry');
+  return jest.fn().mockImplementation((fn, options) => {
+    return originalPRetry(fn, options);
+  });
+});
+
+const pRetryMock = jest.mocked(pRetry);
+
 describe('Agent Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -43,6 +53,7 @@ describe('Agent Policy-Changing license watcher', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    pRetryMock.mockClear();
   });
 
   const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
@@ -180,11 +191,163 @@ describe('Agent Policy-Changing license watcher', () => {
       ],
     });
 
-    await pw.watch(Basic);
+    await expect(pw.watch(Basic)).rejects.toThrow(
+      'Done - 1 out of 2 were unsuccessful. Errors encountered:\n' +
+        'Policy [agent-policy-2] failed to update due to error: error-test'
+    );
 
     expect(logger.error).toHaveBeenLastCalledWith(
       'Done - 1 out of 2 were unsuccessful. Errors encountered:\n' +
         'Policy [agent-policy-2] failed to update due to error: error-test'
     );
+  });
+
+  describe('retry logic', () => {
+    it('should wrap watch method with retry logic on start', async () => {
+      const licenseEmitter: Subject<ILicense> = new Subject();
+      const licenseService = new LicenseService();
+      const pw = new PolicyWatcher(logger);
+
+      licenseService.start(licenseEmitter);
+      pw.start(licenseService);
+
+      const mockWatch = jest.fn().mockResolvedValue(undefined);
+      pw.watch = mockWatch;
+
+      licenseEmitter.next(Platinum);
+
+      // wait for async ops
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(pRetryMock).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          retries: 3,
+          minTimeout: 1000,
+          maxTimeout: 5000,
+          onFailedAttempt: expect.any(Function),
+        })
+      );
+
+      pw.stop();
+      licenseService.stop();
+      licenseEmitter.complete();
+    });
+
+    it('should log retry attempts with proper message format', async () => {
+      const licenseEmitter: Subject<ILicense> = new Subject();
+      const licenseService = new LicenseService();
+      const pw = new PolicyWatcher(logger);
+
+      pRetryMock.mockImplementationOnce((fn: any, options: any) => {
+        // simulate failed attempts
+        const mockError1 = {
+          message: 'Network timeout',
+          attemptNumber: 1,
+          retriesLeft: 2,
+        };
+        options.onFailedAttempt(mockError1);
+
+        const mockError2 = {
+          message: 'Connection refused',
+          attemptNumber: 2,
+          retriesLeft: 1,
+        };
+        options.onFailedAttempt(mockError2);
+
+        // finally succeed
+        return Promise.resolve();
+      });
+
+      licenseService.start(licenseEmitter);
+      pw.start(licenseService);
+
+      const mockWatch = jest.fn().mockResolvedValue(undefined);
+      pw.watch = mockWatch;
+
+      licenseEmitter.next(Platinum);
+
+      // wait for async ops
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to process agent policy license compliance (attempt 1/3): Network timeout'
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to process agent policy license compliance (attempt 2/3): Connection refused'
+      );
+
+      pw.stop();
+      licenseService.stop();
+      licenseEmitter.complete();
+    });
+
+    it('should throw error if watch method throws after exhausting retries', async () => {
+      const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+        jest.fn().mockResolvedValue(
+          jest.fn(async function* () {
+            yield items;
+          })()
+        );
+
+      agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        createAgentPolicyMock({ is_protected: true }),
+      ]);
+
+      const pw = new PolicyWatcher(logger);
+
+      soClientMock.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          createPolicySO('agent-policy-1', false, {
+            error: 'error',
+            statusCode: 500,
+            message: 'All policies failed to update',
+          }),
+        ],
+      });
+
+      await expect(pw.watch(Basic)).rejects.toThrow(
+        'Done - all 1 failed to update. Errors encountered:\nPolicy [agent-policy-1] failed to update due to error: All policies failed to update'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Done - all 1 failed to update. Errors encountered:\nPolicy [agent-policy-1] failed to update due to error: All policies failed to update'
+      );
+    });
+
+    it('should throw error when some policies fail to update', async () => {
+      const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
+        jest.fn().mockResolvedValue(
+          jest.fn(async function* () {
+            yield items;
+          })()
+        );
+
+      agentPolicySvcMock.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+        createAgentPolicyMock({ id: 'policy-1', is_protected: true }),
+        createAgentPolicyMock({ id: 'policy-2', is_protected: true }),
+      ]);
+
+      const pw = new PolicyWatcher(logger);
+
+      soClientMock.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          createPolicySO('policy-1', false),
+          createPolicySO('policy-2', false, {
+            error: 'error',
+            statusCode: 500,
+            message: 'Failed to update policy',
+          }),
+        ],
+      });
+
+      await expect(pw.watch(Basic)).rejects.toThrow(
+        'Done - 1 out of 2 were unsuccessful. Errors encountered:\nPolicy [policy-2] failed to update due to error: Failed to update policy'
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Done - 1 out of 2 were unsuccessful. Errors encountered:\nPolicy [policy-2] failed to update due to error: Failed to update policy'
+      );
+    });
   });
 });
