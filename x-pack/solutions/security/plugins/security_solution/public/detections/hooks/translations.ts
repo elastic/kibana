@@ -130,7 +130,7 @@ export const ALERT_CLOSE_INFO_MODAL_CONTACT_ADMIN_MESSAGE = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.contactAdminMessage',
   {
     defaultMessage:
-      "This behavior can be modified in Kibana's Advanced Settings. Please contact your SOC Manager or Detections Admin to make this change.",
+      "This behavior can be modified in Kibana's Advanced Settings. Please contact your admin to make this change.",
   }
 );
 
@@ -151,6 +151,6 @@ export const ALERT_CLOSE_INFO_MODAL_CANCEL_LABEL = i18n.translate(
 export const ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL = i18n.translate(
   'xpack.securitySolution.alert.closeInfoModal.doNotShowAgainLabel',
   {
-    defaultMessage: 'Do not show this to me again.',
+    defaultMessage: 'Do not show this message again.',
   }
 );
