@@ -24,7 +24,6 @@ export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof 
 
 export interface CloudProviderConfig {
   type: string;
-  showCloudTemplate: boolean;
   organizationMinimumVersion?: string;
   getStartedPath: string;
   minShowVersion?: string;
@@ -38,6 +37,7 @@ export interface CloudSetupConfig {
   overviewPath: string;
   getStartedPath: string;
   showCloudConnectors: boolean;
+  showCloudTemplates: boolean;
   providers: Record<CloudProviders, CloudProviderConfig>;
 }
 

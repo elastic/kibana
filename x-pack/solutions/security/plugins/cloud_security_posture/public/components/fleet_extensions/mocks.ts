@@ -33,6 +33,7 @@ export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {
+    version: '3.0.0',
     policy_templates: [
       {
         title: '',
