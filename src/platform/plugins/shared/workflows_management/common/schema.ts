@@ -22,15 +22,43 @@ const connectors = [
     ],
   },
   {
-    type: 'slack.sendMessage',
+    type: 'slack',
     params: [
       {
         name: 'message',
         type: 'string' as const,
       },
     ],
-    // TODO: fetch from ActionsClient.getAll()
-    availableConnectorIds: ['keep-playground', 'keep-demo'],
+  },
+  {
+    type: 'inference.unified_completion',
+    params: [
+      {
+        name: 'body',
+        type: 'object' as const,
+        properties: {
+          messages: {
+            type: 'array' as const,
+            items: {
+              type: 'object' as const,
+              properties: {
+                role: { type: 'string' as const },
+                content: { type: 'string' as const },
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
+  {
+    type: 'inference.completion',
+    params: [
+      {
+        name: 'input',
+        type: 'string' as const,
+      },
+    ],
   },
   {
     type: 'delay',
