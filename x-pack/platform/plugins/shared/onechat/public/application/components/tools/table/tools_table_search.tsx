@@ -15,6 +15,7 @@ import { useToasts } from '../../../hooks/use_toasts';
 import { labels } from '../../../utils/i18n';
 import { ToolFilterOption } from './tools_table_filter_option';
 import { useOnechatTools } from '../../../hooks/tools/use_tools';
+import { useQueryState } from '../../../hooks/use_query_state';
 
 const getToolsTableSearchConfig = ({
   includeSystemTools,
@@ -90,13 +91,14 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
   const { tools } = useOnechatTools({ includeSystemTools });
   const { tags } = useToolTags({ includeSystemTools });
   const [results, setResults] = useState<ToolDefinitionWithSchema[]>(tools);
+  const [searchQuery, setSearchQuery] = useQueryState('search', { defaultValue: '' });
 
   useEffect(() => {
     setResults(tools);
   }, [tools]);
 
   const handleChange = useCallback(
-    ({ query, error: searchError }: EuiSearchBarOnChangeArgs) => {
+    ({ query, queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
       if (searchError) {
         addErrorToast({
           title: labels.tools.searchToolsErrorToast,
@@ -111,9 +113,10 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
           })
         : tools;
 
+      setSearchQuery(queryText);
       setResults(newItems);
     },
-    [tools, addErrorToast]
+    [tools, addErrorToast, setSearchQuery]
   );
 
   const matchesByType = useMemo(() => {
@@ -121,15 +124,16 @@ export const useToolsTableSearch = (): ToolsTableSearch => {
   }, [tools]);
 
   const matchesByTag = useMemo(() => {
-    return countBy(tools, 'tags');
+    return countBy(tools.flatMap((tool) => tool.tags));
   }, [tools]);
 
-  const searchConfig = useMemo(
+  const searchConfig: Search = useMemo(
     () => ({
       ...getToolsTableSearchConfig({ includeSystemTools, matchesByType, matchesByTag, tags }),
       onChange: handleChange,
+      query: searchQuery,
     }),
-    [includeSystemTools, handleChange, matchesByType, matchesByTag, tags]
+    [includeSystemTools, handleChange, matchesByType, matchesByTag, tags, searchQuery]
   );
   return {
     searchConfig,

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { range } from 'lodash';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -36,10 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
-
-      await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': false,
-      });
     });
 
     describe('POST /api/chat/tools', () => {
@@ -320,96 +315,6 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .delete(`/api/chat/tools/delete-test-tool`)
           .set('kbn-xsrf', 'kibana')
-          .expect(404);
-
-        await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
-        });
-      });
-    });
-
-    describe('POST /api/chat/tools/_bulk_delete', () => {
-      before(async () => {
-        for (let i = 0; i < 4; i++) {
-          const testTool = {
-            ...mockTool,
-            id: `bulk-delete-test-tool-${i}`,
-          };
-          const response = await supertest
-            .post('/api/chat/tools')
-            .set('kbn-xsrf', 'kibana')
-            .send(testTool)
-            .expect(200);
-          createdToolIds.push(response.body.id);
-        }
-      });
-
-      it('should bulk delete existing tools', async () => {
-        const toolIdsToDelete = range(0, 2).map((i) => `bulk-delete-test-tool-${i}`);
-        const response = await supertest
-          .post('/api/chat/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .send({ ids: toolIdsToDelete })
-          .expect(200);
-
-        expect(response.body).to.have.property('results');
-        expect(response.body.results).to.be.an('array');
-        expect(response.body.results).to.have.length(toolIdsToDelete.length);
-
-        for (const result of response.body.results) {
-          expect(result.success).to.be(true);
-          expect(toolIdsToDelete).to.contain(result.toolId);
-        }
-      });
-
-      it('should handle a mix of existing and non-existent tools', async () => {
-        const toolIdsToDelete = range(2, 4).map((i) => `bulk-delete-test-tool-${i}`);
-        const nonExistentToolId = 'this-tool-does-not-exist';
-        const ids = [...toolIdsToDelete, nonExistentToolId];
-
-        const response = await supertest
-          .post('/api/chat/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .send({ ids })
-          .expect(200);
-
-        expect(response.body.results).to.have.length(3);
-
-        const successResults = response.body.results.filter((r: any) => r.success);
-        const failureResult = response.body.results.find((r: any) => !r.success);
-
-        expect(successResults).to.have.length(2);
-        for (const result of successResults) {
-          expect(toolIdsToDelete).to.contain(result.toolId);
-        }
-
-        expect(failureResult).to.not.be(undefined);
-        expect(failureResult.toolId).to.be(nonExistentToolId);
-        expect(failureResult.reason.error).to.have.property('message');
-        expect(failureResult.reason.error.message).to.contain('not found');
-      });
-
-      it('should handle an empty list of IDs', async () => {
-        const response = await supertest
-          .post('/api/chat/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .send({ ids: [] })
-          .expect(200);
-
-        expect(response.body).to.have.property('results');
-        expect(response.body.results).to.be.an('array');
-        expect(response.body.results).to.have.length(0);
-      });
-
-      it('should return 404 when ES|QL tool API is disabled', async () => {
-        await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
-        });
-
-        await supertest
-          .post('/api/chat/tools/_bulk_delete')
-          .set('kbn-xsrf', 'kibana')
-          .send({ ids: ['any-id'] })
           .expect(404);
 
         await kibanaServer.uiSettings.update({

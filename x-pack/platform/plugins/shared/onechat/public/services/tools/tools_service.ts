@@ -38,7 +38,7 @@ export class ToolsService {
   }
 
   async bulkDelete(toolsIds: string[]) {
-    return await this.http.post<BulkDeleteToolResponse>(`/api/chat/tools/_bulk_delete`, {
+    return await this.http.post<BulkDeleteToolResponse>(`/internal/chat/tools/_bulk_delete`, {
       body: JSON.stringify({ ids: toolsIds }),
     });
   }

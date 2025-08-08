@@ -18,8 +18,6 @@ import type {
   UpdateToolPayload,
   CreateToolResponse,
   UpdateToolResponse,
-  BulkDeleteToolResponse,
-  BulkDeleteToolResult,
 } from '../../common/http_api/tools';
 import { apiPrivileges } from '../../common/features';
 import {
@@ -226,62 +224,6 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const success = await registry.delete(id);
         return response.ok<DeleteToolResponse>({
           body: { success },
-        });
-      })
-    );
-  // bulk delete tools
-  router.versioned
-    .post({
-      path: '/api/chat/tools/_bulk_delete',
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageOnechat] },
-      },
-      access: 'public',
-      summary: 'Bulk delete tools',
-      description: TECHNICAL_PREVIEW_WARNING,
-      options: {
-        tags: ['tools'],
-        availability: {
-          stability: 'experimental',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: {
-            body: schema.object({
-              ids: schema.arrayOf(schema.string()),
-            }),
-          },
-        },
-      },
-      wrapHandler(async (ctx, request, response) => {
-        const { ids } = request.body;
-        const { tools: toolService } = getInternalServices();
-        const registry = await toolService.getRegistry({ request });
-        const deleteResults = await Promise.allSettled(ids.map((id) => registry.delete(id)));
-
-        const results: BulkDeleteToolResult[] = deleteResults.map((result, index) => {
-          if (result.status !== 'fulfilled') {
-            return {
-              toolId: ids[index],
-              success: false,
-              reason: result.reason.toJSON(),
-            };
-          }
-
-          return {
-            toolId: ids[index],
-            success: true,
-          };
-        });
-
-        return response.ok<BulkDeleteToolResponse>({
-          body: {
-            results,
-          },
         });
       })
     );

@@ -17,10 +17,11 @@ import { ToolQuickActions } from './tools_table_quick_actions';
 export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinitionWithSchema>> => {
   return [
     {
+      field: 'id',
       name: labels.tools.toolIdLabel,
-      sortable: ({ id }: ToolDefinitionWithSchema) => id,
+      sortable: true,
       width: '60%',
-      render: (tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
+      render: (_, tool: ToolDefinitionWithSchema) => <ToolIdWithDescription tool={tool} />,
     },
     {
       field: 'type',
