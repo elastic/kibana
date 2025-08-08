@@ -84,7 +84,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
         ul: (chunks) => `<ul>${chunks}</ul>`,
         li: (chunks) => `<li>${chunks}</li>`,
         strong: (chunks) => `<strong>${chunks}</strong>`,
-        em: (chunks) => `<em>${chunks}</em>`,
       },
     }),
     schema: schema.object({
