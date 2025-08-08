@@ -34,7 +34,26 @@ describe('KEEP', () => {
       const { ast, errors } = EsqlQuery.fromSrc(src);
       const keep = Walker.match(ast, { type: 'command', name: 'keep' });
 
-      console.log(JSON.stringify(keep, null, 2));
+      expect(errors.length).toBe(0);
+      expect(keep).toMatchObject({
+        type: 'command',
+        name: 'keep',
+        args: [
+          {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'named',
+          },
+        ],
+      });
+    });
+
+    it('parses single param as argument', () => {
+      const src = `
+        FROM employees
+        | KEEP ?keep`;
+      const { ast, errors } = EsqlQuery.fromSrc(src);
+      const keep = Walker.match(ast, { type: 'command', name: 'keep' });
 
       expect(errors.length).toBe(0);
       expect(keep).toMatchObject({
@@ -47,6 +66,83 @@ describe('KEEP', () => {
             paramType: 'named',
           },
         ],
+      });
+    });
+
+    describe('wildcards and ordering', () => {
+      it('parses single wildcard pattern', () => {
+        const src = `
+          FROM employees
+          | KEEP h*`;
+        const { ast, errors } = EsqlQuery.fromSrc(src);
+        const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+        expect(errors.length).toBe(0);
+        expect(keep).toMatchObject({
+          type: 'command',
+          name: 'keep',
+          args: [{}],
+        });
+      });
+
+      it('parses multiple wildcard patterns including *', () => {
+        const src = `
+          FROM employees
+          | KEEP h*, *`;
+        const { ast, errors } = EsqlQuery.fromSrc(src);
+        const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+        expect(errors.length).toBe(0);
+        expect(keep).toMatchObject({
+          type: 'command',
+          name: 'keep',
+          args: [{}, {}],
+        });
+      });
+
+      it('keeps explicit field names before wildcard with same prefix', () => {
+        const src = `
+          FROM employees
+          | KEEP first_name, last_name, first_name*`;
+        const { ast, errors } = EsqlQuery.fromSrc(src);
+        const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+        expect(errors.length).toBe(0);
+        expect(keep).toMatchObject({
+          type: 'command',
+          name: 'keep',
+          args: [{}, {}, {}],
+        });
+      });
+
+      it('preserves source order of wildcard expressions with same precedence', () => {
+        const src = `
+          FROM employees
+          | KEEP first_name*, last_name, first_na*`;
+        const { ast, errors } = EsqlQuery.fromSrc(src);
+        const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+        expect(errors.length).toBe(0);
+        expect(keep).toMatchObject({
+          type: 'command',
+          name: 'keep',
+          args: [{}, {}, {}],
+        });
+      });
+
+      it('parses * with later explicit column', () => {
+        const src = `
+          FROM employees
+          | KEEP *, first_name`;
+        const { ast, errors } = EsqlQuery.fromSrc(src);
+        const keep = Walker.match(ast, { type: 'command', name: 'keep' });
+
+        expect(errors.length).toBe(0);
+        expect(keep).toMatchObject({
+          type: 'command',
+          name: 'keep',
+          args: [{}, {}],
+        });
       });
     });
   });
