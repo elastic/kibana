@@ -12,11 +12,11 @@ import type { ServerError } from '../types';
 import { patchAlertComment } from './api';
 import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
-import type { AlertAttachment } from '../../common/types/domain';
+import type { AlertAttachmentPayload } from '../../common/types/domain';
 
 interface MutationArgs {
   caseId: string;
-  commentUpdate: Pick<AlertAttachment, 'alertId' | 'index' | 'rule' | 'owner' | 'type'> & {
+  commentUpdate: AlertAttachmentPayload & {
     id: string;
     version: string;
   };

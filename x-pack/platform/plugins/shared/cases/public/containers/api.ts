@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachment, CaseCustomField, User } from '../../common/types/domain';
+import type { AlertAttachmentPayload, CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -434,7 +434,7 @@ export const patchAlertComment = async ({
   signal,
 }: {
   caseId: string;
-  commentUpdate: Pick<AlertAttachment, 'alertId' | 'index' | 'rule' | 'owner' | 'type'> & {
+  commentUpdate: AlertAttachmentPayload & {
     id: string;
     version: string;
   };
