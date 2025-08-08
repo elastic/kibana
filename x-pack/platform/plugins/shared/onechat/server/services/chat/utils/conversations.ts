@@ -77,9 +77,6 @@ export const updateConversation$ = ({
   );
 };
 
-/**
- * Check if a conversation exists
- */
 export const conversationExists$ = ({
   conversationId,
   conversationClient,
@@ -90,21 +87,32 @@ export const conversationExists$ = ({
   return defer(() => conversationClient.exists(conversationId));
 };
 
-/**
- * Get an existing conversation or return a placeholder for new conversations
- */
 export const getConversation$ = ({
   agentId,
   conversationId,
+  autoCreateConversationWithId = false,
   conversationClient,
 }: {
   agentId: string;
   conversationId: string | undefined;
+  autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
 }): Observable<Conversation> => {
   return defer(() => {
     if (conversationId) {
-      return conversationClient.get(conversationId);
+      if (autoCreateConversationWithId) {
+        return conversationExists$({ conversationId, conversationClient }).pipe(
+          switchMap((exists) => {
+            if (exists) {
+              return conversationClient.get(conversationId);
+            } else {
+              return of(placeholderConversation({ conversationId, agentId }));
+            }
+          })
+        );
+      } else {
+        return conversationClient.get(conversationId);
+      }
     } else {
       return of(placeholderConversation({ agentId }));
     }

@@ -40,7 +40,6 @@ import {
   executeAgent$,
   getConversation$,
   conversationExists$,
-  createPlaceholderConversation$,
   updateConversation$,
   createConversation$,
 } from './utils';
@@ -136,6 +135,7 @@ class ChatServiceImpl implements ChatService {
     autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference, actions } = this;
+    const isNewConversation = !conversationId;
 
     return withConverseSpan({ agentId, mode, conversationId }, (span) => {
       return forkJoin({
@@ -149,34 +149,20 @@ class ChatServiceImpl implements ChatService {
         chatModel: getChatModel$({ connectorId, request, inference, actions, span }),
       }).pipe(
         switchMap(({ conversationClient, chatModel, agent }) => {
-          const shouldCreateNewConversation$ = (() => {
-            if (!conversationId) {
-              return of(true);
-            }
+          const shouldCreateNewConversation$ = isNewConversation
+            ? of(true)
+            : autoCreateConversationWithId
+            ? conversationExists$({ conversationId, conversationClient }).pipe(
+                switchMap((exists) => of(!exists))
+              )
+            : of(false);
 
-            if (!autoCreateConversationWithId) {
-              return of(false);
-            }
-
-            return conversationExists$({ conversationId, conversationClient }).pipe(
-              switchMap((exists) => of(!exists))
-            );
-          })();
-
-          const conversation$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) => {
-              if (shouldCreate) {
-                return createPlaceholderConversation$({ agentId, conversationId });
-              } else {
-                return getConversation$({
-                  agentId,
-                  conversationId,
-                  conversationClient,
-                });
-              }
-            }),
-            shareReplay()
-          );
+          const conversation$ = getConversation$({
+            agentId,
+            conversationId,
+            autoCreateConversationWithId,
+            conversationClient,
+          });
 
           const agentEvents$ = executeAgent$({
             agentId,
@@ -189,22 +175,22 @@ class ChatServiceImpl implements ChatService {
           });
 
           const title$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) => {
-              return shouldCreate
+            switchMap((willCreate) =>
+              willCreate
                 ? generateTitle$({ chatModel, conversation$, nextInput })
                 : conversation$.pipe(
                     switchMap((conversation) => {
                       return of(conversation.title);
                     })
-                  );
-            })
+                  )
+            )
           );
 
           const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
           const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
-            switchMap((shouldCreate) => {
-              return shouldCreate
+            switchMap((shouldCreate) =>
+              shouldCreate
                 ? createConversation$({
                     agentId,
                     conversationClient,
@@ -217,8 +203,8 @@ class ChatServiceImpl implements ChatService {
                     conversation$,
                     title$,
                     roundCompletedEvents$,
-                  });
-            })
+                  })
+            )
           );
 
           return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
