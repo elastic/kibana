@@ -132,9 +132,9 @@ export const closeFirstAlertModalOff = () => {
 };
 
 export const confirmAlertCloseModal = () => {
-  cy.get('[data-test-subj="confirmModalConfirmButton"]').click()
-  cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist')
-}
+  cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
+  cy.get('[data-test-subj="alertCloseInfoModal"]').should('not.exist');
+};
 
 export const closeAlerts = () => {
   cy.get(TAKE_ACTION_POPOVER_BTN).first().click();
@@ -185,8 +185,8 @@ export const closeAlertFromStatusBadge = (verifyModal?: () => void) => {
     verifyModal();
   }
   confirmAlertCloseModal();
-  cy.get(CLOSE_ALERT_BTN).should('not.exist')
-}
+  cy.get(CLOSE_ALERT_BTN).should('not.exist');
+};
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
   cy.get(ENRICHMENT_QUERY_RANGE_PICKER).within(() => {
@@ -376,7 +376,7 @@ export const bulkCloseSelectedAlerts = (verifyModal?: () => void) => {
     verifyModal();
   }
   confirmAlertCloseModal();
-}
+};
 
 export const groupAlertsBy = (field: string) => {
   cy.get(GROUP_ALERTS_BY_BTN).click();
@@ -390,7 +390,7 @@ export const closeFirstGroupedAlerts = (verifyModal?: () => void) => {
     verifyModal();
   }
   confirmAlertCloseModal();
-}
+};
 
 export const closeAlertFromFlyoutActions = (verifyModal?: () => void) => {
   cy.get(TAKE_ACTION_BTN).click();
@@ -399,7 +399,7 @@ export const closeAlertFromFlyoutActions = (verifyModal?: () => void) => {
     verifyModal();
   }
   confirmAlertCloseModal();
-}
+};
 
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
