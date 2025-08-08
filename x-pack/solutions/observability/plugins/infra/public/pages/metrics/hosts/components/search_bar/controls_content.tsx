@@ -15,9 +15,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
-import { controlPanelConfigs } from './control_panels_config';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { getControlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
 
 interface Props {
@@ -25,17 +26,23 @@ interface Props {
   timeRange: TimeRange;
   filters: Filter[];
   query: Query;
+
+  schema?: DataSchemaFormat | null;
   onFiltersChange: (filters: Filter[]) => void;
 }
 
-export const ControlsContent: React.FC<Props> = ({
+export const ControlsContent = ({
   dataView,
   filters,
   query,
   timeRange,
+  schema,
   onFiltersChange,
-}) => {
-  const [controlPanels, setControlPanels] = useControlPanels(controlPanelConfigs, dataView);
+}: Props) => {
+  const controlConfigs = useMemo(() => getControlPanelConfigs(schema), [schema]);
+
+  const [controlPanels, setControlPanels] = useControlPanels(controlConfigs, dataView);
+
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(
@@ -94,6 +101,7 @@ export const ControlsContent: React.FC<Props> = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
+        key={schema}
         getCreationOptions={getInitialInput()}
         onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}

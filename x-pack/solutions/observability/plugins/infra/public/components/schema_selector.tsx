@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -22,42 +23,43 @@ import {
   DataSchemaFormatEnum,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
-import type { HostsState } from '../pages/metrics/hosts/hooks/use_unified_search_url_state';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
 });
 
-const PrependLabel = ({ count }: { count: number }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        {i18n.translate('xpack.infra.schemaSelector.label', {
-          defaultMessage: 'Schema',
-        })}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiBadge
-        color="primary"
-        data-test-subj="infraSchemaSelectorCount"
-        aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
-          defaultMessage: 'Schemas available',
-        })}
-      >
-        {count}
-      </EuiBadge>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiIconTip
-        content={i18n.translate('xpack.infra.schemaSelector.description', {
-          defaultMessage: 'Select which data collection schema your entities are observed with.',
-        })}
-        position="right"
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const PrependLabel = React.memo(({ count }: { count: number }) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {i18n.translate('xpack.infra.schemaSelector.label', {
+            defaultMessage: 'Schema',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          color="primary"
+          data-test-subj="infraSchemaSelectorCount"
+          aria-label={i18n.translate('xpack.infra.schemaSelector.count', {
+            defaultMessage: 'Schemas available',
+          })}
+        >
+          {count}
+        </EuiBadge>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          content={i18n.translate('xpack.infra.schemaSelector.description', {
+            defaultMessage: 'Select which data collection schema your entities are observed with.',
+          })}
+          position="right"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
 
 const InvalidDropdownDisplay = ({ value }: { value: string }) => {
   return (
@@ -68,7 +70,7 @@ const InvalidDropdownDisplay = ({ value }: { value: string }) => {
   );
 };
 
-const InvalidDisplay = ({ value }: { value: string }) => {
+const InvalidDisplay = React.memo(({ value }: { value: string }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem>
@@ -96,7 +98,8 @@ const InvalidDisplay = ({ value }: { value: string }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
+
 const schemaTranslationMap = {
   [DataSchemaFormatEnum.ECS]: i18n.translate('xpack.infra.schemaSelector.ecsDisplay', {
     defaultMessage: 'Elastic System Integration',
@@ -116,76 +119,90 @@ const getInputDisplay = (schema: DataSchemaFormat) => {
   });
 };
 
-export const SchemaSelector = ({
-  onChange,
-  schemas,
-  value,
-  isLoading,
-}: {
-  onChange: (selected: HostsState['preferredSchema']) => void;
-  schemas: DataSchemaFormat[];
-  value: DataSchemaFormat | null;
-  isLoading: boolean;
-}) => {
-  const options = useMemo(
-    () =>
-      schemas.map((schema) => ({
-        inputDisplay: getInputDisplay(schema),
-        value: schema,
-      })),
-    [schemas]
-  );
-  // Is the selected value in the available options?
-  const isInvalid = !!value && !options.some((opt) => opt.value === value);
+export const SchemaSelector = React.memo(
+  ({
+    onChange,
+    schemas,
+    value,
+    isLoading,
+  }: {
+    onChange: (selected: DataSchemaFormat) => void;
+    schemas: DataSchemaFormat[];
+    value: DataSchemaFormat | null;
+    isLoading: boolean;
+  }) => {
+    const [selectedSchema, setSelectedSchema] = useState<DataSchemaFormat>(value || 'ecs');
 
-  // If only one schema is available and it's not the preferred, show both in the dropdown
-  const displayOptions =
-    options.length === 1 && isInvalid
-      ? [
-          {
-            inputDisplay: <InvalidDisplay value={getInputDisplay(value)} />,
-            value,
-            disabled: true,
-            dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value)} />,
-          },
-          ...options,
-        ]
-      : options;
+    const options = useMemo(
+      () =>
+        schemas.map((schema) => ({
+          inputDisplay: getInputDisplay(schema),
+          value: schema,
+        })),
+      [schemas]
+    );
+    // Is the selected value in the available options?
+    const isInvalid = useMemo(
+      () => !!value && !options.some((opt) => opt.value === value),
+      [value, options]
+    );
 
-  const onSelect = (selectedValue: string) => {
-    if (selectedValue) {
-      onChange(selectedValue as HostsState['preferredSchema']);
-    }
-  };
+    // If only one schema is available and it's not the preferred, show both in the dropdown
+    const displayOptions = useMemo<EuiSuperSelectOption<DataSchemaFormat>[]>(
+      () =>
+        options.length === 1 && isInvalid
+          ? [
+              {
+                inputDisplay: <InvalidDisplay value={getInputDisplay(value ?? 'ecs')} />,
+                value: value ?? 'ecs',
+                disabled: true,
+                dropdownDisplay: <InvalidDropdownDisplay value={getInputDisplay(value ?? 'ecs')} />,
+              },
+              ...options,
+            ]
+          : options,
+      [isInvalid, options, value]
+    );
 
-  return (
-    <>
-      <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <EuiFormRow
-                aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
-                  defaultMessage: 'Schema selector for data collection',
-                })}
-                css={{ minWidth: '356px' }}
-              >
-                <EuiSuperSelect
-                  data-test-subj="infraSchemaSelect"
-                  id={'infraSchemaSelectorSelect'}
-                  options={displayOptions}
-                  valueOfSelected={value || ''}
-                  onChange={onSelect}
-                  isLoading={isLoading}
-                  fullWidth
-                  prepend={<PrependLabel count={schemas.length} />}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-    </>
-  );
-};
+    const onSelect = useCallback(
+      (selectedValue: DataSchemaFormat) => {
+        if (selectedValue) {
+          setSelectedSchema(selectedValue);
+          onChange(selectedValue);
+        }
+      },
+      [onChange]
+    );
+
+    return (
+      <>
+        <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFormRow
+                  aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
+                    defaultMessage: 'Schema selector for data collection',
+                  })}
+                  css={{ minWidth: '356px' }}
+                >
+                  <EuiSuperSelect
+                    data-test-subj="infraSchemaSelect"
+                    id={'infraSchemaSelectorSelect'}
+                    options={displayOptions}
+                    valueOfSelected={selectedSchema}
+                    onChange={onSelect}
+                    isLoading={isLoading}
+                    fullWidth
+                    prepend={<PrependLabel count={options.length} />}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+      </>
+    );
+  }
+);

@@ -5,37 +5,38 @@
  * 2.0.
  */
 
+import {
+  CLOUD_PROVIDER,
+  HOST_OS_NAME,
+  OS_NAME,
+  SERVICE_NAME,
+  type DataSchemaFormat,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { ControlPanels } from '@kbn/observability-shared-plugin/public';
 
-export const availableControlsPanels = {
-  HOST_OS_NAME: 'host.os.name',
-  CLOUD_PROVIDER: 'cloud.provider',
-  SERVICE_NAME: 'service.name',
-};
-
-export const controlPanelConfigs: ControlPanels = {
-  [availableControlsPanels.HOST_OS_NAME]: {
+export const getControlPanelConfigs = (schema: DataSchemaFormat | null = 'ecs'): ControlPanels => ({
+  [schema === 'semconv' ? OS_NAME : HOST_OS_NAME]: {
     order: 0,
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    fieldName: availableControlsPanels.HOST_OS_NAME,
+    fieldName: schema === 'semconv' ? OS_NAME : HOST_OS_NAME,
     title: 'Operating System',
   },
-  [availableControlsPanels.CLOUD_PROVIDER]: {
+  [CLOUD_PROVIDER]: {
     order: 1,
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    fieldName: availableControlsPanels.CLOUD_PROVIDER,
+    fieldName: CLOUD_PROVIDER,
     title: 'Cloud Provider',
   },
-  [availableControlsPanels.SERVICE_NAME]: {
+  [SERVICE_NAME]: {
     order: 2,
     width: 'medium',
     grow: false,
     type: 'optionsListControl',
-    fieldName: availableControlsPanels.SERVICE_NAME,
+    fieldName: SERVICE_NAME,
     title: 'Service Name',
   },
-};
+});

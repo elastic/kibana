@@ -8,6 +8,7 @@
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import createContainer from 'constate';
 import type { FetcherResult } from '@kbn/observability-shared-plugin/public';
+import { useEffect } from 'react';
 import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 import type { GetTimeRangeMetadataResponse } from '../../common/metrics_sources/get_has_data';
 import { getTimeRangeMetadataResponseRT } from '../../common/metrics_sources/get_has_data';
@@ -24,7 +25,7 @@ export const useTimeRangeMetadata = ({
   start: string;
   end: string;
 }): FetcherResult<GetTimeRangeMetadataResponse> => {
-  return useFetcher(
+  const { data, refetch, status } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/source/time_range_metadata', {
         method: 'GET',
@@ -38,8 +39,20 @@ export const useTimeRangeMetadata = ({
 
       return decodeOrThrow(getTimeRangeMetadataResponseRT)(response);
     },
-    [start, end, kuery, dataSource]
+    [start, end, kuery, dataSource],
+    {
+      reloadRequestTimeUpdateEnabled: false,
+    }
   );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  return {
+    data,
+    status,
+  };
 };
 
 export const [TimeRangeMetadataProvider, useTimeRangeMetadataContext] =
