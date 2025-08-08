@@ -6,7 +6,7 @@
  */
 
 import type { RuleMigrationRetryFilter } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../../common/siem_migrations/rules/types';
 
 const RETRY_FILTERS: Record<RuleMigrationRetryFilter, RuleMigrationFilters> = {
   failed: { failed: true },

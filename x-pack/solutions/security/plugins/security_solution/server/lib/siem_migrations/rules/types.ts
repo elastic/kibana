@@ -17,9 +17,8 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 import type { Stored } from '../types';
 import type { SiemMigrationsIndexNameProvider } from '../common/types';
 
-export type StoredSiemMigration = Stored<RuleMigration>;
-
-export type StoredRuleMigration = Stored<RuleMigrationRule>;
+export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigrationRule = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface RuleMigrationIntegration {

@@ -5,25 +5,15 @@
  * 2.0.
  */
 
-import type { EvaluationResult } from 'langsmith/evaluation';
-import type { Run, Example } from 'langsmith/schemas';
 import { distance } from 'fastest-levenshtein';
-import type {
-  RuleMigration,
-  RuleMigrationRule,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
+import type { MigrateRuleState } from './agent/types';
+import type { CustomEvaluator } from '../../common/task/siem_migrations_task_evaluator';
 import { SiemMigrationTaskEvaluable } from '../../common/task/siem_migrations_task_evaluator';
 
-type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
-export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
-
-export class RuleMigrationTaskEvaluator extends SiemMigrationTaskEvaluable<
-  RuleMigration,
-  RuleMigrationRule,
-  MigrateRuleConfigSchema
->(RuleMigrationTaskRunner) {
+export class RuleMigrationTaskEvaluator extends SiemMigrationTaskEvaluable(
+  RuleMigrationTaskRunner
+) {
   protected readonly evaluators: Record<string, CustomEvaluator> = {
     custom_query_accuracy: ({ run, example }) => {
       const runQuery = (run?.outputs as MigrateRuleState)?.elastic_rule?.query;
@@ -54,7 +44,8 @@ export class RuleMigrationTaskEvaluator extends SiemMigrationTaskEvaluable<
     },
 
     prebuilt_rule_match: ({ run, example }) => {
-      const runPrebuiltRuleId = (run?.outputs as MigrateRuleState)?.elastic_rule?.prebuilt_rule_id;
+      const runPrebuiltRuleId = (run?.outputs as MigrateRuleState)?.elastic_rule
+        ?.prebuilt_rule_id;
       const expectedPrebuiltRuleId = (example?.outputs as MigrateRuleState)?.elastic_rule
         ?.prebuilt_rule_id;
 

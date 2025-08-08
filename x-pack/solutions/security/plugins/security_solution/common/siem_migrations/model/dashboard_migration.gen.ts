@@ -26,6 +26,12 @@ import {
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
+ * The original dashboard vendor identifier.
+ */
+export type OriginalDashboardVendor = z.infer<typeof OriginalDashboardVendor>;
+export const OriginalDashboardVendor = z.literal('splunk');
+
+/**
  * The dashboard migration object ( without Id ) with its settings.
  */
 export type DashboardMigrationData = z.infer<typeof DashboardMigrationData>;
@@ -70,10 +76,7 @@ export const OriginalDashboard = z.object({
    * The unique identifier for the dashboard
    */
   id: z.string(),
-  /**
-   * The vendor of the dashboard (e.g., 'splunk')
-   */
-  vendor: z.string(),
+  vendor: OriginalDashboardVendor,
   /**
    * The title of the dashboard
    */
@@ -83,7 +86,7 @@ export const OriginalDashboard = z.object({
    */
   description: z.string(),
   /**
-   * The data of the dashboard, typically in JSON format
+   * The data of the dashboard in the specified format
    */
   data: z.object({}),
   /**
@@ -91,13 +94,36 @@ export const OriginalDashboard = z.object({
    */
   last_updated: z.string().optional(),
   /**
-   * The format of the dashboard (e.g., 'json', 'xml')
+   * The format of the dashboard data (e.g., 'json', 'xml')
    */
   format: z.string(),
   /**
    * Additional properties specific to the splunk
    */
   splunk_properties: SplunkOriginalDashboardProperties.optional(),
+});
+
+/**
+ * The elastic dashboard translation.
+ */
+export type ElasticDashboard = z.infer<typeof ElasticDashboard>;
+export const ElasticDashboard = z.object({
+  /**
+   * The unique identifier for the dashboard installed Saved Object
+   */
+  id: z.string().optional(),
+  /**
+   * The title of the dashboard
+   */
+  title: z.string(),
+  /**
+   * The description of the dashboard
+   */
+  description: z.string().optional(),
+  /**
+   * The data of the dashboard Saved Object
+   */
+  data: z.object({}).optional(),
 });
 
 /**
@@ -121,6 +147,10 @@ export const DashboardMigrationDashboardData = z.object({
    * The original dashboard to migrate.
    */
   original_dashboard: OriginalDashboard,
+  /**
+   * The translated elastic dashboard.
+   */
+  elastic_dashboard: ElasticDashboard.optional(),
   /**
    * The rule translation result.
    */

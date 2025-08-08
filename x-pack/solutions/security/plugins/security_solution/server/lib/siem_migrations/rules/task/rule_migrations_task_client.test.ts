@@ -15,11 +15,11 @@ import {
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StoredSiemMigration } from '../types';
+import type { StoredRuleMigration } from '../types';
 import type { RuleMigrationTaskStartParams } from './types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('./rule_migrations_task_runner', () => {
@@ -255,7 +255,7 @@ describe('RuleMigrationsTaskClient', () => {
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -274,7 +274,7 @@ describe('RuleMigrationsTaskClient', () => {
       } as RuleMigrationDataStats);
       data.migrations.get.mockResolvedValue({
         id: migrationId,
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -294,7 +294,7 @@ describe('RuleMigrationsTaskClient', () => {
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
         logger,
@@ -343,7 +343,7 @@ describe('RuleMigrationsTaskClient', () => {
         last_execution: {
           error: 'Test error',
         },
-      } as unknown as StoredSiemMigration);
+      } as unknown as StoredRuleMigration);
 
       const client = new RuleMigrationsTaskClient(
         migrationsRunning,
@@ -369,7 +369,7 @@ describe('RuleMigrationsTaskClient', () => {
           rules: { total: 10, pending: 2, completed: 3, failed: 2 },
         } as RuleMigrationDataStats,
       ];
-      const migrations = [{ id: 'm1' }, { id: 'm2' }] as unknown as StoredSiemMigration[];
+      const migrations = [{ id: 'm1' }, { id: 'm2' }] as unknown as StoredRuleMigration[];
       data.items.getAllStats.mockResolvedValue(statsArray);
       data.migrations.getAll.mockResolvedValue(migrations);
       // Mark migration m1 as running.

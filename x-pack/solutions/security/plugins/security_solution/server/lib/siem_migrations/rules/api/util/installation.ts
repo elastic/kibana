@@ -15,7 +15,7 @@ import { performTimelinesInstallation } from '../../../../detection_engine/prebu
 import { createPrebuiltRules } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules';
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine';
-import type { StoredRuleMigration } from '../../types';
+import type { StoredRuleMigrationRule } from '../../types';
 import { getPrebuiltRules, getUniquePrebuiltRuleIds } from './prebuilt_rules';
 import {
   convertMigrationCustomRuleToSecurityRulePayload,
@@ -26,7 +26,7 @@ import { getVendorTag } from './tags';
 const MAX_CUSTOM_RULES_TO_CREATE_IN_PARALLEL = 50;
 
 const installPrebuiltRules = async (
-  rulesToInstall: StoredRuleMigration[],
+  rulesToInstall: StoredRuleMigrationRule[],
   enabled: boolean,
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
@@ -88,7 +88,7 @@ const installPrebuiltRules = async (
 };
 
 export const installCustomRules = async (
-  rulesToInstall: StoredRuleMigration[],
+  rulesToInstall: StoredRuleMigrationRule[],
   enabled: boolean,
   detectionRulesClient: IDetectionRulesClient
 ): Promise<{

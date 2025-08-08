@@ -13,11 +13,11 @@ import type {
   OriginalRule,
   RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationResources } from '../retrievers/rule_resource_retriever';
+import type { MigrationResources } from '../../../common/task/retrievers/resource_retriever';
 
 export const migrateRuleState = Annotation.Root({
   original_rule: Annotation<OriginalRule>(),
-  resources: Annotation<RuleMigrationResources>(),
+  resources: Annotation<MigrationResources>(),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),

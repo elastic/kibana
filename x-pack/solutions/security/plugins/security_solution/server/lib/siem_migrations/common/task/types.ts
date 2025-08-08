@@ -42,13 +42,13 @@ export interface SiemMigrationTaskEvaluateParams<C extends object = {}> {
   abortController: AbortController;
 }
 
-export type MigrationState<I extends ItemDocument = ItemDocument> = Partial<Stored<I>>;
-export type MigrationTaskInvoke<I extends ItemDocument = ItemDocument> = () => Promise<
-  MigrationState<I>
->;
-export interface MigrationTask<I extends ItemDocument = ItemDocument, C extends object = {}> {
-  prepare: (item: Stored<I>, config: RunnableConfig<C>) => Promise<MigrationTaskInvoke<I>>;
-}
+export type Invocation<I extends ItemDocument = ItemDocument> = Promise<Stored<I>>;
+export type Invoke<I extends ItemDocument = ItemDocument> = () => Invocation<I>;
+
+export type MigrationTask<P extends object = {}, C extends object = {}, O extends object = {}> = (
+  params: P,
+  config?: RunnableConfig<C>
+) => Promise<O>;
 
 export interface RuleMigrationAgentRunOptions {
   skipPrebuiltRulesMatching: boolean;

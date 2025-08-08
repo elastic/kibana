@@ -12,13 +12,13 @@ import type {
   OriginalRule,
   RuleMigrationRule,
 } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationResources } from '../../../retrievers/rule_resource_retriever';
+import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
 import type { RuleMigrationIntegration } from '../../../../types';
 import type { TranslateRuleValidationErrors } from './types';
 
 export const translateRuleState = Annotation.Root({
   original_rule: Annotation<OriginalRule>(),
-  resources: Annotation<RuleMigrationResources>(),
+  resources: Annotation<MigrationResources>(),
   integration: Annotation<RuleMigrationIntegration>({
     reducer: (current, value) => value ?? current,
     default: () => ({} as RuleMigrationIntegration),

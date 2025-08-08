@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardMigrationsDataDashboardsClient } from '../dashboard_migrations_dashboards_client';
+import type { DashboardMigrationsDataDashboardsClient } from '../dashboard_migrations_data_dashboards_client';
 import type { DashboardMigrationsDataMigrationClient } from '../dashboard_migrations_migration_client';
 
 export const mockDashboardMigrationDataMigrationClient = {

@@ -16,7 +16,7 @@ import { createTracersCallbacks } from '../../../common/api/util/tracing';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import type { MigrateRuleGraphConfig } from '../../task/agent/types';
+import type { MigrateRuleConfig } from '../../task/agent/types';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
@@ -62,7 +62,7 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
             const securitySolutionContext = await context.securitySolution;
             const ruleMigrationsClient = securitySolutionContext.siemMigrations.getRulesClient();
 
-            const invocationConfig: MigrateRuleGraphConfig = {
+            const invocationConfig: MigrateRuleConfig = {
               callbacks: createTracersCallbacks(langsmithOptions, logger),
               configurable: {
                 skipPrebuiltRulesMatching,

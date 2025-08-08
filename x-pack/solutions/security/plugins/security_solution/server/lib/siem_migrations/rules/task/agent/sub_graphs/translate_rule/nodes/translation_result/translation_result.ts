@@ -13,7 +13,7 @@ import { RuleTranslationResult } from '../../../../../../../../../../common/siem
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
-  return async (state, config) => {
+  return async (state) => {
     // Set defaults
     const elasticRule = {
       title: state.original_rule.title,

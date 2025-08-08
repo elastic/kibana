@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';

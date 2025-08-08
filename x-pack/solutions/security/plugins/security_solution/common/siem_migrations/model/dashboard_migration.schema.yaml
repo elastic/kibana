@@ -6,6 +6,12 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
+    OriginalDashboardVendor:
+      type: string
+      description: The original dashboard vendor identifier.
+      enum:
+        - splunk
+
     DashboardMigration:
       description: The dashboard migration object with its settings.
       allOf:
@@ -73,6 +79,9 @@ components:
         original_dashboard:
           description: The original dashboard to migrate.
           $ref: '#/components/schemas/OriginalDashboard'
+        elastic_dashboard:
+          description: The translated elastic dashboard.
+          $ref: '#/components/schemas/ElasticDashboard'
         translation_result:
           description: The rule translation result.
           $ref: './migration.schema.yaml#/components/schemas/MigrationTranslationResult'
@@ -102,8 +111,7 @@ components:
           type: string
           description: The unique identifier for the dashboard
         vendor:
-          type: string
-          description: The vendor of the dashboard (e.g., 'splunk')
+          $ref: '#/components/schemas/OriginalDashboardVendor'
         title:
           type: string
           description: The title of the dashboard
@@ -112,16 +120,35 @@ components:
           description: The description of the dashboard
         data:
           type: object
-          description: The data of the dashboard, typically in JSON format
+          description: The data of the dashboard in the specified format
         last_updated:
           type: string
           description: The last updated timestamp of the dashboard
         format:
           type: string
-          description: The format of the dashboard (e.g., 'json', 'xml')
+          description: The format of the dashboard data (e.g., 'json', 'xml')
         splunk_properties:
           description: Additional properties specific to the splunk
           $ref: './vendor/dashboards/splunk.schema.yaml#/components/schemas/SplunkOriginalDashboardProperties'
+
+    ElasticDashboard:
+      type: object
+      description: The elastic dashboard translation.
+      required:
+        - title
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the dashboard installed Saved Object
+        title:
+          type: string
+          description: The title of the dashboard
+        description:
+          type: string
+          description: The description of the dashboard
+        data:
+          type: object
+          description: The data of the dashboard Saved Object
 
     DashboardMigrationTaskStats:
       description: The dashboard migration task stats object.

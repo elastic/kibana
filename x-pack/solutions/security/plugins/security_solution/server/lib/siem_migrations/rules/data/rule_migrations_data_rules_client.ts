@@ -13,7 +13,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import {
   type RuleMigrationTaskStats,

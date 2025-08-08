@@ -7,29 +7,35 @@
 
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import type {
+  ElasticRule,
   RuleMigration,
   RuleMigrationRule,
-  ElasticRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { MigrateRuleConfigSchema, MigrateRuleGraphConfig } from './agent/types';
+import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
-import type { RuleMigrationInput } from './types';
-import type { StoredRuleMigration } from '../types';
-import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
-import { nullifyElasticRule } from './util/nullify_missing_properties';
+import type { StoredRuleMigrationRule } from '../types';
+import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
+import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { MigrationState, MigrationTask, MigrationTaskInvoke } from '../../common/task/types';
+import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
+
+export interface RuleMigrationTaskInput
+  extends Pick<StoredRuleMigrationRule, 'id' | 'original_rule'> {
+  resources: MigrationResources;
+}
+export type RuleMigrationTaskOutput = MigrateRuleState;
 
 export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   RuleMigration,
   RuleMigrationRule,
-  MigrateRuleConfigSchema
+  RuleMigrationTaskInput,
+  MigrateRuleConfigSchema,
+  RuleMigrationTaskOutput
 > {
-  protected declare task?: MigrationTask<RuleMigrationRule, MigrateRuleConfigSchema>;
   private retriever: RuleMigrationsRetriever;
 
   constructor(
@@ -80,22 +86,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     });
 
     this.telemetry = telemetryClient;
-    this.task = {
-      prepare: async (
-        migrationRule: StoredRuleMigration,
-        config: MigrateRuleGraphConfig
-      ): Promise<MigrationTaskInvoke<RuleMigrationRule>> => {
-        const resources = await this.retriever.resources.getResources(migrationRule);
-        const input: RuleMigrationInput = {
-          id: migrationRule.id,
-          original_rule: migrationRule.original_rule,
-          resources,
-        };
-        return async () => {
-          return agent.invoke(input, config) as Promise<MigrationState<RuleMigrationRule>>;
-        };
-      },
-    };
+    this.task = (input, config) => agent.invoke(input, config);
   }
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
@@ -103,22 +94,25 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     await this.retriever.initialize();
   }
 
-  /** Overload to nullify elastic rule specific properties */
-  protected async saveItemCompleted(
-    ruleMigration: StoredRuleMigration,
-    migrationResult: Partial<StoredRuleMigration>
-  ) {
-    this.logger.debug(`Translation of rule "${ruleMigration.id}" succeeded`);
-    const nullifiedElasticRule = nullifyElasticRule(
-      migrationResult.elastic_rule as ElasticRule,
-      this.logger.error
-    );
-    const ruleMigrationTranslated = {
-      ...ruleMigration,
-      elastic_rule: nullifiedElasticRule as ElasticRule,
-      translation_result: migrationResult.translation_result,
-      comments: migrationResult.comments,
+  protected async prepareTaskInput(
+    migrationRule: StoredRuleMigrationRule
+  ): Promise<RuleMigrationTaskInput> {
+    const resources = await this.retriever.resources.getResources(migrationRule);
+    return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
+  }
+
+  protected processTaskOutput(
+    migrationRule: StoredRuleMigrationRule,
+    migrationOutput: RuleMigrationTaskOutput
+  ): StoredRuleMigrationRule {
+    return {
+      ...migrationRule,
+      elastic_rule: nullifyMissingProperties({
+        source: migrationRule.elastic_rule,
+        target: migrationOutput.elastic_rule as ElasticRule,
+      }),
+      translation_result: migrationOutput.translation_result,
+      comments: migrationOutput.comments,
     };
-    return super.saveItemCompleted(ruleMigration, ruleMigrationTranslated);
   }
 }

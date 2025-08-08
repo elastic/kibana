@@ -11,9 +11,9 @@ import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
 import { migrateRuleConfigSchema, migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type {
-  MigrateRuleGraphConfig,
+  MigrateRuleConfig,
   MigrateRuleGraphParams,
-  MigrateRuleGraphState,
+  MigrateRuleState,
 } from './types';
 
 export function getRuleMigrationAgent({
@@ -62,8 +62,8 @@ export function getRuleMigrationAgent({
 }
 
 const skipPrebuiltRuleConditional = (
-  _state: MigrateRuleGraphState,
-  config: MigrateRuleGraphConfig
+  _state: MigrateRuleState,
+  config: MigrateRuleConfig
 ) => {
   if (config.configurable?.skipPrebuiltRulesMatching) {
     return 'translationSubGraph';
@@ -71,7 +71,7 @@ const skipPrebuiltRuleConditional = (
   return 'matchPrebuiltRule';
 };
 
-const matchedPrebuiltRuleConditional = (state: MigrateRuleGraphState) => {
+const matchedPrebuiltRuleConditional = (state: MigrateRuleState) => {
   if (state.elastic_rule?.prebuilt_rule_id) {
     return END;
   }
