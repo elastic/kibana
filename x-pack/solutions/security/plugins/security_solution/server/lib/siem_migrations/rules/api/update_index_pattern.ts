@@ -17,6 +17,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { authz } from '../../common/utils/authz';
 import { withLicense } from '../../common/utils/with_license';
 import { withExistingMigration } from './util/with_existing_migration_id';
+import { SiemMigrationAuditLogger } from '../../common/utils/audit';
 
 export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
   router: SecuritySolutionPluginRouter,
@@ -48,9 +49,18 @@ export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
             const migrationId = req.params.migration_id;
             const indexPattern = req.body.index_pattern;
             const ids = req.body.ids;
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+
+              await siemMigrationAuditLogger.logUpdateMigration({
+                migrationId,
+                field: 'indexPattern',
+              });
 
               const stats = await ruleMigrationsClient.data.rules.updateIndexPattern(
                 migrationId,
@@ -61,6 +71,11 @@ export const registerSiemRuleMigrationsUpdateIndexPatternRoute = (
               return res.ok({ body: { updated: stats ?? 0 } });
             } catch (err) {
               logger.error(err);
+              await siemMigrationAuditLogger.logUpdateMigration({
+                migrationId,
+                field: 'indexPattern',
+                error: err,
+              });
               return res.badRequest({ body: err.message });
             }
           }
