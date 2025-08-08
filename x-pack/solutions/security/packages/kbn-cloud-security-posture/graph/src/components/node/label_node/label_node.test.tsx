@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Position, type HandleProps } from '@xyflow/react';
+import { ReactFlow, Position } from '@xyflow/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { NodeProps } from '../../types';
+import { getLabelColors } from '../styles';
 import {
   LabelNode,
   TEST_SUBJ_CONTAINER,
@@ -17,19 +19,6 @@ import {
   TEST_SUBJ_HOVER_OUTLINE,
   TEST_SUBJ_TOOLTIP,
 } from './label_node';
-import { getLabelColors } from '../styles';
-import { EuiThemeComputed } from '@elastic/eui';
-
-// Mock react-flow components
-jest.mock('@xyflow/react', () => {
-  const actual = jest.requireActual('@xyflow/react');
-  return {
-    ...actual,
-    Handle: ({ id, ...props }: HandleProps) => (
-      <div data-testid="handle" {...props} id={id !== null ? id : undefined} />
-    ),
-  };
-});
 
 jest.mock('./label_node_badges', () => {
   // Use the actual exports, except override LIMIT
@@ -68,14 +57,22 @@ describe('LabelNode', () => {
   };
 
   test('renders basic label node', () => {
-    render(<LabelNode {...baseProps} />);
+    render(
+      <ReactFlow>
+        <LabelNode {...baseProps} />
+      </ReactFlow>
+    );
 
     expect(screen.getByText('Test Label')).toBeInTheDocument();
     expect(screen.getAllByTestId(TEST_SUBJ_HANDLE)).toHaveLength(2);
   });
 
   test('renders expand button and outline on hover if interactive', async () => {
-    render(<LabelNode {...baseProps} />);
+    render(
+      <ReactFlow>
+        <LabelNode {...baseProps} />
+      </ReactFlow>
+    );
 
     fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
@@ -94,7 +91,11 @@ describe('LabelNode', () => {
       },
     };
 
-    render(<LabelNode {...props} />);
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
 
     fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
@@ -113,7 +114,11 @@ describe('LabelNode', () => {
         ips: ['127.0.0.1'],
       },
     };
-    render(<LabelNode {...props} />);
+    render(
+      <ReactFlow>
+        <LabelNode {...props} />
+      </ReactFlow>
+    );
 
     expect(screen.getByTestId('ips-text')).toBeInTheDocument();
     expect(screen.getByTestId('country-flags-badge')).toBeInTheDocument();
@@ -160,7 +165,11 @@ describe('LabelNode', () => {
         },
       };
 
-      render(<LabelNode {...props} />);
+      render(
+        <ReactFlow>
+          <LabelNode {...props} />
+        </ReactFlow>
+      );
 
       fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
@@ -178,7 +187,11 @@ describe('LabelNode', () => {
         },
       };
 
-      render(<LabelNode {...props} />);
+      render(
+        <ReactFlow>
+          <LabelNode {...props} />
+        </ReactFlow>
+      );
 
       fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
@@ -196,7 +209,11 @@ describe('LabelNode', () => {
         },
       };
 
-      render(<LabelNode {...props} />);
+      render(
+        <ReactFlow>
+          <LabelNode {...props} />
+        </ReactFlow>
+      );
 
       fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
@@ -206,7 +223,11 @@ describe('LabelNode', () => {
     });
 
     test('does not show tooltip otherwise', async () => {
-      render(<LabelNode {...baseProps} />);
+      render(
+        <ReactFlow>
+          <LabelNode {...baseProps} />
+        </ReactFlow>
+      );
 
       fireEvent.mouseOver(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
