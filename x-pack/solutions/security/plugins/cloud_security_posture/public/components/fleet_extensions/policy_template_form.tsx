@@ -14,6 +14,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import semverGte from 'semver/functions/gte';
+import semverCompare from 'semver/functions/compare';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import {
