@@ -218,7 +218,7 @@ export const EXECUTIVE_CALC2 = i18n.translate(
   'xpack.securitySolution.reports.aiValue.executiveCalc2',
   {
     defaultMessage:
-      'By automatically filtering out non-suspicious alerts, the AI SOC reduces triage workload at scale. Cost savings are calculated by multiplying the number of non-suspicious alerts by an average review time of',
+      'By automatically filtering out non-suspicious alerts, the AI SOC reduces triage workload at scale. Cost savings are calculated by multiplying the number of total alerts by an average review time of',
   }
 );
 

@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { getExcludeAlertsFilters } from './utils';
 import * as i18n from './translations';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -18,7 +17,6 @@ import { getCostSavingsTrendAreaLensAttributes } from '../../../common/component
 interface Props {
   from: string;
   to: string;
-  attackAlertIds: string[];
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
@@ -31,18 +29,11 @@ const ID = 'CostSavingsTrendQuery';
  */
 
 const CostSavingsTrendComponent: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   from,
   to,
 }) => {
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      filters: getExcludeAlertsFilters(attackAlertIds),
-    }),
-    [attackAlertIds]
-  );
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   return (
@@ -56,7 +47,6 @@ const CostSavingsTrendComponent: React.FC<Props> = ({
       <EuiSpacer size="l" />
       <VisualizationEmbeddable
         data-test-subj="embeddable-area-chart"
-        extraOptions={extraVisualizationOptions}
         getLensAttributes={(args) =>
           getCostSavingsTrendAreaLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
         }

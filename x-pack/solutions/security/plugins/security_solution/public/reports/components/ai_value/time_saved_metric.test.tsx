@@ -36,7 +36,6 @@ describe('TimeSavedMetric', () => {
         'data-test-subj': 'time-saved-metric',
         timerange: { from: defaultProps.from, to: defaultProps.to },
         id: expect.stringContaining('TimeSavedMetricQuery-metric'),
-        extraOptions: expect.objectContaining({ filters: expect.any(Array) }),
       }),
       {}
     );

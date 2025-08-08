@@ -23,7 +23,7 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
   const minutesPerAlert = 8;
   const analystHourlyRate = 75;
 
-  const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
+  const { isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
     from,
     to,
     minutesPerAlert,
@@ -44,7 +44,6 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
     <>
       <ExecutiveSummary
         analystHourlyRate={analystHourlyRate}
-        attackAlertIds={attackAlertIds}
         hasAttackDiscoveries={hasAttackDiscoveries}
         minutesPerAlert={minutesPerAlert}
         from={from}
@@ -59,7 +58,6 @@ export const AIValueMetrics: React.FC<Props> = ({ setHasAttackDiscoveries, from,
           <AlertProcessing valueMetrics={valueMetrics} valueMetricsCompare={valueMetricsCompare} />
           <CostSavingsTrend
             analystHourlyRate={analystHourlyRate}
-            attackAlertIds={attackAlertIds}
             minutesPerAlert={minutesPerAlert}
             from={from}
             to={to}

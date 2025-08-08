@@ -39,7 +39,6 @@ describe('CostSavingsTrend', () => {
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         'data-test-subj': 'embeddable-area-chart',
-        extraOptions: expect.any(Object),
         getLensAttributes: expect.any(Function),
         timerange: { from: defaultProps.from, to: defaultProps.to },
         id: expect.stringContaining('CostSavingsTrendQuery-area-embeddable'),

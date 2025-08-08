@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getExcludeAlertsFilters } from './utils';
 import * as i18n from './translations';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -19,7 +18,6 @@ import { getCostSavingsMetricLensAttributes } from '../../../common/components/v
 interface Props {
   from: string;
   to: string;
-  attackAlertIds: string[];
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
@@ -32,7 +30,6 @@ const ID = 'CostSavingsMetricQuery';
  */
 
 const CostSavingsMetricComponent: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -41,12 +38,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      filters: getExcludeAlertsFilters(attackAlertIds),
-    }),
-    [attackAlertIds]
-  );
+
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   return (
@@ -76,7 +68,6 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     >
       <VisualizationEmbeddable
         data-test-subj="cost-savings-metric"
-        extraOptions={extraVisualizationOptions}
         getLensAttributes={(args) =>
           getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
         }
