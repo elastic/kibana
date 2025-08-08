@@ -59,6 +59,7 @@ const AlertCloseConfirmationModal = ({
       <EuiText>{i18n.ALERT_CLOSE_INFO_MODAL_CONTACT_ADMIN_MESSAGE}</EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
+        data-test-subj='doNotShowAgainCheckbox'
         id={doNotShowAgainCheckboxId}
         label={i18n.ALERT_CLOSE_INFO_MODAL_DO_NOT_SHOW_AGAIN_LABEL}
         checked={doNotShowAgain}
