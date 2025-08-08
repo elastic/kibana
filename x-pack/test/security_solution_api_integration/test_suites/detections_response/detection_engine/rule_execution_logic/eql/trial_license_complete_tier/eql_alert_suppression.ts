@@ -33,7 +33,7 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleSuccess,
-} from '../../../../../../../common/utils/security_solution';
+} from '../../../../../../config/services/detections_response';
 import {
   getEqlRuleForAlertTesting,
   getOpenAlerts,
@@ -75,11 +75,15 @@ export default ({ getService }: FtrProviderContext) => {
   // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
       await esDeleteAllIndices('.preview.alerts*');
     });
 
@@ -1715,13 +1719,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('alert enrichment', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
-          await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+          await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
-          await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/entity/risks'
+          );
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+          );
         });
 
         it('suppressed alerts are enriched with host risk score', async () => {

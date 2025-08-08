@@ -27,6 +27,8 @@ import * as i18n from '../translations';
 import type { ConnectorFilterOptionData } from '../../types';
 import { useInvalidateFindAttackDiscoveries } from '../../../../use_find_attack_discoveries';
 
+export const DESCRIPTION_PLACEHOLDER = '-';
+
 const LIST_PROPS = {
   isVirtualized: false,
   rowHeight: 60,
@@ -73,7 +75,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
           return {
             checked: checked ? 'on' : undefined,
             data: {
-              description: getDescription(connector?.actionTypeId),
+              description: getDescription(connector?.actionTypeId) ?? DESCRIPTION_PLACEHOLDER,
               deleted: connector == null,
             },
             label: name,
@@ -119,7 +121,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
                 data-test-subj="optionDescription"
                 size="s"
               >
-                {option.deleted ? '-' : option.description}
+                {option.description}
               </EuiText>
             </EuiFlexItem>
 
@@ -153,6 +155,7 @@ const ConnectorFilterComponent: React.FC<Props> = ({
     () => (
       <EuiFilterButton
         badgeColor="subdued"
+        data-test-subj="connectorFilterButton"
         disabled={isLoading}
         iconType="arrowDown"
         isSelected={isPopoverOpen}

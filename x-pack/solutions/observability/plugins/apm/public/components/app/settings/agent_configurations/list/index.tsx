@@ -11,6 +11,7 @@ import {
   EuiButtonIcon,
   EuiEmptyPrompt,
   EuiHealth,
+  EuiIcon,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
@@ -114,10 +115,15 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
       width: euiTheme.size.xl,
       name: '',
       sortable: true,
-      render: (_, { applied_by_agent: appliedByAgent }) => (
+      render: (_, { applied_by_agent: appliedByAgent, error }) => (
         <EuiToolTip
           content={
-            appliedByAgent
+            error
+              ? i18n.translate('xpack.apm.agentConfig.configTable.errorTooltipMessage', {
+                  defaultMessage: 'Error: {error}',
+                  values: { error },
+                })
+              : appliedByAgent
               ? i18n.translate('xpack.apm.agentConfig.configTable.appliedTooltipMessage', {
                   defaultMessage: 'Applied by at least one agent',
                 })
@@ -126,7 +132,16 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
                 })
           }
         >
-          <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />
+          {error ? (
+            <EuiIcon
+              type="error"
+              size="s"
+              color="danger"
+              data-test-subj="apmAgentConfigurationErrorIcon"
+            />
+          ) : (
+            <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />
+          )}
         </EuiToolTip>
       ),
     },

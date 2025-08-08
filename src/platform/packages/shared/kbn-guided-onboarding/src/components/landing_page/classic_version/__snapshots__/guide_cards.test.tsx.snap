@@ -18,47 +18,6 @@ exports[`guide cards snapshots should render all cards 1`] = `
           activeFilter="all"
           card={
             Object {
-              "guideId": "databaseSearch",
-              "icon": "database",
-              "order": 1,
-              "solution": "search",
-              "telemetryId": "onboarding--search--database",
-              "title": <Memo(MemoizedFormattedMessage)
-                defaultMessage="Search across databases {lineBreak} and business systems"
-                id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-                values={
-                  Object {
-                    "lineBreak": <br />,
-                  }
-                }
-              />,
-            }
-          }
-          guidesState={Array []}
-          navigateToApp={[MockFunction]}
-        />
-        <EuiSpacer
-          size="m"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiFlexItem>
-  <EuiFlexItem
-    key="1"
-  >
-    <EuiFlexGroup
-      alignItems="center"
-      direction="column"
-    >
-      <EuiFlexItem
-        grow={false}
-        key="0"
-      >
-        <GuideCard
-          activateGuide={[MockFunction]}
-          activeFilter="all"
-          card={
-            Object {
               "guideId": "siem",
               "icon": "securitySignal",
               "order": 3,

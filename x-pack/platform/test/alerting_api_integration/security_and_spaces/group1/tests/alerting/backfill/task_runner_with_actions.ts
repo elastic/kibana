@@ -116,8 +116,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]]),
-        true // collapse by execution uuid
+        new Map([['execute-backfill', { equal: 4 }]])
       );
 
       await retry.try(async () => {
@@ -179,8 +178,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]]),
-        true // collapse by execution uuid
+        new Map([['execute-backfill', { equal: 4 }]])
       );
 
       await retry.try(async () => {
@@ -243,8 +241,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         getService,
         backfillId,
         spaceId,
-        new Map([['execute-backfill', { equal: 4 }]]),
-        true // collapse by execution uuid
+        new Map([['execute-backfill', { equal: 4 }]])
       );
 
       // since we want to check that no actions were executed and they might take a bit to run

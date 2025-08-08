@@ -290,6 +290,7 @@ export interface DocLinks {
     readonly ruleApiOverview: string;
     readonly configureAlertSuppression: string;
     readonly ingestDataToSecurity: string;
+    readonly automaticImport: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -307,6 +308,7 @@ export interface DocLinks {
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
@@ -339,6 +341,7 @@ export interface DocLinks {
       readonly entityRiskScoring: string;
       readonly assetCriticality: string;
       readonly privilegedUserMonitoring: string;
+      readonly mlAnomalyDetection: string;
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;

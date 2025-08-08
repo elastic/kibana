@@ -68,7 +68,7 @@
           "\nProvider of the layout config"
         ],
         "signature": [
-          "({ value, children }: ",
+          "({ value: initialValue, children, }: ",
           "LayoutConfigProviderProps",
           ") => React.JSX.Element"
         ],
@@ -81,7 +81,7 @@
             "id": "def-common.LayoutConfigProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ value, children }",
+            "label": "{\n  value: initialValue,\n  children,\n}",
             "description": [],
             "signature": [
               "LayoutConfigProviderProps"
@@ -168,6 +168,31 @@
           "The rendered debug overlay."
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-components",
+        "id": "def-common.useLayoutUpdate",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useLayoutUpdate",
+        "description": [
+          "\nHook to access and update the layout configuration."
+        ],
+        "signature": [
+          "() => (updates: Partial<",
+          "LayoutConfig",
+          ">) => void"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "a function to update it"
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -192,7 +217,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+              "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
             "deprecated": false,
@@ -245,7 +270,7 @@
           "\nConfiguration for the layout."
         ],
         "signature": [
-          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; navigationPanelWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
+          "{ sidebarWidth?: number | undefined; bannerHeight?: number | undefined; headerHeight?: number | undefined; footerHeight?: number | undefined; navigationWidth?: number | undefined; sidebarPanelWidth?: number | undefined; applicationTopBarHeight?: number | undefined; applicationBottomBarHeight?: number | undefined; }"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
         "deprecated": false,

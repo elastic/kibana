@@ -17,7 +17,7 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TableText } from '..';
 import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
-import { getColumns } from '../../lib/get_columns';
+import { AvailableColumns, getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
 import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
@@ -32,6 +32,7 @@ interface Props {
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
+  columns?: AvailableColumns[];
 }
 
 export function SearchSessionsMgmtTable({
@@ -41,6 +42,7 @@ export function SearchSessionsMgmtTable({
   config,
   kibanaVersion,
   searchUsageCollector,
+  columns,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -114,6 +116,20 @@ export function SearchSessionsMgmtTable({
     doRefresh();
   };
 
+  const tableColumns = getColumns(
+    core,
+    api,
+    config,
+    timezone,
+    onActionComplete,
+    kibanaVersion,
+    searchUsageCollector
+  ).filter((column) => {
+    if (!columns) return true;
+    if (!('field' in column)) return true;
+    return columns.includes(column.field);
+  });
+
   // table config: search / filters
   const search: EuiSearchBarProps = {
     box: { incremental: true },
@@ -146,15 +162,7 @@ export function SearchSessionsMgmtTable({
         'data-test-subj': `searchSessionsRow`,
         'data-test-search-session-id': `id-${searchSession.id}`,
       })}
-      columns={getColumns(
-        core,
-        api,
-        config,
-        timezone,
-        onActionComplete,
-        kibanaVersion,
-        searchUsageCollector
-      )}
+      columns={tableColumns}
       items={tableData}
       pagination={{
         pageSize,

@@ -96,6 +96,7 @@ describe('getConnectorById', () => {
         propA: 'foo',
         propB: 42,
       },
+      capabilities: expect.any(Object),
     });
   });
 });

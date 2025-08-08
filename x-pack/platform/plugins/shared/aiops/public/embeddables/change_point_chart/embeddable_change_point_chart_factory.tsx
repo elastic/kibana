@@ -132,8 +132,8 @@ export const getChangePointChartEmbeddableFactory = (
             flyoutProps: {
               'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
               'aria-labelledby': 'changePointConfig',
+              focusedPanelId: uuid,
             },
-            uuid,
             loadContent: async ({ closeFlyout }) => {
               const { EmbeddableChangePointUserInput } = await import(
                 './change_point_config_input'
@@ -146,7 +146,7 @@ export const getChangePointChartEmbeddableFactory = (
                     changePointManager.api.updateUserInput(result);
                     closeFlyout();
                   }}
-                  closeFlyout={closeFlyout}
+                  onCancel={closeFlyout}
                   input={changePointManager.getLatestState()}
                 />
               );

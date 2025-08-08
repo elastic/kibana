@@ -423,10 +423,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -570,10 +569,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1415,10 +1413,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -1632,11 +1629,10 @@ paths:
 
         > warn
 
-        > When used with  [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        > When used with [API
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -2905,8 +2901,8 @@ paths:
               properties:
                 objects:
                   description: >-
-                    Array of `rule_id` fields. Exports all rules when
-                    unspecified.
+                    Array of objects with a rule's `rule_id` field. Do not use
+                    rule's `id` here. Exports all rules when unspecified.
                   items:
                     type: object
                     properties:
@@ -3167,10 +3163,9 @@ paths:
         > warn
 
         > When used with [API
-        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
-        authentication, the user's key gets assigned to the affected rules. If
-        the user's key gets deleted or the user becomes inactive, the rules will
-        stop running.
+        key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication,
+        the user's key gets assigned to the affected rules. If the user's key
+        gets deleted or the user becomes inactive, the rules will stop running.
 
 
         > If the API key that is used for authorization has different privileges
@@ -4341,14 +4336,18 @@ components:
       properties:
         add:
           items:
-            description: A list of users ids to assign.
+            description: >-
+              A list of user profile `uid`s to assign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
           type: array
         remove:
           items:
-            description: A list of users ids to unassign.
+            description: >-
+              A list of user profile `uid`s to unassign. Users need to activate
+              their user profile by logging into Kibana at least once.
             format: nonempty
             minLength: 1
             type: string
@@ -4812,9 +4811,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4838,9 +4839,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4877,9 +4880,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -4983,9 +4988,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5014,9 +5021,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5042,9 +5051,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5087,9 +5098,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -5114,9 +5127,11 @@ components:
           description: Gaps range start, valid only when query is provided
           type: string
         ids:
-          description: >-
-            Array of rule IDs. Array of rule IDs to which a bulk action will be
-            applied. Only valid when query property is undefined.
+          description: >
+            Array of rule `id`s to which a bulk action will be applied. Do not
+            use rule's `rule_id` here.
+
+            Only valid when query property is undefined.
           items:
             type: string
           minItems: 1
@@ -6253,6 +6268,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -8507,7 +8523,6 @@ components:
         gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
       type: object
     RuleActionFrequency:
       description: >-
@@ -9536,7 +9551,9 @@ components:
       type: object
       properties:
         signal_ids:
-          description: List of alert `id`s.
+          description: >-
+            List of alert ids. Use field `_id` on alert document or
+            `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
           items:
             format: nonempty
             minLength: 1
@@ -9710,25 +9727,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     ThreatMatchRule:
       allOf:
         - type: object

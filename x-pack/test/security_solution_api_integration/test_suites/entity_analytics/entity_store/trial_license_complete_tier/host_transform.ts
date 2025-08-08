@@ -72,9 +72,26 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       after(async () => {
+        const log = providerContext.getService('log');
         await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
-        await es.indices.deleteAlias({ name: FROZEN_INDEX_NAME, index: `*${FROZEN_INDEX_NAME}*` });
-        await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+
+        try {
+          await es.indices.deleteAlias({
+            name: FROZEN_INDEX_NAME,
+            index: `*${FROZEN_INDEX_NAME}*`,
+          });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
+        try {
+          await es.indices.deleteAlias({ name: COLD_INDEX_NAME, index: `*${COLD_INDEX_NAME}*` });
+        } catch (e: any) {
+          // we should not fail a test on the tear down
+          log.error(`Failed to tear down ${FROZEN_INDEX_NAME}} (${e.toString()})`);
+        }
+
         await dataView.delete('security-solution');
       });
 

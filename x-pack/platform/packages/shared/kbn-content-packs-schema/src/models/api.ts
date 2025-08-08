@@ -7,28 +7,41 @@
 
 import { z } from '@kbn/zod';
 
-export interface ContentPackIncludeObjects {
-  objects: {
-    dashboards: string[];
-  };
-}
-
 export interface ContentPackIncludeAll {
-  all: {};
+  objects: { all: {} };
 }
 
-export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
+export type ContentPackIncludedObjects =
+  | ContentPackIncludeAll
+  | {
+      objects: {
+        queries: Array<{ id: string }>;
+        routing: Array<{ destination: string } & ContentPackIncludedObjects>;
+      };
+    };
 
-const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ dashboards: z.array(z.string()) }),
+const includeAllSchema = z.object({
+  objects: z.object({ all: z.strictObject({}) }),
 });
-const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
 
 export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
-  return contentPackIncludeAllSchema.safeParse(value).success;
+  return includeAllSchema.safeParse(value).success;
 };
 
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.union([
-  contentPackIncludeObjectsSchema,
-  contentPackIncludeAllSchema,
-]);
+export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
+  z.union([
+    includeAllSchema,
+    z.object({
+      objects: z.object({
+        queries: z.array(z.object({ id: z.string() })),
+        routing: z.array(
+          contentPackIncludedObjectsSchema.and(
+            z.object({
+              destination: z.string(),
+            })
+          )
+        ),
+      }),
+    }),
+  ])
+);

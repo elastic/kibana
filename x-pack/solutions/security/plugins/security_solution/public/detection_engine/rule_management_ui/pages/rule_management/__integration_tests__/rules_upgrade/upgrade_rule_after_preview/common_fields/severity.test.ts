@@ -7,6 +7,7 @@
 
 import { assertRuleUpgradePreview } from '../../test_utils/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../test_utils/assert_rule_upgrade_after_review';
+import { assertDiffAfterSavingUnchangedValue } from '../../test_utils/assert_diff_after_saving_unchanged_value';
 
 describe('Upgrade diffable rule "severity" (query rule type) after preview in flyout', () => {
   const ruleType = 'query';
@@ -26,6 +27,15 @@ describe('Upgrade diffable rule "severity" (query rule type) after preview in fl
       customized,
       upgrade,
       resolvedValue,
+    },
+  });
+
+  assertDiffAfterSavingUnchangedValue({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      upgrade,
     },
   });
 

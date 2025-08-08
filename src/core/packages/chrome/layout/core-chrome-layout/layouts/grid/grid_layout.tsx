@@ -11,16 +11,16 @@ import React, { ReactNode } from 'react';
 import { map } from 'rxjs';
 import {
   ChromeLayout,
-  ChromeLayoutConfigProvider,
   ChromeLayoutConfig,
+  ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
 import useObservable from 'react-use/lib/useObservable';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
-  LayoutServiceStartDeps,
   LayoutServiceParams,
+  LayoutServiceStartDeps,
 } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
@@ -71,9 +71,14 @@ export class GridLayout implements LayoutService {
     const chromeVisible$ = chrome.getIsVisible$();
     const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
+    const v2ProjectSideNavEnabled = this.params.projectSideNavVersion === 'v2';
 
     const classicChromeHeader = chrome.getClassicHeaderComponentForGridLayout();
-    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout();
+    const projectChromeHeader = chrome.getProjectHeaderComponentForGridLayout({
+      // for v2 project side navigation we don't need to include the side navigation in the header,
+      // because it is rendered separately in the nav grid cell
+      includeSideNav: v2ProjectSideNavEnabled ? false : 'v1',
+    });
     const headerBanner = chrome.getHeaderBanner();
 
     // chromeless header is used when chrome is not visible and responsible for displaying the data-test-subj and fixed loading bar
@@ -82,6 +87,8 @@ export class GridLayout implements LayoutService {
     // in project style, the project app menu is displayed at the top of application area
     const projectAppMenu = chrome.getProjectAppMenuComponent();
     const hasAppMenu$ = application.currentActionMenu$.pipe(map((menu) => !!menu));
+
+    const projectSideNavigationV2 = chrome.getProjectSideNavV2ComponentForGridLayout();
 
     return React.memo(() => {
       // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
@@ -111,6 +118,10 @@ export class GridLayout implements LayoutService {
           if (hasAppMenu) {
             // If project app menu is present, we use it as the application top bar
             applicationTopBar = projectAppMenu;
+          }
+
+          if (v2ProjectSideNavEnabled) {
+            navigation = projectSideNavigationV2;
           }
         }
       }

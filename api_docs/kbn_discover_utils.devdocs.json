@@ -5285,6 +5285,20 @@
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanDocumentOverview.resource.attributes.telemetry.sdk.language",
+            "type": "string",
+            "tags": [],
+            "label": "'resource.attributes.telemetry.sdk.language'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6873,6 +6887,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE",
+        "description": [],
+        "signature": [
+          "\"resource.attributes.telemetry.sdk.language\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.OTEL_SPAN_KIND",
         "type": "string",
         "tags": [],
@@ -6880,6 +6909,21 @@
         "description": [],
         "signature": [
           "\"kind\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.OTEL_STATUS_CODE",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_STATUS_CODE",
+        "description": [],
+        "signature": [
+          "\"status.code\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -7101,6 +7145,28 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.severityOrder",
+        "type": "Array",
+        "tags": [],
+        "label": "severityOrder",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.LogLevelCoalescedValue",
+            "text": "LogLevelCoalescedValue"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/utils/get_log_level_coalesed_value.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7554,6 +7620,21 @@
         "description": [],
         "signature": [
           "readonly string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LOG_LEVEL_REGEX",
+        "type": "Object",
+        "tags": [],
+        "label": "LOG_LEVEL_REGEX",
+        "description": [],
+        "signature": [
+          "RegExp"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
         "deprecated": false,

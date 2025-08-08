@@ -33,7 +33,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
   const { docLinks } = useKibana().services;
 
   return (
-    <EuiPanel paddingSize="none">
+    <EuiPanel paddingSize="none" data-test-subj="privilegedUserMonitoringOnboardingPanel">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup
           direction="row"
@@ -65,11 +65,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = ({
                   <EuiText size="m">
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageDescription"
-                      defaultMessage="Privileged user monitoring provides visibility into privileged user
-                    activity, helping security teams analyze account usage, track access events, and
-                    spot potential risks. By continuously monitoring high-risk users and detecting anomalous
-                    privileged behaviors, the dashboard enables early detection of potential threats,
-                    such as unauthorized access or lateral movement, before they escalate."
+                      defaultMessage="Gain visibility into privileged user activity to analyze account usage, track access events, and spot potential risks. By continuously monitoring high-risk users and identifying anomalous privileged behaviors, you can detect potential threats, such as unauthorized access or lateral movement, before they escalate."
                     />
                   </EuiText>
                 </EuiFlexItem>

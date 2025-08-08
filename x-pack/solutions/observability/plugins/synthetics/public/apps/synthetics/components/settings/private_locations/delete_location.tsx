@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiConfirmModal, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
@@ -39,12 +39,16 @@ export const DeleteLocation = ({
     }
   );
 
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const deleteModal = (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18n.translate('xpack.synthetics.monitorManagement.deleteLocationName', {
         defaultMessage: 'Delete "{location}"',
         values: { location: label },
       })}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={() => setIsModalOpen(false)}
       onConfirm={() => onDelete(id)}
       cancelButtonText={CANCEL_LABEL}

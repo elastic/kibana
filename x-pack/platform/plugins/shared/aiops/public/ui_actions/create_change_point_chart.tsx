@@ -63,8 +63,8 @@ export function createAddChangePointChartAction(
         flyoutProps: {
           'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
           'aria-labelledby': 'changePointConfig',
+          focusedPanelId: context.embeddable.uuid,
         },
-        uuid: context.embeddable.uuid,
         loadContent: async ({ closeFlyout }) => {
           const { EmbeddableChangePointUserInput } = await import(
             '../embeddables/change_point_chart/change_point_config_input'
@@ -80,8 +80,9 @@ export function createAddChangePointChartAction(
                     rawState: initialState,
                   },
                 });
+                closeFlyout();
               }}
-              closeFlyout={closeFlyout}
+              onCancel={closeFlyout}
             />
           );
         },

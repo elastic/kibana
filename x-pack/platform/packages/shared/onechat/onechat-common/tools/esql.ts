@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolDefinition } from './definition';
+import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
 
 /**
  * Common ES Field Types
@@ -36,9 +36,18 @@ export interface EsqlToolParam {
   description: string;
 }
 
-export interface EsqlToolConfig {
+// To make compatible with ToolDefinition['configuration']
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type EsqlToolConfig = {
   query: string;
   params: Record<string, EsqlToolParam>;
-}
+};
 
 export type EsqlToolDefinition = ToolDefinition<EsqlToolConfig>;
+export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<EsqlToolConfig>;
+
+export function isEsqlTool(tool: ToolDefinitionWithSchema): tool is EsqlToolDefinitionWithSchema;
+export function isEsqlTool(tool: ToolDefinition): tool is EsqlToolDefinition;
+export function isEsqlTool(tool: ToolDefinition): boolean {
+  return tool.type === ToolType.esql;
+}

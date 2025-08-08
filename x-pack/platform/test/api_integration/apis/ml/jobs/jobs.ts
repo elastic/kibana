@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get combined jobs with stats', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
 
