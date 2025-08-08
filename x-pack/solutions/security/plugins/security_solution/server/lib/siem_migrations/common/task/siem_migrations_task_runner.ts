@@ -12,7 +12,7 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import type { SiemMigrationsDataClient } from '../data/siem_migrations_data_client';
-import type { MigrationState, MigrationTask, MigrationTaskInvoke } from './types';
+import type { Invocation, Invoke, MigrationTask } from './types';
 import { generateAssistantComment } from './util/comments';
 import type {
   ItemDocument,
@@ -59,10 +59,12 @@ const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 export class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type
-  C extends object = {} // The migration task config to be passed to the agent, includes parameters for the agent invocation
+  P extends object = {}, // The migration task input parameters schema
+  C extends object = {}, // The migration task config schema
+  O extends object = {} // The migration task output schema
 > {
   protected telemetry?: SiemMigrationTelemetryClient<I>;
-  protected task?: MigrationTask<I, C>;
+  protected task?: MigrationTask<P, C, O>;
   declare actionsClientChat: ActionsClientChat;
   private abort: ReturnType<typeof abortSignalToPromise>;
   private executorSleepMultiplier: number = EXECUTOR_SLEEP.initialValueSeconds;
@@ -80,9 +82,22 @@ export class SiemMigrationTaskRunner<
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 
-  /** Retrieves the connector and creates the migration agent */
-  public async setup(_connectorId: string): Promise<void> {}
+  /** Receives the connectorId and creates the `this.task` and `this.telemetry` attributes */
+  public async setup(connectorId: string): Promise<void> {
+    throw new Error('setup method must be implemented in the subclass');
+  }
 
+  /** Prepares the migration item for the task execution */
+  protected async prepareTaskInput(item: Stored<I>): Promise<P> {
+    throw new Error('prepareTaskInput method must be implemented in the subclass');
+  }
+
+  /** Processes the output of the migration task and returns the item to save */
+  protected processTaskOutput(item: Stored<I>, output: O): Stored<I> {
+    throw new Error('processTaskOutput method must be implemented in the subclass');
+  }
+
+  /** Optional initialization logic */
   protected async initialize() {}
 
   public async run(invocationConfig: RunnableConfig<C>): Promise<void> {
@@ -119,7 +134,7 @@ export class SiemMigrationTaskRunner<
 
         this.logger.debug(`Start processing batch of ${migrationItems.length} items`);
 
-        const { errors } = await initPromisePool<I, void, Error>({
+        const { errors } = await initPromisePool<Stored<I>, void, Error>({
           concurrency: TASK_CONCURRENCY,
           abortSignal: this.abortController.signal,
           items: migrationItems,
@@ -128,10 +143,10 @@ export class SiemMigrationTaskRunner<
             try {
               await this.saveItemProcessing(migrationItem);
 
-              const migrationResult = await migrateItemTask(migrationItem);
+              const migratedItem = await migrateItemTask(migrationItem);
 
-              await this.saveItemCompleted(migrationItem, migrationResult);
-              itemTranslationTelemetry.success(migrationResult);
+              await this.saveItemCompleted(migratedItem);
+              itemTranslationTelemetry.success(migratedItem);
             } catch (error) {
               if (this.abortController.signal.aborted) {
                 throw new AbortError();
@@ -166,6 +181,19 @@ export class SiemMigrationTaskRunner<
     }
   }
 
+  /** Creates the task invoke function, the input is prepared and the output is processed as a migrationItem */
+  private createTaskInvoke = async (
+    migrationItem: I,
+    config: RunnableConfig<C>
+  ): Promise<Invoke<I>> => {
+    const input = await this.prepareTaskInput(migrationItem);
+    return async () => {
+      assert(this.task, 'Migration task is not defined');
+      const output = await this.task(input, config);
+      return this.processTaskOutput(migrationItem, output);
+    };
+  };
+
   protected createMigrateItemTask(invocationConfig?: RunnableConfig<C>) {
     const config: RunnableConfig<C> = {
       timeout: AGENT_INVOKE_TIMEOUT_MIN * 60 * 1000, // milliseconds timeout
@@ -174,9 +202,7 @@ export class SiemMigrationTaskRunner<
     };
 
     // Invokes the item translation with exponential backoff, should be called only when the rate limit has been hit
-    const invokeWithBackoff = async (
-      invoke: MigrationTaskInvoke<I>
-    ): Promise<MigrationState<I>> => {
+    const invokeWithBackoff = async (invoke: Invoke<I>): Invocation<I> => {
       this.logger.debug('Rate limit backoff started');
       let retriesLeft: number = RETRY_CONFIG.maxRetries;
       while (true) {
@@ -204,12 +230,11 @@ export class SiemMigrationTaskRunner<
       }
     };
 
-    let backoffPromise: Promise<MigrationState<I>> | undefined;
+    let backoffPromise: Invocation<I> | undefined;
     // Migrates one item, this function will be called concurrently by the promise pool.
     // Handles rate limit errors and ensures only one task is executing the backoff retries at a time, the rest of translation will await.
-    const migrateItem = async (migrationItem: I): Promise<MigrationState<I>> => {
-      assert(this.task, 'task is not initialized');
-      const invoke = await this.task.prepare(migrationItem, config);
+    const migrateItem = async (migrationItem: I): Invocation<I> => {
+      const invoke = await this.createTaskInvoke(migrationItem, config);
 
       let recoverAttemptsLeft: number = EXECUTOR_RECOVER_MAX_ATTEMPTS;
       while (true) {
@@ -283,9 +308,9 @@ export class SiemMigrationTaskRunner<
     return this.data.items.saveProcessing(migrationItem.id);
   }
 
-  protected async saveItemCompleted(migrationItem: Stored<I>, migrationResult: MigrationState) {
+  protected async saveItemCompleted(migrationItem: Stored<I>) {
     this.logger.debug(`Translation of document "${migrationItem.id}" succeeded`);
-    return this.data.items.saveCompleted(migrationResult as Stored<I>);
+    return this.data.items.saveCompleted(migrationItem);
   }
 
   protected async saveItemFailed(migrationItem: Stored<I>, error: Error) {

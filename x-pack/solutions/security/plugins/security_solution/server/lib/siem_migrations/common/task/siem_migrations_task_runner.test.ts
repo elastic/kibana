@@ -5,44 +5,22 @@
  * 2.0.
  */
 
-import { RuleMigrationTaskRunner } from './siem_migrations_task_runner';
+import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { StoredRuleMigration } from '../types';
-import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
+import type { StoredSiemMigrationItem, SiemMigrationsClientDependencies } from '../types';
+import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SiemMigrationsClientDependencies } from '../types';
+import { SiemMigrationTelemetryClient } from './__mocks__/siem_migrations_telemetry_client';
+import { TELEMETRY_SIEM_MIGRATION_ID } from './util/constants';
 
-jest.mock('./rule_migrations_telemetry_client');
-
-const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
-jest.mock('./retrievers', () => ({
-  ...jest.requireActual('./retrievers'),
-  RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
-    initialize: mockRetrieverInitialize,
-    resources: {
-      getResources: jest.fn(() => ({})),
-    },
-  })),
-}));
-
-const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
-jest.mock('./util/actions_client_chat', () => ({
-  ...jest.requireActual('./util/actions_client_chat'),
-  ActionsClientChat: jest.fn().mockImplementation(() => ({ createModel: mockCreateModel })),
-}));
-
-const mockInvoke = jest.fn().mockResolvedValue({});
-jest.mock('./agent', () => ({
-  ...jest.requireActual('./agent'),
-  getRuleMigrationAgent: () => ({ invoke: mockInvoke }),
-}));
+jest.mock('./siem_migrations_telemetry_client');
 
 // Mock dependencies
 const mockLogger = loggerMock.create();
 
 const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
-  rulesClient: {},
+  itemsClient: {},
   savedObjectsClient: {},
   inferenceClient: {},
   actionsClient: {},
@@ -50,7 +28,7 @@ const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
 } as unknown as SiemMigrationsClientDependencies;
 
 const mockUser = {} as unknown as AuthenticatedUser;
-const ruleId = 'test-rule-id';
+const itemId = 'test-item-id';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
@@ -60,42 +38,66 @@ mockTimeout.mockImplementation((cb) => {
   cb();
 });
 
-describe('RuleMigrationTaskRunner', () => {
-  let taskRunner: RuleMigrationTaskRunner;
+const mockSetup = jest.fn().mockResolvedValue(undefined);
+const mockInvoke = jest.fn().mockResolvedValue(undefined);
+const mockTaskPrepare = jest.fn().mockResolvedValue(mockInvoke);
+const mockInitialize = jest.fn().mockResolvedValue(undefined);
+
+class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
+  protected TaskRunnerClass = SiemMigrationTaskRunner;
+  protected EvaluatorClass = undefined;
+
+  public async setup(connectorId: string): Promise<void> {
+    await mockSetup();
+    this.task = { prepare: mockTaskPrepare };
+    this.telemetry = new SiemMigrationTelemetryClient(
+      this.dependencies.telemetry,
+      this.logger,
+      this.migrationId,
+      TELEMETRY_SIEM_MIGRATION_ID
+    );
+  }
+
+  public async initialize(): Promise<void> {
+    await mockInitialize();
+  }
+}
+
+describe('SiemMigrationTaskRunner', () => {
+  let taskRunner: SiemMigrationTaskRunner;
   let abortController: AbortController;
-  let mockRuleMigrationsDataClient: ReturnType<typeof createRuleMigrationsDataClientMock>;
+  let mockSiemMigrationsDataClient: ReturnType<typeof createSiemMigrationsDataClientMock>;
 
   beforeEach(() => {
-    mockRetrieverInitialize.mockResolvedValue(undefined); // Reset the mock
+    mockSetup.mockResolvedValue(undefined); // Reset the mock
+    mockInitialize.mockResolvedValue(undefined); // Reset the mock
     mockInvoke.mockResolvedValue({}); // Reset the mock
-    mockRuleMigrationsDataClient = createRuleMigrationsDataClientMock();
+    mockSiemMigrationsDataClient = createSiemMigrationsDataClientMock();
     jest.clearAllMocks();
 
     abortController = new AbortController();
-    taskRunner = new RuleMigrationTaskRunner(
+    taskRunner = new TestMigrationTaskRunner(
       'test-migration-id',
       mockUser,
       abortController,
-      mockRuleMigrationsDataClient,
+      mockSiemMigrationsDataClient,
       mockLogger,
       mockDependencies
     );
   });
 
   describe('setup', () => {
-    it('should create the agent and tools', async () => {
+    it('should create the task and tools', async () => {
       await expect(taskRunner.setup('test-connector-id')).resolves.toBeUndefined();
       // @ts-expect-error (checking private properties)
-      expect(taskRunner.agent).toBeDefined();
-      // @ts-expect-error (checking private properties)
-      expect(taskRunner.retriever).toBeDefined();
+      expect(taskRunner.task).toBeDefined();
       // @ts-expect-error (checking private properties)
       expect(taskRunner.telemetry).toBeDefined();
     });
 
     it('should throw if an error occurs', async () => {
       const errorMessage = 'Test error';
-      mockCreateModel.mockImplementationOnce(() => {
+      mockSetup.mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
 
@@ -110,22 +112,23 @@ describe('RuleMigrationTaskRunner', () => {
     });
 
     it('should handle the migration successfully', async () => {
-      mockRuleMigrationsDataClient.rules.get.mockResolvedValue({ total: 0, data: [] });
-      mockRuleMigrationsDataClient.rules.get.mockResolvedValueOnce({
+      mockSiemMigrationsDataClient.items.get.mockResolvedValue({ total: 0, data: [] });
+      mockSiemMigrationsDataClient.items.get.mockResolvedValueOnce({
         total: 1,
-        data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+        data: [{ id: itemId, status: SiemMigrationStatus.PENDING }] as StoredSiemMigrationItem[],
       });
 
       await taskRunner.setup('test-connector-id');
       await expect(taskRunner.run({})).resolves.toBeUndefined();
 
-      expect(mockRuleMigrationsDataClient.rules.saveProcessing).toHaveBeenCalled();
+      expect(mockSiemMigrationsDataClient.items.saveProcessing).toHaveBeenCalled();
       expect(mockTimeout).toHaveBeenCalledTimes(1); // random execution sleep
       expect(mockTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), expect.any(Number));
 
+      expect(mockTaskPrepare).toHaveBeenCalledTimes(1);
       expect(mockInvoke).toHaveBeenCalledTimes(1);
-      expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalled();
-      expect(mockRuleMigrationsDataClient.rules.get).toHaveBeenCalledTimes(2); // One with data, one without
+      expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalled();
+      expect(mockSiemMigrationsDataClient.items.get).toHaveBeenCalledTimes(2); // One with data, one without
       expect(mockLogger.info).toHaveBeenCalledWith('Migration completed successfully');
     });
 
@@ -134,9 +137,9 @@ describe('RuleMigrationTaskRunner', () => {
 
       describe('during initialization', () => {
         it('should handle abort error correctly', async () => {
-          runPromise = taskRunner.run({});
-          abortController.abort(); // Trigger the abort signal
+          abortController.abort();
 
+          runPromise = taskRunner.run({});
           await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
 
           expect(mockLogger.info).toHaveBeenCalledWith(
@@ -145,7 +148,7 @@ describe('RuleMigrationTaskRunner', () => {
         });
 
         it('should handle other errors correctly', async () => {
-          mockRetrieverInitialize.mockRejectedValueOnce(new Error(errorMessage));
+          mockInitialize.mockRejectedValueOnce(new Error(errorMessage));
 
           runPromise = taskRunner.run({});
           await expect(runPromise).rejects.toEqual(
@@ -156,12 +159,14 @@ describe('RuleMigrationTaskRunner', () => {
 
       describe('during migration', () => {
         beforeEach(() => {
-          mockRuleMigrationsDataClient.rules.get.mockRestore();
-          mockRuleMigrationsDataClient.rules.get
+          mockSiemMigrationsDataClient.items.get.mockRestore();
+          mockSiemMigrationsDataClient.items.get
             .mockResolvedValue({ total: 0, data: [] })
             .mockResolvedValueOnce({
               total: 1,
-              data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+              data: [
+                { id: itemId, status: SiemMigrationStatus.PENDING },
+              ] as StoredSiemMigrationItem[],
             });
         });
 
@@ -175,7 +180,7 @@ describe('RuleMigrationTaskRunner', () => {
 
           await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
           expect(mockLogger.info).toHaveBeenCalledWith('Abort signal received, stopping migration');
-          expect(mockRuleMigrationsDataClient.rules.releaseProcessing).toHaveBeenCalled();
+          expect(mockSiemMigrationsDataClient.items.releaseProcessing).toHaveBeenCalled();
         });
 
         it('should handle other errors correctly', async () => {
@@ -185,48 +190,49 @@ describe('RuleMigrationTaskRunner', () => {
           await expect(runPromise).resolves.toBeUndefined();
 
           expect(mockLogger.error).toHaveBeenCalledWith(
-            `Error translating rule \"${ruleId}\" with error: ${errorMessage}`
+            `Error translating document \"${itemId}\" with error: ${errorMessage}`
           );
-          expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalled();
+          expect(mockSiemMigrationsDataClient.items.saveError).toHaveBeenCalled();
         });
 
         describe('during rate limit errors', () => {
-          const rule2Id = 'test-rule-id-2';
+          const item2Id = 'test-item-id-2';
           const error = new Error('429. You did way too many requests to this random LLM API bud');
 
           beforeEach(async () => {
-            mockRuleMigrationsDataClient.rules.get.mockRestore();
-            mockRuleMigrationsDataClient.rules.get
+            mockSiemMigrationsDataClient.items.get.mockRestore();
+            mockSiemMigrationsDataClient.items.get
               .mockResolvedValue({ total: 0, data: [] })
               .mockResolvedValueOnce({
                 total: 2,
                 data: [
-                  { id: ruleId, status: SiemMigrationStatus.PENDING },
-                  { id: rule2Id, status: SiemMigrationStatus.PENDING },
-                ] as StoredRuleMigration[],
+                  { id: itemId, status: SiemMigrationStatus.PENDING },
+                  { id: item2Id, status: SiemMigrationStatus.PENDING },
+                ] as StoredSiemMigrationItem[],
               });
           });
 
           it('should retry with exponential backoff', async () => {
             mockInvoke
               .mockResolvedValue({}) // Successful calls from here on
-              .mockRejectedValueOnce(error) // First failed call for rule 1
-              .mockRejectedValueOnce(error) // First failed call for rule 2
-              .mockRejectedValueOnce(error) // Second failed call for rule 1
-              .mockRejectedValueOnce(error); // Third failed call for rule 1
+              .mockRejectedValueOnce(error) // First failed call for item 1
+              .mockRejectedValueOnce(error) // First failed call for item 2
+              .mockRejectedValueOnce(error) // Second failed call for item 1
+              .mockRejectedValueOnce(error); // Third failed call for item 1
 
             await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
 
+            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
             /**
              * Invoke calls:
-             * rule 1 -> failure -> start backoff retries
-             * rule 2 -> failure -> await for rule 1 backoff
+             * item 1 -> failure -> start backoff retries
+             * item 2 -> failure -> await for item 1 backoff
              * then:
-             * rule 1 retry 1 -> failure
-             * rule 1 retry 2 -> failure
-             * rule 1 retry 3 -> success
+             * item 1 retry 1 -> failure
+             * item 1 retry 2 -> failure
+             * item 1 retry 3 -> success
              * then:
-             * rule 2 -> success
+             * item 2 -> success
              */
             expect(mockInvoke).toHaveBeenCalledTimes(6);
             expect(mockTimeout).toHaveBeenCalledTimes(6); // 2 execution sleeps + 3 backoff sleeps + 1 execution sleep
@@ -250,10 +256,11 @@ describe('RuleMigrationTaskRunner', () => {
             );
 
             expect(mockLogger.debug).toHaveBeenCalledWith(
-              `Awaiting backoff task for rule "${rule2Id}"`
+              `Awaiting backoff task for document "${item2Id}"`
             );
+            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
             expect(mockInvoke).toHaveBeenCalledTimes(6); // 3 retries + 3 executions
-            expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalledTimes(2); // 2 rules
+            expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalledTimes(2); // 2 items
           });
 
           it('should fail when reached maxRetries', async () => {
@@ -261,59 +268,62 @@ describe('RuleMigrationTaskRunner', () => {
 
             await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
 
+            expect(mockTaskPrepare).toHaveBeenCalledTimes(2); // 2 items
             // maxRetries = 8
             expect(mockInvoke).toHaveBeenCalledTimes(10); // 8 retries + 2 executions
             expect(mockTimeout).toHaveBeenCalledTimes(10); // 2 execution sleeps + 8 backoff sleeps
 
-            expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalledTimes(2); // 2 rules
+            expect(mockSiemMigrationsDataClient.items.saveError).toHaveBeenCalledTimes(2); // 2 items
           });
 
           it('should fail when reached max recovery attempts', async () => {
-            const rule3Id = 'test-rule-id-3';
-            const rule4Id = 'test-rule-id-4';
-            mockRuleMigrationsDataClient.rules.get.mockRestore();
-            mockRuleMigrationsDataClient.rules.get
+            const item3Id = 'test-item-id-3';
+            const item4Id = 'test-item-id-4';
+            mockSiemMigrationsDataClient.items.get.mockRestore();
+            mockSiemMigrationsDataClient.items.get
               .mockResolvedValue({ total: 0, data: [] })
               .mockResolvedValueOnce({
                 total: 4,
                 data: [
-                  { id: ruleId, status: SiemMigrationStatus.PENDING },
-                  { id: rule2Id, status: SiemMigrationStatus.PENDING },
-                  { id: rule3Id, status: SiemMigrationStatus.PENDING },
-                  { id: rule4Id, status: SiemMigrationStatus.PENDING },
-                ] as StoredRuleMigration[],
+                  { id: itemId, status: SiemMigrationStatus.PENDING },
+                  { id: item2Id, status: SiemMigrationStatus.PENDING },
+                  { id: item3Id, status: SiemMigrationStatus.PENDING },
+                  { id: item4Id, status: SiemMigrationStatus.PENDING },
+                ] as StoredSiemMigrationItem[],
               });
 
             // max recovery attempts = 3
             mockInvoke
               .mockResolvedValue({}) // should never reach this
-              .mockRejectedValueOnce(error) // 1st failed call for rule 1
-              .mockRejectedValueOnce(error) // 1st failed call for rule 2
-              .mockRejectedValueOnce(error) // 1st failed call for rule 3
-              .mockRejectedValueOnce(error) // 1st failed call for rule 4
-              .mockResolvedValueOnce({}) // Successful call for the rule 1 backoff
-              .mockRejectedValueOnce(error) // 2nd failed call for the rule 2 recover
-              .mockRejectedValueOnce(error) // 2nd failed call for the rule 3 recover
-              .mockRejectedValueOnce(error) // 2nd failed call for the rule 4 recover
-              .mockResolvedValueOnce({}) // Successful call for the rule 2 backoff
-              .mockRejectedValueOnce(error) // 3rd failed call for the rule 3 recover
-              .mockRejectedValueOnce(error) // 3rd failed call for the rule 4 recover
-              .mockResolvedValueOnce({}) // Successful call for the rule 3 backoff
-              .mockRejectedValueOnce(error); // 4th failed call for the rule 4 recover (max attempts failure)
+              .mockRejectedValueOnce(error) // 1st failed call for item 1
+              .mockRejectedValueOnce(error) // 1st failed call for item 2
+              .mockRejectedValueOnce(error) // 1st failed call for item 3
+              .mockRejectedValueOnce(error) // 1st failed call for item 4
+              .mockResolvedValueOnce({}) // Successful call for the item 1 backoff
+              .mockRejectedValueOnce(error) // 2nd failed call for the item 2 recover
+              .mockRejectedValueOnce(error) // 2nd failed call for the item 3 recover
+              .mockRejectedValueOnce(error) // 2nd failed call for the item 4 recover
+              .mockResolvedValueOnce({}) // Successful call for the item 2 backoff
+              .mockRejectedValueOnce(error) // 3rd failed call for the item 3 recover
+              .mockRejectedValueOnce(error) // 3rd failed call for the item 4 recover
+              .mockResolvedValueOnce({}) // Successful call for the item 3 backoff
+              .mockRejectedValueOnce(error); // 4th failed call for the item 4 recover (max attempts failure)
 
             await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
 
-            expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalledTimes(3); // rules 1, 2 and 3
-            expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalledTimes(1); // rule 4
+            expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalledTimes(3); // items 1, 2 and 3
+            expect(mockSiemMigrationsDataClient.items.saveError).toHaveBeenCalledTimes(1); // item 4
           });
 
           it('should increase the executor sleep time when rate limited', async () => {
             const getResponse = {
               total: 1,
-              data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+              data: [
+                { id: itemId, status: SiemMigrationStatus.PENDING },
+              ] as StoredSiemMigrationItem[],
             };
-            mockRuleMigrationsDataClient.rules.get.mockRestore();
-            mockRuleMigrationsDataClient.rules.get
+            mockSiemMigrationsDataClient.items.get.mockRestore();
+            mockSiemMigrationsDataClient.items.get
               .mockResolvedValue({ total: 0, data: [] })
               .mockResolvedValueOnce(getResponse)
               .mockResolvedValueOnce({ total: 0, data: [] })

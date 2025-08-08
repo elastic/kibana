@@ -19,7 +19,7 @@ import type { StoredSiemMigration } from '../types';
 import type { SiemMigrationTaskStartParams } from './types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { SiemMigrationDataStats } from '../data/siem_migrations_data_item_client';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import type { SiemMigrationsClientDependencies } from '../types';
 
 jest.mock('./rule_migrations_task_runner', () => {

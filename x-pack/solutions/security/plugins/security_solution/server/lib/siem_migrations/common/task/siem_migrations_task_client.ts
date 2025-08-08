@@ -12,7 +12,7 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
 import type { SiemMigrationsDataClient } from '../data/siem_migrations_data_client';
 import type { SiemMigrationTaskStats } from '../data/types';
 import type {
@@ -28,7 +28,7 @@ import type {
   SiemMigrationTaskStopResult,
 } from './types';
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
-import type { SiemMigrationTaskEvaluator } from './siem_migrations_task_evaluator';
+import type { SiemMigrationTaskEvaluatorClass } from './siem_migrations_task_evaluator';
 
 export abstract class SiemMigrationsTaskClient<
   M extends MigrationDocument = StoredSiemMigration,
@@ -36,7 +36,7 @@ export abstract class SiemMigrationsTaskClient<
   C extends object = {}
 > {
   protected abstract readonly TaskRunnerClass: typeof SiemMigrationTaskRunner<M, I, C>;
-  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluator<M, I, C>;
+  protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluatorClass<M, I, C>;
 
   constructor(
     protected migrationsRunning: Map<string, SiemMigrationTaskRunner<M, I, C>>,

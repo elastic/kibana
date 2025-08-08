@@ -20,9 +20,8 @@ import type {
   SiemMigrationsIndexNameProvider,
 } from '../common/types';
 
-export type StoredSiemMigration = Stored<RuleMigration>;
-
-export type StoredRuleMigration = Stored<RuleMigrationRule>;
+export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigrationRule = Stored<RuleMigrationRule>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
 export interface RuleMigrationIntegration {

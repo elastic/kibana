@@ -8,7 +8,7 @@
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { RuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
+import type { StoredRuleMigrationRule } from '../types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -112,7 +112,7 @@ describe('RuleMigrationTaskRunner', () => {
       mockRuleMigrationsDataClient.items.get.mockResolvedValue({ total: 0, data: [] });
       mockRuleMigrationsDataClient.items.get.mockResolvedValueOnce({
         total: 1,
-        data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+        data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigrationRule[],
       });
 
       await taskRunner.setup('test-connector-id');
@@ -160,7 +160,9 @@ describe('RuleMigrationTaskRunner', () => {
             .mockResolvedValue({ total: 0, data: [] })
             .mockResolvedValueOnce({
               total: 1,
-              data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+              data: [
+                { id: ruleId, status: SiemMigrationStatus.PENDING },
+              ] as StoredRuleMigrationRule[],
             });
         });
 
@@ -202,7 +204,7 @@ describe('RuleMigrationTaskRunner', () => {
                 data: [
                   { id: ruleId, status: SiemMigrationStatus.PENDING },
                   { id: rule2Id, status: SiemMigrationStatus.PENDING },
-                ] as StoredRuleMigration[],
+                ] as StoredRuleMigrationRule[],
               });
           });
 
@@ -280,7 +282,7 @@ describe('RuleMigrationTaskRunner', () => {
                   { id: rule2Id, status: SiemMigrationStatus.PENDING },
                   { id: rule3Id, status: SiemMigrationStatus.PENDING },
                   { id: rule4Id, status: SiemMigrationStatus.PENDING },
-                ] as StoredRuleMigration[],
+                ] as StoredRuleMigrationRule[],
               });
 
             // max recovery attempts = 3
@@ -309,7 +311,9 @@ describe('RuleMigrationTaskRunner', () => {
           it('should increase the executor sleep time when rate limited', async () => {
             const getResponse = {
               total: 1,
-              data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+              data: [
+                { id: ruleId, status: SiemMigrationStatus.PENDING },
+              ] as StoredRuleMigrationRule[],
             };
             mockRuleMigrationsDataClient.items.get.mockRestore();
             mockRuleMigrationsDataClient.items.get

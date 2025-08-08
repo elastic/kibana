@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { EsqlKnowledgeBase } from '../../../util/esql_knowledge_base';
+import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
+import type { EsqlKnowledgeBase } from '../../../../../common/task/util/esql_knowledge_base';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { ChatModel } from '../../../util/actions_client_chat';
 import type { translateRuleState } from './state';
 import type { migrateRuleConfigSchema } from '../../state';
 

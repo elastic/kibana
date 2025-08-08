@@ -19,7 +19,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
-import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
+import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/common/task/util/esql_knowledge_base';
 import type { RuleMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 import type { CreateLlmInstance } from '../../server/assistant/tools/esql/utils/common';
 

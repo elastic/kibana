@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import assert from 'assert';
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { Run, Example } from 'langsmith/schemas';
@@ -25,11 +25,13 @@ export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResu
 type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
-export type SiemMigrationTaskEvaluator<
+export type SiemMigrationTaskEvaluatorClass<
   M extends MigrationDocument = MigrationDocument,
   I extends ItemDocument = ItemDocument,
-  C extends object = {}
-> = ReturnType<typeof SiemMigrationTaskEvaluable<M, I, C>>;
+  P extends object = {},
+  C extends object = {},
+  O extends object = {}
+> = ReturnType<typeof SiemMigrationTaskEvaluable<M, I, P, C, O>>;
 
 /**
  * Mixin to create a task evaluator based on a concrete implementation of a SiemMigrationTaskRunner.
@@ -39,32 +41,12 @@ export type SiemMigrationTaskEvaluator<
 export function SiemMigrationTaskEvaluable<
   M extends MigrationDocument = MigrationDocument,
   I extends ItemDocument = ItemDocument,
-  C extends object = {}
->(TaskRunnerConcreteClass: typeof SiemMigrationTaskRunner<M, I, C>) {
+  P extends object = {}, // The migration task input parameters schema
+  C extends object = {}, // The migration task config schema
+  O extends object = {} // The migration task output schema
+>(TaskRunnerConcreteClass: typeof SiemMigrationTaskRunner<M, I, P, C, O>) {
   return class extends TaskRunnerConcreteClass {
     protected evaluators!: Record<string, CustomEvaluator>;
-    private genericEvaluators: Record<string, CustomEvaluator> = {
-      translation_result: ({ run, example }) => {
-        const runResult = (run?.outputs as ItemDocument)?.translation_result;
-        const expectedResult = (example?.outputs as ItemDocument)?.translation_result;
-
-        if (!expectedResult) {
-          return { comment: 'No translation result expected' };
-        }
-        if (!runResult) {
-          return { score: false, comment: 'No translation result received' };
-        }
-
-        if (runResult === expectedResult) {
-          return { score: true, comment: 'Correct' };
-        }
-
-        return {
-          score: false,
-          comment: `Incorrect, expected "${expectedResult}" but got "${runResult}"`,
-        };
-      },
-    };
 
     public async evaluate({ connectorId, langsmithOptions, invocationConfig }: EvaluateParams<C>) {
       if (!isLangSmithEnabled()) {
@@ -95,7 +77,10 @@ export function SiemMigrationTaskEvaluable<
       await this.setup(connectorId);
 
       // create the migration task after setup
-      const migrateItemTask = this.createMigrateItemTask(invocationConfig);
+      const migrateItemTask = (params: P) => {
+        assert(this.task, 'Task is not defined');
+        return this.task(params, invocationConfig);
+      };
       const evaluators = this.getEvaluators();
 
       evaluate(migrateItemTask, {
@@ -112,6 +97,29 @@ export function SiemMigrationTaskEvaluable<
           this.logger.error(`Evaluation error:\n ${JSON.stringify(err, null, 2)}`);
         });
     }
+
+    private genericEvaluators: Record<string, CustomEvaluator> = {
+      translation_result: ({ run, example }) => {
+        const runResult = (run?.outputs as ItemDocument)?.translation_result;
+        const expectedResult = (example?.outputs as ItemDocument)?.translation_result;
+
+        if (!expectedResult) {
+          return { comment: 'No translation result expected' };
+        }
+        if (!runResult) {
+          return { score: false, comment: 'No translation result received' };
+        }
+
+        if (runResult === expectedResult) {
+          return { score: true, comment: 'Correct' };
+        }
+
+        return {
+          score: false,
+          comment: `Incorrect, expected "${expectedResult}" but got "${runResult}"`,
+        };
+      },
+    };
 
     private getEvaluators(): Evaluator[] {
       return Object.entries({ ...this.genericEvaluators, ...this.evaluators }).map(
