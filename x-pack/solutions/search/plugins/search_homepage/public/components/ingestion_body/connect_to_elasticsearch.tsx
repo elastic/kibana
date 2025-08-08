@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormInfoField } from '@kbn/search-shared-ui';
@@ -17,7 +16,6 @@ import { ExploreLanguageClients } from './explore_language_clients';
 import { ApiKeyForm } from '../api_key_form';
 
 export const ConnectToElasticsearch = () => {
-  const { euiTheme } = useEuiTheme();
   const elasticsearchUrl = useElasticsearchUrl();
 
   return (
@@ -40,15 +38,8 @@ export const ConnectToElasticsearch = () => {
       </EuiFlexGroup>
       <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            css={css({
-              borderRight: euiTheme.border.thick,
-              paddingRight: euiTheme.size.m,
-            })}
-          >
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+            <EuiFlexItem grow={4}>
               <EuiFlexGroup direction="column" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xxs">
@@ -65,12 +56,12 @@ export const ConnectToElasticsearch = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={6}>
               <ApiKeyForm />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={1}>
           <ExploreLanguageClients />
         </EuiFlexItem>
       </EuiFlexGroup>

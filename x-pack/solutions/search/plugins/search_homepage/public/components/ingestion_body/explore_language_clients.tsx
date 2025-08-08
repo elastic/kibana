@@ -56,7 +56,16 @@ export const ExploreLanguageClients = () => {
   const assetBasePath = useAssetBasePath();
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="l">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="flexStart"
+      gutterSize="l"
+      wrap
+      css={css({
+        borderLeft: euiTheme.border.thin,
+        paddingLeft: euiTheme.size.m,
+      })}
+    >
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
           {LanguageIcons.map((icon) => (
