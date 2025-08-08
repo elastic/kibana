@@ -46,7 +46,7 @@ export const ExpressionDropDown = <TDropDownType extends string>({
   popoverTitle,
   ...props
 }: WhenExpressionProps<TDropDownType>) => {
-  const [popoverOpen, { toggle: togglePopover }] = useBoolean(false);
+  const [popoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
@@ -60,12 +60,12 @@ export const ExpressionDropDown = <TDropDownType extends string>({
         />
       }
       isOpen={popoverOpen}
-      closePopover={togglePopover}
+      closePopover={closePopover}
       ownFocus
       anchorPosition={popupPosition ?? 'downLeft'}
     >
-      <div onBlur={togglePopover}>
-        <ClosablePopoverTitle onClose={togglePopover}>
+      <div onBlur={closePopover}>
+        <ClosablePopoverTitle onClose={closePopover}>
           <>{popoverTitle}</>
         </ClosablePopoverTitle>
         <EuiSelect
@@ -75,7 +75,7 @@ export const ExpressionDropDown = <TDropDownType extends string>({
           fullWidth
           onChange={(e) => {
             onChange(e.target.value as TDropDownType);
-            togglePopover();
+            closePopover();
           }}
           options={Object.values(options).map((o) => o) as EuiSelectOption[]}
         />

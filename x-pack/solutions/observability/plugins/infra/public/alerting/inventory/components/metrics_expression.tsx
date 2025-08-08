@@ -107,7 +107,7 @@ export const MetricExpression = ({
   popupPosition,
   nodeType,
 }: Props) => {
-  const [popoverOpen, { toggle: togglePopover }] = useBoolean(false);
+  const [popoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
   const [customMetricTabOpen, setCustomMetricTabOpen] = useState(metric?.value === 'custom');
   const [selectedOption, setSelectedOption] = useState(metric?.value);
   const [fieldDisplayedCustomLabel, setFieldDisplayedCustomLabel] = useState(customMetric?.label);
@@ -218,12 +218,12 @@ export const MetricExpression = ({
         />
       }
       isOpen={popoverOpen}
-      closePopover={togglePopover}
+      closePopover={closePopover}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
-      <div style={{ width: 620 }} onBlur={togglePopover}>
-        <ClosablePopoverTitle onClose={togglePopover}>
+      <div style={{ width: 620 }} onBlur={closePopover}>
+        <ClosablePopoverTitle onClose={closePopover}>
           <FormattedMessage
             id="xpack.infra.metrics.alertFlyout.expression.metric.popoverTitle"
             defaultMessage="Metric"
