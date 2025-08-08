@@ -119,9 +119,6 @@ export const getConversation$ = ({
   }).pipe(shareReplay());
 };
 
-/**
- * Create a placeholder conversation
- */
 export const createPlaceholderConversation$ = ({
   agentId,
   conversationId,

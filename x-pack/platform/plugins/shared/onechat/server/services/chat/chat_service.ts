@@ -175,8 +175,8 @@ class ChatServiceImpl implements ChatService {
           });
 
           const title$ = shouldCreateNewConversation$.pipe(
-            switchMap((willCreate) =>
-              willCreate
+            switchMap((shouldCreate) =>
+              shouldCreate
                 ? generateTitle$({ chatModel, conversation$, nextInput })
                 : conversation$.pipe(
                     switchMap((conversation) => {
