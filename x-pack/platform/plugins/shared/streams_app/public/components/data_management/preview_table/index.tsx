@@ -60,8 +60,17 @@ export function PreviewTable({
     });
     let allColumns = Array.from(cols);
 
-    // Sort columns alphabetically
-    allColumns = allColumns.sort((a, b) => a.localeCompare(b));
+    // Sort columns by displayColumns or alphabetically as baseline
+    allColumns = allColumns.sort((a, b) => {
+      const indexA = (displayColumns || []).indexOf(a);
+      const indexB = (displayColumns || []).indexOf(b);
+      if (indexA === -1 && indexB === -1) {
+        return a.localeCompare(b);
+      }
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
 
     // Sort columns based on the columnOrderHint if provided
     if (columnOrderHint.length > 0) {
