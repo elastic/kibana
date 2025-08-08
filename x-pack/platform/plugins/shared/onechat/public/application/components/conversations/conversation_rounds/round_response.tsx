@@ -11,8 +11,8 @@ import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-comm
 import React from 'react';
 import { useTimer } from '../../../hooks/use_timer';
 import { ChatMessageText } from './chat_message_text';
-import { RoundThinking } from './round_thinking';
-import { RoundTimer } from './round_timer';
+import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundTimer } from './round_thinking/round_timer';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
