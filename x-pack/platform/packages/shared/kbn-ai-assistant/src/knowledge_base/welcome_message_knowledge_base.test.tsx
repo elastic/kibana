@@ -27,6 +27,10 @@ function createMockKnowledgeBase(
     install: partial.install ?? (async (_id: string) => {}),
     warmupModel: partial.warmupModel ?? (async (_id: string) => {}),
     isWarmingUpModel: partial.isWarmingUpModel ?? false,
+    isProductDocInstalling: partial.isProductDocInstalling ?? false,
+    isProductDocUninstalling: partial.isProductDocUninstalling ?? false,
+    installProductDoc: partial.installProductDoc ?? (async (_id: string) => {}),
+    uninstallProductDoc: partial.uninstallProductDoc ?? (async (_id: string) => {}),
     status: partial.status ?? {
       value: {
         enabled: true,

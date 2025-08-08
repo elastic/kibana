@@ -13,6 +13,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     isInstalling: false,
     isPolling: false,
     install: async () => {},
+    isProductDocInstalling: false,
+    isProductDocUninstalling: false,
+    installProductDoc: async (inferenceId: string) => {},
+    uninstallProductDoc: async (inferenceId: string) => {},
     status: {
       loading: false,
       refresh: () => {},

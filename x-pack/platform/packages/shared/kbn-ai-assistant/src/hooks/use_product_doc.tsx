@@ -58,7 +58,7 @@ export function useProductDoc(): UseKnowledgeBaseResult {
     async (inferenceId: string) => {
       if (!productDocBase) {
         throw new Error(
-          i18n.translate('xpack.observabilityAiAssistantManagement.productDocBaseNotAvailable', {
+          i18n.translate('xpack.aiAssistant.productDocBaseNotAvailable', {
             defaultMessage: 'Product Doc Base is not available',
           })
         );

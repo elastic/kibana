@@ -54,6 +54,10 @@ const createMockKnowledgeBase = (
   install: jest.fn(),
   warmupModel: jest.fn(),
   isWarmingUpModel: false,
+  isProductDocInstalling: false,
+  isProductDocUninstalling: false,
+  installProductDoc: jest.fn(),
+  uninstallProductDoc: jest.fn(),
   status: {
     value: {
       enabled: true,
