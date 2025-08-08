@@ -114,7 +114,7 @@ export function createSecurityTests(
             await kibanaServer.savedObjects.cleanStandardList();
 
             await kibanaServer.importExport.load(
-              'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+              'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
             );
 
             await esArchiver.loadIfNeeded(
@@ -131,7 +131,7 @@ export function createSecurityTests(
             await security.forceLogout();
 
             await kibanaServer.importExport.unload(
-              'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+              'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/security/security.json'
             );
 
             await kibanaServer.savedObjects.cleanStandardList();

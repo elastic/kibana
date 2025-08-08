@@ -23,6 +23,7 @@ import {
 } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { SSLCertType } from '../../../common/auth/constants';
 import type {
   WebhookConnectorType,
@@ -257,6 +258,11 @@ export async function executor(
           getOrElse(() => retryResult(actionId, message))
         );
       }
+
+      if (status === 404) {
+        return errorResultInvalid(actionId, message, TaskErrorSource.USER);
+      }
+
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
@@ -280,7 +286,8 @@ function successResult(actionId: string, data: unknown): ConnectorTypeExecutorRe
 
 function errorResultInvalid(
   actionId: string,
-  serviceMessage: string
+  serviceMessage: string,
+  errorSource?: TaskErrorSource
 ): ConnectorTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.stackConnectors.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
@@ -290,6 +297,7 @@ function errorResultInvalid(
     message: errMessage,
     actionId,
     serviceMessage,
+    errorSource,
   };
 }
 

@@ -820,6 +820,52 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
+  test('404 response returns user error', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.POST,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    requestMock.mockRejectedValueOnce({
+      tag: 'err',
+      response: {
+        status: 404,
+        statusText: 'Not Found',
+        data: {
+          message:
+            'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+        },
+      },
+    });
+    const result = await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(result.errorSource).toBe('user');
+    expect(result.serviceMessage).toBe(
+      '[404] Not Found: The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.'
+    );
+  });
+
   describe('oauth2 client credentials', () => {
     it('throws if refresh token fails', async () => {
       (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(undefined);

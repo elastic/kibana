@@ -7082,7 +7082,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PatchRule
@@ -7204,7 +7204,7 @@ paths:
       description: |
         Create a new detection rule.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -7893,7 +7893,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: UpdateRule
@@ -8066,7 +8066,7 @@ paths:
         The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
-        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PerformRulesBulkAction
@@ -9363,7 +9363,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -24051,6 +24051,16 @@ paths:
                           additionalProperties: true
                           type: object
                           properties:
+                            datasets:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                required:
+                                  - name
+                              type: array
                             fields:
                               items:
                                 additionalProperties: true
@@ -25220,6 +25230,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -25851,6 +25871,16 @@ paths:
                         additionalProperties: true
                         type: object
                         properties:
+                          datasets:
+                            items:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                              required:
+                                - name
+                            type: array
                           fields:
                             items:
                               additionalProperties: true
@@ -52294,23 +52324,47 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
-                            streams:
-                              items:
-                                type: string
-                              type: array
+                            all:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
                           required:
-                            - streams
+                            - all
                       required:
                         - objects
                     - additionalProperties: false
                       type: object
                       properties:
-                        all:
+                        objects:
                           additionalProperties: false
                           type: object
-                          properties: {}
+                          properties:
+                            queries:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                required:
+                                  - id
+                              type: array
+                            routing:
+                              items:
+                                allOf:
+                                  - {}
+                                  - type: object
+                                    properties:
+                                      destination:
+                                        type: string
+                                    required:
+                                      - destination
+                              type: array
+                          required:
+                            - queries
+                            - routing
                       required:
-                        - all
+                        - objects
                 name:
                   type: string
                 version:
@@ -52753,6 +52807,53 @@ paths:
                 - not: {}
       responses: {}
       summary: Read the significant events
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events/_generate:
+    get:
+      description: 'Generate significant events queries based on the stream data<br/><br/>[Required authorization] Route required privileges: read_stream.'
+      operationId: get-streams-name-significant-events-generate
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: connectorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: currentDate
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: shortLookback
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: longLookback
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Generate significant events
       tags:
         - streams
       x-state: Technical Preview
@@ -61244,6 +61345,7 @@ components:
         - rule_default
         - endpoint
         - endpoint_trusted_apps
+        - endpoint_trusted_devices
         - endpoint_events
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
@@ -63176,7 +63278,6 @@ components:
         - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
             - `kql` (string, required): A KQL string.
             - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-              
       type: object
     Security_Detections_API_RuleActionFrequency:
       description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
@@ -64209,25 +64310,29 @@ components:
         properties:
           entries:
             items:
-              type: object
-              properties:
-                field:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-                type:
-                  enum:
-                    - mapping
-                  type: string
-                value:
-                  $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-              required:
-                - field
-                - type
-                - value
+              $ref: '#/components/schemas/Security_Detections_API_ThreatMappingEntry'
             type: array
         required:
           - entries
       minItems: 1
       type: array
+    Security_Detections_API_ThreatMappingEntry:
+      type: object
+      properties:
+        field:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+        negate:
+          type: boolean
+        type:
+          enum:
+            - mapping
+          type: string
+        value:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+      required:
+        - field
+        - type
+        - value
     Security_Detections_API_ThreatMatchRule:
       allOf:
         - type: object
