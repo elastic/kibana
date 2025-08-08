@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import type { CaseAttachmentWithoutOwner } from '../attachment/v1';
 
-const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
+export const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
 
 export const suggestionContextRt = z.object({
   'service.name': z.string().optional(),
@@ -19,13 +19,7 @@ export const suggestionContextRt = z.object({
     .optional(),
 });
 
-export const suggestionRequestRt = z.object({
-  owners: z.array(suggestionOwnerSchema),
-  context: suggestionContextRt,
-});
-
 export type SuggestionContext = z.infer<typeof suggestionContextRt>;
-export type SuggestionRequest = z.infer<typeof suggestionRequestRt>;
 
 export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];

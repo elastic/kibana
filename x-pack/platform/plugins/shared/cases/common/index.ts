@@ -66,7 +66,6 @@ export {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
-  type SuggestionRequest,
   type SuggestionResponse,
   type SuggestionContext,
   type SuggestionItem,
@@ -75,4 +74,5 @@ export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from '.
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
+export type { SuggestionRequest } from './types/api/suggestion/v1';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
