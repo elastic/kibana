@@ -11,6 +11,6 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../../..',
   roots: [
-    '<rootDir>/x-pack/platform/packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_common',
+    '<rootDir>/src/platform/packages/shared/ui-actions-enhanced/dynamic_actions/dynamic_actions_common',
   ],
 };
