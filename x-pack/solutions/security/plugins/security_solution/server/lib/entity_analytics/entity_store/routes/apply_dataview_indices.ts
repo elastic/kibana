@@ -52,11 +52,14 @@ export const applyDataViewIndicesEntityEngineRoute = (
           if (successes.length === 0 && errors.length > 0) {
             return siemResponse.error({
               statusCode: 500,
-              body: `Error in ApplyEntityEngineDataViewIndices. Errors: [${errorMessages.join(
-                ', '
-              )}]`,
+              body: `Errors applying data view changes to the entity store. Errors: \n${errorMessages.join(
+                '\n\n'
+              )}`,
             });
           }
+
+          const apiKeyManager = secSol.getEntityStoreApiKeyManager();
+          await apiKeyManager.generate();
 
           if (errors.length === 0) {
             return response.ok({
@@ -75,7 +78,7 @@ export const applyDataViewIndicesEntityEngineRoute = (
             });
           }
         } catch (e) {
-          logger.error('Error in ApplyEntityEngineDataViewIndices:', e);
+          logger.error(`Error in ApplyEntityEngineDataViewIndices: ${e.message}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

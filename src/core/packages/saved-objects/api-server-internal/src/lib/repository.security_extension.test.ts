@@ -17,7 +17,7 @@ import {
 
 import { SavedObjectsRepository } from './repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
@@ -281,6 +281,7 @@ describe('SavedObjectsRepository Security Extension', () => {
         type: 'multiNamespaceTypeCustomIndex',
         id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
         existingNamespaces: multiNamespaceObjNamespaces,
+        name: 'Testing',
       };
 
       const { namespace: actualNamespace, object: actualObject } =

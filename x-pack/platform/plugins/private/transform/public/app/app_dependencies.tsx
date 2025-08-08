@@ -15,7 +15,6 @@ import type {
   IUiSettingsClient,
   NotificationsStart,
   OverlayStart,
-  SavedObjectsStart,
   ScopedHistory,
   ThemeServiceStart,
   UserProfileService,
@@ -38,6 +37,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface AppDependencies {
   analytics: AnalyticsServiceStart;
@@ -53,7 +53,6 @@ export interface AppDependencies {
   i18n: I18nStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
-  savedObjects: SavedObjectsStart;
   savedSearch: SavedSearchPublicPluginStart;
   storage: Storage;
   overlays: OverlayStart;
@@ -68,6 +67,7 @@ export interface AppDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   settings: SettingsStart;
   contentManagement: ContentManagementPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export const useAppDependencies = () => {

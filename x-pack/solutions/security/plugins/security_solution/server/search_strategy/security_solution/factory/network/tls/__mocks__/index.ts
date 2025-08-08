@@ -72,37 +72,35 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            aggs: {
-              count: { cardinality: { field: 'tls.server.hash.sha1' } },
-              sha1: {
-                terms: { field: 'tls.server.hash.sha1', size: 10, order: { _key: 'desc' } },
-                aggs: {
-                  issuers: { terms: { field: 'tls.server.issuer' } },
-                  subjects: { terms: { field: 'tls.server.subject' } },
-                  not_after: { terms: { field: 'tls.server.not_after' } },
-                  ja3: { terms: { field: 'tls.client.ja3' } },
-                },
+          aggs: {
+            count: { cardinality: { field: 'tls.server.hash.sha1' } },
+            sha1: {
+              terms: { field: 'tls.server.hash.sha1', size: 10, order: { _key: 'desc' } },
+              aggs: {
+                issuers: { terms: { field: 'tls.server.issuer' } },
+                subjects: { terms: { field: 'tls.server.subject' } },
+                not_after: { terms: { field: 'tls.server.not_after' } },
+                ja3: { terms: { field: 'tls.client.ja3' } },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T09:58:58.637Z',
-                        lte: '2020-09-14T09:58:58.637Z',
-                        format: 'strict_date_optional_time',
-                      },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T09:58:58.637Z',
+                      lte: '2020-09-14T09:58:58.637Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
-            size: 0,
           },
+          size: 0,
         },
         null,
         2
@@ -127,35 +125,33 @@ export const expectedDsl = {
   ],
   ignore_unavailable: true,
   track_total_hits: false,
-  body: {
-    aggs: {
-      count: { cardinality: { field: 'tls.server.hash.sha1' } },
-      sha1: {
-        terms: { field: 'tls.server.hash.sha1', size: 10, order: { _key: 'desc' } },
-        aggs: {
-          issuers: { terms: { field: 'tls.server.issuer' } },
-          subjects: { terms: { field: 'tls.server.subject' } },
-          not_after: { terms: { field: 'tls.server.not_after' } },
-          ja3: { terms: { field: 'tls.client.ja3' } },
-        },
+  aggs: {
+    count: { cardinality: { field: 'tls.server.hash.sha1' } },
+    sha1: {
+      terms: { field: 'tls.server.hash.sha1', size: 10, order: { _key: 'desc' } },
+      aggs: {
+        issuers: { terms: { field: 'tls.server.issuer' } },
+        subjects: { terms: { field: 'tls.server.subject' } },
+        not_after: { terms: { field: 'tls.server.not_after' } },
+        ja3: { terms: { field: 'tls.client.ja3' } },
       },
     },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T09:58:58.637Z',
-                lte: '2020-09-14T09:58:58.637Z',
-                format: 'strict_date_optional_time',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T09:58:58.637Z',
+              lte: '2020-09-14T09:58:58.637Z',
+              format: 'strict_date_optional_time',
             },
           },
-        ],
-      },
+        },
+      ],
     },
-    size: 0,
   },
+  size: 0,
 };

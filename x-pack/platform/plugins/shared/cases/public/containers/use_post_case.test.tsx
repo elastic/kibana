@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { ConnectorTypes } from '../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { usePostCase } from './use_post_case';
 import { casesQueriesKeys } from './constants';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -40,17 +40,14 @@ describe('usePostCase', () => {
 
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'postCase');
     const { result } = renderHook(() => usePostCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -61,9 +58,10 @@ describe('usePostCase', () => {
   });
 
   it('invalidates the queries correctly', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => usePostCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -72,14 +70,15 @@ describe('usePostCase', () => {
 
     await waitFor(() => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
     });
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
   });
 
   it('does not show a success toaster', async () => {
     const { result } = renderHook(() => usePostCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -93,7 +92,7 @@ describe('usePostCase', () => {
     jest.spyOn(api, 'postCase').mockRejectedValue(new Error('usePostCase: Test error'));
 
     const { result } = renderHook(() => usePostCase(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

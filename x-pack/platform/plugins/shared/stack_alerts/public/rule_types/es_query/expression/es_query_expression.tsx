@@ -68,7 +68,7 @@ export const EsQueryExpression: React.FC<
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-      size: size ? size : isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE,
+      size: size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
       groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
@@ -98,10 +98,12 @@ export const EsQueryExpression: React.FC<
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
-    setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
+    const query = esQuery ?? DEFAULT_VALUES.QUERY;
+    setXJson(query);
 
     if (index && index.length > 0) {
-      await refreshEsFields(index);
+      const initialRuntimeFields = getRuntimeFields(query);
+      await refreshEsFields(index, initialRuntimeFields);
     }
   };
 
@@ -110,10 +112,14 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async (indices: string[]) => {
+  const refreshEsFields = async (indices: string[], initialRuntimeFields?: FieldOption[]) => {
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
-    setCombinedFields(sortBy(currentEsFields.concat(runtimeFields), 'name'));
+
+    const combined = currentEsFields.concat(
+      initialRuntimeFields !== undefined ? initialRuntimeFields : runtimeFields
+    );
+    setCombinedFields(sortBy(combined, 'name'));
   };
 
   const getRuntimeFields = (xjson: string) => {
@@ -127,6 +133,7 @@ export const EsQueryExpression: React.FC<
       const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
       setRuntimeFields(currentRuntimeFields);
       setCombinedFields(sortBy(esFields.concat(currentRuntimeFields), 'name'));
+      return currentRuntimeFields;
     }
   };
 
@@ -198,6 +205,7 @@ export const EsQueryExpression: React.FC<
     <Fragment>
       <EuiFormRow
         fullWidth
+        data-test-subj="indexSelectPopover"
         label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectIndexPrompt"
@@ -207,7 +215,6 @@ export const EsQueryExpression: React.FC<
       >
         <IndexSelectPopover
           index={index}
-          data-test-subj="indexSelectPopover"
           esFields={esFields}
           timeField={timeField}
           errors={errors}

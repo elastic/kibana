@@ -21,9 +21,9 @@ import { generateSideNavItems } from './classic_nav_helpers';
 describe('generateSideNavItems', () => {
   const deepLinksMap = {
     enterpriseSearch: {
-      id: 'enterpriseSearch',
-      url: '/app/elasticsearch/overview',
-      title: 'Overview',
+      id: 'searchHomepage',
+      url: '/app/elasticsearch/home',
+      title: 'Home',
     },
     'enterpriseSearchContent:searchIndices': {
       id: 'enterpriseSearchContent:searchIndices',
@@ -58,10 +58,10 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: false,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);
@@ -88,10 +88,10 @@ describe('generateSideNavItems', () => {
         id: 'parent',
         items: [
           {
-            href: '/app/elasticsearch/overview',
+            href: '/app/elasticsearch/home',
             id: 'unit-test',
             isSelected: false,
-            name: 'Overview',
+            name: 'Home',
             onClick: expect.any(Function),
           },
         ],
@@ -113,7 +113,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',
@@ -141,7 +141,7 @@ describe('generateSideNavItems', () => {
 
     expect(generateSideNavItems(classicNavItems, deepLinksMap)).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: false,
         name: 'Home',

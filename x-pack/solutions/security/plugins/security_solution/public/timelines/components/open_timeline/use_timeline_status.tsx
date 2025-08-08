@@ -93,6 +93,8 @@ export const useTimelineStatus = ({
     return isTemplateFilterEnabled
       ? filters.map((tab: TemplateTimelineFilter) => (
           <EuiFilterButton
+            isToggle
+            isSelected={tab.id === templateTimelineType}
             hasActiveFilters={tab.id === templateTimelineType}
             key={`template-timeline-filter-${tab.id}`}
             numFilters={tab.count}

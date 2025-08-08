@@ -23,10 +23,10 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
-jest.mock('../../../lib/rule_api/rule_types');
-jest.mocked(loadRuleTypes).mockResolvedValue([]);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+jest.mocked(getRuleTypes).mockResolvedValue([]);
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -300,7 +300,7 @@ describe('rules', () => {
       enabled: false,
     });
     const ruleType = mockRuleType({
-      hasFieldsForAAD: true,
+      hasAlertsMappings: true,
     });
     const ruleSummary = mockRuleSummary();
     jest.setSystemTime(fake2MinutesAgo);
@@ -603,6 +603,7 @@ function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
     ...overloads,
   };
 }

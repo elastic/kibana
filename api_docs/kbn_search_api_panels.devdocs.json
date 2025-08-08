@@ -1235,7 +1235,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,

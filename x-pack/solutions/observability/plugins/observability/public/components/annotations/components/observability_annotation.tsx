@@ -12,15 +12,14 @@ import {
   TooltipSpec,
   TooltipType,
 } from '@elastic/charts';
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import moment from 'moment';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { CreateAnnotationForm } from './create_annotation';
-import { Annotation } from '../../../../common/annotations';
-import { DisplayAnnotation } from '../display_annotations';
+import { ObsAnnotation } from './obs_annotation';
+import type { CreateAnnotationForm } from './create_annotation';
+import type { Annotation } from '../../../../common/annotations';
 import { NewLineAnnotation } from './new_line_annotation';
 import { NewRectAnnotation } from './new_rect_annotation';
 
@@ -55,13 +54,15 @@ export function ObservabilityAnnotations({
   ];
 
   return (
-    <EuiErrorBoundary>
+    <>
       <Tooltip {...(tooltipSpecs ?? {})} actions={actions} type={TooltipType.VerticalCursor} />
-      <DisplayAnnotation annotations={annotations} />
+      {annotations?.map((annotation, index) => (
+        <ObsAnnotation annotation={annotation} key={annotation.id ?? index} />
+      ))}
 
       <NewLineAnnotation slo={slo} isCreateOpen={isCreateOpen} />
       <NewRectAnnotation slo={slo} isCreateOpen={isCreateOpen} />
-    </EuiErrorBoundary>
+    </>
   );
 }
 

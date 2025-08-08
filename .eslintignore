@@ -26,7 +26,7 @@ snapshots.js
 /x-pack/platform/plugins/private/canvas/storybook/build
 /x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/platform/plugins/private/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
-/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/assets/**
+/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/public/assets/**
 
 # package overrides
 /packages/kbn-eslint-config

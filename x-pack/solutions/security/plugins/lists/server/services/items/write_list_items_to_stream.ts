@@ -7,7 +7,7 @@
 
 import { PassThrough } from 'stream';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
@@ -117,18 +117,16 @@ export const getResponse = async ({
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
   return (await esClient.search<SearchEsListItemSchema>({
-    body: {
-      query: {
-        term: {
-          list_id: listId,
-        },
-      },
-      search_after: searchAfter,
-      sort: [{ tie_breaker_id: 'asc' }],
-    },
     ignore_unavailable: true,
     index: listItemIndex,
+    query: {
+      term: {
+        list_id: listId,
+      },
+    },
+    search_after: searchAfter,
     size,
+    sort: [{ tie_breaker_id: 'asc' }],
   })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 

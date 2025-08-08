@@ -13,14 +13,17 @@ export type Protocol = 'http' | 'https';
 
 export const VALID_CONFIG_MARKER = Symbol('validConfig');
 
+export type ScoutPlaywrightProjects = 'local' | 'ech' | 'mki';
+
+export type ScoutConfigName = 'local' | 'cloud_ech' | 'cloud_mki';
+
 export interface ScoutTestOptions extends PlaywrightTestOptions {
   serversConfigDir: string;
+  configName: ScoutConfigName;
   [VALID_CONFIG_MARKER]: boolean;
 }
 
-export interface ScoutPlaywrightOptions
-  extends Pick<PlaywrightTestConfig, 'testDir' | 'workers' | 'globalSetup'> {
+export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
   testDir: string;
   workers?: 1 | 2 | 3; // to keep performance consistent within test suites
-  globalSetup?: string;
 }

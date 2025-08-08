@@ -15,7 +15,7 @@ import type {
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
 import semVerCompare from 'semver/functions/compare';
 import semVerCoerce from 'semver/functions/coerce';
-import { benchmarksNavigation } from '../../common/navigation/constants';
+import { benchmarksNavigation } from '@kbn/cloud-security-posture';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';

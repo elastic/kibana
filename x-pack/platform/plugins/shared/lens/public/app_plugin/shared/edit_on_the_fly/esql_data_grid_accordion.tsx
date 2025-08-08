@@ -86,19 +86,21 @@ export const ESQLDataGridAccordion = ({
           </EuiNotificationBadge>
         }
       >
-        <>
-          <ESQLDataGrid
-            rows={dataGridAttrs?.rows}
-            columns={dataGridAttrs?.columns}
-            dataView={dataGridAttrs?.dataView}
-            query={query}
-            flyoutType="overlay"
-            isTableView={isTableView}
-            initialRowHeight={0}
-            controlColumnIds={['openDetails']}
-          />
-          <EuiSpacer />
-        </>
+        {isAccordionOpen && (
+          <>
+            <ESQLDataGrid
+              rows={dataGridAttrs?.rows}
+              columns={dataGridAttrs?.columns}
+              dataView={dataGridAttrs?.dataView}
+              query={query}
+              flyoutType="overlay"
+              isTableView={isTableView}
+              initialRowHeight={0}
+              controlColumnIds={['openDetails']}
+            />
+            <EuiSpacer />
+          </>
+        )}
       </EuiAccordion>
     </EuiFlexItem>
   );

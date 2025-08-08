@@ -99,7 +99,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     return (
       <EuiFlyoutResizable
         onClose={onClose}
-        size="m"
+        size={850}
         maxWidth={1200}
         minWidth={500}
         data-test-subj="uploadRulesFlyout"
@@ -158,6 +158,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 onClick={onStartMigration}
                 disabled={!migrationStats?.id}
                 isLoading={isStartLoading}
+                data-test-subj="startMigrationButton"
               >
                 {isRetry ? (
                   <FormattedMessage

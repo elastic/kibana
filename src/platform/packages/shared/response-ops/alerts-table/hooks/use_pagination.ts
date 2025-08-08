@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { BulkActionsVerbs } from '../types';
-import { AdditionalContext, RenderContext } from '../types';
+import type { AdditionalContext, RenderContext } from '../types';
 
 export type PaginationProps = RuleRegistrySearchRequestPagination & {
   bulkActionsStore: RenderContext<AdditionalContext>['bulkActionsStore'];

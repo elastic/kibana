@@ -94,6 +94,13 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          deletion: {
+            properties: {
+              num_deleted: {
+                type: 'long',
+              },
+            },
+          },
           rule: {
             properties: {
               consumer: {
@@ -133,6 +140,9 @@ exports.EcsCustomPropertyMappings = {
                   },
                   in_progress_duration_ms: {
                     type: 'long',
+                  },
+                  deleted: {
+                    type: 'boolean',
                   },
                 },
               },
@@ -206,6 +216,9 @@ exports.EcsCustomPropertyMappings = {
                       gap_range: {
                         type: 'date_range',
                         format: 'strict_date_optional_time||epoch_millis',
+                      },
+                      frozen_indices_queried_count: {
+                        type: 'long',
                       },
                       rule_type_run_duration_ms: {
                         type: 'long',

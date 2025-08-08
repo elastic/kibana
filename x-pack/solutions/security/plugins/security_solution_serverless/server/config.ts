@@ -13,8 +13,10 @@ import { schema } from '@kbn/config-schema';
 
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { productTypes } from '../common/config';
+import { commonConfigSchema, exposeToBrowser } from '../common/config';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 
 const tlsConfig = schema.object({
   certificate: schema.string(),
@@ -30,51 +32,36 @@ const usageApiConfig = schema.object({
 });
 export type UsageApiConfigSchema = TypeOf<typeof usageApiConfig>;
 
-export const configSchema = schema.object({
+export const serverConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  productTypes,
   /**
    * Usage Reporting: the interval between runs of the endpoint task
    */
-
-  usageReportingTaskInterval: schema.string({ defaultValue: '5m' }),
+  usageReportingTaskInterval: schema.string({ defaultValue: ENDPOINT_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: the interval between runs of the cloud security task
    */
-
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
+
+  /**
+   * Usage Reporting: the interval between runs of the ai4soc metering task
+   */
+  ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: timeout value for how long the task should run.
    */
   usageReportingTaskTimeout: schema.string({ defaultValue: '1m' }),
 
-  /**
-   * For internal use. A list of string values (comma delimited) that will enable experimental
-   * type of functionality that is not yet released. Valid values for this settings need to
-   * be defined in:
-   * `x-pack/solutions/security/plugins/security_solution_serverless/common/experimental_features.ts`
-   * under the `allowedExperimentalValues` object
-   *
-   * @example
-   * xpack.securitySolutionServerless.enableExperimental:
-   *   - someCrazyServerlessFeature
-   *   - someEvenCrazierServerlessFeature
-   */
-  enableExperimental: schema.arrayOf(schema.string(), {
-    defaultValue: () => [],
-  }),
-
   usageApi: usageApiConfig,
 });
+const configSchema = schema.allOf([commonConfigSchema, serverConfigSchema]);
+
 export type ServerlessSecuritySchema = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ServerlessSecuritySchema> = {
-  exposeToBrowser: {
-    enableExperimental: true,
-    productTypes: true,
-  },
+  exposeToBrowser,
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(

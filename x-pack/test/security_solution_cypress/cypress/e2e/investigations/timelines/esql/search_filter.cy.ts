@@ -26,6 +26,7 @@ import {
   addFieldToTable,
   convertEditorNonBreakingSpaceToSpace,
   waitForDiscoverFieldsToLoad,
+  waitForESQLInputToBeVisible,
 } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
@@ -55,6 +56,7 @@ describe(
       });
       createNewTimeline();
       goToEsqlTab();
+      waitForESQLInputToBeVisible();
     });
 
     it('should show data according to the esql query', () => {

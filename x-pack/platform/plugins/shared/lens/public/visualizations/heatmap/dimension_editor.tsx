@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry } from '@kbn/coloring';
+import { css } from '@emotion/react';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { PalettePanelContainer } from '../../shared_components';
-import './dimension_editor.scss';
 import type { HeatmapVisualizationState } from './types';
 import { getSafePaletteParams } from './utils';
 
@@ -37,12 +37,14 @@ export function HeatmapDimensionEditor(
   return (
     <>
       <EuiFormRow
-        className="lnsDynamicColoringRow"
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.paletteHeatmapGradient.label', {
           defaultMessage: 'Color',
         })}
+        css={css`
+          align-items: center;
+        `}
       >
         <PalettePanelContainer
           palette={displayStops.map(({ color }) => color)}

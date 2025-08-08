@@ -7,34 +7,41 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { LensRenderer } from './lens_renderer';
 import { lensVisualization } from './index.mock';
+import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('LensRenderer', () => {
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-    appMockRender.coreStart.lens.EmbeddableComponent = mockEmbeddableComponent;
   });
 
   it('renders the lens visualization correctly', () => {
+    const services = createStartServicesMock();
+    services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
     // @ts-expect-error: props are correct
-    appMockRender.render(<LensRenderer {...lensVisualization} />);
+    renderWithTestingProviders(<LensRenderer {...lensVisualization} />, {
+      wrapperProps: { services },
+    });
 
     expect(screen.getByTestId('embeddableComponent')).toBeInTheDocument();
   });
 
   it('renders the lens visualization with correct attributes', () => {
+    const services = createStartServicesMock();
+    services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
     // @ts-expect-error: props are correct
-    appMockRender.render(<LensRenderer {...lensVisualization} />);
+    renderWithTestingProviders(<LensRenderer {...lensVisualization} />, {
+      wrapperProps: { services },
+    });
 
     expect(mockEmbeddableComponent).toHaveBeenCalledWith(
       {
@@ -57,16 +64,25 @@ describe('LensRenderer', () => {
   });
 
   it('does not renders the lens visualization if the attributes are not defined', () => {
+    const services = createStartServicesMock();
+    services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
     // @ts-expect-error: props are correct
-    appMockRender.render(<LensRenderer {...lensVisualization} attributes={undefined} />);
+    renderWithTestingProviders(<LensRenderer {...lensVisualization} attributes={undefined} />, {
+      wrapperProps: { services },
+    });
 
     expect(screen.queryByTestId('embeddableComponent')).not.toBeInTheDocument();
   });
 
   it('renders the lens visualization with description', () => {
-    appMockRender.render(
+    const services = createStartServicesMock();
+    services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
+    renderWithTestingProviders(
       // @ts-expect-error: props are correct
-      <LensRenderer {...lensVisualization} metadata={{ description: 'description' }} />
+      <LensRenderer {...lensVisualization} metadata={{ description: 'description' }} />,
+      { wrapperProps: { services } }
     );
 
     expect(screen.getByText('description')).toBeInTheDocument();

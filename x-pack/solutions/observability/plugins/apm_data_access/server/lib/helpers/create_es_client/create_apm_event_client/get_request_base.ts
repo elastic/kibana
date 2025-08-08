@@ -9,7 +9,7 @@ import type { ESFilter } from '@kbn/es-types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { uniq } from 'lodash';
 import { PROCESSOR_EVENT } from '@kbn/apm-types/es_fields';
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getConfigForDocumentType, getProcessorEventForDocumentType } from '../document_type';
 import type { ApmDataSource } from '../../../../../common/data_source';
 
@@ -31,6 +31,7 @@ export function processorEventsToIndex(events: ProcessorEvent[], indices: APMInd
 export function getRequestBase(options: {
   apm: { events: ProcessorEvent[] } | { sources: ApmDataSource[] };
   indices: APMIndices;
+  skipProcessorEventFilter?: boolean;
 }) {
   const events =
     'events' in options.apm
@@ -39,13 +40,8 @@ export function getRequestBase(options: {
 
   const index = processorEventsToIndex(events, options.indices);
 
-  const filters: ESFilter[] = [
-    {
-      terms: {
-        [PROCESSOR_EVENT]: events,
-      },
-    },
-  ];
+  const filters: ESFilter[] =
+    options.skipProcessorEventFilter === true ? [] : [{ terms: { [PROCESSOR_EVENT]: events } }];
 
   if ('sources' in options.apm) {
     options.apm.sources.forEach((source) => {

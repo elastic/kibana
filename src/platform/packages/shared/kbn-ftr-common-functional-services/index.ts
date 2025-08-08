@@ -46,3 +46,4 @@ export { IndexPatternsService } from './services/index_patterns';
 export { RandomnessService } from './services/randomness';
 export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
 export { retryForSuccess } from './services/retry/retry_for_success';
+export { SecurityService } from './services/security';

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import { JOB_STATUS } from '@kbn/reporting-common';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { BaseParamsV2, ReportApiJSON, ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportMock } from './types';
 
 const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
@@ -172,4 +173,75 @@ export const mockJobs: ReportApiJSON[] = [
     started_at: '2020-04-09T19:09:54.570Z',
     status: JOB_STATUS.COMPLETED,
   }),
+];
+
+export const mockScheduledReports: ScheduledReportApiJSON[] = [
+  {
+    created_at: '2025-06-10T12:41:45.136Z',
+    created_by: 'Foo Bar',
+    enabled: true,
+    id: 'scheduled-report-1',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-05-10T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    schedule: {
+      rrule: { freq: Frequency.WEEKLY, tzid: 'UTC', interval: 1 },
+    },
+    title: 'Scheduled report 1',
+    space_id: 'default',
+    payload: {
+      browserTimezone: 'UTC',
+      title: 'test PDF allowed',
+      layout: {
+        id: 'preserve_layout',
+      },
+      objectType: 'dashboard',
+      version: '7.14.0',
+      locatorParams: [
+        {
+          id: 'canvas',
+          version: '7.14.0',
+          params: {
+            dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+            preserveSavedFilters: 'true',
+            timeRange: {
+              from: 'now-7d',
+              to: 'now',
+            },
+            useHash: 'false',
+            viewMode: 'view',
+          },
+        },
+      ],
+      isDeprecated: false,
+    } as BaseParamsV2,
+  },
+  {
+    created_at: '2025-06-16T12:41:45.136Z',
+    created_by: 'Test abc',
+    enabled: true,
+    id: 'scheduled-report-2',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-06-16T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    space_id: 'default',
+    schedule: {
+      rrule: { freq: Frequency.DAILY, tzid: 'UTC', interval: 1 },
+    },
+    title: 'Scheduled report 2',
+  },
+  {
+    created_at: '2025-06-12T12:41:45.136Z',
+    created_by: 'New',
+    enabled: false,
+    id: 'scheduled-report-3',
+    jobtype: 'printable_pdf_v2',
+    last_run: '2025-06-16T12:41:46.959Z',
+    next_run: '2025-06-16T13:56:07.123Z',
+    space_id: 'space-a',
+    schedule: {
+      rrule: { freq: Frequency.MONTHLY, tzid: 'UTC', interval: 2 },
+    },
+    title: 'Scheduled report 3',
+  },
 ];

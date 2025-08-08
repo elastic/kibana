@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf } from '@kbn/config-schema';
-import { KueryNode } from '@kbn/es-query';
-import { aggregateOptionsSchema } from '../schemas';
-
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { TypeOf } from '@kbn/config-schema';
+import type { KueryNode } from '@kbn/es-query';
+import type { aggregateOptionsSchema } from '../schemas';
 export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
   // Adding filter as in schema it's defined as any instead of KueryNode
   filter?: string | KueryNode;

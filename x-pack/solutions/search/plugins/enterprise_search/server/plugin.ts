@@ -18,29 +18,20 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ELASTICSEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ANALYTICS_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID,
   ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID,
-  VECTOR_SEARCH_PLUGIN,
-  SEMANTIC_SEARCH_PLUGIN,
-  AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_INDICES,
+  SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
+  SEARCH_INDEX_MANAGEMENT,
 } from '../common/constants';
-
-import {
-  websiteSearchGuideId,
-  databaseSearchGuideId,
-  websiteSearchGuideConfig,
-  databaseSearchGuideConfig,
-} from '../common/guided_onboarding/search_guide_config';
 
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
@@ -98,24 +89,21 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       customIntegrations,
       ml,
       licensing,
-      guidedOnboarding,
       cloud,
-      searchConnectors,
+      contentConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
-      ELASTICSEARCH_PLUGIN.ID,
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
-      VECTOR_SEARCH_PLUGIN.ID,
-      SEMANTIC_SEARCH_PLUGIN.ID,
-      AI_SEARCH_PLUGIN.ID,
+      SEARCH_HOMEPAGE,
       SEARCH_INDICES,
       SEARCH_INDICES_START,
+      SEARCH_INDEX_MANAGEMENT,
     ];
 
     if (customIntegrations) {
@@ -199,6 +187,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
+
       privileges: {
         all: {
           app: ['kibana', ANALYTICS_PLUGIN.ID],
@@ -300,23 +289,12 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     });
 
     /**
-     * Register a config for the search guide
-     */
-    if (config.hasWebCrawler) {
-      // TODO: Do we remove this guide with the removal of native crawler?
-      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
-    }
-    if (config.hasConnectors) {
-      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
-    }
-
-    /**
      * Register our integrations in the global search bar
      */
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [])
+        getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

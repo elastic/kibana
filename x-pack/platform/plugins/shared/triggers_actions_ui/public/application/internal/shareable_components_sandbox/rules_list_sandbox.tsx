@@ -14,13 +14,13 @@ const style = {
 
 export const RulesListSandbox = () => {
   const {
-    services: { validateEmailAddresses },
+    services: { validateEmailAddresses, enabledEmailServices },
   } = useConnectorContext();
 
   return (
     <div style={style}>
       {getRulesListLazy({
-        connectorServices: { validateEmailAddresses },
+        connectorServices: { validateEmailAddresses, enabledEmailServices },
         rulesListProps: {},
       })}
     </div>

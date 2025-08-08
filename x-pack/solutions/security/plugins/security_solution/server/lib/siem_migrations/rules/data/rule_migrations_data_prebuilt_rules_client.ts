@@ -9,8 +9,8 @@ import type { RuleVersions } from '../../../detection_engine/prebuilt_rules/logi
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
+import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import type { RuleMigrationPrebuiltRule } from '../types';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
@@ -24,7 +24,7 @@ const RETURNED_RULES = 5 as const;
  */
 const BULK_MAX_SIZE = 500 as const;
 
-export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBaseClient {
+export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient {
   async getRuleVersionsMap(): Promise<PrebuildRuleVersionsMap> {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(this.dependencies.savedObjectsClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(this.dependencies.rulesClient);
@@ -71,10 +71,17 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error preparing prebuilt rules for SIEM migration: ${error.message}`);
+          this.logger.error(`Error indexing prebuilt rules embeddings: ${error.message}`);
           throw error;
         });
     }

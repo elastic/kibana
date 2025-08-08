@@ -8,6 +8,7 @@
 import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  SIEM_MIGRATIONS_MIGRATION_ABORTED,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
@@ -16,6 +17,8 @@ import {
 } from '../../../telemetry/event_based/events';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
 import type { MigrateRuleState } from './agent/types';
+import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
+import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 
 interface IntegrationMatchEvent {
   preFilterIntegrations: RuleMigrationIntegration[];
@@ -54,6 +57,7 @@ export class SiemMigrationTelemetryClient {
       preFilterIntegrationCount: preFilterIntegrations.length,
       postFilterIntegrationName: postFilterIntegration ? postFilterIntegration.id : '',
       postFilterIntegrationCount: postFilterIntegration ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.IntegrationsMatch],
     });
   }
 
@@ -68,6 +72,7 @@ export class SiemMigrationTelemetryClient {
       preFilterRuleCount: preFilterRules.length,
       postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
       postFilterRuleCount: postFilterRule ? 1 : 0,
+      eventName: siemMigrationEventNames[SiemMigrationsEventTypes.PrebuiltRulesMatch],
     });
   }
 
@@ -87,6 +92,7 @@ export class SiemMigrationTelemetryClient {
               duration: Date.now() - ruleStartTime,
               model: this.modelName,
               prebuiltMatch: migrationResult.elastic_rule?.prebuilt_rule_id ? true : false,
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
             });
           },
           failure: (error: Error) => {
@@ -95,6 +101,7 @@ export class SiemMigrationTelemetryClient {
               migrationId: this.migrationId,
               error: error.message,
               model: this.modelName,
+              eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationFailure],
             });
           },
         };
@@ -108,6 +115,7 @@ export class SiemMigrationTelemetryClient {
           failed: stats.failed,
           total: stats.completed + stats.failed,
           duration,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationSuccess],
         });
       },
       failure: (error: Error) => {
@@ -120,6 +128,20 @@ export class SiemMigrationTelemetryClient {
           total: stats.completed + stats.failed,
           duration,
           error: error.message,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationFailure],
+        });
+      },
+      aborted: (error: Error) => {
+        const duration = Date.now() - startTime;
+        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_ABORTED, {
+          migrationId: this.migrationId,
+          model: this.modelName || '',
+          completed: stats.completed,
+          failed: stats.failed,
+          total: stats.completed + stats.failed,
+          duration,
+          reason: error.message,
+          eventName: siemMigrationEventNames[SiemMigrationsEventTypes.MigrationAborted],
         });
       },
     };

@@ -15,43 +15,41 @@ describe('getLatestMonitor', () => {
   beforeEach(() => {
     expectedGetLatestSearchParams = {
       index: DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                exists: {
-                  field: 'summary',
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              exists: {
+                field: 'summary',
               },
-              {
-                bool: {
-                  must_not: {
-                    exists: {
-                      field: 'run_once',
-                    },
+            },
+            {
+              bool: {
+                must_not: {
+                  exists: {
+                    field: 'run_once',
                   },
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1h',
-                    lte: 'now',
-                  },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-1h',
+                  lte: 'now',
                 },
               },
-              {
-                term: { 'monitor.id': 'testMonitor' },
-              },
-            ],
-          },
+            },
+            {
+              term: { 'monitor.id': 'testMonitor' },
+            },
+          ],
         },
-        size: 1,
-        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error', 'tags'],
-        sort: {
-          '@timestamp': { order: 'desc' },
-        },
+      },
+      size: 1,
+      _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error', 'tags'],
+      sort: {
+        '@timestamp': { order: 'desc' },
       },
     };
     mockEsSearchResult = {
@@ -107,6 +105,9 @@ describe('getLatestMonitor', () => {
     expect(result.timestamp).toBe('123456');
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');
-    expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams, { meta: true });
+    expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams, {
+      meta: true,
+      context: { loggingOptions: { loggerName: 'uptime' } },
+    });
   });
 });

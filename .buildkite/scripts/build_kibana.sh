@@ -19,30 +19,6 @@ is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 echo "> node scripts/build" "${BUILD_ARGS[@]}"
 node scripts/build "${BUILD_ARGS[@]}"
 
-if is_pr_with_label "ci:build-cloud-image"; then
-  node scripts/build \
-  --skip-initialize \
-  --skip-generic-folders \
-  --skip-platform-folders \
-  --skip-cdn-assets \
-  --skip-archives \
-  --docker-images \
-  --docker-tag-qualifier="$GIT_COMMIT" \
-  --docker-push \
-  --skip-docker-ubi \
-  --skip-docker-fips \
-  --skip-docker-ubuntu \
-  --skip-docker-wolfi \
-  --skip-docker-serverless \
-  --skip-docker-contexts
-
-  CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
-  cat << EOF | buildkite-agent annotate --style "info" --context kibana-cloud-image
-
-  Kibana cloud image: \`$CLOUD_IMAGE\`
-EOF
-fi
-
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"
 linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"

@@ -19,6 +19,13 @@ paths:
           description: The connector's `id` value.
           schema:
             type: string
+        - name: content_references_disabled
+          in: query
+          required: false
+          description: If true, the response will not include content references.
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:
@@ -62,6 +69,11 @@ paths:
                   type: string
                 langSmithApiKey:
                   type: string
+                screenContext:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/ScreenContext'
+                promptIds:
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/PromptIds'
+                  description: System prompt, will be appended to default system prompt. Different from conversation system prompt, which is retrieved on the server
       responses:
         '200':
           description: Successful static response

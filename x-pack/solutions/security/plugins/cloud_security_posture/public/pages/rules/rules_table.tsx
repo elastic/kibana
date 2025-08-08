@@ -189,6 +189,9 @@ const getColumns = ({
             ? onChangeDeselectAllThisPageFn()
             : onChangeSelectAllThisPageFn();
         }}
+        aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectAllRulesAriaLabel', {
+          defaultMessage: 'Select all rules on current page',
+        })}
       />
     ),
     width: '40px',
@@ -211,6 +214,10 @@ const getColumns = ({
                   )
                 );
           }}
+          aria-label={i18n.translate('xpack.csp.rules.rulesTable.selectRuleAriaLabel', {
+            defaultMessage: 'Select rule: {ruleName}',
+            values: { ruleName: item.metadata?.name || item.metadata?.id },
+          })}
         />
       );
     },

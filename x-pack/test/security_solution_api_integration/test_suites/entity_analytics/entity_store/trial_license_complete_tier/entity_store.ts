@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { defaultOptions } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/constants';
-import { omit } from 'lodash/fp';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -19,8 +18,6 @@ export default ({ getService }: FtrProviderContext) => {
   const utils = EntityStoreUtils(getService);
   describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
-
-    const defaults = omit('docsPerSecond', defaultOptions);
 
     before(async () => {
       await utils.cleanEngines();
@@ -45,6 +42,11 @@ export default ({ getService }: FtrProviderContext) => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
         await utils.expectEngineAssetsExist('host');
       });
+
+      it('should have installed the expected generic resources', async () => {
+        await utils.initEntityEngineForEntityTypesAndWait(['generic']);
+        await utils.expectEngineAssetsExist('generic');
+      });
     });
 
     describe('init error handling', () => {
@@ -55,8 +57,17 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return "error" when the security data view does not exist', async () => {
         await dataView.delete('security-solution');
-        await utils.initEntityEngineForEntityType('host');
-        await utils.waitForEngineStatus('host', 'error');
+
+        const { body, status } = await api.initEntityEngine(
+          {
+            params: { entityType: 'host' },
+            body: {},
+          },
+          'default'
+        );
+
+        expect(status).toEqual(500);
+        expect(body.message).toContain('Data view not found');
       });
     });
 
@@ -92,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(getResponse.body).toEqual({
-            ...defaults,
+            ...defaultOptions,
             status: 'started',
             type: 'host',
           });
@@ -106,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(getResponse.body).toEqual({
-            ...defaults,
+            ...defaultOptions,
             status: 'started',
             type: 'user',
           });
@@ -122,12 +133,12 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(sortedEngines).toEqual([
             {
-              ...defaults,
+              ...defaultOptions,
               status: 'started',
               type: 'host',
             },
             {
-              ...defaults,
+              ...defaultOptions,
               status: 'started',
               type: 'user',
             },

@@ -117,8 +117,8 @@ export class ScopeExpression extends Component {
     const { fieldName, filterId, filterType, enabled, filterListIds } = this.props;
 
     return (
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false} className="scope-field-checkbox">
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={`scope_cb_${fieldName}`}
             checked={enabled}
@@ -127,7 +127,6 @@ export class ScopeExpression extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiExpression
-            className="scope-field-button"
             description={
               <FormattedMessage
                 id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
@@ -136,6 +135,9 @@ export class ScopeExpression extends Component {
             }
             value={fieldName}
             isActive={false}
+            css={{
+              pointerEvents: 'none',
+            }}
             onClick={(event) => event.preventDefault()}
           />
         </EuiFlexItem>

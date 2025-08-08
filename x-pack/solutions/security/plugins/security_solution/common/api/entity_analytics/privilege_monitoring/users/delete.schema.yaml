@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/{id}:
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: DeletePrivMonUser
+      summary: Delete a monitored user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  aknowledged:
+                    type: boolean
+                    description: Indicates if the deletion was successful
+                  message:
+                    type: string
+                    description: A message providing additional information about the deletion status

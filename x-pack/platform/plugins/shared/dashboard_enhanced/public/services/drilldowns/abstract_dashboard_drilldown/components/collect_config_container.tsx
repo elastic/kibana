@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce, findIndex } from 'lodash';
-import { SimpleSavedObject } from '@kbn/core/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
@@ -26,13 +25,9 @@ const mergeDashboards = (
   return dashboards;
 };
 
-const dashboardSavedObjectToMenuItem = (
-  savedObject: SimpleSavedObject<{
-    title: string;
-  }>
-) => ({
-  value: savedObject.id,
-  label: savedObject.attributes.title,
+const dashboardToMenuItem = (dashboardId: string, title: string) => ({
+  value: dashboardId,
+  label: title,
 });
 
 export interface DashboardDrilldownCollectConfigProps extends CollectConfigProps<Config, object> {
@@ -104,15 +99,14 @@ export class CollectConfigContainer extends React.Component<
       params: { start },
     } = this.props;
     if (!config.dashboardId) return;
-    const savedObject = await start().core.savedObjects.client.get<{ title: string }>(
-      'dashboard',
-      config.dashboardId
-    );
+    const { dashboard } = await start().plugins;
+    const findDashboardsService = await dashboard.findDashboardsService();
+    const dashboardResponse = await findDashboardsService.findById(config.dashboardId);
 
     if (!this.isMounted) return;
 
     // handle case when destination dashboard no longer exists
-    if (savedObject.error?.statusCode === 404) {
+    if (dashboardResponse.status === 'error' && dashboardResponse.error?.statusCode === 404) {
       this.setState({
         error: txtDestinationDashboardNotFound(config.dashboardId),
       });
@@ -120,34 +114,39 @@ export class CollectConfigContainer extends React.Component<
       return;
     }
 
-    if (savedObject.error) {
+    if (dashboardResponse.status === 'error') {
       this.setState({
-        error: savedObject.error.message,
+        error: dashboardResponse.error.message,
       });
       this.props.onConfig({ ...config, dashboardId: undefined });
       return;
     }
 
-    this.setState({ selectedDashboard: dashboardSavedObjectToMenuItem(savedObject) });
+    this.setState({
+      selectedDashboard: dashboardToMenuItem(
+        config.dashboardId,
+        dashboardResponse.attributes.title
+      ),
+    });
   }
 
   private readonly debouncedLoadDashboards: (searchString?: string) => void;
   private async loadDashboards(searchString?: string) {
     this.setState({ searchString, isLoading: true });
-    const savedObjectsClient = this.props.params.start().core.savedObjects.client;
-    const { savedObjects } = await savedObjectsClient.find<{ title: string }>({
-      type: 'dashboard',
-      search: searchString ? `${searchString}*` : undefined,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
-      perPage: 100,
+    const { dashboard } = this.props.params.start().plugins;
+    const findDashboardsService = await dashboard.findDashboardsService();
+    const results = await findDashboardsService.search({
+      search: searchString ? `${searchString}*` : '',
+      size: 100,
     });
 
     // bail out if this response is no longer needed
     if (!this.isMounted) return;
     if (searchString !== this.state.searchString) return;
 
-    const dashboardList = savedObjects.map(dashboardSavedObjectToMenuItem);
+    const dashboardList = results.hits.map(({ id, attributes }) =>
+      dashboardToMenuItem(id, attributes.title)
+    );
 
     this.setState({ dashboards: dashboardList, isLoading: false });
   }

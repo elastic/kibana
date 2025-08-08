@@ -11,7 +11,7 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import {
+import type {
   CasesWebhookActionParamsType,
   CasesWebhookExecutorResultData,
   CasesWebhookPublicConfigurationType,

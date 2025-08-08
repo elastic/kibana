@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../../../common/mock';
@@ -22,12 +24,12 @@ describe('PointToolTipContent', () => {
   ];
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <PointToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
       </TestProviders>
     );
-    expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   describe('#getRenderedFieldValue', () => {

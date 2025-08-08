@@ -14,7 +14,6 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
@@ -60,7 +59,8 @@ export class EventFilterValidator extends BaseValidator {
       await this.validateByPolicyItem(item);
     }
 
-    await this.setOwnerSpaceId(item);
+    await this.validateCreateOwnerSpaceIds(item);
+    await this.validateCanCreateGlobalArtifacts(item);
 
     return item;
   }
@@ -85,11 +85,9 @@ export class EventFilterValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
-
-    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
-      await this.setOwnerSpaceId(_updatedItem);
-    }
+    await this.validateByPolicyItem(updatedItem, currentItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 
     return _updatedItem;
   }
@@ -104,16 +102,18 @@ export class EventFilterValidator extends BaseValidator {
     }
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreSummary(): Promise<void> {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreExport(): Promise<void> {

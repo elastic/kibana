@@ -8,11 +8,11 @@
 import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { LayerDescriptor } from '../../common/descriptor_types';
 import { INITIAL_LOCATION, MAP_SAVED_OBJECT_TYPE } from '../../common';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapRuntimeState, MapSerializedState } from '../react_embeddable/types';
+import { MapApi, MapSerializedState } from '../react_embeddable/types';
 
 export interface Props {
   passiveLayer: LayerDescriptor;
@@ -50,7 +50,7 @@ export function PassiveMap(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
+      <EmbeddableRenderer<MapSerializedState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           hideFilterActions: true,
@@ -65,7 +65,7 @@ export function PassiveMap(props: Props) {
                 },
                 filters: [],
                 hidePanelTitles: true,
-                viewMode: ViewMode.VIEW,
+                viewMode: 'view',
                 isLayerTOCOpen: false,
                 mapSettings: {
                   disableInteractive: false,

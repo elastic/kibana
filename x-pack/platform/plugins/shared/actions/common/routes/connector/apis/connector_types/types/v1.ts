@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { connectorTypesQuerySchemaV1 } from '..';
+import type { connectorTypesQuerySchemaV1 } from '..';
 
 export type ConnectorTypesRequestQuery = TypeOf<typeof connectorTypesQuerySchemaV1>;

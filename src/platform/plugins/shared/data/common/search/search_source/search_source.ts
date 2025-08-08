@@ -71,10 +71,11 @@ import {
   concat,
   omitBy,
   isNil,
+  omit,
 } from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   buildEsQuery,
   Filter,
@@ -223,7 +224,7 @@ export class SearchSource {
   /**
    * Internal, do not use. Overrides all search source fields with the new field array.
    *
-   * @private
+   * @internal
    * @param newFields New field array.
    */
   private setFields(newFields: SearchSourceFields) {
@@ -543,12 +544,12 @@ export class SearchSource {
     options: SearchSourceSearchOptions
   ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
-
-    const params = getSearchParamsFromRequest(searchRequest, {
+    const { indexType, ...restRequest } = searchRequest;
+    const params = getSearchParamsFromRequest(restRequest, {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).pipe(
+    return search({ params, indexType }, options).pipe(
       switchMap((response) => {
         // For testing timeout messages in UI, uncomment the next line
         // response.rawResponse.timed_out = true;
@@ -795,9 +796,15 @@ export class SearchSource {
     const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
-    searchRequest.body = searchRequest.body || {};
-    const { body, index } = searchRequest;
-    const dataView = this.getDataView(index);
+    const bodyParams = omit(searchRequest, [
+      'index',
+      'filters',
+      'highlightAll',
+      'fieldsFromSource',
+      'body',
+    ]);
+    const body = { ...bodyParams, ...searchRequest.body };
+    const dataView = this.getDataView(searchRequest.index);
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, runtimeFields } = dataView?.getComputedFields() ?? {
@@ -809,7 +816,9 @@ export class SearchSource {
 
     // set defaults
     const _source =
-      index && !Object.hasOwn(body, '_source') ? dataView?.getSourceFiltering() : body._source;
+      searchRequest.index && !Object.hasOwn(body, '_source')
+        ? dataView?.getSourceFiltering()
+        : body._source;
 
     // get filter if data view specified, otherwise null filter
     const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
@@ -855,7 +864,7 @@ export class SearchSource {
     // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
     // 3. Uncomment the lines below, navigate to Discover,
     //    and switch to the data view created in step 2.
-    // body.query.bool.must.push({
+    // query.bool.must.push({
     //   error_query: {
     //     indices: [
     //       {
@@ -879,7 +888,7 @@ export class SearchSource {
     }
 
     const builtQuery = this.getBuiltEsQuery({
-      index,
+      index: searchRequest.index,
       query: searchRequest.query,
       filters: searchRequest.filters,
       getConfig,
@@ -887,7 +896,7 @@ export class SearchSource {
     });
 
     const bodyToReturn = {
-      ...searchRequest.body,
+      ...body,
       pit: searchRequest.pit,
       query: builtQuery,
       highlight:
@@ -913,9 +922,9 @@ export class SearchSource {
     };
 
     return omitByIsNil({
-      ...searchRequest,
+      ...omit(searchRequest, ['query', 'filters', 'fieldsFromSource']),
       body: omitByIsNil(bodyToReturn),
-      indexType: this.getIndexType(index),
+      indexType: this.getIndexType(searchRequest.index),
       highlightAll:
         searchRequest.highlightAll && builtQuery ? undefined : searchRequest.highlightAll,
     });
@@ -1092,7 +1101,7 @@ export class SearchSource {
       filter: originalFilters,
       aggs: searchSourceAggs,
       parent,
-      size: omit,
+      size: _size, // omit it
       sort,
       index,
       ...searchSourceFields
@@ -1214,23 +1223,16 @@ export class SearchSource {
   }
 
   parseActiveIndexPatternFromQueryString(queryString: string): string[] {
-    let m;
     const indexPatternSet: Set<string> = new Set();
-    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+    //  Regex to capture full index names including dashes, numbers, and periods
+    const indexNameRegExp = /\s?(_index)\s*:\s*(['"]?)([^\s'"]+)\2/g;
 
-    while ((m = regex.exec(queryString)) !== null) {
-      // This is necessary to avoid infinite loops with zero-width matches
-      if (m.index === regex.lastIndex) {
-        regex.lastIndex++;
+    for (const match of queryString.matchAll(indexNameRegExp)) {
+      const indexName = match[3];
+      if (indexName) {
+        indexPatternSet.add(indexName);
       }
-
-      m.forEach((match, groupIndex) => {
-        if (groupIndex === 2) {
-          indexPatternSet.add(match);
-        }
-      });
     }
-
     return [...indexPatternSet];
   }
 }

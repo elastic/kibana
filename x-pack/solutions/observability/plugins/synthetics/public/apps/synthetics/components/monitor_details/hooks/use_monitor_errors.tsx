@@ -32,58 +32,56 @@ export function useMonitorErrors(monitorIdArg?: string) {
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                range: {
-                  '@timestamp': {
-                    gte: dateRangeStart,
-                    lte: dateRangeEnd,
-                    time_zone: timeZone,
-                  },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                  time_zone: timeZone,
                 },
               },
-              {
-                term: {
-                  config_id: monitorIdArg ?? monitorId,
-                },
+            },
+            {
+              term: {
+                config_id: monitorIdArg ?? monitorId,
               },
-              {
-                term: {
-                  'observer.geo.name': selectedLocation?.label,
-                },
+            },
+            {
+              term: {
+                'observer.geo.name': selectedLocation?.label,
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [{ 'state.started_at': 'desc' }],
+      aggs: {
+        states: {
+          terms: {
+            field: 'state.id',
+            size: 10000,
+          },
+          aggs: {
+            summary: {
+              top_hits: {
+                size: 1,
+                _source: ['error', 'state', 'monitor', '@timestamp'],
+                sort: [{ '@timestamp': 'desc' }],
+              },
+            },
           },
         },
-        sort: [{ 'state.started_at': 'desc' }],
-        aggs: {
-          states: {
-            terms: {
-              field: 'state.id',
-              size: 10000,
-            },
-            aggs: {
-              summary: {
-                top_hits: {
-                  size: 1,
-                  _source: ['error', 'state', 'monitor', '@timestamp'],
-                  sort: [{ '@timestamp': 'desc' }],
-                },
-              },
-            },
-          },
-          latest: {
-            top_hits: {
-              size: 1,
-              _source: ['monitor.status'],
-              sort: [{ '@timestamp': 'desc' }],
-            },
+        latest: {
+          top_hits: {
+            size: 1,
+            _source: ['monitor.status'],
+            sort: [{ '@timestamp': 'desc' }],
           },
         },
       },

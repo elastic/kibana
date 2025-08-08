@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
 import type { NavTab } from '../../../../common/components/navigation/types';
@@ -24,7 +23,7 @@ export enum RuleDetailTabs {
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
-  [RuleDetailTabs.alerts]: detectionI18n.ALERT,
+  [RuleDetailTabs.alerts]: i18n.ALERTS_TAB,
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,

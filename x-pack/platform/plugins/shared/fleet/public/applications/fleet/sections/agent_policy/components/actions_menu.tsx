@@ -18,11 +18,13 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../services';
+import { policyHasFleetServer } from '../../../services';
 
 import { AgentUpgradeAgentModal } from '../../agents/components';
 
 import { ManageAutoUpgradeAgentsModal } from '../../agents/components/manage_auto_upgrade_agents_modal';
+
+import { useCanEnableAutomaticAgentUpgrades } from '../../../../../hooks/use_can_enable_auto_upgrades';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
@@ -54,7 +56,7 @@ export const AgentPolicyActionMenu = memo<{
     const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
       useState<boolean>(false);
     const refreshAgentPolicy = useAgentPolicyRefresh();
-    const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
+    const canEnableAutomaticAgentUpgrades = useCanEnableAutomaticAgentUpgrades();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -210,7 +212,7 @@ export const AgentPolicyActionMenu = memo<{
               )}
             </EuiContextMenuItem>,
             viewPolicyItem,
-            ...(enableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
+            ...(canEnableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
             copyPolicyItem,
             deletePolicyItem,
           ];

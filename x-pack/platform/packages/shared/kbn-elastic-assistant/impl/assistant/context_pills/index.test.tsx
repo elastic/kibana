@@ -54,6 +54,30 @@ describe('ContextPills', () => {
     });
   });
 
+  it('does not render item if description is empty', () => {
+    render(
+      <TestProviders>
+        <ContextPills
+          {...defaultProps}
+          promptContexts={{
+            ...mockPromptContexts,
+            context3: {
+              category: 'event',
+              description: '',
+              getPromptContext: () => Promise.resolve('Context 2 data'),
+              id: 'context3',
+              tooltip: 'Context 2 tooltip',
+            },
+          }}
+          selectedPromptContexts={{}}
+          setSelectedPromptContexts={jest.fn()}
+        />
+      </TestProviders>
+    );
+    expect(screen.getByTestId(`pillButton-context2`)).toBeInTheDocument();
+    expect(screen.queryByTestId(`pillButton-context3`)).not.toBeInTheDocument();
+  });
+
   it('invokes setSelectedPromptContexts() when the prompt is NOT already selected', async () => {
     const context = mockPromptContexts.context1;
     const setSelectedPromptContexts = jest.fn();

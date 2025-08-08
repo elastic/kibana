@@ -8,15 +8,9 @@
  */
 
 import { LinksCrudTypes } from './types';
-export type {
-  LinksCrudTypes,
-  LinksAttributes,
-  Link,
-  LinkOptions,
-  LinksLayoutType,
-  LinkType,
-} from './types';
+export type { LinksCrudTypes, LinksLayoutType, LinkType } from './types';
 export type LinksItem = LinksCrudTypes['Item'];
+export type LinksSearchOut = LinksCrudTypes['SearchOut'];
 export {
   EXTERNAL_LINK_TYPE,
   DASHBOARD_LINK_TYPE,

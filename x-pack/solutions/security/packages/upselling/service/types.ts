@@ -16,11 +16,13 @@ export type UpsellingSectionId =
   | 'endpointPolicyProtections'
   | 'osquery_automated_response_actions'
   | 'endpoint_protection_updates'
+  | 'endpoint_device_control'
   | 'endpoint_agent_tamper_protection'
   | 'endpoint_custom_notification'
   | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions'
-  | 'automatic_import';
+  | 'automatic_import'
+  | 'siem_migrations_start';
 
 export type UpsellingMessageId =
   | 'investigation_guide'

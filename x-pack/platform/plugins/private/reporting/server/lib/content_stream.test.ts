@@ -58,7 +58,7 @@ describe('ContentStream', () => {
       const [[request]] = client.search.mock.calls;
       expect(request).toHaveProperty('index', 'somewhere');
       expect(request).toHaveProperty(
-        'body.query.constant_score.filter.bool.must.0.term._id',
+        'query.constant_score.filter.bool.must.0.term._id',
         'something'
       );
     });
@@ -124,17 +124,17 @@ describe('ContentStream', () => {
       const [[request1], [request2], [request3]] = client.search.mock.calls;
 
       expect(request1).toHaveProperty(
-        'body.query.constant_score.filter.bool.must.0.term._id',
+        'query.constant_score.filter.bool.must.0.term._id',
         'something'
       );
       expect(request2).toHaveProperty('index', '.reporting-*,.kibana-reporting*');
       expect(request2).toHaveProperty(
-        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'query.constant_score.filter.bool.must.0.term.parent_id',
         'something'
       );
       expect(request3).toHaveProperty('index', '.reporting-*,.kibana-reporting*');
       expect(request3).toHaveProperty(
-        'body.query.constant_score.filter.bool.must.0.term.parent_id',
+        'query.constant_score.filter.bool.must.0.term.parent_id',
         'something'
       );
     });
@@ -224,7 +224,7 @@ describe('ContentStream', () => {
 
       expect(request).toHaveProperty('id', 'something');
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('body.doc.output.content', '123456');
+      expect(request).toHaveProperty('doc.output.content', '123456');
     });
 
     it('should update a number of written bytes', async () => {
@@ -266,10 +266,7 @@ describe('ContentStream', () => {
 
       const [[request]] = client.update.mock.calls;
 
-      expect(request).toHaveProperty(
-        'body.doc.output.content',
-        Buffer.from('12345').toString('base64')
-      );
+      expect(request).toHaveProperty('doc.output.content', Buffer.from('12345').toString('base64'));
     });
 
     it('should remove all previous chunks before writing', async () => {
@@ -281,7 +278,7 @@ describe('ContentStream', () => {
       const [[request]] = client.deleteByQuery.mock.calls;
 
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('body.query.match.parent_id', 'something');
+      expect(request).toHaveProperty('query.match.parent_id', 'something');
     });
 
     it('should split raw data into chunks', async () => {
@@ -291,7 +288,7 @@ describe('ContentStream', () => {
 
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(client.update).toHaveBeenCalledWith(
-        expect.objectContaining(set({}, 'body.doc.output.content', '12'))
+        expect.objectContaining(set({}, 'doc.output.content', '12'))
       );
       expect(client.index).toHaveBeenCalledTimes(2);
       expect(client.index).toHaveBeenNthCalledWith(
@@ -300,7 +297,7 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          body: {
+          document: {
             '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
             output: {
@@ -316,7 +313,7 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          body: {
+          document: {
             '@timestamp': '1970-01-01T00:00:00.000Z',
             parent_id: 'something',
             output: {
@@ -336,7 +333,7 @@ describe('ContentStream', () => {
       expect(client.update).toHaveBeenCalledTimes(1);
       expect(client.update).toHaveBeenCalledWith(
         expect.objectContaining(
-          set({}, 'body.doc.output.content', Buffer.from('123').toString('base64'))
+          set({}, 'doc.output.content', Buffer.from('123').toString('base64'))
         )
       );
       expect(client.index).toHaveBeenCalledTimes(2);
@@ -346,7 +343,7 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          body: {
+          document: {
             parent_id: 'something',
             '@timestamp': '1970-01-01T00:00:00.000Z',
             output: {
@@ -362,7 +359,7 @@ describe('ContentStream', () => {
           id: expect.any(String),
           index: '.kibana-reporting',
           op_type: 'create',
-          body: {
+          document: {
             parent_id: 'something',
             '@timestamp': '1970-01-01T00:00:00.000Z',
             output: {
@@ -384,8 +381,8 @@ describe('ContentStream', () => {
       const [[deleteRequest]] = client.deleteByQuery.mock.calls;
       const [[updateRequest]] = client.update.mock.calls;
 
-      expect(deleteRequest).toHaveProperty('body.query.match.parent_id', 'something');
-      expect(updateRequest).toHaveProperty('body.doc.output.content', '');
+      expect(deleteRequest).toHaveProperty('query.match.parent_id', 'something');
+      expect(updateRequest).toHaveProperty('doc.output.content', '');
     });
   });
 });

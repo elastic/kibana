@@ -14,7 +14,7 @@ import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -38,6 +38,7 @@ import {
 } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
+import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
 import type { JobMessage } from '../../../common/types/audit_message';
@@ -249,6 +250,7 @@ export function registerJobsMonitoringRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
+    solution: 'stack',
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
@@ -271,7 +273,7 @@ export function registerJobsMonitoringRuleType({
         fakeRequest,
         logger
       );
-      const executionResult = await getTestsResults(options);
+      const executionResult = await getTestsResults(options).catch(assertUserError);
 
       const unhealthyTests = executionResult.filter(({ isHealthy }) => !isHealthy);
 

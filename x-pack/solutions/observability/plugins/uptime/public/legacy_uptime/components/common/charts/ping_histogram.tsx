@@ -182,6 +182,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
               splitSeriesAccessors={['type']}
               timeZone={timeZone}
               xAccessor="x"
+              // Defaults to multi layer time axis as of Elastic Charts v70
               xScaleType={ScaleType.Time}
               yAccessors={['y']}
               yScaleType={ScaleType.Linear}

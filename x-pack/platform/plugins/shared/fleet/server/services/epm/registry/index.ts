@@ -88,6 +88,9 @@ export async function fetchList(
     if (params.prerelease) {
       url.searchParams.set('prerelease', params.prerelease.toString());
     }
+    if (params.type) {
+      url.searchParams.set('type', params.type);
+    }
   }
 
   setConstraints(url);
@@ -280,11 +283,19 @@ function setSpecVersion(url: URL) {
   const specMax = appContextService.getConfig()?.internal?.registry?.spec?.max;
 
   if (specMin) {
-    url.searchParams.set('spec.min', specMin);
+    url.searchParams.set('spec.min', formatSpecVersion(specMin));
   }
   if (specMax) {
-    url.searchParams.set('spec.max', specMax);
+    url.searchParams.set('spec.max', formatSpecVersion(specMax));
   }
+}
+
+function formatSpecVersion(version: string): string {
+  // Version can be coerced from number when obtained through flags, in these cases X.0 versions are coerced to X.
+  if (version.indexOf('.') > 0) {
+    return version;
+  }
+  return version + '.0';
 }
 
 function setCapabilities(url: URL) {

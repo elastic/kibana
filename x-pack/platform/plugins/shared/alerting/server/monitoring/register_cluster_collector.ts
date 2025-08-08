@@ -7,12 +7,13 @@
 import type {
   AggregationsKeyedPercentiles,
   AggregationsPercentilesAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
-import { AlertingPluginsStart } from '../plugin';
-import { ClusterRulesMetric, EMPTY_CLUSTER_RULES_METRICS } from './types';
+import type { CoreSetup } from '@kbn/core/server';
+import type { AlertingPluginsStart } from '../plugin';
+import type { ClusterRulesMetric } from './types';
+import { EMPTY_CLUSTER_RULES_METRICS } from './types';
 
 export function registerClusterCollector({
   monitoringCollection,

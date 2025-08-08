@@ -8,8 +8,9 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
+import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { TakeActionDropdown } from './take_action_dropdown';
@@ -18,12 +19,12 @@ import { EventFiltersFlyout } from '../../../../management/pages/event_filters/v
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { useDocumentDetailsContext } from '../context';
 import { useHostIsolation } from '../hooks/use_host_isolation';
-import { DocumentDetailsIsolateHostPanelKey } from '../constants/panel_keys';
 import { useRefetchByScope } from '../../right/hooks/use_refetch_by_scope';
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-
+import { IsolateHostPanelHeader } from '../../isolate_host/header';
+import { IsolateHostPanelContent } from '../../isolate_host/content';
 interface AlertSummaryData {
   /**
    * Status of the alert (open, closed...)
@@ -58,33 +59,21 @@ export const TakeActionButton: FC = () => {
     [euiTheme]
   );
 
-  const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
-  const {
-    eventId,
-    indexName,
-    dataFormattedForFieldBrowser,
-    dataAsNestedObject,
-    refetchFlyoutData,
-    scopeId,
-  } = useDocumentDetailsContext();
+  const { closeFlyout } = useExpandableFlyoutApi();
+  const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
+    useDocumentDetailsContext();
 
   // host isolation interaction
-  const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolation();
-  const showHostIsolationPanelCallback = useCallback(
-    (action: 'isolateHost' | 'unisolateHost' | undefined) => {
-      showHostIsolationPanel(action);
-      openRightPanel({
-        id: DocumentDetailsIsolateHostPanelKey,
-        params: {
-          id: eventId,
-          indexName,
-          scopeId,
-          isolateAction: action,
-        },
-      });
-    },
-    [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
-  );
+  const {
+    isolateAction,
+    isHostIsolationPanelOpen,
+    showHostIsolationPanel,
+    isIsolateActionSuccessBannerVisible,
+    handleIsolationActionSuccess,
+    showAlertDetails,
+  } = useHostIsolation();
+
+  const { hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const { refetch: refetchAll } = useRefetchByScope({ scopeId });
 
@@ -174,7 +163,7 @@ export const TakeActionButton: FC = () => {
           isHostIsolationPanelOpen={isHostIsolationPanelOpen}
           onAddEventFilterClick={onAddEventFilterClick}
           onAddExceptionTypeClick={onAddExceptionTypeClick}
-          onAddIsolationStatusClick={showHostIsolationPanelCallback}
+          onAddIsolationStatusClick={showHostIsolationPanel}
           refetchFlyoutData={refetchFlyoutData}
           refetch={refetchAll}
           scopeId={scopeId}
@@ -212,6 +201,25 @@ export const TakeActionButton: FC = () => {
           onClose={closeOsqueryFlyout}
           ecsData={dataAsNestedObject}
         />
+      )}
+
+      {isHostIsolationPanelOpen && (
+        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={flyoutZIndex}>
+          <IsolateHostPanelHeader
+            isolateAction={isolateAction}
+            data={dataFormattedForFieldBrowser}
+          />
+          <IsolateHostPanelContent
+            isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+            hostName={hostName}
+            alertId={alertId ?? undefined}
+            isolateAction={isolateAction}
+            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+            showAlertDetails={showAlertDetails}
+            handleIsolationActionSuccess={handleIsolationActionSuccess}
+          />
+        </EuiFlyout>
       )}
     </>
   );

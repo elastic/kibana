@@ -9,15 +9,20 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { LoadingSpinner } from './loading_spinner';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;
 
   it('LoadingSpinner renders a Searching text and a spinner', () => {
-    component = mountWithIntl(<LoadingSpinner />);
+    component = mountWithIntl(
+      <DiscoverTestProvider>
+        <LoadingSpinner />
+      </DiscoverTestProvider>
+    );
     expect(findTestSubject(component, 'loadingSpinnerText').text()).toBe('Searching');
     expect(findTestSubject(component, 'loadingSpinner').length).toBe(1);
   });

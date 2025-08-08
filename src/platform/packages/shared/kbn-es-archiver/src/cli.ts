@@ -26,7 +26,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
-const defaultConfigPath = resolveConfigPath('test/functional/config.base.js');
+const defaultConfigPath = resolveConfigPath('src/platform/test/functional/config.base.js');
 
 export function runCli() {
   new RunWithCommands({
@@ -110,6 +110,7 @@ export function runCli() {
         node: esUrl,
         tls: esCa ? { ca: esCa } : undefined,
         Connection: HttpConnection,
+        requestTimeout: 30_000,
       });
       addCleanupTask(() => client.close());
 
@@ -142,7 +143,7 @@ export function runCli() {
 
           WARNING: If the [test/functional/es_archives/my_test_data] snapshot exists it will be deleted!
 
-          $ node scripts/es_archiver save test/functional/es_archives/my_test_data logstash-*
+          $ node scripts/es_archiver save src/platform/test/functional/es_archives/my_test_data logstash-*
       `,
       flags: {
         boolean: ['raw', 'keep-index-names'],

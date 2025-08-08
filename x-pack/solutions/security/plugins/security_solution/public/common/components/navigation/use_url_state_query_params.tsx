@@ -7,10 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 import type { SecurityPageName } from '../../../app/types';
-
 import { useGlobalQueryString } from '../../utils/global_query_string';
-
-import { getSearch } from './helpers';
+import { useGetLinkInfo } from '../../links/links_hooks';
 
 export const useUrlStateQueryParams = (pageName: SecurityPageName) => {
   const getUrlStateQueryParams = useGetUrlStateQueryParams();
@@ -23,9 +21,14 @@ export const useUrlStateQueryParams = (pageName: SecurityPageName) => {
 
 export const useGetUrlStateQueryParams = () => {
   const globalQueryString = useGlobalQueryString();
+  const getLinkInfo = useGetLinkInfo();
+
   const getUrlStateQueryParams = useCallback(
-    (pageName: SecurityPageName) => getSearch(pageName, globalQueryString),
-    [globalQueryString]
+    (pageName: SecurityPageName) => {
+      const { skipUrlState = false } = getLinkInfo(pageName) ?? {};
+      return !skipUrlState && globalQueryString ? `?${globalQueryString}` : '';
+    },
+    [getLinkInfo, globalQueryString]
   );
   return getUrlStateQueryParams;
 };

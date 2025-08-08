@@ -7,7 +7,8 @@
 
 import { times } from 'lodash';
 
-import { getDateRangeInfo, DateRangeInfo } from './date_range_info';
+import type { DateRangeInfo } from './date_range_info';
+import { getDateRangeInfo } from './date_range_info';
 
 // dates to test with, separated by 1m, starting with BaseDate, descending
 const BaseDate = Date.parse('2000-01-01T00:00:00Z');

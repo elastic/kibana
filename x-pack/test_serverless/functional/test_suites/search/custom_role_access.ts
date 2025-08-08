@@ -22,8 +22,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     // skipping on MKI while we are working on a solution
     this.tags(['skipMKI']);
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -46,8 +50,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
       if (roleAuthc) {
@@ -79,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should access console with API key', async () => {
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const { body } = await supertestWithoutAuth
         .get('/api/console/api_server')
         .set(roleAuthc.apiKeyHeader)

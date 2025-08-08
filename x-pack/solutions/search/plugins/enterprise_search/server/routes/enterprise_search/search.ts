@@ -22,6 +22,12 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{index_name}/search',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           searchQuery: schema.string({

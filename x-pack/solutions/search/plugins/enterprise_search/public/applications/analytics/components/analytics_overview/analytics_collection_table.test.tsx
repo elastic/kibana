@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonGroup, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -50,7 +50,9 @@ describe('AnalyticsCollectionTable', () => {
   });
 
   it('renders filters', () => {
-    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(EuiButtonGroup);
+    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(
+      '[data-test-subj="enterpriseSearchAnalyticsCollectionTableButtonGroup"]'
+    );
 
     expect(buttonGroup).toHaveLength(1);
     expect(buttonGroup.prop('options')).toHaveLength(4);

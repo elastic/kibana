@@ -27,6 +27,7 @@ import { formatLocation } from '../../../common/utils/location_formatter';
 import * as locationsUtil from '../get_all_locations';
 import { mockEncryptedSO } from '../utils/mocks';
 import { SyntheticsServerSetup } from '../../types';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
 const testMonitors = [
   {
@@ -129,6 +130,7 @@ describe('ProjectMonitorFormatter', () => {
   syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
+  syntheticsService.getMaintenanceWindows = jest.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
@@ -153,6 +155,7 @@ describe('ProjectMonitorFormatter', () => {
     server: serverMock,
     syntheticsMonitorClient: monitorClient,
     request: kibanaRequest,
+    monitorConfigRepository: new MonitorConfigRepository(soClient, encryptedSavedObjectsClient),
   } as any;
 
   jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
@@ -203,7 +206,6 @@ describe('ProjectMonitorFormatter', () => {
       projectId: 'test-project',
       spaceId: 'default',
       routeContext,
-      encryptedSavedObjectsClient,
       monitors: [invalidMonitor],
     });
 
@@ -239,7 +241,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -271,7 +272,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -303,7 +303,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -341,7 +340,6 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      encryptedSavedObjectsClient,
       monitors: testMonitors,
       routeContext,
     });
@@ -494,14 +492,14 @@ const soData = [
       ...payloadData[0],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
   {
     attributes: formatSecrets({
       ...payloadData[1],
       revision: 1,
     } as any),
-    type: 'synthetics-monitor',
+    type: 'synthetics-monitor-multi-space',
   },
 ];
 

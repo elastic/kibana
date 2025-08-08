@@ -11,11 +11,11 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { I18nStart } from '@kbn/core-i18n-browser';
+import { apm } from '@elastic/apm-rum';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ErrorToastOptions,
   IToasts,
@@ -24,8 +24,7 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -37,12 +36,49 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   return omitBy(toastOrTitle, isUndefined);
 };
 
+const getMountPointText = (mountPoint: MountPoint, prefix: string): string => {
+  const div = document.createElement('div');
+  const unmount = mountPoint(div);
+  try {
+    return `${prefix}: ${div.textContent || div.innerText || 'Fallback ' + prefix}`;
+  } finally {
+    unmount?.();
+  }
+};
+
+const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
+  const toastInfo = [];
+
+  if (typeof toastOrTitle === 'string') {
+    toastInfo.push(toastOrTitle);
+  } else {
+    // Handle toastOrTitle.title?: string | MountPoint
+    if (typeof toastOrTitle.title === 'string') {
+      toastInfo.push(`Title: ${toastOrTitle.title}`);
+    } else if (toastOrTitle.title instanceof Function) {
+      toastInfo.push(getMountPointText(toastOrTitle.title, 'Title'));
+    }
+
+    // Handle toastOrTitle.text?: string | MountPoint
+    if (typeof toastOrTitle.text === 'string') {
+      toastInfo.push(`Text: ${toastOrTitle.text}`);
+    } else if (toastOrTitle.text instanceof Function) {
+      toastInfo.push(getMountPointText(toastOrTitle.text, 'Text'));
+    }
+  }
+
+  return !!toastInfo.length ? toastInfo.join(', ') : 'No title or text is provided.';
+};
+
+const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
+  return {
+    error_type: errorType,
+  };
+};
+
 interface StartDeps {
-  analytics: AnalyticsServiceStart;
   overlays: OverlayStart;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
-  userProfile: UserProfileService;
+  rendering: RenderingService;
 }
 
 /**
@@ -65,7 +101,7 @@ export class ToastsApi implements IToasts {
     this.startDeps = startDeps;
   }
 
-  /** Observable of the toast messages to show to the user. */
+  /** Observable of the toast messages queued to be shown to the user. */
   public get$() {
     return this.toasts$.asObservable();
   }
@@ -111,7 +147,7 @@ export class ToastsApi implements IToasts {
   public addInfo(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'primary',
-      iconType: 'iInCircle',
+      iconType: 'info',
       ...normalizeToast(toastOrTitle),
       ...options,
     });
@@ -158,6 +194,10 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addDanger(toastOrTitle: ToastInput, options?: ToastOptions) {
+    const toastTitle = getToastTitleOrText(toastOrTitle);
+    apm.captureError(toastTitle, {
+      labels: getApmLabels('ToastDanger'),
+    });
     return this.add({
       color: 'danger',
       iconType: 'error',
@@ -175,6 +215,16 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
+    const optionsLabels = {
+      title: options.title,
+      ...(options.toastMessage && { toast_message: options.toastMessage }),
+    };
+    apm.captureError(error, {
+      labels: {
+        ...getApmLabels('ToastError'),
+        ...optionsLabels,
+      },
+    });
     const message = options.toastMessage || error.message;
     return this.add({
       color: 'danger',
@@ -186,7 +236,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
-          {...this.startDeps!}
+          rendering={this.startDeps!.rendering}
         />
       ),
       ...options,

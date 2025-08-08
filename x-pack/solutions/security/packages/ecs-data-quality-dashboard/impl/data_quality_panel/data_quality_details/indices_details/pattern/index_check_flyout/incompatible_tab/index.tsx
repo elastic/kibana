@@ -38,6 +38,7 @@ interface Props {
   customFieldsCount: number;
   allFieldsCount: number;
   hasStickyActions?: boolean;
+  checkedAt?: number;
 }
 
 const IncompatibleTabComponent: React.FC<Props> = ({
@@ -53,6 +54,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
   customFieldsCount,
   allFieldsCount,
   hasStickyActions = true,
+  checkedAt,
 }) => {
   const { isILMAvailable, formatBytes, formatNumber } = useDataQualityContext();
 
@@ -132,6 +134,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
           <EuiSpacer size="m" />
           {hasStickyActions ? (
             <StickyActions
+              checkedAt={checkedAt}
               markdownComment={markdownComment}
               indexName={indexName}
               showChatAction={true}
@@ -140,6 +143,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
             />
           ) : (
             <Actions
+              checkedAt={checkedAt}
               markdownComment={markdownComment}
               indexName={indexName}
               showChatAction={true}

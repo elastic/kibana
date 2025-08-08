@@ -41,9 +41,11 @@ export const CertificateFingerprint = React.memo<{
   contextId: string;
   fieldName: string;
   value?: string | null;
-}>(({ eventId, certificateType, contextId, fieldName, value }) => {
+  scopeId: string;
+}>(({ eventId, certificateType, contextId, fieldName, value, scopeId }) => {
   return (
     <DraggableBadge
+      scopeId={scopeId}
       contextId={contextId}
       data-test-subj={`${certificateType}-certificate-fingerprint`}
       eventId={eventId}

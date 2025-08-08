@@ -19,7 +19,7 @@ import type {
   GroupedSearchQueryResponse,
 } from '../../../../common/alerting/logs/log_threshold';
 import { Comparator } from '../../../../common/alerting/logs/log_threshold';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   positiveComparators,
   negativeComparators,
@@ -221,37 +221,36 @@ describe('Log threshold executor', () => {
           index: 'filebeat-*',
           allow_no_indices: true,
           ignore_unavailable: true,
-          body: {
-            track_total_hits: true,
-            aggregations: {},
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.any(Number),
-                        lte: expect.any(Number),
-                        format: 'epoch_millis',
-                      },
+
+          track_total_hits: true,
+          aggregations: {},
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: expect.any(Number),
+                      lte: expect.any(Number),
+                      format: 'epoch_millis',
                     },
                   },
-                  ...expectedPositiveFilterClauses,
-                ],
-                must_not: [...expectedNegativeFilterClauses],
-              },
-            },
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  lang: 'painless',
-                  source: 'emit("a runtime value")',
                 },
+                ...expectedPositiveFilterClauses,
+              ],
+              must_not: [...expectedNegativeFilterClauses],
+            },
+          },
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                lang: 'painless',
+                source: 'emit("a runtime value")',
               },
             },
-            size: 0,
           },
+          size: 0,
         });
       });
 
@@ -274,60 +273,58 @@ describe('Log threshold executor', () => {
             index: 'filebeat-*',
             allow_no_indices: true,
             ignore_unavailable: true,
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: expect.any(Number),
-                          lte: expect.any(Number),
-                          format: 'epoch_millis',
-                        },
-                      },
-                    },
-                    ...expectedPositiveFilterClauses,
-                  ],
-                  must_not: [...expectedNegativeFilterClauses],
-                },
-              },
-              aggregations: {
-                groups: {
-                  aggregations: {
-                    additionalContext: {
-                      top_hits: {
-                        _source: false,
-                        fields: ['host.*'],
-                        size: 1,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.any(Number),
+                        lte: expect.any(Number),
+                        format: 'epoch_millis',
                       },
                     },
                   },
-                  composite: {
-                    size: 2000,
-                    sources: [
-                      {
-                        'group-0-host.name': {
-                          terms: {
-                            field: 'host.name',
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
+                  ...expectedPositiveFilterClauses,
+                ],
+                must_not: [...expectedNegativeFilterClauses],
               },
-              runtime_mappings: {
-                runtime_field: {
-                  type: 'keyword',
-                  script: {
-                    lang: 'painless',
-                    source: 'emit("a runtime value")',
-                  },
-                },
-              },
-              size: 0,
             },
+            aggregations: {
+              groups: {
+                aggregations: {
+                  additionalContext: {
+                    top_hits: {
+                      _source: false,
+                      fields: ['host.*'],
+                      size: 1,
+                    },
+                  },
+                },
+                composite: {
+                  size: 2000,
+                  sources: [
+                    {
+                      'group-0-host.name': {
+                        terms: {
+                          field: 'host.name',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("a runtime value")',
+                },
+              },
+            },
+            size: 0,
           });
         });
 
@@ -354,79 +351,77 @@ describe('Log threshold executor', () => {
             index: 'filebeat-*',
             allow_no_indices: true,
             ignore_unavailable: true,
-            body: {
-              query: {
-                bool: {
-                  filter: [
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: expect.any(Number),
+                        lte: expect.any(Number),
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            aggregations: {
+              groups: {
+                composite: {
+                  size: 2000,
+                  sources: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: expect.any(Number),
-                          lte: expect.any(Number),
-                          format: 'epoch_millis',
+                      'group-0-host.name': {
+                        terms: {
+                          field: 'host.name',
                         },
                       },
                     },
                   ],
                 },
-              },
-              aggregations: {
-                groups: {
-                  composite: {
-                    size: 2000,
-                    sources: [
-                      {
-                        'group-0-host.name': {
-                          terms: {
-                            field: 'host.name',
-                          },
-                        },
-                      },
-                    ],
-                  },
-                  aggregations: {
-                    filtered_results: {
-                      filter: {
-                        bool: {
-                          filter: [
-                            {
-                              range: {
-                                '@timestamp': {
-                                  gte: expect.any(Number),
-                                  lte: expect.any(Number),
-                                  format: 'epoch_millis',
-                                },
+                aggregations: {
+                  filtered_results: {
+                    filter: {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: expect.any(Number),
+                                lte: expect.any(Number),
+                                format: 'epoch_millis',
                               },
                             },
-                            ...expectedPositiveFilterClauses,
-                          ],
-                          must_not: [...expectedNegativeFilterClauses],
-                        },
-                      },
-                      aggregations: {
-                        additionalContext: {
-                          top_hits: {
-                            _source: false,
-                            fields: ['host.*'],
-                            size: 1,
                           },
+                          ...expectedPositiveFilterClauses,
+                        ],
+                        must_not: [...expectedNegativeFilterClauses],
+                      },
+                    },
+                    aggregations: {
+                      additionalContext: {
+                        top_hits: {
+                          _source: false,
+                          fields: ['host.*'],
+                          size: 1,
                         },
                       },
                     },
                   },
                 },
               },
-              runtime_mappings: {
-                runtime_field: {
-                  type: 'keyword',
-                  script: {
-                    lang: 'painless',
-                    source: 'emit("a runtime value")',
-                  },
+            },
+            runtime_mappings: {
+              runtime_field: {
+                type: 'keyword',
+                script: {
+                  lang: 'painless',
+                  source: 'emit("a runtime value")',
                 },
               },
-              size: 0,
             },
+            size: 0,
           });
         });
       });

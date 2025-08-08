@@ -9,13 +9,12 @@ import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 
 import type { ExternalReferenceAttachmentViewProps } from '../../client/attachment_framework/types';
-import type { AppMockRenderer } from '../../common/mock';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { createAppMockRenderer } from '../../common/mock';
 import { basicCase, basicFileMock } from '../../containers/mock';
 import { getFileType } from './file_type';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('getFileType', () => {
   const fileType = getFileType();
@@ -30,10 +29,7 @@ describe('getFileType', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/175841
-  describe.skip('getFileAttachmentViewObject', () => {
-    let appMockRender: AppMockRenderer;
-
+  describe('getFileAttachmentViewObject', () => {
     const attachmentViewProps: ExternalReferenceAttachmentViewProps = {
       externalReferenceId: basicFileMock.id,
       // @ts-expect-error: files is a proper JSON
@@ -45,33 +41,27 @@ describe('getFileType', () => {
       jest.clearAllMocks();
     });
 
-    afterEach(async () => {
-      await appMockRender.clearQueryCache();
-    });
-
     it('event renders a clickable name if the file is an image', async () => {
-      appMockRender = createAppMockRenderer();
-
-      // @ts-expect-error: event is defined
-      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
+      renderWithTestingProviders(
+        // @ts-expect-error: event is defined
+        fileType.getAttachmentViewObject({ ...attachmentViewProps }).event
+      );
 
       expect(await screen.findByText('my-super-cool-screenshot.png')).toBeInTheDocument();
       expect(screen.queryByTestId('cases-files-image-preview')).not.toBeInTheDocument();
     });
 
     it('clicking the name rendered in event opens the file preview', async () => {
-      appMockRender = createAppMockRenderer();
-
-      // @ts-expect-error: event is a React element
-      appMockRender.render(fileType.getAttachmentViewObject({ ...attachmentViewProps }).event);
+      renderWithTestingProviders(
+        // @ts-expect-error: event is a React element
+        fileType.getAttachmentViewObject({ ...attachmentViewProps }).event
+      );
 
       await userEvent.click(await screen.findByText('my-super-cool-screenshot.png'));
       expect(await screen.findByTestId('cases-files-image-preview')).toBeInTheDocument();
     });
 
     it('getActions renders a download button', async () => {
-      appMockRender = createAppMockRenderer();
-
       const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
 
       expect(attachmentViewObject).not.toBeUndefined();
@@ -87,14 +77,12 @@ describe('getFileType', () => {
       });
 
       // @ts-expect-error: render exists on CustomAttachmentAction
-      appMockRender.render(actions[0].render());
+      renderWithTestingProviders(actions[0].render());
 
       expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
     });
 
     it('getActions renders a delete button', async () => {
-      appMockRender = createAppMockRenderer();
-
       const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
 
       expect(attachmentViewObject).not.toBeUndefined();
@@ -110,14 +98,12 @@ describe('getFileType', () => {
       });
 
       // @ts-expect-error: render exists on CustomAttachmentAction
-      appMockRender.render(actions[1].render());
+      renderWithTestingProviders(actions[1].render());
 
       expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
     });
 
     it('clicking the delete button in actions opens deletion modal', async () => {
-      appMockRender = createAppMockRenderer();
-
       const attachmentViewObject = fileType.getAttachmentViewObject({ ...attachmentViewProps });
 
       expect(attachmentViewObject).not.toBeUndefined();
@@ -133,7 +119,7 @@ describe('getFileType', () => {
       });
 
       // @ts-expect-error: render exists on CustomAttachmentAction
-      appMockRender.render(actions[1].render());
+      renderWithTestingProviders(actions[1].render());
 
       const deleteButton = await screen.findByTestId('cases-files-delete-button');
 
@@ -162,6 +148,15 @@ describe('getFileType', () => {
       expect(fileType.getAttachmentViewObject(attachmentViewProps)).toEqual(
         expect.objectContaining({
           timelineAvatar: 'image',
+        })
+      );
+    });
+
+    it('children is defined when file is an image', () => {
+      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      expect(attachmentViewObject).toEqual(
+        expect.objectContaining({
+          children: expect.any(Object),
         })
       );
     });

@@ -20,7 +20,7 @@
       "_snapshot/{repository}/_status",
       "_snapshot/{repository}/{snapshot}/_status"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-snapshot-status-api.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-snapshot-status",
     "availability": {
       "stack": true,
       "serverless": false

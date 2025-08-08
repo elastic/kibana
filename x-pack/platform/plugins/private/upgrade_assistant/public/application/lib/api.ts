@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
-import {
+import type { UpdateIndexOperation } from '../../../common/update_index';
+import type {
   ESUpgradeStatus,
   CloudBackupStatus,
   ClusterUpgradeState,
@@ -24,9 +25,9 @@ import {
   CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS,
 } from '../../../common/constants';
 import {
-  UseRequestConfig,
-  SendRequestConfig,
-  SendRequestResponse,
+  type UseRequestConfig,
+  type SendRequestConfig,
+  type SendRequestResponse,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../../shared_imports';
@@ -211,40 +212,50 @@ export class ApiService {
     });
   }
 
-  public async getDataStreamReindexStatus(dataStreamName: string) {
+  /**
+   * Data Stream Migrations
+   * Reindex and readonly operations
+   */
+
+  public async getDataStreamMigrationStatus(dataStreamName: string) {
     return await this.sendRequest<DataStreamReindexStatusResponse>({
-      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`,
       method: 'get',
     });
   }
 
   public async getDataStreamMetadata(dataStreamName: string) {
     return await this.sendRequest<DataStreamMetadata>({
-      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/metadata`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/metadata`,
       method: 'get',
     });
   }
 
   public async startDataStreamReindexTask(dataStreamName: string) {
     return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/reindex`,
       method: 'post',
     });
   }
 
   public async cancelDataStreamReindexTask(dataStreamName: string) {
     return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/cancel`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/reindex/cancel`,
       method: 'post',
     });
   }
 
-  public async pauseDataStreamReindexTask(dataStreamName: string) {
+  public async markIndicesAsReadOnly(dataStreamName: string, indices: string[]) {
     return await this.sendRequest({
-      path: `${API_BASE_PATH}/reindex_data_streams/${dataStreamName}/pause`,
+      path: `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/readonly`,
       method: 'post',
+      body: { indices },
     });
   }
+
+  /**
+   * FINISH: Data Stream Migrations
+   */
 
   public async getReindexStatus(indexName: string) {
     return await this.sendRequest<ReindexStatusResponse>({
@@ -264,6 +275,14 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
       method: 'post',
+    });
+  }
+
+  public async updateIndex(indexName: string, operations: UpdateIndexOperation[]) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/update_index/${indexName}`,
+      method: 'post',
+      body: { operations },
     });
   }
 

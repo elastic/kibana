@@ -46,7 +46,6 @@
     "@kbn/shared-ux-utility",
     "@kbn/index-management-shared-types",
     "@kbn/utility-types",
-    "@kbn/inference_integration_flyout",
     "@kbn/ml-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
@@ -57,6 +56,10 @@
     "@kbn/core-application-browser",
     "@kbn/delete-managed-asset-callout",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/streams-plugin",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/deeplinks-observability",
+    "@kbn/streams-app-plugin",
   ],
   "exclude": ["target/**/*"]
 }

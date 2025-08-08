@@ -21,12 +21,15 @@ export class DocumentationService {
   private classificationUrl: string = '';
   private regressionUrl: string = '';
   private documentationUrl: string = '';
+  private createIndexParameters: string = '';
+  private docLinks: DocLinksStart | undefined;
 
   public setup(docLinks: DocLinksStart): void {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinks;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
+    const { links } = docLinks;
 
-    this.esDocBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
+    this.docLinks = docLinks;
+
+    this.esDocBasePath = links.elasticsearch.docsBase;
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
@@ -39,6 +42,7 @@ export class DocumentationService {
     this.classificationUrl = links.ingest.inferenceClassification;
     this.regressionUrl = links.ingest.inferenceRegression;
     this.documentationUrl = links.ingest.inference;
+    this.createIndexParameters = links.elasticsearch.createIndexParameters;
   }
 
   public getEsDocsBasePath() {
@@ -91,6 +95,14 @@ export class DocumentationService {
 
   public getDocumentationUrl() {
     return this.documentationUrl;
+  }
+
+  public getIndexParametersUrl() {
+    return this.createIndexParameters;
+  }
+
+  public getDocLinks(): undefined | DocLinksStart {
+    return this.docLinks;
   }
 }
 

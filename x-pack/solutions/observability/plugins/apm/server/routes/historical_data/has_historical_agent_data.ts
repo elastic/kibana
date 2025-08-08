@@ -33,12 +33,10 @@ async function hasDataRequest(apmEventClient: APMEventClient, dataTiers?: DataTi
     apm: {
       events: [ProcessorEvent.error, ProcessorEvent.metric, ProcessorEvent.transaction],
     },
-    body: {
-      terminate_after: 1,
-      track_total_hits: 1,
-      size: 0,
-      query,
-    },
+    terminate_after: 1,
+    track_total_hits: 1,
+    size: 0,
+    query,
   };
 
   const resp = await apmEventClient.search('has_historical_agent_data', params);

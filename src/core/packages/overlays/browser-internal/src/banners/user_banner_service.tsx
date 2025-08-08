@@ -74,7 +74,7 @@ export class UserBannerService {
                     defaultMessage="Attention"
                   />
                 }
-                iconType="help"
+                iconType="question"
               >
                 <React.Suspense
                   fallback={

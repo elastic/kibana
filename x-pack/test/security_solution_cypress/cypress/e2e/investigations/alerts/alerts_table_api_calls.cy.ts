@@ -41,7 +41,7 @@ describe('Alert Table API calls', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should call `api/lists/index` only once', () => {
-    cy.get('[data-test-subj="alertsTable"]').then(() => {
+    cy.get('[data-test-subj="alertsTableIsLoaded"]').then(() => {
       expect(callCount, 'number of times lists index api is called').to.equal(1);
     });
   });

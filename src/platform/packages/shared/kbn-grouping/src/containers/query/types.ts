@@ -11,10 +11,10 @@ import type {
   Script,
   MappingRuntimeField,
   MappingRuntimeFields,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import type { BoolQuery } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 type RunTimeMappings =
   | Record<string, Omit<RuntimeFieldSpec, 'type'> & { type: RuntimePrimitiveTypes }>
@@ -32,7 +32,6 @@ export type NamedAggregation = Record<string, estypes.AggregationsAggregationCon
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
-  from: string;
   groupByField: string;
   rootAggregations?: NamedAggregation[];
   runtimeMappings?: RunTimeMappings;
@@ -42,7 +41,12 @@ export interface GroupingQueryArgs {
   size?: number;
   sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
   statsAggregations?: NamedAggregation[];
-  to: string;
+  timeRange?: {
+    from: string;
+    to: string;
+  };
+  multiValueFieldsToFlatten?: string[];
+  countByKeyForMultiValueFields?: string;
 }
 
 export interface MainAggregation extends NamedAggregation {

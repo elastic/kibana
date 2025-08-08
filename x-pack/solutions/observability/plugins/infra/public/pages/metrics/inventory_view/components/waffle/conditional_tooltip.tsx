@@ -11,6 +11,9 @@ import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { usePluginConfig } from '../../../../../containers/plugin_config_context';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import type { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -34,7 +37,14 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics } = useWaffleOptionsContext();
-  const requestMetrics = model.tooltipMetrics
+  const config = usePluginConfig();
+
+  const schema = config.featureFlags.hostOtelEnabled ? DataSchemaFormat.SEMCONV : undefined;
+
+  const requestMetrics = model.metrics
+    .getWaffleMapTooltipMetrics({
+      schema,
+    })
     .map((type) => ({ type }))
     .concat(customMetrics) as Array<
     | {
@@ -42,15 +52,9 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
       }
     | SnapshotCustomMetricInput
   >;
-  const query = JSON.stringify({
-    bool: {
-      filter: {
-        match_phrase: { [model.fields.id]: node.id },
-      },
-    },
-  });
+
   const { nodes, loading } = useSnapshot({
-    filterQuery: query,
+    kuery: `"${model.fields.id}": ${node.id}`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,
@@ -58,12 +62,18 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
     currentTime: requestCurrentTime.current,
     accountId: '',
     region: '',
+    schema,
   });
 
   const dataNode = first(nodes);
   const metrics = (dataNode && dataNode.metrics) || [];
+
   return (
-    <div style={{ minWidth: 220 }} data-test-subj={`conditionalTooltipContent-${node.name}`}>
+    <div
+      style={{ minWidth: 220 }}
+      data-test-subj={`conditionalTooltipContent-${node.name}`}
+      aria-label={node.name}
+    >
       <div
         style={{
           borderBottom: `${euiTheme.border.thin}`,
@@ -91,8 +101,16 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
           const formatter = customMetric
             ? createFormatterForMetric(customMetric)
             : createInventoryMetricFormatter({ type: metricName });
+
+          const metricAriaLabel = i18n.translate('xpack.infra.node.tooltip.ariaLabel', {
+            defaultMessage: '{customMetric} : {value}',
+            values: {
+              customMetric: customMetric ? getCustomMetricLabel(customMetric) : name,
+              value: (metric.value && formatter(metric.value)) || '-',
+            },
+          });
           return (
-            <EuiFlexGroup gutterSize="s" key={metric.name}>
+            <EuiFlexGroup gutterSize="s" key={metric.name} aria-label={metricAriaLabel}>
               <EuiFlexItem
                 grow={1}
                 className="eui-textTruncate eui-displayBlock"

@@ -73,11 +73,11 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         await setup();
       });
 
-      test('renders a count for critical issues and success state for warning issues', () => {
+      test('renders a count for critical issues', () => {
         const { exists, find } = testBed;
         expect(exists('esStatsPanel')).toBe(true);
         expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(exists('esStatsPanel.noWarningDeprecationIssues')).toBe(true);
+        expect(exists('esStatsPanel.warningDeprecations')).toBe(false);
       });
 
       test('panel links to ES deprecations page', () => {
@@ -93,7 +93,7 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         await setup();
       });
 
-      test('renders a count for critical issues and success state for warning issues', () => {
+      test('renders a success state', () => {
         const { exists } = testBed;
         expect(exists('esStatsPanel')).toBe(true);
         expect(exists('esStatsPanel.noDeprecationIssues')).toBe(true);

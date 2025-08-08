@@ -8,23 +8,44 @@ components:
   schemas:
     RuleObjectId:
       $ref: '../../../model/primitives.schema.yaml#/components/schemas/UUID'
+      description: A dynamic unique identifier for the rule object. It is randomly generated when a rule is created and cannot be changed after that. It is always a UUID. It is unique within a given Kibana space. The same prebuilt Elastic rule, when installed in two different Kibana spaces or two different Elastic environments, will have different object `id`s.
 
     RuleSignatureId:
       type: string
-      description: Could be any string, not necessarily a UUID
+      description: A stable unique identifier for the rule object. It can be assigned during rule creation. It can be any string, but often is a UUID. It should be unique not only within a given Kibana space, but also across spaces and Elastic environments. The same prebuilt Elastic rule, when installed in two different Kibana spaces or two different Elastic environments, will have the same `rule_id`s.
 
     RuleName:
       type: string
+      description: A human-readable name for the rule.
       minLength: 1
+      example: Anomalous Windows Process Creation
 
     RuleDescription:
       type: string
+      description: The rule’s description.
       minLength: 1
+      example: Detects anomalous Windows process creation events.
 
     RuleVersion:
       type: integer
       minimum: 1
-      description: The rule's version number.
+      description: |
+        The rule's version number.
+
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
+        - For custom rules it is set to `1` when the rule is created. 
+        > info
+        > It is not incremented on each update. Compare this to the `revision` field.
+
+    RuleRevision:
+      type: integer
+      minimum: 0
+      description: |
+        The rule's revision number.
+
+        It represents the version of rule's object in Kibana. It is set to `0` when the rule is installed or created and then gets incremented on each update.
+        > info
+        > Not all updates to any rule fields will increment the revision. Only those fields that are considered static `rule parameters` can trigger revision increments. For example, an update to a rule's query or index fields will increment the rule's revision by `1`. However, changes to dynamic or technical fields like enabled or execution_summary will not cause revision increments.
 
     QueryLanguage:
       type: string
@@ -84,7 +105,7 @@ components:
 
     IsRuleEnabled:
       type: boolean
-      description: Determines whether the rule is enabled.
+      description: Determines whether the rule is enabled. Defaults to true.
 
     RuleInterval:
       type: string
@@ -100,7 +121,12 @@ components:
 
     RiskScore:
       type: integer
-      description: Risk score (0 to 100)
+      description: |
+        A numerical representation of the alert's severity from 0 to 100, where:
+        * `0` - `21` represents low severity
+        * `22` - `47` represents medium severity
+        * `48` - `73` represents high severity
+        * `74` - `100` represents critical severity
       minimum: 0
       maximum: 100
 
@@ -111,6 +137,7 @@ components:
         properties:
           field:
             type: string
+            description: Source event field used to override the default `risk_score`.
           operator:
             type: string
             enum:
@@ -124,11 +151,15 @@ components:
           - operator
           - value
       description: Overrides generated alerts' risk_score with a value from the source event
-
     Severity:
       type: string
       enum: [low, medium, high, critical]
-      description: Severity of the rule
+      description: |
+        Severity level of alerts produced by the rule, which must be one of the following:
+        * `low`: Alerts that are of interest but generally not considered to be security incidents
+        * `medium`: Alerts that require investigation
+        * `high`: Alerts that require immediate investigation
+        * `critical`: Alerts that indicate it is highly likely a security incident has occurred
 
     SeverityMapping:
       type: array
@@ -137,6 +168,7 @@ components:
         properties:
           field:
             type: string
+            description: Source event field used to override the default `severity`.
           operator:
             type: string
             enum:
@@ -160,6 +192,11 @@ components:
 
     RuleMetadata:
       type: object
+      description: |
+        Placeholder for metadata about the rule.
+        > info
+        > This field is overwritten when you save changes to the rule’s settings.
+
       additionalProperties: true
 
     RuleLicense:
@@ -168,16 +205,19 @@ components:
 
     RuleAuthorArray:
       type: array
+      description: The rule’s author.
       items:
         type: string
 
     RuleFalsePositiveArray:
       type: array
+      description: String array used to describe common reasons why the rule may issue false-positive alerts. Defaults to an empty array.
       items:
         type: string
 
     RuleReferenceArray:
       type: array
+      description: Array containing notes about or references to relevant information about the rule. Defaults to an empty array.
       items:
         type: string
 
@@ -187,10 +227,14 @@ components:
 
     SetupGuide:
       type: string
+      description: Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
 
     BuildingBlockType:
       type: string
-      description: Determines if the rule acts as a building block. By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts. Its value must be default.
+      description: |
+        Determines if the rule acts as a building block. If yes, the value must be `default`.
+        By default, building-block alerts are not displayed in the UI. These rules are used as a foundation for other rules that do generate alerts.
+        For more information, refer to [About building block rules](https://www.elastic.co/guide/en/security/current/building-block-rule.html).
 
     AlertsIndex:
       type: string
@@ -203,6 +247,11 @@ components:
 
     MaxSignals:
       type: integer
+      default: 100
+      description: |
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#rule-ui-advanced-params) value).
+        > info
+        > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/guide/en/kibana/current/alert-action-settings-kb.html#alert-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
 
     ThreatSubtechnique:
@@ -236,9 +285,10 @@ components:
           description: Technique reference
         subtechnique:
           type: array
+          description: |
+            Array containing more specific information on the attack technique.
           items:
             $ref: '#/components/schemas/ThreatSubtechnique'
-          description: Array containing more specific information on the attack technique
       required:
         - id
         - name
@@ -246,6 +296,8 @@ components:
 
     ThreatTactic:
       type: object
+      description: |
+        Object containing information on the attack type
       properties:
         id:
           type: string
@@ -263,6 +315,9 @@ components:
 
     Threat:
       type: object
+      description: |
+        > info
+        > Currently, only threats described using the MITRE ATT&CK&trade; framework are supported.
       properties:
         framework:
           type: string
@@ -284,6 +339,10 @@ components:
         $ref: '#/components/schemas/Threat'
 
     IndexPatternArray:
+      description: |
+        Indices on which the rule functions. Defaults to the Security Solution indices defined on the Kibana Advanced Settings page (Kibana → Stack Management → Advanced Settings → `securitySolution:defaultIndex`).
+        > info
+        > This field is not supported for ES|QL rules.
       type: array
       items:
         type: string
@@ -293,21 +352,31 @@ components:
 
     SavedQueryId:
       type: string
+      description: Kibana [saved search](https://www.elastic.co/guide/en/kibana/current/save-open-search.html) used by the rule to create alerts.
 
     RuleQuery:
       type: string
+      description: |
+        [Query](https://www.elastic.co/guide/en/kibana/8.17/search.html) used by the rule to create alerts.
+
+        - For indicator match rules, only the query’s results are used to determine whether an alert is generated.
+        - ES|QL rules have additional query requirements. Refer to [Create ES|QL](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-esql-rule) rules for more information.
 
     RuleFilterArray:
       type: array
+      description: |
+        The query and filter context array used to define the conditions for when alerts are created from events. Defaults to an empty array.
+        > info
+        > This field is not supported for ES|QL rules.
       items: {} # unknown
 
     RuleNameOverride:
       type: string
-      description: Sets the source field for the alert's signal.rule.name value
+      description: Sets which field in the source event is used to populate the alert's `signal.rule.name` value (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s `name` value is used. The source field must be a string data type.
 
     TimestampOverride:
       type: string
-      description: Sets the time field used to query indices
+      description: Sets the time field used to query indices. When unspecified, rules query the `@timestamp` field. The source field must be an Elasticsearch date data type.
 
     TimestampOverrideFallbackDisabled:
       type: boolean
@@ -339,14 +408,18 @@ components:
         };
       properties:
         name:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: Name of an Elasticsearch field
         type:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: Type of the Elasticsearch field
         ecs:
           type: boolean
-          description: Whether the field is an ECS field
+          description: Indicates whether the field is ECS-compliant. This property is only present in responses. Its value is computed based on field’s name and type.
       required:
         - name
         - type
@@ -357,11 +430,15 @@ components:
       description: Input parameters to create a RequiredField. Does not include the `ecs` field, because `ecs` is calculated on the backend based on the field name and type.
       properties:
         name:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: Name of an Elasticsearch field
         type:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
-          description: Type of an Elasticsearch field
+          type: string
+          format: nonempty
+          minLength: 1
+          description: Type of the Elasticsearch field
       required:
         - name
         - type
@@ -398,36 +475,23 @@ components:
     RelatedIntegration:
       type: object
       description: |
-        Related integration is a potential dependency of a rule. It's assumed that if the user installs
-        one of the related integrations of a rule, the rule might start to work properly because it will
-        have source events (generated by this integration) potentially matching the rule's query.
+            Related integration is a potential dependency of a rule. It's assumed that if the user installs
+            one of the related integrations of a rule, the rule might start to work properly because it will
+            have source events (generated by this integration) potentially matching the rule's query.
 
-        NOTE: Proper work is not guaranteed, because a related integration, if installed, can be
-        configured differently or generate data that is not necessarily relevant for this rule.
+            NOTE: Proper work is not guaranteed, because a related integration, if installed, can be
+            configured differently or generate data that is not necessarily relevant for this rule.
 
-        Related integration is a combination of a Fleet package and (optionally) one of the
-        package's "integrations" that this package contains. It is represented by 3 properties:
+            Related integration is a combination of a Fleet package and (optionally) one of the
+            package's "integrations" that this package contains. It is represented by 3 properties:
 
-        - `package`: name of the package (required, unique id)
-        - `version`: version of the package (required, semver-compatible)
-        - `integration`: name of the integration of this package (optional, id within the package)
+            - `package`: name of the package (required, unique id)
+            - `version`: version of the package (required, semver-compatible)
+            - `integration`: name of the integration of this package (optional, id within the package)
 
-        There are Fleet packages like `windows` that contain only one integration; in this case,
-        `integration` should be unspecified. There are also packages like `aws` and `azure` that contain
-        several integrations; in this case, `integration` should be specified.
-
-        @example
-        const x: RelatedIntegration = {
-          package: 'windows',
-          version: '1.5.x',
-        };
-
-        @example
-        const x: RelatedIntegration = {
-          package: 'azure',
-          version: '~1.1.6',
-          integration: 'activitylogs',
-        };
+            There are Fleet packages like `windows` that contain only one integration; in this case,
+            `integration` should be unspecified. There are also packages like `aws` and `azure` that contain
+            several integrations; in this case, `integration` should be specified.
       properties:
         package:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
@@ -435,6 +499,10 @@ components:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration:
           $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      example:
+        package: 'azure'
+        version: '~1.1.6'
+        integration: 'activitylogs'
       required:
         - package
         - version
@@ -449,17 +517,6 @@ components:
       description: |
         Schema for fields relating to investigation fields. These are user defined fields we use to highlight
         in various features in the UI such as alert details flyout and exceptions auto-population from alert.
-        Added in PR #163235
-        Right now we only have a single field but anticipate adding more related fields to store various
-        configuration states such as `override` - where a user might say if they want only these fields to
-        display, or if they want these fields + the fields we select. When expanding this field, it may look
-        something like:
-        ```typescript
-        const investigationFields = z.object({
-          field_names: NonEmptyArray(NonEmptyString),
-          override: z.boolean().optional(),
-        });
-        ```
       properties:
         field_names:
           type: array
@@ -487,7 +544,7 @@ components:
         - 'onActiveAlert'
         - 'onThrottleInterval'
         - 'onActionGroupChange'
-      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
+      description: Defines how often rules run actions.
 
     RuleActionFrequency:
       type: object
@@ -509,10 +566,49 @@ components:
     RuleActionAlertsFilter:
       type: object
       additionalProperties: true
+      description: |
+        Object containing an action’s conditional filters.
 
+        - `timeframe` (object, optional): Object containing the time frame for when this action can be run.
+            - `days` (array of integers, required): List of days of the week on which this action will be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
+            - `hours` (object, required): The hours of the day during which this action will run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
+                - start (string, required): Start time in `hh:mm` format.
+                - end (string, required): End time in `hh:mm` format.
+            - `timezone` (string, required): An ISO timezone name, such as `Europe/Madrid` or `America/New_York`. Specific offsets such as `UTC` or `UTC+1` will also work, but lack built-in DST.
+        - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
+            - `kql` (string, required): A KQL string.
+            - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
+              
     RuleActionParams:
       type: object
-      description: Object containing the allowed connector fields, which varies according to the connector type.
+      description: |
+        Object containing the allowed connector fields, which varies according to the connector type.
+
+        For Slack:
+
+          - `message` (string, required): The notification message.
+
+        For email:
+
+          - `to`, `cc`, `bcc` (string): Email addresses to which the notifications are sent. At least one field must have a value.
+          - `subject` (string, optional): Email subject line.
+          - `message` (string, required): Email body text.
+
+        For Webhook:
+
+          - `body` (string, required): JSON payload.
+
+        For PagerDuty:
+
+          - `severity` (string, required): Severity of on the alert notification, can be: `Critical`, `Error`, `Warning` or `Info`.
+          - `eventAction` (string, required): Event [action type](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action), which can be `trigger`, `resolve`, or `acknowledge`.
+          - `dedupKey` (string, optional): Groups alert notifications with the same PagerDuty alert.
+          - `timestamp` (DateTime, optional): ISO-8601 format [timestamp](https://v2.developer.pagerduty.com/docs/types#datetime).
+          - `component` (string, optional): Source machine component responsible for the event, for example `security-solution`.
+          - `group` (string, optional): Enables logical grouping of service components.
+          - `source` (string, optional): The affected system. Defaults to the Kibana saved object ID of the action.
+          - `summary` (string, options): Summary of the event. Defaults to `No summary provided`. Maximum length is 1024 characters.
+          - `class` (string, optional): Value indicating the class/type of the event.
       additionalProperties: true
 
     RuleActionGroup:
@@ -528,7 +624,26 @@ components:
       properties:
         action_type_id:
           type: string
-          description: The action type used for sending notifications.
+          description: |
+            The action type used for sending notifications, can be:
+
+              - `.slack`
+              - `.slack_api`
+              - `.email`
+              - `.index`
+              - `.pagerduty`
+              - `.swimlane`
+              - `.webhook`
+              - `.servicenow`
+              - `.servicenow-itom`
+              - `.servicenow-sir`
+              - `.jira`
+              - `.resilient`
+              - `.opsgenie`
+              - `.teams`
+              - `.torq`
+              - `.tines`
+              - `.d3security`
         group:
           $ref: '#/components/schemas/RuleActionGroup'
         id:
@@ -560,12 +675,18 @@ components:
 
     RuleExceptionList:
       type: object
+      description: |
+        Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       properties:
         id:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: ID of the exception container
         list_id:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: List ID of the exception container
         type:
           $ref: '#/components/schemas/ExceptionListType'
@@ -583,6 +704,7 @@ components:
 
     AlertSuppressionDurationUnit:
       type: string
+      description: Time unit
       enum:
         - s
         - m
@@ -619,6 +741,7 @@ components:
 
     AlertSuppression:
       type: object
+      description: Defines alert suppression configuration.
       properties:
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'

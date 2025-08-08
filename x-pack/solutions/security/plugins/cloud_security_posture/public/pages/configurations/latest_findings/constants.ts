@@ -100,6 +100,12 @@ export const defaultGroupingOptions: GroupOption[] = [
     }),
     key: FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID,
   },
+  {
+    label: i18n.translate('xpack.csp.findings.latestFindings.groupNamespace', {
+      defaultMessage: 'Namespace',
+    }),
+    key: FINDINGS_GROUPING_OPTIONS.NAMESPACE,
+  },
 ];
 
 export const groupingTitle = i18n.translate('xpack.csp.findings.latestFindings.groupBy', {

@@ -24,12 +24,12 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { IndexMappingProps } from '@kbn/index-management-shared-types';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors';
+import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -58,7 +58,6 @@ export interface KibanaLogicProps {
   fleet?: FleetStart;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
   isSidebarEnabled: boolean;
@@ -68,6 +67,7 @@ export interface KibanaLogicProps {
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchNavigation: SearchNavigationPluginStart;
   security?: SecurityPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -91,7 +91,6 @@ export interface KibanaValues {
   fleet: FleetStart | null;
   getChromeStyle$: ChromeStart['getChromeStyle$'];
   getNavLinks: ChromeStart['navLinks']['getAll'];
-  guidedOnboarding: GuidedOnboardingPluginStart | null;
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isAgentlessEnabled: boolean;
@@ -105,6 +104,7 @@ export interface KibanaValues {
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart | null;
+  searchNavigation: SearchNavigationPluginStart;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
@@ -133,7 +133,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     fleet: [props.fleet || null, {}],
     getChromeStyle$: [props.getChromeStyle$, {}],
     getNavLinks: [props.getNavLinks, {}],
-    guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
@@ -150,6 +149,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     ],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchNavigation: [props.searchNavigation, {}],
     security: [props.security || null, {}],
     setBreadcrumbs: [props.setBreadcrumbs, {}],
     setChromeIsVisible: [props.setChromeIsVisible, {}],
@@ -161,7 +161,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     user: [
       props.user || null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setUser: (_, { user }) => user || null,
       },
     ],

@@ -1,0 +1,88 @@
+{
+  "id": "@kbn/deeplinks-chat",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.DeepLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "DeepLinkId",
+        "description": [],
+        "signature": [
+          "\"workchat\" | \"workchat:integrations\" | \"workchat:agents\" | \"onechat\" | \"onechat:agents\" | \"onechat:tools\" | \"onechat:conversations\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WORKCHAT_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "WORKCHAT_APP_ID",
+        "description": [],
+        "signature": [
+          "\"workchat\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WorkchatApp",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkchatApp",
+        "description": [],
+        "signature": [
+          "\"workchat\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-chat",
+        "id": "def-common.WorkchatLinkId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkchatLinkId",
+        "description": [],
+        "signature": [
+          "\"integrations\" | \"agents\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/chat/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

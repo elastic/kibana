@@ -8,17 +8,18 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
+
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { incidentTypes, severity, choices } from '../connectors/mock';
-import { noConnectorsCasePermission, createAppMockRenderer } from '../../common/mock';
+import { noConnectorsCasePermission, renderWithTestingProviders } from '../../common/mock';
 
 import { FormTestComponent } from '../../common/test_utils';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../connectors/resilient/use_get_incident_types');
 jest.mock('../connectors/resilient/use_get_severity');
@@ -49,20 +50,17 @@ const defaultProps = {
   isLoadingConnectors: false,
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/208443
-describe.skip('Connector', () => {
-  let appMockRender: AppMockRenderer;
-
+describe('Connector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetChoicesMock.mockReturnValue(useGetChoicesResponse);
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
@@ -73,7 +71,7 @@ describe.skip('Connector', () => {
   });
 
   it('renders loading state correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...{ ...defaultProps, isLoading: true }} />
       </FormTestComponent>
@@ -85,7 +83,7 @@ describe.skip('Connector', () => {
   });
 
   it('renders default connector correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[2].id }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
@@ -98,7 +96,7 @@ describe.skip('Connector', () => {
   });
 
   it('shows all connectors in dropdown', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
@@ -118,7 +116,7 @@ describe.skip('Connector', () => {
   });
 
   it('changes connector correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
@@ -135,16 +133,19 @@ describe.skip('Connector', () => {
   });
 
   it('shows the actions permission message if the user does not have read access to actions', async () => {
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
+    const coreStart = coreMock.createStart();
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
       actions: { save: false, show: false },
     };
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { coreStart } }
     );
+
     expect(
       await screen.findByTestId('create-case-connector-permissions-error-msg')
     ).toBeInTheDocument();
@@ -152,12 +153,11 @@ describe.skip('Connector', () => {
   });
 
   it('shows the actions permission message if the user does not have access to case connector', async () => {
-    appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
-
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
-      </FormTestComponent>
+      </FormTestComponent>,
+      { wrapperProps: { permissions: noConnectorsCasePermission() } }
     );
     expect(screen.getByTestId('create-case-connector-permissions-error-msg')).toBeInTheDocument();
     expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();

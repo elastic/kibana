@@ -11,8 +11,8 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
 import { Either, fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
-import * as TE from 'fp-ts/lib/TaskEither';
-import * as T from 'fp-ts/lib/Task';
+import * as TE from 'fp-ts/TaskEither';
+import * as T from 'fp-ts/Task';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrService } from '../ftr_provider_context';
 import { print } from './utils';
@@ -38,10 +38,14 @@ export const types =
     await pipe(
       TE.tryCatch(
         async () => {
-          const body = await new Client({ node, Connection: HttpConnection }).search({
+          const body = await new Client({
+            node,
+            Connection: HttpConnection,
+            requestTimeout: 30_000,
+          }).search({
             index,
             size: 0,
-            body: query,
+            ...query,
           });
           return body;
         },

@@ -8,13 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { ActionModalProvider } from '../../../context/action_modal';
+import type { ViewType } from '../types';
 import { SloListCardView } from './card_view/slo_list_card_view';
 import { SloListCompactView } from './compact_view/slo_list_compact_view';
 import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
 import { SloListView } from './slo_list_view/slo_list_view';
-import type { ViewType } from '../types';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -34,37 +35,35 @@ export function SlosView({ sloList, loading, error, view }: Props) {
 
   if (view === 'cardView') {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <HealthCallout sloList={sloList} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SloListCardView sloList={sloList} loading={loading} error={error} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Wrapper sloList={sloList}>
+        <SloListCardView sloList={sloList} loading={loading} error={error} />
+      </Wrapper>
     );
   }
 
   if (view === 'compactView') {
     return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <HealthCallout sloList={sloList} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <SloListCompactView sloList={sloList} loading={loading} error={error} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <Wrapper sloList={sloList}>
+        <SloListCompactView sloList={sloList} loading={loading} error={error} />
+      </Wrapper>
     );
   }
 
+  return (
+    <Wrapper sloList={sloList}>
+      <SloListView sloList={sloList} loading={loading} error={error} />
+    </Wrapper>
+  );
+}
+
+function Wrapper({ children, sloList }: { children: React.ReactNode } & Pick<Props, 'sloList'>) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <HealthCallout sloList={sloList} />
       </EuiFlexItem>
       <EuiFlexItem>
-        <SloListView sloList={sloList} loading={loading} error={error} />
+        <ActionModalProvider>{children}</ActionModalProvider>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

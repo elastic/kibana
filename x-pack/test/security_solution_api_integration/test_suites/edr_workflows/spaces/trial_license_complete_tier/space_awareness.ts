@@ -15,21 +15,12 @@ import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  EXCEPTION_LIST_ITEM_URL,
-} from '@kbn/securitysolution-list-constants';
-import { buildSpaceOwnerIdTag } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
-import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { createSupertestErrorLogger } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
   const endpointTestresources = getService('endpointTestResources');
-  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
@@ -46,15 +37,23 @@ export default function ({ getService }: FtrProviderContext) {
         ensureSpaceIdExists(kbnServer, 'space_b', { log }),
       ]);
 
+      log.info(`Loading endpoint data into space_a`);
+
       dataSpaceA = await endpointTestresources.loadEndpointData({
         spaceId: 'space_a',
         generatorSeed: Math.random().toString(32),
       });
 
+      log.info(`Done with loading of endpoint data into space_a
+
+Loading endpoint data into space_b`);
+
       dataSpaceB = await endpointTestresources.loadEndpointData({
         spaceId: 'space_b',
         generatorSeed: Math.random().toString(32),
       });
+
+      log.info(`Done with loading of endpoint data into space_b`);
 
       log.verbose(
         `mocked data loaded:\nSPACE A:\n${JSON.stringify(
@@ -194,79 +193,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(body.data[dataSpaceB.hosts[0].agent.id].found).to.eql(false);
       });
-    });
-
-    describe(`Artifact management (via Lists plugin)`, () => {
-      const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
-
-      for (const artifactList of artifactLists) {
-        const listInfo =
-          ENDPOINT_ARTIFACT_LISTS[artifactList as keyof typeof ENDPOINT_ARTIFACT_LISTS];
-
-        describe(`for ${listInfo.name}`, () => {
-          let itemDataSpaceA: ArtifactTestData;
-
-          beforeEach(async () => {
-            itemDataSpaceA = await endpointArtifactTestResources.createArtifact(
-              listInfo.id,
-              { tags: [] },
-              { supertest: adminSupertest, spaceId: dataSpaceA.spaceId }
-            );
-          });
-
-          afterEach(async () => {
-            if (itemDataSpaceA) {
-              await itemDataSpaceA.cleanup();
-              // @ts-expect-error assigning `undefined`
-              itemDataSpaceA = undefined;
-            }
-          });
-
-          it('should add owner space id when item is created', async () => {
-            expect(itemDataSpaceA.artifact.tags).to.include.string(
-              buildSpaceOwnerIdTag(dataSpaceA.spaceId)
-            );
-          });
-
-          it('should not add owner space id during artifact update if one is already present', async () => {
-            const { body } = await adminSupertest
-              .put(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
-              .set('elastic-api-version', '2023-10-31')
-              .set('x-elastic-internal-origin', 'kibana')
-              .set('kbn-xsrf', 'true')
-              .on('error', createSupertestErrorLogger(log))
-              .send(
-                exceptionItemToCreateExceptionItem({
-                  ...itemDataSpaceA.artifact,
-                  description: 'item was updated',
-                })
-              )
-              .expect(200);
-
-            expect((body as ExceptionListItemSchema).tags).to.eql(itemDataSpaceA.artifact.tags);
-          });
-
-          it('should add owner space id when item is updated, if one is not present', async () => {
-            const { body } = await adminSupertest
-              .put(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
-              .set('elastic-api-version', '2023-10-31')
-              .set('x-elastic-internal-origin', 'kibana')
-              .set('kbn-xsrf', 'true')
-              .on('error', createSupertestErrorLogger(log))
-              .send(
-                exceptionItemToCreateExceptionItem({
-                  ...itemDataSpaceA.artifact,
-                  tags: [],
-                })
-              )
-              .expect(200);
-
-            expect((body as ExceptionListItemSchema).tags).to.eql([
-              buildSpaceOwnerIdTag(dataSpaceA.spaceId),
-            ]);
-          });
-        });
-      }
     });
   });
 }

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { EsQueryConfig } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
@@ -33,6 +33,7 @@ export type Evaluation = CustomMetricExpressionParams & {
   shouldFire: boolean;
   isNoData: boolean;
   bucketKey: Record<string, string>;
+  flattenGrouping?: Record<string, any>;
   context?: AdditionalContext;
 };
 
@@ -118,6 +119,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             shouldFire: result.trigger,
             isNoData: result.value === null,
             bucketKey: result.bucketKey,
+            flattenGrouping: result.flattenGrouping,
             context: {
               cloud: result.cloud,
               host: result.host,

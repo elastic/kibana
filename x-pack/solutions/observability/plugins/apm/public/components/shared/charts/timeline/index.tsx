@@ -27,9 +27,16 @@ export interface TimelineProps {
   xMin?: number;
   xMax?: number;
   margins: Margins;
+  numberOfTicks?: number;
 }
 
-export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelineProps) {
+export function TimelineAxisContainer({
+  xMax,
+  xMin,
+  margins,
+  marks,
+  numberOfTicks,
+}: TimelineProps) {
   const [width, setWidth] = useState(0);
   if (xMax === undefined) {
     return null;
@@ -38,10 +45,14 @@ export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelinePr
   return (
     <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
       {(resizeRef) => {
-        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const plotValues = getPlotValues({ width, xMin, xMax, margins, numberOfTicks });
         const topTraceDuration = xMax - (xMin ?? 0);
         return (
-          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+          <div
+            style={{ width: '100%', height: '100%' }}
+            ref={resizeRef}
+            data-test-subj="timeline-axis-container"
+          >
             <TimelineAxis
               plotValues={plotValues}
               marks={marks}

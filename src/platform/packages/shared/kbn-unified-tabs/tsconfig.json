@@ -4,10 +4,6 @@
     "outDir": "target/types"
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": [
-    "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/i18n",
-  ]
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/i18n", "@kbn/es-query", "@kbn/core-chrome-browser", "@kbn/core"]
 }

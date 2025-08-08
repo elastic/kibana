@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { type ESQLAstQueryExpression, parse, ESQLCommandOption, EditorError } from '@kbn/esql-ast';
-import { isColumnItem, isOptionItem } from '@kbn/esql-validation-autocomplete';
+import {
+  type ESQLAstQueryExpression,
+  parse,
+  ESQLCommandOption,
+  EditorError,
+  isColumn,
+  isOptionNode,
+} from '@kbn/esql-ast';
 import { isAggregatingQuery } from './compute_if_esql_query_aggregating';
 
 export interface ParseEsqlQueryResult {
@@ -42,7 +48,7 @@ function computeHasMetadataOperator(astExpression: ESQLAstQueryExpression): bool
 
   // Check whether the `metadata` operator has `_id` argument
   const idColumnItem = metadataOption.args.find(
-    (fromArg) => isColumnItem(fromArg) && fromArg.name === '_id'
+    (fromArg) => isColumn(fromArg) && fromArg.name === '_id'
   );
   if (!idColumnItem) {
     return false;
@@ -60,7 +66,7 @@ function getMetadataOption(astExpression: ESQLAstQueryExpression): ESQLCommandOp
 
   // Check whether the `from` command has `metadata` operator
   for (const fromArg of fromCommand.args) {
-    if (isOptionItem(fromArg) && fromArg.name === 'metadata') {
+    if (isOptionNode(fromArg) && fromArg.name === 'metadata') {
       return fromArg;
     }
   }

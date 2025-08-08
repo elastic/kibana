@@ -412,6 +412,176 @@
       },
       {
         "parentPluginId": "@kbn/core-notifications-browser",
+        "id": "def-public.NotificationCoordinatorPublicApi",
+        "type": "Interface",
+        "tags": [
+          "description"
+        ],
+        "label": "NotificationCoordinatorPublicApi",
+        "description": [],
+        "path": "src/core/packages/notifications/browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorPublicApi.optInToCoordination",
+            "type": "Function",
+            "tags": [],
+            "label": "optInToCoordination",
+            "description": [
+              "\nMethod that opts in a some observable to the notification coordination."
+            ],
+            "signature": [
+              "<T extends { id: string; }[]>($: ",
+              "Observable",
+              "<T>, cond: (coordinatorState: ",
+              "NotificationCoordinatorState",
+              ") => boolean) => ",
+              "Observable",
+              "<T>"
+            ],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-notifications-browser",
+                "id": "def-public.NotificationCoordinatorPublicApi.optInToCoordination.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "$",
+                "description": [],
+                "signature": [
+                  "Observable",
+                  "<T>"
+                ],
+                "path": "src/core/packages/notifications/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-notifications-browser",
+                "id": "def-public.NotificationCoordinatorPublicApi.optInToCoordination.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "cond",
+                "description": [],
+                "signature": [
+                  "(coordinatorState: ",
+                  "NotificationCoordinatorState",
+                  ") => boolean"
+                ],
+                "path": "src/core/packages/notifications/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorPublicApi.acquireLock",
+            "type": "Function",
+            "tags": [],
+            "label": "acquireLock",
+            "description": [
+              "\nAcquires a lock for the registrar bounded to this method."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorPublicApi.releaseLock",
+            "type": "Function",
+            "tags": [],
+            "label": "releaseLock",
+            "description": [
+              "\nReleases the lock for the registrar bounded to this method."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorPublicApi.lock$",
+            "type": "Object",
+            "tags": [],
+            "label": "lock$",
+            "description": [
+              "\nObservable that emits the current state of the notification coordinator."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "NotificationCoordinatorState",
+              ">"
+            ],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-notifications-browser",
+        "id": "def-public.NotificationCoordinatorState",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotificationCoordinatorState",
+        "description": [
+          "\nSpecifies the internal state of {@link NotificationCoordinatorPublicApi}."
+        ],
+        "path": "src/core/packages/notifications/browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorState.locked",
+            "type": "boolean",
+            "tags": [],
+            "label": "locked",
+            "description": [],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinatorState.controller",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controller",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-notifications-browser",
         "id": "def-public.NotificationsSetup",
         "type": "Interface",
         "tags": [],
@@ -436,6 +606,37 @@
             "path": "src/core/packages/notifications/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationsSetup.coordinator",
+            "type": "Function",
+            "tags": [],
+            "label": "coordinator",
+            "description": [
+              "\n{@link NotificationCoordinator}"
+            ],
+            "signature": [
+              "(registrar: string) => ",
+              "NotificationCoordinatorPublicApi"
+            ],
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-notifications-browser",
+                "id": "def-public.NotificationsSetup.coordinator.$1",
+                "type": "string",
+                "tags": [],
+                "label": "registrar",
+                "description": [],
+                "path": "src/core/packages/notifications/browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -560,6 +761,38 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-notifications-browser",
+        "id": "def-public.NotificationCoordinator",
+        "type": "Type",
+        "tags": [
+          "description"
+        ],
+        "label": "NotificationCoordinator",
+        "description": [],
+        "signature": [
+          "(registrar: string) => ",
+          "NotificationCoordinatorPublicApi"
+        ],
+        "path": "src/core/packages/notifications/browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-notifications-browser",
+            "id": "def-public.NotificationCoordinator.$1",
+            "type": "string",
+            "tags": [],
+            "label": "registrar",
+            "description": [],
+            "path": "src/core/packages/notifications/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-notifications-browser",
         "id": "def-public.Toast",

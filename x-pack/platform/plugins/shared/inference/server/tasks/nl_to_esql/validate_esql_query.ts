@@ -6,7 +6,6 @@
  */
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
@@ -25,7 +24,7 @@ export async function runAndValidateEsqlQuery({
   error?: Error;
   errorMessages?: string[];
 }> {
-  const { errors } = await validateQuery(query, getAstAndSyntaxErrors, {
+  const { errors } = await validateQuery(query, {
     // setting this to true, we don't want to validate the index / fields existence
     ignoreOnMissingCallbacks: true,
   });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RenderCompleteListener } from './render_complete_listener';
 export {
   dispatchRenderStart,
   dispatchRenderComplete,

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { ChatForm } from '../../../types';
+import { PlaygroundForm } from '../../../types';
 import { LangchainPythonExmaple } from './py_langchain_python';
 
 describe('LangchainPythonExmaple component', () => {
@@ -21,12 +21,16 @@ describe('LangchainPythonExmaple component', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
     const { container } = render(
-      <LangchainPythonExmaple formValues={formValues} clientDetails={clientDetails} />
+      <LangchainPythonExmaple
+        formValues={formValues}
+        formErrors={{}}
+        clientDetails={clientDetails}
+      />
     );
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
@@ -42,12 +46,16 @@ describe('LangchainPythonExmaple component', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
     const { container } = render(
-      <LangchainPythonExmaple formValues={formValues} clientDetails={clientDetails} />
+      <LangchainPythonExmaple
+        formValues={formValues}
+        formErrors={{}}
+        clientDetails={clientDetails}
+      />
     );
 
     expect(container.firstChild?.textContent).toMatchSnapshot();

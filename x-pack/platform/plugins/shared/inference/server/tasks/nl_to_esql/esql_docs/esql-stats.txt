@@ -1,57 +1,32 @@
-# STATS ... BY
+# STATS
 
-The `STATS ... BY` command groups rows based on a common value and calculates one or more aggregated values over these grouped rows.
+The `STATS` command groups rows based on a common value and calculates one or more aggregated values over the grouped rows.
 
 ## Syntax
 
-```esql
-STATS [column1 =] expression1[, ..., [columnN =] expressionN] [BY grouping_expression1[, ..., grouping_expressionN]]
-```
+`STATS [column1 =] expression1 [WHERE boolean_expression1][, ..., [columnN =] expressionN [WHERE boolean_expressionN]] [BY grouping_expression1[, ..., grouping_expressionN]]`
 
 ### Parameters
 
-#### columnX
+#### `columnX`
 
-The name for the aggregated value in the output. If not provided, the name defaults to the corresponding expression (`expressionX`).
+The name by which the aggregated value is returned. If omitted, the name defaults to the corresponding expression (`expressionX`). If multiple columns have the same name, all but the rightmost column with this name are ignored.
 
-#### expressionX
+#### `expressionX`
 
 An expression that computes an aggregated value.
 
-#### grouping_expressionX
+#### `grouping_expressionX`
 
 An expression that outputs the values to group by. If its name coincides with one of the computed columns, that column will be ignored.
 
-## Description
+#### `boolean_expressionX`
 
-The `STATS ... BY` command groups rows based on a common value and calculates one or more aggregated values over these grouped rows.
-If `BY` is omitted, the output table contains exactly one row with the aggregations applied over the entire dataset.
-
-The following aggregation functions are supported:
-
-- `AVG`
-- `COUNT`
-- `COUNT_DISTINCT`
-- `MAX`
-- `MEDIAN`
-- `MEDIAN_ABSOLUTE_DEVIATION`
-- `MIN`
-- `PERCENTILE`
-- `ST_CENTROID_AGG`
-- `STD_DEV`
-- `SUM`
-- `TOP`
-- `VALUES`
-- `WEIGHTED_AVG`
-
-The following grouping functions are supported:
-
-- `BUCKET`
-- `CATEGORIZE`
+The condition that must be met for a row to be included in the evaluation of `expressionX`.
 
 ## Examples
 
-Calculate a statistic and group by the values of another column:
+### Calculating a statistic and grouping by the values of another column
 
 ```esql
 FROM employees
@@ -59,50 +34,87 @@ FROM employees
 | SORT languages
 ```
 
-Omitting `BY` returns one row with the aggregations applied over the entire dataset:
+Group rows by the `languages` column and calculate the count of `emp_no` for each group.
+
+### Omitting `BY` to return one row with the aggregations applied over the entire dataset
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages)
 ```
 
-It’s possible to calculate multiple values:
+Calculate the average number of languages across all rows.
+
+### Calculating multiple values
 
 ```esql
 FROM employees
 | STATS avg_lang = AVG(languages), max_lang = MAX(languages)
 ```
 
-If the grouping key is multivalued then the input row is in all groups:
+Calculate both the average and maximum number of languages.
 
-```esql
-ROW i=1, a=["a", "b"] | STATS MIN(i) BY a | SORT a ASC
-```
-
-It’s also possible to group by multiple values:
+### Filtering rows that go into an aggregation using `WHERE`
 
 ```esql
 FROM employees
-| EVAL hired = DATE_FORMAT("YYYY", hire_date)
+| STATS avg50s = AVG(salary)::LONG WHERE birth_date < "1960-01-01"
+```
+
+Group rows by `gender` and calculate the average salary for employees born before and after 1960.
+
+### Mixing aggregations with and without filters, and optional grouping
+
+```esql
+FROM employees
+| EVAL Ks = salary / 1000 // thousands
+| STATS under_40K = COUNT(*) WHERE Ks < 40, inbetween = COUNT(*) WHERE Ks >= 40 and Ks <= 60, over_60K = COUNT(*) WHERE Ks > 60, total = COUNT(*)
+```
+
+Calculate counts for salary ranges (under 40K, between 40K and 60K, over 60K) and the total count.
+
+### Grouping by a multivalued key
+
+```esql
+ROW i=1, a=["a", "b"]
+| STATS MIN(i) BY a
+| SORT a ASC
+```
+
+Group rows by the multivalued column `a` and calculate the minimum value of `i` for each group.
+
+### Grouping by multiple values
+
+```esql
+FROM employees
+| EVAL hired = DATE_FORMAT("yyyy", hire_date)
 | STATS avg_salary = AVG(salary) BY hired, languages.long
 | EVAL avg_salary = ROUND(avg_salary)
 | SORT hired, languages.long
 ```
 
-If all grouping keys are multivalued then the input row is in all groups:
+Group rows by the year of hire and the `languages.long` column, then calculate and round the average salary for each group.
+
+### Grouping by multiple multivalued keys
 
 ```esql
-ROW i=1, a=["a", "b"], b=[2, 3] | STATS MIN(i) BY a, b | SORT a ASC, b ASC
+ROW i=1, a=["a", "b"], b=[2, 3]
+| STATS MIN(i) BY a, b
+| SORT a ASC, b ASC
 ```
 
-Both the aggregating functions and the grouping expressions accept other functions. This is useful for using `STATS...BY` on multivalue columns.
+Group rows by the multivalued columns `a` and `b` and calculate the minimum value of `i` for each group.
+
+### Using functions in aggregating and grouping expressions
 
 ```esql
 FROM employees
 | STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
 ```
 
-An example of grouping by an expression is grouping employees on the first letter of their last name:
+Calculate the average salary change using the `MV_AVG` function and round the result to 10 decimal places.
+
+### Grouping by an expression
 
 ```esql
 FROM employees
@@ -110,14 +122,18 @@ FROM employees
 | SORT `LEFT(last_name, 1)`
 ```
 
-Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query returns a column named `AVG(salary)`:
+Group rows by the first letter of the `last_name` column and calculate the count for each group.
+
+### Specifying the output column name (optional)
 
 ```esql
 FROM employees
 | STATS AVG(salary)
 ```
 
-Because this name contains special characters, it needs to be quoted with backticks (`) when using it in subsequent commands:
+Calculate the average salary. The output column name defaults to `AVG(salary)`.
+
+### Using quoted column names in subsequent commands
 
 ```esql
 FROM employees
@@ -125,16 +141,11 @@ FROM employees
 | EVAL avg_salary_rounded = ROUND(`AVG(salary)`)
 ```
 
-STATS works with grouping functions such as BUCKET, e.g. grouping data based on their timestamp:
+Use the calculated column `AVG(salary)` in subsequent commands by quoting its name.
 
-```esql
-FROM sample_data
-| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
-| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour)
-```
+## Limitations
 
-## Notes
-
-- If multiple columns share the same name, all but the rightmost column with this name are ignored.
-- `STATS` without any groups is much faster than adding a group. Grouping on a single expression is more optimized than grouping on multiple expressions.
-- If the grouping key is multivalued, the input row is included in all groups.
+- Individual `null` values are skipped when computing aggregations.
+- `STATS` without any groups is faster than adding a group.
+- Grouping on a single expression is more optimized than grouping on multiple expressions. For example, grouping on a single `keyword` column is significantly faster than grouping on two `keyword` columns.
+- Avoid combining columns with functions like `CONCAT` for grouping, as it does not improve performance.

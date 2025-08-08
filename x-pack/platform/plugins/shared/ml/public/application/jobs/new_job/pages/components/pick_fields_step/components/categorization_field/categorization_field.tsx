@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
 
+import { useGeneratedHtmlId } from '@elastic/eui';
 import { CategorizationFieldSelect } from './categorization_field_select';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { useNewJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
@@ -27,6 +28,10 @@ export const CategorizationField: FC = () => {
   );
   const isCategorizationJob = isCategorizationJobCreator(jobCreator);
 
+  const titleId = useGeneratedHtmlId({
+    prefix: 'categorizationField',
+  });
+
   useEffect(() => {
     if (jobCreator.categorizationFieldName !== categorizationFieldName) {
       jobCreator.categorizationFieldName = categorizationFieldName;
@@ -41,11 +46,12 @@ export const CategorizationField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description isOptional={isCategorizationJob === false}>
+    <Description titleId={titleId} isOptional={isCategorizationJob === false}>
       <CategorizationFieldSelect
         fields={catFields}
         changeHandler={setCategorizationFieldName}
         selectedField={categorizationFieldName}
+        titleId={titleId}
       />
     </Description>
   );

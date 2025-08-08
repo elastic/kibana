@@ -1,0 +1,162 @@
+{
+  "id": "@kbn/restorable-state",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/restorable-state",
+        "id": "def-public.createRestorableStateProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "createRestorableStateProvider",
+        "description": [],
+        "signature": [
+          "<TState extends object>() => { withRestorableState: <TComponent extends React.ComponentType<any>>(Component: TComponent) => React.ForwardRefExoticComponent<React.PropsWithoutRef<React.CustomComponentPropsWithRef<TComponent> & Pick<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<TState>, \"initialState\" | \"onInitialStateChange\">> & React.RefAttributes<",
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderApi",
+            "text": "RestorableStateProviderApi"
+          },
+          ">>; useRestorableState: <TKey extends keyof TState>(key: TKey, initialValue: InitialValue<TState, TKey>, options?: { shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey> | undefined; shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; useRestorableRef: <TKey extends keyof TState>(key: TKey, initialValue: TState[TKey], options?: { shouldStoreDefaultValueRightAway?: boolean | undefined; } | undefined) => React.MutableRefObject<TState[TKey]>; useRestorableLocalStorage: <TKey extends keyof TState>(key: TKey, localStorageKey: string, initialValue: TState[TKey]) => readonly [TState[TKey], (value: React.SetStateAction<TState[TKey]>) => void]; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/restorable-state",
+        "id": "def-public.RestorableStateProviderApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "RestorableStateProviderApi",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/restorable-state",
+            "id": "def-public.RestorableStateProviderApi.refreshInitialState",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshInitialState",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/restorable-state",
+        "id": "def-public.RestorableStateProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RestorableStateProviderProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/restorable-state",
+            "scope": "public",
+            "docId": "kibKbnRestorableStatePluginApi",
+            "section": "def-public.RestorableStateProviderProps",
+            "text": "RestorableStateProviderProps"
+          },
+          "<TState>"
+        ],
+        "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/restorable-state",
+            "id": "def-public.RestorableStateProviderProps.initialState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              "Partial<TState> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/restorable-state",
+            "id": "def-public.RestorableStateProviderProps.onInitialStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialStateChange",
+            "description": [],
+            "signature": [
+              "((initialState: Partial<TState>) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/restorable-state",
+                "id": "def-public.RestorableStateProviderProps.onInitialStateChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  "Partial<TState>"
+                ],
+                "path": "src/platform/packages/shared/kbn-restorable-state/src/restorable_state_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

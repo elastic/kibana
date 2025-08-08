@@ -6,7 +6,7 @@
  */
 
 import type { TimelineFilter } from '../objects/timeline';
-import { getDataTestSubjectSelector } from '../helpers/common';
+import { getDataTestSubjectSelector, getDataTestSubjectSelectorStartWith } from '../helpers/common';
 
 export const ADD_NOTE_BUTTON = '[data-test-subj="securitySolutionNotesAddNotesButton"]';
 
@@ -268,7 +268,7 @@ export const TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN =
 export const TIMELINE_STATUS = '[data-test-subj="timeline-save-status"]';
 
 export const ALERT_TABLE_SEVERITY_VALUES =
-  '[data-test-subj="render-content-kibana.alert.severity"]';
+  '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
 
@@ -325,3 +325,6 @@ export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
 export const TOGGLE_DATA_PROVIDER_BTN = getDataTestSubjectSelector('toggle-data-provider');
 
 export const EXPAND_ALERT_BTN = getDataTestSubjectSelector('docTableExpandToggleColumn');
+
+export const TIMELINE_ROW_RENDERERS_WRAPPER =
+  getDataTestSubjectSelectorStartWith('timeline-row-renderer-');

@@ -187,6 +187,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
         enableFindAction={true}
+        enableCustomContextMenu={true}
         options={{
           readOnly: true,
           fontSize: readOnlySettings.fontSize,

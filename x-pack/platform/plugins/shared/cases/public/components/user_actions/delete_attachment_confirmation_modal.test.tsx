@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
 import { render, screen } from '@testing-library/react';
 
-// FLAKY: https://github.com/elastic/kibana/issues/205953
-describe.skip('DeleteAttachmentConfirmationModal', () => {
+describe('DeleteAttachmentConfirmationModal', () => {
   const props = {
     title: 'My title',
     confirmButtonText: 'My button text',
@@ -29,10 +28,10 @@ describe.skip('DeleteAttachmentConfirmationModal', () => {
   });
 
   it('calls onConfirm', async () => {
-    const result = render(<DeleteAttachmentConfirmationModal {...props} />);
+    render(<DeleteAttachmentConfirmationModal {...props} />);
 
-    expect(await result.findByText('My button text')).toBeInTheDocument();
-    await userEvent.click(await result.findByText('My button text'));
+    expect(await screen.findByText('My button text')).toBeInTheDocument();
+    await userEvent.click(await screen.findByText('My button text'));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });

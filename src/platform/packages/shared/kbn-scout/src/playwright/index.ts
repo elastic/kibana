@@ -7,29 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelFixtures } from './fixtures';
-
-// Scout core fixtures: worker & test scope
-export const test = scoutFixtures;
-
-// Scout core 'space aware' fixtures: worker & test scope
-export const spaceTest = scoutParallelFixtures;
-
+// Config and utilities
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 export { expect } from './expect';
 
+// Types for Playwright options
 export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
+
+// Fixtures and Page Objects (can be extended with solution-specific logic)
+export type {
+  BrowserAuthFixture,
+  ScoutPage,
+  PageObjects, // can be extended with solution specific Page Objects
+} from './fixtures/scope/test';
+export { browserAuthFixture } from './fixtures/scope/test';
+
+// Test and worker fixtures (can be extended with solution specific fixtures)
 export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
-  ScoutPage,
-  PageObjects,
-} from './fixtures';
+} from './test/ui';
 
-// use to tag tests
+// API services (can be extended with solution specific API services)
+export type { ApiServicesFixture } from './fixtures/scope/worker/apis';
+
+// Other worker types
+export type { SamlAuth, SynthtraceFixture } from './fixtures/scope/worker';
+
+// Tagging utility
 export { tags } from './tags';
 
-export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';
+// Test entrypoints
+export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
+export { apiTest } from './test/api';

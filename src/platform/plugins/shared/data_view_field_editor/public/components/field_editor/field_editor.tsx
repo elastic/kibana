@@ -43,9 +43,11 @@ export interface FieldEditorFormState {
   submit: FormHook<Field>['submit'];
 }
 
-export interface FieldFormInternal extends Omit<Field, 'type' | 'internalType' | 'fields'> {
+export interface FieldFormInternal
+  extends Omit<Field, 'type' | 'internalType' | 'fields' | 'popularity'> {
   fields?: Record<string, { type: RuntimePrimitiveTypes }>;
   type: TypeSelection;
+  popularity?: string;
   __meta__: {
     isCustomLabelVisible: boolean;
     isCustomDescriptionVisible: boolean;
@@ -84,6 +86,7 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 
   return {
     ...field,
+    popularity: typeof field.popularity === 'number' ? String(field.popularity) : field.popularity,
     type: fieldType,
     format,
     __meta__: {
@@ -97,12 +100,15 @@ const formDeserializer = (field: Field): FieldFormInternal => {
 };
 
 const formSerializer = (field: FieldFormInternal): Field => {
-  const { __meta__, type, format, ...rest } = field;
+  const { __meta__, type, format, popularity, ...rest } = field;
+
   return {
     type: type && type[0].value!,
     // By passing "null" we are explicitly telling DataView to remove the
     // format if there is one defined for the field.
     format: format === undefined ? null : format,
+    // convert from the input string value into a number
+    popularity: typeof popularity === 'string' ? Number(popularity) || 0 : popularity,
     ...rest,
   };
 };
@@ -290,7 +296,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {field?.parentName && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
               values: { parentName: field?.parentName },

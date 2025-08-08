@@ -13,27 +13,25 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { getOptionsListMocks } from '../../mocks/api_mocks';
-import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 describe('Options list sorting button', () => {
   const mountComponent = async ({
-    api,
+    componentApi,
     displaySettings,
-    stateManager,
   }: {
-    api: any;
-    displaySettings: any;
-    stateManager: any;
+    componentApi: OptionsListComponentApi;
+    displaySettings: OptionsListDisplaySettings;
   }) => {
     const component = render(
       <OptionsListControlContext.Provider
         value={{
-          api: api as unknown as OptionsListComponentApi,
+          componentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ContextStateManager,
         }}
       >
         <OptionsListPopoverSortingButton showOnlySelected={false} />
@@ -48,12 +46,12 @@ describe('Options list sorting button', () => {
   };
 
   test('when sorting suggestions, show both sorting types for keyword field', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.field$.next({
+    const contextMock = getOptionsListContextMock();
+    contextMock.testOnlyMethods.setField({
       name: 'Test keyword field',
       type: 'keyword',
     } as DataViewField);
-    const component = await mountComponent(mocks);
+    const component = await mountComponent(contextMock);
 
     const sortingOptionsDiv = component.getByTestId('optionsListControl__sortingOptions');
     const optionsText = within(sortingOptionsDiv)
@@ -63,13 +61,13 @@ describe('Options list sorting button', () => {
   });
 
   test('sorting popover selects appropriate sorting type on load', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.field$.next({
+    const contextMock = getOptionsListContextMock();
+    contextMock.testOnlyMethods.setField({
       name: 'Test keyword field',
       type: 'keyword',
     } as DataViewField);
-    mocks.stateManager.sort.next({ by: '_key', direction: 'asc' });
-    const component = await mountComponent(mocks);
+    contextMock.componentApi.setSort({ by: '_key', direction: 'asc' });
+    const component = await mountComponent(contextMock);
 
     const sortingOptionsDiv = component.getByTestId('optionsListControl__sortingOptions');
     const optionsText = within(sortingOptionsDiv)
@@ -84,9 +82,9 @@ describe('Options list sorting button', () => {
   });
 
   test('when sorting suggestions, only show document count sorting for IP fields', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.field$.next({ name: 'Test IP field', type: 'ip' } as DataViewField);
-    const component = await mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.testOnlyMethods.setField({ name: 'Test IP field', type: 'ip' } as DataViewField);
+    const component = await mountComponent(contextMock);
 
     const sortingOptionsDiv = component.getByTestId('optionsListControl__sortingOptions');
     const optionsText = within(sortingOptionsDiv)
@@ -96,9 +94,12 @@ describe('Options list sorting button', () => {
   });
 
   test('when sorting suggestions, show "By date" sorting option for date fields', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.field$.next({ name: 'Test date field', type: 'date' } as DataViewField);
-    const component = await mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.testOnlyMethods.setField({
+      name: 'Test date field',
+      type: 'date',
+    } as DataViewField);
+    const component = await mountComponent(contextMock);
 
     const sortingOptionsDiv = component.getByTestId('optionsListControl__sortingOptions');
     const optionsText = within(sortingOptionsDiv)
@@ -108,9 +109,12 @@ describe('Options list sorting button', () => {
   });
 
   test('when sorting suggestions, show "Numerically" sorting option for number fields', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.field$.next({ name: 'Test number field', type: 'number' } as DataViewField);
-    const component = await mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.testOnlyMethods.setField({
+      name: 'Test number field',
+      type: 'number',
+    } as DataViewField);
+    const component = await mountComponent(contextMock);
 
     const sortingOptionsDiv = component.getByTestId('optionsListControl__sortingOptions');
     const optionsText = within(sortingOptionsDiv)

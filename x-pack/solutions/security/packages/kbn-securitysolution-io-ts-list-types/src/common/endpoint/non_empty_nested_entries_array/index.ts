@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import { Either } from 'fp-ts/Either';
 import { endpointEntryMatch } from '../entry_match';
 import { endpointEntryMatchAny } from '../entry_match_any';
 

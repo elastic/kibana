@@ -9,9 +9,8 @@
 
 import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
-import { FieldListSerializedStateState } from './types';
 
-const getPanelPlacementSetting = (serializedState?: FieldListSerializedStateState) => {
+const getPanelPlacementSetting = () => {
   // Consider using the serialized state to determine the width, height, and strategy
   return {
     width: 12,

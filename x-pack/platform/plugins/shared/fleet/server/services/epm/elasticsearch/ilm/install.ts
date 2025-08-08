@@ -16,7 +16,7 @@ import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 import { PackageInvalidArchiveError } from '../../../../errors';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 import { MAX_CONCURRENT_ILM_POLICIES_OPERATIONS } from '../../../../constants';
 
 export async function installILMPolicy(
@@ -30,10 +30,20 @@ export async function installILMPolicy(
   const ilmPaths = packageInstallContext.paths.filter((path) => isILMPolicy(path));
   if (!ilmPaths.length) return esReferences;
 
+  const ilmAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+
+      ilmAssetsMap.set(entry.path, entry.buffer);
+    },
+    (path) => ilmPaths.includes(path)
+  );
+
   const ilmPolicies = ilmPaths.map((path) => {
-    const body = JSON.parse(
-      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8')
-    );
+    const body = JSON.parse(getAssetFromAssetsMap(ilmAssetsMap, path).toString('utf-8'));
 
     body.policy._meta = getESAssetMetadata({ packageName: packageInfo.name });
 

@@ -8,15 +8,32 @@
  */
 
 import { UserInteractionEvent } from '../types';
-import { isMouseEvent } from './mouse';
-import { isTouchEvent } from './touch';
+import { isKeyboardEvent, getElementPosition } from './keyboard';
+import { isMouseEvent, getMouseSensorPosition } from './mouse';
+import { isTouchEvent, getTouchSensorPosition } from './touch';
 
 export { isMouseEvent, startMouseInteraction } from './mouse';
 export { isTouchEvent, startTouchInteraction } from './touch';
+export { isKeyboardEvent, startKeyboardInteraction } from './keyboard';
 
-export function getPointerPosition(e: UserInteractionEvent) {
-  if (!isMouseEvent(e) && !isTouchEvent(e)) {
-    throw new Error('Invalid event type');
+export function getSensorPosition(e: UserInteractionEvent) {
+  if (isMouseEvent(e)) {
+    return getMouseSensorPosition(e);
+  } else if (isTouchEvent(e)) {
+    return getTouchSensorPosition(e);
+  } else if (isKeyboardEvent(e) && e.target instanceof HTMLElement) {
+    return getElementPosition(e.target);
   }
-  return isTouchEvent(e) ? e.touches[0] : e;
+  throw new Error('Invalid event type');
+}
+
+export function getSensorType(e: UserInteractionEvent) {
+  if (isMouseEvent(e)) {
+    return 'mouse';
+  } else if (isTouchEvent(e)) {
+    return 'touch';
+  } else if (isKeyboardEvent(e)) {
+    return 'keyboard';
+  }
+  throw new Error('Invalid event type');
 }

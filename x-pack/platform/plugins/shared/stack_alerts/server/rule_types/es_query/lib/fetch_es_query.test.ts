@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { OnlyEsQueryRuleParams } from '../types';
+import type { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
-import { fetchEsQuery } from './fetch_es_query';
+import { fetchEsQuery, generateLink } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
   const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');
@@ -53,6 +56,16 @@ describe('fetchEsQuery', () => {
     jest.useRealTimers();
   });
   const services = {
+    // @ts-expect-error
+    share: {
+      url: {
+        locators: {
+          get: jest.fn().mockReturnValue({
+            getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+          } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+        },
+      },
+    } as SharePluginStart,
     scopedClusterClient: scopedClusterClientMock,
     logger,
     ruleResultService: mockRuleResultService,
@@ -68,80 +81,77 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {},
-          docvalue_fields: [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    filter: [
-                      {
-                        match_all: {},
-                      },
-                      {
-                        bool: {
-                          must_not: [
-                            {
-                              bool: {
-                                filter: [
-                                  {
-                                    range: {
-                                      '@timestamp': {
-                                        format: 'strict_date_optional_time',
-                                        lte: '2020-02-09T23:15:41.941Z',
-                                      },
+        aggs: {},
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      match_all: {},
+                    },
+                    {
+                      bool: {
+                        must_not: [
+                          {
+                            bool: {
+                              filter: [
+                                {
+                                  range: {
+                                    '@timestamp': {
+                                      format: 'strict_date_optional_time',
+                                      lte: '2020-02-09T23:15:41.941Z',
                                     },
                                   },
-                                ],
-                              },
+                                },
+                              ],
                             },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: date,
-                            lte: date,
                           },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: date,
+                          lte: date,
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              format: 'strict_date_optional_time||epoch_millis',
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                format: 'strict_date_optional_time||epoch_millis',
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         ignore_unavailable: true,
         index: ['test-index'],
         size: 100,
@@ -162,54 +172,51 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {},
-          docvalue_fields: [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: date,
-                            lte: date,
-                          },
+        aggs: {},
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: date,
+                          lte: date,
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              format: 'strict_date_optional_time||epoch_millis',
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                format: 'strict_date_optional_time||epoch_millis',
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         ignore_unavailable: true,
         index: ['test-index'],
         size: 100,
@@ -230,54 +237,51 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {},
-          docvalue_fields: [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
-            },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: date,
-                            lte: date,
-                          },
+        aggs: {},
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: date,
+                          lte: date,
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              format: 'strict_date_optional_time||epoch_millis',
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                format: 'strict_date_optional_time||epoch_millis',
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         ignore_unavailable: true,
         index: ['test-index'],
         size: 100,
@@ -298,81 +302,78 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              aggs: {
-                conditionSelector: {
-                  bucket_selector: {
-                    buckets_path: {
-                      compareValue: '_count',
-                    },
-                    script: 'params.compareValue < 0L',
+        aggs: {
+          groupAgg: {
+            aggs: {
+              conditionSelector: {
+                bucket_selector: {
+                  buckets_path: {
+                    compareValue: '_count',
                   },
-                },
-                topHitsAgg: {
-                  top_hits: {
-                    size: 100,
-                  },
+                  script: 'params.compareValue < 0L',
                 },
               },
-              terms: {
-                field: 'host.name',
-                size: 10,
+              topHitsAgg: {
+                top_hits: {
+                  size: 100,
+                },
               },
             },
-            groupAggCount: {
-              stats_bucket: {
-                buckets_path: 'groupAgg._count',
-              },
+            terms: {
+              field: 'host.name',
+              size: 10,
             },
           },
-          docvalue_fields: [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
+          groupAggCount: {
+            stats_bucket: {
+              buckets_path: 'groupAgg._count',
             },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: date,
-                            lte: date,
-                          },
+          },
+        },
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: date,
+                          lte: date,
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              format: 'strict_date_optional_time||epoch_millis',
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                format: 'strict_date_optional_time||epoch_millis',
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         ignore_unavailable: true,
         index: ['test-index'],
         size: 0,
@@ -399,7 +400,6 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -407,74 +407,72 @@ describe('fetchEsQuery', () => {
     expect(scopedClusterClientMock.asCurrentUser.search).toHaveBeenCalledWith(
       {
         allow_no_indices: true,
-        body: {
-          aggs: {
-            groupAgg: {
-              aggs: {
-                conditionSelector: {
-                  bucket_selector: {
-                    buckets_path: {
-                      compareValue: '_count',
-                    },
-                    script: 'params.compareValue < 0L',
+        aggs: {
+          groupAgg: {
+            aggs: {
+              conditionSelector: {
+                bucket_selector: {
+                  buckets_path: {
+                    compareValue: '_count',
                   },
-                },
-                topHitsAgg: {
-                  top_hits: {
-                    size: 100,
-                  },
+                  script: 'params.compareValue < 0L',
                 },
               },
-              terms: {
-                field: 'host.name',
-                size: 10,
+              topHitsAgg: {
+                top_hits: {
+                  size: 100,
+                },
               },
             },
-            groupAggCount: {
-              stats_bucket: {
-                buckets_path: 'groupAgg._count',
-              },
+            terms: {
+              field: 'host.name',
+              size: 10,
             },
           },
-          docvalue_fields: [
-            {
-              field: '@timestamp',
-              format: 'strict_date_optional_time',
+          groupAggCount: {
+            stats_bucket: {
+              buckets_path: 'groupAgg._count',
             },
-          ],
-          query: {
-            bool: {
-              filter: [
-                {
-                  match_all: {},
-                },
-                {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          '@timestamp': {
-                            format: 'strict_date_optional_time',
-                            gte: date,
-                            lte: date,
-                          },
+          },
+        },
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {
+                match_all: {},
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: date,
+                          lte: date,
                         },
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            '@timestamp': {
+              format: 'strict_date_optional_time||epoch_millis',
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              '@timestamp': {
-                format: 'strict_date_optional_time||epoch_millis',
-                order: 'desc',
-              },
-            },
-          ],
-        },
+        ],
         ignore_unavailable: true,
         index: ['test-index'],
         size: 0,
@@ -525,7 +523,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
     });
@@ -606,7 +603,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
     });
@@ -616,6 +612,93 @@ describe('fetchEsQuery', () => {
     );
     expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
       `Top hits result window is too large, the top hits aggregator [topHitsAgg]'s from + size must be less than or equal to: [100] but was [300]. This limit can be set by changing the [index.max_inner_result_window] index level setting.`
+    );
+  });
+
+  it('should generate a link', () => {
+    const date = '2020-02-09T23:15:41.941Z';
+    const locatorMock = {
+      getRedirectUrl: jest.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
+    } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
+    const filter = {
+      bool: {
+        filter: [
+          { match_all: {} },
+          {
+            bool: {
+              must_not: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          '@timestamp': {
+                            lte: date,
+                            format: 'strict_date_optional_time',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    const link = generateLink(defaultParams, filter, locatorMock, date, date, 'space1');
+
+    expect(link).toBe('space1/app/r?l=DISCOVER_APP_LOCATOR');
+    expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataViewSpec: {
+          id: 'es_query_rule_adhoc_data_view',
+          timeFieldName: '@timestamp',
+          title: 'test-index',
+        },
+        filters: [
+          {
+            $state: { store: 'appState' },
+            bool: {
+              filter: [
+                { match_all: {} },
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        bool: {
+                          filter: [
+                            {
+                              range: {
+                                '@timestamp': {
+                                  format: 'strict_date_optional_time',
+                                  lte: '2020-02-09T23:15:41.941Z',
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            meta: {
+              alias: 'Rule query DSL',
+              disabled: false,
+              index: 'es_query_rule_adhoc_data_view',
+              negate: false,
+              type: 'custom',
+            },
+          },
+        ],
+        isAlertResults: true,
+        timeRange: { from: '2020-02-09T23:15:41.941Z', to: '2020-02-09T23:15:41.941Z' },
+      },
+      { spaceId: 'space1' }
     );
   });
 });

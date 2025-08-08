@@ -42,6 +42,7 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        nodeConnections: null,
       });
     });
 
@@ -67,7 +68,8 @@ describe('cluster_serialization', () => {
         proxyAddress: 'localhost:9300',
         isConnected: true,
         connectedSocketsCount: 1,
-        proxySocketConnections: 3,
+        maxProxySocketConnections: 3,
+        proxySocketConnections: null,
         initialConnectTimeout: '30s',
         skipUnavailable: false,
         transportPingSchedule: '-1',
@@ -219,6 +221,85 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         securityModel: SECURITY_MODEL.API,
+        nodeConnections: null,
+      });
+    });
+
+    it('should deserialize a cluster with node connections information', () => {
+      expect(
+        deserializeCluster(
+          'test_cluster',
+          {
+            seeds: ['localhost:9300'],
+            connected: true,
+            mode: 'sniff',
+            num_nodes_connected: 1,
+            max_connections_per_cluster: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            transport: {
+              ping_schedule: '-1',
+              compress: false,
+            },
+            cluster_credentials: '::es_redacted::',
+          },
+          undefined,
+          undefined,
+          2
+        )
+      ).toEqual({
+        name: 'test_cluster',
+        mode: 'sniff',
+        seeds: ['localhost:9300'],
+        isConnected: true,
+        connectedNodesCount: 1,
+        maxConnectionsPerCluster: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        transportPingSchedule: '-1',
+        transportCompress: false,
+        securityModel: SECURITY_MODEL.API,
+        nodeConnections: 2,
+      });
+    });
+
+    it('should deserialize a cluster with proxy socket connections information', () => {
+      expect(
+        deserializeCluster(
+          'test_cluster',
+          {
+            proxy_address: 'localhost:9300',
+            mode: 'proxy',
+            connected: true,
+            num_proxy_sockets_connected: 1,
+            max_proxy_socket_connections: 3,
+            initial_connect_timeout: '30s',
+            skip_unavailable: false,
+            server_name: 'my_server_name',
+            transport: {
+              ping_schedule: '-1',
+              compress: false,
+            },
+          },
+          undefined,
+          undefined,
+          undefined,
+          3
+        )
+      ).toEqual({
+        name: 'test_cluster',
+        mode: 'proxy',
+        proxyAddress: 'localhost:9300',
+        isConnected: true,
+        connectedSocketsCount: 1,
+        maxProxySocketConnections: 3,
+        proxySocketConnections: 3,
+        initialConnectTimeout: '30s',
+        skipUnavailable: false,
+        transportPingSchedule: '-1',
+        transportCompress: false,
+        serverName: 'my_server_name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
   });

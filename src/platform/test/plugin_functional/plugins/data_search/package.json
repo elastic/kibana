@@ -1,0 +1,12 @@
+{
+  "name": "@kbn/data-search-plugin",
+  "version": "1.0.0",
+  "kibana": {
+    "version": "kibana"
+  },
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+  }
+}

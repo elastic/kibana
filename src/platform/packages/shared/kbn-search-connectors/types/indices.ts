@@ -10,10 +10,11 @@
 import {
   HealthStatus,
   IndexName,
+  IndicesIndexState,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Connector } from './connectors';
+import { Connector, ConnectorViewIndex } from './connectors';
 
 export enum IngestionStatus {
   CONFIGURED,
@@ -57,4 +58,17 @@ export interface ElasticsearchViewIndexExtension {
 
 export interface ConnectorIndex extends ElasticsearchIndex {
   connector: Connector;
+}
+
+export type ApiViewIndex = ElasticsearchIndex & ElasticsearchViewIndexExtension;
+
+export type ElasticsearchViewIndex = ConnectorViewIndex | ApiViewIndex;
+
+export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex;
+
+export interface FetchIndexResult {
+  index: IndicesIndexState & {
+    connector?: Connector;
+    count: number;
+  };
 }

@@ -15,6 +15,7 @@ const assistantTelemetry = {
   reportAssistantInvoked,
   reportAssistantMessageSent: () => {},
   reportAssistantQuickPrompt: () => {},
+  reportAssistantStarterPrompt: () => {},
   reportAssistantSettingToggled: () => {},
 };
 describe('AssistantOverlay', () => {
@@ -57,7 +58,6 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);
     expect(reportAssistantInvoked).toHaveBeenCalledWith({
       invokedBy: 'shortcut',
-      conversationId: 'Welcome',
     });
     fireEvent.keyDown(document, { key: ';', ctrlKey: true });
     expect(reportAssistantInvoked).toHaveBeenCalledTimes(1);

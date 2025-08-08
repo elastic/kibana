@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash';
 import { alertMappings } from '../../../common/saved_objects/rules/mappings';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -82,7 +82,7 @@ export const iterateFilterKureyNode = ({
 }: IterateFilterKureyNodeParams) => {
   let localStoreValue = storeValue;
   let localNestedKeys: string | undefined;
-  let localFieldName: string = '';
+  let localFieldName = '';
   if (localStoreValue === undefined) {
     localStoreValue = astFilter.type === 'function' && astFunctionType.includes(astFilter.function);
   }

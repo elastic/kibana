@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './snooze_rule_options';
+export type * from './snooze_rule_options';

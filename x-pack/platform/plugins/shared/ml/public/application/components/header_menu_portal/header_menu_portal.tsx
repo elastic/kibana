@@ -37,7 +37,9 @@ export const HeaderMenuPortal: FC<PropsWithChildren<unknown>> = ({ children }) =
 
     return () => {
       portalNode.unmount();
-      setHeaderActionMenu(undefined);
+      if (setHeaderActionMenu) {
+        setHeaderActionMenu(undefined);
+      }
     };
   }, [portalNode, setHeaderActionMenu, services]);
 

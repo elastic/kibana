@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
@@ -84,7 +84,7 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
 
           <EuiCallOut
             color="primary"
-            iconType="iInCircle"
+            iconType="info"
             size="s"
             title={
               <FormattedMessage

@@ -45,9 +45,11 @@ describe('CreateUserPage', () => {
     coreStart.http.post.mockResolvedValue({});
 
     const { findByRole, findByLabelText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <CreateUserPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <CreateUserPage />
+        </Providers>
+      )
     );
 
     fireEvent.change(await findByLabelText('Username'), { target: { value: 'jdoe' } });
@@ -80,9 +82,11 @@ describe('CreateUserPage', () => {
     };
 
     render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <CreateUserPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <CreateUserPage />
+        </Providers>
+      )
     );
 
     await waitFor(() => {
@@ -103,9 +107,11 @@ describe('CreateUserPage', () => {
     ]);
 
     const { findAllByText, findByRole, findByLabelText } = render(
-      <Providers services={coreStart} authc={authc} history={history}>
-        <CreateUserPage />
-      </Providers>
+      coreStart.rendering.addContext(
+        <Providers services={coreStart} authc={authc} history={history}>
+          <CreateUserPage />
+        </Providers>
+      )
     );
 
     fireEvent.click(await findByRole('button', { name: 'Create user' }));

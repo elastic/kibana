@@ -18,7 +18,6 @@ import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/serv
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
@@ -28,46 +27,6 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { makeTar, type Entry } from './make_tar';
-
-const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'Authorization is checked by the Saved Object client',
-    },
-  },
-  params: t.type({
-    path: t.type({
-      onboardingId: t.string,
-    }),
-    body: t.partial({
-      state: t.record(t.string, t.unknown),
-    }),
-  }),
-  async handler(resources): Promise<{ onboardingId: string }> {
-    const {
-      params: {
-        path: { onboardingId },
-        body: { state },
-      },
-      core,
-      request,
-    } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    const { id } = await saveObservabilityOnboardingFlow({
-      savedObjectsClient,
-      savedObjectId: onboardingId,
-      observabilityOnboardingState: {
-        type: 'logFiles',
-        state,
-        progress: {},
-      } as ObservabilityOnboardingFlow,
-    });
-    return { onboardingId: id };
-  },
-});
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -102,6 +61,12 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       core,
     } = resources;
 
+    /**
+     * Message is base64 encoded as it might include arbitrary error messages
+     * from user's terminal containing special characters that would otherwise
+     * break the request.
+     */
+    const decodedMessage = Buffer.from(message ?? '', 'base64').toString('utf-8');
     const coreStart = await core.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
 
@@ -129,7 +94,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
           ...observabilityOnboardingState.progress,
           [name]: {
             status,
-            message,
+            message: decodedMessage,
             payload,
           },
         },
@@ -141,7 +106,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       flow_id: id,
       step: name,
       step_status: status,
-      step_message: message,
+      step_message: decodedMessage,
       payload,
     });
 
@@ -210,10 +175,6 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
  * Elastic agent.
  *
  * If the user does not have all necessary privileges a 403 Forbidden response is returned.
- *
- * This endpoint differs from the existing `POST /internal/observability_onboarding/logs/flow`
- * endpoint in that it caters for the auto-detect flow where integrations are detected and installed
- * on the host system, rather than in the Kibana UI.
  */
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
@@ -223,22 +184,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       reason: 'Authorization is checked by the Saved Object client',
     },
   },
-  params: t.type({
-    body: t.type({
-      name: t.string,
-    }),
-  }),
   async handler(resources) {
-    const {
-      context,
-      params: {
-        body: { name },
-      },
-      core,
-      request,
-      plugins,
-      kibanaVersion,
-    } = resources;
+    const { context, core, request, plugins, kibanaVersion } = resources;
     const coreStart = await core.start();
     const {
       elasticsearch: { client },
@@ -262,10 +209,10 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
             progress: {},
           },
         }),
-        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        createShipperApiKey(client.asCurrentUser, 'standalone-elastic-agent'),
         (
           await context.resolve(['core'])
-        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        ).core.security.authc.apiKeys.create(createInstallApiKey('onboarding-install')),
         getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       ]);
 
@@ -351,6 +298,12 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     path: t.type({
       onboardingId: t.string,
     }),
+    query: t.union([
+      t.partial({
+        metricsEnabled: t.string,
+      }),
+      t.undefined,
+    ]),
     body: t.string,
   }),
   async handler({ context, request, response, params, core, plugins, services }) {
@@ -383,11 +336,13 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       });
     }
 
+    const metricsEnabled = params.query?.metricsEnabled === 'true';
     let installedIntegrations: InstalledIntegration[] = [];
     try {
       const settledResults = await ensureInstalledIntegrations(
         integrationsToInstall,
-        packageClient
+        packageClient,
+        metricsEnabled
       );
       installedIntegrations = settledResults.reduce<InstalledIntegration[]>((acc, result) => {
         if (result.status === 'fulfilled') {
@@ -472,7 +427,8 @@ export type IntegrationToInstall = RegistryIntegrationToInstall | CustomIntegrat
 
 async function ensureInstalledIntegrations(
   integrationsToInstall: IntegrationToInstall[],
-  packageClient: PackageClient
+  packageClient: PackageClient,
+  metricsEnabled: boolean = true
 ): Promise<Array<PromiseSettledResult<InstalledIntegration>>> {
   return Promise.allSettled(
     integrationsToInstall.map(async (integration) => {
@@ -481,7 +437,14 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
+        const config = await packageClient.getAgentPolicyConfigYAML(
+          pkg.name,
+          pkg.version,
+          (input) =>
+            !['httpjson', 'winlog'].includes(input.type) &&
+            (metricsEnabled || !input.type.endsWith('/metrics'))
+        );
+
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
@@ -569,6 +532,10 @@ async function ensureInstalledIntegrations(
  * ```
  */
 function parseIntegrationsTSV(tsv: string) {
+  if (tsv.trim() === '') {
+    return [];
+  }
+
   return Object.values(
     tsv
       .trim()
@@ -656,7 +623,6 @@ function generateAgentConfigTar(output: Output, installedIntegrations: Installed
 
 export const flowRouteRepository = {
   ...createFlowRoute,
-  ...updateOnboardingFlowRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
   ...integrationsInstallRoute,

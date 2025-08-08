@@ -63,7 +63,7 @@ export class TempSummaryCleanupTask {
     }
 
     if (!plugins.taskManager) {
-      this.logger.error('Missing required service during start');
+      this.logger.debug('Missing required service during start');
       return;
     }
 
@@ -108,8 +108,9 @@ export class TempSummaryCleanupTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.debug(`runTask() started`);
+    this.logger.debug(`runTask started`);
 
+    this.abortController = new AbortController();
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -126,7 +127,7 @@ export class TempSummaryCleanupTask {
 
         return;
       }
-      this.logger.error(`Error: ${err}`);
+      this.logger.debug(`Error: ${err}`);
     }
   }
 }

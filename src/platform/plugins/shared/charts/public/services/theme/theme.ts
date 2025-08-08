@@ -23,7 +23,11 @@ export class ThemeService {
   /** An observable of the current charts base theme */
   public chartsBaseTheme$ = this._chartsBaseTheme$.asObservable();
 
-  /** An observable boolean for dark mode of kibana */
+  /**
+   * An observable boolean for dark mode of kibana
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public get darkModeEnabled$(): Observable<CoreTheme> {
     if (!this.theme$) {
       throw new Error('ThemeService not initialized');
@@ -32,7 +36,11 @@ export class ThemeService {
     return this.theme$;
   }
 
-  /** A React hook for consuming the dark mode value */
+  /**
+   * A React hook for consuming the dark mode value
+   *
+   * @deprecated use `useKibanaIsDarkMode`
+   */
   public useDarkMode = (): boolean => {
     const [value, update] = useState(false);
 

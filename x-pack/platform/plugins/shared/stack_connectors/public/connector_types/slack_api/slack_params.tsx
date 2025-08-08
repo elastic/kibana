@@ -55,7 +55,7 @@ const SlackParamsFields: React.FunctionComponent<
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(text);
   const [validChannelId, setValidChannelId] = useState('');
-  const { toasts } = useKibana().notifications;
+  const { toasts } = useKibana().services.notifications;
   const allowedChannelsConfig =
     (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
       ?.allowedChannels ?? [];
@@ -140,9 +140,9 @@ const SlackParamsFields: React.FunctionComponent<
       );
       setChannelValidError([errorMessage]);
       setValidChannelId('');
-      toasts.danger({
+      toasts.addDanger({
         title: errorMessage,
-        body: channelValidErrorResp.message,
+        text: channelValidErrorResp.message,
       });
     }
   }, [toasts, channelValidErrorResp, validChannelId, editAction, text, index]);

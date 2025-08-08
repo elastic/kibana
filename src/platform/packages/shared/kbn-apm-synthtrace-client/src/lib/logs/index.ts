@@ -57,6 +57,7 @@ export type LogDocument = Fields &
     'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
+    'client.ip'?: string;
     'error.stack_trace'?: string;
     'error.exception'?: unknown;
     'error.log'?: unknown;
@@ -68,6 +69,9 @@ export type LogDocument = Fields &
     'event.duration': number;
     'event.start': Date;
     'event.end': Date;
+    'event.category'?: string;
+    'event.type'?: string;
+    'event.outcome'?: string;
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
@@ -76,8 +80,11 @@ export type LogDocument = Fields &
     svc: string;
     hostname: string;
     [LONG_FIELD_NAME]: string;
-    'http.status_code'?: number;
+    'http.response.status_code'?: number;
+    'http.response.bytes'?: number;
     'http.request.method'?: string;
+    'http.request.referrer'?: string;
+    'http.version'?: string;
     'url.path'?: string;
     'process.name'?: string;
     'kubernetes.namespace'?: string;
@@ -85,6 +92,7 @@ export type LogDocument = Fields &
     'kubernetes.container.name'?: string;
     'orchestrator.resource.name'?: string;
     tags?: string | string[];
+    'user_agent.name'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

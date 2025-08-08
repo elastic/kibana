@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 
+import { getLatestTransformId } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -70,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
-        const transformId = 'risk_score_latest_transform_default';
+        const transformId = getLatestTransformId('default');
         const defaultPipeline =
           'entity_analytics_create_eventIngest_from_timestamp-pipeline-default';
 
@@ -350,7 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = `.risk-score.risk-score-${customSpaceName}-index-template`;
         const dataStreamName = `risk-score.risk-score-${customSpaceName}`;
         const latestIndexName = `risk-score.risk-score-latest-${customSpaceName}`;
-        const transformId = `risk_score_latest_transform_${customSpaceName}`;
+        const transformId = getLatestTransformId(customSpaceName);
         const defaultPipeline = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${customSpaceName}`;
 
         await riskEngineRoutesWithNamespace.init();
@@ -637,6 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(response?.saved_objects?.[0]?.attributes).to.eql({
           dataViewId: '.alerts-security.alerts-default',
           enabled: true,
+          excludeAlertStatuses: ['closed'],
           filter: {},
           interval: '1h',
           pageSize: 3500,
@@ -645,7 +647,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 3,
+            mappingsVersion: 4,
           },
         });
       });
@@ -676,57 +678,53 @@ export default ({ getService }: FtrProviderContext) => {
 
         await es.cluster.putComponentTemplate({
           name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
               },
             },
-            version: 1,
           },
+          version: 1,
         });
 
         // Call an API to put the index template
 
         await es.indices.putIndexTemplate({
           name: indexTemplateName,
-          body: {
-            index_patterns: [indexTemplateName],
-            composed_of: [componentTemplateName],
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          index_patterns: [indexTemplateName],
+          composed_of: [componentTemplateName],
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },

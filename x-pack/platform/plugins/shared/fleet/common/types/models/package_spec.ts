@@ -40,8 +40,13 @@ export interface PackageSpecManifest {
     fields?: Array<{
       name: string;
     }>;
+    datasets?: DiscoveryDataset[];
   };
 }
+export interface DiscoveryDataset {
+  name: string;
+}
+
 export interface PackageSpecTags {
   text: string;
   asset_types?: string[];
@@ -104,6 +109,7 @@ export type PackageSpecCategory =
   | 'proxy_security'
   | 'sdk_search'
   | 'security'
+  | 'siem'
   | 'stream_processing'
   | 'support'
   | 'threat_intel'

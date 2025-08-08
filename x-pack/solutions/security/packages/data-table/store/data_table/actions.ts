@@ -7,13 +7,8 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type {
-  ColumnHeaderOptions,
-  SessionViewConfig,
-  SortColumnTable,
-  ViewSelection,
-} from '../../common/types';
-import type { InitialyzeDataTableSettings, DataTablePersistInput } from './types';
+import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../common/types';
+import type { DataTablePersistInput, InitialyzeDataTableSettings } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');
 
@@ -105,15 +100,6 @@ export const initializeDataTableSettings =
 export const setDataTableSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
   'SET_DATA_TABLE_SELECT_ALL'
 );
-
-export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_DATA_TABLE_GRAPH_EVENT_ID'
-);
-
-export const updateSessionViewConfig = actionCreator<{
-  id: string;
-  sessionViewConfig: SessionViewConfig | null;
-}>('UPDATE_DATA_TABLE_SESSION_VIEW_CONFIG');
 
 export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
   'SET_TABLE_UPDATED_AT'

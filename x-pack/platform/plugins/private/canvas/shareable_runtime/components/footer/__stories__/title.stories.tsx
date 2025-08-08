@@ -6,26 +6,42 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 
 import { ExampleContext } from '../../../test/context_example';
 import { Title, TitleComponent } from '../title';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Footer/Title', module)
-  .add('contextual: hello', () => (
+export default {
+  title: 'shareables/Footer/Title',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext source="hello" {...{ style }}>
       <Title />
     </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext source="austin" {...{ style }}>
       <Title />
     </ExampleContext>
-  ))
-  .add('component', () => (
+  ),
+
+  name: 'contextual: austin',
+};
+
+export const Component = {
+  render: () => (
     <ExampleContext {...{ style }}>
       <TitleComponent title="This is a test title." />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component',
+};

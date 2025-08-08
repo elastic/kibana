@@ -40,8 +40,6 @@ export const mockGlobalState = {
             sortDirection: 'desc',
           },
         ],
-        graphEventId: '',
-        sessionViewConfig: null,
         selectAll: false,
         id: TableId.test,
         title: '',

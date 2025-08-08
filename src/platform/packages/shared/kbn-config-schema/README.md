@@ -227,6 +227,7 @@ __Options:__
   * `validate: (value: TValue[]) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
   * `minSize: number` - defines a minimum size the array should have.
   * `maxSize: number` - defines a maximum size the array should have.
+  * `unknowns: 'ignore' | 'forbid'` - indicates whether unknown properties in nested objects should be ignored or forbidden. It is `forbid` by default unless the global validation option `stripUnknownKeys` is set to `true` when calling `validate()`.
 
 __Usage:__
 ```typescript
@@ -273,6 +274,7 @@ __Output type:__ `Record<TKey, TValue>`
 __Options:__
   * `defaultValue: Record<TKey, TValue> | Reference<Record<TKey, TValue>> | (() => Record<TKey, TValue>)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: Record<TKey, TValue>) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `unknowns: 'ignore' | 'forbid'` - indicates whether unknown properties in nested objects should be ignored or forbidden. It is `forbid` by default unless the global validation option `stripUnknownKeys` is set to `true` when calling `validate()`.
 
 __Usage:__
 ```typescript
@@ -292,6 +294,7 @@ __Output type:__ `Map<TKey, TValue>`
 __Options:__
   * `defaultValue: Map<TKey, TValue> | Reference<Map<TKey, TValue>> | (() => Map<TKey, TValue>)` - defines a default value, see [Default values](#default-values) section for more details.
   * `validate: (value: Map<TKey, TValue>) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+  * `unknowns: 'ignore' | 'forbid'` - indicates whether unknown properties in nested objects should be ignored or forbidden. It is `forbid` by default unless the global validation option `stripUnknownKeys` is set to `true` when calling `validate()`.
 
 __Usage:__
 ```typescript
@@ -345,6 +348,7 @@ const valueSchema = schema.oneOf([schema.literal('∞'), schema.number()]);
 
 __Notes:__
 * Since the result data type is a type union you should use various TypeScript type guards to get the exact type.
+* Can't use the `unknowns` option since this is implemented on top of `joi.alternatives()`, and it doesn't accept this option.
 
 ### `schema.any()`
 

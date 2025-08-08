@@ -19,22 +19,41 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
     apiUrl: schema.string(),
+    organizationId: schema.maybe(schema.string()),
+    projectId: schema.maybe(schema.string()),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
     apiUrl: schema.string(),
     defaultModel: schema.string(),
+    verificationMode: schema.maybe(
+      schema.oneOf(
+        [schema.literal('full'), schema.literal('certificate'), schema.literal('none')],
+        { defaultValue: 'full' }
+      )
+    ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    contextWindowLength: schema.maybe(schema.number({})),
   }),
 ]);
 
-export const SecretsSchema = schema.object({ apiKey: schema.string() });
+export const SecretsSchema = schema.oneOf([
+  schema.object({ apiKey: schema.string() }),
+  schema.object({
+    apiKey: schema.maybe(schema.string({ minLength: 1 })),
+    certificateData: schema.maybe(schema.string({ minLength: 1 })),
+    privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
+    caData: schema.maybe(schema.string({ minLength: 1 })),
+  }),
+]);
 
 // Run action schema
 export const RunActionParamsSchema = schema.object({
@@ -148,6 +167,7 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
   ),
   temperature: schema.maybe(schema.number()),
+  response_format: schema.maybe(schema.any()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),

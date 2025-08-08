@@ -37,7 +37,13 @@ export const createDjangoAgentInstructions = (commonOptions: AgentInstructions):
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.django.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Django',
+            })}
+          >
             $ pip install elastic-apm
           </EuiCodeBlock>
         </>

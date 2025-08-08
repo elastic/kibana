@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const aggregationGroups = [
-  'x-pack/solutions/observability/plugins',
-  'x-pack/solutions/observability/packages',
-  'x-pack/solutions/security/plugins',
-  'x-pack/solutions/security/packages',
-  'x-pack/solutions/search/plugins',
-  'x-pack/solutions/search/packages',
+// TODO: This cannot be imported until Kibana supports ESM
+// import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+const KIBANA_SOLUTIONS = ['observability', 'security', 'search', 'chat'] as const;
+
+export const aggregationGroups: string[] = [
+  ...KIBANA_SOLUTIONS.flatMap((solution) => [
+    `x-pack/solutions/${solution}/plugins`,
+    `x-pack/solutions/${solution}/packages`,
+  ]),
   'x-pack/platform/plugins',
   'x-pack/platform/packages',
   'x-pack/packages',
@@ -27,7 +29,7 @@ export const aggregationGroups = [
   'test',
 ];
 
-export const excludePaths = [
+export const excludePaths: string[] = [
   '(^|/)target($|/)',
   '^kbn',
   '^@kbn',

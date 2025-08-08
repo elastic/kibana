@@ -9,7 +9,6 @@ import { useCallback } from 'react';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, ClientMessage } from '../../assistant_context/types';
-import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
   createConversation as createConversationApi,
@@ -17,23 +16,7 @@ import {
   getConversationById,
   updateConversation,
 } from '../api/conversations';
-import { WELCOME_CONVERSATION } from './sample_conversations';
 import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
-
-export const DEFAULT_CONVERSATION_STATE: Conversation = {
-  id: '',
-  messages: [],
-  replacements: {},
-  category: 'assistant',
-  title: i18n.DEFAULT_CONVERSATION_TITLE,
-};
-
-interface CreateConversationProps {
-  cTitle: string;
-  messages?: ClientMessage[];
-  conversationIds?: string[];
-  apiConfig?: Conversation['apiConfig'];
-}
 
 interface SetApiConfigProps {
   conversation: Conversation;
@@ -47,7 +30,6 @@ interface UpdateConversationTitleProps {
 
 export interface UseConversation {
   clearConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
-  getDefaultConversation: ({ cTitle, messages }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<ClientMessage[] | undefined>;
   setApiConfig: ({
@@ -122,26 +104,6 @@ export const useConversation = (): UseConversation => {
   );
 
   /**
-   * Create a new conversation with the given conversationId, and optionally add messages
-   */
-  const getDefaultConversation = useCallback(
-    ({ cTitle, messages }: CreateConversationProps): Conversation => {
-      const newConversation: Conversation =
-        cTitle === i18n.WELCOME_CONVERSATION_TITLE
-          ? WELCOME_CONVERSATION
-          : {
-              ...DEFAULT_CONVERSATION_STATE,
-              id: '',
-              title: cTitle,
-              messages: messages != null ? messages : [],
-            };
-
-      return newConversation;
-    },
-    []
-  );
-
-  /**
    * Create a new conversation with the given conversation
    */
   const createConversation = useCallback(
@@ -167,20 +129,8 @@ export const useConversation = (): UseConversation => {
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
       if (conversation.id === '') {
-        return createConversationApi({
-          http,
-          conversation: {
-            apiConfig,
-            category: 'assistant',
-            title: conversation.title,
-            replacements: conversation.replacements,
-            excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
-            isDefault: conversation.isDefault,
-            id: '',
-            messages: conversation.messages ?? [],
-          },
-          toasts,
-        });
+        // Conversation ID is required to set API config, return empty conversation
+        return { ...conversation, apiConfig };
       } else {
         return updateConversation({
           http,
@@ -205,7 +155,6 @@ export const useConversation = (): UseConversation => {
 
   return {
     clearConversation,
-    getDefaultConversation,
     deleteConversation,
     removeLastMessage,
     setApiConfig,

@@ -11,7 +11,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isEmpty, isNumber } from 'lodash/fp';
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
@@ -22,7 +22,6 @@ import {
 } from '../../../../../../common/field_maps/field_names';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
@@ -38,7 +37,6 @@ import {
   EVENT_URL_FIELD_NAME,
   GEO_FIELD_TYPE,
   IP_FIELD_TYPE,
-  MESSAGE_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
@@ -50,9 +48,6 @@ import { HostName } from './host_name';
 import { UserName } from './user_name';
 import { AssetCriticalityLevel } from './asset_criticality_level';
 import { ServiceName } from './service_name';
-
-// simple black-list to prevent dragging and dropping fields such as message name
-const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
 // Offset top-aligned tooltips so that cell actions are more visible
 const dataGridToolTipOffset = css`
@@ -124,7 +119,7 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         value={value}
         tooltipProps={
-          isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }
+          isUnifiedDataTable ? undefined : { position: 'bottom', css: dataGridToolTipOffset }
         }
       />
     );
@@ -226,13 +221,13 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName)) {
+  } else {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
           data-test-subj="message-tool-tip"
           position="bottom"
-          className={dataGridToolTipOffset}
+          css={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -248,27 +243,7 @@ const FormattedFieldValueComponent: React.FC<{
         </EuiToolTip>
       </TruncatableText>
     ) : (
-      <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
-    );
-  } else {
-    // This should not be reached for the unified data table
-    const contentValue = getOrEmptyTagFromValue(value);
-    const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
-    return (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        fieldType={fieldType ?? ''}
-        isAggregatable={isAggregatable}
-        value={`${value}`}
-        tooltipContent={
-          fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME
-            ? null
-            : fieldName
-        }
-      >
-        {content}
-      </DefaultDraggable>
+      <span data-test-subj={`formatted-field-${fieldName}`}>{getOrEmptyTagFromValue(value)}</span>
     );
   }
 };

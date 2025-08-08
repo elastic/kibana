@@ -155,7 +155,7 @@ export const getMonitorAvailability: UMElasticsearchQueryFn<
       },
     };
 
-    const { body: result } = await uptimeEsClient.search({ body: esParams });
+    const { body: result } = await uptimeEsClient.search(esParams);
     afterKey = result?.aggregations?.monitors?.after_key as AfterKey;
     queryResults.push(formatBuckets(result?.aggregations?.monitors?.buckets || []));
   } while (afterKey !== undefined);

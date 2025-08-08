@@ -49,7 +49,7 @@ export const reindexHandler = async ({
   security,
 }: ReindexHandlerArgs): Promise<ReindexOperation> => {
   const callAsCurrentUser = dataClient.asCurrentUser;
-  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser);
+  const reindexActions = reindexActionsFactory(savedObjects, callAsCurrentUser, log);
   const reindexService = reindexServiceFactory(callAsCurrentUser, reindexActions, log, licensing);
 
   if (!(await reindexService.hasRequiredPrivileges(indexName))) {

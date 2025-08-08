@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiFlexGroup,
   EuiFlexItem,

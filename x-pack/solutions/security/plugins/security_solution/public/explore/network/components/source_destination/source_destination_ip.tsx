@@ -149,6 +149,7 @@ IpAdressesWithPorts.displayName = 'IpAdressesWithPorts';
 export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
   ({
     contextId,
+    scopeId,
     destinationGeoContinentName,
     destinationGeoCountryName,
     destinationGeoCountryIsoCode,
@@ -203,6 +204,7 @@ export const SourceDestinationIp = React.memo<SourceDestinationIpProps>(
           </EuiFlexItem>
           <EuiFlexItem>
             <GeoFields
+              scopeId={scopeId}
               contextId={contextId}
               destinationGeoContinentName={destinationGeoContinentName}
               destinationGeoCountryName={destinationGeoCountryName}

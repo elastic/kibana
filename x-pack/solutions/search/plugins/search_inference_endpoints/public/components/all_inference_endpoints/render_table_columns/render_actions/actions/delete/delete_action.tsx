@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
-import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {
-  selectedEndpoint: InferenceEndpointUI;
+  selectedEndpoint: InferenceInferenceEndpointInfo;
   onCancel: () => void;
   displayModal: boolean;
 }
@@ -29,8 +29,8 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({
     }
 
     deleteEndpoint({
-      type: selectedEndpoint.type,
-      id: selectedEndpoint.endpoint,
+      type: selectedEndpoint.task_type,
+      id: selectedEndpoint.inference_id,
     });
   };
 

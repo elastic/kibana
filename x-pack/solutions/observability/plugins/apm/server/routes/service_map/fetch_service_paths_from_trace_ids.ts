@@ -7,6 +7,10 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type {
+  ConnectionNodeLegacy,
+  ExitSpanDestinationLegacy,
+} from '../../../common/service_map/types';
 import {
   AGENT_NAME,
   PARENT_ID,
@@ -18,11 +22,6 @@ import {
   SPAN_TYPE,
   TRACE_ID,
 } from '../../../common/es_fields/apm';
-import type {
-  ConnectionNode,
-  ExternalConnectionNode,
-  ServiceConnectionNode,
-} from '../../../common/service_map';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { calculateDocsPerShard } from './calculate_docs_per_shard';
 
@@ -66,21 +65,19 @@ export async function fetchServicePathsFromTraceIds({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      terminate_after: terminateAfter,
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
+    terminate_after: terminateAfter,
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              [TRACE_ID]: traceIds,
             },
-            ...rangeQuery(startRange, endRange),
-          ],
-        },
+          },
+          ...rangeQuery(startRange, endRange),
+        ],
       },
     },
   };
@@ -178,90 +175,86 @@ export async function fetchServicePathsFromTraceIds({
             }
       
             def processAndReturnEvent(def context, def eventId) {
-              def stack = new Stack();
-              def reprocessQueue = new LinkedList();
-
-              // Avoid reprocessing the same event
+              def pathStack = new Stack();
               def visited = new HashSet();
 
-              stack.push(eventId);
+              def event = context.eventsById.get(eventId);
 
-              while (!stack.isEmpty()) {
-                def currentEventId = stack.pop();
-                def event = context.eventsById.get(currentEventId);
+              if (event == null) {
+                return null;
+              }
 
-                if (event == null || context.processedEvents.get(currentEventId) != null) {
+              pathStack.push(eventId);
+
+              // build a stack with the path from the current event to the root
+              def parentId = event['parent.id'];
+              while (parentId != null && !parentId.equals(eventId)) {
+                def parent = context.eventsById.get(parentId);
+                if (parent == null || visited.contains(parentId)) {
+                  break;
+                }
+
+                pathStack.push(parentId);
+                visited.add(parentId);
+                parentId = parent['parent.id'];
+              }
+
+              // pop the stack starting from the root to current event to build the path
+              while (!pathStack.isEmpty()) {
+                def currentEventId = pathStack.pop();
+                def currentEvent = context.eventsById.get(currentEventId);
+
+                def basePath = new ArrayList();
+
+                if (currentEvent == null || context.processedEvents.get(currentEventId) != null) {
                   continue;
                 }
-                visited.add(currentEventId);
 
                 def service = new HashMap();
-                service['service.name'] = event['service.name'];
-                service['service.environment'] = event['service.environment'];
-                service['agent.name'] = event['agent.name'];
-                
-                def basePath = new ArrayList();
-                def parentId = event['parent.id'];
+                service['service.name'] = currentEvent['service.name'];
+                service['service.environment'] = currentEvent['service.environment'];
+                service['agent.name'] = currentEvent['agent.name'];
 
-                if (parentId != null && !parentId.equals(currentEventId)) {
-                  def parent = context.processedEvents.get(parentId);
-                  
-                  if (parent == null) {
-                    
-                    // Only adds the parentId to the stack if it hasn't been visited to prevent infinite loop scenarios
-                    // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                    // doesn't have a parent, in which case we should skip it
-                    if (!visited.contains(parentId)) {
-                      stack.push(parentId);
-                      // Add currentEventId to be reprocessed once its parent is processed
-                      reprocessQueue.add(currentEventId); 
-                    }
+                def currentParentId = currentEvent['parent.id'];
+                def parent = currentParentId != null ? context.processedEvents.get(currentParentId) : null;
 
-
-                    continue;
-                  }
-
+                if (parent != null) {
                   // copy the path from the parent
                   basePath.addAll(parent.path);
                   // flag parent path for removal, as it has children
                   context.locationsToRemove.add(parent.path);
-      
+
                   // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
                   if (parent['span.destination.service.resource'] != null
                     && parent['span.destination.service.resource'] != ""
-                    && (parent['service.name'] != event['service.name']
-                      || parent['service.environment'] != event['service.environment'])
+                    && (parent['service.name'] != currentEvent['service.name']
+                      || parent['service.environment'] != currentEvent['service.environment'])
                   ) {
                     def parentDestination = getDestination(parent);
                     context.externalToServiceMap.put(parentDestination, service);
                   }
                 }
-          
+
                 def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
                 def currentLocation = service;
-        
+
                 // only add the current location to the path if it's different from the last one
                 if (lastLocation == null || !lastLocation.equals(currentLocation)) {
                   basePath.add(currentLocation);
                 }
-        
-                // if there is an outgoing span, create a new path
-                if (event['span.destination.service.resource'] != null
-                  && !event['span.destination.service.resource'].equals("")) {
 
-                  def outgoingLocation = getDestination(event);
+                // if there is an outgoing span, create a new path
+                if (currentEvent['span.destination.service.resource'] != null
+                  && !currentEvent['span.destination.service.resource'].equals("")) {
+
+                  def outgoingLocation = getDestination(currentEvent);
                   def outgoingPath = new ArrayList(basePath);
                   outgoingPath.add(outgoingLocation);
                   context.paths.add(outgoingPath);
                 }
-        
-                event.path = basePath;
-                context.processedEvents[currentEventId] = event;
 
-                // reprocess events which were waiting for their parents to be processed
-                while (!reprocessQueue.isEmpty()) {
-                  stack.push(reprocessQueue.remove());
-                }
+                currentEvent.path = basePath;
+                context.processedEvents[currentEventId] = currentEvent;
               }
 
               return null;
@@ -320,12 +313,9 @@ export async function fetchServicePathsFromTraceIds({
 
   const serviceMapParamsWithAggs = {
     ...serviceMapParams,
-    body: {
-      ...serviceMapParams.body,
-      size: 1,
-      terminate_after: numDocsPerShardAllowed,
-      aggs: serviceMapAggs,
-    },
+    size: 1,
+    terminate_after: numDocsPerShardAllowed,
+    aggs: serviceMapAggs,
   };
 
   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
@@ -337,11 +327,8 @@ export async function fetchServicePathsFromTraceIds({
     aggregations?: {
       service_map: {
         value: {
-          paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
+          paths: ConnectionNodeLegacy[][];
+          discoveredServices: ExitSpanDestinationLegacy[];
         };
       };
     };

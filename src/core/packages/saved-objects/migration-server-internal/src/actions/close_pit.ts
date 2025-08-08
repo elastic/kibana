@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Either from 'fp-ts/Either';
+import * as TaskEither from 'fp-ts/TaskEither';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
@@ -28,9 +28,7 @@ export const closePit =
   ({ client, pitId }: ClosePitParams): TaskEither.TaskEither<RetryableEsClientError, {}> =>
   () => {
     return client
-      .closePointInTime({
-        body: { id: pitId },
-      })
+      .closePointInTime({ id: pitId })
       .then((response) => {
         if (!response.succeeded) {
           throw new Error(`Failed to close PointInTime with id: ${pitId}`);

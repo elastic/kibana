@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { InfraMetadata } from '../../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../../translations';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
@@ -30,12 +31,12 @@ import { Section } from '../../../components/section';
 interface MetadataSummaryProps {
   metadata?: InfraMetadata;
   loading: boolean;
-  assetType: InventoryItemType;
+  entityType: InventoryItemType;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
-  assetType: InventoryItemType;
+  entityType: InventoryItemType;
 }
 
 export interface MetadataData {
@@ -117,7 +118,7 @@ const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataDat
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
-  assetType,
+  entityType,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -143,6 +144,12 @@ const MetadataSummaryListWrapper = ({
       id="metadata"
       extraAction={
         <EuiButtonEmpty
+          aria-label={i18n.translate(
+            'xpack.infra.assetDetails.metadataSummary.showAllMetadataButton.ariaLabel',
+            {
+              defaultMessage: 'Show all metadata',
+            }
+          )}
           data-test-subj="infraAssetDetailsMetadataShowAllButton"
           onClick={onClick}
           size="xs"
@@ -159,13 +166,13 @@ const MetadataSummaryListWrapper = ({
       }
     >
       <>
-        <MetadataExplanationMessage assetType={assetType} />
+        <MetadataExplanationMessage entityType={entityType} />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {visibleMetadata
             .filter((metadataValue) => metadataValue)
             .map((metadataValue) => (
-              <EuiFlexItem key={metadataValue.field} grow={false} style={{ width: '200px' }}>
+              <EuiFlexItem key={metadataValue.field} grow={false} css={{ width: '200px' }}>
                 <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
                   <MetadataHeader metadataValue={metadataValue} />
                   <EuiDescriptionListDescription>
@@ -183,8 +190,8 @@ const MetadataSummaryListWrapper = ({
     </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSummaryProps) => {
-  switch (assetType) {
+export const MetadataSummaryList = ({ metadata, loading, entityType }: MetadataSummaryProps) => {
+  switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
@@ -193,7 +200,7 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...hostExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     case 'container':
@@ -204,12 +211,16 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
             ...containerExtendedMetadata(metadata?.info),
           ]}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     default:
       return (
-        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+        <MetadataSummaryListWrapper
+          visibleMetadata={[]}
+          loading={loading}
+          entityType={entityType}
+        />
       );
   }
 };
@@ -217,15 +228,15 @@ export const MetadataSummaryList = ({ metadata, loading, assetType }: MetadataSu
 export const MetadataSummaryListCompact = ({
   metadata,
   loading,
-  assetType,
+  entityType,
 }: MetadataSummaryProps) => {
-  switch (assetType) {
+  switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
           visibleMetadata={hostMetadataData(metadata?.info)}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     case 'container':
@@ -233,12 +244,16 @@ export const MetadataSummaryListCompact = ({
         <MetadataSummaryListWrapper
           visibleMetadata={containerMetadataData(metadata?.info)}
           loading={loading}
-          assetType={assetType}
+          entityType={entityType}
         />
       );
     default:
       return (
-        <MetadataSummaryListWrapper visibleMetadata={[]} loading={loading} assetType={assetType} />
+        <MetadataSummaryListWrapper
+          visibleMetadata={[]}
+          loading={loading}
+          entityType={entityType}
+        />
       );
   }
 };

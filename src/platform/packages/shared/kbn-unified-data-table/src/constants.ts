@@ -16,6 +16,8 @@ export const SCORE_COLUMN_NAME = '_score';
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
+
+export const DEFAULT_PAGINATION_MODE = 'multiPage';
 /**
  * Row height might be a value from -1 to 20
  * A value of -1 automatically adjusts the row height to fit the contents.
@@ -23,6 +25,7 @@ export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 50
  */
 export const ROWS_HEIGHT_OPTIONS = {
   auto: -1,
+  single: 1,
   default: 3,
 } as const;
 export const defaultRowLineHeight = '1.6em';

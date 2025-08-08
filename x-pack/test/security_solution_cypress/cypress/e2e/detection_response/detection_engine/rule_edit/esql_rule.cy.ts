@@ -46,7 +46,7 @@ import { editFirstRule } from '../../../../tasks/alerts_detection_rules';
 import {
   saveEditedRule,
   saveEditedRuleWithNonBlockingErrors,
-  visitEditRulePage,
+  visitRuleEditPage,
 } from '../../../../tasks/edit_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -55,10 +55,7 @@ const rule = getEsqlRule();
 const expectedValidEsqlQuery =
   'from auditbeat* | stats _count=count(event.category) by event.category';
 
-// Skipping in MKI due to flake
-// Failing: See https://github.com/elastic/kibana/issues/184557
-// Failing: See https://github.com/elastic/kibana/issues/184556
-describe.skip(
+describe(
   'Detection ES|QL rules, edit',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -203,7 +200,7 @@ describe.skip(
           query: 'from fake-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
         };
         createRule(esqlRule).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
           saveEditedRuleWithNonBlockingErrors();
         });
       });
@@ -214,7 +211,7 @@ describe.skip(
           query: 'from auditbeat-* metadata _id, _version, _index | keep hello.world',
         };
         createRule(esqlRule).then((createdRule) => {
-          visitEditRulePage(createdRule.body.id);
+          visitRuleEditPage(createdRule.body.id);
           saveEditedRuleWithNonBlockingErrors();
         });
       });

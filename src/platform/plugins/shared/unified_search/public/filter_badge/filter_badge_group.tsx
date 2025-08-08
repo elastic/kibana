@@ -56,7 +56,3 @@ export function FilterBadgeGroup({
     </FilterBadgeErrorBoundary>
   );
 }
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterBadgeGroup;

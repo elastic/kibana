@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
-import { StackAlertsDeps, StackAlertsStartDeps } from './types';
+import type { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInRuleTypes } from './rule_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 

@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
-
-const borderSpec = `1px solid ${euiThemeVars.euiColorLightShade}`;
+import { useEuiTheme } from '@elastic/eui';
 
 export function NestedView({
   children,
@@ -20,30 +18,32 @@ export function NestedView({
   last?: boolean;
   isBeingDragged?: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   return isBeingDragged ? (
     <>{children}</>
   ) : (
     <div
       className={css`
-        padding-left: ${euiThemeVars.euiSizeS}; //11px
-        margin-left: ${euiThemeVars.euiSizeS}; //11px
-        border-left: ${last ? 'none' : borderSpec};
-        margin-top: -${euiThemeVars.euiSizeXS}; //-4px
-        padding-top: ${euiThemeVars.euiSizeXS}; //4px
+        padding-left: ${euiTheme.size.s}; //11px
+        margin-left: ${euiTheme.size.s}; //11px
+        border-left: ${last ? 'none' : euiTheme.border.thin};
+        margin-top: -${euiTheme.size.xs}; //-4px
+        padding-top: ${euiTheme.size.xs}; //4px
         position: relative;
-      `}
-    >
-      <div
-        className={css`
-          border-bottom: ${borderSpec};
-          border-left: ${borderSpec};
+
+        &::before {
+          content: '';
+          border-bottom: ${euiTheme.border.thin};
+          border-left: ${euiTheme.border.thin};
           position: absolute;
           top: 0;
           left: ${last ? '0px' : '-1px'};
           width: ${last ? '9px' : '10px'};
-          height: ${euiThemeVars.euiSizeL}; //25px
-        `}
-      />
+          height: calc(50% + ${euiTheme.size.xs}); // Exactly half of the height of the panel
+        }
+      `}
+    >
       {children}
     </div>
   );

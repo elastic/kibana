@@ -17,9 +17,14 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service']);
+export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
+
+export type BaseECSEntityField = z.infer<typeof BaseECSEntityField>;
+export const BaseECSEntityField = z.enum(['user', 'host', 'service', 'entity']);
+export type BaseECSEntityFieldEnum = typeof BaseECSEntityField.enum;
+export const BaseECSEntityFieldEnum = BaseECSEntityField.enum;
 
 export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
@@ -58,7 +63,12 @@ export const EngineDescriptor = z.object({
     .optional()
     .default('1m'),
   docsPerSecond: z.number().int().optional(),
-  error: z.object({}).optional(),
+  error: z
+    .object({
+      message: z.string(),
+      action: z.literal('init'),
+    })
+    .optional(),
 });
 
 export type TransformStatsMetadata = z.infer<typeof TransformStatsMetadata>;
@@ -129,7 +139,7 @@ export const InspectQuery = z.object({
 });
 
 /**
- * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
  */
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

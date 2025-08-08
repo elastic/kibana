@@ -40,29 +40,26 @@ export const NativeConnectorConfiguration: React.FC = () => {
     () => connectors.filter(({ isNative }) => isNative),
     [connectors]
   );
+
+  // TODO service_type === "" is considered unknown/custom connector multiple places replace all of them with a better solution
+  const CUSTOM_CONNECTOR = useMemo(
+    () => connectors.filter(({ serviceType }) => serviceType === ''),
+    [connectors]
+  );
+
   const BETA_CONNECTORS = useMemo(() => connectors.filter(({ isBeta }) => isBeta), [connectors]);
 
   if (!connector) {
     return <></>;
   }
 
-  const nativeConnector = NATIVE_CONNECTORS.find(
-    (connectorDefinition) => connectorDefinition.serviceType === connector.service_type
-  ) || {
-    docsUrl: '',
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    iconPath: 'custom.svg',
-    isBeta: true,
-    isNative: true,
-    keywords: [],
-    name: connector.name,
-    serviceType: connector.service_type ?? '',
-  };
+  const nativeConnector =
+    NATIVE_CONNECTORS.find(
+      (connectorDefinition) => connectorDefinition.serviceType === connector.service_type
+    ) || CUSTOM_CONNECTOR[0];
 
   const iconPath = nativeConnector.iconPath;
 
-  // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
     !connector.service_type ||
     Boolean(BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type));

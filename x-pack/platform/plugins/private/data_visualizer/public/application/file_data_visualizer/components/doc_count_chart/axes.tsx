@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React from 'react';
 import { Axis, Position } from '@elastic/charts';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LineChartPoint } from './event_rate_chart';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
@@ -24,9 +23,8 @@ function tickFormatter(d: number): string {
 export const Axes: FC<Props> = ({ chartData }) => {
   const yDomain = getYRange(chartData);
   const {
-    services: { fieldFormats, uiSettings },
+    services: { fieldFormats },
   } = useDataVisualizerKibana();
-  const useLegacyTimeAxis = uiSettings.get('visualization:useLegacyTimeAxis', false);
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
 
   return (
@@ -36,9 +34,7 @@ export const Axes: FC<Props> = ({ chartData }) => {
         position={Position.Bottom}
         showOverlappingTicks={true}
         tickFormat={(value) => xAxisFormatter.convert(value)}
-        labelFormat={useLegacyTimeAxis ? undefined : () => ''}
-        timeAxisLayerCount={useLegacyTimeAxis ? 0 : 2}
-        style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
+        labelFormat={() => ''}
       />
       <Axis id="left" position={Position.Left} tickFormat={tickFormatter} domain={yDomain} />
     </>

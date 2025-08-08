@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import './spaces_menu.scss';
-
-import type { ExclusiveUnion } from '@elastic/eui';
+import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  withEuiTheme,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable';
 import type {
@@ -52,9 +51,33 @@ interface Props {
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
 }
-class SpacesMenuUI extends Component<Props> {
+class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
+  private calculateOptimalWidth = (): number => {
+    const minWidth = 300;
+    const maxWidth = 400;
+
+    const { euiTheme } = this.props.theme;
+    const avatarWidth = parseInt(euiTheme.size.l, 10); // EUI theme size.l = 24px, matches avatar 's' size
+    const solutionBadgeWidth = this.props.allowSolutionVisibility ? 110 : 0; // 110px for badges like "Elasticsearch" or "Observability"
+    const paddingAndMargins = 48; // Rough estimate for internal padding and gaps between elements
+
+    // Find the longest space name
+    const longestSpaceName = this.props.spaces.reduce((longest, space) => {
+      return space.name.length > longest.length ? space.name : longest;
+    }, '');
+
+    // Rough estimation: 8px per character
+    const estimatedTextWidth = longestSpaceName.length * 8;
+    const totalEstimatedWidth =
+      estimatedTextWidth + avatarWidth + solutionBadgeWidth + paddingAndMargins;
+
+    // Clamp between min and max
+    return Math.min(Math.max(minWidth, totalEstimatedWidth), maxWidth);
+  };
+
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
+    const calculatedWidth = this.calculateOptimalWidth();
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -96,7 +119,6 @@ class SpacesMenuUI extends Component<Props> {
             defaultMessage: 'Spaces',
           })}
           id={this.props.id}
-          className={'spcMenu'}
           title={i18n.translate('xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle', {
             defaultMessage: 'Change current space',
           })}
@@ -104,7 +126,7 @@ class SpacesMenuUI extends Component<Props> {
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}
-          style={{ minWidth: 300, maxWidth: 320 }}
+          style={{ minWidth: calculatedWidth, maxWidth: calculatedWidth }}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,
@@ -217,7 +239,6 @@ class SpacesMenuUI extends Component<Props> {
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        className="spcMenu__manageButton"
         size="s"
         onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
@@ -227,4 +248,4 @@ class SpacesMenuUI extends Component<Props> {
   };
 }
 
-export const SpacesMenu = injectI18n(SpacesMenuUI);
+export const SpacesMenu = withEuiTheme(injectI18n(SpacesMenuUI));

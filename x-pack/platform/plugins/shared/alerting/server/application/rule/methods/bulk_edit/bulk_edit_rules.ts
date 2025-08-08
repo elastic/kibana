@@ -8,18 +8,19 @@
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
 import { cloneDeep } from 'lodash';
-import { KueryNode, nodeBuilder } from '@kbn/es-query';
-import {
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
+import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
+import type { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
-import { RuleTypeRegistry } from '../../../../types';
+import type { BulkEditActionSkipResult } from '../../../../../common/bulk_action';
+import type { RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,
   getRuleNotifyWhenType,
@@ -38,6 +39,7 @@ import {
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
   injectReferencesIntoActions,
+  injectReferencesIntoArtifacts,
 } from '../../../../rules_client/common';
 import {
   alertingAuthorizationFilterOpts,
@@ -53,15 +55,15 @@ import {
   addGeneratedActionValues,
   createNewAPIKeySet,
 } from '../../../../rules_client/lib';
-import {
+import type {
   BulkOperationError,
   RuleBulkOperationAggregation,
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
-import {
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import type {
   BulkEditFields,
   BulkEditOperation,
   BulkEditOptionsFilter,
@@ -69,17 +71,18 @@ import {
   ParamsModifier,
   ShouldIncrementRevision,
 } from './types';
-import { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
+import type { RawRuleAction, RawRule, SanitizedRule } from '../../../../types';
 import { ruleNotifyWhen } from '../../constants';
 import { actionRequestSchema, ruleDomainSchema, systemActionRequestSchema } from '../../schemas';
-import { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
+import type { RuleParams, RuleDomain, RuleSnoozeSchedule } from '../../types';
 import { findRulesSo, bulkCreateRulesSo } from '../../../../data/rule';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
   transformRuleDomainToRule,
 } from '../../transforms';
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -104,7 +107,7 @@ type RuleType = ReturnType<RuleTypeRegistry['get']>;
 // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 export interface BulkEditResult<Params extends RuleParams> {
   rules: Array<SanitizedRule<Params>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   total: number;
 }
@@ -281,7 +284,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
 }> {
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -294,7 +297,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const skipped: BulkActionSkipResult[] = [];
+  const skipped: BulkEditActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
@@ -307,6 +310,8 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       .filter(isValidInterval);
 
     prevInterval.concat(intervals);
+
+    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
 
     await pMap(
       response.saved_objects,
@@ -327,7 +332,6 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
   }
   await rulesFinder.close();
-
   const updatedInterval = rules
     .filter((rule) => rule.attributes.enabled)
     .map((rule) => rule.attributes.schedule?.interval)
@@ -440,7 +444,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   paramsModifier?: ParamsModifier<Params>;
   apiKeysMap: ApiKeysMap;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
@@ -457,24 +461,16 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
 
-    // migrate legacy actions only for SIEM rules
-    // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions as RawRuleAction[],
-      references: rule.references,
-      attributes: rule.attributes as RawRule,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
-    }
-
     const ruleActions = injectReferencesIntoActions(
       rule.id,
       rule.attributes.actions || [],
       rule.references || []
+    );
+
+    const ruleArtifacts = injectReferencesIntoArtifacts(
+      rule.id,
+      rule.attributes.artifacts,
+      rule.references
     );
 
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
@@ -543,11 +539,13 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       references,
       params: updatedParams,
       actions: actionsWithRefs,
+      artifacts: artifactsWithRefs,
     } = await extractReferences(
       context,
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
-      validatedMutatedAlertTypeParams
+      validatedMutatedAlertTypeParams,
+      ruleArtifacts ?? {}
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({
@@ -557,6 +555,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         legacyId: rule.attributes.legacyId,
         paramsWithRefs: updatedParams,
       },
+      artifactsWithRefs,
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(

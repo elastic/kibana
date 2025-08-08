@@ -19,9 +19,7 @@ export const getIndexExists = async (
         index,
         size: 0,
         allow_no_indices: true,
-        body: {
-          terminate_after: 1,
-        },
+        terminate_after: 1,
       },
       { meta: true }
     );

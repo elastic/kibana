@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionType } from '../types';
+import type { ActionType } from '../types';
 
 export function getActionTypeFeatureUsageName(actionType: ActionType) {
   return `Connector: ${actionType.name}`;

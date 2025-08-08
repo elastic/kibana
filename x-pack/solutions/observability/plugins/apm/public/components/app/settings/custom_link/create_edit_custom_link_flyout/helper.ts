@@ -48,7 +48,7 @@ export const getSelectOptions = (filters: Filter[], selectedKey: Filter['key']) 
 };
 
 const getInvalidTemplateVariables = (template: string, transaction: Transaction) => {
-  return (Mustache.parse(template) as Array<[string, string]>)
+  return Mustache.parse(template)
     .filter(([type]) => type === 'name')
     .map(([, value]) => value)
     .filter((templateVar) => get(transaction, templateVar) == null);

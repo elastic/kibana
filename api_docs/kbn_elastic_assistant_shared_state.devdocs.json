@@ -1,0 +1,493 @@
+{
+  "id": "@kbn/elastic-assistant-shared-state",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.AssistantContextValueService",
+        "type": "Class",
+        "tags": [],
+        "label": "AssistantContextValueService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.AssistantContextValueService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { setAssistantContextValue: (assistantContextValue: ",
+              "UseAssistantContext",
+              ") => () => void; getAssistantContextValue$: () => ",
+              "Observable",
+              "<",
+              "UseAssistantContext",
+              " | undefined>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.AssistantContextValueService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/assistant_context_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.AugmentMessageCodeBlocksService",
+        "type": "Class",
+        "tags": [],
+        "label": "AugmentMessageCodeBlocksService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.AugmentMessageCodeBlocksService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { registerAugmentMessageCodeBlocks: (augmentMessageCodeBlocks: ",
+              {
+                "pluginId": "@kbn/elastic-assistant-shared-state",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+                "section": "def-public.AugmentMessageCodeBlocks",
+                "text": "AugmentMessageCodeBlocks"
+              },
+              ") => () => void; getAugmentMessageCodeBlocks$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/elastic-assistant-shared-state",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+                "section": "def-public.AugmentMessageCodeBlocks",
+                "text": "AugmentMessageCodeBlocks"
+              },
+              ">; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.AugmentMessageCodeBlocksService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.CommentsService",
+        "type": "Class",
+        "tags": [],
+        "label": "CommentsService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.CommentsService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { registerActions: (actions: ",
+              {
+                "pluginId": "@kbn/elastic-assistant-shared-state",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+                "section": "def-public.CommentServiceActions",
+                "text": "CommentServiceActions"
+              },
+              ") => () => void; getActions$: () => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/elastic-assistant-shared-state",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantSharedStatePluginApi",
+                "section": "def-public.CommentServiceActions",
+                "text": "CommentServiceActions"
+              },
+              "[]>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.CommentsService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.PromptContextService",
+        "type": "Class",
+        "tags": [],
+        "label": "PromptContextService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.PromptContextService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { setPromptContext: (promptContext: Record<string, ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.PromptContextTemplate",
+                "text": "PromptContextTemplate"
+              },
+              ">) => () => void; getPromptContext$: () => ",
+              "Observable",
+              "<Record<string, ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.PromptContextTemplate",
+                "text": "PromptContextTemplate"
+              },
+              ">>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.PromptContextService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/prompt_contexts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.SignalIndexService",
+        "type": "Class",
+        "tags": [],
+        "label": "SignalIndexService",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.SignalIndexService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => { setSignalIndex: (signalIndex: string | undefined) => () => void; getSignalIndex$: () => ",
+              "Observable",
+              "<string | undefined>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.SignalIndexService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/signal_index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.AugmentMessageCodeBlocks",
+        "type": "Interface",
+        "tags": [],
+        "label": "AugmentMessageCodeBlocks",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.AugmentMessageCodeBlocks.mount",
+            "type": "Function",
+            "tags": [],
+            "label": "mount",
+            "description": [],
+            "signature": [
+              "(args: { currentConversation: ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.Conversation",
+                "text": "Conversation"
+              },
+              "; showAnonymizedValues: boolean; }) => ",
+              "UnmountCallback"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-shared-state",
+                "id": "def-public.AugmentMessageCodeBlocks.mount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-shared-state",
+                    "id": "def-public.AugmentMessageCodeBlocks.mount.$1.currentConversation",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "currentConversation",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/elastic-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnElasticAssistantPluginApi",
+                        "section": "def-public.Conversation",
+                        "text": "Conversation"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-shared-state",
+                    "id": "def-public.AugmentMessageCodeBlocks.mount.$1.showAnonymizedValues",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "showAnonymizedValues",
+                    "description": [],
+                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/augment_message_code_blocks.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-shared-state",
+        "id": "def-public.CommentServiceActions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommentServiceActions",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.CommentServiceActions.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-shared-state",
+            "id": "def-public.CommentServiceActions.mount",
+            "type": "Function",
+            "tags": [],
+            "label": "mount",
+            "description": [],
+            "signature": [
+              "(args: { message: ",
+              {
+                "pluginId": "@kbn/elastic-assistant",
+                "scope": "public",
+                "docId": "kibKbnElasticAssistantPluginApi",
+                "section": "def-public.ClientMessage",
+                "text": "ClientMessage"
+              },
+              "; }) => ",
+              "MountPoint",
+              "<HTMLElement>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-shared-state",
+                "id": "def-public.CommentServiceActions.mount.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/elastic-assistant-shared-state",
+                    "id": "def-public.CommentServiceActions.mount.$1.message",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "message",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/elastic-assistant",
+                        "scope": "public",
+                        "docId": "kibKbnElasticAssistantPluginApi",
+                        "section": "def-public.ClientMessage",
+                        "text": "ClientMessage"
+                      }
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

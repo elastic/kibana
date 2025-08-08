@@ -36,62 +36,9 @@ export const NO_TRANSLATIONS_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
 );
 
 export const GO_BACK_TO_RULES_TABLE_BUTTON = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.goToMigrationsPageButton',
+  'xpack.securitySolution.siemMigrations.rules.table.goToAutomaticMigrationsPageButton',
   {
-    defaultMessage: 'Go back to SIEM Migrations',
-  }
-);
-
-export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installSelectedRules', {
-    defaultMessage: 'Install selected ({numberOfSelectedRules})',
-    values: { numberOfSelectedRules },
-  });
-};
-
-export const REPROCESS_FAILED_RULES = (numberOfFailedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRules', {
-    defaultMessage: 'Reprocess rules ({numberOfFailedRules})',
-    values: { numberOfFailedRules },
-  });
-};
-
-export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
-  {
-    defaultMessage: 'Install translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_RULES = (numberOfAllRules: number) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRules',
-    {
-      defaultMessage:
-        'Install translated {numberOfAllRules, plural, one {rule} other {rules}} ({numberOfAllRules})',
-      values: { numberOfAllRules },
-    }
-  );
-};
-
-export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installSelectedButtonAriaLabel',
-  {
-    defaultMessage: 'Install selected translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
-  {
-    defaultMessage: 'Install all translated rules',
-  }
-);
-
-export const REPROCESS_FAILED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRulesButtonAriaLabel',
-  {
-    defaultMessage: 'Reprocess failed rules',
+    defaultMessage: 'Go back to Automatic Migrations',
   }
 );
 
@@ -120,5 +67,54 @@ export const INSTALL_AND_ENABLE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installAndEnableButtonLabel',
   {
     defaultMessage: 'Install and enable',
+  }
+);
+
+export const REPROCESS_RULES_DIALOG_TITLE = (count: number) =>
+  i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.title', {
+    defaultMessage: 'Reprocess {count} {count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
+
+export const REPROCESS_RULES_DIALOG_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessRulesDialog.description',
+  {
+    defaultMessage:
+      "You are about to reprocess selected rules and this will incur additional tokens. You have option to choose a different LLM and to switch off mapping to Elastic's prebuilt rules. These options apply only to the current execution.",
+  }
+);
+
+export const START_RULE_MIGRATION_MODAL_AI_CONNECTOR_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.aiConnectorLabel',
+  {
+    defaultMessage: 'AI connector',
+  }
+);
+
+export const START_RULE_MIGRATION_MODAL_SETUP_NEW_AI_CONNECTOR_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.setupNewAiConnectorHelpText',
+  {
+    defaultMessage: 'Configure AI Provider',
+  }
+);
+
+export const START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.prebuiltRulesLabel',
+  {
+    defaultMessage: 'Match to Elastic prebuilt rules',
+  }
+);
+
+export const START_RULE_MIGRATION_MODAL_TRANSLATE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.translate',
+  {
+    defaultMessage: 'Translate',
+  }
+);
+
+export const START_RULE_MIGRATION_MODAL_CANCEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.startRuleMigrationModal.cancel',
+  {
+    defaultMessage: 'Cancel',
   }
 );

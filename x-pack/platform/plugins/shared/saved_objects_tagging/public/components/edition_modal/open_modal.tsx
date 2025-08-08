@@ -39,12 +39,7 @@ const LazyEditTagModal = React.lazy(() =>
 );
 
 export const getCreateModalOpener =
-  ({
-    overlays,
-    tagClient,
-    notifications,
-    ...startServices
-  }: GetModalOpenerOptions): CreateModalOpener =>
+  ({ overlays, tagClient, notifications, rendering }: GetModalOpenerOptions): CreateModalOpener =>
   async ({ onCreate, defaultValues }: OpenCreateModalOptions) => {
     const modal = overlays.openModal(
       toMountPoint(
@@ -62,7 +57,7 @@ export const getCreateModalOpener =
             notifications={notifications}
           />
         </React.Suspense>,
-        startServices
+        rendering
       )
     );
     return modal;
@@ -74,7 +69,7 @@ interface OpenEditModalOptions {
 }
 
 export const getEditModalOpener =
-  ({ overlays, tagClient, notifications, ...startServices }: GetModalOpenerOptions) =>
+  ({ overlays, tagClient, notifications, rendering }: GetModalOpenerOptions) =>
   async ({ tagId, onUpdate }: OpenEditModalOptions) => {
     const tag = await tagClient.get(tagId);
 
@@ -94,7 +89,7 @@ export const getEditModalOpener =
             notifications={notifications}
           />
         </React.Suspense>,
-        startServices
+        rendering
       )
     );
 

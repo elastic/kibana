@@ -29,7 +29,6 @@ import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_
 import { getGroups } from '../../common/custom_threshold_rule/helpers/get_group';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
-
 const thresholdDefaultActionMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultActionMessage',
   {
@@ -44,7 +43,9 @@ const thresholdDefaultActionMessage = i18n.translate(
 const thresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{rule.name}}' has recovered.
+    defaultMessage: `Recovered: '{{context.reason}}'
+    
+    '{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
 `,
@@ -68,6 +69,7 @@ export const registerObservabilityRuleTypes = (
     criteria: CustomMetricExpressionParams[];
     searchConfiguration: CustomThresholdSearchSourceFields;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
+
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     description: i18n.translate(
@@ -97,6 +99,7 @@ export const registerObservabilityRuleTypes = (
         criteria.length === 1 ? criteria[0].metrics : [];
 
       const dataViewId = getDataViewId(searchConfiguration);
+
       return {
         reason: fields[ALERT_REASON] ?? '-',
         link: getViewInAppUrl({

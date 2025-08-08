@@ -10,7 +10,7 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, OptionsForUnknowns } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
@@ -65,10 +65,6 @@ type ExtendedObjectType<P extends Props, NP extends NullableProps> = ObjectType<
 type ExtendedObjectTypeOptions<P extends Props, NP extends NullableProps> = ObjectTypeOptions<
   ExtendedProps<P, NP>
 >;
-
-interface UnknownOptions {
-  unknowns?: OptionsForUnknowns;
-}
 
 interface ObjectTypeOptionsMeta {
   /**

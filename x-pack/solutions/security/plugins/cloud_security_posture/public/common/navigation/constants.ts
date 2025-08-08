@@ -12,7 +12,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { NAV_ITEMS_NAMES } from '@kbn/cloud-security-posture/src/constants/navigation';
 import { CNVM_POLICY_TEMPLATE } from '../../../common/constants';
-import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
+import type { CspPage, CspPageNavigationItem } from './types';
 
 const CSPM_DASHBOARD_TAB_NAME = 'Cloud';
 const KSPM_DASHBOARD_TAB_NAME = 'Kubernetes';
@@ -47,14 +47,6 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
     name: NAV_ITEMS_NAMES.BENCHMARKS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks`,
     id: 'cloud_security_posture-benchmarks',
-  },
-};
-
-export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
-  rules: {
-    name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules/:ruleId?`,
-    id: 'cloud_security_posture-benchmarks-rules',
   },
 };
 

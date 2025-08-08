@@ -16,12 +16,12 @@ import {
   SaveResult,
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import {
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
-  isSavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/common';
 import { getNotifications } from '../../services';
+import {
+  VisualizeByReferenceInput,
+  VisualizeByValueInput,
+  VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -34,76 +34,57 @@ export const ATTRIBUTE_SERVICE_KEY = 'attributes';
 export interface GenericAttributes {
   title: string;
 }
-export interface AttributeServiceUnwrapResult<
-  SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
-> {
-  attributes: SavedObjectAttributes;
-  metaInfo?: MetaInfo;
+export interface AttributeServiceUnwrapResult {
+  attributes: VisualizeSavedObjectAttributes;
+  metaInfo?: unknown;
 }
-export interface AttributeServiceOptions<
-  SavedObjectAttributes extends GenericAttributes,
-  MetaInfo extends unknown = unknown
-> {
+export interface AttributeServiceOptions {
   saveMethod: (
-    attributes: SavedObjectAttributes,
+    attributes: VisualizeSavedObjectAttributes,
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
-  unwrapMethod?: (
-    savedObjectId: string
-  ) => Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>>;
+  unwrapMethod?: (savedObjectId: string) => Promise<AttributeServiceUnwrapResult>;
 }
 
-export class AttributeService<
-  SavedObjectAttributes extends { title: string },
-  ValType extends EmbeddableInput & {
-    [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
-  } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-  MetaInfo extends unknown = unknown
-> {
-  constructor(
-    private type: string,
-    private options: AttributeServiceOptions<SavedObjectAttributes, MetaInfo>
-  ) {}
+export class AttributeService {
+  constructor(private type: string, private options: AttributeServiceOptions) {}
 
   private async defaultUnwrapMethod(
-    input: RefType
-  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
-    return Promise.resolve({ attributes: { ...(input as unknown as SavedObjectAttributes) } });
+    input: VisualizeByReferenceInput
+  ): Promise<AttributeServiceUnwrapResult> {
+    return Promise.resolve({
+      attributes: { ...(input as unknown as VisualizeSavedObjectAttributes) },
+    });
   }
 
   public async unwrapAttributes(
-    input: RefType | ValType
-  ): Promise<AttributeServiceUnwrapResult<SavedObjectAttributes, MetaInfo>> {
+    input: VisualizeByReferenceInput | VisualizeByValueInput
+  ): Promise<AttributeServiceUnwrapResult> {
     if (this.inputIsRefType(input)) {
       return this.options.unwrapMethod
         ? await this.options.unwrapMethod(input.savedObjectId)
         : await this.defaultUnwrapMethod(input);
     }
-    return { attributes: (input as ValType)[ATTRIBUTE_SERVICE_KEY] };
+    return { attributes: (input as VisualizeByValueInput)[ATTRIBUTE_SERVICE_KEY] };
   }
 
   public async wrapAttributes(
-    newAttributes: SavedObjectAttributes,
+    newAttributes: VisualizeSavedObjectAttributes,
     useRefType: boolean,
-    input?: ValType | RefType
-  ): Promise<Omit<ValType | RefType, 'id'>> {
+    input?: VisualizeByValueInput | VisualizeByReferenceInput
+  ): Promise<Omit<VisualizeByValueInput | VisualizeByReferenceInput, 'id'>> {
     const originalInput = input ? input : {};
-    const savedObjectId =
-      input && this.inputIsRefType(input)
-        ? (input as SavedObjectEmbeddableInput).savedObjectId
-        : undefined;
+    const savedObjectId = input && this.inputIsRefType(input) ? input.savedObjectId : undefined;
     if (!useRefType) {
-      return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
+      return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as VisualizeByValueInput;
     }
     try {
       const savedItem = await this.options.saveMethod(newAttributes, savedObjectId);
       if ('id' in savedItem) {
-        return { ...originalInput, savedObjectId: savedItem.id } as RefType;
+        return { ...originalInput, savedObjectId: savedItem.id } as VisualizeByReferenceInput;
       }
-      return { ...originalInput } as RefType;
+      return { ...originalInput } as VisualizeByReferenceInput;
     } catch (error) {
       getNotifications().toasts.addDanger({
         title: i18n.translate('visualizations.attributeService.saveToLibraryError', {
@@ -118,13 +99,17 @@ export class AttributeService<
     }
   }
 
-  inputIsRefType = (input: ValType | RefType): input is RefType => {
-    return isSavedObjectEmbeddableInput(input);
+  inputIsRefType = (
+    input: VisualizeByValueInput | VisualizeByReferenceInput
+  ): input is VisualizeByReferenceInput => {
+    return Boolean((input as VisualizeByReferenceInput).savedObjectId);
   };
 
-  getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
+  getInputAsValueType = async (
+    input: VisualizeByValueInput | VisualizeByReferenceInput
+  ): Promise<VisualizeByValueInput> => {
     if (!this.inputIsRefType(input)) {
-      return input as ValType;
+      return input as VisualizeByValueInput;
     }
     const { attributes } = await this.unwrapAttributes(input);
     const { savedObjectId, ...originalInputToPropagate } = input;
@@ -133,26 +118,26 @@ export class AttributeService<
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
       ...{ attributes: omit(attributes, ['title', 'description']) },
-    } as unknown as ValType;
+    } as unknown as VisualizeByValueInput;
   };
 
   getInputAsRefType = async (
-    input: ValType | RefType,
+    input: VisualizeByValueInput | VisualizeByReferenceInput,
     saveOptions?: { showSaveModal: boolean; saveModalTitle?: string } | { title: string }
-  ): Promise<RefType> => {
+  ): Promise<VisualizeByReferenceInput> => {
     if (this.inputIsRefType(input)) {
       return input;
     }
-    return new Promise<RefType>((resolve, reject) => {
+    return new Promise<VisualizeByReferenceInput>((resolve, reject) => {
       const onSave = async (props: OnSaveProps): Promise<SaveResult> => {
         await this.options.checkForDuplicateTitle(props);
         try {
-          const newAttributes = { ...(input as ValType)[ATTRIBUTE_SERVICE_KEY] };
+          const newAttributes = { ...(input as VisualizeByValueInput)[ATTRIBUTE_SERVICE_KEY] };
           newAttributes.title = props.newTitle;
           const wrappedInput = (await this.wrapAttributes(
             newAttributes,
             true
-          )) as unknown as RefType;
+          )) as unknown as VisualizeByReferenceInput;
           // Remove unneeded attributes from the original input. Note that the original panel title
           // is removed in favour of the new attributes title
           const newInput = omit(input, [ATTRIBUTE_SERVICE_KEY, 'title']);
@@ -173,7 +158,7 @@ export class AttributeService<
             title={get(
               saveOptions,
               'saveModalTitle',
-              (input as ValType)[ATTRIBUTE_SERVICE_KEY].title
+              (input as VisualizeByValueInput)[ATTRIBUTE_SERVICE_KEY].title
             )}
             showCopyOnSave={false}
             objectType={this.type}

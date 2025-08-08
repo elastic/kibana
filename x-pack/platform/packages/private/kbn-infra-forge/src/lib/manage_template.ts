@@ -22,7 +22,7 @@ export async function installTemplate(
     await client.cluster
       .putComponentTemplate({
         name: component.name,
-        ...component.template,
+        ...(component.template as Omit<IndexTemplateDef, 'name'>),
       })
       .catch((error) => logger.error(`Failed installing component > ${JSON.stringify(error)}`));
   }

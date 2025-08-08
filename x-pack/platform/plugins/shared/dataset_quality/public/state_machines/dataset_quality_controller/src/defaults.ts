@@ -32,10 +32,10 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     },
   },
   datasetUserPrivileges: {
-    canRead: true,
-    canMonitor: true,
+    datasetsPrivilages: {},
     canViewIntegrations: true,
   },
+  authorizedDatasetTypes: [],
   dataStreamStats: [],
   degradedDocStats: [],
   failedDocStats: [],

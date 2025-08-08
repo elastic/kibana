@@ -104,7 +104,7 @@ const TotalIntegrationsCount = ({
   pageCount,
   totalCount,
 }: Record<'pageCount' | 'totalCount', number>) => (
-  <EuiText size="xs" style={{ marginLeft: 8 }}>
+  <EuiText size="xs" css={{ marginLeft: 8 }}>
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
@@ -125,7 +125,7 @@ const BenchmarkSearchField = ({
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
+      <EuiFlexItem grow={true} css={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
           fullWidth
           onSearch={setLocalValue}

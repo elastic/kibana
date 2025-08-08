@@ -1,0 +1,369 @@
+{
+  "queries": [
+    {
+      "id": "cupsd_startup",
+      "title": "CUPS Daemon Startup",
+      "description": "Extracts log messages indicating that the CUPS daemon startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cupsd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "cupsd_shutdown",
+      "title": "CUPS Daemon Shutdown",
+      "description": "Extracts log messages indicating that the CUPS daemon shutdown succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "cupsd shutdown succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_client_address",
+      "title": "Warning: Client Address Issue",
+      "description": "Extracts log messages indicating a warning related to client address connection reset by peer.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "warning: can't get client address: Connection reset by peer",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "auth_failed_permission_denied",
+      "title": "Error: Authentication Failed (Permission Denied)",
+      "description": "Extracts log messages indicating authentication failure due to permission denied in replay cache code.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Authentication failed from .* \\(.*\\): Permission denied in replay cache code"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "auth_failed_connection_abort",
+      "title": "Error: Authentication Failed (Connection Abort)",
+      "description": "Extracts log messages indicating authentication failure due to software caused connection abort.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "Authentication failed from .* \\(.*\\): Software caused connection abort"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "couldnt_authenticate_user",
+      "title": "Error: Couldn't Authenticate User",
+      "description": "Extracts log messages indicating failure to authenticate a user.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Couldn't authenticate user",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "failure_registering_capabilities",
+      "title": "Error: Failure Registering Capabilities",
+      "description": "Extracts log messages indicating failure in registering capabilities with the kernel.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Failure registering capabilities with the kernel",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "kerberos_auth_failed",
+      "title": "Error: Kerberos Authentication Failed",
+      "description": "Extracts log messages indicating Kerberos authentication failure.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Kerberos authentication failed",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "anonymous_ftp_login",
+      "title": "Error: Anonymous FTP Login",
+      "description": "Extracts log messages indicating an anonymous FTP login attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "ANONYMOUS FTP LOGIN FROM .*,  \\(anonymous\\)"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "alert_exited_abnormally",
+      "title": "Error: Alert Exited Abnormally",
+      "description": "Extracts log messages indicating an alert that exited abnormally with code 1.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ALERT exited abnormally with [1]",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "audit_netlink_socket",
+      "title": "Audit: Initializing Netlink Socket",
+      "description": "Extracts log messages indicating that the audit system is initializing a netlink socket.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "audit: initializing netlink socket (disabled)",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "audit_initialized",
+      "title": "Audit: Initialized",
+      "description": "Extracts log messages indicating that the audit system has been initialized.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "audit\\(.*\\..*\\:.*\\): initialized"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "klogd_startup",
+      "title": "Klogd Startup",
+      "description": "Extracts log messages indicating that the klogd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "klogd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "syslogd_startup",
+      "title": "Syslogd Startup",
+      "description": "Extracts log messages indicating that the syslogd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "syslogd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpc_idmapd_startup",
+      "title": "RPC Idmapd Startup",
+      "description": "Extracts log messages indicating that the rpc.idmapd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rpc.idmapd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "rpc_statd_startup",
+      "title": "RPC Statd Startup",
+      "description": "Extracts log messages indicating that the rpc.statd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "rpc.statd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sdpd_startup",
+      "title": "SDPD Startup",
+      "description": "Extracts log messages indicating that the sdpd startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "sdpd startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "hcid_startup",
+      "title": "HCID Startup",
+      "description": "Extracts log messages indicating that the hcid startup succeeded.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "hcid startup succeeded",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "imps2_autodetected",
+      "title": "IMPS2 Auto-detected",
+      "description": "Extracts log messages indicating that the IMPS2 auto-detected an IntelliMouse PS/2.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "imps2: Auto-detected intellimouse PS/.*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "crypto_api_init",
+      "title": "Initializing Cryptographic API",
+      "description": "Extracts log messages indicating that the cryptographic API is being initialized.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Initializing Cryptographic API",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

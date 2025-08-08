@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EditAPMPolicyForm } from './edit_apm_policy_form';
@@ -36,7 +36,7 @@ const stories: Meta<{}> = {
 };
 export default stories;
 
-export const EditAPMPolicy: Story = () => {
+export const EditAPMPolicy: StoryFn = () => {
   const [newPolicy, setNewPolicy] = useState<NewPackagePolicy>(policy);
   const [isPolicyValid, setIsPolicyValid] = useState(true);
 

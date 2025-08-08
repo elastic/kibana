@@ -11,8 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { MlEntityFieldOperation } from '@kbn/ml-anomaly-utils';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
+import { useEntityFilterStyles } from './entity_filter_styles';
 import { blurButtonOnClick } from '../../../../../util/component_utils';
-import './_entity_filter.scss';
 
 interface EntityFilterProps {
   onFilter: (params: {
@@ -30,6 +30,8 @@ export const EntityFilter: FC<EntityFilterProps> = ({
   influencerFieldValue,
   isEmbeddable,
 }) => {
+  const { filterButton } = useEntityFilterStyles();
+
   return (
     <React.Fragment>
       <EuiToolTip
@@ -42,7 +44,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       >
         <EuiButtonIcon
           size="s"
-          className="filter-button"
+          css={filterButton}
           onClick={blurButtonOnClick(() => {
             onFilter({
               influencerFieldName,
@@ -74,7 +76,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       >
         <EuiButtonIcon
           size="s"
-          className="filter-button"
+          css={filterButton}
           onClick={blurButtonOnClick(() => {
             onFilter({
               influencerFieldName,

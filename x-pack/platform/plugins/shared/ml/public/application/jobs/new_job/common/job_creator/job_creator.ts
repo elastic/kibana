@@ -361,7 +361,7 @@ export class JobCreator {
       this._job_config.analysis_limits &&
       this._job_config.analysis_limits.model_memory_limit !== undefined
     ) {
-      return this._job_config.analysis_limits.model_memory_limit;
+      return this._job_config.analysis_limits.model_memory_limit as string;
     } else {
       return null;
     }
@@ -483,7 +483,7 @@ export class JobCreator {
 
   /**
    * Extends assigned calendars with created job id.
-   * @private
+   * @internal
    */
   private async _updateCalendars() {
     if (this._calendars.length === 0) {

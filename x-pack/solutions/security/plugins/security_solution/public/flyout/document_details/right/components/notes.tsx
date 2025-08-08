@@ -40,7 +40,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { AlertHeaderBlock } from '../../../shared/components/alert_header_block';
 import { LeftPanelNotesTab } from '../../left';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 
@@ -69,7 +69,7 @@ export const VIEW_NOTES_BUTTON_ARIA_LABEL = i18n.translate(
 export const Notes = memo(() => {
   const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
-  const { eventId, isPreview } = useDocumentDetailsContext();
+  const { eventId, isRulePreview } = useDocumentDetailsContext();
   const { addError: addErrorToast } = useAppToasts();
   const { notesPrivileges } = useUserPrivileges();
 
@@ -78,7 +78,7 @@ export const Notes = memo(() => {
       tab: LeftPanelNotesTab,
     });
 
-  const isNotesDisabled = !isLinkEnabled || isPreview;
+  const isNotesDisabled = !isLinkEnabled || isRulePreview;
   const cannotAddNotes = isNotesDisabled || !notesPrivileges.crud;
   const cannotReadNotes = isNotesDisabled || !notesPrivileges.read;
 
@@ -154,6 +154,7 @@ export const Notes = memo(() => {
 
   return (
     <AlertHeaderBlock
+      hasBorder
       title={
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.notesTitle"
@@ -162,7 +163,7 @@ export const Notes = memo(() => {
       }
       data-test-subj={NOTES_TITLE_TEST_ID}
     >
-      {isPreview ? (
+      {isRulePreview ? (
         getEmptyTagValue()
       ) : (
         <>

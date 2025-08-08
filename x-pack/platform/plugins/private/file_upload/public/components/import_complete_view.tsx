@@ -22,7 +22,7 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
-import { ImportResults } from '../importer';
+import type { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
 const services = {
@@ -167,7 +167,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'File upload complete with failures',
           })}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>

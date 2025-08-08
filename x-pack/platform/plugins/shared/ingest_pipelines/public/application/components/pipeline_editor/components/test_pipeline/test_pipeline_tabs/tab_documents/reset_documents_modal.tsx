@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
   confirmResetTestOutput: () => void;
@@ -45,11 +45,15 @@ export const ResetDocumentsModal: FunctionComponent<Props> = ({
   confirmResetTestOutput,
   closeModal,
 }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       buttonColor="danger"
       data-test-subj="resetDocumentsConfirmationModal"
       title={i18nTexts.modalTitle}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
       onConfirm={confirmResetTestOutput}
       cancelButtonText={i18nTexts.cancelButtonLabel}

@@ -221,7 +221,6 @@ export const lexerRules = {
       [/[()]/, '@brackets'],
       [/--.*$/, 'comment'],
       [/\/\*/, 'comment', '@comment'],
-      [/\/.*$/, 'comment'],
 
       [/".*?"/, 'string'],
 

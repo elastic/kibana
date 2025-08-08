@@ -22,7 +22,7 @@ export const esClient = (
 
   /*
   system_indices_superuser is a user created for testing purposes (an operator one) that does not have restrictions,
-  that user is the one used on ESS and stateless environments to access internal indexes directly and does not exist on MKI environments. 
+  that user is the one used on ESS and stateless environments to access internal indexes directly and does not exist on MKI environments.
   */
   const authOverride = isServerless ? (isCloudServerless ? user : systemIndicesSuperuser) : user;
 
@@ -36,16 +36,14 @@ export const esClient = (
     putMapping: async (index: string) => {
       await client.indices.putMapping({
         index,
-        body: {
-          dynamic: true,
-        },
+        dynamic: true,
       });
       return null;
     },
-    bulkInsert: async (body) => {
+    bulkInsert: async (operations) => {
       await client.bulk({
         refresh: true,
-        body,
+        operations,
       });
       return null;
     },
@@ -57,14 +55,20 @@ export const esClient = (
         return false;
       }
     },
+    clearCache: async () => {
+      try {
+        await client.indices.clearCache();
+        return true;
+      } catch (error) {
+        return false;
+      }
+    },
     searchIndex: async (index) => {
       try {
         const response = await client.search({
           index,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
 
@@ -98,10 +102,8 @@ export const esClient = (
     deleteDocuments: async (index: string) => {
       await client.deleteByQuery({
         index,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
         conflicts: 'proceed',
         scroll_size: 10000,
@@ -112,10 +114,8 @@ export const esClient = (
     createIndex: async ({ index: indexName, properties }) => {
       const result = await client.indices.create({
         index: indexName,
-        body: {
-          mappings: {
-            properties,
-          },
+        mappings: {
+          properties,
         },
       });
       return result;
@@ -132,17 +132,15 @@ export const esClient = (
     deleteSecurityRulesFromKibana: async () => {
       await client.deleteByQuery({
         index: '.kibana_*',
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  match: {
-                    type: 'security-rule',
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                match: {
+                  type: 'security-rule',
                 },
-              ],
-            },
+              },
+            ],
           },
         },
         conflicts: 'proceed',

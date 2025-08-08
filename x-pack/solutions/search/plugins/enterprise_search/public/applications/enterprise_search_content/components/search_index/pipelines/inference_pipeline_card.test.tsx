@@ -118,7 +118,7 @@ describe('TrainedModelHealthPopover', () => {
 
     const fixButton = wrapper.find(EuiButtonEmpty).at(0);
     expect(fixButton.prop('iconType')).toBe('wrench');
-    expect(fixButton.prop('href')).toBe('/app/ml/trained_models');
+    expect(fixButton.prop('href')).toBe('/app/management/ml/trained_models');
     expect(fixButton.children().text()).toBe('Fix issue in Trained Models');
   });
   it('popover does not render fix button when model deployed', () => {

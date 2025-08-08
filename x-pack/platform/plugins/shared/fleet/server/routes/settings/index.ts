@@ -36,6 +36,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
   if (experimentalFeatures.useSpaceAwareness) {
     router.versioned
+      // @ts-ignore https://github.com/elastic/kibana/issues/203170
       .get({
         path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
         fleetAuthz: (authz) => {
@@ -47,6 +48,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           );
         },
         summary: `Get space settings`,
+        options: {
+          availability: {
+            since: '9.1.0',
+            stability: 'stable',
+          },
+        },
       })
       .addVersion(
         {
@@ -72,6 +79,12 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
         summary: `Create space settings`,
+        options: {
+          availability: {
+            since: '9.1.0',
+            stability: 'stable',
+          },
+        },
       })
       .addVersion(
         {

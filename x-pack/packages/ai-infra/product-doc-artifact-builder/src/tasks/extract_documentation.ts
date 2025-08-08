@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import { Client as ElasticsearchClient8 } from 'elasticsearch-8.x';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
@@ -64,7 +64,7 @@ export const extractDocumentation = async ({
   productName,
   log,
 }: {
-  client: Client;
+  client: ElasticsearchClient8;
   index: string;
   stackVersion: string;
   productName: ProductName;

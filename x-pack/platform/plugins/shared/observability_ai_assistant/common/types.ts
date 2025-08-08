@@ -30,10 +30,55 @@ export interface PendingMessage {
   error?: any;
 }
 
+export interface Deanonymization {
+  start: number;
+  end: number;
+  entity: {
+    class_name: string;
+    value: string;
+    mask: string;
+  };
+}
+
+export interface DeanonymizationItem {
+  message: {
+    role: MessageRole;
+    content?: string;
+    toolCalls?: Array<{
+      function: {
+        name: string;
+        arguments: Record<string, any> | {};
+      };
+    }>;
+    name?: string;
+    response?: Record<string, any>;
+    toolCallId?: string;
+  };
+  deanonymizations: Deanonymization[];
+}
+
+export type DeanonymizationInput = DeanonymizationItem[];
+
+export interface DeanonymizationOutput {
+  message: {
+    content?: string;
+    toolCalls?: Array<{
+      toolCallId: string;
+      function: {
+        name: string;
+        arguments: Record<string, any>;
+      };
+    }>;
+    role: MessageRole;
+  };
+  deanonymizations: Deanonymization[];
+}
+
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    deanonymizations?: Deanonymization[];
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -62,6 +107,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -78,8 +124,6 @@ export interface KnowledgeBaseEntry {
   id: string;
   title?: string;
   text: string;
-  confidence: 'low' | 'medium' | 'high';
-  is_correction: boolean;
   type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
@@ -87,6 +131,8 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
+  confidence?: 'low' | 'medium' | 'high'; // deprecated
+  is_correction?: boolean; // deprecated
 }
 
 export interface Instruction {
@@ -94,20 +140,21 @@ export interface Instruction {
   text: string;
 }
 
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
-
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -152,4 +199,9 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
 }

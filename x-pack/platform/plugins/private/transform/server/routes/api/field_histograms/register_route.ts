@@ -19,17 +19,17 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .post({
       path: addInternalBasePath('field_histograms/{dataViewTitle}'),
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch',
+        },
+      },
     })
     .addVersion<DataViewTitleSchema, undefined, FieldHistogramsRequestSchema>(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch',
-          },
-        },
         validate: {
           request: {
             params: dataViewTitleSchema,

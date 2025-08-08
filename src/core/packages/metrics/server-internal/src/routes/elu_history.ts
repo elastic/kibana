@@ -36,8 +36,17 @@ export function registerEluHistoryRoute(router: IRouter, elu: () => EluMetrics) 
       enableQueryVersion: true,
       path: '/api/_elu_history',
       options: {
-        authRequired: false,
         excludeFromRateLimiter: true,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is used for internal monitoring and does not require authorization.',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route is used for internal monitoring and does not require authentication.',
+        },
       },
     })
     .addVersion(

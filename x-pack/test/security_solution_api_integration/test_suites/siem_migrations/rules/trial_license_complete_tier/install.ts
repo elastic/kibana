@@ -7,17 +7,19 @@
 
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticRule } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
+import {
+  ElasticRule,
+  RuleMigrationRuleData,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { RuleTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
-  RuleMigrationDocument,
   createMigrationRules,
   defaultElasticRule,
-  deleteAllMigrationRules,
+  deleteAllRuleMigrations,
   getMigrationRuleDocuments,
-  migrationRulesRouteHelpersFactory,
+  ruleMigrationRouteHelpersFactory,
   statsOverrideCallbackFactory,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -33,20 +35,20 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const supertest = getService('supertest');
   const securitySolutionApi = getService('securitySolutionApi');
-  const migrationRulesRoutes = migrationRulesRouteHelpersFactory(supertest);
+  const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @serverlessQA Install API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deleteAllMigrationRules(es);
+      await deleteAllRuleMigrations(es);
     });
 
     it('should install all installable custom migration rules', async () => {
       const migrationId = uuidv4();
 
-      const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+      const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
         const title = `Rule - ${index}`;
         const elasticRule = { ...defaultElasticRule, title };
         return {
@@ -63,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(installResponse.body).toEqual({ installed: 2 });
 
       // fetch installed migration rules information
-      const response = await migrationRulesRoutes.get({ migrationId });
+      const response = await migrationRulesRoutes.getRules({ migrationId });
       const installedMigrationRules = response.body.data.reduce((acc, item) => {
         if (item.elastic_rule?.id) {
           acc.push(item.elastic_rule);
@@ -100,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const migrationId = uuidv4();
 
-      const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+      const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
         const { query_language: queryLanguage, query, ...rest } = defaultElasticRule;
         return {
           migration_id: migrationId,

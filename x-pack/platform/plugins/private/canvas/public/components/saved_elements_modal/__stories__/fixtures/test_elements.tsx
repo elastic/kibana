@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '../../../../lib';
 
 export const getTestCustomElements = async () => {
-  const { elasticLogo } = await getElasticLogo();
   const testCustomElements = [
     {
       id: 'custom-element-10d625f5-1342-47c9-8f19-d174ea6b65d5',

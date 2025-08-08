@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
@@ -19,12 +24,13 @@ import type {
   SearchIndicesServicesContextDeps,
 } from './types';
 import { initQueryClient } from './services/query_client';
-import { INDICES_APP_ID, START_APP_ID } from '../common';
+import { SEARCH_INDEX_MANAGEMENT_APP_ID, INDICES_APP_ID, START_APP_ID } from '../common';
 import {
   CREATE_INDEX_PATH,
   INDICES_APP_BASE,
   START_APP_BASE,
   SearchIndexDetailsTabValues,
+  SEARCH_INDEX_MANAGEMENT_APP_BASE,
 } from './routes';
 import { registerLocators } from './locators';
 
@@ -87,6 +93,24 @@ export class SearchIndicesPlugin
         return renderApp(SearchIndicesRouter, coreStart, startDeps, element, queryClient);
       },
       visibleIn: [],
+    });
+    core.application.register({
+      id: SEARCH_INDEX_MANAGEMENT_APP_ID,
+      appRoute: SEARCH_INDEX_MANAGEMENT_APP_BASE,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      title: i18n.translate('xpack.searchIndices.elasticsearchIndices.indexManagementTitle', {
+        defaultMessage: 'Index Management',
+      }),
+      async mount({ element, history }) {
+        const { renderIndexManagementApp } = await import('./index_management_application');
+        return renderIndexManagementApp(element, {
+          core,
+          history,
+          indexManagement: plugins.indexManagement,
+        });
+      },
+      order: 1,
+      visibleIn: ['sideNav'],
     });
 
     registerLocators(plugins.share);

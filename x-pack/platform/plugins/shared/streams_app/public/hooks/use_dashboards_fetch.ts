@@ -7,8 +7,9 @@
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
-export const useDashboardsFetch = (name?: string) => {
+export const useDashboardsFetch = (name: string) => {
   const {
+    services: { telemetryClient },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -17,20 +18,27 @@ export const useDashboardsFetch = (name?: string) => {
   } = useKibana();
 
   const dashboardsFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!name) {
-        return Promise.resolve(undefined);
-      }
-      return streamsRepositoryClient.fetch('GET /api/streams/{name}/dashboards', {
-        signal,
-        params: {
-          path: {
-            name,
+    async ({ signal }) => {
+      const response = await streamsRepositoryClient.fetch(
+        'GET /api/streams/{name}/dashboards 2023-10-31',
+        {
+          signal,
+          params: {
+            path: {
+              name,
+            },
           },
-        },
+        }
+      );
+
+      telemetryClient.trackAssetCounts({
+        name,
+        dashboards: response.dashboards.length,
       });
+
+      return response;
     },
-    [name, streamsRepositoryClient]
+    [name, streamsRepositoryClient, telemetryClient]
   );
 
   return dashboardsFetch;

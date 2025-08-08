@@ -12,7 +12,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import {
   IndexedEndpointRuleAlerts,
@@ -34,7 +34,7 @@ export class DetectionsTestService extends FtrService {
    * when things fail.
    *
    * @param ignoredStatusCodes
-   * @private
+   * @internal
    *
    * @example
    *

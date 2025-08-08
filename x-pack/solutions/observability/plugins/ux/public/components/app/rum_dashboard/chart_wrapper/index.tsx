@@ -6,7 +6,7 @@
  */
 
 import React, { HTMLAttributes, ReactNode } from 'react';
-import { EuiErrorBoundary, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 
 interface Props {
   children?: ReactNode;
@@ -36,7 +36,7 @@ export function ChartWrapper({
   const opacity = loading === true ? 0.3 : 1;
 
   return (
-    <EuiErrorBoundary>
+    <>
       <div
         style={{
           height,
@@ -64,6 +64,6 @@ export function ChartWrapper({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </EuiErrorBoundary>
+    </>
   );
 }

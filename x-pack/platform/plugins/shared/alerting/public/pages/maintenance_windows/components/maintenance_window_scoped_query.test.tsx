@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
 jest.mock('../../../utils/kibana_react');

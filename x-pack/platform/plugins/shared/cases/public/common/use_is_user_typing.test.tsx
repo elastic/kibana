@@ -6,20 +6,13 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { AppMockRenderer } from './mock';
-import { createAppMockRenderer } from './mock';
 import { useIsUserTyping } from './use_is_user_typing';
+import { TestProviders } from './mock';
 
 describe('useIsUserTyping', () => {
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   it('set isUserTyping=false on init', () => {
     const { result } = renderHook(() => useIsUserTyping(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.isUserTyping).toBe(false);
@@ -27,7 +20,7 @@ describe('useIsUserTyping', () => {
 
   it('set isUserTyping to true with setIsUserTyping', () => {
     const { result } = renderHook(() => useIsUserTyping(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -39,7 +32,7 @@ describe('useIsUserTyping', () => {
 
   it('set isUserTyping to true onContentChange', () => {
     const { result } = renderHook(() => useIsUserTyping(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -51,7 +44,7 @@ describe('useIsUserTyping', () => {
 
   it('does not set isUserTyping to true onContentChange when the value is empty', () => {
     const { result } = renderHook(() => useIsUserTyping(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -63,7 +56,7 @@ describe('useIsUserTyping', () => {
 
   it('set isUserTyping to false onDebounce', () => {
     const { result } = renderHook(() => useIsUserTyping(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   let supertest: TestAgent;
 
-  describe('Timeline', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/213990
+  describe.skip('Timeline', () => {
     before(async () => (supertest = await utils.createSuperTest()));
 
     describe('timelines', () => {
@@ -68,13 +69,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('@skipInServerless resolve timeline', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
         );
       });
 

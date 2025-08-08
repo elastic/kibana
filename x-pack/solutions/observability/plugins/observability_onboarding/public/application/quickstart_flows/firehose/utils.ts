@@ -13,12 +13,14 @@ export function buildCreateStackCommand({
   streamName,
   encodedApiKey,
   elasticsearchUrl,
+  metricsEnabled,
 }: {
   templateUrl: string;
   stackName: string;
   streamName: string;
   encodedApiKey: string;
   elasticsearchUrl: string;
+  metricsEnabled: boolean;
 }) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
   const escapedTemplateUrl = templateUrl.replace(/\//g, '\\/');
@@ -30,6 +32,7 @@ export function buildCreateStackCommand({
       --parameters ParameterKey=FirehoseStreamName,ParameterValue=${streamName}
                    ParameterKey=ElasticEndpointURL,ParameterValue=${escapedElasticsearchUrl}
                    ParameterKey=ElasticAPIKey,ParameterValue=${encodedApiKey}
+                   ParameterKey=EnableCloudWatchMetrics,ParameterValue=${metricsEnabled}
       --capabilities CAPABILITY_IAM
   `
     .trim()
@@ -54,12 +57,14 @@ export function buildCreateStackAWSConsoleURL({
   streamName,
   elasticsearchUrl,
   encodedApiKey,
+  metricsEnabled,
 }: {
   templateUrl: string;
   stackName: string;
   streamName: string;
   elasticsearchUrl: string;
   encodedApiKey: string;
+  metricsEnabled: boolean;
 }): string {
   const url = new URL('https://console.aws.amazon.com');
   const params = new URLSearchParams({
@@ -74,6 +79,7 @@ export function buildCreateStackAWSConsoleURL({
     param_FirehoseStreamName: streamName,
     param_ElasticEndpointURL: elasticsearchUrl,
     param_ElasticAPIKey: encodedApiKey,
+    param_EnableCloudWatchMetrics: String(metricsEnabled),
     /* eslint-enable @typescript-eslint/naming-convention */
   });
 

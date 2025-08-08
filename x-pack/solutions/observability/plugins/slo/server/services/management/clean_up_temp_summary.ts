@@ -6,12 +6,13 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
 } from '../../../common/constants';
 
-interface AggBucketKey {
+interface AggBucketKey extends AggregationsCompositeAggregateKey {
   spaceId: string;
   id: string;
 }
@@ -128,34 +129,32 @@ export class CleanUpTempSummary {
         wait_for_completion: false,
         slices: 'auto',
         conflicts: 'proceed',
-        body: {
-          query: {
-            bool: {
-              should: buckets.map((bucket) => {
-                return {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          isTempDoc: true,
-                        },
+        query: {
+          bool: {
+            should: buckets.map((bucket) => {
+              return {
+                bool: {
+                  must: [
+                    {
+                      term: {
+                        isTempDoc: true,
                       },
-                      {
-                        term: {
-                          'slo.id': bucket.id,
-                        },
+                    },
+                    {
+                      term: {
+                        'slo.id': bucket.id,
                       },
-                      {
-                        term: {
-                          spaceId: bucket.spaceId,
-                        },
+                    },
+                    {
+                      term: {
+                        spaceId: bucket.spaceId,
                       },
-                    ],
-                  },
-                };
-              }),
-              minimum_should_match: 1,
-            },
+                    },
+                  ],
+                },
+              };
+            }),
+            minimum_should_match: 1,
           },
         },
       },

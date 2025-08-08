@@ -5,32 +5,33 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, AlertInstanceState, RuleTaskState } from '@kbn/alerting-state-types';
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTaskState,
+} from '@kbn/alerting-state-types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { Logger } from '@kbn/core/server';
-import {
-  ConcreteTaskInstance,
-  createTaskRunError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { IAlertsClient } from '../alerts_client/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
-import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  RuleAlertData,
-  RuleExecutionStatusErrorReasons,
-  RuleTypeParams,
-  RuleTypeState,
-  SanitizedRule,
-} from '../types';
-import { ExecutorServices } from './get_executor_services';
-import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
-import { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
+import type { NormalizedRuleType } from '../rule_type_registry';
+import type { RuleAlertData, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
+import type { ExecutorServices } from './get_executor_services';
+import type { TaskRunnerTimer } from './task_runner_timer';
+import { TaskRunnerTimerSpan } from './task_runner_timer';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTypeRunnerContext,
+  TaskRunnerContext,
+} from './types';
 import { withAlertingSpan } from './lib';
-import { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
+import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 
 interface ConstructorOpts<
   Params extends RuleTypeParams,
@@ -43,7 +44,6 @@ interface ConstructorOpts<
   AlertData extends RuleAlertData
 > {
   context: TaskRunnerContext;
-  logger: Logger;
   task: ConcreteTaskInstance;
   timer: TaskRunnerTimer;
 }
@@ -81,6 +81,7 @@ interface RunOpts<
 > {
   context: RuleTypeRunnerContext;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   executionId: string;
   executorServices: ExecutorServices & {
     getTimeRangeFn?: (
@@ -120,7 +121,7 @@ export class RuleTypeRunner<
   RecoveryActionGroupId extends string,
   AlertData extends RuleAlertData
 > {
-  private cancelled: boolean = false;
+  private cancelled = false;
 
   constructor(
     private readonly options: ConstructorOpts<
@@ -142,6 +143,7 @@ export class RuleTypeRunner<
   public async run({
     context,
     alertsClient,
+    actionsClient,
     executionId,
     executorServices,
     rule,
@@ -190,7 +192,7 @@ export class RuleTypeRunner<
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertsClient.hasReachedAlertLimit() || false;
           if (reachedLimit) {
-            this.options.logger.warn(
+            context.logger.warn(
               `rule execution generated greater than ${this.options.context.maxAlerts} alerts: ${context.ruleLogPrefix}`
             );
             context.ruleRunMetricsStore.setHasReachedAlertLimit(true);
@@ -216,6 +218,7 @@ export class RuleTypeRunner<
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
+                  actionsClient,
                   getDataViews: executorServices.getDataViews,
                   getMaintenanceWindowIds: async () => {
                     if (context.maintenanceWindowsService) {
@@ -276,16 +279,17 @@ export class RuleTypeRunner<
                   snoozeSchedule,
                   alertDelay,
                 },
-                logger: this.options.logger,
+                logger: context.logger,
                 flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
                 getTimeRange: (timeWindow) =>
                   getTimeRange({
-                    logger: this.options.logger,
+                    logger: context.logger,
                     window: timeWindow,
                     ...(context.queryDelaySec ? { queryDelay: context.queryDelaySec } : {}),
                     ...(startedAtOverridden ? { forceNow: startedAt } : {}),
                   }),
                 isServerless: context.isServerless,
+                ruleExecutionTimeout: ruleType.ruleTaskTimeout,
               })
             )
           );
@@ -338,8 +342,9 @@ export class RuleTypeRunner<
 
     await withAlertingSpan('alerting:process-alerts', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
-        await alertsClient.processAlerts({
-          flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
+        await alertsClient.processAlerts();
+        alertsClient.determineFlappingAlerts();
+        alertsClient.determineDelayedAlerts({
           alertDelay: alertDelay?.active ?? 0,
           ruleRunMetricsStore: context.ruleRunMetricsStore,
         });
@@ -348,16 +353,22 @@ export class RuleTypeRunner<
 
     await withAlertingSpan('alerting:index-alerts-as-data', () =>
       this.options.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
-        const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
+        if (this.shouldLogAndScheduleActionsForAlerts(ruleType.cancelAlertsOnRuleTimeout)) {
+          const updateAlertsMaintenanceWindowResult = await alertsClient.persistAlerts();
 
-        // Set the event log MW ids again, this time including the ids that matched alerts with
-        // scoped query
-        if (
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
-          updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
-        ) {
-          context.alertingEventLogger.setMaintenanceWindowIds(
-            updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+          // Set the event log MW ids again, this time including the ids that matched alerts with
+          // scoped query
+          if (
+            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds &&
+            updateAlertsMaintenanceWindowResult?.maintenanceWindowIds.length > 0
+          ) {
+            context.alertingEventLogger.setMaintenanceWindowIds(
+              updateAlertsMaintenanceWindowResult.maintenanceWindowIds
+            );
+          }
+        } else {
+          context.logger.debug(
+            `skipping persisting alerts for rule ${context.ruleLogPrefix}: rule execution has been cancelled.`
           );
         }
       })

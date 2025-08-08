@@ -11,6 +11,8 @@ import http, { type Server } from 'http';
 import { once, pull } from 'lodash';
 import { createOpenAiChunk } from './create_openai_chunk';
 
+const PROXY_INTERCEPT_TIMEOUT = 5000;
+
 type Request = http.IncomingMessage;
 type Response = http.ServerResponse<http.IncomingMessage> & { req: http.IncomingMessage };
 
@@ -100,8 +102,8 @@ export class LlmProxy {
     : {
         complete: () => Promise<void>;
       } {
-    const waitForInterceptPromise = Promise.race([
-      new Promise<LlmResponseSimulator>((outerResolve) => {
+    const waitForInterceptPromise = new Promise<LlmResponseSimulator>(
+      (outerResolve, _outerReject) => {
         this.interceptors.push({
           name,
           when,
@@ -147,14 +149,27 @@ export class LlmProxy {
             outerResolve(simulator);
           },
         });
-      }),
-      new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 5000ms`)), 5000);
-      }),
-    ]);
+      }
+    );
+
+    const waitForIntercept = (): Promise<LlmResponseSimulator> => {
+      return new Promise<LlmResponseSimulator>((resolve, reject) => {
+        const timeoutHandle = setTimeout(
+          () =>
+            reject(new Error(`Interceptor "${name}" timed out after ${PROXY_INTERCEPT_TIMEOUT}ms`)),
+          PROXY_INTERCEPT_TIMEOUT
+        );
+        waitForInterceptPromise
+          .then((simulator) => {
+            clearTimeout(timeoutHandle);
+            resolve(simulator);
+          })
+          .catch((error) => reject(error));
+      });
+    };
 
     if (responseChunks === undefined) {
-      return { waitForIntercept: () => waitForInterceptPromise } as any;
+      return { waitForIntercept } as any;
     }
 
     const parsedChunks = Array.isArray(responseChunks)
@@ -163,7 +178,7 @@ export class LlmProxy {
 
     return {
       complete: async () => {
-        const simulator = await waitForInterceptPromise;
+        const simulator = await waitForIntercept();
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
         }

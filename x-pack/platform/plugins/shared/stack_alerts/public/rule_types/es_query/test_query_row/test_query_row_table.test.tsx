@@ -18,7 +18,7 @@ describe('TestQueryRow', () => {
   it('should render the datagrid', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',
@@ -33,7 +33,6 @@ describe('TestQueryRow', () => {
             },
           ],
         }}
-        alerts={null}
       />,
       {
         wrapper: AppWrapper,
@@ -42,29 +41,37 @@ describe('TestQueryRow', () => {
 
     expect(result.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
     expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
-    expect(result.queryByText('Alerts generated')).not.toBeInTheDocument();
+    expect(
+      result.queryByText(
+        'This table is a preview and shows data from only the top 5 rows returned by the query.'
+      )
+    ).toBeInTheDocument();
     expect(result.queryAllByTestId('alert-badge')).toHaveLength(0);
   });
 
   it('should render the datagrid and alerts if provided', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',
+            },
+            {
+              id: 'Alert ID',
             },
           ],
           rows: [
             {
               test: 'esql query 1',
+              ['Alert ID']: 'alert 1',
             },
             {
               test: 'esql query 2',
+              ['Alert ID']: 'alert 2',
             },
           ],
         }}
-        alerts={['alert1', 'alert2']}
       />,
       {
         wrapper: AppWrapper,
@@ -72,15 +79,14 @@ describe('TestQueryRow', () => {
     );
 
     expect(result.getByTestId('test-query-row-datagrid')).toBeInTheDocument();
-    expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(2);
-    expect(result.getByText('Alerts generated')).toBeInTheDocument();
-    expect(result.getAllByTestId('alert-badge')).toHaveLength(2);
+    expect(result.getAllByTestId('dataGridRowCell')).toHaveLength(4);
+    expect(result.queryAllByTestId('alert-badge')).toHaveLength(2);
   });
 
   it('should render the datagrid if values are undefined', () => {
     const result = render(
       <TestQueryRowTable
-        rawResults={{
+        preview={{
           cols: [
             {
               id: 'test',
@@ -95,7 +101,6 @@ describe('TestQueryRow', () => {
             },
           ],
         }}
-        alerts={null}
       />,
       {
         wrapper: AppWrapper,

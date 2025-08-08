@@ -11,7 +11,7 @@
         "label": "ResizableLayout",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "({ className, mode, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, resizeButtonClassName, [\"data-test-subj\"]: dataTestSubj, onFixedPanelSizeChange, }: ",
           {
             "pluginId": "@kbn/resizable-layout",
             "scope": "public",
@@ -19,36 +19,35 @@
             "section": "def-public.ResizableLayoutProps",
             "text": "ResizableLayoutProps"
           },
-          " & ",
-          {
-            "pluginId": "@kbn/shared-ux-utility",
-            "scope": "common",
-            "docId": "kibKbnSharedUxUtilityPluginApi",
-            "section": "def-common.WithSuspenseExtendedDeps",
-            "text": "WithSuspenseExtendedDeps"
-          },
-          " & React.RefAttributes<{}>>"
+          ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/kbn-resizable-layout/index.ts",
+        "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayout.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{\n  className,\n  mode,\n  direction,\n  fixedPanelSize,\n  minFixedPanelSize,\n  minFlexPanelSize,\n  fixedPanel,\n  flexPanel,\n  resizeButtonClassName,\n  ['data-test-subj']: dataTestSubj,\n  onFixedPanelSizeChange,\n}",
             "description": [],
             "signature": [
-              "P"
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "public",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-public.ResizableLayoutProps",
+                "text": "ResizableLayoutProps"
+              }
             ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -126,22 +125,6 @@
           },
           {
             "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-public.ResizableLayoutProps.container",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "container",
-            "description": [
-              "\nThe parent container element, used to calculate the layout size"
-            ],
-            "signature": [
-              "HTMLElement | null"
-            ],
-            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.fixedPanelSize",
             "type": "number",
             "tags": [],
@@ -182,14 +165,14 @@
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.fixedPanel",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "fixedPanel",
             "description": [
               "\nThe fixed panel"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "deprecated": false,
@@ -198,14 +181,14 @@
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayoutProps.flexPanel",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "flexPanel",
             "description": [
               "\nThe flex panel"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "deprecated": false,

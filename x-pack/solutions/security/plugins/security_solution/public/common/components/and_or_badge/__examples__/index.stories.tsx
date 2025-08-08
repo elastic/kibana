@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -21,11 +20,23 @@ const withTheme = (storyFn: () => ReactNode) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
-storiesOf('Components/AndOrBadge', module)
-  .addDecorator(withTheme)
-  .add('and', () => <AndOrBadge type="and" />)
-  .add('or', () => <AndOrBadge type="or" />)
-  .add('antennas', () => (
+export default {
+  title: 'Components/AndOrBadge',
+  decorators: [withTheme],
+};
+
+export const And = {
+  render: () => <AndOrBadge type="and" />,
+  name: 'and',
+};
+
+export const Or = {
+  render: () => <AndOrBadge type="or" />,
+  name: 'or',
+};
+
+export const Antennas = {
+  render: () => (
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <AndOrBadge type="and" includeAntennas />
@@ -34,4 +45,7 @@ storiesOf('Components/AndOrBadge', module)
         <p>{sampleText}</p>
       </EuiFlexItem>
     </EuiFlexGroup>
-  ));
+  ),
+
+  name: 'antennas',
+};

@@ -39,16 +39,16 @@ export const registerProcessEventsRoute = (
     .get({
       access: 'internal',
       path: PROCESS_EVENTS_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -113,37 +113,35 @@ export const fetchEventsAndScopedAlerts = async (
 
   const search = await client.search({
     index: [index],
-    body: {
-      query: {
-        bool: {
-          must: [
-            { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-            {
-              bool: {
-                should: [
-                  { term: { [EVENT_ACTION]: EVENT_ACTION_FORK } },
-                  { term: { [EVENT_ACTION]: EVENT_ACTION_EXEC } },
-                  { term: { [EVENT_ACTION]: EVENT_ACTION_EXECUTED } },
-                  { term: { [EVENT_ACTION]: EVENT_ACTION_END } },
-                ],
+    query: {
+      bool: {
+        must: [
+          { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+          {
+            bool: {
+              should: [
+                { term: { [EVENT_ACTION]: EVENT_ACTION_FORK } },
+                { term: { [EVENT_ACTION]: EVENT_ACTION_EXEC } },
+                { term: { [EVENT_ACTION]: EVENT_ACTION_EXECUTED } },
+                { term: { [EVENT_ACTION]: EVENT_ACTION_END } },
+              ],
+            },
+          },
+          {
+            range: {
+              // optimization to prevent data before this session from being hit.
+              [TIMESTAMP_PROPERTY]: {
+                gte: sessionStartTime,
               },
             },
-            {
-              range: {
-                // optimization to prevent data before this session from being hit.
-                [TIMESTAMP_PROPERTY]: {
-                  gte: sessionStartTime,
-                },
-              },
-            },
-          ],
-        },
+          },
+        ],
       },
-      size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
-      sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
-      search_after: cursorMillis ? [cursorMillis] : undefined,
-      fields: PROCESS_EVENT_FIELDS,
     },
+    size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
+    sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
+    search_after: cursorMillis ? [cursorMillis] : undefined,
+    fields: PROCESS_EVENT_FIELDS,
   });
 
   let events = search.hits.hits;

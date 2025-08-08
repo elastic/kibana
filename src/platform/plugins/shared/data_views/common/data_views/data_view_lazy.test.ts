@@ -480,6 +480,23 @@ describe('DataViewLazy', () => {
       dataViewLazy.removeRuntimeField(newField);
     });
 
+    test('add and remove a popularity score from a runtime field', async () => {
+      const newField = 'new_field_test';
+      fieldCapsResponse = [];
+      dataViewLazy.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        popularity: 10,
+      });
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(10);
+      dataViewLazy.setFieldCount(newField, 20);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(20);
+      dataViewLazy.setFieldCount(newField, null);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(0);
+      dataViewLazy.setFieldCount(newField, undefined);
+      expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(0);
+      dataViewLazy.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', async () => {
       const fieldMap = (await dataViewLazy.getFields({ fieldName: ['*'] })).getFieldMap();
       const fieldCount = Object.values(fieldMap).length;

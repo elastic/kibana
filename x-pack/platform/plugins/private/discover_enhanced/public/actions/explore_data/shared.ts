@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { apiPublishesDataViews, EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 export const getDataViews = (embeddable: EmbeddableApiContext['embeddable']): string[] => {

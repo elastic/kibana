@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -163,7 +164,21 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
+  const { dataType, label, isBucketed, operationType, timeShift, reducedTimeRange } = column;
+
+  const operationDefinition = operationDefinitionMap[operationType];
+  if (!operationDefinition) {
+    throw new Error(
+      i18n.translate('xpack.lens.indexPattern.operationNotFoundErrorMessage', {
+        defaultMessage: 'Operation {operationType} not found',
+        values: { operationType },
+      })
+    );
+  }
+
+  const scale = operationDefinition.scale
+    ? operationDefinition.scale(column, dataView as IndexPattern)
+    : 'ratio';
 
   return {
     dataType: normalizeOperationDataType(dataType),
@@ -226,7 +241,7 @@ export function getFormBasedDatasource({
 
     initialize(
       persistedState?: FormBasedPersistedState,
-      references?: SavedObjectReference[],
+      references?: Reference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
       indexPatterns?: Record<string, IndexPattern>
@@ -854,9 +869,9 @@ export function getFormBasedDatasource({
     },
     isEqual: (
       persistableState1: FormBasedPersistedState,
-      references1: SavedObjectReference[],
+      references1: Reference[],
       persistableState2: FormBasedPersistedState,
-      references2: SavedObjectReference[]
+      references2: Reference[]
     ) =>
       isEqual(
         injectReferences(persistableState1, references1),
@@ -934,7 +949,7 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
   framePublicAPI: FramePublicAPI,
-  setState: StateSetter<FormBasedPrivateState, unknown>,
+  setState: StateSetter<FormBasedPrivateState, unknown> | undefined,
   core: CoreStart,
   data: DataPublicPluginStart
 ): UserMessage[] {
@@ -962,7 +977,7 @@ function getLayerErrorMessages(
             ) : (
               <>
                 {error.message}
-                {error.fixAction && (
+                {error.fixAction && setState && (
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {

@@ -17,7 +17,7 @@ import {
   ExpressionFunctionFormulaInterval,
   ExpressionFunctionFormulaNow,
   ExpressionFunctionFormulaTimeRange,
-} from '../../../../../../common/expressions/formula_context/context_fns';
+} from '../../../../../../common/expressions/defs/formula_context/context_fns';
 import type {
   DateHistogramIndexPatternColumn,
   FormBasedLayer,
@@ -237,7 +237,6 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         dataType: 'number',
         operationType: type,
         isBucketed: false,
-        scale: 'ratio',
         references: [],
       } as unknown as ColumnType;
     },

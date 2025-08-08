@@ -59,7 +59,7 @@ describe('getMonitorDetails', () => {
 
       const esParams = (uptimeEsClient.baseESClient.search as jest.Mock).mock.calls[0];
 
-      expect(esParams[0].body.query).toEqual({
+      expect(esParams[0].query).toEqual({
         bool: {
           filter: [
             {

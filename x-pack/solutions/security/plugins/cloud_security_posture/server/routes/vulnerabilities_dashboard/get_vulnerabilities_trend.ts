@@ -53,9 +53,9 @@ export const getVulnTrendsQuery = () => ({
     vuln_severity_per_day: {
       date_histogram: {
         field: '@timestamp',
-        calendar_interval: '1d',
+        calendar_interval: '1d' as const,
         order: {
-          _key: 'asc',
+          _key: 'asc' as const,
         },
       },
       aggs: {
@@ -65,7 +65,7 @@ export const getVulnTrendsQuery = () => ({
             sort: [
               {
                 '@timestamp': {
-                  order: 'desc',
+                  order: 'desc' as const,
                 },
               },
             ],

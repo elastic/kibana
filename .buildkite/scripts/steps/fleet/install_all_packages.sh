@@ -9,4 +9,4 @@ echo '--- Installing all packages'
 node scripts/functional_tests \
   --debug \
   --bail \
-  --config x-pack/test/fleet_packages/config.ts
+  --config x-pack/platform/test/fleet_packages/config.ts

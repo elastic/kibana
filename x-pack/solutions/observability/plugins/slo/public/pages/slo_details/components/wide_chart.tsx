@@ -67,7 +67,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   });
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
+    return <EuiLoadingChart size="m" data-test-subj="wideChartLoading" />;
   }
 
   return (
@@ -130,6 +130,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
           point: { visible: 'never' },
         }}
         xAccessor="key"
+        // Defaults to multi layer time axis as of Elastic Charts v70
         xScaleType={ScaleType.Time}
         yAccessors={['value']}
         yScaleType={ScaleType.Linear}

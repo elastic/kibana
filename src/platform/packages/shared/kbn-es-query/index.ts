@@ -39,6 +39,9 @@ export type {
   ScriptedPhraseFilter,
   ScriptedRangeFilter,
   TimeRange,
+  TimeState,
+  RelativeTimeRange,
+  AbsoluteTimeRange,
   CombinedFilter,
 } from './src/filters';
 
@@ -57,6 +60,8 @@ export {
   getAggregateQueryMode,
   getLanguageDisplayName,
 } from './src/es_query';
+
+export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
 
 export {
   COMPARE_ALL_OPTIONS,

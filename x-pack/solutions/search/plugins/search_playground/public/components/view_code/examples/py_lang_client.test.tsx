@@ -8,9 +8,10 @@
 import { render } from '@testing-library/react';
 import { PY_LANG_CLIENT } from './py_lang_client'; // Adjust the import path according to your project structure
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { ChatForm } from '../../../types';
+import { PlaygroundForm } from '../../../types';
 
 describe('PY_LANG_CLIENT function', () => {
+  const formErrors = {};
   test('renders with correct content', () => {
     // Mocking necessary values for your function
     const formValues = {
@@ -21,11 +22,11 @@ describe('PY_LANG_CLIENT function', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
-    const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
+    const { container } = render(PY_LANG_CLIENT(formValues, formErrors, clientDetails));
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
   });
@@ -39,11 +40,11 @@ describe('PY_LANG_CLIENT function', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
-    const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
+    const { container } = render(PY_LANG_CLIENT(formValues, formErrors, clientDetails));
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
   });

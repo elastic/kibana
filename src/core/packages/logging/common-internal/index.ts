@@ -14,6 +14,7 @@ export {
   MessageConversion,
   LevelConversion,
   MetaConversion,
+  ErrorConversion,
   type Conversion,
   AbstractLogger,
   type CreateLogRecordFn,

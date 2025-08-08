@@ -55,15 +55,13 @@ export function getApmsForClusters(req: LegacyRequest, clusters: Cluster[], ccs?
         size: 0,
         ignore_unavailable: true,
         filter_path: apmAggFilterPath,
-        body: {
-          query: createApmQuery({
-            start,
-            end,
-            clusterUuid,
-            metric: ApmMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
-          }),
-          aggs: apmUuidsAgg(maxBucketSize, cgroup),
-        },
+        query: createApmQuery({
+          start,
+          end,
+          clusterUuid,
+          metric: ApmMetric.getMetricFields(), // override default of BeatMetric.getMetricFields
+        }),
+        aggs: apmUuidsAgg(maxBucketSize, cgroup),
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

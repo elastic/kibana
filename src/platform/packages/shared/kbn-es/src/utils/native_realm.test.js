@@ -134,45 +134,37 @@ describe('setPasswords', () => {
     });
 
     expect(mockClient.security.changePassword.mock.calls).toMatchInlineSnapshot(`
-Array [
-  Array [
-    Object {
-      "body": Object {
-        "password": "bar",
-      },
-      "refresh": "wait_for",
-      "username": "kibana_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "logstash_system",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "elastic",
-    },
-  ],
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "beats_system",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          Object {
+            "password": "bar",
+            "refresh": "wait_for",
+            "username": "kibana_system",
+          },
+        ],
+        Array [
+          Object {
+            "password": "changeme",
+            "refresh": "wait_for",
+            "username": "logstash_system",
+          },
+        ],
+        Array [
+          Object {
+            "password": "changeme",
+            "refresh": "wait_for",
+            "username": "elastic",
+          },
+        ],
+        Array [
+          Object {
+            "password": "changeme",
+            "refresh": "wait_for",
+            "username": "beats_system",
+          },
+        ],
+      ]
+    `);
   });
 });
 
@@ -204,7 +196,7 @@ describe('setPassword', () => {
   it('sets password for provided user', async () => {
     await nativeRealm.setPassword('kibana_system', 'foo');
     expect(mockClient.security.changePassword).toHaveBeenCalledWith({
-      body: { password: 'foo' },
+      password: 'foo',
       refresh: 'wait_for',
       username: 'kibana_system',
     });

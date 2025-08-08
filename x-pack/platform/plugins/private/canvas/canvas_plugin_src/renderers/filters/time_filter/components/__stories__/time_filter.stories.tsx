@@ -6,8 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { TimeFilter } from '../time_filter';
 
 const timeRanges = [
@@ -23,45 +23,75 @@ const timeRanges = [
   { start: 'now-1y', end: 'now', label: 'Last 1 year' },
 ];
 
-storiesOf('renderers/TimeFilter', module)
-  .addDecorator((story) => (
-    <div
-      style={{
-        width: '600px',
-      }}
-    >
-      {story()}
-    </div>
-  ))
-  .add('default', () => (
+export default {
+  title: 'renderers/TimeFilter',
+
+  decorators: [
+    (story) => (
+      <div
+        style={{
+          width: '600px',
+        }}
+      >
+        {story()}
+      </div>
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <TimeFilter
       filter="timefilter from=now-1y to=now column=@timestamp"
       commit={action('commit')}
     />
-  ))
-  .add('with relative time bounds', () => (
+  ),
+
+  name: 'default',
+};
+
+export const WithRelativeTimeBounds = {
+  render: () => (
     <TimeFilter
       filter="timefilter from=now/w to=now/w column=@timestamp"
       commit={action('commit')}
     />
-  ))
-  .add('with absolute time bounds', () => (
+  ),
+
+  name: 'with relative time bounds',
+};
+
+export const WithAbsoluteTimeBounds = {
+  render: () => (
     <TimeFilter
       filter="timefilter from='01/01/2019' to='12/31/2019' column=@timestamp"
       commit={action('commit')}
     />
-  ))
-  .add('with dateFormat', () => (
+  ),
+
+  name: 'with absolute time bounds',
+};
+
+export const WithDateFormat = {
+  render: () => (
     <TimeFilter
       filter="timefilter from=now-24h to=now column=@timestamp"
       commit={action('commit')}
       dateFormat="MM/DD/YY HH:MM:SSA"
     />
-  ))
-  .add('with commonlyUsedRanges', () => (
+  ),
+
+  name: 'with dateFormat',
+};
+
+export const WithCommonlyUsedRanges = {
+  render: () => (
     <TimeFilter
       filter="timefilter from=now-30d to=now column=@timestamp"
       commit={action('commit')}
       commonlyUsedRanges={timeRanges}
     />
-  ));
+  ),
+
+  name: 'with commonlyUsedRanges',
+};

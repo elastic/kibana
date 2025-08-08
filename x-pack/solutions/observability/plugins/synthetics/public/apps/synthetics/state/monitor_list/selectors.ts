@@ -23,11 +23,17 @@ export const selectEncryptedSyntheticsSavedMonitors = createSelector(
 );
 
 export const selectMonitorFiltersAndQueryState = createSelector(selectMonitorListState, (state) => {
-  const { monitorTypes, tags, locations, projects, schedules }: MonitorFilterState =
-    state.pageState;
+  const {
+    monitorTypes,
+    tags,
+    locations,
+    projects,
+    schedules,
+    useLogicalAndFor,
+  }: MonitorFilterState = state.pageState;
   const { query } = state.pageState;
 
-  return { monitorTypes, tags, locations, projects, schedules, query };
+  return { monitorTypes, tags, locations, projects, schedules, query, useLogicalAndFor };
 });
 
 export const selectMonitorUpsertStatuses = (state: SyntheticsAppState) =>

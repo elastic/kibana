@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
@@ -45,7 +45,7 @@ export class NotificationsService {
 
   /**
    * Provides entity IDs per type for the current space.
-   * @private
+   * @internal
    */
   private async _getEntityIdsPerType() {
     const [adJobIds, dfaJobIds, modelIds] = await Promise.all([
@@ -89,53 +89,51 @@ export class NotificationsService {
               ignore_unavailable: true,
               from: 0,
               size: MAX_NOTIFICATIONS_SIZE,
-              body: {
-                sort: [{ [params.sortField]: { order: params.sortDirection } }],
-                query: {
-                  bool: {
-                    ...(params.queryString
-                      ? {
-                          must: [
-                            {
-                              query_string: {
-                                query: params.queryString,
-                                default_field: 'message',
-                              },
+              sort: [{ [params.sortField]: { order: params.sortDirection } }],
+              query: {
+                bool: {
+                  ...(params.queryString
+                    ? {
+                        must: [
+                          {
+                            query_string: {
+                              query: params.queryString,
+                              default_field: 'message',
                             },
-                          ],
-                        }
-                      : {}),
-                    filter: [
-                      ...(v.ids
-                        ? [
-                            {
-                              terms: {
-                                job_id: v.ids as string[],
-                              },
-                            },
-                          ]
-                        : []),
-                      {
-                        term: {
-                          job_type: {
-                            value: v.type,
                           },
+                        ],
+                      }
+                    : {}),
+                  filter: [
+                    ...(v.ids
+                      ? [
+                          {
+                            terms: {
+                              job_id: v.ids as string[],
+                            },
+                          },
+                        ]
+                      : []),
+                    {
+                      term: {
+                        job_type: {
+                          value: v.type,
                         },
                       },
-                      ...(params.earliest || params.latest
-                        ? [
-                            {
-                              range: {
-                                timestamp: {
-                                  ...(params.earliest ? { gt: params.earliest } : {}),
-                                  ...(params.latest ? { lte: params.latest } : {}),
-                                },
+                    },
+                    ...(params.earliest || params.latest
+                      ? [
+                          {
+                            range: {
+                              timestamp: {
+                                ...(params.earliest ? { gt: params.earliest } : {}),
+                                ...(params.latest ? { lte: params.latest } : {}),
                               },
                             },
-                          ]
-                        : []),
-                    ],
-                  },
+                          },
+                        ]
+                      : []),
+                  ],
                 },
               },
             },
@@ -217,40 +215,38 @@ export class NotificationsService {
         const responseBody = await this.scopedClusterClient.asInternalUser.search({
           size: 0,
           index: ML_NOTIFICATION_INDEX_PATTERN,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  ...(v.ids
-                    ? [
-                        {
-                          terms: {
-                            job_id: v.ids as string[],
-                          },
+          query: {
+            bool: {
+              filter: [
+                ...(v.ids
+                  ? [
+                      {
+                        terms: {
+                          job_id: v.ids as string[],
                         },
-                      ]
-                    : []),
-                  {
-                    term: {
-                      job_type: {
-                        value: v.type,
                       },
+                    ]
+                  : []),
+                {
+                  term: {
+                    job_type: {
+                      value: v.type,
                     },
                   },
-                  {
-                    range: {
-                      timestamp: {
-                        gt: params.lastCheckedAt,
-                      },
+                },
+                {
+                  range: {
+                    timestamp: {
+                      gt: params.lastCheckedAt,
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
-            aggs: {
-              by_level: {
-                terms: { field: 'level' },
-              },
+          },
+          aggs: {
+            by_level: {
+              terms: { field: 'level' },
             },
           },
         });

@@ -14,10 +14,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { SynthtraceGenerator } from '@kbn/apm-synthtrace-client/src/types';
 import { Readable } from 'stream';
 import { BaseStepCtx } from './journey';
-import { SynthtraceClientType } from '../services/synthtrace';
+import { SynthtraceDataType } from '../services/synthtrace';
 
 interface JourneySynthtrace<T extends { '@timestamp'?: number | undefined }, O = any> {
-  type: SynthtraceClientType;
+  type: SynthtraceDataType;
   generator: (options: O) => Readable | SynthtraceGenerator<T>;
   options: O;
 }
@@ -82,7 +82,7 @@ export interface ScalabilitySetup {
 export interface JourneyConfigOptions<CtxExt extends { '@timestamp'?: number | undefined }> {
   /**
    * Relative path to FTR config file. Use to override the default ones:
-   * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
+   * 'x-pack/test/functional/config.base.js', 'src/platform/test/functional/config.base.js'
    */
   ftrConfigPath?: string;
   /**

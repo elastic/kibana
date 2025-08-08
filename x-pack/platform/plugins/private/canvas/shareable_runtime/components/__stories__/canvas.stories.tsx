@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ExampleContext } from '../../test/context_example';
@@ -15,18 +14,32 @@ import { sharedWorkpads } from '../../test';
 import { initialCanvasShareableState } from '../../context/state';
 const { austin } = sharedWorkpads;
 
-storiesOf('shareables/Canvas', module)
-  .add('contextual: austin', () => (
+export default {
+  title: 'shareables/Canvas',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext source="austin">
       <Canvas />
     </ExampleContext>
-  ))
-  .add('contextual: hello', () => (
+  ),
+
+  name: 'contextual: austin',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext source="hello">
       <Canvas />
     </ExampleContext>
-  ))
-  .add('component', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const Component = {
+  render: () => (
     <ExampleContext source="austin">
       <CanvasComponent
         onSetPage={action('onSetPage')}
@@ -41,4 +54,7 @@ storiesOf('shareables/Canvas', module)
         workpad={austin}
       />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component',
+};

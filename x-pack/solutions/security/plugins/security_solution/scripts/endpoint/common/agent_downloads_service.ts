@@ -37,7 +37,7 @@ interface AgentDownloadStorageSettings {
 
 /**
  * Class for managing Agent Downloads on the local disk
- * @private
+ * @internal
  */
 class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings> {
   private downloadsFolderExists = false;

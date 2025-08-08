@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -65,11 +65,15 @@ export default ({ getService }: FtrProviderContext) => {
   // NOTE: Add to second quality gate after feature is GA
   describe('@ess @serverless ES|QL rule type, alert suppression', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -2025,11 +2029,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -2067,11 +2071,15 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       it('should be enriched alert with criticality_level', async () => {
@@ -2103,6 +2111,222 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
 
         expect(previewAlerts[0]?._source?.['host.asset.criticality']).toBe('extreme_impact');
+      });
+    });
+
+    describe('mv_expand command', () => {
+      it('should suppress alerts generated from expanded rows', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const documents = [
+          { agent: { name: 'test-1', type: 'auditbeat' } },
+          { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+        ];
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+          alert_suppression: {
+            group_by: ['agent.type'],
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        await indexEnhancedDocuments({
+          documents,
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 2);
+      });
+
+      it('should suppress alerts generated from expanded rows when expanded field renamed', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const documents = [
+          { agent: { name: 'test-1', type: 'auditbeat' } },
+          { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+        ];
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | mv_expand agent.name | rename agent.name as new_field`,
+          from: 'now-1h',
+          interval: '1h',
+          alert_suppression: {
+            group_by: ['agent.type'],
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        await indexEnhancedDocuments({
+          documents,
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 2);
+      });
+
+      it('should NOT generate alerts per expanded row when expanded field dropped', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const documents = [
+          { agent: { name: 'test-1', type: 'auditbeat' } },
+          { agent: { name: ['part-0', 'part-1'], type: 'auditbeat' } },
+        ];
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | mv_expand agent.name | drop agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+          alert_suppression: {
+            group_by: ['agent.type'],
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        await indexEnhancedDocuments({
+          documents,
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 1);
+      });
+
+      it('should suppress alerts from expanded rows on interval', async () => {
+        const id = uuidv4();
+        const doc1 = {
+          id,
+          '@timestamp': '2020-10-28T05:45:00.000Z',
+          agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+        };
+
+        const doc2 = {
+          id,
+          '@timestamp': '2020-10-28T06:25:00.000Z',
+          agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+        };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          // only _id and agent.name is projected at the end of query pipeline
+          query: `from ecs_compliant metadata _id ${internalIdPipe(id)} | mv_expand agent.name`,
+          from: 'now-35m',
+          interval: '30m',
+          alert_suppression: {
+            group_by: ['agent.type'],
+            missing_fields_strategy: 'suppress',
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+
+        await indexListOfDocuments([doc1, doc2]);
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 3);
+      });
+
+      it('should suppress alerts on interval when expanded field renamed', async () => {
+        const id = uuidv4();
+        const doc1 = {
+          id,
+          '@timestamp': '2020-10-28T05:45:00.000Z',
+          agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+        };
+
+        const doc2 = {
+          id,
+          '@timestamp': '2020-10-28T06:25:00.000Z',
+          agent: { name: ['part-0', 'part-1'], type: 'auditbeat' },
+        };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          // only _id and agent.name is projected at the end of query pipeline
+          query: `from ecs_compliant metadata _id ${internalIdPipe(
+            id
+          )} | mv_expand agent.name  | rename agent.name as new_field`,
+          from: 'now-35m',
+          interval: '30m',
+          alert_suppression: {
+            group_by: ['agent.type'],
+            missing_fields_strategy: 'suppress',
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+        };
+
+        await indexListOfDocuments([doc1, doc2]);
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 3);
       });
     });
   });

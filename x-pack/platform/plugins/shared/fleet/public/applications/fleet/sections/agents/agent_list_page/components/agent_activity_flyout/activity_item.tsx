@@ -17,7 +17,10 @@ import {
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
+  EuiIconTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -26,12 +29,23 @@ import { ViewErrors } from '../view_errors';
 import { formattedTime, getAction, inProgressDescription, inProgressTitle } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
+const Divider = styled.div`
+  width: 0;
+  height: 50%;
+  border-left: ${(props) => props.theme.euiTheme.border.thin};
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
 export const ActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   const theme = useEuiTheme();
 
+  const isAutomaticUpgrade = action.is_automatic;
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>
@@ -41,26 +55,43 @@ export const ActivityItem: React.FunctionComponent<{
         />
       </EuiText>
     ) : (
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.agentActivity.completedTitle"
-          defaultMessage="{nbAgents} {agents} {completedText}{offlineText}"
-          values={{
-            nbAgents:
-              action.nbAgentsAck === action.nbAgentsActioned
-                ? action.nbAgentsAck
-                : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
-            agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-            completedText: getAction(action.type, action.actionId).completedText,
-            offlineText:
-              action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
-                ? `, ${
-                    action.nbAgentsActioned - action.nbAgentsAck
-                  } agent(s) offline during the rollout period`
-                : '',
-          }}
-        />
-      </EuiText>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <FormattedMessage
+                id="xpack.fleet.agentActivity.completedTitle"
+                defaultMessage="{nbAgents} {agents} {completedText}{versionText}{offlineText}{automaticIcon}"
+                values={{
+                  nbAgents:
+                    action.nbAgentsAck === action.nbAgentsActioned
+                      ? action.nbAgentsAck
+                      : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+                  agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
+                  completedText: getAction(action.type, action.actionId).completedText,
+                  offlineText:
+                    action.status === 'ROLLOUT_PASSED' &&
+                    action.nbAgentsActioned - action.nbAgentsAck > 0
+                      ? `, ${
+                          action.nbAgentsActioned - action.nbAgentsAck
+                        } agent(s) offline during the rollout period`
+                      : '',
+                  versionText: action.version ? ` to version ${action.version}` : '',
+                  automaticIcon: action.is_automatic ? (
+                    <EuiIconTip
+                      anchorProps={{
+                        style: { display: 'flex', alignItems: 'center' },
+                      }}
+                      type="timeRefresh"
+                      content="Triggered by an automatic upgrade"
+                    />
+                  ) : null,
+                }}
+              />
+            </EuiFlexGroup>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
   // TODO: investigate whether default completion is due to a bug
@@ -100,7 +131,7 @@ export const ActivityItem: React.FunctionComponent<{
   } = {
     IN_PROGRESS: {
       icon: <EuiLoadingSpinner size="m" />,
-      title: <EuiText>{inProgressTitle(action)}</EuiText>,
+      title: <EuiText>{inProgressTitle(action, action.is_automatic)}</EuiText>,
       titleColor: theme.euiTheme.colors.textPrimary,
       description: <EuiText color="subdued">{inProgressDescription(action.creationTime)}</EuiText>,
     },
@@ -247,7 +278,31 @@ export const ActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+        </EuiFlexItem>
+
+        {isAutomaticUpgrade && (
+          <>
+            <EuiFlexItem grow={false}>
+              <Divider />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="manageAutoUpgradesButton"
+                onClick={() => onClickManageAutoUpgradeAgents(action)}
+                size="m"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                  defaultMessage="Manage auto-upgrade agents"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

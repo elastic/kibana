@@ -33,12 +33,14 @@ export const fetchDurationHistogramRangeSteps = async ({
   searchMetrics,
   durationMinOverride,
   durationMaxOverride,
+  isOtel = false,
 }: CommonCorrelationsQueryParams & {
   chartType: LatencyDistributionChartType;
   apmEventClient: APMEventClient;
   searchMetrics: boolean;
   durationMinOverride?: number;
   durationMaxOverride?: number;
+  isOtel?: boolean;
 }): Promise<{
   durationMin?: number;
   durationMax?: number;
@@ -58,7 +60,7 @@ export const fetchDurationHistogramRangeSteps = async ({
     };
   }
 
-  const durationField = getDurationField(chartType, searchMetrics);
+  const durationField = getDurationField(chartType, searchMetrics, isOtel);
 
   // when using metrics data, ensure we filter by docs with the appropriate duration field
   const filteredQuery = searchMetrics
@@ -69,11 +71,12 @@ export const fetchDurationHistogramRangeSteps = async ({
       }
     : query;
 
-  const resp = await apmEventClient.search('get_duration_histogram_range_steps', {
-    apm: {
-      events: [getEventType(chartType, searchMetrics)],
-    },
-    body: {
+  const resp = await apmEventClient.search(
+    'get_duration_histogram_range_steps',
+    {
+      apm: {
+        events: [getEventType(chartType, searchMetrics)],
+      },
       track_total_hits: 1,
       size: 0,
       query: getCommonCorrelationsQuery({
@@ -88,7 +91,8 @@ export const fetchDurationHistogramRangeSteps = async ({
         duration_max: { max: { field: durationField } },
       },
     },
-  });
+    { skipProcessorEventFilter: isOtel }
+  );
 
   if (resp.hits.total.value === 0) {
     return { rangeSteps: getHistogramRangeSteps(0, 1, 100) };

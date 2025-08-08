@@ -12,21 +12,27 @@ export {
   expect,
   test,
   spaceTest,
+  lighthouseTest,
+  apiTest,
+  globalSetupHook,
   tags,
+  browserAuthFixture,
   createPlaywrightConfig,
   createLazyPageObject,
-  ingestTestDataHook,
-  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
   ScoutTestOptions,
   ScoutPage,
   PageObjects,
+  ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  SynthtraceFixture,
 } from './src/playwright';
 
 export type {
@@ -36,9 +42,14 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  KibanaRole,
+  ElasticsearchRoleDescriptor,
 } from './src/types';
 
 // re-export from Playwright
-export type { Locator } from 'playwright/test';
+export type { Locator, CDPSession } from 'playwright/test';
+export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';

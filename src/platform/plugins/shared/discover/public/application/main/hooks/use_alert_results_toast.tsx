@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
-import { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import useMount from 'react-use/lib/useMount';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import type { MainHistoryLocationState } from '../../../../common';
 
 export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart) => {
   const infoTitle = i18n.translate('discover.viewAlert.documentsMayVaryInfoTitle', {
@@ -26,16 +28,14 @@ export const displayPossibleDocsDiffInfoAlert = (toastNotifications: ToastsStart
   });
 };
 
-export const useAlertResultsToast = ({
-  isAlertResults,
-  toastNotifications,
-}: {
-  isAlertResults?: boolean;
-  toastNotifications: ToastsStart;
-}) => {
-  useEffect(() => {
-    if (isAlertResults) {
+export const useAlertResultsToast = () => {
+  const { getScopedHistory, toastNotifications } = useDiscoverServices();
+
+  useMount(() => {
+    const historyLocationState = getScopedHistory<MainHistoryLocationState>()?.location.state;
+
+    if (historyLocationState?.isAlertResults) {
       displayPossibleDocsDiffInfoAlert(toastNotifications);
     }
-  }, [isAlertResults, toastNotifications]);
+  });
 };

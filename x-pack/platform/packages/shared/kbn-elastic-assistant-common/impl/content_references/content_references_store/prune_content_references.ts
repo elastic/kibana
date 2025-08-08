@@ -10,35 +10,35 @@ import { getContentReferenceId } from '../references/utils';
 import { ContentReferencesStore, ContentReferenceBlock } from '../types';
 
 /**
- * Returnes a pruned copy of the ContentReferencesStore.
+ * Returnes a pruned copy of the ContentReferencesStore and content.
  * @param content The content that may contain references to data within the ContentReferencesStore.
  * @param contentReferencesStore The ContentReferencesStore contain the contentReferences.
- * @returns a new record only containing the ContentReferences that are referenced to by the content.
+ * @returns prunedContentReferencesStore - a new record only containing the ContentReferences that are referenced to by the content. prunedContent - the content with the references that do not exist removed.
  */
 export const pruneContentReferences = (
   content: string,
   contentReferencesStore: ContentReferencesStore
-): ContentReferences | undefined => {
+): {
+  prunedContentReferencesStore: ContentReferences;
+  prunedContent: string;
+} => {
   const fullStore = contentReferencesStore.getStore();
-  const prunedStore: Record<string, ContentReference> = {};
-  const matches = content.matchAll(/\{reference\([0-9a-zA-Z]+\)\}/g);
-  let isPrunedStoreEmpty = true;
+  const prunedContentReferencesStore: Record<string, ContentReference> = {};
+  const matches = content.matchAll(/\{reference\([0-9a-zA-Z-_]+\)\}/g);
+  let prunedContent = content;
 
   for (const match of matches) {
     const referenceElement = match[0];
     const referenceId = getContentReferenceId(referenceElement as ContentReferenceBlock);
-    if (!(referenceId in prunedStore)) {
+    if (!(referenceId in prunedContentReferencesStore)) {
       const contentReference = fullStore[referenceId];
       if (contentReference) {
-        isPrunedStoreEmpty = false;
-        prunedStore[referenceId] = contentReference;
+        prunedContentReferencesStore[referenceId] = contentReference;
+      } else {
+        prunedContent = prunedContent.replace(referenceElement, '');
       }
     }
   }
 
-  if (isPrunedStoreEmpty) {
-    return undefined;
-  }
-
-  return prunedStore;
+  return { prunedContentReferencesStore, prunedContent };
 };

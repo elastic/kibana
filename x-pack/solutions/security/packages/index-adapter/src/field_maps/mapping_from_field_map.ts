@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
 import type { FieldMap, MultiField } from './types';
 

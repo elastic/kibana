@@ -16,6 +16,7 @@ import {
 } from '../fixtures/summary_search_document';
 import { DefaultSummarySearchClient } from './summary_search_client';
 import type { Sort, SummarySearchClient } from './types';
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 const defaultSort: Sort = {
   field: 'sli_value',
@@ -27,11 +28,13 @@ const defaultPagination: Pagination = {
 };
 
 describe('Summary Search Client', () => {
-  let esClientMock: ElasticsearchClientMock;
+  let scopedClusterClient: IScopedClusterClient;
   let service: SummarySearchClient;
+  let esClientMock: ElasticsearchClientMock;
 
   beforeEach(() => {
-    esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
+    esClientMock = scopedClusterClient.asCurrentUser as ElasticsearchClientMock;
     const soClientMock = {
       getCurrentNamespace: jest.fn().mockReturnValue('default'),
       get: jest.fn().mockResolvedValue({
@@ -42,7 +45,7 @@ describe('Summary Search Client', () => {
       }),
     } as any;
     service = new DefaultSummarySearchClient(
-      esClientMock,
+      scopedClusterClient,
       soClientMock,
       loggerMock.create(),
       'default'
@@ -233,8 +236,25 @@ describe('Summary Search Client', () => {
               { term: { spaceId: 'default' } },
               {
                 bool: {
-                  minimum_should_match: 1,
-                  should: [{ range: { summaryUpdatedAt: { gt: 'now-2h' } } }],
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              summaryUpdatedAt: {
+                                gt: 'now-2h',
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                  must: [],
+                  must_not: [],
+                  should: [],
                 },
               },
             ],

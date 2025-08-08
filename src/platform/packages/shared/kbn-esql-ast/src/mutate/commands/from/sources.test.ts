@@ -40,16 +40,26 @@ describe('commands.from.sources', () => {
       expect(list).toMatchObject([
         {
           type: 'source',
-          index: 'index',
+          index: {
+            valueUnquoted: 'index',
+          },
         },
         {
           type: 'source',
-          index: 'index2',
+          index: {
+            valueUnquoted: 'index2',
+          },
         },
         {
           type: 'source',
-          index: 'index3',
-          cluster: 'cl',
+          index: {
+            valueUnquoted: 'index3',
+          },
+          prefix: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'cl',
+          },
         },
       ]);
     });
@@ -72,7 +82,9 @@ describe('commands.from.sources', () => {
       expect(source).toMatchObject({
         type: 'source',
         name: 'index',
-        index: 'index',
+        index: {
+          valueUnquoted: 'index',
+        },
       });
     });
 
@@ -85,13 +97,21 @@ describe('commands.from.sources', () => {
       expect(source1).toMatchObject({
         type: 'source',
         name: 's2',
-        index: 's2',
+        index: {
+          valueUnquoted: 's2',
+        },
       });
       expect(source2).toMatchObject({
         type: 'source',
         name: 'c:s1',
-        index: 's1',
-        cluster: 'c',
+        index: {
+          valueUnquoted: 's1',
+        },
+        prefix: {
+          type: 'literal',
+          literalType: 'keyword',
+          valueUnquoted: 'c',
+        },
       });
     });
   });

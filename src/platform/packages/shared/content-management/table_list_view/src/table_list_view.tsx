@@ -23,7 +23,6 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
   | 'initialFilter'
   | 'headingId'
   | 'initialPageSize'
-  | 'listingLimit'
   | 'urlStateEnabled'
   | 'customTableColumn'
   | 'emptyPrompt'
@@ -59,7 +58,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
   initialFilter,
   headingId,
   initialPageSize,
-  listingLimit,
   urlStateEnabled = true,
   customTableColumn,
   emptyPrompt,
@@ -109,7 +107,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
           initialFilter={initialFilter}
           headingId={headingId}
           initialPageSize={initialPageSize}
-          listingLimit={listingLimit}
           urlStateEnabled={urlStateEnabled}
           customTableColumn={customTableColumn}
           emptyPrompt={emptyPrompt}

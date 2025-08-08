@@ -7,7 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
+import {
+  EuiSkeletonLoading,
+  EuiSkeletonText,
+  EuiSkeletonTitle,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -28,10 +34,11 @@ import { MigrationProgressPanel } from '../components/migration_status_panels/mi
 import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
-import { PageTitle } from './page_title';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { EmptyMigrationRulesPage } from './empty';
+import * as i18n from './translations';
 
-type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
+export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
 export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   ({
@@ -54,13 +61,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [getIntegrations]);
 
     useEffect(() => {
-      if (isLoading) {
-        return;
-      }
-
-      // Navigate to landing page if there are no migrations
-      if (!ruleMigrationsStats.length) {
-        navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
+      if (isLoading || ruleMigrationsStats.length === 0) {
         return;
       }
 
@@ -93,9 +94,10 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       refreshStats,
     ]);
 
-    const pageTitle = useMemo(() => <PageTitle />, []);
-
     const content = useMemo(() => {
+      if (ruleMigrationsStats.length === 0 && !migrationId) {
+        return <EmptyMigrationRulesPage />;
+      }
       const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
@@ -111,14 +113,18 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
                 />
                 <EuiSpacer size="m" />
                 <MigrationRulesTable
-                  migrationId={migrationId}
                   refetchData={refetchData}
                   integrations={integrations}
                   isIntegrationsLoading={isIntegrationsLoading}
+                  migrationStats={migrationStats}
                 />
               </>
             )}
-            {migrationStats.status === SiemMigrationTaskStatus.READY && (
+            {[
+              SiemMigrationTaskStatus.READY,
+              SiemMigrationTaskStatus.INTERRUPTED,
+              SiemMigrationTaskStatus.STOPPED,
+            ].includes(migrationStats.status) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
@@ -131,7 +137,14 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
 
     return (
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={pageTitle} border>
+        <HeaderPage
+          title={
+            <EuiTitle data-test-subj="siemMigrationsPageTitle" size="l">
+              <h1>{i18n.PAGE_TITLE}</h1>
+            </EuiTitle>
+          }
+          border
+        >
           <HeaderButtons
             ruleMigrationsStats={ruleMigrationsStats}
             selectedMigrationId={migrationId}
@@ -141,6 +154,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
         <EuiSkeletonLoading
+          data-test-subj="migrationRulesPageLoading"
           isLoading={isLoading}
           loadingContent={
             <>

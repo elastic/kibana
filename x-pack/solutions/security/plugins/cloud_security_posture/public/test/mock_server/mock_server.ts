@@ -17,7 +17,6 @@ import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
 import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
-
 /**
  * Mock the lastValueFrom function from rxjs to return the result of the promise instead of the Observable
  * This is for simplifying the testing by avoiding the need to subscribe to the Observable while producing the same result

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { fillGapByIdParamsSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { fillGapByIdParamsSchema } from '../schemas';
 
 export type FillGapByIdParams = TypeOf<typeof fillGapByIdParamsSchema>;

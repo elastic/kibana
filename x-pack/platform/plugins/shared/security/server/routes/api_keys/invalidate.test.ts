@@ -133,7 +133,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'] } }],
+        apiArguments: [{ ids: ['si8If24B1bKsmSLTAhJV'] }],
         statusCode: 200,
         result: {
           itemsInvalidated: [],
@@ -157,7 +157,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'] } }],
+        apiArguments: [{ ids: ['si8If24B1bKsmSLTAhJV'] }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -173,7 +173,7 @@ describe('Invalidate API keys', () => {
         isAdmin: false,
       },
       asserts: {
-        apiArguments: [{ body: { ids: ['si8If24B1bKsmSLTAhJV'], owner: true } }],
+        apiArguments: [{ ids: ['si8If24B1bKsmSLTAhJV'], owner: true }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -197,10 +197,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [
-          { body: { ids: ['si8If24B1bKsmSLTAhJV'] } },
-          { body: { ids: ['ab8If24B1bKsmSLTAhNC'] } },
-        ],
+        apiArguments: [{ ids: ['si8If24B1bKsmSLTAhJV'] }, { ids: ['ab8If24B1bKsmSLTAhNC'] }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key1' }],

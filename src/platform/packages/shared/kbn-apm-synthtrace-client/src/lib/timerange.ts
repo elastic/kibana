@@ -9,15 +9,20 @@
 
 import datemath from '@kbn/datemath';
 import type { Moment } from 'moment';
+import { ToolingLog } from '@kbn/tooling-log';
 import { GaussianEvents } from './gaussian_events';
 import { Interval } from './interval';
 import { PoissonEvents } from './poisson_events';
 
 export class Timerange {
-  constructor(public readonly from: Date, public readonly to: Date) {}
+  constructor(
+    public readonly from: Date,
+    public readonly to: Date,
+    private readonly log?: ToolingLog
+  ) {}
 
   interval(interval: string) {
-    return new Interval({ from: this.from, to: this.to, interval });
+    return new Interval({ from: this.from, to: this.to, interval, log: this.log });
   }
 
   ratePerMinute(rate: number) {
@@ -39,7 +44,7 @@ export class Timerange {
     return Array.from({ length: segmentCount }, (_, i) => {
       const from = new Date(this.from.getTime() + i * segmentDuration);
       const to = new Date(from.getTime() + segmentDuration);
-      return new Timerange(from, to);
+      return new Timerange(from, to, this.log);
     });
   }
 
@@ -65,7 +70,7 @@ function getDateFrom(date: DateLike, now: Date): Date {
   return date.toDate();
 }
 
-export function timerange(from: DateLike, to: DateLike) {
+export function timerange(from: DateLike, to: DateLike, log?: ToolingLog) {
   const now = new Date();
-  return new Timerange(getDateFrom(from, now), getDateFrom(to, now));
+  return new Timerange(getDateFrom(from, now), getDateFrom(to, now), log);
 }

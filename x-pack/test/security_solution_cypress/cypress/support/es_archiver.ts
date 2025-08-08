@@ -12,10 +12,21 @@ import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kb
 import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
-export const esArchiver = (
-  on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
-): EsArchiver => {
+interface ClientOptions {
+  url: string;
+  username: string;
+  password: string;
+}
+
+function createKibanaUrlWithAuth({ url, username, password }: ClientOptions) {
+  const clientUrl = new URL(url);
+  clientUrl.username = username;
+  clientUrl.password = password;
+
+  return clientUrl.toString();
+}
+
+export const esArchiver = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): void => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
   const isServerless = config.env.IS_SERVERLESS;
@@ -26,7 +37,7 @@ export const esArchiver = (
     password: config.env.ELASTICSEARCH_PASSWORD,
   };
 
-  let authOverride;
+  let authOverride = systemIndicesSuperuser;
   if (isServerless) {
     authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
   }
@@ -39,34 +50,42 @@ export const esArchiver = (
 
   const kibanaUrl = config.env.KIBANA_URL || config.env.BASE_URL;
 
+  const kibanaUrlWithAuth = createKibanaUrlWithAuth({
+    url: kibanaUrl,
+    ...authOverride,
+  });
+
   const kbnClient = new KbnClient({
     log,
-    url: kibanaUrl as string,
+    url: kibanaUrlWithAuth,
     ...(config.env.ELASTICSEARCH_URL.includes('https')
       ? { certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)] }
       : {}),
   });
 
-  const esArchiverInstance = new EsArchiver({
-    log,
-    client,
-    kbnClient,
-    baseDir: '../es_archives',
-  });
-
-  const ftrEsArchiverInstance = new EsArchiver({
-    log,
-    client,
-    kbnClient,
-    baseDir: '../../functional/es_archives/security_solution',
-  });
+  const esArchiverFactory = (baseDir: string) =>
+    new EsArchiver({
+      log,
+      client,
+      kbnClient,
+      baseDir,
+    });
+  const cypressEsArchiverInstance = esArchiverFactory('../es_archives');
+  const ftrEsArchiverInstance = esArchiverFactory(
+    '../../../solutions/security/test/fixtures/es_archives/security_solution'
+  );
+  const platformEsArchiverInstance = esArchiverFactory(
+    '../../../platform/test/fixtures/es_archives'
+  );
 
   on('task', {
     esArchiverLoad: async ({ archiveName, type = 'cypress', ...options }) => {
       if (type === 'cypress') {
-        return esArchiverInstance.load(archiveName, options);
+        return cypressEsArchiverInstance.load(archiveName, options);
       } else if (type === 'ftr') {
         return ftrEsArchiverInstance.load(archiveName, options);
+      } else if (type === 'platform') {
+        return platformEsArchiverInstance.load(archiveName, options);
       } else {
         throw new Error(
           `Unable to load the specified archive: ${JSON.stringify({ archiveName, type, options })}`
@@ -75,14 +94,14 @@ export const esArchiver = (
     },
     esArchiverUnload: async ({ archiveName, type = 'cypress' }) => {
       if (type === 'cypress') {
-        return esArchiverInstance.unload(archiveName);
+        return cypressEsArchiverInstance.unload(archiveName);
       } else if (type === 'ftr') {
         return ftrEsArchiverInstance.unload(archiveName);
+      } else if (type === 'platform') {
+        return platformEsArchiverInstance.unload(archiveName);
       } else {
         throw new Error('It is not possible to unload the archive.');
       }
     },
   });
-
-  return esArchiverInstance;
 };

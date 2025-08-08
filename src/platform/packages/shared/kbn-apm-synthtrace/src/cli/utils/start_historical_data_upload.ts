@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { range } from 'lodash';
+import { once, range } from 'lodash';
 import moment from 'moment';
 import { cpus } from 'os';
 import Path from 'path';
-import { Worker } from 'worker_threads';
-import { LogLevel } from '../../..';
 import { bootstrap } from './bootstrap';
 import { RunOptions } from './parse_run_cli_flags';
-import { WorkerData } from './synthtrace_worker';
+import { getScenario } from './get_scenario';
+import { StreamManager } from './stream_manager';
+import { indexData } from './index_data';
+import { runWorker } from './workers/run_worker';
+import { WorkerData } from './workers/historical_data/synthtrace_historical_data_worker';
 
 export async function startHistoricalDataUpload({
   runOptions,
@@ -23,23 +25,57 @@ export async function startHistoricalDataUpload({
   to,
 }: {
   runOptions: RunOptions;
-  from: Date;
-  to: Date;
+  from: number;
+  to: number;
 }) {
-  const { logger, esUrl, version, kibanaUrl } = await bootstrap(runOptions);
+  const { logger, clients } = await bootstrap(runOptions);
+
+  const files = runOptions.files;
+
+  const scenarios = await logger.perf('get_scenario', async () =>
+    Promise.all(
+      files.map(async (file) => {
+        const fn = await getScenario({ file, logger });
+        return fn({
+          ...runOptions,
+          logger,
+          from,
+          to,
+        });
+      })
+    )
+  );
+
+  const teardown = once(async () => {
+    await Promise.all(
+      scenarios.map(async (scenario) => {
+        if (scenario.teardown) {
+          return scenario.teardown(clients);
+        }
+      })
+    );
+  });
+
+  const streamManager = new StreamManager(logger, teardown);
+
+  await Promise.all(
+    scenarios.map(async (scenario) => {
+      if (scenario.bootstrap) {
+        return scenario.bootstrap(clients);
+      }
+    })
+  );
 
   const cores = cpus().length;
 
   let workers = Math.min(runOptions.workers ?? 10, cores - 1);
 
-  const rangeEnd = to;
-
-  const diff = moment(from).diff(rangeEnd);
+  const diff = moment(from).diff(to);
 
   const d = moment.duration(Math.abs(diff), 'ms');
 
-  // make sure ranges cover at least 100k documents
-  const minIntervalSpan = moment.duration(60, 'm');
+  // make sure ranges cover at least 1m
+  const minIntervalSpan = moment.duration(1, 'm');
 
   const minNumberOfRanges = d.asMilliseconds() / minIntervalSpan.asMilliseconds();
   if (minNumberOfRanges < workers) {
@@ -52,15 +88,12 @@ export async function startHistoricalDataUpload({
     logger.info(`updating maxWorkers to ${workers} to ensure each worker does enough work`);
   }
 
-  logger.info(`Generating data from ${from.toISOString()} to ${rangeEnd.toISOString()}`);
-
-  interface WorkerMessages {
-    log: LogLevel;
-    args: any[];
-  }
+  logger.info(
+    `Generating data from ${new Date(from).toISOString()} to ${new Date(to).toISOString()}`
+  );
 
   function rangeStep(interval: number) {
-    if (from > rangeEnd) return moment(from).subtract(interval, 'ms').toDate();
+    if (from > to) return moment(from).subtract(interval, 'ms').toDate();
     return moment(from).add(interval, 'ms').toDate();
   }
 
@@ -73,68 +106,39 @@ export async function startHistoricalDataUpload({
       workerIndex: index,
       bucketFrom: rangeStep(interval),
       bucketTo: rangeStep(interval + intervalSpan),
+      file: files[index % files.length],
     }));
 
-  function runService({
-    bucketFrom,
-    bucketTo,
-    workerIndex,
-  }: {
-    bucketFrom: Date;
-    bucketTo: Date;
-    workerIndex: number;
-  }) {
-    return new Promise((resolve, reject) => {
-      logger.debug(`Setting up Worker: ${workerIndex}`);
-      const workerData: WorkerData = {
-        runOptions,
-        bucketFrom,
-        bucketTo,
-        workerId: workerIndex.toString(),
-        esUrl,
-        version,
-        kibanaUrl,
-      };
-      const worker = new Worker(Path.join(__dirname, './worker.js'), {
-        workerData,
-      });
-      worker.on('message', (message: WorkerMessages) => {
-        switch (message.log) {
-          case LogLevel.debug:
-            logger.debug.apply({}, message.args);
-            return;
-          case LogLevel.info:
-            logger.info.apply({}, message.args);
-            return;
-          case LogLevel.trace:
-            logger.debug.apply({}, message.args);
-            return;
-          case LogLevel.warn:
-            logger.warn.apply({}, message.args);
-            return;
-          case LogLevel.error:
-            logger.error.apply({}, message.args);
-            return;
-          default:
-            logger.info(message);
-        }
-      });
-      worker.on('error', (message) => {
-        logger.error(message);
-        reject();
-      });
-      worker.on('exit', (code) => {
-        if (code === 2) reject(new Error(`Worker ${workerIndex} exited with error: ${code}`));
-        if (code === 1) {
-          logger.info(`Worker ${workerIndex} exited early because cancellation was requested`);
-        }
-        resolve(null);
-      });
-      worker.postMessage('start');
-    });
-  }
+  const workerServices =
+    intervals.length === 1
+      ? // just run in this process. it's hard to attach
+        // a debugger to a worker_thread, see:
+        // https://issues.chromium.org/issues/41461728
+        files.map((file) =>
+          indexData({
+            file,
+            bucketFrom: intervals[0].bucketFrom,
+            bucketTo: intervals[0].bucketTo,
+            clients,
+            logger,
+            runOptions,
+            workerId: 'i',
+            from,
+            to,
+            streamManager,
+          })
+        )
+      : range(0, intervals.length).map((index) =>
+          runWorker<WorkerData>({
+            logger,
+            streamManager,
+            workerIndex: index,
+            workerScriptPath: Path.join(__dirname, './workers/historical_data/worker.js'),
+            workerData: { ...intervals[index], workerId: index.toString(), from, to, runOptions },
+          })
+        );
 
-  const workerServices = range(0, intervals.length).map((index) => runService(intervals[index]));
+  await Promise.race(workerServices);
 
-  return Promise.all(workerServices);
+  await teardown();
 }

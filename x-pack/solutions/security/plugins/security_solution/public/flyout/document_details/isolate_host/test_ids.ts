@@ -8,3 +8,4 @@
 import { PREFIX } from '../../shared/test_ids';
 
 export const FLYOUT_HEADER_TITLE_TEST_ID = `${PREFIX}HeaderTitle` as const;
+export const FLYOUT_HOST_ISOLATION_PANEL_TEST_ID = `${PREFIX}HostIsolationPanel` as const;

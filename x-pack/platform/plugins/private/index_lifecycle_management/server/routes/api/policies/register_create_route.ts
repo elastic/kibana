@@ -16,12 +16,11 @@ async function createPolicy(
   name: string,
   policy: Omit<typeof bodySchema.type, 'name'>
 ): Promise<any> {
-  const body = { policy };
   const options = {
     ignore: [404],
   };
 
-  return client.ilm.putLifecycle({ name, body }, options);
+  return client.ilm.putLifecycle({ name, policy }, options);
 }
 
 /**

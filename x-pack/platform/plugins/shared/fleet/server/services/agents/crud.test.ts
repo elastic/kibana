@@ -29,6 +29,7 @@ import {
   updateAgent,
   _joinFilters,
   getByIds,
+  fetchAllAgentsByKuery,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -180,6 +181,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', '4', '5', 'up', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -211,6 +213,7 @@ describe('Agents CRUD test', () => {
           Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5', 'up2', '7'], 7, 'inactive'))
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -249,6 +252,7 @@ describe('Agents CRUD test', () => {
           )
         );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 2,
@@ -276,6 +280,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         page: 1,
@@ -306,6 +311,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 100, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -343,6 +349,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2', '3', 'up', '5'], 10001, 'updating'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: true,
         showInactive: false,
         getStatusSummary: true,
@@ -376,6 +383,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['6', '7'], 7, 'inactive'))
       );
       const result = await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showUpgradeable: false,
         showInactive: false,
         page: 2,
@@ -410,6 +418,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
       });
 
@@ -424,6 +433,7 @@ describe('Agents CRUD test', () => {
         Promise.resolve(getEsResponse(['1', '2'], 2, 'inactive'))
       );
       await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
         showInactive: false,
         sortField: 'policy_id',
       });
@@ -436,6 +446,7 @@ describe('Agents CRUD test', () => {
       });
       it('should add inactive and unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: '',
         });
@@ -447,6 +458,7 @@ describe('Agents CRUD test', () => {
 
       it('should add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: '',
         });
@@ -458,6 +470,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add unenrolled filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:unenrolled',
         });
@@ -469,6 +482,7 @@ describe('Agents CRUD test', () => {
 
       it('should add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: false,
           kuery: 'status:*',
         });
@@ -480,6 +494,7 @@ describe('Agents CRUD test', () => {
 
       it('should not add inactive filter', async () => {
         await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
           showInactive: true,
           kuery: 'status:*',
         });
@@ -510,10 +525,10 @@ describe('Agents CRUD test', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.openPointInTime.mockResolvedValueOnce({ id: 'test-pit' } as any);
 
-      await openPointInTime(esClient, AGENTS_INDEX);
+      await openPointInTime(esClient);
 
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `User opened point in time query [index=${AGENTS_INDEX}] [pitId=test-pit]`,
+        message: `User opened point in time query [index=${AGENTS_INDEX}] [keepAlive=10m] [pitId=test-pit]`,
       });
     });
   });
@@ -572,6 +587,44 @@ describe('Agents CRUD test', () => {
       await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).rejects.toThrow(
         AgentNotFoundError
       );
+    });
+  });
+
+  describe('fetchAllAgentsByKuery', () => {
+    const createEsSearchResultMock = (ids: string[]) => {
+      const mock = getEsResponse(ids, ids.length, 'online');
+      return {
+        ...mock,
+        hits: {
+          ...mock.hits,
+          hits: mock.hits.hits.map((item) => ({ ...item, sort: ['enrolled_at'] })),
+        },
+      };
+    };
+
+    it('should return an iterator', async () => {
+      expect(await fetchAllAgentsByKuery(esClientMock, soClientMock, {})).toEqual({
+        [Symbol.asyncIterator]: expect.any(Function),
+      });
+    });
+
+    it('should provide agents on every iteration', async () => {
+      const agentIds = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+      ];
+      searchMock
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[0]))
+        .mockResolvedValueOnce(createEsSearchResultMock(agentIds[1]))
+        .mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      let testCounter = 0;
+      for await (const agents of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        expect(agents.map((agent) => agent.id)).toEqual(agentIds[testCounter]);
+        testCounter++;
+      }
+
+      expect(searchMock).toHaveBeenCalledTimes(3);
     });
   });
 });

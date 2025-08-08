@@ -12,7 +12,7 @@ import { isUrl } from '../../../validators/string';
 import { ERROR_CODE } from './types';
 
 export const urlField =
-  (message: string) =>
+  (message: string, { requireTld = true }: { requireTld?: boolean } = {}) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
@@ -26,5 +26,5 @@ export const urlField =
       return error;
     }
 
-    return isUrl(value) ? undefined : error;
+    return isUrl(value, { requireTld }) ? undefined : error;
   };

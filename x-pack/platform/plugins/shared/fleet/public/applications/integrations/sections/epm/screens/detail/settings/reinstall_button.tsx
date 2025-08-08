@@ -15,9 +15,10 @@ import { useAuthz, useGetPackageInstallStatus, useInstallPackage } from '../../.
 
 type ReinstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> & {
   installSource: string;
+  isCustomPackage: boolean;
 };
 export function ReinstallButton(props: ReinstallationButtonProps) {
-  const { name, title, version, installSource } = props;
+  const { name, title, version, installSource, isCustomPackage } = props;
   const canInstallPackages = useAuthz().integrations.installPackages;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -35,7 +36,7 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
       iconType="refresh"
       isLoading={isReinstalling}
       onClick={handleClickReinstall}
-      disabled={isUploadedPackage}
+      disabled={isUploadedPackage || isCustomPackage}
     >
       {isReinstalling ? (
         <FormattedMessage

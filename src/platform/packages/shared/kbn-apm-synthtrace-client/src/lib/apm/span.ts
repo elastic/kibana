@@ -130,6 +130,16 @@ export function sqliteSpan(spanName: string, statement?: string): SpanParams {
     'span.destination.service.resource': spanSubtype,
   };
 }
+export function kafkaSpan(spanName: string): SpanParams {
+  const spanType = 'messaging';
+  const spanSubtype = 'kafka';
+
+  return {
+    spanName,
+    spanType,
+    spanSubtype,
+  };
+}
 
 export function redisSpan(spanName: string): SpanParams {
   const spanType = 'db';

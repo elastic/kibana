@@ -52,5 +52,17 @@ export function SvlSearchNavigationServiceProvider({
         shouldLoginIfPrompted: false,
       });
     },
+    async navigateToSearchPlaygroundList() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('searchPlayground');
+        await testSubjects.existOrFail('playgroundsListPage', { timeout: 2000 });
+      });
+    },
+    async navigateToSearchPlayground() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('searchPlayground', { path: 'chat' });
+        await testSubjects.existOrFail('svlPlaygroundPage', { timeout: 2000 });
+      });
+    },
   };
 }

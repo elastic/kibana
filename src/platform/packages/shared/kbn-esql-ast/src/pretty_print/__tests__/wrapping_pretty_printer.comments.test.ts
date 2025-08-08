@@ -13,8 +13,15 @@ import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });
   const text = WrappingPrettyPrinter.print(root, opts);
+  // console.log(JSON.stringify(root, null, 2));
 
   return { text };
+};
+
+const assertReprint = (src: string, expected: string = src) => {
+  const text = reprint(src).text;
+  // console.log(text);
+  expect(text).toBe(expected);
 };
 
 describe('commands', () => {
@@ -95,6 +102,21 @@ FROM index
   /* limit */
   // LIMIT
   | LIMIT 123`);
+    });
+  });
+
+  /**
+   * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
+   * get back to it after 9.1 release.
+   */
+  describe.skip('RERANK', () => {
+    test('comments around all elements', () => {
+      assertReprint(
+        `FROM a
+  | /*0*/ RERANK /*1*/ "query" /*2*/
+        ON /*3*/ field /*4*/
+        WITH /*5*/ id /*6*/`
+      );
     });
   });
 });
@@ -250,7 +272,7 @@ FROM
   // 2
   /* 3 */
   // 4
-  /* 5 */ /* 6 */ index1, /* 7 */ /* 8 */ // 9
+  /* 5 */ /* 6 */ index1 /* 7 */ /* 8 */, // 9
   index2`);
     });
   });
@@ -424,6 +446,34 @@ ROW
     });
   });
 
+  describe('list tuple expressions', () => {
+    test('numeric list literal, surrounded from three sides', () => {
+      assertReprint(`FROM a | WHERE b IN ()`);
+      assertReprint(`FROM a | WHERE b NOT IN (/* 1 */ 123456789 /* 2 */)`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */ // 3
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */
+        )`);
+      assertReprint(`FROM a
+  | WHERE
+      b IN
+        (
+          /* 1 */ 123456789 /* 2 */, // 3
+          "asdfasdfasdfasdfasdfasdfasdfasdfasfd" /* 4 */,
+          /* 5 */ 123456789 /* 6 */ // 7
+        )`);
+    });
+  });
+
   describe('rename expressions', () => {
     test('rename expression, surrounded from three sides', () => {
       const query = `
@@ -455,7 +505,7 @@ ROW 1
         // 2
         /* 3 */
         // 4
-        /* 5 */ /* 6 */ a AS b /* 7 */ /* 8 */, // 9
+        /* 5 */ /* 6 */ a AS b, /* 7 */ /* 8 */ // 9
         
         x AS y
         `;
@@ -470,7 +520,7 @@ ROW 1
       /* 3 */
       // 4
       /* 5 */ /* 6 */ a AS
-        b, /* 7 */ /* 8 */ // 9
+        b /* 7 */ /* 8 */, // 9
       x AS y`);
     });
 
@@ -492,7 +542,7 @@ ROW 1
       /* 1 */
       /* 2 */ a /* 3 */ AS
         /* 4 */
-        /* 5 */ b, /* 6 */
+        /* 5 */ b /* 6 */,
       x AS y`);
     });
   });
@@ -533,7 +583,7 @@ FROM index
       a
         ON
           // c.1
-          /* c.2 */ c, /* c.3 */
+          /* c.2 */ c /* c.3 */,
           // d.1
           /* d.2 */ d /* d.3 */`);
     });
@@ -590,6 +640,155 @@ ROW
         expect(text).toBe(
           'FROM a | STATS /* 1 */ a /* 2 */ WHERE /* 3 */ a /* 4 */ == /* 5 */ 1 /* 6 */'
         );
+      });
+    });
+
+    describe('variadic call', () => {
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
+      });
+
+      test('can decorate a function call from all sides', () => {
+        assertReprint(`FROM logs-*-*
+  | WHERE
+      // t1
+      /* t2 */
+      /* l1 */ /* l2 */ QSTR("term") /* r1 */ /* r2 */ // r3
+  | LIMIT 10`);
+      });
+
+      test('can decorate a function call outside and inside', () => {
+        assertReprint(`FROM logs-*-*
+  | WHERE
+      /* t0 */
+      // t1
+      /* t2 */
+      /* l1 */ /* l2 */ QSTR(/* i1 */ "term" /* i2 */ /* i3 */) /* r1 */ /* r2 */ // r3
+  | LIMIT 10`);
+      });
+    });
+  });
+
+  describe('map expressions', () => {
+    describe('inline comments', () => {
+      test('basic map, no comments', () => {
+        assertReprint('ROW FUNC(1, {"a": 1})');
+      });
+
+      test('leading comment', () => {
+        assertReprint('ROW FUNC(1, /* cmt */ {"a": 1})');
+      });
+
+      test('trailing comment', () => {
+        assertReprint('ROW FUNC(1, {"a": 1} /* cmt */)');
+      });
+
+      test('comment before first key', () => {
+        assertReprint('ROW FUNC(1, {/* cmt */ "a": 1})');
+      });
+
+      test('comment after first key', () => {
+        assertReprint('ROW FUNC(1, {"a" /* cmt */: 1})');
+      });
+
+      test('comment before first value', () => {
+        assertReprint('ROW FUNC(1, {"a": /* cmt */ 1})');
+      });
+
+      test('comment after first (and only) value', () => {
+        assertReprint('ROW FUNC(1, {"a": 1 /* cmt */})');
+      });
+
+      test('comment before keys', () => {
+        assertReprint('ROW FUNC(1, {/* 1 */ "a": 1, /* 2 */ "b": 2})');
+      });
+
+      test('comment after keys', () => {
+        assertReprint('ROW FUNC(1, {"a" /* 1 */: 1, "b" /* 2 */: 2})');
+      });
+
+      test('comment before values', () => {
+        assertReprint('ROW FUNC(1, {"a": /* 1 */ 1, "b": /* 2 */ 2})');
+      });
+
+      test('comment after values', () => {
+        assertReprint('ROW FUNC(1, {"a": 1 /* 1 */, "b": 2 /* 2 */})');
+      });
+    });
+
+    describe('single-line comments', () => {
+      test('comment over map', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    // this is map:
+    {"a": 1})`;
+        assertReprint(src);
+      });
+
+      test('comment next to map', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    {"a": 1} // this is map
+  )`;
+        assertReprint(src);
+      });
+
+      test('comment over key', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    {
+      // this is key:
+      "a":
+        1
+    })`;
+        assertReprint(src);
+      });
+
+      test('comment next to key', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    {
+      "a": // "a" keys is very important
+        1
+    }
+  )`;
+        assertReprint(src);
+      });
+
+      test('comment over value', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    {
+      "a":
+        // this is value:
+        1
+    })`;
+        assertReprint(src);
+      });
+
+      test('comment next to value', () => {
+        const src = `ROW
+  FUNCTION(
+    123456,
+    {
+      "a":
+        1 // This is a very important value
+    }
+  )`;
+        assertReprint(src);
       });
     });
   });

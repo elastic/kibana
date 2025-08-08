@@ -14,8 +14,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
 import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
-import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
-import { getUISettings } from '../../../../services';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -298,12 +296,10 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
   const xAxisIsHorizontal =
     stateParams.categoryAxes[0].position === Position.Bottom ||
     stateParams.categoryAxes[0].position === Position.Top;
-  const useLegacyTimeAxis = getUISettings().get(LEGACY_TIME_AXIS, false);
   const linearOrStackedBars = stateParams.seriesParams.every(
     ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
   );
-  const useMultiLayerAxis =
-    xAxisIsHorizontal && isTimeViz && !useLegacyTimeAxis && linearOrStackedBars;
+  const disableAxisControls = xAxisIsHorizontal && isTimeViz && linearOrStackedBars;
 
   return isTabSelected ? (
     <>
@@ -329,7 +325,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
-        useMultiLayerAxis={useMultiLayerAxis}
+        disableAxisControls={disableAxisControls}
       />
     </>
   ) : null;

@@ -7,166 +7,131 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
-import { PassThrough, Readable, Writable } from 'stream';
-import { isGeneratorObject } from 'util/types';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import Path from 'path';
+import { once } from 'lodash';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { StreamManager } from './stream_manager';
+import { SynthtraceClientTypes } from './clients_manager';
+import { startPerformanceLogger } from './performance_logger';
+import { runWorker } from './workers/run_worker';
+import { logMessage } from './workers/log_message';
+import { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
 
 export async function startLiveDataUpload({
   runOptions,
-  start,
+  from,
+  to,
 }: {
   runOptions: RunOptions;
-  start: Date;
+  from: number;
+  to: number;
 }) {
-  const file = runOptions.file;
+  const files = runOptions.files;
 
-  const {
-    logger,
-    apmEsClient,
-    logsEsClient,
-    infraEsClient,
-    syntheticsEsClient,
-    otelEsClient,
-    entitiesEsClient,
-    entitiesKibanaClient,
-  } = await bootstrap(runOptions);
+  const clientsPerIndices = new Map<string, SynthtraceClientTypes>();
 
-  const scenario = await getScenario({ file, logger });
-  const {
-    generate,
-    bootstrap: scenarioBootsrap,
-    teardown: scenarioTearDown,
-  } = await scenario({ ...runOptions, logger });
+  const { logger, clients } = await bootstrap(runOptions);
 
-  if (scenarioBootsrap) {
-    await scenarioBootsrap({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      otelEsClient,
-      syntheticsEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
-    });
-  }
+  Object.entries(clients).forEach(([key, client]) => {
+    clientsPerIndices.set(client.getAllIndices().join(','), key as SynthtraceClientTypes);
+  });
+
+  const scenarios = await Promise.all(
+    files.map(async (file) => {
+      const fn = await getScenario({ file, logger });
+      return fn({
+        ...runOptions,
+        logger,
+        from,
+        to,
+      });
+    })
+  );
+
+  const stopPerformanceLogger = startPerformanceLogger({ logger });
+
+  const teardown = once(async () => {
+    await Promise.all(
+      scenarios.map((scenario) => {
+        if (scenario.teardown) {
+          return scenario.teardown(clients);
+        }
+      })
+    );
+
+    stopPerformanceLogger();
+  });
+
+  const streamManager = new StreamManager(logger, teardown);
+
+  await Promise.all(
+    scenarios.map((scenario) => {
+      if (scenario.bootstrap) {
+        return scenario.bootstrap(clients);
+      }
+    })
+  );
 
   const bucketSizeInMs = runOptions.liveBucketSize;
-  let requestedUntil = start;
 
-  let currentStreams: PassThrough[] = [];
-  // @ts-expect-error upgrade typescript v4.9.5
-  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
+  const workersWaitingRefresh = new Map<string, string>();
 
-  process.on('SIGINT', () => closeStreamsAndTeardown());
-  process.on('SIGTERM', () => closeStreamsAndTeardown());
-  process.on('SIGQUIT', () => closeStreamsAndTeardown());
+  function refreshIndices() {
+    return Promise.all(
+      [...new Set(workersWaitingRefresh.values())].map(async (indices) => {
+        if (!indices) return;
 
-  async function closeStreamsAndTeardown() {
-    if (scenarioTearDown) {
-      try {
-        await scenarioTearDown({
-          apmEsClient,
-          logsEsClient,
-          infraEsClient,
-          otelEsClient,
-          syntheticsEsClient,
-          entitiesEsClient,
-          entitiesKibanaClient,
-        });
-      } catch (error) {
-        logger.error('Error during scenario teardown', error);
+        const clientName = clientsPerIndices.get(indices);
+        const client = clientName ? clients[clientName] : undefined;
+
+        await client?.refresh();
+      })
+    );
+  }
+
+  async function onMessage(message: any) {
+    if ('status' in message && message.status === 'done') {
+      const { workerId, indicesToRefresh }: { workerId: string; indicesToRefresh: string[] } =
+        message;
+
+      if (!workersWaitingRefresh.has(workerId)) {
+        workersWaitingRefresh.set(workerId, indicesToRefresh.join(','));
       }
-    }
 
-    currentStreams.forEach((stream) => {
-      stream.end(() => {
-        process.exit(0);
-      });
-    });
-    currentStreams = []; // Reset the stream array
-  }
+      if (workersWaitingRefresh.size === files.length) {
+        await refreshIndices();
+        logger.debug('Refreshing completed');
 
-  async function uploadNextBatch() {
-    const now = Date.now();
+        streamManager.trackedWorkers.forEach((trackedWorker) => {
+          trackedWorker.postMessage('continue');
+        });
 
-    if (now > requestedUntil.getTime()) {
-      const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
-
-      logger.info(
-        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
-      );
-
-      const generatorsAndClients = generate({
-        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: {
-          logsEsClient,
-          apmEsClient,
-          infraEsClient,
-          entitiesEsClient,
-          syntheticsEsClient,
-          otelEsClient,
-        },
-      });
-
-      const generatorsAndClientsArray = castArray(generatorsAndClients);
-
-      const streams = generatorsAndClientsArray.map(({ client }) => {
-        let stream: PassThrough;
-
-        if (cachedStreams.has(client)) {
-          stream = cachedStreams.get(client)!;
-        } else {
-          stream = new PassThrough({ objectMode: true });
-          cachedStreams.set(client, stream);
-          client.index(stream);
-        }
-
-        return stream;
-      });
-
-      currentStreams = streams;
-
-      const promises = generatorsAndClientsArray.map(({ generator }, i) => {
-        const concatenatedStream = castArray(generator)
-          .reverse()
-          .reduce<Writable>((prev, current) => {
-            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-            return currentStream.pipe(prev);
-          }, new PassThrough({ objectMode: true }));
-
-        concatenatedStream.pipe(streams[i], { end: false });
-
-        return awaitStream(concatenatedStream);
-      });
-
-      await Promise.all(promises);
-
-      logger.info('Indexing completed');
-
-      const refreshPromise = generatorsAndClientsArray.map(async ({ client }) => {
-        await client.refresh();
-      });
-
-      await Promise.all(refreshPromise);
-      logger.info('Refreshing completed');
-
-      requestedUntil = bucketTo;
+        workersWaitingRefresh.clear();
+      }
+    } else {
+      logMessage(logger, message);
     }
   }
 
-  do {
-    await uploadNextBatch();
-    await delay(bucketSizeInMs);
-  } while (true);
-}
+  const workerServices = files.map((file, index) =>
+    runWorker<WorkerData>({
+      logger,
+      streamManager,
+      workerIndex: index,
+      workerScriptPath: Path.join(__dirname, './workers/live_data/worker.js'),
+      workerData: {
+        file,
+        runOptions,
+        bucketSizeInMs,
+        workerId: index.toString(),
+        from,
+        to,
+      },
+      onMessage,
+    })
+  );
 
-async function delay(ms: number) {
-  return await new Promise((resolve) => setTimeout(resolve, ms));
+  await Promise.race(workerServices);
 }

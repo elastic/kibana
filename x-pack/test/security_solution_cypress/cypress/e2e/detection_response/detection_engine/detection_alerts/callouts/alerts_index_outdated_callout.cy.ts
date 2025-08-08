@@ -7,6 +7,7 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 import { ruleDetailsUrl } from '../../../../../urls/rule_details';
@@ -43,6 +44,10 @@ describe(
       login();
       visit(ALERTS_URL);
       waitForPageTitleToBeShown();
+    });
+
+    beforeEach(() => {
+      deleteAlertsAndRules();
     });
 
     context(

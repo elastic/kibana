@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectReference } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectReference } from '@kbn/core/server';
 
 export enum ActionExecutionSourceType {
   SAVED_OBJECT = 'SAVED_OBJECT',

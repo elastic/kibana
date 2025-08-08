@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// TODO: Move to slo-schema package?
+
 export interface Dashboard {
   id: string;
   title: string;

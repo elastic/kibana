@@ -79,7 +79,7 @@ export const PROVIDER_REQUIRED = i18n.translate(
 );
 
 export const DOCUMENTATION = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.documentation',
+  'xpack.inferenceEndpointUICommon.components.inferenceDocumentation',
   {
     defaultMessage: 'Inference API documentation',
   }
@@ -130,7 +130,7 @@ export const LEARN_MORE = i18n.translate(
 export const RE_ENTER_SECRETS = (label: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
     defaultMessage:
-      'You will need to reenter your ${label} each time you edit the inference endpoint',
+      'You will need to re-enter your {label} each time you edit the inference endpoint',
     values: { label },
   });
 };
@@ -182,5 +182,23 @@ export const ENDPOINT_UPDATE_FAILED = i18n.translate(
   'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
   {
     defaultMessage: 'Inference endpoint update failed',
+  }
+);
+
+export const SOLUTION_FILTER = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.solutionFilterText',
+  {
+    defaultMessage: 'Solution filter.',
+  }
+);
+
+export const GEMINI = i18n.translate('xpack.inferenceEndpointUICommon.components.gemini.title', {
+  defaultMessage: 'Google Gemini',
+});
+
+export const DOCUMENTATION_BASE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.documentation',
+  {
+    defaultMessage: 'documentation',
   }
 );

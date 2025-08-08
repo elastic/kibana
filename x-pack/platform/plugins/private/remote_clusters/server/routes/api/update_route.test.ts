@@ -101,6 +101,7 @@ describe('UPDATE remote clusters', () => {
                 max_connections_per_cluster: 3,
                 initial_connect_timeout: '30s',
                 skip_unavailable: true,
+                node_connections: 4,
               },
             },
           },
@@ -128,20 +129,19 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'sniff',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        nodeConnections: 4,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: true,
-                  mode: 'sniff',
-                  node_connections: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: ['127.0.0.1:9300'],
+                skip_unavailable: true,
+                mode: 'sniff',
+                node_connections: null,
               },
             },
           },
@@ -203,23 +203,22 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'proxy',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        proxySocketConnections: 18,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  proxy_address: '127.0.0.1:9300',
-                  skip_unavailable: true,
-                  mode: 'proxy',
-                  proxy_socket_connections: 18,
-                  node_connections: null,
-                  seeds: null,
-                  server_name: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                proxy_address: '127.0.0.1:9300',
+                skip_unavailable: true,
+                mode: 'proxy',
+                proxy_socket_connections: 18,
+                node_connections: null,
+                seeds: null,
+                server_name: null,
               },
             },
           },
@@ -283,22 +282,21 @@ describe('UPDATE remote clusters', () => {
         skipUnavailable: true,
         mode: 'proxy',
         securityModel: SECURITY_MODEL.CERTIFICATE,
+        proxySocketConnections: 18,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  proxy_address: '127.0.0.1:9300',
-                  skip_unavailable: true,
-                  mode: 'proxy',
-                  proxy_socket_connections: 18,
-                  server_name: null,
-                  proxy: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                proxy_address: '127.0.0.1:9300',
+                skip_unavailable: true,
+                mode: 'proxy',
+                proxy_socket_connections: 18,
+                server_name: null,
+                proxy: null,
               },
             },
           },
@@ -365,16 +363,14 @@ describe('UPDATE remote clusters', () => {
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
       expect(putSettingsMockFn).toHaveBeenCalledWith({
-        body: {
-          persistent: {
-            cluster: {
-              remote: {
-                test: {
-                  seeds: ['127.0.0.1:9300'],
-                  skip_unavailable: false,
-                  mode: 'sniff',
-                  node_connections: null,
-                },
+        persistent: {
+          cluster: {
+            remote: {
+              test: {
+                seeds: ['127.0.0.1:9300'],
+                skip_unavailable: false,
+                mode: 'sniff',
+                node_connections: null,
               },
             },
           },

@@ -7,9 +7,9 @@
 
 import * as rt from 'io-ts';
 import { pick } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { constant, identity } from 'fp-ts/function';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
 import { useUrlState } from './use_url_state';

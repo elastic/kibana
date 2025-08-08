@@ -65,7 +65,7 @@ export function AddDashboardFlyout({
   const dashboardSuggestionsFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('POST /api/streams/{name}/dashboards/_suggestions', {
+        .fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
           signal,
           params: {
             path: {
@@ -114,6 +114,10 @@ export function AddDashboardFlyout({
     prefix: 'filterGroupPopover',
   });
 
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'addDashboardFlyoutTitle',
+  });
+
   useEffect(() => {
     setSelectedDashboards([]);
   }, [linkedDashboards]);
@@ -123,10 +127,10 @@ export function AddDashboardFlyout({
   }, [dashboardSuggestionsFetch.value]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.streams.addDashboardFlyout.flyoutHeaderLabel', {
               defaultMessage: 'Add dashboards',
             })}
@@ -202,10 +206,12 @@ export function AddDashboardFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
           <DashboardsTable
+            entityId={entityId}
             dashboards={allDashboards}
             loading={dashboardSuggestionsFetch.loading}
             selectedDashboards={selectedDashboards}
             setSelectedDashboards={setSelectedDashboards}
+            dataTestSubj="streamsAppAddDashboardFlyoutDashboardsTable"
           />
         </EuiFlexGroup>
       </EuiFlyoutBody>

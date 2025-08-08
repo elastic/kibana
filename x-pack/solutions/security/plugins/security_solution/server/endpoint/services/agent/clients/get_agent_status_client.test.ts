@@ -13,15 +13,21 @@ import { UnsupportedAgentTypeError } from './errors';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { CrowdstrikeMock } from '../../actions/clients/crowdstrike/mocks';
 import { responseActionsClientMock } from '../../actions/clients/mocks';
+import type { AgentStatusClientOptions } from './lib/base_agent_status_client';
 
 describe('getAgentStatusClient', () => {
-  const mockedConstructorOptions = responseActionsClientMock.createConstructorOptions();
-  const constructorOptions = {
-    esClient: mockedConstructorOptions.esClient,
-    soClient: savedObjectsClientMock.create(),
-    connectorActionsClient: CrowdstrikeMock.createConnectorActionsClient(),
-    endpointService: mockedConstructorOptions.endpointService,
-  };
+  let constructorOptions: AgentStatusClientOptions;
+
+  beforeEach(() => {
+    const mockedConstructorOptions = responseActionsClientMock.createConstructorOptions();
+    constructorOptions = {
+      spaceId: 'default',
+      esClient: mockedConstructorOptions.esClient,
+      soClient: savedObjectsClientMock.create(),
+      connectorActionsClient: CrowdstrikeMock.createConnectorActionsClient(),
+      endpointService: mockedConstructorOptions.endpointService,
+    };
+  });
 
   it('returns an EndpointAgentStatusClient for endpoint agent type', () => {
     const client = getAgentStatusClient('endpoint', constructorOptions);

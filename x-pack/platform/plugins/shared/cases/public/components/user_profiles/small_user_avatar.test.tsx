@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import { SmallUserAvatar } from './small_user_avatar';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 describe('SmallUserAvatar', () => {
   it('renders an avatar with size small', () => {
-    const { getByTestId } = render(<SmallUserAvatar userInfo={userProfiles[0]} />);
+    render(<SmallUserAvatar userInfo={userProfiles[0]} />);
 
-    expect(getByTestId(`case-user-profile-avatar-${userProfiles[0].user.username}`)).toHaveClass(
-      'euiAvatar--s'
-    );
+    expect(
+      screen.getByTestId(`case-user-profile-avatar-${userProfiles[0].user.username}`)
+    ).toHaveClass('euiAvatar--s');
   });
 });

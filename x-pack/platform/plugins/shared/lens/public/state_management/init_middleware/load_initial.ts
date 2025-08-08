@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
@@ -286,7 +285,13 @@ async function loadFromSavedObject(
           : !inlineEditing
           ? data.search.session.start()
           : undefined,
-      persistedDoc: doc,
+      persistedDoc: {
+        ...doc,
+        state: {
+          ...doc.state,
+          visualization: visualizationState,
+        },
+      },
       activeDatasourceId: getInitialDatasourceId(loaderSharedArgs.datasourceMap, doc),
       visualization: {
         activeId: doc.visualizationType,
@@ -343,7 +348,7 @@ export async function loadInitial(
   }
   if (initialStateFromLocator) {
     const newFilters = initialStateFromLocator.filters
-      ? cloneDeep(initialStateFromLocator.filters)
+      ? structuredClone(initialStateFromLocator.filters)
       : undefined;
 
     if (newFilters) {
@@ -384,7 +389,7 @@ export async function loadInitial(
   ) {
     const newFilters =
       initialContext && 'searchFilters' in initialContext && initialContext.searchFilters
-        ? cloneDeep(initialContext.searchFilters)
+        ? structuredClone(initialContext.searchFilters)
         : undefined;
 
     if (newFilters) {

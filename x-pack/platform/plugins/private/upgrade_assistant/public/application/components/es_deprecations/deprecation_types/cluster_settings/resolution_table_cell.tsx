@@ -7,14 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiFlexGroup, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Status } from '../../../types';
 
@@ -35,19 +28,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.clusterSettings.deleteFailedText',
     {
       defaultMessage: 'Settings removal failed',
-    }
-  ),
-  resolutionText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.clusterSettings.resolutionText',
-    {
-      defaultMessage: 'Remove settings',
-    }
-  ),
-  resolutionTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.clusterSettings.resolutionTooltipLabel',
-    {
-      defaultMessage:
-        'Resolve this issue by removing settings from this cluster. This issue can be resolved automatically.',
     }
   ),
 };
@@ -85,7 +65,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="checkInCircleFilled" color="success" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteCompleteText}</EuiText>
@@ -102,7 +82,7 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
         data-test-subj="clusterSettingsResolutionStatusCell"
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warningFilled" color="danger" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">{i18nTexts.deleteFailedText}</EuiText>
@@ -111,20 +91,5 @@ export const ClusterSettingsResolutionCell: React.FunctionComponent<Props> = ({ 
     );
   }
 
-  return (
-    <EuiToolTip position="top" content={i18nTexts.resolutionTooltipLabel}>
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="center"
-        data-test-subj="clusterSettingsResolutionStatusCell"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="indexSettings" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
-  );
+  return <></>;
 };

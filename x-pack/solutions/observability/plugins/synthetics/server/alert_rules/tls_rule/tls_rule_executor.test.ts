@@ -12,10 +12,12 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
+import { randomUUID } from 'node:crypto';
+import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -59,25 +61,115 @@ describe('tlsRuleExecutor', () => {
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
+  const commonFilter =
+    'synthetics-monitor-multi-space.attributes.alert.tls.enabled: true and (synthetics-monitor-multi-space.attributes.type: http or synthetics-monitor-multi-space.attributes.type: tcp)';
+
+  const getTLSRuleExecutorParams = (
+    ruleParams: TLSRuleParams = {}
+  ): [
+    Date,
+    TLSRuleParams,
+    SavedObjectsClientContract,
+    ElasticsearchClient,
+    SyntheticsServerSetup,
+    SyntheticsMonitorClient,
+    string,
+    string
+  ] => [
+    moment().toDate(),
+    ruleParams,
+    soClient,
+    mockEsClient,
+    serverMock,
+    monitorClient,
+    'test-space',
+    'rule-name',
+  ];
+
   it('should only query enabled monitors', async () => {
-    const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
-    const tlsRule = new TLSRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
+    const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams());
+    const configRepo = tlsRule.monitorConfigRepository;
+    const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
     const { certs } = await tlsRule.getExpiredCertificates();
 
     expect(certs).toEqual([]);
 
     expect(spy).toHaveBeenCalledWith({
-      filter:
-        'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)',
-      soClient,
+      filter: commonFilter,
+    });
+  });
+
+  describe('getMonitors', () => {
+    it('should filter monitors based on monitor ids', async () => {
+      const monitorId = randomUUID();
+      const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ monitorIds: [monitorId] }));
+      const configRepo = tlsRule.monitorConfigRepository;
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.id:(\"${monitorId}\")`,
+      });
+    });
+
+    it('should filter monitors based on tags', async () => {
+      const tag = 'myMonitor';
+      const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ tags: [tag] }));
+      const configRepo = tlsRule.monitorConfigRepository;
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.tags:(\"${tag}\")`,
+      });
+    });
+
+    it('should filter monitors based on monitor types', async () => {
+      const monitorType = 'http';
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ monitorTypes: [monitorType] })
+      );
+      const configRepo = tlsRule.monitorConfigRepository;
+      const getAllMock = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(getAllMock).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor-multi-space.attributes.type:(\"${monitorType}\")`,
+      });
+    });
+
+    it('should filter monitors based on KQL query', async () => {
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ kqlQuery: 'monitor.type : "tcp" ' })
+      );
+
+      await tlsRule.getMonitors();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                {
+                  bool: {
+                    should: {
+                      bool: {
+                        should: [{ match_phrase: { 'monitor.type': 'tcp' } }],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+              ]),
+            }),
+          }),
+        }),
+        { meta: true, context: { loggingOptions: { loggerName: 'synthetics' } } }
+      );
     });
   });
 });

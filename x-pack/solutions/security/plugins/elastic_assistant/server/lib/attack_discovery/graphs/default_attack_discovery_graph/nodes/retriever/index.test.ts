@@ -9,19 +9,19 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { Replacements } from '@kbn/elastic-assistant-common';
 
+import type { AttackDiscoveryGraphState } from '../../../../../langchain/graphs';
 import { getRetrieveAnonymizedAlertsNode } from '.';
 import { mockAnonymizedAlerts } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
-import type { GraphState } from '../../types';
 import {
   ATTACK_DISCOVERY_CONTINUE,
   ATTACK_DISCOVERY_DEFAULT,
   ATTACK_DISCOVERY_REFINE,
 } from '../../../../../prompt/prompts';
 
-const initialGraphState: GraphState = {
-  attackDiscoveries: null,
-  attackDiscoveryPrompt: ATTACK_DISCOVERY_DEFAULT,
-  anonymizedAlerts: [],
+const initialGraphState: AttackDiscoveryGraphState = {
+  insights: null,
+  prompt: ATTACK_DISCOVERY_DEFAULT,
+  anonymizedDocuments: [],
   combinedGenerations: '',
   combinedRefinements: '',
   continuePrompt: ATTACK_DISCOVERY_CONTINUE,
@@ -82,7 +82,7 @@ describe('getRetrieveAnonymizedAlertsNode', () => {
   });
 
   it('updates state with anonymized alerts', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: AttackDiscoveryGraphState = { ...initialGraphState };
 
     const retrieveAnonymizedAlerts = getRetrieveAnonymizedAlertsNode({
       esClient,
@@ -91,11 +91,11 @@ describe('getRetrieveAnonymizedAlertsNode', () => {
 
     const result = await retrieveAnonymizedAlerts(state);
 
-    expect(result).toHaveProperty('anonymizedAlerts', mockAnonymizedAlerts);
+    expect(result).toHaveProperty('anonymizedDocuments', mockAnonymizedAlerts);
   });
 
   it('calls onNewReplacements with updated replacements', async () => {
-    const state: GraphState = { ...initialGraphState };
+    const state: AttackDiscoveryGraphState = { ...initialGraphState };
     const onNewReplacements = jest.fn();
     const replacements = { key: 'value' };
 

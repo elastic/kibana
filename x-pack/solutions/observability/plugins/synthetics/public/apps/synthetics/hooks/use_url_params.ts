@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
@@ -16,7 +16,7 @@ function getParsedParams(search: string) {
 
 export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
-  updatedParams: Partial<SyntheticsUrlParams> | null,
+  updatedParams: Partial<Record<keyof SyntheticsUrlParams, string>> | null,
   replaceState?: boolean
 ) => void;
 
@@ -25,7 +25,9 @@ export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  return getSupportedUrlParams(getParsedParams(search));
+  const urlParams = useMemo(() => getSupportedUrlParams(getParsedParams(search)), [search]);
+
+  return urlParams;
 };
 
 export const useUrlParams: SyntheticsUrlParamsHook = () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import { isEmpty } from 'lodash';
@@ -105,11 +105,20 @@ export function AgentConfigurationCreateEdit({
     <>
       <EuiText color="subdued">
         {i18n.translate('xpack.apm.agentConfig.newConfig.description', {
-          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+          defaultMessage: `Fine-tune your agent configuration. Changes are automatically propagated to your APM agents and EDOT SDKs, so there’s no need to redeploy.`,
         })}
       </EuiText>
 
       <EuiSpacer size="m" />
+
+      {isEditMode && existingConfigResult?.data?.error ? (
+        <>
+          <EuiCallOut title="Error applying configuration" color="danger" iconType="error">
+            <p>{existingConfigResult.data.error}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
 
       <EuiTitle size="s">
         <h2>

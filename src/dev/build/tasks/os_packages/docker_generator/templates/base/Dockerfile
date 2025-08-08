@@ -12,20 +12,18 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip{{#fips}} perl make gcc{{/fips}}
+RUN microdnf install -y findutils tar gzip
 {{/ubi}}
-{{#ubuntu}}
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
-{{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add curl
 {{/wolfi}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  curl --retry 8 -s -L \
+  {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
+  curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
-     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
+     https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-${arch}.tar.gz && \
   cd -
 {{/usePublicArtifact}}
 {{^usePublicArtifact}}
@@ -38,29 +36,6 @@ RUN tar \
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz
 
-{{#fips}}
-# OpenSSL requires specific versions that are FIPS certified.
-#
-# See:
-# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
-# https://www.openssl.org/docs/man3.0/man7/fips_module.html
-RUN set -e ; \
- OPENSSL_VERSION='3.0.8'; \
- OPENSSL_PATH=/usr/share/kibana/openssl ; \
- mkdir "${OPENSSL_PATH}"; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" ; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz.sha256" ; \
- echo "$(cat openssl-${OPENSSL_VERSION}.tar.gz.sha256) openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c ; \
- tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
- rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
- cd "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
- make -j $(nproc) > /dev/null ; \
- make install > /dev/null ; \
- rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- chown -R 1000:0 "${OPENSSL_PATH}";
-
-{{/fips}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -70,20 +45,21 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    case "$(arch)" in \
+    {{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}}; \
+    case "$arch" in \
         aarch64) \
             TINI_BIN='tini-arm64' ; \
+            TINI_CHECKSUM='07952557df20bfd2a95f9bef198b445e006171969499a1d361bd9e6f8e5e0e81' ; \
             ;; \
         x86_64) \
             TINI_BIN='tini-amd64' ; \
+            TINI_CHECKSUM='93dcc18adc78c65a028a84799ecf8ad40c936fdfc5f2a57b1acda5a8117fa82c' ; \
             ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+        *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
-  sha256sum -c "${TINI_BIN}.sha256sum" ; \
-  rm "${TINI_BIN}.sha256sum" ; \
+  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  echo "${TINI_CHECKSUM} ${TINI_BIN}" | sha256sum -c - ; \
   mv "${TINI_BIN}" /bin/tini ; \
   chmod +x /bin/tini
 {{^serverless}}
@@ -111,28 +87,10 @@ FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}
-RUN for iter in {1..10}; do \
-      microdnf update --setopt=tsflags=nodocs -y && \
-      microdnf install --setopt=tsflags=nodocs -y \
+RUN microdnf install --setopt=tsflags=nodocs -y \
       fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
-      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+      microdnf clean all
 {{/ubi}}
-{{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-      fontconfig fonts-liberation libnss3 curl ca-certificates && \
-      apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
-{{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
 {{/wolfi}}
@@ -149,21 +107,12 @@ COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /
 RUN fc-cache -v
 {{/serverless}}
 WORKDIR /usr/share/kibana
-{{#fips}}
 
-# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /bin/echo -e '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
-COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
-ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
-ENV XPACK_SECURITY_FIPSMODE_ENABLED=true
-
-{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
 {{! Kibana applications may depend on the ELASTIC_CONTAINER value. Screenshotting uses this to conditionally disable the Chromium sandbox when launching Puppeteer. }}
-ENV ELASTIC_CONTAINER true
+ENV ELASTIC_CONTAINER=true
 ENV PATH=/usr/share/kibana/bin:$PATH
 
 # Set some Kibana configuration defaults.
@@ -171,9 +120,15 @@ COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
-{{^opensslLegacyProvider}}
-RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
-{{/opensslLegacyProvider}}
+{{#fips}}
+
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
+ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
+RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
+
+{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
@@ -221,8 +176,7 @@ LABEL name="Kibana" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
 
-RUN mkdir /licenses && \
-    cp LICENSE.txt /licenses/LICENSE
+RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
 ENTRYPOINT ["/bin/tini", "--"]

@@ -72,14 +72,6 @@ describe('<CodeEditor />', () => {
     monaco.languages.setMonarchTokensProvider('loglang', simpleLogLang);
   });
 
-  test('is rendered', () => {
-    const component = mountWithIntl(
-      <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
   test('editor mount setup', () => {
     const suggestionProvider = {
       provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => ({

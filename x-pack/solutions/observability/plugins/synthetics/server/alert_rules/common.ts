@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import {
@@ -142,6 +142,7 @@ export const setRecoveredAlertsContext = ({
   basePath,
   spaceId,
   staleDownConfigs = {},
+  stalePendingConfigs = {},
   upConfigs,
   dateFormat,
   tz,
@@ -158,6 +159,7 @@ export const setRecoveredAlertsContext = ({
   spaceId?: string;
   params?: StatusRuleParams;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
@@ -212,9 +214,13 @@ export const setRecoveredAlertsContext = ({
       monitorSummary.locationId = formattedLocationIds;
     }
 
-    if (recoveredAlertId && locationIds && staleDownConfigs[recoveredAlertId]) {
+    if (
+      recoveredAlertId &&
+      locationIds &&
+      (staleDownConfigs[recoveredAlertId] || stalePendingConfigs[recoveredAlertId])
+    ) {
       const summary = getDeletedMonitorOrLocationSummary({
-        staleDownConfigs,
+        staleConfigs: staleDownConfigs[recoveredAlertId] ? staleDownConfigs : stalePendingConfigs,
         recoveredAlertId,
         locationIds,
         dateFormat,
@@ -355,7 +361,7 @@ export const getDefaultRecoveredSummary = ({
       ...(hit['error.message'] ? { error: { message: hit['error.message'] } } : {}),
       ...(hit['url.full'] ? { url: { full: hit['url.full'] } } : {}),
     } as unknown as OverviewPing,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId,
     configId,
     dateFormat,
@@ -365,38 +371,40 @@ export const getDefaultRecoveredSummary = ({
 };
 
 export const getDeletedMonitorOrLocationSummary = ({
-  staleDownConfigs,
+  staleConfigs,
   recoveredAlertId,
   locationIds,
   dateFormat,
   tz,
   params,
 }: {
-  staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  staleConfigs:
+    | AlertOverviewStatus['staleDownConfigs']
+    | AlertOverviewStatus['stalePendingConfigs'];
   recoveredAlertId: string;
   locationIds: string[];
   dateFormat: string;
   tz: string;
   params?: StatusRuleParams;
 }) => {
-  const downConfig = staleDownConfigs[recoveredAlertId];
-  const { ping } = downConfig;
+  const config = staleConfigs[recoveredAlertId];
+  const monitorInfo = 'monitorInfo' in config ? config.monitorInfo : config.ping;
   const monitorSummary = getMonitorSummary({
-    monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    monitorInfo,
+    reason: 'recovered',
     locationId: locationIds,
-    configId: downConfig.configId,
+    configId: config.configId,
     dateFormat,
     tz,
     params,
   });
   const lastErrorMessage = monitorSummary.lastErrorMessage;
 
-  if (downConfig.isDeleted) {
+  if (config.isDeleted) {
     return {
       lastErrorMessage,
       monitorSummary,
-      stateId: ping.state?.id,
+      stateId: monitorInfo?.state?.id,
       recoveryStatus: i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor.status', {
         defaultMessage: `has been deleted`,
       }),
@@ -404,11 +412,11 @@ export const getDeletedMonitorOrLocationSummary = ({
         defaultMessage: `has been deleted`,
       }),
     };
-  } else if (downConfig.isLocationRemoved) {
+  } else if (config.isLocationRemoved) {
     return {
       monitorSummary,
       lastErrorMessage,
-      stateId: ping.state?.id,
+      stateId: monitorInfo?.state?.id,
       recoveryStatus: i18n.translate(
         'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
         {
@@ -458,7 +466,7 @@ export const getUpMonitorRecoverySummary = ({
 
   const monitorSummary = getMonitorSummary({
     monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId: locationIds,
     configId,
     dateFormat,
@@ -502,10 +510,6 @@ export const getUpMonitorRecoverySummary = ({
     stateId,
   };
 };
-
-export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
-  defaultMessage: 'recovered',
-});
 
 export const formatFilterString = async (
   syntheticsEsClient: SyntheticsEsClient,

@@ -9,12 +9,13 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
 
-export type ArrayOptions<T> = TypeOptions<T[]> & {
-  minSize?: number;
-  maxSize?: number;
-};
+export type ArrayOptions<T> = TypeOptions<T[]> &
+  UnknownOptions & {
+    minSize?: number;
+    maxSize?: number;
+  };
 
 export class ArrayType<T> extends Type<T[]> {
   private readonly arrayType: Type<T>;
@@ -29,6 +30,12 @@ export class ArrayType<T> extends Type<T[]> {
 
     if (options.maxSize !== undefined) {
       schema = schema.max(options.maxSize);
+    }
+
+    // Only set stripUnknown if we have an explicit value of unknowns
+    const { unknowns } = options;
+    if (unknowns) {
+      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
     }
 
     super(schema, options);

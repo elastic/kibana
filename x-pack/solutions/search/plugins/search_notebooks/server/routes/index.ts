@@ -16,6 +16,12 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
   router.get(
     {
       path: '/internal/search_notebooks/notebooks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the notebook service',
+        },
+      },
       validate: {
         query: schema.object({
           list: schema.maybe(schema.string()),
@@ -44,6 +50,12 @@ export function defineRoutes({ config, notebooksCache, logger, router }: RouteDe
   router.get(
     {
       path: '/internal/search_notebooks/notebooks/{notebookId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the notebook service',
+        },
+      },
       validate: {
         params: schema.object({
           notebookId: schema.string(),

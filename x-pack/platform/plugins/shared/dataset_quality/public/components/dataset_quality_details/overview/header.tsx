@@ -51,7 +51,7 @@ export default function OverviewHeader({
           <span>{overviewHeaderTitle}</span>
         </EuiTitle>
         <EuiToolTip content={overviewTitleTooltip}>
-          <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          <EuiIcon size="m" color="subdued" type="question" className="eui-alignTop" />
         </EuiToolTip>
       </EuiFlexGroup>
 

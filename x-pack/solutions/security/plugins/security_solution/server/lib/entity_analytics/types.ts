@@ -81,6 +81,8 @@ export interface RiskEngineConfiguration {
   _meta: {
     mappingsVersion: number;
   };
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
 }
 
 export interface CalculateScoresParams {
@@ -109,6 +111,8 @@ export interface CalculateAndPersistScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard?: number;
+  excludeAlertStatuses?: string[];
+  excludeAlertTags?: string[];
   returnScores?: boolean;
   refresh?: 'wait_for';
 }

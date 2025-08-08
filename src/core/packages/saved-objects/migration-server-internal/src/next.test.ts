@@ -21,7 +21,8 @@ describe('migrations v2 next', () => {
       (() => {}) as any,
       waitGroup(),
       waitGroup(),
-      waitGroup()
+      waitGroup(),
+      []
     )(state);
     expect(action).toEqual(null);
   });
@@ -32,7 +33,8 @@ describe('migrations v2 next', () => {
       (() => {}) as any,
       waitGroup(),
       waitGroup(),
-      waitGroup()
+      waitGroup(),
+      []
     )(state);
     expect(action).toEqual(null);
   });

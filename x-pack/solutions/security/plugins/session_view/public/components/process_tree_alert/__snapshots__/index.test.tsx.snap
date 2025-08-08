@@ -3,7 +3,7 @@
 exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should render alert row correctly 1`] = `
 <div>
   <div
-    css="[object Object]"
+    class="css-7urdeb-ProcessTreeAlert"
     data-id="6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38"
   >
     <div
@@ -43,22 +43,21 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          css="[object Object]"
+          class="css-4xrfms-ProcessTreeAlert"
         >
           <div
-            class="euiText emotion-EuiText"
+            class="euiText emotion-euiText-s-ProcessTreeAlert"
             data-test-subj="sessionView:sessionViewAlertDetailRuleName-6bb22512e0e588d1a2449b61f164b216e366fba2de39e65d002ae734d71a6c38-text"
           >
             cmd test alert
           </div>
-          
         </div>
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
-          class="euiBadge emotion-EuiInnerText"
+          class="euiBadge emotion-euiBadge-primary-ProcessTreeAlert"
           title="open"
         >
           <span
@@ -76,7 +75,7 @@ exports[`ProcessTreeAlerts component When ProcessTreeAlert is mounted should ren
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <span
-          class="euiBadge emotion-EuiInnerText"
+          class="euiBadge emotion-euiBadge-default-ProcessTreeAlert"
           title="exec"
         >
           <span

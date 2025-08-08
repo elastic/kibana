@@ -72,10 +72,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.category.control.type",
+                        "id": "def-public.StorybookMock.propArguments.category.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -120,10 +120,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.title.control.type",
+                        "id": "def-public.StorybookMock.propArguments.title.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -168,10 +168,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.description.control.type",
+                        "id": "def-public.StorybookMock.propArguments.description.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -216,10 +216,10 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.button.control.type",
+                        "id": "def-public.StorybookMock.propArguments.button.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
                         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
@@ -267,13 +267,26 @@
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
                     "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
                     "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",

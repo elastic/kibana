@@ -45,7 +45,7 @@ export const useRiskScoreKpi = ({
   timerange,
 }: UseRiskScoreKpiProps): RiskScoreKpi => {
   const { addError } = useAppToasts();
-  const defaultIndex = useGetDefaultRiskIndex(riskEntity);
+  const defaultIndex = useGetDefaultRiskIndex();
   const {
     data: riskEngineStatus,
     isFetching: isStatusLoading,

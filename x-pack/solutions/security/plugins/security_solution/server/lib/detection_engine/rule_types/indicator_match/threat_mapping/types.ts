@@ -4,179 +4,86 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
-  ThreatQuery,
   ThreatMapping,
   ThreatMappingEntries,
   ThreatIndex,
   ThreatLanguageOrUndefined,
-  ConcurrentSearches,
-  ItemsPerSearch,
   ThreatIndicatorPath,
-  LanguageOrUndefined,
-  Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ListClient } from '@kbn/lists-plugin/server';
 import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
+  OpenPointInTimeResponse,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import type {
-  BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
-  WrapHits,
   WrapSuppressedHits,
   OverrideBodyQuery,
-  RunOpts,
-  CreateRuleOptions,
+  SecuritySharedParams,
+  SecurityRuleServices,
 } from '../../types';
-import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
+import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { ExperimentalFeatures } from '../../../../../../common';
+import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface CreateThreatSignalsOptions {
-  alertId: string;
-  bulkCreate: BulkCreate;
-  completeRule: CompleteRule<ThreatRuleParams>;
-  concurrentSearches: ConcurrentSearches;
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  filters: unknown[];
-  inputIndex: string[];
-  itemsPerSearch: ItemsPerSearch;
-  language: LanguageOrUndefined;
-  listClient: ListClient;
-  outputIndex: string;
-  query: string;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  savedId: string | undefined;
-  searchAfterSize: number;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatFilters: unknown[];
-  threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPath;
-  threatLanguage: ThreatLanguageOrUndefined;
-  threatMapping: ThreatMapping;
-  threatQuery: ThreatQuery;
-  tuple: RuleRangeTuple;
-  type: Type;
-  wrapHits: WrapHits;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
-  runOpts: RunOpts<ThreatRuleParams>;
   licensing: LicensingPluginSetup;
-  experimentalFeatures: ExperimentalFeatures;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export interface CreateThreatSignalOptions {
-  alertId: string;
-  bulkCreate: BulkCreate;
-  completeRule: CompleteRule<ThreatRuleParams>;
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
   currentThreatList: ThreatListItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
-  inputIndex: string[];
-  language: LanguageOrUndefined;
-  listClient: ListClient;
-  outputIndex: string;
-  query: string;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  savedId: string | undefined;
-  searchAfterSize: number;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  threatMapping: ThreatMapping;
-  tuple: RuleRangeTuple;
-  type: Type;
-  wrapHits: WrapHits;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
   threatFilters: unknown[];
-  threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPath;
-  threatLanguage: ThreatLanguageOrUndefined;
-  threatQuery: ThreatQuery;
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
-  runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 export interface CreateEventSignalOptions {
-  alertId: string;
-  bulkCreate: BulkCreate;
-  completeRule: CompleteRule<ThreatRuleParams>;
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
   currentEventList: EventItem[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filters: unknown[];
-  inputIndex: string[];
-  language: LanguageOrUndefined;
-  listClient: ListClient;
-  outputIndex: string;
-  query: string;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  savedId: string | undefined;
-  searchAfterSize: number;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  tuple: RuleRangeTuple;
-  type: Type;
-  wrapHits: WrapHits;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
   threatFilters: unknown[];
-  threatIndex: ThreatIndex;
-  threatIndicatorPath: ThreatIndicatorPath;
-  threatLanguage: ThreatLanguageOrUndefined;
-  threatMapping: ThreatMapping;
-  threatQuery: ThreatQuery;
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  exceptionFilter: Filter | undefined;
-  unprocessedExceptions: ExceptionListItemSchema[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
-  threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
-  runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
   isAlertSuppressionActive: boolean;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 type EntryKey = 'field' | 'value';
 
 export interface BuildThreatMappingFilterOptions {
-  chunkSize?: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
@@ -202,16 +109,10 @@ export interface CreateAndOrClausesOptions {
 }
 
 export interface BuildEntriesMappingFilterOptions {
-  chunkSize: number;
   threatList: ThreatListItem[];
   threatMapping: ThreatMapping;
   entryKey: EntryKey;
   allowedFieldsForTermsQuery?: AllowedFieldsForTermsQuery;
-}
-
-export interface SplitShouldClausesOptions {
-  chunkSize: number;
-  should: BooleanFilter[];
 }
 
 export interface BooleanFilter {
@@ -228,20 +129,14 @@ interface ThreatListConfig {
 }
 
 export interface GetThreatListOptions {
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
   esClient: ElasticsearchClient;
-  index: string[];
-  language: ThreatLanguageOrUndefined;
   perPage?: number;
-  query: string;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   searchAfter: estypes.SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
   reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  listClient: ListClient;
-  exceptionFilter: Filter | undefined;
   indexFields: DataViewFieldBase[];
 }
 
@@ -289,36 +184,22 @@ export type DecodedThreatNamedQuery = BaseThreatNamedQuery & { id?: string; inde
 export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
 
 export interface BuildThreatEnrichmentOptions {
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
+  services: SecurityRuleServices;
   threatFilters: unknown[];
-  threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
-  threatLanguage: ThreatLanguageOrUndefined;
-  threatQuery: ThreatQuery;
   pitId: string;
-  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
-  listClient: ListClient;
-  exceptionFilter: Filter | undefined;
-  threatMapping: ThreatMapping;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
+  allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
 }
 
 export interface EventsOptions {
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  query: string;
-  language: ThreatLanguageOrUndefined;
-  index: string[];
+  sharedParams: SecuritySharedParams<ThreatRuleParams>;
+  services: SecurityRuleServices;
   searchAfter: estypes.SortResults | undefined;
   perPage?: number;
   filters: unknown[];
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  tuple: RuleRangeTuple;
-  runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
@@ -350,7 +231,7 @@ export interface SignalMatch {
 
 export type GetDocumentListInterface = (params: {
   searchAfter: estypes.SortResults | undefined;
-}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
+}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc, unknown>>;
 
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
@@ -376,21 +257,21 @@ export interface AllowedFieldsForTermsQuery {
   threat: Record<string, boolean>;
 }
 
-export interface SignalValuesMap {
+export interface FieldAndValueToDocIdsMap {
   [field: string]: {
     [fieldValue: string]: string[];
   };
 }
 
 export interface GetAllowedFieldsForTermQuery {
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   inputIndex: string[];
   threatIndex: ThreatIndex;
   threatMatchedFields: ThreatMatchedFields;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-export interface GetSignalValuesMap {
+export interface GetFieldAndValueToDocIdsMap {
   eventList: EventItem[];
   threatMatchedFields: ThreatMatchedFields;
 }

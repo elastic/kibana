@@ -21,28 +21,32 @@ interface Props {
   contextId: string;
   eventId: string;
   processHashSha256: string | null | undefined;
+  scopeId: string;
 }
 
-export const ProcessHash = React.memo<Props>(({ contextId, eventId, processHashSha256 }) => {
-  if (isNillEmptyOrNotFinite(processHashSha256)) {
-    return null;
-  }
+export const ProcessHash = React.memo<Props>(
+  ({ contextId, eventId, processHashSha256, scopeId }) => {
+    if (isNillEmptyOrNotFinite(processHashSha256)) {
+      return null;
+    }
 
-  return (
-    <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
-      <TokensFlexItem grow={false} component="div">
-        <DraggableBadge
-          contextId={contextId}
-          eventId={eventId}
-          field="process.hash.sha256"
-          iconType="number"
-          value={processHashSha256}
-          fieldType="keyword"
-          isAggregatable={true}
-        />
-      </TokensFlexItem>
-    </HashFlexGroup>
-  );
-});
+    return (
+      <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
+        <TokensFlexItem grow={false} component="div">
+          <DraggableBadge
+            scopeId={scopeId}
+            contextId={contextId}
+            eventId={eventId}
+            field="process.hash.sha256"
+            iconType="number"
+            value={processHashSha256}
+            fieldType="keyword"
+            isAggregatable={true}
+          />
+        </TokensFlexItem>
+      </HashFlexGroup>
+    );
+  }
+);
 
 ProcessHash.displayName = 'ProcessHash';

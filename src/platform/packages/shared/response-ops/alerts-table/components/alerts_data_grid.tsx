@@ -18,7 +18,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { ActionsCellHost } from './actions_cell_host';
 import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
@@ -79,7 +78,7 @@ export const AlertsDataGrid = typedMemo(
       onChangePageSize,
       onChangePageIndex,
       actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
-      getBulkActions,
+      additionalBulkActions,
       fieldsBrowserOptions,
       cellActionsOptions,
       pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
@@ -101,7 +100,7 @@ export const AlertsDataGrid = typedMemo(
       services: { http, notifications, application, cases: casesService, settings },
     } = renderContext;
 
-    const { colorMode } = useEuiTheme();
+    const { colorMode, euiTheme } = useEuiTheme();
     const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
     const {
       isBulkActionsColumnActive,
@@ -114,7 +113,7 @@ export const AlertsDataGrid = typedMemo(
       query,
       alertsCount: alerts.length,
       casesConfig: casesConfiguration,
-      getBulkActions,
+      additionalBulkActions,
       refresh: refreshQueries,
       hideBulkActions,
       http,
@@ -321,16 +320,16 @@ export const AlertsDataGrid = typedMemo(
     const rowStyles = useMemo(
       () => css`
         .alertsTableHighlightedRow {
-          background-color: ${euiThemeVars.euiColorHighlight};
+          background-color: ${euiTheme.components.dataGridRowBackgroundMarked};
         }
 
         .alertsTableActiveRow {
           background-color: ${colorMode === 'LIGHT'
-            ? tint(euiThemeVars.euiColorLightShade, 0.5)
-            : euiThemeVars.euiColorLightShade};
+            ? tint(euiTheme.colors.lightShade, 0.5)
+            : euiTheme.colors.lightShade};
         }
       `,
-      [colorMode]
+      [colorMode, euiTheme]
     );
 
     return (
@@ -358,7 +357,7 @@ export const AlertsDataGrid = typedMemo(
               ref={dataGridRef}
               css={rowStyles}
               aria-label="Alerts table"
-              data-test-subj="alertsTable"
+              data-test-subj={isLoading ? `alertsTableIsLoading` : `alertsTableIsLoaded`}
               height={height}
               columns={columnsWithCellActions}
               columnVisibility={columnVisibility}

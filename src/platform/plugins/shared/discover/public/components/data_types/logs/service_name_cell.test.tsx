@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { getServiceNameCell } from './service_name_cell';
-import { CellRenderersExtensionParams } from '../../../context_awareness';
+import type { CellRenderersExtensionParams } from '../../../context_awareness';
 
 const core = {
   application: {
@@ -68,6 +69,20 @@ describe('getServiceNameCell', () => {
   it('renders icon if agent name is recognized', () => {
     const record = buildDataTableRecord(
       { fields: { 'service.name': 'test-service', 'agent.name': 'nodejs' } },
+      dataViewMock
+    );
+    renderCell('service.name', record);
+    expect(screen.getByTestId('dataTableCellActionsPopover_service.name')).toBeInTheDocument();
+  });
+
+  it('renders otel icon if otel sdk language is recognized', () => {
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          'service.name': 'test-service',
+          'resource.attributes.telemetry.sdk.language': 'nodejs',
+        },
+      },
       dataViewMock
     );
     renderCell('service.name', record);

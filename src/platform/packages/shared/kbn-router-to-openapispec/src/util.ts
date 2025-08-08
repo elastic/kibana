@@ -19,6 +19,7 @@ import {
 } from '@kbn/core-http-server';
 import { CustomOperationObject, KnownParameters } from './type';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import { Env } from './generate_oas';
 
 const tagPrefix = 'oas-tag:';
 const extractTag = (tag: string) => {
@@ -183,15 +184,22 @@ export const getXsrfHeaderForMethod = (
 
 export const setXState = (
   availability: RouteConfigOptions<RouteMethod>['availability'],
-  operation: CustomOperationObject
+  operation: CustomOperationObject,
+  env: Env
 ): void => {
   if (availability) {
-    if (availability.stability === 'experimental') {
-      operation['x-state'] = 'Technical Preview';
+    let state = '';
+    if (availability.stability === 'stable') {
+      state = 'Generally available';
+    } else if (availability.stability === 'experimental') {
+      state = 'Technical Preview';
+    } else if (availability.stability === 'beta') {
+      state = 'Beta';
     }
-    if (availability.stability === 'beta') {
-      operation['x-state'] = 'Beta';
+    if (!env.serverless && availability.since) {
+      state = state ? `${state}; added in ${availability.since}` : `Added in ${availability.since}`;
     }
+    operation['x-state'] = state;
   }
 };
 

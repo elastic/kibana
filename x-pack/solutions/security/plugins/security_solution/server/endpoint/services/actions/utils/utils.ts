@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { keyBy } from 'lodash';
+import { catchAndWrapError } from '../../../utils';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import type { FetchActionResponsesResult } from '../..';
 import type {
   ResponseActionAgentType,
@@ -36,7 +38,6 @@ import type {
   WithAllKeys,
 } from '../../../../../common/endpoint/types';
 import { ActivityLogItemTypes } from '../../../../../common/endpoint/types';
-import type { EndpointMetadataService } from '../../metadata';
 
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
@@ -540,25 +541,39 @@ export const formatEndpointActionResults = (
     : [];
 };
 
+/**
+ * Retrieves the hosts name for each agent ID provided on input.
+ * Note that if any ID provided is not a fleet agent ID (ex. 3rd party EDR agent id),
+ * then no host name will be returned for agent.
+ * @param agentIds
+ * @param metadataService
+ */
 export const getAgentHostNamesWithIds = async ({
-  esClient,
   agentIds,
-  metadataService,
+  endpointService,
+  spaceId,
 }: {
-  esClient: ElasticsearchClient;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
   agentIds: string[];
-  metadataService: EndpointMetadataService;
-}): Promise<{ [id: string]: string }> => {
-  // get host metadata docs with queried agents
-  const metaDataDocs = await metadataService.findHostMetadataForFleetAgents([...new Set(agentIds)]);
-  // agent ids and names from metadata
-  // map this into an object as {id1: name1, id2: name2} etc
-  const agentsMetadataInfo = agentIds.reduce<{ [id: string]: string }>((acc, id) => {
-    acc[id] = metaDataDocs.find((doc) => doc.agent.id === id)?.host.hostname ?? '';
-    return acc;
-  }, {});
+}): Promise<{ [agentId: string]: string }> => {
+  if (agentIds.length === 0) {
+    return {};
+  }
 
-  return agentsMetadataInfo;
+  const fleetServices = endpointService.getInternalFleetServices(spaceId);
+  const agentFound = await fleetServices.agent
+    .getByIds(agentIds, { ignoreMissing: true })
+    .catch(catchAndWrapError);
+  const agentDocById = keyBy(agentFound, 'id');
+
+  return agentIds.reduce((acc, id) => {
+    const agentHostInfo = agentDocById[id]?.local_metadata?.host;
+
+    acc[id] = agentHostInfo?.name || agentHostInfo?.hostname || '';
+
+    return acc;
+  }, {} as { [agentId: string]: string });
 };
 
 export const createActionDetailsRecord = <T extends ActionDetails = ActionDetails>(

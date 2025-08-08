@@ -11,9 +11,11 @@ import type {
 } from '@kbn/alerting-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
+  ApplicationStart,
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  NotificationsStart,
   Plugin,
   PluginInitializerContext,
   SecurityServiceStart,
@@ -64,7 +66,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -72,6 +74,10 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -88,7 +94,7 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-export type ApmPluginStart = void;
+export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
 
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
@@ -118,6 +124,8 @@ export interface ApmServices {
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
+  application: ApplicationStart;
+  cases?: CasesPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   discover?: DiscoverStart;
@@ -132,8 +140,9 @@ export interface ApmPluginStartDeps {
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   fleet?: FleetStart;
-  fieldFormats?: FieldFormatsStart;
+  fieldFormats: FieldFormatsStart;
   security?: SecurityPluginStart;
+  settings: SettingsStart;
   spaces?: SpacesPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -147,7 +156,11 @@ export interface ApmPluginStartDeps {
   uiSettings: IUiSettingsClient;
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;
+  apmSourcesAccess: ApmSourceAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+  share?: SharePublicStart;
+  notifications: NotificationsStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -155,7 +168,7 @@ const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
 });
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-  defaultMessage: 'Service Inventory',
+  defaultMessage: 'Service inventory',
 });
 
 const serviceGroupsTitle = i18n.translate('xpack.apm.navigation.serviceGroupsTitle', {
@@ -166,7 +179,7 @@ const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
 const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
-  defaultMessage: 'Service Map',
+  defaultMessage: 'Service map',
 });
 
 const dependenciesTitle = i18n.translate('xpack.apm.navigation.dependenciesTitle', {
@@ -178,7 +191,7 @@ const apmSettingsTitle = i18n.translate('xpack.apm.navigation.apmSettingsTitle',
 });
 
 const apmStorageExplorerTitle = i18n.translate('xpack.apm.navigation.apmStorageExplorerTitle', {
-  defaultMessage: 'Storage Explorer',
+  defaultMessage: 'Storage explorer',
 });
 
 const apmTutorialTitle = i18n.translate('xpack.apm.navigation.apmTutorialTitle', {
@@ -288,22 +301,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     // Registers custom component that is going to be render on fleet section
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialFleetInstructions',
-      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
-      () => import('./tutorial/tutorial_fleet_instructions')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialFleetInstructions', () =>
+      import('./tutorial/tutorial_fleet_instructions').then((mod) => mod.TutorialFleetInstructions)
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialConfigAgent',
-      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
-      () => import('./tutorial/config_agent')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgent', () =>
+      import('./tutorial/config_agent').then((mod) => mod.TutorialConfigAgent)
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialConfigAgentRumScript',
-      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
-      () => import('./tutorial/config_agent/rum_script')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgentRumScript', () =>
+      import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
     );
 
     pluginSetupDeps.uiActions.registerTrigger({

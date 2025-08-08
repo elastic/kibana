@@ -60,7 +60,7 @@ describe(
           })
         )
         .then(() => {
-          loadRule().then((data) => {
+          loadRule({ query: `agent.id: ${createdHost.agentId}` }).then((data) => {
             ruleId = data.id;
             ruleName = data.name;
           });

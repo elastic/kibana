@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { TypeOf, schema } from '@kbn/config-schema';
+import path from 'node:path';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
   meta: { description: 'The parameters for the rule.' },
@@ -21,6 +22,9 @@ export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
     meta: { description: 'The parameters for the rule.' },
   }
 );
+
+export const createRuleParamsExamples = () =>
+  path.join(__dirname, 'examples_create_rule_params.yaml');
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;

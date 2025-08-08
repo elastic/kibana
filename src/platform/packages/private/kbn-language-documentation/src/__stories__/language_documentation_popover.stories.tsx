@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { LanguageDocumentationPopover } from '../components/as_popover';
 
 const sections = {
@@ -62,12 +61,20 @@ const sections = {
   ),
 };
 
-storiesOf('Language documentation popover', module).add('default', () => (
-  <LanguageDocumentationPopover
-    language="Test"
-    sections={sections}
-    buttonProps={{ color: 'text' }}
-    isHelpMenuOpen={true}
-    onHelpMenuVisibilityChange={() => {}}
-  />
-));
+export default {
+  title: 'Language documentation popover',
+};
+
+export const Default = {
+  render: () => (
+    <LanguageDocumentationPopover
+      language="Test"
+      sections={sections}
+      buttonProps={{ color: 'text' }}
+      isHelpMenuOpen={true}
+      onHelpMenuVisibilityChange={() => {}}
+    />
+  ),
+
+  name: 'default',
+};

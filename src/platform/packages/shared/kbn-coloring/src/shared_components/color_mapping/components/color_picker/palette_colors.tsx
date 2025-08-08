@@ -106,7 +106,7 @@ export function PaletteColors({
                   }
                 )}
               >
-                <EuiIcon tabIndex={0} type="questionInCircle" />
+                <EuiIcon tabIndex={0} type="question" />
               </EuiToolTip>
             </h6>
           </EuiTitle>

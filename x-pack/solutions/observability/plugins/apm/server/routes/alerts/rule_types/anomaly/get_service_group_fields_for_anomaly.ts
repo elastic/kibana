@@ -10,7 +10,7 @@ import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -45,32 +45,30 @@ export async function getServiceGroupFieldsForAnomaly({
 }) {
   const params = {
     index: apmIndices.transaction,
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            { term: { [SERVICE_ENVIRONMENT]: environment } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: timestamp,
-                  lte: timestamp + bucketSpan * 1000,
-                  format: 'epoch_millis',
-                },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [TRANSACTION_TYPE]: transactionType } },
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
+          {
+            range: {
+              '@timestamp': {
+                gte: timestamp,
+                lte: timestamp + bucketSpan * 1000,
+                format: 'epoch_millis',
               },
             },
-          ],
-        },
+          },
+        ],
       },
-      aggs: {
-        ...getApmAlertSourceFieldsAgg({
-          sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
-        }),
-      },
+    },
+    aggs: {
+      ...getApmAlertSourceFieldsAgg({
+        sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
+      }),
     },
   };
 

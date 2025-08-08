@@ -65,7 +65,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
                 .service(SERVICE_NAMES[index])
                 .defaults({
-                  'trace.id': generateShortId(),
+                  'trace.id': generateLongId(),
                   'agent.name': 'synth-agent',
                   'orchestrator.cluster.name': clusterName,
                   'orchestrator.cluster.id': clusterId,

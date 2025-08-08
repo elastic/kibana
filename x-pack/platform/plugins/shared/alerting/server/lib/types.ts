@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Rule } from '../types';
-import { RuleRunMetrics } from './rule_run_metrics_store';
+import type { Rule } from '../types';
+import type { RuleRunMetrics } from './rule_run_metrics_store';
 
 export type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
 

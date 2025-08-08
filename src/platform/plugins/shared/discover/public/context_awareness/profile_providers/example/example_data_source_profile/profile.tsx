@@ -8,18 +8,15 @@
  */
 
 import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
-import {
-  AppMenuActionId,
-  AppMenuActionType,
-  getFieldValue,
-  RowControlColumn,
-} from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
@@ -114,7 +111,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       const prevValue = prev(params);
 
       // This is what is available via params:
-      // const { dataView, services, isEsqlMode, adHocDataViews, onUpdateAdHocDataViews } = params;
+      // const { dataView, services, isEsqlMode, adHocDataViews, actions } = params;
 
       return {
         appMenuRegistry: (registry) => {
@@ -200,10 +197,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       return [
         ...additionalControls,
         ...['visBarVerticalStacked', 'heart', 'inspect'].map(
-          (iconType, index): RowControlColumn => ({
+          (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
-            headerAriaLabel: `Example Row Control ${iconType}`,
-            renderControl: (Control, rowProps) => {
+            render: (Control, rowProps) => {
               return (
                 <Control
                   data-test-subj={`exampleLogsControl_${iconType}`}
@@ -258,6 +254,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           isCompatible: ({ field }) => field.name !== 'message',
         },
       ],
+    getPaginationConfig: (prev) => () => ({
+      ...prev(),
+      paginationMode: 'singlePage',
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
@@ -272,7 +272,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (indexPattern !== 'my-example-logs') {
+    if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return { isMatch: false };
     }
 

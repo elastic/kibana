@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -64,11 +64,8 @@ export const fetchMiniHistogramsForSignificantGroups = async (
     {
       index: params.index,
       size: 0,
-      body: {
-        query: histogramQuery,
-        aggs: wrap(histogramAggs),
-        size: 0,
-      },
+      query: histogramQuery,
+      aggs: wrap(histogramAggs),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

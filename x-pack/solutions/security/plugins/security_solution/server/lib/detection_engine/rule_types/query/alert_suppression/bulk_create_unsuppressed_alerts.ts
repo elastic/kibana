@@ -7,7 +7,11 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import type { RunOpts, SearchAfterAndBulkCreateReturnType, RuleServices } from '../../types';
+import type {
+  SecuritySharedParams,
+  SearchAfterAndBulkCreateReturnType,
+  SecurityRuleServices,
+} from '../../types';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
@@ -15,11 +19,11 @@ import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 
 type BulkCreateUnsuppressedAlerts = (params: {
-  runOpts: RunOpts<UnifiedQueryRuleParams>;
+  sharedParams: SecuritySharedParams<UnifiedQueryRuleParams>;
   size: number;
   groupByFields: string[];
   buildReasonMessage: BuildReasonMessage;
-  services: RuleServices;
+  services: SecurityRuleServices;
   filter: QueryDslQueryContainer;
   eventsTelemetry: ITelemetryEventsSender | undefined;
 }) => Promise<SearchAfterAndBulkCreateReturnType>;
@@ -33,28 +37,19 @@ export const bulkCreateUnsuppressedAlerts: BulkCreateUnsuppressedAlerts = async 
   size,
   groupByFields,
   buildReasonMessage,
-  runOpts,
+  sharedParams,
   filter,
   services,
   eventsTelemetry,
 }) => {
   const bulkCreatedResult = await searchAfterAndBulkCreate({
-    tuple: { ...runOpts.tuple, maxSignals: size },
-    exceptionsList: [],
+    sharedParams,
     services,
-    listClient: runOpts.listClient,
-    ruleExecutionLogger: runOpts.ruleExecutionLogger,
     eventsTelemetry,
-    inputIndexPattern: runOpts.inputIndex,
-    pageSize: runOpts.searchAfterSize,
     filter,
     buildReasonMessage,
-    bulkCreate: runOpts.bulkCreate,
-    wrapHits: runOpts.wrapHits,
-    runtimeMappings: runOpts.runtimeMappings,
-    primaryTimestamp: runOpts.primaryTimestamp,
-    secondaryTimestamp: runOpts.secondaryTimestamp,
     additionalFilters: buildMissingFieldsFilter(groupByFields),
+    maxSignalsOverride: size,
   });
 
   return bulkCreatedResult;

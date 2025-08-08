@@ -8,7 +8,6 @@
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
-import { cloneDeep } from 'lodash';
 import {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
@@ -38,7 +37,7 @@ describe('revert changes routine', () => {
     ...byValueLayer,
     annotationGroupId: 'shouldnt show up',
     __lastSaved: {
-      ...cloneDeep(byValueLayer),
+      ...structuredClone(byValueLayer),
 
       // some differences
       annotations: [

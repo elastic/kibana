@@ -1,0 +1,207 @@
+{
+  "queries": [
+    {
+      "id": "terminate_instance",
+      "title": "E11: Terminating instance",
+      "description": "Returns logs where an instance is being terminated.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Terminating instance",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "vm_paused",
+      "title": "E20: VM Paused (Lifecycle Event)",
+      "description": "Returns logs where a VM has been paused.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "VM Paused Lifecycle Event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "vm_resumed",
+      "title": "E21: VM Resumed (Lifecycle Event)",
+      "description": "Returns logs where a VM has been resumed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "VM Resumed Lifecycle Event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "vm_started",
+      "title": "E22: VM Started (Lifecycle Event)",
+      "description": "Returns logs where a VM has been started.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "VM Started Lifecycle Event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "vm_stopped",
+      "title": "E23: VM Stopped (Lifecycle Event)",
+      "description": "Returns logs where a VM has been stopped.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "VM Stopped Lifecycle Event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "disk_limit_not_specified",
+      "title": "E6: disk limit not specified, defaulting to unlimited",
+      "description": "Returns logs where the disk limit was not specified and defaulted to unlimited.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "disk limit not specified defaulting to unlimited",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sync_power_state_pending_task",
+      "title": "E7: During sync_power_state the instance has a pending task (spawning). Skip.",
+      "description": "Returns logs where an instance has a pending task during sync_power_state.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "During sync_power_state the instance has a pending task spawning Skip",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "vcpu_limit_not_specified",
+      "title": "E19: vcpu limit not specified, defaulting to unlimited",
+      "description": "Returns logs where the vcpu limit was not specified and defaulted to unlimited.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "vcpu limit not specified defaulting to unlimited",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "http_exception_no_instances",
+      "title": "E33: HTTP exception thrown: No instances found for any event",
+      "description": "Returns logs where an HTTP exception was thrown due to no instances found for any event.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "HTTP exception thrown No instances found for any event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "instance_sync_host_mismatch",
+      "title": "E40: The instance sync for host '<*>' did not match. Re-created its InstanceList.",
+      "description": "Returns logs where the instance sync for a host did not match and its InstanceList was re-created.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "The instance sync for host .* did not match Re-created its InstanceList"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sync_instance_power_states_mismatch",
+      "title": "E43: While synchronizing instance power states, found <*> instances in the database and <*> instances on the hypervisor.",
+      "description": "Returns logs where there was a mismatch in the number of instances found in the database and on the hypervisor during instance power state synchronization.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": "While synchronizing instance power states found .* instances in the database and .* instances on the hypervisor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

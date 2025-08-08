@@ -9,7 +9,6 @@ import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -57,10 +56,6 @@ jest.mock('../../hooks/use_get_available_rules_with_descriptions', () => ({
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
-}));
-
 jest.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => ({
   RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
     <div data-test-subj="ruleTypeModal">
@@ -92,7 +87,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
-const { useLoadRuleTypesQuery } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks');
+const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 describe('RulesPage with all capabilities', () => {
   beforeEach(() => {
@@ -100,62 +96,8 @@ describe('RulesPage with all capabilities', () => {
   });
 
   async function setup() {
-    const ruleTypeIndex = new Map(
-      Object.entries({
-        '1': {
-          enabledInLicense: true,
-          id: '1',
-          name: 'test rule',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { all: true },
-          },
-          ruleTaskTimeout: '1m',
-        },
-        '2': {
-          enabledInLicense: true,
-          id: '2',
-          name: 'test rule ok',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { all: true },
-          },
-          ruleTaskTimeout: '1m',
-        },
-        '3': {
-          enabledInLicense: true,
-          id: '3',
-          name: 'test rule pending',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { all: true },
-          },
-          ruleTaskTimeout: '1m',
-        },
-      })
-    );
-
-    useLoadRuleTypesQuery.mockReturnValue({
-      ruleTypesState: {
-        isLoading: false,
-        isInitialLoading: false,
-        data: ruleTypeIndex,
-      },
+    useGetRuleTypesPermissions.mockReturnValue({
+      authorizedToCreateAnyRules: true,
     });
 
     return render(
@@ -200,60 +142,8 @@ describe('RulesPage with all capabilities', () => {
 
 describe('RulesPage with show only capability', () => {
   async function setup() {
-    const ruleTypeIndex = new Map(
-      Object.entries({
-        '1': {
-          enabledInLicense: true,
-          id: '1',
-          name: 'test rule',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { read: true, all: false },
-          },
-          ruleTaskTimeout: '1m',
-        },
-        '2': {
-          enabledInLicense: true,
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { read: true, all: false },
-          },
-          ruleTaskTimeout: '1m',
-          id: '2',
-          name: 'test rule ok',
-        },
-        '3': {
-          enabledInLicense: true,
-          id: '3',
-          name: 'test rule pending',
-          actionGroups: [{ id: 'default', name: 'Default' }],
-          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-          actionVariables: { context: [], state: [] },
-          defaultActionGroupId: 'default',
-          producer: ALERTING_FEATURE_ID,
-          minimumLicenseRequired: 'basic',
-          authorizedConsumers: {
-            [ALERTING_FEATURE_ID]: { read: true, all: false },
-          },
-          ruleTaskTimeout: '1m',
-        },
-      })
-    );
-
-    useLoadRuleTypesQuery.mockReturnValue({
-      ruleTypesState: {
-        data: ruleTypeIndex,
-      },
+    useGetRuleTypesPermissions.mockReturnValue({
+      authorizedToCreateAnyRules: false,
     });
 
     return render(

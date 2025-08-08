@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -33,7 +33,7 @@ const getTerm2CategoryCountRequest = (
   category: Category,
   from: number | undefined,
   to: number | undefined
-): estypes.SearchRequest['body'] => {
+): estypes.SearchRequest => {
   const query = getQueryWithParams({
     params,
   });
@@ -77,7 +77,7 @@ export async function fetchTerms2CategoriesCounts(
   abortSignal?: AbortSignal
 ): Promise<FetchFrequentItemSetsResponse> {
   const searches: Array<
-    | estypes.MsearchMultisearchBody
+    | estypes.SearchSearchRequestBody
     | {
         index: string;
       }
@@ -95,7 +95,7 @@ export async function fetchTerms2CategoriesCounts(
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
-        ) as estypes.MsearchMultisearchBody
+        ) as estypes.SearchSearchRequestBody
       );
       results.push({
         set: [
@@ -120,7 +120,7 @@ export async function fetchTerms2CategoriesCounts(
           { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
-        ) as estypes.MsearchMultisearchBody
+        ) as estypes.SearchSearchRequestBody
       );
       results.push({
         set: [...itemSet.set, { fieldName: category.fieldName, fieldValue: category.fieldValue }],

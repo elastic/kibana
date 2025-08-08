@@ -30,7 +30,7 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
+  assignmentColor: ColorMapping.Assignment['color'];
   index: number;
   total: number;
   palette: IKbnPalette;
@@ -76,6 +76,11 @@ export const ColorSwatch = ({
       repositionOnScroll={true}
       closePopover={() => dispatch(hideColorPickerVisibility())}
       anchorPosition="upLeft"
+      css={css`
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      `}
       button={
         swatchShape === 'round' ? (
           <button
@@ -163,8 +168,11 @@ export const ColorSwatch = ({
   ) : (
     <EuiColorPickerSwatch
       color={colorHex}
-      aria-label={i18n.translate('coloring.colorMapping.colorPicker.newColorAriaLabel', {
-        defaultMessage: 'Select a new color',
+      aria-label={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
+      })}
+      title={i18n.translate('coloring.colorMapping.colorSwatch.gradientAriaLabel', {
+        defaultMessage: 'Computed gradient color',
       })}
       disabled
       style={{

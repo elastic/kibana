@@ -68,14 +68,10 @@ export const getAPIKeyForSyntheticsService = async ({
         return { isValid: false, apiKey };
       }
 
-      if (!isValid) {
-        server.logger.info('Synthetics api is no longer valid');
-      }
-
       return { apiKey, isValid };
     }
-  } catch (err) {
-    server.logger.error(err);
+  } catch (error) {
+    server.logger.error(`API key is invalid, ${error.message}`, { error });
   }
 
   return { isValid: false };
@@ -215,10 +211,8 @@ const hasEnablePermissions = async ({
   const { cluster: clusterPrivs, indices: index } =
     getServiceApiKeyPrivileges(isElasticsearchServerless);
   const hasPrivileges = await syntheticsEsClient.baseESClient.security.hasPrivileges({
-    body: {
-      cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
-      index,
-    },
+    cluster: ['manage_security', 'manage_api_key', 'manage_own_api_key', ...clusterPrivs],
+    index,
   });
 
   const { cluster } = hasPrivileges;

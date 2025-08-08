@@ -13,6 +13,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -21,7 +22,6 @@ import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
-import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
@@ -122,6 +122,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   id: CLIENT_ALERT_TYPES.TLS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: uptimeTLSRuleParamsSchema,
@@ -256,7 +257,6 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, foundCerts) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
-  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

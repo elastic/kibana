@@ -1,18 +1,13 @@
-.loginWelcome {
-  @include kibanaFullScreenGraphics;
-}
-
 .loginWelcome__header {
+  margin-top: calc($euiSizeXXL * 3);
   position: relative;
-  padding: $euiSizeXL;
+  padding: $euiSize;
   z-index: 10;
 }
 
 .loginWelcome__logo {
   margin-bottom: $euiSizeXL;
-
-  @include kibanaCircleLogo;
-  @include euiBottomShadowMedium;
+  display: inline-block;
 }
 
 .loginWelcome__content {

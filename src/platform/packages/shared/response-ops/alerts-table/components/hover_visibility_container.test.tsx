@@ -10,9 +10,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { HoverVisibilityContainer } from './hover_visibility_container';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 describe('HoverVisibilityContainer', () => {
   const targetClass1 = 'Component1';

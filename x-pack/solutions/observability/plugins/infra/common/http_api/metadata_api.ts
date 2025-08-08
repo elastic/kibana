@@ -95,6 +95,10 @@ export const InfraMetadataInfoRT = rt.partial({
   '@timestamp': rt.string,
 });
 
+export const InfraMetadataFieldsRT = rt.partial({
+  fields: rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), rt.null, rt.undefined])),
+});
+
 export const InfraMetadataInfoResponseRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
@@ -117,6 +121,8 @@ const InfraMetadataOptionalRT = rt.partial({
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);
 
 export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
+
+export type InfraMetadataFields = rt.TypeOf<typeof InfraMetadataFieldsRT>;
 
 export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
 

@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/index-patterns-test-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Index pattern test plugin",
+  "plugin": {
+    "id": "indexPatternsTestPlugin",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "index_patterns_test_plugin"
+    ],
+    "requiredPlugins": [
+      "data"
+    ]
+  }
+}

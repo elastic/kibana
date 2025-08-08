@@ -140,6 +140,7 @@ Array [
         <button
           aria-controls="generated-id"
           aria-expanded="true"
+          aria-hidden="true"
           aria-labelledby="generated-id"
           class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
           tabindex="-1"
@@ -155,7 +156,7 @@ Array [
       </div>
       <div
         aria-labelledby="generated-id"
-        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+        class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
         id="generated-id"
         role="group"
         style="block-size: 0;"
@@ -168,7 +169,7 @@ Array [
           >
             <ul
               aria-label="Recently viewed links"
-              class="euiListGroup emotion-EuiListGroup"
+              class="euiListGroup emotion-euiListGroup-none-navRecentsListGroupCss"
               style="max-inline-size: none;"
             >
               <li
@@ -218,10 +219,10 @@ Array [
       class="euiHorizontalRule emotion-euiHorizontalRule-full"
     />
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-navSolutions"
     >
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none-navSolutionGroupButton"
         data-test-subj="collapsibleNavGroup-kibana"
       >
         <div
@@ -263,6 +264,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -278,7 +280,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -351,7 +353,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none-navSolutionGroupButton"
         data-test-subj="collapsibleNavGroup-observability"
       >
         <div
@@ -393,6 +395,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -408,7 +411,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -464,7 +467,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none-navSolutionGroupButton"
         data-test-subj="collapsibleNavGroup-securitySolution"
       >
         <div
@@ -506,6 +509,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -521,7 +525,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -560,7 +564,7 @@ Array [
         </div>
       </div>
       <div
-        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-EuiCollapsibleNavGroup"
+        class="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup emotion-euiAccordion-euiCollapsibleNavGroup-isCollapsible-none-navSolutionGroupButton"
         data-test-subj="collapsibleNavGroup-management"
       >
         <div
@@ -602,6 +606,7 @@ Array [
           <button
             aria-controls="generated-id"
             aria-expanded="true"
+            aria-hidden="true"
             aria-labelledby="generated-id"
             class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-right-isOpen"
             tabindex="-1"
@@ -617,7 +622,7 @@ Array [
         </div>
         <div
           aria-labelledby="generated-id"
-          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen"
+          class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isOpen-noTransition"
           id="generated-id"
           role="group"
           style="block-size: 0;"
@@ -811,7 +816,6 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
       "_value": Array [],
@@ -858,15 +862,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
-    css={
-      Object {
-        "map": undefined,
-        "name": "1pvcuvk",
-        "next": undefined,
-        "styles": "@media (max-height: 240px){overflow-y:auto;}",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}
@@ -874,13 +870,93 @@ exports[`CollapsibleNav renders the default nav 1`] = `
     ownFocus={false}
     size={248}
   >
-    <button
-      aria-controls="collapsibe-nav"
-      aria-expanded={false}
-      aria-pressed={false}
-      onMouseUpCapture={[Function]}
-      onTouchEnd={[Function]}
+    <Insertion
+      cache={
+        Object {
+          "insert": [Function],
+          "inserted": Object {
+            "1751mc5-navCss": true,
+          },
+          "key": "css",
+          "nonce": undefined,
+          "registered": Object {
+            "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
+          },
+          "sheet": StyleSheet {
+            "_alreadyInsertedOrderInsensitiveRule": true,
+            "_insertTag": [Function],
+            "before": null,
+            "container": <head>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-1751mc5-navCss{}
+              </style>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
+              </style>
+            </head>,
+            "ctr": 2,
+            "insertionPoint": undefined,
+            "isSpeedy": false,
+            "key": "css",
+            "nonce": undefined,
+            "prepend": undefined,
+            "tags": Array [
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-1751mc5-navCss{}
+              </style>,
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
+              </style>,
+            ],
+          },
+        }
+      }
+      isStringTag={false}
+      serialized={
+        Object {
+          "map": undefined,
+          "name": "1751mc5-navCss",
+          "next": undefined,
+          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
+          "toString": [Function],
+        }
+      }
     />
+    <EuiCollapsibleNav
+      aria-label="Primary"
+      button={<button />}
+      className="css-1751mc5-navCss"
+      data-test-subj="collapsibleNav"
+      id="collapsibe-nav"
+      isOpen={false}
+      onClose={[Function]}
+      ownFocus={false}
+      size={248}
+    >
+      <button
+        aria-controls="collapsibe-nav"
+        aria-expanded={false}
+        aria-pressed={false}
+        onMouseUpCapture={[Function]}
+        onTouchEnd={[Function]}
+      />
+    </EuiCollapsibleNav>
   </EuiCollapsibleNav>
 </CollapsibleNav>
 `;
@@ -1006,7 +1082,6 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   }
   navigateToApp={[Function]}
   navigateToUrl={[Function]}
-  onIsLockedUpdate={[Function]}
   recentlyAccessed$={
     BehaviorSubject {
       "_value": Array [],
@@ -1053,15 +1128,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
   <EuiCollapsibleNav
     aria-label="Primary"
     button={<button />}
-    css={
-      Object {
-        "map": undefined,
-        "name": "1pvcuvk",
-        "next": undefined,
-        "styles": "@media (max-height: 240px){overflow-y:auto;}",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
     data-test-subj="collapsibleNav"
     id="collapsibe-nav"
     isOpen={false}
@@ -1069,13 +1136,93 @@ exports[`CollapsibleNav renders the default nav 2`] = `
     ownFocus={false}
     size={248}
   >
-    <button
-      aria-controls="collapsibe-nav"
-      aria-expanded={false}
-      aria-pressed={false}
-      onMouseUpCapture={[Function]}
-      onTouchEnd={[Function]}
+    <Insertion
+      cache={
+        Object {
+          "insert": [Function],
+          "inserted": Object {
+            "1751mc5-navCss": true,
+          },
+          "key": "css",
+          "nonce": undefined,
+          "registered": Object {
+            "css-1751mc5-navCss": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
+          },
+          "sheet": StyleSheet {
+            "_alreadyInsertedOrderInsensitiveRule": true,
+            "_insertTag": [Function],
+            "before": null,
+            "container": <head>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-1751mc5-navCss{}
+              </style>
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
+              </style>
+            </head>,
+            "ctr": 2,
+            "insertionPoint": undefined,
+            "isSpeedy": false,
+            "key": "css",
+            "nonce": undefined,
+            "prepend": undefined,
+            "tags": Array [
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                .css-1751mc5-navCss{}
+              </style>,
+              <style
+                data-emotion="css"
+                data-s=""
+              >
+                
+                @media (max-height: 240px){.css-1751mc5-navCss{overflow-y:auto;}}
+              </style>,
+            ],
+          },
+        }
+      }
+      isStringTag={false}
+      serialized={
+        Object {
+          "map": undefined,
+          "name": "1751mc5-navCss",
+          "next": undefined,
+          "styles": "@media (max-height: 240px){overflow-y:auto;};label:navCss;",
+          "toString": [Function],
+        }
+      }
     />
+    <EuiCollapsibleNav
+      aria-label="Primary"
+      button={<button />}
+      className="css-1751mc5-navCss"
+      data-test-subj="collapsibleNav"
+      id="collapsibe-nav"
+      isOpen={false}
+      onClose={[Function]}
+      ownFocus={false}
+      size={248}
+    >
+      <button
+        aria-controls="collapsibe-nav"
+        aria-expanded={false}
+        aria-pressed={false}
+        onMouseUpCapture={[Function]}
+        onTouchEnd={[Function]}
+      />
+    </EuiCollapsibleNav>
   </EuiCollapsibleNav>
 </CollapsibleNav>
 `;

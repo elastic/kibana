@@ -21,43 +21,32 @@ function generateData({
   from,
   to,
   serviceName,
+  agentName,
 }: {
   from: number;
   to: number;
   serviceName: string;
+  agentName: string;
 }) {
   const range = timerange(from, to);
 
-  const service1 = apm
+  const service = apm
     .service({
       name: serviceName,
       environment: 'production',
-      agentName: 'java',
+      agentName,
     })
-    .instance('service-1-prod-1')
-    .podId('service-1-prod-1-pod');
-
-  const service2 = apm
-    .service({
-      name: serviceName,
-      environment: 'development',
-      agentName: 'nodejs',
-    })
-    .instance('opbeans-node-prod-1');
+    .instance('instance-1')
+    .podId('pod-1');
 
   return range
     .interval('1m')
     .rate(1)
     .generator((timestamp, index) => [
-      service1
+      service
         .transaction({ transactionName: 'GET /apple 🍎 ' })
         .timestamp(timestamp)
         .duration(1000)
-        .success(),
-      service2
-        .transaction({ transactionName: 'GET /banana 🍌' })
-        .timestamp(timestamp)
-        .duration(500)
         .success(),
     ]);
 }
@@ -66,13 +55,26 @@ describe('Agent configuration', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
 
-    synthtrace.index(
-      generateData({
+    synthtrace.index([
+      ...generateData({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
         serviceName: 'opbeans-node',
-      })
-    );
+        agentName: 'nodejs',
+      }),
+      ...generateData({
+        from: new Date(rangeFrom).getTime(),
+        to: new Date(rangeTo).getTime(),
+        serviceName: 'opbeans-java',
+        agentName: 'nodejs',
+      }),
+      ...generateData({
+        from: new Date(rangeFrom).getTime(),
+        to: new Date(rangeTo).getTime(),
+        serviceName: 'opbeans-java-edot',
+        agentName: 'opentelemetry/java/elastic',
+      }),
+    ]);
   });
 
   after(() => {
@@ -147,6 +149,44 @@ describe('Agent configuration', () => {
         .find('input')
         .invoke('val')
         .should('contain', 'production');
+    });
+
+    it('Should create an EDOT agent configuration', () => {
+      cy.intercept('GET', '/api/apm/settings/agent-configuration/environments?*').as(
+        'serviceEnvironmentApi'
+      );
+      cy.contains('Create configuration').click();
+      cy.getByTestSubj('serviceNameComboBox').find('input').click();
+      cy.getByTestSubj('serviceNameComboBox').type('opbeans-java-edot{enter}');
+      cy.wait('@serviceEnvironmentApi');
+
+      cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
+        'be.visible'
+      );
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+        .contains('button', 'production')
+        .click();
+
+      cy.contains('Next step').click();
+      cy.contains('Create configuration');
+      cy.contains('Deactivate instrumentations');
+      cy.contains('Deactivate all instrumentations');
+      cy.contains('Send traces');
+      cy.contains('Send metrics');
+      cy.contains('Send logs');
+      cy.get('[data-test-subj="row_deactivate_all_instrumentations"')
+        .find('[data-test-subj="apmSelectWithPlaceholderSelect"]')
+        .select('true');
+      cy.contains('Save configuration').click();
+      cy.url().should('include', 'apm/settings/agent-configuration');
+      cy.contains('Configurations');
+      cy.contains('opbeans-java-edot');
+      cy.get('[data-test-subj="apmColumnsButton"]').then((e) => {
+        e[2].click();
+      });
+      cy.get('[data-test-subj="confirmModalConfirmButton"]').click();
+      cy.contains('No configurations found');
     });
 
     it('displays All label when selecting all option', () => {

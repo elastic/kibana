@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  value: string;
+  value: React.ReactNode;
   tooltipContent: string;
 }
 

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { dashboardServiceProvider } from './dashboard_service';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 describe('DashboardService', () => {
+  const getUrlMock = jest.fn();
   const dashboard: DashboardStart = {
     // @ts-expect-error Only partial mock of full plugin
     locator: {
@@ -22,7 +24,17 @@ describe('DashboardService', () => {
     }),
   };
 
-  const dashboardService = dashboardServiceProvider(dashboard);
+  const shareMock = {
+    url: {
+      locators: {
+        get: () => ({
+          getUrl: getUrlMock,
+        }),
+      },
+    },
+  } as unknown as SharePluginStart;
+
+  const dashboardService = dashboardServiceProvider(dashboard, shareMock);
 
   test('should fetch dashboard', async () => {
     // act
@@ -37,7 +49,7 @@ describe('DashboardService', () => {
   });
   test('should generate url to the dashboard', () => {
     dashboardService.getDashboardUrl('test-id');
-    expect(dashboard.locator?.getUrl).toHaveBeenCalledWith({
+    expect(getUrlMock).toHaveBeenCalledWith({
       dashboardId: 'test-id',
       useHash: false,
       viewMode: 'edit',

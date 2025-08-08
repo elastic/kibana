@@ -2,7 +2,7 @@
 
 exports[`graph_visualization should render to svg elements 1`] = `
 <svg
-  className="gphGraph"
+  css="unknown styles"
   height="100%"
   id="graphSvg"
   pointerEvents="all"
@@ -11,207 +11,73 @@ exports[`graph_visualization should render to svg elements 1`] = `
 >
   <g>
     <g>
-      <g
-        className="gphEdge--wrapper"
-        key="A..1-B..2"
-      >
-        <line
-          className="gphEdge gphEdge--selected"
-          strokeLinecap="round"
-          style={
-            Object {
-              "strokeWidth": 2,
-            }
-          }
-          x1={5}
-          x2={7}
-          y1={5}
-          y2={9}
-        />
-        <line
-          className="gphEdge gphEdge--clickable"
-          onClick={[Function]}
-          style={
-            Object {
-              "strokeWidth": 15,
-            }
-          }
-          x1={5}
-          x2={7}
-          y1={5}
-          y2={9}
-        />
-      </g>
-      <g
-        className="gphEdge--wrapper"
-        key="B..2-C..3"
-      >
-        <line
-          className="gphEdge gphEdge--selected"
-          strokeLinecap="round"
-          style={
-            Object {
-              "strokeWidth": 2.2,
-            }
-          }
-          x1={7}
-          x2={12}
-          y1={9}
-          y2={2}
-        />
-        <line
-          className="gphEdge gphEdge--clickable"
-          onClick={[Function]}
-          style={
-            Object {
-              "strokeWidth": 15,
-            }
-          }
-          x1={7}
-          x2={12}
-          y1={9}
-          y2={2}
-        />
-      </g>
-    </g>
-    <g
-      className="gphNode"
-      key="A..1"
-      onClick={[Function]}
-      onMouseDown={[Function]}
-    >
-      <circle
-        className="gphNode__circle gphNode__circle--selected"
-        cx={5}
-        cy={5}
-        r={10}
+      <EmotionCssPropInternal
+        __EMOTION_TYPE_PLEASE_DO_NOT_USE__="line"
+        className="gphEdge gphEdge--clickable"
+        onClick={[Function]}
         style={
           Object {
-            "fill": "black",
+            "strokeWidth": 15,
           }
         }
+        x1={5}
+        x2={7}
+        y1={5}
+        y2={9}
       />
-      <IconRenderer
-        color="black"
-        icon={
+      <EmotionCssPropInternal
+        __EMOTION_TYPE_PLEASE_DO_NOT_USE__="line"
+        className="gphEdge gphEdge--clickable"
+        onClick={[Function]}
+        style={
           Object {
-            "id": "a",
-            "label": "",
-            "package": "eui",
-            "prevName": "",
+            "strokeWidth": 15,
           }
         }
-        x={-2.5}
-        y={-3.5}
+        x1={7}
+        x2={12}
+        y1={9}
+        y2={2}
+      />
+    </g>
+    <g>
+      <circle
+        css="unknown styles"
+        cx={5}
+        cy={5}
+        r="5"
+        transform="translate(10,10)"
       />
       <text
-        className="gphNode__label"
+        css="unknown styles"
         textAnchor="middle"
-        transform="translate(0,22)"
+        transform="translate(10,12)"
         x={5}
         y={5}
       >
         1
       </text>
-      <g>
-        <circle
-          className="gphNode__markerCircle"
-          cx={5}
-          cy={5}
-          r="5"
-          transform="translate(10,10)"
-        />
-        <text
-          className="gphNode__markerText"
-          textAnchor="middle"
-          transform="translate(10,12)"
-          x={5}
-          y={5}
-        >
-          1
-        </text>
-      </g>
     </g>
-    <g
-      className="gphNode"
-      key="B..2"
-      onClick={[Function]}
-      onMouseDown={[Function]}
+    <EmotionCssPropInternal
+      __EMOTION_TYPE_PLEASE_DO_NOT_USE__="text"
+      className="gphNode__label"
+      textAnchor="middle"
+      transform="translate(0,22)"
+      x={7}
+      y={9}
     >
-      <circle
-        className="gphNode__circle"
-        cx={7}
-        cy={9}
-        r={10}
-        style={
-          Object {
-            "fill": "red",
-          }
-        }
-      />
-      <IconRenderer
-        color="red"
-        icon={
-          Object {
-            "id": "b",
-            "label": "",
-            "package": "eui",
-            "prevName": "",
-          }
-        }
-        x={-0.5}
-        y={0.5}
-      />
-      <text
-        className="gphNode__label"
-        textAnchor="middle"
-        transform="translate(0,22)"
-        x={7}
-        y={9}
-      >
-        2
-      </text>
-    </g>
-    <g
-      className="gphNode"
-      key="C..3"
-      onClick={[Function]}
-      onMouseDown={[Function]}
+      2
+    </EmotionCssPropInternal>
+    <EmotionCssPropInternal
+      __EMOTION_TYPE_PLEASE_DO_NOT_USE__="text"
+      className="gphNode__label"
+      textAnchor="middle"
+      transform="translate(0,22)"
+      x={12}
+      y={2}
     >
-      <circle
-        className="gphNode__circle"
-        cx={12}
-        cy={2}
-        r={10}
-        style={
-          Object {
-            "fill": "yellow",
-          }
-        }
-      />
-      <IconRenderer
-        color="yellow"
-        icon={
-          Object {
-            "id": "c",
-            "label": "",
-            "package": "eui",
-            "prevName": "",
-          }
-        }
-        x={4.5}
-        y={-6.5}
-      />
-      <text
-        className="gphNode__label"
-        textAnchor="middle"
-        transform="translate(0,22)"
-        x={12}
-        y={2}
-      >
-        3
-      </text>
-    </g>
+      3
+    </EmotionCssPropInternal>
   </g>
 </svg>
 `;

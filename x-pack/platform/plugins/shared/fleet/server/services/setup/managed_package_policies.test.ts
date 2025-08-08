@@ -88,7 +88,7 @@ describe('upgradeManagedPackagePolicies', () => {
     expect(packagePolicyService.upgrade).toBeCalledWith(
       soClient,
       esClient,
-      ['managed-package-id'],
+      'managed-package-id',
       { force: true },
       packagePolicy,
       '1.0.0'

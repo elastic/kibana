@@ -1,21 +1,8 @@
 /.gradle
 /build
 /target
-/test/functional/failure_debug
-/test/functional/screenshots
-/test/functional/apps/**/reports/session
-/test/reporting/configs/failure_debug/
-
-# TODO remove once all of the modules have been relocated
-# we keep them around to avoid conflicts derived of merge commits,
-# suddenly adding a huge amount of files due to these rules being outdated
-/platform/plugins/private/reporting/.chromium/
-/platform/plugins/private/reporting/.phantom/
-/plugins/screenshotting/.chromium/
-/plugins/screenshotting/chromium/
-
 /.aws-config.json
 /.env
 /.kibana-plugin-helpers.dev.*
 .cache
-**/ui_tests/output
+**/test/scout/ui/output

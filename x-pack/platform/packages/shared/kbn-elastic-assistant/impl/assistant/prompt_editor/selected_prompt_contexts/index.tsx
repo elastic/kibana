@@ -61,7 +61,7 @@ const SelectedPromptContextsComponent: React.FC<Props> = ({
                 'data-test-subj': `selectedPromptContext-${i}-button`,
               }}
               extraAction={
-                <EuiToolTip content={i18n.REMOVE_CONTEXT}>
+                <EuiToolTip content={i18n.REMOVE_CONTEXT} disableScreenReaderOutput>
                   <EuiButtonIcon
                     aria-label={i18n.REMOVE_CONTEXT}
                     data-test-subj={`removePromptContext-${id}`}

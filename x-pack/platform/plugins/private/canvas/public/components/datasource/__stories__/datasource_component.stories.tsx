@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import React from 'react';
 // @ts-expect-error untyped local
@@ -15,7 +14,7 @@ import { templateFromReactComponent } from '../../../lib/template_from_react_com
 import { Datasource } from '../../../expression_types/datasource';
 
 const TestDatasource = ({ args }: any) => (
-  <EuiCallOut title="My Test Data Source" iconType="iInCircle">
+  <EuiCallOut title="My Test Data Source" iconType="info">
     <EuiText size="s">
       <p>Hello! I am a datasource with a query arg of: {args.query}</p>
     </EuiText>
@@ -36,8 +35,10 @@ const args = {
   query: ['select * from kibana'],
 };
 
-storiesOf('components/datasource/DatasourceComponent', module)
-  .addParameters({
+export default {
+  title: 'components/datasource/DatasourceComponent',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -50,8 +51,11 @@ storiesOf('components/datasource/DatasourceComponent', module)
         },
       },
     },
-  })
-  .add('simple datasource', () => (
+  },
+};
+
+export const SimpleDatasource = {
+  render: () => (
     <DatasourceComponent
       args={args}
       datasources={[wrappedTestDatasource]}
@@ -71,8 +75,13 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setInvalid={action('setInvalid')}
       renderError={action('renderError')}
     />
-  ))
-  .add('datasource with expression arguments', () => (
+  ),
+
+  name: 'simple datasource',
+};
+
+export const DatasourceWithExpressionArguments = {
+  render: () => (
     <DatasourceComponent
       args={{ query: [{ name: 'expression' }] }}
       datasources={[wrappedTestDatasource]}
@@ -92,4 +101,7 @@ storiesOf('components/datasource/DatasourceComponent', module)
       setInvalid={action('setInvalid')}
       renderError={action('renderError')}
     />
-  ));
+  ),
+
+  name: 'datasource with expression arguments',
+};

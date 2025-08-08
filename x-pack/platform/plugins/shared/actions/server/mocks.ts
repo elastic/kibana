@@ -12,10 +12,12 @@ import {
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { Logger } from '@kbn/core/server';
-import { actionsClientMock, ActionsClientMock } from './actions_client/actions_client.mock';
-import { PluginSetupContract, PluginStartContract, renderActionParameterTemplates } from './plugin';
-import { Services, UnsecuredServices } from './types';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsClientMock } from './actions_client/actions_client.mock';
+import { actionsClientMock } from './actions_client/actions_client.mock';
+import type { PluginSetupContract, PluginStartContract } from './plugin';
+import { renderActionParameterTemplates } from './plugin';
+import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
@@ -33,7 +35,9 @@ const createSetupMock = () => {
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
-    getActionsConfigurationUtilities: jest.fn(),
+    getActionsConfigurationUtilities: jest.fn().mockReturnValue({
+      getAwsSesConfig: jest.fn(),
+    }),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
   };

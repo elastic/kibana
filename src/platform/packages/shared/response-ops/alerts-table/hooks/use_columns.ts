@@ -8,9 +8,9 @@
  */
 
 import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { BrowserField, BrowserFields } from '@kbn/alerting-types';
+import type { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { BrowserField, BrowserFields } from '@kbn/alerting-types';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

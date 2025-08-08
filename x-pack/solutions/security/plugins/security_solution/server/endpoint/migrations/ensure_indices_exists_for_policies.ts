@@ -18,7 +18,13 @@ export const ensureIndicesExistsForPolicies = async (
   const endpointPoliciesIds = await fleetServices.packagePolicy.listIds(soClient, {
     kuery: fleetServices.endpointPolicyKuery,
     perPage: 10000,
+    spaceIds: ['*'],
   });
+
+  if (endpointPoliciesIds.items.length === 0) {
+    logger.info(`Nothing to do. No endpoint policies found.`);
+    return;
+  }
 
   logger.info(
     `Checking to ensure [${endpointPoliciesIds.items.length}] endpoint policies have backing indices`
@@ -28,4 +34,6 @@ export const ensureIndicesExistsForPolicies = async (
     endpointServices,
     endpointPolicyIds: endpointPoliciesIds.items,
   });
+
+  logger.info(`Done checking endpoint policies have backing indices`);
 };

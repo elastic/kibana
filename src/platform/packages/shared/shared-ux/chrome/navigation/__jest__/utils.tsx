@@ -19,7 +19,6 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import { NavigationProvider } from '../src/services';
 import { Navigation } from '../src/ui/navigation';
-import type { PanelContentProvider } from '../src/ui';
 import { NavigationServices } from '../src/types';
 import { EventTracker } from '../src/analytics';
 
@@ -47,16 +46,14 @@ const services = getServicesMock();
 export const renderNavigation = ({
   navTreeDef,
   services: overrideServices = {},
-  panelContentProvider,
 }: {
   navTreeDef: Observable<NavigationTreeDefinitionUI>;
   services?: Partial<NavigationServices>;
-  panelContentProvider?: PanelContentProvider;
 }): RenderResult => {
   const renderResult = render(
     <EuiThemeProvider>
       <NavigationProvider {...services} {...overrideServices}>
-        <Navigation navigationTree$={navTreeDef} panelContentProvider={panelContentProvider} />
+        <Navigation navigationTree$={navTreeDef} />
       </NavigationProvider>
     </EuiThemeProvider>
   );

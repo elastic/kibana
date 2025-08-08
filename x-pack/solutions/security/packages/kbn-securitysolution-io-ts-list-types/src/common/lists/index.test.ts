@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import { left } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { left } from 'fp-ts/Either';
 import { getEndpointListMock, getListArrayMock, getListMock } from './index.mock';
 import { List, list, ListArray, listArray, ListArrayOrUndefined, listArrayOrUndefined } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';

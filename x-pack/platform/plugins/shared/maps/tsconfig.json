@@ -5,12 +5,13 @@
     "allowJs": true
   },
   "include": [
+    "*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "server/config.ts",
     "../../../../../typings/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -94,6 +95,7 @@
     "@kbn/react-hooks",
     "@kbn/scout",
     "@kbn/react-kibana-mount",
+    "@kbn/css-utils",
   ],
   "exclude": [
     "target/**/*",

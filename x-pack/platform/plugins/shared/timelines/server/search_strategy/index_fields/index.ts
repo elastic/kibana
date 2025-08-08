@@ -6,8 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import isEmpty from 'lodash/isEmpty';
-import get from 'lodash/get';
+import { isEmpty, get } from 'lodash';
 import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
@@ -63,7 +62,8 @@ export const findExistingIndices = async (
         if ([apmIndexPattern, apmDataStreamsPattern].includes(index)) {
           const searchResponse = await esClient.search({
             index,
-            body: { query: { match_all: {} }, size: 0 },
+            query: { match_all: {} },
+            size: 0,
           });
           return get(searchResponse, 'hits.total.value', 0) > 0;
         }

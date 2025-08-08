@@ -1,0 +1,437 @@
+{
+  "id": "@kbn/projects-solutions-groups",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_CHAT_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_CHAT_PROJECT",
+        "description": [
+          "\nConstant for the Kibana Chat (workchat) serverless project type."
+        ],
+        "signature": [
+          "\"chat\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_CHAT_SOLUTION",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_CHAT_SOLUTION",
+        "description": [
+          "\nConstant for the Kibana Chat (workchat) solution."
+        ],
+        "signature": [
+          "\"chat\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_OBSERVABILITY_COMPLETE_TIER",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_OBSERVABILITY_COMPLETE_TIER",
+        "description": [
+          "\nComplete tier for Observability solution."
+        ],
+        "signature": [
+          "\"complete\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_OBSERVABILITY_LOGS_ESSENTIALS_TIER",
+        "description": [
+          "\nLogs Essentials tier for Observability solution."
+        ],
+        "signature": [
+          "\"logs_essentials\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_OBSERVABILITY_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_OBSERVABILITY_PROJECT",
+        "description": [
+          "\nConstant for the Kibana Observability (workchat) serverless project type."
+        ],
+        "signature": [
+          "\"oblt\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_OBSERVABILITY_SOLUTION",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_OBSERVABILITY_SOLUTION",
+        "description": [
+          "\nConstant for the Kibana Observability solution."
+        ],
+        "signature": [
+          "\"observability\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_PLATFORM",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_PLATFORM",
+        "description": [
+          "\nThe base group, for all modules that are commonly used across solutions."
+        ],
+        "signature": [
+          "\"platform\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SEARCH_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SEARCH_PROJECT",
+        "description": [
+          "\nConstant for the Kibana Search (workchat) serverless project type."
+        ],
+        "signature": [
+          "\"es\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SEARCH_SOLUTION",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SEARCH_SOLUTION",
+        "description": [
+          "\nConstant for the Kibana Search solution."
+        ],
+        "signature": [
+          "\"search\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SECURITY_COMPLETE_TIER",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SECURITY_COMPLETE_TIER",
+        "description": [
+          "\nComplete tier for Security solution."
+        ],
+        "signature": [
+          "\"complete\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SECURITY_ESSENTIALS_TIER",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SECURITY_ESSENTIALS_TIER",
+        "description": [
+          "\nEssentials tier for Security solution."
+        ],
+        "signature": [
+          "\"essentials\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SECURITY_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SECURITY_PROJECT",
+        "description": [
+          "\nConstant for the Kibana Security (workchat) serverless project type."
+        ],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SECURITY_SEARCH_AI_LAKE_TIER",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SECURITY_SEARCH_AI_LAKE_TIER",
+        "description": [
+          "\nSearch AI Lake tier for Security solution."
+        ],
+        "signature": [
+          "\"search_ai_lake\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SECURITY_SOLUTION",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_SECURITY_SOLUTION",
+        "description": [
+          "\nConstant for the Kibana Security solution."
+        ],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KibanaGroup",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaGroup",
+        "description": [
+          "\nA type that defines the existing groups (platform + solutions)."
+        ],
+        "signature": [
+          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KibanaProductTier",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaProductTier",
+        "description": [
+          "\nExisting product tiers for all Kibana solutions."
+        ],
+        "signature": [
+          "\"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KibanaProject",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaProject",
+        "description": [
+          "\nA type that defines the existing serverless project types."
+        ],
+        "signature": [
+          "\"security\" | \"oblt\" | \"es\" | \"chat\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KibanaSolution",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaSolution",
+        "description": [
+          "\nA type that defines the existing solutions."
+        ],
+        "signature": [
+          "\"search\" | \"security\" | \"observability\" | \"chat\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.ModuleGroup",
+        "type": "Type",
+        "tags": [],
+        "label": "ModuleGroup",
+        "description": [
+          "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
+        ],
+        "signature": [
+          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | \"common\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.ModuleVisibility",
+        "type": "Type",
+        "tags": [],
+        "label": "ModuleVisibility",
+        "description": [
+          "\nModuleVisibility tells whether a module is accessible from any module (shared) or only from modules of the same group (private)"
+        ],
+        "signature": [
+          "\"shared\" | \"private\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_GROUPS",
+        "type": "Object",
+        "tags": [],
+        "label": "KIBANA_GROUPS",
+        "description": [
+          "\nA list of all Kibana groups (platform + solutions)."
+        ],
+        "signature": [
+          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"chat\"]"
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_PRODUCT_TIERS",
+        "type": "Object",
+        "tags": [],
+        "label": "KIBANA_PRODUCT_TIERS",
+        "description": [
+          "\nPossible product tiers for Kibana solutions."
+        ],
+        "signature": [
+          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly chat: readonly []; }"
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_PROJECTS",
+        "type": "Object",
+        "tags": [],
+        "label": "KIBANA_PROJECTS",
+        "description": [
+          "\nA list of all Kibana serverless project types."
+        ],
+        "signature": [
+          "readonly [\"oblt\", \"security\", \"es\", \"chat\"]"
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_SOLUTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "KIBANA_SOLUTIONS",
+        "description": [
+          "\nA list of all Kibana solutions."
+        ],
+        "signature": [
+          "readonly [\"observability\", \"security\", \"search\", \"chat\"]"
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

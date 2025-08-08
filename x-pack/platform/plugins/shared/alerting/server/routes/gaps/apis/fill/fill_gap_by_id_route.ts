@@ -4,18 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
-import {
-  fillGapByIdQuerySchemaV1,
-  FillGapByIdQueryV1,
-} from '../../../../../common/routes/gaps/apis/fill';
-import { ScheduleBackfillResponseV1 } from '../../../../../common/routes/backfill/apis/schedule';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { FillGapByIdQueryV1 } from '../../../../../common/routes/gaps/apis/fill';
+import { fillGapByIdQuerySchemaV1 } from '../../../../../common/routes/gaps/apis/fill';
+import type { ScheduleBackfillResponseV1 } from '../../../../../common/routes/backfill/apis/schedule';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH } from '../../../../types';
 import { transformRequestV1 } from './transforms';
 import { transformResponseV1 } from '../../../backfill/apis/schedule/transforms';
 
@@ -26,6 +22,12 @@ export const fillGapByIdRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: fillGapByIdQuerySchemaV1,
       },

@@ -15,13 +15,14 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
-import { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage,
   UiActionsEnhancedDynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DashboardHelloWorldDrilldown } from './drilldowns/dashboard_hello_world_drilldown';
 import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover_drilldown';
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
@@ -39,7 +40,6 @@ import { App2ToDashboardDrilldown } from './drilldowns/app2_to_dashboard_drilldo
 import { registerButtonEmbeddable } from './embeddables/register_button_embeddable';
 
 export interface SetupDependencies {
-  dashboard: DashboardSetup;
   data: DataPublicPluginSetup;
   developerExamples: DeveloperExamplesSetup;
   discover: DiscoverSetup;
@@ -51,6 +51,7 @@ export interface StartDependencies {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   discover: DiscoverStart;
+  share: SharePluginStart;
   uiActionsEnhanced: AdvancedUiActionsStart;
 }
 
@@ -97,7 +98,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,
@@ -123,7 +124,7 @@ export class UiActionsEnhancedExamplesPlugin
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },
             }),
-            coreStart
+            coreStart.rendering
           ),
           {
             ownFocus: true,

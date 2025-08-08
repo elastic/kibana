@@ -55,6 +55,7 @@ import {
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
   TOOLTIP,
+  ACKNOWLDEGED_ALERTS_FILTER_BTN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -292,6 +293,12 @@ export const selectAlertsTreemap = () => {
   cy.get(SELECT_TREEMAP).click();
 };
 
+export const goToAcknowledgedAlertsOnRuleDetailsPage = () => {
+  cy.get(ACKNOWLDEGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
+};
+
 export const goToAcknowledgedAlerts = () => {
   /*
    * below line commented because alertPageFiltersEnabled feature flag
@@ -489,7 +496,7 @@ export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: numbe
 };
 
 export const selectFirstPageAlerts = () => {
-  const ALERTS_DATA_GRID = '[data-test-subj="alertsTable"]';
+  const ALERTS_DATA_GRID = '[data-test-subj="alertsTableIsLoaded"]';
   cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).scrollIntoView();
   cy.get(ALERTS_DATA_GRID).find(SELECT_ALL_VISIBLE_ALERTS).click({ force: true });
 };

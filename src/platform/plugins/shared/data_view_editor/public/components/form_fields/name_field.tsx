@@ -78,6 +78,7 @@ export const NameField = ({ namesNotAllowed }: NameFieldProps) => {
         return (
           <EuiFormRow label={field.label} fullWidth error={errorMessage} isInvalid={isInvalid}>
             <EuiFieldText
+              isInvalid={isInvalid}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 field.setValue(e.target.value);

@@ -41,8 +41,6 @@ import { useUrlParams } from '../../hooks/use_url_params';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
-import { useGetEndpointSpecificPolicies } from '../../services/policies/hooks';
-import { getLoadPoliciesError } from '../../common/translations';
 import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
@@ -163,13 +161,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
       allowCardDeleteAction,
       allowCardEditAction,
-    });
-
-    const policiesRequest = useGetEndpointSpecificPolicies({
-      perPage: 1000,
-      onError: (err) => {
-        toasts.addWarning(getLoadPoliciesError(err));
-      },
     });
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
@@ -299,8 +290,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             labels={labels}
             size={flyoutSize}
             submitHandler={onFormSubmit}
-            policies={policiesRequest.data?.items || []}
-            policiesIsLoading={policiesRequest.isLoading}
             data-test-subj={getTestId('flyout')}
           />
         )}
@@ -335,7 +324,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               onSearch={handleOnSearch}
               placeholder={labels.searchPlaceholderInfo}
               hasPolicyFilter
-              policyList={policiesRequest.data?.items}
               defaultIncludedPolicies={includedPolicies}
             />
 

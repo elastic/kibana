@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, RenderResult } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { mockBrowserFields } from '../../mock';
 
 import { FieldTable, FieldTableProps } from './field_table';
@@ -142,42 +143,42 @@ describe('FieldTable', () => {
     const isAtFirstPage = (result: RenderResult) =>
       result.getByTestId('pagination-button-0').hasAttribute('aria-current');
 
-    const changePage = (result: RenderResult) => {
-      result.getByTestId('pagination-button-1').click();
+    const changePage = async (result: RenderResult) => {
+      await userEvent.click(result.getByTestId('pagination-button-1'));
     };
 
     const paginationProps = {
       filteredBrowserFields: mockBrowserFields,
     };
 
-    it('should paginate on page clicked', () => {
+    it('should paginate on page clicked', async () => {
       const result = renderComponent(paginationProps);
 
       expect(isAtFirstPage(result)).toBeTruthy();
 
-      changePage(result);
+      await changePage(result);
 
       expect(isAtFirstPage(result)).toBeFalsy();
     });
 
-    it('should not reset on field checked', () => {
+    it('should not reset on field checked', async () => {
       const result = renderComponent(paginationProps);
 
-      changePage(result);
+      await changePage(result);
 
-      result.getAllByRole('checkbox').at(0)?.click();
+      await userEvent.click(result.getAllByRole('checkbox').at(0)!);
       expect(mockOnToggleColumn).toHaveBeenCalled(); // assert some field has been selected
 
       expect(isAtFirstPage(result)).toBeFalsy();
     });
 
-    it('should reset on filter change', () => {
+    it('should reset on filter change', async () => {
       const result = renderComponent({
         ...paginationProps,
         selectedCategoryIds: ['destination', 'event', 'client', 'agent', 'host'],
       });
 
-      changePage(result);
+      await changePage(result);
       expect(isAtFirstPage(result)).toBeFalsy();
 
       result.rerender(

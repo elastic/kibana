@@ -19,6 +19,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError, createFlagError, isFailError } from '@kbn/dev-cli-errors';
 import { sortPackageJson } from '@kbn/sort-package-json';
 
+import {
+  KIBANA_GROUPS,
+  type KibanaGroup,
+  type ModuleVisibility,
+} from '@kbn/projects-solutions-groups';
 import { validateElasticTeam } from '../lib/validate_elastic_team';
 import { PKG_TEMPLATE_DIR, determineDevPackageDir, determinePackageDir } from '../paths';
 import type { GenerateCommand } from '../generate_command';
@@ -33,7 +38,7 @@ export const PackageCommand: GenerateCommand = {
   usage: 'node scripts/generate package [pkgId]',
   flags: {
     boolean: ['web', 'force', 'dev'],
-    string: ['dir', 'owner'],
+    string: ['dir', 'owner', 'group', 'visibility', 'license'],
     help: `
       --dev          Generate a package which is intended for dev-only use and can access things like devDependencies
       --web          Build webpack-compatible version of sources for this package. If your package is intended to be
@@ -43,6 +48,9 @@ export const PackageCommand: GenerateCommand = {
       --force        If the --dir already exists, delete it before generation
       --owner        Github username of the owner for this package, if this is not specified then you will be asked for
                       this value interactively.
+      --group        Group the package belongs to
+      --visibility   Visibility of the package (private or shared)
+      --license      License (oss or x-pack)
     `,
   },
   async run({ log, flags, render }) {
@@ -67,8 +75,14 @@ export const PackageCommand: GenerateCommand = {
 
     const web = !!flags.web;
     const dev = !!flags.dev;
-    let group: 'platform' | 'observability' | 'security' | 'search' = 'platform';
-    let visibility: 'private' | 'shared' = 'private';
+    let group = flags.group as KibanaGroup | undefined;
+    let visibility = flags.visibility as 'private' | 'shared' | undefined;
+
+    if (group !== 'platform') {
+      visibility = 'private';
+    }
+
+    const license = flags.license as 'oss' | 'x-pack' | undefined;
     let calculatedPackageDir: string;
 
     const owner =
@@ -105,27 +119,32 @@ export const PackageCommand: GenerateCommand = {
     }
 
     if (isCliScript) {
+      group = 'platform';
       calculatedPackageDir = determineDevPackageDir(pkgId);
     } else {
-      group = (
-        await inquirer.prompt<{
-          group: 'platform' | 'observability' | 'security' | 'search';
-        }>({
-          type: 'list',
-          choices: [
-            { name: 'Platform', value: 'platform' },
-            { name: 'Observability', value: 'observability' },
-            { name: 'Security', value: 'security' },
-            { name: 'Search', value: 'search' },
-          ],
-          name: 'group',
-          message: `What group is this package part of?`,
-        })
-      ).group;
+      group =
+        group ||
+        (
+          await inquirer.prompt<{
+            group: KibanaGroup;
+          }>({
+            type: 'list',
+            choices: [
+              ...KIBANA_GROUPS.map((groupName) => ({
+                name: groupName,
+                value: groupName,
+              })),
+            ],
+            name: 'group',
+            message: `What group is this package part of?`,
+          })
+        ).group;
 
       let xpack: boolean;
 
-      if (group === 'platform') {
+      if (!!license) {
+        xpack = license === 'x-pack';
+      } else if (group === 'platform') {
         const resXpack = await inquirer.prompt<{ xpack: boolean }>({
           type: 'list',
           default: false,
@@ -141,19 +160,21 @@ export const PackageCommand: GenerateCommand = {
         xpack = true;
       }
 
-      visibility = (
-        await inquirer.prompt<{
-          visibility: 'private' | 'shared';
-        }>({
-          type: 'list',
-          choices: [
-            { name: 'Private', value: 'private' },
-            { name: 'Shared', value: 'shared' },
-          ],
-          name: 'visibility',
-          message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
-        })
-      ).visibility;
+      visibility =
+        visibility ||
+        (
+          await inquirer.prompt<{
+            visibility: ModuleVisibility;
+          }>({
+            type: 'list',
+            choices: [
+              { name: 'Private', value: 'private' },
+              { name: 'Shared', value: 'shared' },
+            ],
+            name: 'visibility',
+            message: `What visibility does this package have? "private" (used from within platform) or "shared" (used from solutions)`,
+          })
+        ).visibility;
 
       calculatedPackageDir = determinePackageDir({ pkgId, group, visibility, xpack });
     }

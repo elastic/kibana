@@ -16,6 +16,8 @@ import type {
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
+import type { TypeOf } from '@kbn/config-schema';
+
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import type { PackageList } from '../../../common';
@@ -25,6 +27,7 @@ import type {
   BundledPackage,
   CategoryId,
   EsAssetReference,
+  GetInstalledPackagesRequestSchema,
   InstallablePackage,
   Installation,
   RegistryPackage,
@@ -38,6 +41,10 @@ import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/ep
 import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
+
+import type { GetInstalledPackagesResponse } from '../../../common/types';
+
+import type { TemplateAgentPolicyInput } from '../../../common/types/models/agent_policy';
 
 import {
   type CustomPackageDatasetConfiguration,
@@ -57,6 +64,7 @@ import {
   installPackage,
   getTemplateInputs,
   getPackageInfo,
+  getInstalledPackages,
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
@@ -70,7 +78,10 @@ export interface PackageService {
 }
 
 export interface PackageClient {
-  getInstallation(pkgName: string): Promise<Installation | undefined>;
+  getInstallation(
+    pkgName: string,
+    savedObjectsClient?: SavedObjectsClientContract
+  ): Promise<Installation | undefined>;
 
   ensureInstalledPackage(options: {
     pkgName: string;
@@ -84,6 +95,9 @@ export interface PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult>;
 
   installCustomIntegration(options: {
@@ -128,6 +142,7 @@ export interface PackageClient {
   getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ): Promise<string>;
@@ -136,6 +151,10 @@ export interface PackageClient {
     packageInfo: InstallablePackage,
     assetPaths: string[]
   ): Promise<InstalledAssetType[]>;
+
+  getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse>;
 }
 
 export class PackageServiceImpl implements PackageService {
@@ -197,11 +216,14 @@ class PackageClientImpl implements PackageClient {
     }
   }
 
-  public async getInstallation(pkgName: string) {
+  public async getInstallation(
+    pkgName: string,
+    savedObjectsClient: SavedObjectsClientContract = this.internalSoClient
+  ) {
     await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
     return getInstallation({
       pkgName,
-      savedObjectsClient: this.internalSoClient,
+      savedObjectsClient,
     });
   }
 
@@ -225,10 +247,21 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
     force?: boolean;
+    keepFailedInstallation?: boolean;
+    useStreaming?: boolean;
+    automaticInstall?: boolean;
   }): Promise<InstallResult> {
     await this.#runPreflight(INSTALL_PACKAGES_AUTHZ);
 
-    const { pkgName, pkgVersion, spaceId = DEFAULT_SPACE_ID, force = false } = options;
+    const {
+      pkgName,
+      pkgVersion,
+      spaceId = DEFAULT_SPACE_ID,
+      force = false,
+      keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
+    } = options;
 
     // If pkgVersion isn't specified, find the latest package version
     const pkgKeyProps = pkgVersion
@@ -244,6 +277,9 @@ class PackageClientImpl implements PackageClient {
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
       neverIgnoreVerificationError: !force,
+      keepFailedInstallation,
+      useStreaming,
+      automaticInstall,
     });
   }
 
@@ -296,6 +332,7 @@ class PackageClientImpl implements PackageClient {
   public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
+    isInputIncluded?: (input: TemplateAgentPolicyInput) => boolean,
     prerelease?: boolean,
     ignoreUnverified?: boolean
   ) {
@@ -312,6 +349,7 @@ class PackageClientImpl implements PackageClient {
       pkgName,
       pkgVersion,
       'yml',
+      isInputIncluded,
       prerelease,
       ignoreUnverified
     );
@@ -356,6 +394,18 @@ class PackageClientImpl implements PackageClient {
       excludeInstallStatus,
       category,
       prerelease,
+    });
+  }
+
+  public async getInstalledPackages(
+    params: TypeOf<typeof GetInstalledPackagesRequestSchema.query>
+  ): Promise<GetInstalledPackagesResponse> {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    return getInstalledPackages({
+      savedObjectsClient: this.internalSoClient,
+      esClient: this.internalEsClient,
+      ...params,
     });
   }
 
@@ -405,7 +455,6 @@ class PackageClientImpl implements PackageClient {
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
-        assetsMap,
         packageInfo,
         paths,
         archiveIterator,

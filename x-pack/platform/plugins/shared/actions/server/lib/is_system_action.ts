@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionsClientContext } from '../actions_client';
+import type { ActionsClientContext } from '../actions_client';
 
 export function isSystemAction(context: ActionsClientContext, connectorId: string): boolean {
   return !!context.inMemoryConnectors.find(

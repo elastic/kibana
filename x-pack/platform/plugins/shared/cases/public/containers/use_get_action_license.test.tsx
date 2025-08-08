@@ -8,26 +8,23 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import * as api from './api';
 import { useGetActionLicense } from './use_get_action_license';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// FLAKY: https://github.com/elastic/kibana/issues/207404
-describe.skip('useGetActionLicense', () => {
+describe('useGetActionLicense', () => {
   const abortCtrl = new AbortController();
-  let appMockRenderer: AppMockRenderer;
+
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('calls getActionLicense with correct arguments', async () => {
     const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
     renderHook(() => useGetActionLicense(), {
-      wrapper: appMockRenderer.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal));
@@ -43,7 +40,7 @@ describe.skip('useGetActionLicense', () => {
     });
 
     renderHook(() => useGetActionLicense(), {
-      wrapper: appMockRenderer.AppWrapper,
+      wrapper: TestProviders,
     });
     await waitFor(() => expect(addError).toHaveBeenCalled());
   });

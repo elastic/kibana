@@ -43,7 +43,7 @@ import { registerDiscoverHistogramActions } from './register_discover_histogram_
 import { createFilterInLensAction } from './filter/lens/filter_in';
 import { createFilterOutLensAction } from './filter/lens/filter_out';
 
-export const registerUIActions = (
+export const registerUIActions = async (
   store: SecurityAppStore,
   history: History,
   coreSetup: CoreSetup,
@@ -53,7 +53,7 @@ export const registerUIActions = (
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
   // TODO: Remove discover histogram actions when timeline esql tab is extracted from discover
-  registerDiscoverHistogramActions(store, history, coreSetup, services);
+  await registerDiscoverHistogramActions(store, history, coreSetup, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {

@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -16,13 +16,10 @@ import {
 } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type {
-  BaseFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  WrappedAlert,
 } from '../../../../../../common/api/detection_engine/model/alerts';
-import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { SignalSource } from '../../types';
+import type { SecuritySharedParams, SignalSource } from '../../types';
 import { transformHitToAlert } from '../../factories/utils/transform_hit_to_alert';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 
@@ -47,28 +44,15 @@ export const createSuppressedAlertInstanceId = ({
 };
 
 export const wrapSuppressedAlerts = ({
+  sharedParams,
   suppressionBuckets,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
   buildReasonMessage,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  intendedTimestamp,
 }: {
+  sharedParams: SecuritySharedParams;
   suppressionBuckets: SuppressionBucket[];
-  spaceId: string;
-  completeRule: CompleteRule<RuleParams>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
   buildReasonMessage: BuildReasonMessage;
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  intendedTimestamp: Date | undefined;
-}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+}): Array<WrappedAlert<DetectionAlertLatest & SuppressionFieldsLatest>> => {
+  const { completeRule, spaceId } = sharedParams;
   return suppressionBuckets.map((bucket) => {
     const id = objectHash([
       bucket.event._index,
@@ -84,21 +68,12 @@ export const wrapSuppressedAlerts = ({
       ruleId: completeRule.alertId,
       spaceId,
     });
-    const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+    const baseAlert: DetectionAlertLatest = transformHitToAlert({
+      sharedParams,
       doc: bucket.event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {

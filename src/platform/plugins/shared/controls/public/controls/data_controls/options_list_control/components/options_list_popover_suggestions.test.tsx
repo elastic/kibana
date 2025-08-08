@@ -9,14 +9,20 @@
 
 import React from 'react';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render as rtlRender, waitFor } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { take } from 'lodash';
-import { getOptionsListMocks } from '../../mocks/api_mocks';
+import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '../constants';
-import { ContextStateManager, OptionsListControlContext } from '../options_list_context_provider';
+import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
+import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+
+const render = (ui: React.ReactElement) => {
+  return rtlRender(ui, { wrapper: EuiThemeProvider });
+};
 
 describe('Options list popover', () => {
   const allOptions = [
@@ -31,22 +37,19 @@ describe('Options list popover', () => {
   ];
 
   const mountComponent = ({
-    api,
+    componentApi,
     displaySettings,
-    stateManager,
     showOnlySelected,
   }: {
-    api: any;
-    displaySettings: any;
-    stateManager: any;
+    componentApi: OptionsListComponentApi;
+    displaySettings: OptionsListDisplaySettings;
     showOnlySelected?: boolean;
   }) => {
     return render(
       <OptionsListControlContext.Provider
         value={{
-          api: api as unknown as OptionsListComponentApi,
+          componentApi,
           displaySettings,
-          stateManager: stateManager as unknown as ContextStateManager,
         }}
       >
         <OptionsListPopoverSuggestions showOnlySelected={showOnlySelected ?? false} />
@@ -55,10 +58,10 @@ describe('Options list popover', () => {
   };
 
   test('displays "load more" text when possible', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.totalCardinality$.next(allOptions.length);
-    mocks.api.availableOptions$.next(take(allOptions, 5));
-    const suggestionsComponent = mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(allOptions.length);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 5));
+    const suggestionsComponent = mountComponent(contextMock);
 
     // the cardinality is larger than the available options, so display text
     let optionComponents = await suggestionsComponent.findAllByRole('option');
@@ -69,7 +72,7 @@ describe('Options list popover', () => {
     expect(suggestionsComponent.queryByTestId('optionslist--canLoadMore')).toBeInTheDocument();
 
     // we are displaying all the available options - so don't display "load more" text
-    mocks.api.availableOptions$.next(allOptions);
+    contextMock.componentApi.setAvailableOptions(allOptions);
     await waitFor(async () => {
       optionComponents = await suggestionsComponent.findAllByRole('option');
       expect(optionComponents.length).toBe(9);
@@ -81,19 +84,19 @@ describe('Options list popover', () => {
   });
 
   test('only fetch up to maximum request size on scroll', async () => {
-    const mocks = getOptionsListMocks();
-    mocks.api.totalCardinality$.next(100);
-    mocks.api.availableOptions$.next(take(allOptions, 5));
-    const suggestionsComponent = mountComponent(mocks);
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(100);
+    contextMock.componentApi.setAvailableOptions(take(allOptions, 5));
+    const suggestionsComponent = mountComponent(contextMock);
 
     // ensure we fetch the cardinality on scroll
-    expect(mocks.stateManager.requestSize.getValue()).toBe(MIN_OPTIONS_LIST_REQUEST_SIZE);
+    expect(contextMock.componentApi.requestSize$.getValue()).toBe(MIN_OPTIONS_LIST_REQUEST_SIZE);
     fireEvent.scroll(suggestionsComponent.getByTestId('optionsList--scrollListener'));
-    expect(mocks.stateManager.requestSize.getValue()).toBe(100);
+    expect(contextMock.componentApi.requestSize$.getValue()).toBe(100);
 
     // reset request size + update cardinality
-    mocks.stateManager.requestSize.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
-    mocks.api.totalCardinality$.next(MAX_OPTIONS_LIST_REQUEST_SIZE + 100);
+    contextMock.componentApi.setRequestSize(MIN_OPTIONS_LIST_REQUEST_SIZE);
+    contextMock.componentApi.setTotalCardinality(MAX_OPTIONS_LIST_REQUEST_SIZE + 100);
     await waitFor(async () => {
       // wait for request size to be reset in UI
       const optionComponents = await suggestionsComponent.findAllByRole('option');
@@ -102,6 +105,6 @@ describe('Options list popover', () => {
 
     // ensure we don't fetch more than MAX_OPTIONS_LIST_REQUEST_SIZE
     fireEvent.scroll(suggestionsComponent.getByTestId('optionsList--scrollListener'));
-    expect(mocks.stateManager.requestSize.getValue()).toBe(MAX_OPTIONS_LIST_REQUEST_SIZE);
+    expect(contextMock.componentApi.requestSize$.getValue()).toBe(MAX_OPTIONS_LIST_REQUEST_SIZE);
   });
 });

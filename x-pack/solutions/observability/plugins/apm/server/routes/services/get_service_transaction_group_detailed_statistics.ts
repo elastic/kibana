@@ -78,46 +78,44 @@ async function getServiceTransactionGroupDetailedStatistics({
       apm: {
         sources: [{ documentType, rollupInterval }],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { term: { [SERVICE_NAME]: serviceName } },
-              { term: { [TRANSACTION_TYPE]: transactionType } },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          total_duration: { sum: { field } },
-          transaction_groups: {
-            terms: {
-              field: TRANSACTION_NAME,
-              include: transactionNames,
-              size: transactionNames.length,
+      },
+      aggs: {
+        total_duration: { sum: { field } },
+        transaction_groups: {
+          terms: {
+            field: TRANSACTION_NAME,
+            include: transactionNames,
+            size: transactionNames.length,
+          },
+          aggs: {
+            transaction_group_total_duration: {
+              sum: { field },
             },
-            aggs: {
-              transaction_group_total_duration: {
-                sum: { field },
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: startWithOffset,
+                  max: endWithOffset,
+                },
               },
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                  extended_bounds: {
-                    min: startWithOffset,
-                    max: endWithOffset,
-                  },
-                },
-                aggs: {
-                  ...getLatencyAggregation(latencyAggregationType, field),
-                  ...getOutcomeAggregation(documentType),
-                },
+              aggs: {
+                ...getLatencyAggregation(latencyAggregationType, field),
+                ...getOutcomeAggregation(documentType),
               },
             },
           },

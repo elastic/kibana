@@ -12,7 +12,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -70,7 +69,7 @@ export const renderApp = ({
           defaultMessage: 'Getting started',
         }),
         prompt: i18n.translate('xpack.slo.starterPrompts.whatAreSlos.prompt', {
-          defaultMessage: 'What are SLOs?',
+          defaultMessage: 'What are Service Level Objectives (SLOs)?',
         }),
         icon: 'bullseye',
       },
@@ -81,13 +80,13 @@ export const renderApp = ({
         prompt: i18n.translate('xpack.slo.starterPrompts.canYouCreateAnSlo.prompt', {
           defaultMessage: 'Can you create an SLO?',
         }),
-        icon: 'questionInCircle',
+        icon: 'question',
       },
     ],
   });
 
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <ApplicationUsageTrackingProvider>
         <CloudProvider>
           <KibanaContextProvider
@@ -124,7 +123,7 @@ export const renderApp = ({
           </KibanaContextProvider>
         </CloudProvider>
       </ApplicationUsageTrackingProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 

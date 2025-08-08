@@ -122,7 +122,6 @@ const runCli: RunFn = async ({ log, flags }) => {
   ok(s1Url, getRequiredArgMessage('s1Url'));
   ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
 
-  const vmName = (flags.vmName as string) || generateVmName('sentinelone');
   const s1Client = new S1Client({ url: s1Url, apiToken: s1ApiToken, log });
   const kbnClient = createKbnClient({
     log,
@@ -139,6 +138,7 @@ const runCli: RunFn = async ({ log, flags }) => {
   }
 
   const activeSpaceId = (await fetchActiveSpace(kbnClient)).id;
+  const vmName = (flags.vmName as string) || generateVmName(`sentinelone-${activeSpaceId}`);
 
   const runningS1VMs = (
     await findVm(

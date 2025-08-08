@@ -8,7 +8,7 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: FindConversations
-      description: Get a list of all conversations for the current user.
+      description: Get a list of all conversations for the current user. This endpoint allows users to search, filter, sort, and paginate through their conversations.
       summary: Get conversations
       tags:
         - Conversations API
@@ -16,48 +16,55 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: A list of fields to include in the response. If omitted, all fields are returned.
           schema:
             type: array
             items:
               type: string
+            example: ["id", "title", "createdAt"]
         - name: 'filter'
           in: query
-          description: Search query
+          description: A search query to filter the conversations. Can match against titles, messages, or other conversation attributes.
           required: false
           schema:
             type: string
+            example: "Security Issue"
         - name: 'sort_field'
           in: query
-          description: Field to sort by
+          description: The field by which to sort the results. Valid fields are `created_at`, `title`, and `updated_at`.
           required: false
           schema:
             $ref: '#/components/schemas/FindConversationsSortField'
+            example: "created_at"
         - name: 'sort_order'
           in: query
-          description: Sort order
+          description: The order in which to sort the results. Can be either `asc` for ascending or `desc` for descending.
           required: false
           schema:
             $ref: '../common_attributes.schema.yaml#/components/schemas/SortOrder'
+            example: "desc"
         - name: 'page'
           in: query
-          description: Page number
+          description: The page number of the results to retrieve. Default is 1.
           required: false
           schema:
             type: integer
             minimum: 1
             default: 1
+            example: 1
         - name: 'per_page'
           in: query
-          description: Conversations per page
+          description: The number of conversations to return per page. Default is 20.
           required: false
           schema:
             type: integer
             minimum: 0
             default: 20
+            example: 20
 
       responses:
         200:
-          description: Successful response
+          description: Successful response, returns a paginated list of conversations matching the specified criteria.
           content:
             application/json:
               schema:
@@ -65,12 +72,19 @@ paths:
                 properties:
                   page:
                     type: integer
+                    description: The current page of the results.
+                    example: 1
                   perPage:
                     type: integer
+                    description: The number of results returned per page.
+                    example: 20
                   total:
                     type: integer
+                    description: The total number of conversations matching the filter criteria.
+                    example: 100
                   data:
                     type: array
+                    description: A list of conversations.
                     items:
                       $ref: './common_attributes.schema.yaml#/components/schemas/ConversationResponse'
                 required:
@@ -79,7 +93,7 @@ paths:
                   - total
                   - data
         400:
-          description: Generic Error
+          description: Generic Error. The request could not be processed due to an invalid query parameter or other issue.
           content:
             application/json:
               schema:
@@ -87,17 +101,21 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    example: 400
                   error:
                     type: string
+                    example: "Bad Request"
                   message:
                     type: string
+                    example: "Invalid filter query parameter"
 
 components:
   schemas:
     FindConversationsSortField:
       type: string
+      description: The field by which to sort the conversations. Possible values are `created_at`, `title`, and `updated_at`.
       enum:
         - 'created_at'
-        - 'is_default'
         - 'title'
         - 'updated_at'
+      example: "created_at"

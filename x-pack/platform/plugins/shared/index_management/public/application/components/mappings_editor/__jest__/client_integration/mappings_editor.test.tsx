@@ -510,6 +510,44 @@ describe('Mappings editor: core', () => {
         ...updatedMappings,
         properties: {
           ...updatedMappings.properties,
+          [newField.name]: { reference_field: '', type: 'semantic_text' },
+        },
+      };
+
+      ({ data } = await getMappingsEditorData(component));
+
+      expect(data).toEqual(updatedMappings);
+    });
+
+    test('updates mapping with reference field value for semantic_text field', async () => {
+      let updatedMappings = { ...defaultMappings };
+
+      const {
+        find,
+        actions: { addField },
+        component,
+      } = testBed;
+
+      /**
+       * Mapped fields
+       */
+      await act(async () => {
+        find('addFieldButton').simulate('click');
+        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+      });
+      component.update();
+
+      const newField = {
+        name: 'someNewField',
+        type: 'semantic_text',
+        referenceField: 'address.city',
+      };
+      await addField(newField.name, newField.type, undefined, newField.referenceField);
+
+      updatedMappings = {
+        ...updatedMappings,
+        properties: {
+          ...updatedMappings.properties,
           [newField.name]: { reference_field: 'address.city', type: 'semantic_text' },
         },
       };

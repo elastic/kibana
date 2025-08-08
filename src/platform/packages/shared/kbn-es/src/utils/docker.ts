@@ -63,12 +63,12 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
@@ -126,14 +126,21 @@ const DOCKER_BASE_CMD = [
 ];
 
 const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
-
   ['ES_LOG_STYLE', 'file'],
 
   ['discovery.type', 'single-node'],
 
   ['xpack.security.enabled', 'false'],
 ];
+// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
+if (process.arch === 'arm64') {
+  DEFAULT_DOCKER_ESARGS.push(
+    ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m -XX:UseSVE=0'],
+    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
+  );
+} else {
+  DEFAULT_DOCKER_ESARGS.push(['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m']);
+}
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
@@ -173,8 +180,6 @@ const SHARED_SERVERLESS_PARAMS = [
 
 // only allow certain ES args to be overwrote by options
 const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
-  ['ES_JAVA_OPTS', '-Xms1g -Xmx1g'],
-
   ['ES_LOG_STYLE', 'file'],
 
   ['cluster.name', 'stateless'],
@@ -212,6 +217,15 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.transport.ssl.verification_mode', 'certificate'],
 ];
+// Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
+if (process.arch === 'arm64') {
+  DEFAULT_SERVERLESS_ESARGS.push(
+    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
+    ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
+  );
+} else {
+  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
+}
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.http.ssl.enabled', 'true'],
@@ -384,6 +398,7 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
   'connection refused',
   'i/o timeout',
   'Client.Timeout',
+  'TLS handshake timeout',
 ];
 
 /**
@@ -411,13 +426,15 @@ ${message}`;
       retries: 2,
       onFailedAttempt: (error) => {
         // Only retry if retryable error messages are found in the error message.
-        if (
-          RETRYABLE_DOCKER_PULL_ERROR_MESSAGES.every(
-            (msg) => !error?.message?.includes('connection refused')
-          )
-        ) {
-          throw error;
+        for (const msg of RETRYABLE_DOCKER_PULL_ERROR_MESSAGES) {
+          if (error?.message?.includes(msg)) {
+            log.info(`Retrying due to error: ${error.message}`);
+            return;
+          }
         }
+
+        log.warning('Docker pull failed, error not retriable. Exiting.');
+        throw error;
       },
     }
   );
@@ -771,6 +788,7 @@ export async function runServerlessEsNode(
 function getESClient(clientOptions: ClientOptions): Client {
   return new Client({
     Connection: HttpConnection,
+    requestTimeout: 30_000,
     ...clientOptions,
   });
 }

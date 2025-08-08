@@ -14,9 +14,9 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { of } from 'rxjs';
 
-const mockGetProductProductFeatures = jest.fn();
+const mockGetEnabledProductFeatures = jest.fn();
 jest.mock('../../common/pli/pli_features', () => ({
-  getProductProductFeatures: () => mockGetProductProductFeatures(),
+  getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
 }));
 
 const setPages = jest.fn();
@@ -42,7 +42,7 @@ describe('registerUpsellings', () => {
   });
 
   it('should not register anything when all PLIs features are enabled', () => {
-    mockGetProductProductFeatures.mockReturnValue(ALL_PRODUCT_FEATURE_KEYS);
+    mockGetEnabledProductFeatures.mockReturnValue(ALL_PRODUCT_FEATURE_KEYS);
 
     registerUpsellings(allProductTypes, mockServices);
 
@@ -57,7 +57,7 @@ describe('registerUpsellings', () => {
   });
 
   it('should register all upsellings pages, sections and messages when PLIs features are disabled', () => {
-    mockGetProductProductFeatures.mockReturnValue([]);
+    mockGetEnabledProductFeatures.mockReturnValue([]);
 
     registerUpsellings(allProductTypes, mockServices);
 

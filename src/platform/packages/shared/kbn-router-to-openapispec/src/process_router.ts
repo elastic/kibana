@@ -25,16 +25,26 @@ import {
   setXState,
   GetOpId,
 } from './util';
-import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
+import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';
 import { extractAuthzDescription } from './extract_authz_description';
+import { mergeOperation } from './merge_operation';
 
-export const processRouter = (
-  appRouter: Router,
-  converter: OasConverter,
-  getOpId: GetOpId,
-  filters: GenerateOpenApiDocumentOptionsFilters
-) => {
+export interface ProcessRouterOptions {
+  appRouter: Router;
+  converter: OasConverter;
+  getOpId: GetOpId;
+  filters: GenerateOpenApiDocumentOptionsFilters;
+  env?: Env;
+}
+
+export const processRouter = async ({
+  appRouter,
+  converter,
+  getOpId,
+  filters,
+  env = { serverless: false },
+}: ProcessRouterOptions) => {
   const paths: OpenAPIV3.PathsObject = {};
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
   const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
@@ -97,7 +107,11 @@ export const processRouter = (
         operationId: getOpId({ path: route.path, method: route.method }),
       };
 
-      setXState(route.options.availability, operation);
+      setXState(route.options.availability, operation, env);
+
+      if (route.options.oasOperationObject) {
+        await mergeOperation(route.options.oasOperationObject(), operation);
+      }
 
       const path: OpenAPIV3.PathItemObject = {
         [route.method]: operation,

@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
@@ -41,7 +40,6 @@ import {
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
 }
@@ -84,13 +82,7 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          {
-            dataViews,
-            urlForwarding: urlForwardingStart,
-            guidedOnboarding,
-            share: shareStart,
-            cloud: cloudStart,
-          },
+          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart },
         ] = await core.getStartServices();
 
         setServices({
@@ -101,7 +93,6 @@ export class HomePublicPlugin
           toastNotifications: coreStart.notifications.toasts,
           banners: coreStart.overlays.banners,
           docLinks: coreStart.docLinks,
-          savedObjectsClient: coreStart.savedObjects.client,
           chrome: coreStart.chrome,
           application: coreStart.application,
           uiSettings: core.uiSettings,
@@ -115,7 +106,6 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
           cloudStart,
           overlays: coreStart.overlays,

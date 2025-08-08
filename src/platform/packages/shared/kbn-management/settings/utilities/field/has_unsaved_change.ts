@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 
 import type {
   FieldDefinition,

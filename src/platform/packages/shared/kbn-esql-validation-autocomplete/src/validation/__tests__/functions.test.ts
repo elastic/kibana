@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '../../definitions/types';
-import { setTestFunctions } from '../../shared/test_functions';
+import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
 
 describe('function validation', () => {
@@ -25,7 +26,7 @@ describe('function validation', () => {
               name: 'test',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [{ name: 'arg1', type: 'integer' }],
@@ -41,7 +42,7 @@ describe('function validation', () => {
               name: 'returns_integer',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -53,7 +54,7 @@ describe('function validation', () => {
               name: 'returns_double',
               type: FunctionDefinitionTypes.SCALAR,
               description: '',
-              supportedCommands: ['eval'],
+              locationsAvailable: [Location.EVAL],
               signatures: [
                 {
                   params: [],
@@ -87,9 +88,9 @@ describe('function validation', () => {
           await expectErrors('FROM a_index | EVAL TEST(integerField)', []);
           await expectErrors('FROM a_index | EVAL TEST(dateField)', []);
 
-          // variables
-          await expectErrors('FROM a_index | EVAL var1 = 1 | EVAL TEST(var1)', []);
-          await expectErrors('FROM a_index | EVAL var1 = NOW() | EVAL TEST(var1)', []);
+          // userDefinedColumns
+          await expectErrors('FROM a_index | EVAL col1 = 1 | EVAL TEST(col1)', []);
+          await expectErrors('FROM a_index | EVAL col1 = NOW() | EVAL TEST(col1)', []);
 
           // multiple instances
           await expectErrors('FROM a_index | EVAL TEST(1) | EVAL TEST(1)', []);
@@ -123,9 +124,9 @@ describe('function validation', () => {
             'Argument of [test] must be [integer], found value [doubleField] type [double]',
           ]);
 
-          // variables
-          await expectErrors('FROM a_index | EVAL var1 = 1. | EVAL TEST(var1)', [
-            'Argument of [test] must be [integer], found value [var1] type [double]',
+          // userDefinedColumns
+          await expectErrors('FROM a_index | EVAL col1 = 1. | EVAL TEST(col1)', [
+            'Argument of [test] must be [integer], found value [col1] type [double]',
           ]);
 
           // multiple instances
@@ -147,7 +148,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'any' }],
@@ -172,7 +173,7 @@ describe('function validation', () => {
             name: 'in',
             type: FunctionDefinitionTypes.OPERATOR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [
@@ -200,7 +201,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -271,7 +272,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -290,7 +291,7 @@ describe('function validation', () => {
           name: 'variadic_fn',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer' }],
@@ -329,7 +330,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -350,56 +351,13 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
     });
 
-    it('validates "all" parameter (wildcard)', async () => {
-      setTestFunctions([
-        {
-          name: 'supports_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          supportedCommands: ['eval'],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: true }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'does_not_support_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          supportedCommands: ['eval'],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: false }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*)', []);
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*, "")', [
-        // It may seem strange that these are syntax errors, but the grammar actually doesn't allow
-        // for a function to support the asterisk and have additional arguments. Testing it here so we'll
-        // be notified if that changes.
-        `SyntaxError: extraneous input ')' expecting <EOF>`,
-        `SyntaxError: no viable alternative at input 'SUPPORTS_ALL(*,'`,
-      ]);
-      await expectErrors('FROM a_index | EVAL DOES_NOT_SUPPORT_ALL(*)', [
-        'Using wildcards (*) in does_not_support_all is not allowed',
-      ]);
-    });
-
     it('casts string arguments to dates', async () => {
       setTestFunctions([
         {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -424,13 +382,67 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("2024-09-09", "2024-09-09")', []);
     });
 
+    it('treats text and keyword as interchangeable', async () => {
+      setTestFunctions([
+        {
+          name: 'accepts_text',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'text' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'accepts_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [{ name: 'arg1', type: 'keyword' }],
+              returnType: 'keyword',
+            },
+          ],
+        },
+        {
+          name: 'returns_keyword',
+          type: FunctionDefinitionTypes.SCALAR,
+          description: '',
+          locationsAvailable: [Location.EVAL],
+          signatures: [
+            {
+              params: [],
+              returnType: 'keyword',
+            },
+          ],
+        },
+      ]);
+
+      const { expectErrors } = await setup();
+
+      // literals — all string literals are keywords
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT("keyword literal")', []);
+
+      // fields
+      await expectErrors('FROM a_index | EVAL ACCEPTS_KEYWORD(textField)', []);
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(keywordField)', []);
+
+      // functions
+      // no need to test a function that returns text, because they no longer exist: https://github.com/elastic/elasticsearch/pull/114334
+      await expectErrors('FROM a_index | EVAL ACCEPTS_TEXT(RETURNS_KEYWORD())', []);
+    });
+
     it('enforces constant-only parameters', async () => {
       setTestFunctions([
         {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'integer', constantOnly: true }],
@@ -442,7 +454,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -478,7 +490,7 @@ describe('function validation', () => {
           name: 'test',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword', acceptedValues: ['ASC', 'DESC'] }],
@@ -512,7 +524,7 @@ describe('function validation', () => {
           name: 'test1',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -524,7 +536,7 @@ describe('function validation', () => {
           name: 'test2',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'keyword' }],
@@ -536,7 +548,7 @@ describe('function validation', () => {
           name: 'test3',
           type: FunctionDefinitionTypes.SCALAR,
           description: '',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [{ name: 'arg1', type: 'long' }],
@@ -563,7 +575,7 @@ describe('function validation', () => {
             name: 'eval_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -575,7 +587,7 @@ describe('function validation', () => {
             name: 'stats_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -587,7 +599,7 @@ describe('function validation', () => {
             name: 'row_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['row'],
+            locationsAvailable: [Location.ROW],
             signatures: [
               {
                 params: [],
@@ -599,7 +611,7 @@ describe('function validation', () => {
             name: 'where_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['where'],
+            locationsAvailable: [Location.WHERE],
             signatures: [
               {
                 params: [],
@@ -611,7 +623,7 @@ describe('function validation', () => {
             name: 'sort_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['sort'],
+            locationsAvailable: [Location.SORT],
             signatures: [
               {
                 params: [],
@@ -625,7 +637,7 @@ describe('function validation', () => {
 
         await expectErrors('FROM a_index | EVAL EVAL_FN()', []);
         await expectErrors('FROM a_index | SORT SORT_FN()', []);
-        await expectErrors('FROM a_index | STATS STATS_FN()', []);
+        await expectErrors('FROM a_index | STATS max(doubleField)', []);
         await expectErrors('ROW ROW_FN()', []);
         await expectErrors('FROM a_index | WHERE WHERE_FN()', []);
 
@@ -636,7 +648,6 @@ describe('function validation', () => {
           'SORT does not support function stats_fn',
         ]);
         await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'At least one aggregation function required in [STATS], found [ROW_FN()]',
           'STATS does not support function row_fn',
         ]);
         await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
@@ -651,8 +662,7 @@ describe('function validation', () => {
             name: 'supports_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: ['by'],
+            locationsAvailable: [Location.EVAL, Location.STATS_BY],
             signatures: [
               {
                 params: [],
@@ -664,8 +674,7 @@ describe('function validation', () => {
             name: 'does_not_support_by_option',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
-            supportedOptions: [],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [],
@@ -678,8 +687,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
-            supportedOptions: [],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [],
@@ -688,9 +696,7 @@ describe('function validation', () => {
             ],
           },
         ]);
-
         const { expectErrors } = await setup();
-
         await expectErrors('FROM a_index | STATS AGG_FN() BY SUPPORTS_BY_OPTION()', []);
         await expectErrors('FROM a_index | STATS AGG_FN() BY DOES_NOT_SUPPORT_BY_OPTION()', [
           'STATS BY does not support function does_not_support_by_option',
@@ -705,7 +711,7 @@ describe('function validation', () => {
             name: 'test',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -717,7 +723,7 @@ describe('function validation', () => {
             name: 'test2',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['eval'],
+            locationsAvailable: [Location.EVAL],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'integer' }],
@@ -738,7 +744,7 @@ describe('function validation', () => {
             name: 'agg_fn',
             type: FunctionDefinitionTypes.AGG,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -750,7 +756,7 @@ describe('function validation', () => {
             name: 'scalar_fn',
             type: FunctionDefinitionTypes.SCALAR,
             description: '',
-            supportedCommands: ['stats'],
+            locationsAvailable: [Location.STATS],
             signatures: [
               {
                 params: [{ name: 'arg1', type: 'keyword' }],
@@ -772,6 +778,181 @@ describe('function validation', () => {
       });
 
       // @TODO — test function aliases
+    });
+  });
+
+  describe('License-based validation', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.GROUPING,
+          name: 'platinum_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'text',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'keyword',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+          license: 'PLATINUM',
+        },
+        {
+          type: FunctionDefinitionTypes.AGG,
+          name: 'platinum_partial_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_shape',
+                  optional: false,
+                },
+              ],
+              license: 'PLATINUM',
+              returnType: 'cartesian_shape',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+        },
+      ]);
+    });
+
+    it('Should Validate Platinum Functions With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        []
+      );
+    });
+
+    it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.', 'Unknown column [wrongField]']
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_FUNCTION_MOCK(PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0])))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        []
+      );
+    });
+
+    it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        [
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(0))',
+        [
+          'Argument of [to_cartesianshape] must be [cartesian_point], found value [0] type [integer]',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(PLATINUM_FUNCTION_MOCK()))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
+        'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
+        'Argument of [platinum_partial_function_mock] must be [cartesian_point], found value [0] type [integer]',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [
+        'Unknown column [WrongField]',
+      ]);
     });
   });
 });

@@ -24,6 +24,7 @@ describe('HistoricalCheckFields', () => {
         <TestDataQualityProviders>
           <TestHistoricalResultsProvider>
             <HistoricalCheckFields
+              checkedAt={1706526408000}
               indexName="test"
               historicalResult={getHistoricalResultStub('test')}
             />
@@ -46,6 +47,7 @@ describe('HistoricalCheckFields', () => {
           <TestDataQualityProviders>
             <TestHistoricalResultsProvider>
               <HistoricalCheckFields
+                checkedAt={1706526408000}
                 indexName="test"
                 historicalResult={getHistoricalResultStub('test')}
               />

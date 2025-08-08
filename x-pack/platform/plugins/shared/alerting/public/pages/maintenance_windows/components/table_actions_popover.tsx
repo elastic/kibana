@@ -14,9 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import * as i18n from '../translations';
-import { MaintenanceWindowStatus } from '../../../../common';
+import type { MaintenanceWindowStatus } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface TableActionsPopoverProps {
@@ -27,15 +28,17 @@ export interface TableActionsPopoverProps {
   onCancel: (id: string) => void;
   onArchive: (id: string, archive: boolean) => void;
   onCancelAndArchive: (id: string) => void;
+  onDelete: (id: string) => void;
 }
-type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive';
+type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive' | 'delete';
 type ActionType = ModalType | 'edit' | 'copyId';
 
 export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
-  ({ id, status, isLoading, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
+  ({ id, status, isLoading, onEdit, onCancel, onArchive, onCancelAndArchive, onDelete }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();
+    const modalTitleId = useGeneratedHtmlId();
 
     const {
       notifications: { toasts },
@@ -104,6 +107,18 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           },
           subtitle: i18n.UNARCHIVE_MODAL_SUBTITLE,
         },
+        delete: {
+          props: {
+            title: i18n.DELETE_MODAL_TITLE,
+            onConfirm: () => {
+              closeModal();
+              onDelete(id);
+            },
+            cancelButtonText: i18n.CANCEL,
+            confirmButtonText: i18n.DELETE_MODAL_TITLE,
+          },
+          subtitle: i18n.DELETE_MODAL_SUBTITLE,
+        },
       };
       let m;
       if (isModalVisible && modalType) {
@@ -115,13 +130,25 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             onCancel={closeModal}
             defaultFocusedButton="confirm"
             buttonColor="danger"
+            aria-labelledby={modalTitleId}
+            titleProps={{ id: modalTitleId }}
           >
             <p>{modalProps.subtitle}</p>
           </EuiConfirmModal>
         );
       }
       return m;
-    }, [id, modalType, isModalVisible, closeModal, onArchive, onCancel, onCancelAndArchive]);
+    }, [
+      id,
+      modalType,
+      isModalVisible,
+      closeModal,
+      onArchive,
+      onCancel,
+      onCancelAndArchive,
+      onDelete,
+      modalTitleId,
+    ]);
 
     const items = useMemo(() => {
       const menuItems = {
@@ -170,7 +197,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           <EuiContextMenuItem
             data-test-subj="table-actions-cancel-and-archive"
             key="cancel-and-archive"
-            icon="trash"
+            icon="folderOpen"
             onClick={() => {
               closePopover();
               showModal('cancelAndArchive');
@@ -183,7 +210,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
           <EuiContextMenuItem
             data-test-subj="table-actions-archive"
             key="archive"
-            icon="trash"
+            icon="folderOpen"
             onClick={() => {
               closePopover();
               showModal('archive');
@@ -205,12 +232,25 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             {i18n.TABLE_ACTION_UNARCHIVE}
           </EuiContextMenuItem>
         ),
+        delete: (
+          <EuiContextMenuItem
+            data-test-subj="table-actions-delete"
+            key="delete"
+            icon="trash"
+            onClick={() => {
+              closePopover();
+              showModal('delete');
+            }}
+          >
+            {i18n.TABLE_ACTION_DELETE}
+          </EuiContextMenuItem>
+        ),
       };
       const statusMenuItemsMap: Record<MaintenanceWindowStatus, ActionType[]> = {
-        running: ['edit', 'copyId', 'cancel', 'cancelAndArchive'],
-        upcoming: ['edit', 'copyId', 'archive'],
-        finished: ['edit', 'copyId', 'archive'],
-        archived: ['copyId', 'unarchive'],
+        running: ['edit', 'copyId', 'cancel', 'cancelAndArchive', 'delete'],
+        upcoming: ['edit', 'copyId', 'archive', 'delete'],
+        finished: ['edit', 'copyId', 'archive', 'delete'],
+        archived: ['copyId', 'unarchive', 'delete'],
       };
       return statusMenuItemsMap[status].map((type) => menuItems[type]);
     }, [status, closePopover, onEdit, id, toasts, showModal]);

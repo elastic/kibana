@@ -7,14 +7,17 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import {
+  legacySyntheticsMonitorTypeSingle,
+  syntheticsMonitorAttributes,
+  syntheticsMonitorSavedObjectType,
+} from '../../../../common/types/saved_objects';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getSavedObjectKqlFilter } from '../../common';
-import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
@@ -37,7 +40,6 @@ import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
 import { DefaultAlertService } from '../../default_alerts/default_alert_service';
 import { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import { formatSecrets } from '../../../synthetics_service/utils';
 import { formatKibanaNamespace } from '../../../../common/formatters';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
@@ -59,11 +61,13 @@ export class AddEditMonitorAPI {
   async syncNewMonitor({
     id,
     normalizedMonitor,
+    savedObjectType,
   }: {
     id?: string;
     normalizedMonitor: SyntheticsMonitor;
+    savedObjectType?: string;
   }) {
-    const { savedObjectsClient, server, syntheticsMonitorClient, spaceId } = this.routeContext;
+    const { server, syntheticsMonitorClient, spaceId } = this.routeContext;
     const newMonitorId = id ?? uuidV4();
 
     let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
@@ -73,10 +77,11 @@ export class AddEditMonitorAPI {
     });
 
     try {
-      const newMonitorPromise = this.createNewSavedObjectMonitor({
+      const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
-        savedObjectsClient,
+        spaceId,
+        savedObjectType,
       });
 
       const syncErrorsPromise = syntheticsMonitorClient.addMonitors(
@@ -88,10 +93,7 @@ export class AddEditMonitorAPI {
       const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
         newMonitorPromise,
         syncErrorsPromise,
-      ]).catch((e) => {
-        server.logger.error(e);
-        throw e;
-      });
+      ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
         const failed = packagePolicyResult.failed.map((f) => f.error);
@@ -119,43 +121,13 @@ export class AddEditMonitorAPI {
         },
       };
     } catch (e) {
-      server.logger.error(
-        `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`
-      );
+      e.message = `${e.message}, monitor name: ${monitorWithNamespace[ConfigKey.NAME]}`;
       await this.revertMonitorIfCreated({
         newMonitorId,
       });
 
-      server.logger.error(e);
-
       throw e;
     }
-  }
-
-  async createNewSavedObjectMonitor({
-    id,
-    savedObjectsClient,
-    normalizedMonitor,
-  }: {
-    id: string;
-    savedObjectsClient: SavedObjectsClientContract;
-    normalizedMonitor: SyntheticsMonitor;
-  }) {
-    return await savedObjectsClient.create<EncryptedSyntheticsMonitorAttributes>(
-      syntheticsMonitorType,
-      formatSecrets({
-        ...normalizedMonitor,
-        [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-        [ConfigKey.CONFIG_ID]: id,
-        revision: 1,
-      }),
-      id
-        ? {
-            id,
-            overwrite: true,
-          }
-        : undefined
-    );
   }
 
   validateMonitorType(monitorFields: MonitorFields, previousMonitor?: MonitorFields) {
@@ -237,12 +209,13 @@ export class AddEditMonitorAPI {
   }
 
   async validateUniqueMonitorName(name: string, id?: string) {
-    const { savedObjectsClient } = this.routeContext;
+    const { monitorConfigRepository } = this.routeContext;
     const kqlFilter = getSavedObjectKqlFilter({ field: 'name.keyword', values: name });
-    const { total } = await savedObjectsClient.find({
+    const { total } = await monitorConfigRepository.find({
       perPage: 0,
-      type: syntheticsMonitorType,
-      filter: id ? `${kqlFilter} and not (${monitorAttributes}.config_id: ${id})` : kqlFilter,
+      filter: id
+        ? `${kqlFilter} and not (${syntheticsMonitorAttributes}.config_id: ${id})`
+        : kqlFilter,
     });
 
     if (total > 0) {
@@ -254,7 +227,12 @@ export class AddEditMonitorAPI {
   }
 
   initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context } = this.routeContext;
+    const { server, savedObjectsClient, context, request } = this.routeContext;
+    const { gettingStarted } = request.query;
+    if (!gettingStarted) {
+      return;
+    }
+
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
@@ -264,10 +242,12 @@ export class AddEditMonitorAPI {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
         .catch((error) => {
-          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`);
+          server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, {
+            error,
+          });
         });
-    } catch (e) {
-      server.logger.error(`Error creating default alert: ${e} for monitor: ${name}`);
+    } catch (error) {
+      server.logger.error(`Error creating default alert: ${error} for monitor: ${name}`, { error });
     }
   }
 
@@ -283,13 +263,19 @@ export class AddEditMonitorAPI {
           .then(() => {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
-          .catch((e) => {
-            server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+          .catch((error) => {
+            server.logger.error(
+              `Error triggering test for monitor: ${configId}, Error: ${error.message}`,
+              {
+                error,
+              }
+            );
           });
       }
-    } catch (e) {
-      server.logger.info(`Error triggering test for getting started monitor: ${configId}`);
-      server.logger.error(e);
+    } catch (error) {
+      server.logger.error(`Error triggering test for getting started monitor: ${configId}`, {
+        error,
+      });
     }
   };
 
@@ -330,23 +316,28 @@ export class AddEditMonitorAPI {
   }
 
   async revertMonitorIfCreated({ newMonitorId }: { newMonitorId: string }) {
-    const { server, savedObjectsClient } = this.routeContext;
+    const { server, monitorConfigRepository } = this.routeContext;
     try {
-      const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
-        syntheticsMonitorType,
-        newMonitorId
-      );
+      const encryptedMonitor = await monitorConfigRepository.get(newMonitorId);
       if (encryptedMonitor) {
-        await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
+        await monitorConfigRepository.bulkDelete([
+          { id: newMonitorId, type: syntheticsMonitorSavedObjectType },
+          { id: newMonitorId, type: legacySyntheticsMonitorTypeSingle },
+        ]);
 
         const deleteMonitorAPI = new DeleteMonitorAPI(this.routeContext);
         await deleteMonitorAPI.execute({
           monitorIds: [newMonitorId],
         });
       }
-    } catch (e) {
+    } catch (error) {
       // ignore errors here
-      server.logger.error(e);
+      server.logger.error(
+        `Unable to revert monitor with id ${newMonitorId}, Error: ${error.message}`,
+        {
+          error,
+        }
+      );
     }
   }
 }

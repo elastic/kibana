@@ -19,9 +19,11 @@ import {
   EuiButton,
   EuiText,
   EuiSwitch,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { createJobActionFocusRestoration } from '../../../../util/create_focus_restoration';
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
@@ -39,6 +41,8 @@ interface Props {
 }
 
 export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   const {
     services: {
       notifications: { toasts },
@@ -76,7 +80,11 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
-  }, []);
+    // This is a workaround to fix the issue where the focus is not returned to the action button when the modal is closed
+    if (jobIds.length === 1) {
+      createJobActionFocusRestoration(jobIds[0])();
+    }
+  }, [jobIds]);
 
   const resetJob = useCallback(async () => {
     setResetting(true);
@@ -92,9 +100,13 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   }
 
   return (
-    <EuiModal data-test-subj="mlResetJobConfirmModal" onClose={closeModal}>
+    <EuiModal
+      data-test-subj="mlResetJobConfirmModal"
+      onClose={closeModal}
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
             id="xpack.ml.jobsList.resetJobModal.resetJobsTitle"
             defaultMessage="Reset {jobsCount, plural, one {{jobId}} other {# jobs}}?"

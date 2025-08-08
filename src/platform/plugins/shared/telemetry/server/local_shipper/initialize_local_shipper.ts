@@ -44,6 +44,12 @@ function registerRoute(
     .versioned.post({
       path: '/internal/telemetry/ebt_local_shipper',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Elasticsearch client',
+        },
+      },
     })
     .addVersion(
       {

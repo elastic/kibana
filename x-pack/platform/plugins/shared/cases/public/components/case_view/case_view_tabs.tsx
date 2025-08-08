@@ -151,13 +151,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData);
 
-  const { observablesAuthorized: canShowObservableTabs } = useCasesFeatures();
+  const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
+    useCasesFeatures();
 
   const { data: similarCasesData } = useGetSimilarCases({
     caseId: caseData.id,
     perPage: 0,
     page: 0,
-    enabled: canShowObservableTabs,
+    enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
   const tabs = useMemo(
@@ -194,7 +195,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
           />
         ),
       },
-      ...(canShowObservableTabs
+      ...(canShowObservableTabs && isObservablesFeatureEnabled
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.OBSERVABLES,
@@ -234,6 +235,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       isLoadingObservables,
       observables.length,
       similarCasesData?.total,
+      isObservablesFeatureEnabled,
     ]
   );
 

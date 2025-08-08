@@ -23,10 +23,11 @@ import {
   EuiToolTip,
   EuiSwitchEvent,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
+import { SecurityPageName } from '@kbn/deeplinks-security';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { Conversation, useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
@@ -58,15 +59,17 @@ const ConditionalWrap = ({
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
+    const confirmModalTitleId = useGeneratedHtmlId();
     const { euiTheme } = useEuiTheme();
     const {
+      assistantAvailability,
       navigateToApp,
       knowledgeBase,
       setContentReferencesVisible,
       contentReferencesVisible,
       showAnonymizedValues,
       setShowAnonymizedValues,
-      assistantFeatures: { contentReferencesEnabled },
+      showAssistantOverlay,
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -96,26 +99,37 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       setIsResetConversationModalVisible(true);
     }, [closePopover]);
 
-    const handleNavigateToSettings = useCallback(
-      () =>
+    const handleNavigateToSettings = useCallback(() => {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
+        navigateToApp('securitySolutionUI', {
+          deepLinkId: SecurityPageName.configurationsAiSettings,
+        });
+        showAssistantOverlay?.({ showOverlay: false });
+      } else {
         navigateToApp('management', {
           path: 'kibana/securityAiAssistantManagement',
-        }),
-      [navigateToApp]
-    );
+        });
+      }
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleNavigateToAnonymization = useCallback(() => {
       showAnonymizationModal();
       closePopover();
     }, [closePopover, showAnonymizationModal]);
 
-    const handleNavigateToKnowledgeBase = useCallback(
-      () =>
+    const handleNavigateToKnowledgeBase = useCallback(() => {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
+        navigateToApp('securitySolutionUI', {
+          deepLinkId: SecurityPageName.configurationsAiSettings,
+          path: `?tab=${KNOWLEDGE_BASE_TAB}`,
+        });
+        showAssistantOverlay?.({ showOverlay: false });
+      } else {
         navigateToApp('management', {
           path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
-        }),
-      [navigateToApp]
-    );
+        });
+      }
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleShowAlertsModal = useCallback(() => {
       showAlertSettingsModal();
@@ -143,6 +157,11 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
 
     const selectedConversationHasAnonymizedValues = useMemo(
       () => conversationContainsAnonymizedValues(selectedConversation),
+      [selectedConversation]
+    );
+
+    const selectedConversationExists = useMemo(
+      () => selectedConversation && selectedConversation.id !== '',
       [selectedConversation]
     );
 
@@ -216,6 +235,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     <EuiToolTip
                       position="top"
                       key={'disabled-anonymize-values-tooltip'}
+                      data-test-subj={'disabled-anonymize-values-tooltip'}
                       content={
                         <FormattedMessage
                           id="xpack.elasticAssistant.assistant.settings.anonymizeValues.disabled.tooltip"
@@ -228,6 +248,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                   )}
                 >
                   <EuiSwitch
+                    data-test-subj={'anonymize-switch'}
                     label={i18n.ANONYMIZE_VALUES}
                     checked={showAnonymizedValues}
                     onChange={onChangeShowAnonymizedValues}
@@ -251,80 +272,83 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                     />
                   }
                 >
-                  <EuiIcon tabIndex={0} type="iInCircle" />
+                  <EuiIcon tabIndex={0} type="info" />
                 </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiContextMenuItem>
-
-          {contentReferencesEnabled && (
-            <EuiContextMenuItem
-              aria-label={'show-citations'}
-              key={'show-citations'}
-              data-test-subj={'show-citations'}
-            >
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ConditionalWrap
-                    condition={!selectedConversationHasCitations}
-                    wrap={(children) => (
-                      <EuiToolTip
-                        position="top"
-                        key={'disabled-anonymize-values-tooltip'}
-                        content={
-                          <FormattedMessage
-                            id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
-                            defaultMessage="This conversation does not contain citations."
-                          />
-                        }
-                      >
-                        {children}
-                      </EuiToolTip>
-                    )}
-                  >
-                    <EuiSwitch
-                      label={i18n.SHOW_CITATIONS}
-                      checked={contentReferencesVisible}
-                      onChange={onChangeContentReferencesVisible}
-                      compressed
-                      disabled={!selectedConversationHasCitations}
-                    />
-                  </ConditionalWrap>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    position="top"
-                    key={'show-citations-tooltip'}
-                    content={
-                      <FormattedMessage
-                        id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
-                        defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                        values={{
-                          keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
-                          bold: (str) => <strong>{str}</strong>,
-                        }}
-                      />
-                    }
-                  >
-                    <EuiIcon tabIndex={0} type="iInCircle" />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiContextMenuItem>
-          )}
-          <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
-            aria-label={'clear-chat'}
-            key={'clear-chat'}
-            onClick={showDestroyModal}
-            icon={'refresh'}
-            data-test-subj={'clear-chat'}
-            css={css`
-              color: ${euiTheme.colors.textDanger};
-            `}
+            aria-label={'show-citations'}
+            key={'show-citations'}
+            data-test-subj={'show-citations'}
           >
-            {i18n.RESET_CONVERSATION}
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <ConditionalWrap
+                  condition={!selectedConversationHasCitations}
+                  wrap={(children) => (
+                    <EuiToolTip
+                      position="top"
+                      key={'disabled-citations-values-tooltip'}
+                      data-test-subj={'disabled-citations-values-tooltip'}
+                      content={
+                        <FormattedMessage
+                          id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
+                          defaultMessage="This conversation does not contain citations."
+                        />
+                      }
+                    >
+                      {children}
+                    </EuiToolTip>
+                  )}
+                >
+                  <EuiSwitch
+                    data-test-subj={'citations-switch'}
+                    label={i18n.SHOW_CITATIONS}
+                    checked={contentReferencesVisible}
+                    onChange={onChangeContentReferencesVisible}
+                    compressed
+                    disabled={!selectedConversationHasCitations}
+                  />
+                </ConditionalWrap>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
+                  key={'show-citations-tooltip'}
+                  content={
+                    <FormattedMessage
+                      id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
+                      defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
+                      values={{
+                        keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
+                        bold: (str) => <strong>{str}</strong>,
+                      }}
+                    />
+                  }
+                >
+                  <EuiIcon tabIndex={0} type="info" />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiContextMenuItem>
+          {selectedConversationExists && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                aria-label={'clear-chat'}
+                key={'clear-chat'}
+                onClick={showDestroyModal}
+                icon={'refresh'}
+                data-test-subj={'clear-chat'}
+                css={css`
+                  color: ${euiTheme.colors.textDanger};
+                `}
+              >
+                {i18n.RESET_CONVERSATION}
+              </EuiContextMenuItem>
+            </>
+          )}
         </EuiPanel>,
       ],
       [
@@ -339,9 +363,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         showDestroyModal,
-        contentReferencesEnabled,
         euiTheme.size.m,
         euiTheme.size.xs,
+        selectedConversationExists,
         selectedConversationHasCitations,
         selectedConversationHasAnonymizedValues,
       ]
@@ -357,15 +381,13 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       <>
         <EuiPopover
           button={
-            <KnowledgeBaseTour>
-              <EuiButtonIcon
-                aria-label={AI_ASSISTANT_MENU}
-                isDisabled={isDisabled}
-                iconType="boxesVertical"
-                onClick={onButtonClick}
-                data-test-subj="chat-context-menu"
-              />
-            </KnowledgeBaseTour>
+            <EuiButtonIcon
+              aria-label={AI_ASSISTANT_MENU}
+              isDisabled={isDisabled}
+              iconType="boxesVertical"
+              onClick={onButtonClick}
+              data-test-subj="chat-context-menu"
+            />
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
@@ -385,7 +407,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         )}
         {isResetConversationModalVisible && (
           <EuiConfirmModal
+            aria-labelledby={confirmModalTitleId}
             title={i18n.RESET_CONVERSATION}
+            titleProps={{ id: confirmModalTitleId }}
             onCancel={closeDestroyModal}
             onConfirm={handleReset}
             cancelButtonText={i18n.CANCEL_BUTTON_TEXT}

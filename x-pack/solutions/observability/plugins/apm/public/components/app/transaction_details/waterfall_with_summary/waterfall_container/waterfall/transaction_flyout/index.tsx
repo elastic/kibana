@@ -123,8 +123,8 @@ function TransactionFlyoutBody({
 }) {
   const spanLinksTabContent = getSpanLinksTabContent({
     spanLinksCount,
-    traceId: transaction.trace.id,
-    spanId: transaction.transaction.id,
+    traceId: transaction.trace?.id,
+    spanId: transaction.transaction?.id,
     processorEvent: ProcessorEvent.transaction,
   });
 

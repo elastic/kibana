@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
@@ -23,7 +21,8 @@ import {
   PushToServiceIncidentSchema,
 } from '../../../common/thehive/schema';
 import { THEHIVE_CONNECTOR_ID, THEHIVE_TITLE } from '../../../common/thehive/constants';
-import { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
+import type { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
+import { renderParameterTemplates } from './render';
 
 export type TheHiveConnectorType = SubActionConnectorType<TheHiveConfig, TheHiveSecrets>;
 
@@ -43,6 +42,7 @@ export function getConnectorType(): TheHiveConnectorType {
       config: TheHiveConfigSchema,
       secrets: TheHiveSecretsSchema,
     },
+    renderParameterTemplates,
     validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   };
 }

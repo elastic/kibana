@@ -22,7 +22,7 @@ import {
   BulkCrudActionSummary,
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
@@ -159,7 +159,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -183,8 +183,8 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             if (result?.data != null && result.total > 0) {
               return assistantResponse.error({
                 statusCode: 409,
-                body: `prompt with id: "${result.data.hits.hits
-                  .map((c) => c._id)
+                body: `prompt with name: "${result.data.hits.hits
+                  .map((c) => c._source?.name ?? c._id)
                   .join(',')}" already exists`,
               });
             }

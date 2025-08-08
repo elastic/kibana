@@ -18,6 +18,7 @@ import {
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   selectDefaultWidths,
   selectPushVsOverlay,
@@ -31,7 +32,19 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { useExpandableFlyoutApi } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+const BACK_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.backButton',
+  {
+    defaultMessage: 'Back',
+  }
+);
+const CLOSE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export interface PreviewBanner {
   /**
@@ -108,7 +121,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="cross"
-          onClick={() => closePreviewPanel()}
+          onClick={closePreviewPanel}
           data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
           aria-label={CLOSE_BUTTON}
         />
@@ -121,7 +134,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
             size="xs"
             iconType="arrowLeft"
             iconSide="left"
-            onClick={() => previousPreviewPanel()}
+            onClick={previousPreviewPanel}
             data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
             aria-label={BACK_BUTTON}
           >

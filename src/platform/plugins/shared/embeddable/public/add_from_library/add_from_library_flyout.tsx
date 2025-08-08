@@ -68,7 +68,6 @@ export const AddFromLibraryFlyout = ({
         );
         return;
       }
-
       libraryType.onAdd(container, savedObject);
       runAddTelemetry(container, savedObject, libraryType.savedObjectMetaData);
     },

@@ -14,7 +14,8 @@
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "../../../../../../../typings/emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/core-chrome-browser",
@@ -22,7 +23,7 @@
     "@kbn/i18n",
     "@kbn/shared-ux-storybook-mock",
     "@kbn/core-http-browser",
-    "@kbn/core-analytics-browser",
+    "@kbn/core-analytics-browser"
   ],
   "exclude": [
     "target/**/*"

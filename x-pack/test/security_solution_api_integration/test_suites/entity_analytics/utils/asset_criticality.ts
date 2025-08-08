@@ -6,6 +6,7 @@
  */
 
 import SuperTest from 'supertest';
+import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -28,6 +29,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { routeWithNamespace, waitFor } from '../../../../common/utils/security_solution';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
@@ -86,14 +88,22 @@ export const assetCriticalityRouteHelpersFactory = (
   upsert: async (
     body: Record<string, unknown>,
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
-  ) =>
-    await supertest
+  ) => {
+    const response = await supertest
       .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send(body)
-      .expect(expectStatusCode),
+      .send(body);
+
+    if (response.status !== expectStatusCode) {
+      // eslint-disable-next-line no-console
+      console.log(`Unexpected status code: ${response.status}. Response body:`, response.body);
+    }
+
+    expect(response.status).equal(expectStatusCode);
+    return response;
+  },
   delete: async (
     idField: string,
     idValue: string,
@@ -199,7 +209,7 @@ export const createAssetCriticalityRecords = async (
   records: CreateAssetCriticalityRecord[],
   es: Client
 ) => {
-  const ops = records.flatMap((record) => [
+  const operations = records.flatMap((record) => [
     {
       index: {
         _index: getAssetCriticalityIndex(),
@@ -210,7 +220,7 @@ export const createAssetCriticalityRecords = async (
   ]);
 
   const res = await es.bulk({
-    body: ops,
+    operations,
     refresh: 'wait_for',
   });
 
@@ -248,4 +258,77 @@ export const waitForAssetCriticalityToBePresent = async ({
     'waitForAssetCriticalityToBePresent',
     log
   );
+};
+
+export const getAssetCriticalityMappingAndSettings = async (
+  es: Client,
+  space = 'default'
+): Promise<{ mappings?: MappingTypeMapping; settings?: IndicesIndexSettings | undefined }> => {
+  const index = getAssetCriticalityIndex(space);
+  const indexInfo = await es.indices.get({
+    index,
+  });
+  return {
+    mappings: indexInfo[index]?.mappings,
+    settings: indexInfo[index]?.settings,
+  };
+};
+
+export const getAssetCriticalityIndexVersion = async ({
+  es,
+  space = 'default',
+}: {
+  es: Client;
+  space?: string;
+}): Promise<number | undefined> => {
+  const { mappings } = await getAssetCriticalityMappingAndSettings(es, space);
+  return mappings?._meta?.version;
+};
+
+export const setAssetCriticalityIndexVersion = async ({
+  es,
+  version,
+  space = 'default',
+}: {
+  es: Client;
+  version: number;
+  space?: string;
+}): Promise<void> => {
+  const index = getAssetCriticalityIndex(space);
+  await es.indices.putMapping({
+    index,
+    _meta: {
+      version,
+    },
+  });
+};
+
+/**
+ * Function to get an asset criticality record from ES by its ID.
+ * Only use this if you wish to see the document as it is stored in ES.
+ * If you want to use the asset criticality record in your tests, use the
+ * API helper `get` instead.
+ */
+export const getAssetCriticalityEsDocument = async ({
+  es,
+  idField,
+  idValue,
+  space = 'default',
+}: {
+  es: Client;
+  idField: string;
+  idValue: string;
+  space?: string;
+}): Promise<AssetCriticalityRecord | undefined> => {
+  const index = getAssetCriticalityIndex(space);
+  try {
+    const doc = await es.get({
+      index,
+      id: `${idField}:${idValue}`,
+    });
+
+    return doc._source as AssetCriticalityRecord;
+  } catch (e) {
+    return undefined;
+  }
 };

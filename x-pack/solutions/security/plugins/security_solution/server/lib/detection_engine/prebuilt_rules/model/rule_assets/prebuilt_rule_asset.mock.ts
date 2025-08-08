@@ -33,6 +33,7 @@ export const getPrebuiltRuleMock = (rewrites?: Partial<PrebuiltRuleAsset>): Preb
     version: 1,
     author: [],
     license: 'Elastic License v2',
+    index: ['index-1', 'index-2'],
     ...rewrites,
   });
 };

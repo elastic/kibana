@@ -32,7 +32,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
     return (
       <React.Fragment>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id="vis-wizard-modal-title">
             <FormattedMessage
               id="visualizations.newVisWizard.newVisTypeTitle"
               defaultMessage="New {visTypeName}"

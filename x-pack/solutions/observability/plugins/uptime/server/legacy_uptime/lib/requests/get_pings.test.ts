@@ -125,47 +125,50 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
                       },
                     },
                   },
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-1h",
-                        "lte": "now",
-                      },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-1h",
+                      "lte": "now",
                     },
                   },
-                ],
+                },
+              ],
+            },
+          },
+          "size": 12,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "asc",
               },
             },
-            "size": 12,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "asc",
-                },
-              },
-            ],
-          },
-          "index": "heartbeat-*",
+          ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "uptime",
+            },
+          },
           "meta": true,
         },
       ]
@@ -187,47 +190,50 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
                       },
                     },
                   },
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-1h",
-                        "lte": "now",
-                      },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-1h",
+                      "lte": "now",
                     },
                   },
-                ],
+                },
+              ],
+            },
+          },
+          "size": 12,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "desc",
               },
             },
-            "size": 12,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-          },
-          "index": "heartbeat-*",
+          ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "uptime",
+            },
+          },
           "meta": true,
         },
       ]
@@ -249,47 +255,50 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
                       },
                     },
                   },
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-1h",
-                        "lte": "now",
-                      },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-1h",
+                      "lte": "now",
                     },
                   },
-                ],
+                },
+              ],
+            },
+          },
+          "size": 25,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "desc",
               },
             },
-            "size": 25,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-          },
-          "index": "heartbeat-*",
+          ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "uptime",
+            },
+          },
           "meta": true,
         },
       ]
@@ -311,52 +320,55 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
                       },
                     },
                   },
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-1h",
-                        "lte": "now",
-                      },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-1h",
+                      "lte": "now",
                     },
                   },
-                  Object {
-                    "term": Object {
-                      "monitor.id": "testmonitorid",
-                    },
+                },
+                Object {
+                  "term": Object {
+                    "monitor.id": "testmonitorid",
                   },
-                ],
+                },
+              ],
+            },
+          },
+          "size": 25,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "desc",
               },
             },
-            "size": 25,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-          },
-          "index": "heartbeat-*",
+          ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "uptime",
+            },
+          },
           "meta": true,
         },
       ]
@@ -377,7 +389,7 @@ describe('getAll', () => {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     // @ts-expect-error the response is not typed, but should always result in this object, and in this order,
     // unless the code that builds the query is modified.
-    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter[1]).toMatchInlineSnapshot(`
+    expect(mockEsClient.search.mock.calls[0][0].query.bool.filter[1]).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
           "must_not": Object {
@@ -419,52 +431,55 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "body": Object {
-            "query": Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "exists": Object {
-                      "field": "summary",
-                    },
+          "index": "heartbeat-*",
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "exists": Object {
+                    "field": "summary",
                   },
-                  Object {
-                    "bool": Object {
-                      "must_not": Object {
-                        "exists": Object {
-                          "field": "run_once",
-                        },
+                },
+                Object {
+                  "bool": Object {
+                    "must_not": Object {
+                      "exists": Object {
+                        "field": "run_once",
                       },
                     },
                   },
-                  Object {
-                    "range": Object {
-                      "@timestamp": Object {
-                        "gte": "now-1h",
-                        "lte": "now",
-                      },
+                },
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-1h",
+                      "lte": "now",
                     },
                   },
-                  Object {
-                    "term": Object {
-                      "monitor.status": "down",
-                    },
+                },
+                Object {
+                  "term": Object {
+                    "monitor.status": "down",
                   },
-                ],
+                },
+              ],
+            },
+          },
+          "size": 25,
+          "sort": Array [
+            Object {
+              "@timestamp": Object {
+                "order": "desc",
               },
             },
-            "size": 25,
-            "sort": Array [
-              Object {
-                "@timestamp": Object {
-                  "order": "desc",
-                },
-              },
-            ],
-          },
-          "index": "heartbeat-*",
+          ],
         },
         Object {
+          "context": Object {
+            "loggingOptions": Object {
+              "loggerName": "uptime",
+            },
+          },
           "meta": true,
         },
       ]

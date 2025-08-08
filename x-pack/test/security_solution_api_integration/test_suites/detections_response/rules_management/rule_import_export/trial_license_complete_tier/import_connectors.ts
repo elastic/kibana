@@ -102,81 +102,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('DOES NOT import an action connector without rules', async () => {
-        const ndjson = combineToNdJson(CUSTOM_ACTION_CONNECTOR);
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [],
-          success: true,
-          success_count: 0,
-          rules_count: 0,
-          action_connectors_success: true,
-          action_connectors_success_count: 0,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-
-        await supertest
-          .get(`/api/actions/connector/${CONNECTOR_ID}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(404);
-      });
-
-      it('DOES NOT import an action connector when there are no rules referencing it', async () => {
-        const ndjson = combineToNdJson(
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            name: 'Rule 1',
-            actions: [
-              {
-                group: 'default',
-                id: ANOTHER_CONNECTOR_ID,
-                params: {
-                  message: 'Some message',
-                  to: ['test@test.com'],
-                  subject: 'Test',
-                },
-                action_type_id: '.email',
-                uuid: 'fda6721b-d3a4-4d2c-ad0c-18893759e096',
-                frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
-              },
-            ],
-          }),
-          { ...CUSTOM_ACTION_CONNECTOR, id: ANOTHER_CONNECTOR_ID },
-          CUSTOM_ACTION_CONNECTOR
-        );
-
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).toMatchObject({
-          errors: [],
-          success: true,
-          success_count: 1,
-          rules_count: 1,
-          action_connectors_success: true,
-          action_connectors_success_count: 1,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-
-        await supertest
-          .get(`/api/actions/connector/${CONNECTOR_ID}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(404);
-      });
-
       it('DOES NOT return an error when rule actions reference a preconfigured connector', async () => {
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -273,9 +198,17 @@ export default ({ getService }: FtrProviderContext): void => {
           success: true,
           success_count: 1,
           rules_count: 1,
-          action_connectors_success: true,
+          action_connectors_success: false,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              error: {
+                message: 'Saved Object already exists',
+                status_code: 409,
+              },
+              id: '1be16246-642a-4ed8-bfd3-b47f8c7d7055',
+            },
+          ],
           action_connectors_warnings: [],
         });
 
@@ -318,28 +251,18 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: `1 connector is missing. Connector id missing is: ${CONNECTOR_ID}`,
+                message: `Rule actions reference the following missing action IDs: ${CONNECTOR_ID}`,
                 status_code: 404,
               },
-              id: CONNECTOR_ID,
               rule_id: 'rule-1',
             },
           ],
           success: false,
           success_count: 0,
           rules_count: 1,
-          action_connectors_success: false,
+          action_connectors_success: true,
           action_connectors_success_count: 0,
-          action_connectors_errors: [
-            {
-              error: {
-                message: `1 connector is missing. Connector id missing is: ${CONNECTOR_ID}`,
-                status_code: 404,
-              },
-              id: CONNECTOR_ID,
-              rule_id: 'rule-1',
-            },
-          ],
+          action_connectors_errors: [],
           action_connectors_warnings: [],
         });
       });
@@ -445,28 +368,18 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               error: {
-                message: `1 connector is missing. Connector id missing is: ${CONNECTOR_ID}`,
+                message: `Rule actions reference the following missing action IDs: ${CONNECTOR_ID}`,
                 status_code: 404,
               },
-              id: CONNECTOR_ID,
               rule_id: 'rule-1',
             },
           ],
           success: false,
           success_count: 0,
           rules_count: 1,
-          action_connectors_success: false,
+          action_connectors_success: true,
           action_connectors_success_count: 0,
-          action_connectors_errors: [
-            {
-              error: {
-                message: `1 connector is missing. Connector id missing is: ${CONNECTOR_ID}`,
-                status_code: 404,
-              },
-              id: CONNECTOR_ID,
-              rule_id: 'rule-1',
-            },
-          ],
+          action_connectors_errors: [],
           action_connectors_warnings: [],
         });
       });

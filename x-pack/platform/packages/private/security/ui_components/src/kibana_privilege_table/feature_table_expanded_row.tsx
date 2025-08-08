@@ -102,7 +102,7 @@ export const FeatureTableExpandedRow = ({
               position="right"
               aria-label="sub-feature-information-tip"
               size="m"
-              type="iInCircle"
+              type="info"
               color="subdued"
               iconProps={{
                 className: 'eui-alignTop',

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { IndexCheckFlyout } from '.';
@@ -42,8 +42,6 @@ describe('IndexCheckFlyout', () => {
                 pattern="auditbeat-*"
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
-                onDismissTour={jest.fn()}
-                isTourActive={false}
               />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
@@ -100,8 +98,6 @@ describe('IndexCheckFlyout', () => {
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
                 initialSelectedTabId="latest_check"
-                isTourActive={false}
-                onDismissTour={jest.fn()}
               />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
@@ -134,8 +130,6 @@ describe('IndexCheckFlyout', () => {
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
                 initialSelectedTabId="latest_check"
-                isTourActive={false}
-                onDismissTour={jest.fn()}
               />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
@@ -182,8 +176,6 @@ describe('IndexCheckFlyout', () => {
                 patternRollup={auditbeatWithAllResults}
                 stats={mockStats}
                 initialSelectedTabId="latest_check"
-                onDismissTour={jest.fn()}
-                isTourActive={false}
               />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
@@ -207,172 +199,6 @@ describe('IndexCheckFlyout', () => {
       expect(latestCheckTab).toHaveAttribute('aria-selected', 'false');
 
       expect(screen.getByTestId('historicalResults')).toBeInTheDocument();
-    });
-  });
-
-  describe('Tour guide', () => {
-    describe('when in Latest Check tab and isTourActive', () => {
-      it('should render the tour guide near history tab with proper data-tour-element attribute', async () => {
-        const pattern = 'auditbeat-*';
-        render(
-          <TestExternalProviders>
-            <TestDataQualityProviders>
-              <TestHistoricalResultsProvider>
-                <IndexCheckFlyout
-                  ilmExplain={mockIlmExplain}
-                  indexName="auditbeat-custom-index-1"
-                  onClose={jest.fn()}
-                  pattern={pattern}
-                  patternRollup={auditbeatWithAllResults}
-                  stats={mockStats}
-                  initialSelectedTabId="latest_check"
-                  onDismissTour={jest.fn()}
-                  isTourActive={true}
-                />
-              </TestHistoricalResultsProvider>
-            </TestDataQualityProviders>
-          </TestExternalProviders>
-        );
-
-        const historyTab = screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
-        const latestCheckTab = screen.getByTestId(`indexCheckFlyoutTab-${LATEST_CHECK_TAB_ID}`);
-
-        expect(historyTab).toHaveAttribute('data-tour-element', `${pattern}-history-tab`);
-        expect(latestCheckTab).not.toHaveAttribute('data-tour-element', `${pattern}-history-tab`);
-        await waitFor(() =>
-          expect(historyTab.closest('[data-test-subj="historicalResultsTour"]')).toBeInTheDocument()
-        );
-        expect(screen.getByTestId('historicalResultsTourPanel')).toBeInTheDocument();
-      });
-
-      describe('when the tour close button is clicked', () => {
-        it('should invoke the dismiss tour callback', async () => {
-          const onDismissTour = jest.fn();
-          render(
-            <TestExternalProviders>
-              <TestDataQualityProviders>
-                <TestHistoricalResultsProvider>
-                  <IndexCheckFlyout
-                    ilmExplain={mockIlmExplain}
-                    indexName="auditbeat-custom-index-1"
-                    onClose={jest.fn()}
-                    pattern="auditbeat-*"
-                    patternRollup={auditbeatWithAllResults}
-                    stats={mockStats}
-                    initialSelectedTabId="latest_check"
-                    onDismissTour={onDismissTour}
-                    isTourActive={true}
-                  />
-                </TestHistoricalResultsProvider>
-              </TestDataQualityProviders>
-            </TestExternalProviders>
-          );
-
-          const dialogWrapper = await screen.findByTestId('historicalResultsTourPanel');
-          const closeButton = within(dialogWrapper).getByText('Close');
-          await userEvent.click(closeButton);
-
-          expect(onDismissTour).toHaveBeenCalled();
-        });
-      });
-
-      describe('when the tour TryIt button is clicked', () => {
-        it('should switch to history tab and invoke onDismissTour', async () => {
-          const onDismissTour = jest.fn();
-          render(
-            <TestExternalProviders>
-              <TestDataQualityProviders>
-                <TestHistoricalResultsProvider>
-                  <IndexCheckFlyout
-                    ilmExplain={mockIlmExplain}
-                    indexName="auditbeat-custom-index-1"
-                    onClose={jest.fn()}
-                    pattern="auditbeat-*"
-                    patternRollup={auditbeatWithAllResults}
-                    stats={mockStats}
-                    initialSelectedTabId="latest_check"
-                    onDismissTour={onDismissTour}
-                    isTourActive={true}
-                  />
-                </TestHistoricalResultsProvider>
-              </TestDataQualityProviders>
-            </TestExternalProviders>
-          );
-
-          const dialogWrapper = await screen.findByTestId('historicalResultsTourPanel');
-
-          const tryItButton = within(dialogWrapper).getByText('Try it');
-          await userEvent.click(tryItButton);
-
-          expect(onDismissTour).toHaveBeenCalled();
-          expect(screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`)).toHaveAttribute(
-            'aria-selected',
-            'true'
-          );
-
-          expect(onDismissTour).toHaveBeenCalled();
-        });
-      });
-
-      describe('when manually switching to history tab', () => {
-        it('should invoke onDismissTour', async () => {
-          const onDismissTour = jest.fn();
-          render(
-            <TestExternalProviders>
-              <TestDataQualityProviders>
-                <TestHistoricalResultsProvider>
-                  <IndexCheckFlyout
-                    ilmExplain={mockIlmExplain}
-                    indexName="auditbeat-custom-index-1"
-                    onClose={jest.fn()}
-                    pattern="auditbeat-*"
-                    patternRollup={auditbeatWithAllResults}
-                    stats={mockStats}
-                    initialSelectedTabId="latest_check"
-                    onDismissTour={onDismissTour}
-                    isTourActive={true}
-                  />
-                </TestHistoricalResultsProvider>
-              </TestDataQualityProviders>
-            </TestExternalProviders>
-          );
-
-          const historyTab = screen.getByTestId(`indexCheckFlyoutTab-${HISTORY_TAB_ID}`);
-          await userEvent.click(historyTab);
-
-          expect(onDismissTour).toHaveBeenCalled();
-        });
-      });
-    });
-
-    describe('when not isTourActive', () => {
-      it('should not render the tour guide', async () => {
-        render(
-          <TestExternalProviders>
-            <TestDataQualityProviders>
-              <TestHistoricalResultsProvider>
-                <IndexCheckFlyout
-                  ilmExplain={mockIlmExplain}
-                  indexName="auditbeat-custom-index-1"
-                  onClose={jest.fn()}
-                  pattern="auditbeat-*"
-                  patternRollup={auditbeatWithAllResults}
-                  stats={mockStats}
-                  initialSelectedTabId="latest_check"
-                  onDismissTour={jest.fn()}
-                  isTourActive={false}
-                />
-              </TestHistoricalResultsProvider>
-            </TestDataQualityProviders>
-          </TestExternalProviders>
-        );
-
-        await waitFor(() =>
-          expect(screen.queryByTestId('historicalResultsTour')).not.toBeInTheDocument()
-        );
-
-        expect(screen.queryByTestId('historicalResultsTourPanel')).not.toBeInTheDocument();
-      });
     });
   });
 });

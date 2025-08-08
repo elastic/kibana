@@ -13,7 +13,7 @@ import { MiniCallout } from './mini_callout';
 describe('MiniCallout', () => {
   const defaultProps: MiniCalloutProps = {
     color: 'primary',
-    iconType: 'iInCircle',
+    iconType: 'info',
     title: 'Mini Callout Title',
   };
 
@@ -27,7 +27,7 @@ describe('MiniCallout', () => {
     const { container } = render(<MiniCallout {...defaultProps} />);
 
     const miniCallout = screen.getByTestId('mini-callout');
-    const icon = container.querySelector('[data-euiicon-type="iInCircle"]');
+    const icon = container.querySelector('[data-euiicon-type="info"]');
     expect(icon).not.toBeNull();
     expect(miniCallout).toHaveAttribute(
       'class',

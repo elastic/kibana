@@ -17,6 +17,7 @@ export const TelemtryMetadataSchema = schema.object({
 export const ConfigSchema = schema.object({
   apiUrl: schema.string(),
   defaultModel: schema.string({ defaultValue: DEFAULT_BEDROCK_MODEL }),
+  contextWindowLength: schema.maybe(schema.number({})),
 });
 
 export const SecretsSchema = schema.object({
@@ -56,6 +57,18 @@ export const BedrockToolChoiceSchema = schema.object({
   name: schema.maybe(schema.string()),
 });
 
+export const BedrockUsageSchema = schema.maybe(
+  schema.object(
+    {
+      input_tokens: schema.number(),
+      output_tokens: schema.number(),
+      // added with Sonnet 3.7
+      cache_creation_input_tokens: schema.maybe(schema.number()),
+    },
+    { unknowns: 'allow' }
+  )
+);
+
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
@@ -82,12 +95,7 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usage: schema.maybe(
-    schema.object({
-      input_tokens: schema.number(),
-      output_tokens: schema.number(),
-    })
-  ),
+  usage: BedrockUsageSchema,
 });
 
 export const InvokeAIRawActionParamsSchema = schema.object({
@@ -125,10 +133,7 @@ export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'al
 export const RunApiLatestResponseSchema = schema.object(
   {
     stop_reason: schema.maybe(schema.string()),
-    usage: schema.object({
-      input_tokens: schema.number(),
-      output_tokens: schema.number(),
-    }),
+    usage: BedrockUsageSchema,
     content: schema.arrayOf(
       schema.object(
         { type: schema.string(), text: schema.maybe(schema.string()) },
@@ -143,12 +148,7 @@ export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),
     stop_reason: schema.maybe(schema.string()),
-    usage: schema.maybe(
-      schema.object({
-        input_tokens: schema.number(),
-        output_tokens: schema.number(),
-      })
-    ),
+    usage: BedrockUsageSchema,
   },
   { unknowns: 'ignore' }
 );
@@ -173,3 +173,25 @@ export const BedrockClientSendParamsSchema = schema.object({
 });
 
 export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });
+
+export const ConverseActionParamsSchema = schema.object(
+  {
+    // Converse API will already be validating, no need for us to strictly validate again
+    messages: schema.arrayOf(schema.any()),
+    model: schema.maybe(schema.string()),
+    system: schema.maybe(schema.arrayOf(schema.any())),
+    temperature: schema.maybe(schema.number()),
+    maxTokens: schema.maybe(schema.number()),
+    stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+    tools: schema.maybe(schema.arrayOf(schema.any())),
+    toolChoice: schema.maybe(schema.any()),
+    // Kibana related properties
+    signal: schema.maybe(schema.any()),
+    timeout: schema.maybe(schema.number()),
+    telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+    connectorUsageCollector: schema.maybe(schema.any()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const ConverseStreamActionParamsSchema = ConverseActionParamsSchema;

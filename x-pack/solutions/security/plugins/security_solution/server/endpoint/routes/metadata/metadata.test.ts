@@ -62,11 +62,11 @@ import type {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
-import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 describe('test endpoint routes', () => {
   let routerMock: SecuritySolutionPluginRouterMock;
@@ -178,8 +178,7 @@ describe('test endpoint routes', () => {
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
       expect(esSearchMock.mock.calls[0][0]?.index).toEqual(METADATA_UNITED_INDEX);
-      // @ts-expect-error partial definition
-      expect(esSearchMock.mock.calls[0][0]?.body?.query).toEqual({
+      expect(esSearchMock.mock.calls[0][0]?.query).toEqual({
         bool: {
           must: [
             {
@@ -193,10 +192,10 @@ describe('test endpoint routes', () => {
                   },
                 },
                 filter: [
-                  { terms: { 'united.agent.policy_id': [] } },
                   { exists: { field: 'united.endpoint.agent.id' } },
                   { exists: { field: 'united.agent.agent.id' } },
                   { term: { 'united.agent.active': { value: true } } },
+                  { terms: { 'united.agent.policy_id': [] } },
                 ],
               },
             },

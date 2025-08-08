@@ -12,6 +12,7 @@ import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { mockEndgameCreationEvent } from '../../../../../../common/mock/mock_endgame_ecs_data';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -35,17 +36,31 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('SystemGenericFileDetails', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
+
   const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
       const wrapper = shallow(
         <SystemGenericFileDetails
+          scopeId="some_scope"
           contextId="[contextid-123]"
           text="[generic-text-123]"
           data={mockTimelineData[29].ecs}
-          timelineId="test"
         />
       );
       expect(wrapper).toMatchSnapshot();
@@ -55,10 +70,10 @@ describe('SystemGenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <SystemGenericFileDetails
+            scopeId="some_scope"
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockTimelineData[29].ecs}
-            timelineId="test"
           />
         </TestProviders>
       );
@@ -71,15 +86,35 @@ describe('SystemGenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <SystemGenericFileDetails
+            scopeId="some_scope"
             contextId="[contextid-123]"
             text="[generic-text-123]"
             data={mockEndgameCreationEvent}
-            timelineId="test"
           />
         </TestProviders>
       );
       expect(wrapper.find('SystemGenericFileLine').prop('processHashSha256')).toEqual(
         'd4c97ed46046893141652e2ec0056a698f6445109949d7fcabbce331146889ee'
+      );
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <SystemGenericFileDetails
+            scopeId="some_scope"
+            contextId="[contextid-123]"
+            text="[generic-text-123]"
+            data={mockTimelineData[29].ecs}
+          />
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
       );
     });
   });
@@ -91,6 +126,7 @@ describe('SystemGenericFileDetails', () => {
           <div>
             <SystemGenericFileLine
               id="[id-123]"
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName="[endgameFileName-123]"
@@ -140,6 +176,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -188,6 +225,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -236,6 +274,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -284,6 +323,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -334,6 +374,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -384,6 +425,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -434,6 +476,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -484,6 +527,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -534,6 +578,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -584,6 +629,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -634,6 +680,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -684,6 +731,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -734,6 +782,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -784,6 +833,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={null}
               endgameFileName={null}
@@ -834,6 +884,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -884,6 +935,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -934,6 +986,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -984,6 +1037,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1034,6 +1088,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1084,6 +1139,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1134,6 +1190,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1184,6 +1241,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode="[endgameExitCode-123]"
               endgameFileName={null}
@@ -1234,6 +1292,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName="[endgameFileName]"
@@ -1282,6 +1341,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName="[endgameFileName]"
@@ -1332,6 +1392,7 @@ describe('SystemGenericFileDetails', () => {
           <TestProviders>
             <div>
               <SystemGenericFileLine
+                scopeId="some_scope"
                 contextId="[context-123]"
                 endgameExitCode={undefined}
                 endgameFileName={undefined}
@@ -1384,6 +1445,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1435,6 +1497,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1488,6 +1551,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1539,6 +1603,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1588,6 +1653,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1637,6 +1703,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1686,6 +1753,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1735,6 +1803,7 @@ describe('SystemGenericFileDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericFileLine
+              scopeId="some_scope"
               contextId="[context-123]"
               endgameExitCode={undefined}
               endgameFileName={undefined}
@@ -1777,6 +1846,59 @@ describe('SystemGenericFileDetails', () => {
       );
 
       expect(wrapper.text()).toEqual('[processName](123)');
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <SystemGenericFileLine
+            scopeId="some_scope"
+            contextId="[context-123]"
+            endgameExitCode={undefined}
+            endgameFileName={undefined}
+            endgameFilePath={undefined}
+            endgameParentProcessName={undefined}
+            endgamePid={789}
+            endgameProcessName="[endgameProcessName]"
+            eventAction={undefined}
+            fileExtOriginalPath={undefined}
+            fileHashSha256={undefined}
+            fileName={undefined}
+            filePath={undefined}
+            hostName={undefined}
+            id="[id-123]"
+            message={undefined}
+            outcome={undefined}
+            packageName={undefined}
+            packageSummary={undefined}
+            packageVersion={undefined}
+            processExecutable={undefined}
+            processExitCode={undefined}
+            processHashSha256={undefined}
+            processParentName={undefined}
+            processParentPid={undefined}
+            processPid={123}
+            processPpid={undefined}
+            processName="[processName]"
+            showMessage={true}
+            sshMethod={undefined}
+            processTitle={undefined}
+            args={undefined}
+            sshSignature={undefined}
+            text={undefined}
+            userDomain={undefined}
+            userName={undefined}
+            workingDirectory={undefined}
+          />
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
+      );
     });
   });
 });

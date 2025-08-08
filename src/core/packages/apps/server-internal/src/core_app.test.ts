@@ -136,8 +136,15 @@ describe('CoreApp', () => {
         {
           path: '/status',
           validate: false,
-          options: {
-            authRequired: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: false,
+              reason: expect.any(String),
+            },
           },
         },
         expect.any(Function)
@@ -152,8 +159,14 @@ describe('CoreApp', () => {
         {
           path: '/status',
           validate: false,
-          options: {
-            authRequired: true,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: true,
+            },
           },
         },
         expect.any(Function)
@@ -200,6 +213,12 @@ describe('CoreApp', () => {
         {
           path: '/{path*}',
           validate: expect.any(Object),
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+          },
         },
         expect.any(Function)
       );
@@ -278,8 +297,8 @@ describe('CoreApp', () => {
         version: '1.0.0',
       });
 
-      internalCorePreboot.http.staticAssets.prependServerPath.mockReturnValue(
-        '/static-assets-path'
+      internalCorePreboot.http.staticAssets.prependServerPath.mockImplementation(
+        (path: string) => `/static-assets-path${path}`
       );
       internalCorePreboot.http.staticAssets.getPluginServerPath.mockImplementation(
         (name: string, path: string) => `/static-assets-path/${name}/${path}`
@@ -287,15 +306,19 @@ describe('CoreApp', () => {
       coreApp.preboot(internalCorePreboot, prebootUIPlugins);
 
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledTimes(
-        // Twice for all UI plugins + core's UI asset routes
-        prebootUIPlugins.public.size * 2 + 2
+        // Twice for all UI plugins + core's UI asset routes + @elastic/charts assets
+        prebootUIPlugins.public.size * 2 + 3
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
-        '/static-assets-path',
+        '/static-assets-path/ui/{path*}',
         expect.any(String)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
         '/ui/{path*}',
+        expect.any(String)
+      );
+      expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
+        '/static-assets-path/ui/charts/{file}',
         expect.any(String)
       );
       expect(internalCorePreboot.http.registerStaticDir).toHaveBeenCalledWith(
@@ -332,7 +355,17 @@ describe('CoreApp', () => {
           path: '/app/{id}/{any*}',
           validate: false,
           options: {
-            authRequired: true,
+            excludeFromRateLimiter: true,
+          },
+          security: {
+            authz: {
+              enabled: false,
+              reason:
+                'The route is opted out of the authorization since it is a wrapper around core app view',
+            },
+            authc: {
+              enabled: true,
+            },
           },
         },
         expect.any(Function)
@@ -392,22 +425,28 @@ describe('CoreApp', () => {
       version: '1.0.0',
     });
 
-    internalCoreSetup.http.staticAssets.prependServerPath.mockReturnValue('/static-assets-path');
+    internalCoreSetup.http.staticAssets.prependServerPath.mockImplementation(
+      (path: string) => `/static-assets-path${path}`
+    );
     internalCoreSetup.http.staticAssets.getPluginServerPath.mockImplementation(
       (name: string, path: string) => `/static-assets-path/${name}/${path}`
     );
     await coreApp.setup(internalCoreSetup, uiPlugins);
 
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(
-      // Twice for all _internal_ UI plugins + core's UI asset routes
-      uiPlugins.internal.size * 2 + 2
+      // Twice for all _internal_ UI plugins + core's UI asset routes + @elastic/charts assets
+      uiPlugins.internal.size * 2 + 3
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
-      '/static-assets-path',
+      '/static-assets-path/ui/{path*}',
       expect.any(String)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
       '/ui/{path*}',
+      expect.any(String)
+    );
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/static-assets-path/ui/charts/{file}',
       expect.any(String)
     );
     expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(

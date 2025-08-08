@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../../../../../config/serverless/config.base.essentials';
+import { createEssentialsTierTestConfig } from '../../../configs/serverless/rules_management.essentials.config';
 
-export default createTestConfig({
+export default createEssentialsTierTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Rules Management - Rule Patch Integration Tests - Serverless Env - Essentials Tier ',
+      'Rules Management - Rule Import/Export Integration Tests - Serverless Env - Essentials Tier',
   },
 });

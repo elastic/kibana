@@ -1,0 +1,528 @@
+{
+  "id": "@kbn/kibana-api-cli",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.FetchResponseError",
+        "type": "Class",
+        "tags": [],
+        "label": "FetchResponseError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/kibana-api-cli",
+            "scope": "common",
+            "docId": "kibKbnKibanaApiCliPluginApi",
+            "section": "def-common.FetchResponseError",
+            "text": "FetchResponseError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.FetchResponseError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.FetchResponseError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.FetchResponseError.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "response",
+                "description": [],
+                "signature": [
+                  "Response"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.FetchResponseError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.KibanaClient",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaClient",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.KibanaClient.es",
+            "type": "Object",
+            "tags": [],
+            "label": "es",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.KibanaClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.KibanaClient.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "KibanaClientOptions"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.KibanaClient.fetch",
+            "type": "Function",
+            "tags": [],
+            "label": "fetch",
+            "description": [],
+            "signature": [
+              "{ (options: FetchInputOptions, init: Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse: true; }): Promise<Response>; <T>(options: FetchInputOptions, init?: FetchInitOptions | undefined): Promise<T>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.KibanaClient.fetch.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FetchInputOptions"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.KibanaClient.fetch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "init",
+                "description": [],
+                "signature": [
+                  "(Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse?: boolean | undefined; }) | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.createKibanaClient",
+        "type": "Function",
+        "tags": [],
+        "label": "createKibanaClient",
+        "description": [],
+        "signature": [
+          "({\n  log,\n  signal,\n}: { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; signal: AbortSignal; }) => Promise<",
+          {
+            "pluginId": "@kbn/kibana-api-cli",
+            "scope": "common",
+            "docId": "kibKbnKibanaApiCliPluginApi",
+            "section": "def-common.KibanaClient",
+            "text": "KibanaClient"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.createKibanaClient.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  log,\n  signal,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.createKibanaClient.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.createKibanaClient.$1.signal",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/create_kibana_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.discoverKibanaUrl",
+        "type": "Function",
+        "tags": [],
+        "label": "discoverKibanaUrl",
+        "description": [],
+        "signature": [
+          "({\n  baseUrl,\n  log,\n  auth,\n}: { baseUrl?: string | undefined; log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; auth?: { basic: { username: string; password: string; }; } | undefined; }) => Promise<string>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.discoverKibanaUrl.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  baseUrl,\n  log,\n  auth,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.discoverKibanaUrl.$1.baseUrl",
+                "type": "string",
+                "tags": [],
+                "label": "baseUrl",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.discoverKibanaUrl.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.discoverKibanaUrl.$1.auth",
+                "type": "Object",
+                "tags": [],
+                "label": "auth",
+                "description": [],
+                "signature": [
+                  "{ basic: { username: string; password: string; }; } | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.toHttpHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "toHttpHandler",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/kibana-api-cli",
+            "scope": "common",
+            "docId": "kibKbnKibanaApiCliPluginApi",
+            "section": "def-common.KibanaClient",
+            "text": "KibanaClient"
+          },
+          ") => ",
+          "HttpHandler"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.toHttpHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/kibana-api-cli",
+                "scope": "common",
+                "docId": "kibKbnKibanaApiCliPluginApi",
+                "section": "def-common.KibanaClient",
+                "text": "KibanaClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/to_http_handler.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/kibana-api-cli",
+        "id": "def-common.toolingLogToLogger",
+        "type": "Function",
+        "tags": [],
+        "label": "toolingLogToLogger",
+        "description": [],
+        "signature": [
+          "({ flags, log }: { flags: ",
+          {
+            "pluginId": "@kbn/dev-cli-runner",
+            "scope": "common",
+            "docId": "kibKbnDevCliRunnerPluginApi",
+            "section": "def-common.Flags",
+            "text": "Flags"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; }) => ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.toolingLogToLogger.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ flags, log }",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.toolingLogToLogger.$1.flags",
+                "type": "Object",
+                "tags": [],
+                "label": "flags",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/dev-cli-runner",
+                    "scope": "common",
+                    "docId": "kibKbnDevCliRunnerPluginApi",
+                    "section": "def-common.Flags",
+                    "text": "Flags"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.toolingLogToLogger.$1.log",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/tooling_log_to_logger.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

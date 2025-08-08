@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { Filter } from '@kbn/es-query';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 
 type BaseContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'name' | 'title'>;
 

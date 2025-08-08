@@ -13,6 +13,7 @@ import {
   catchError,
   combineLatest,
   debounceTime,
+  distinctUntilChanged,
   EMPTY,
   from,
   map,
@@ -64,7 +65,11 @@ export const initializeSwimLaneDataFetcher = (
     fromPage: swimLaneApi.fromPage,
   });
 
-  const bucketInterval$ = combineLatest([selectedJobs$, chartWidth$, appliedTimeRange$]).pipe(
+  const bucketInterval$ = combineLatest([
+    selectedJobs$,
+    chartWidth$.pipe(distinctUntilChanged()),
+    appliedTimeRange$,
+  ]).pipe(
     skipWhile(([jobs, width]) => {
       return !Array.isArray(jobs) || !width;
     }),

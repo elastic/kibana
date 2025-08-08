@@ -7,10 +7,10 @@
 
 import {
   AnnotationDomainType,
-  AreaSeries,
   Axis,
   Chart,
   LineAnnotation,
+  LineSeries,
   Position,
   RectAnnotation,
   ScaleType,
@@ -24,7 +24,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -33,12 +32,12 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { max, min } from 'lodash';
+import { GetPreviewDataResponse } from '@kbn/slo-schema';
+import { map, max, min, values } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { GoodBadEventsChart } from '../../../../components/good_bad_events_chart/good_bad_events_chart';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
@@ -50,24 +49,16 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
-  useGoodBadEventsChart?: boolean;
-  label?: string;
-  range?: {
-    from: Date;
-    to: Date;
-  };
 }
 
 export function DataPreviewChart({
   formatPattern,
+  // Specific to timeslice metric indicator type
   threshold,
   thresholdDirection,
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
-  label,
-  useGoodBadEventsChart,
-  range,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
@@ -78,22 +69,24 @@ export function DataPreviewChart({
     watch,
   });
 
-  const [defaultRange, _] = useState({
-    from: moment().subtract(1, 'hour').toDate(),
+  const [range, _] = useState({
+    from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
   });
 
   const indicator = watch('indicator');
+  const groupBy = watch('groupBy');
 
   const {
     data: previewData,
-    isLoading: isPreviewLoading,
+    isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range ?? defaultRange);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
 
   const isMoreThan100 =
-    !ignoreMoreThan100 && previewData?.find((row) => row.sliValue && row.sliValue > 1) != null;
+    !ignoreMoreThan100 &&
+    previewData?.results.some((datum) => datum.sliValue && datum.sliValue > 1);
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -102,17 +95,7 @@ export function DataPreviewChart({
       ? formatPattern
       : (uiSettings.get('format:percent:defaultPattern') as string);
 
-  // map values to row.sliValue and filter out no data values
-  const values = (previewData || []).map((row) => row.sliValue);
-  const maxValue = max(values);
-  const minValue = min(values);
-  const domain = {
-    fit: true,
-    min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
-    max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
-  };
+  const { maxValue, minValue, domain } = getChartDomain(previewData, threshold);
 
   const title = (
     <>
@@ -157,7 +140,7 @@ export function DataPreviewChart({
         style={{
           line: {
             strokeWidth: 2,
-            stroke: thresholdColor || '#000',
+            stroke: thresholdColor ?? '#000',
             opacity: 1,
           },
         }}
@@ -167,16 +150,13 @@ export function DataPreviewChart({
           {
             coordinates:
               thresholdDirection === 'above'
-                ? {
-                    y0: threshold,
-                    y1: maxValue,
-                  }
+                ? { y0: threshold, y1: maxValue }
                 : { y0: minValue, y1: threshold },
             details: thresholdMessage,
           },
         ]}
         id="thresholdShade"
-        style={{ fill: thresholdColor || '#000', opacity: 0.1 }}
+        style={{ fill: thresholdColor ?? '#000', opacity: 0.1 }}
       />
     </>
   );
@@ -187,27 +167,53 @@ export function DataPreviewChart({
       type: 'color',
     },
     {
-      id: 'label',
+      id: 'group',
       type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.groupLabel', {
+        defaultMessage: 'Group',
+      }),
       truncate: true,
       cell: ({ label: cellLabel }) => <span className="echTooltip__label">{cellLabel}</span>,
-      style: {
-        textAlign: 'left',
-      },
+      style: { textAlign: 'left' },
     },
     {
-      id: 'value',
+      id: 'sli',
       type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.sliLabel', {
+        defaultMessage: 'SLI',
+      }),
       cell: ({ formattedValue }) => (
-        <>
-          <span className="echTooltip__value" dir="ltr">
-            {formattedValue}
-          </span>
-        </>
+        <span className="echTooltip__value" dir="ltr">
+          {formattedValue}
+        </span>
       ),
-      style: {
-        textAlign: 'right',
-      },
+      style: { textAlign: 'right' },
+    },
+    {
+      id: 'good',
+      type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.goodEventsLabel', {
+        defaultMessage: 'Good events',
+      }),
+      cell: ({ datum }) => (
+        <span className="echTooltip__value" dir="ltr">
+          {datum.events?.good ?? '-'}
+        </span>
+      ),
+      style: { textAlign: 'right' },
+    },
+    {
+      id: 'total',
+      type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.totalEventsLabel', {
+        defaultMessage: 'Total events',
+      }),
+      cell: ({ datum }) => (
+        <span className="echTooltip__value" dir="ltr">
+          {datum.events?.total ?? '-'}
+        </span>
+      ),
+      style: { textAlign: 'right' },
     },
   ];
 
@@ -231,10 +237,10 @@ export function DataPreviewChart({
       )}
       <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
-          {(isPreviewLoading || isError) && (
+          {(isLoading || isError) && (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
               <EuiFlexItem grow={false}>
-                {isPreviewLoading && <EuiLoadingChart size="m" mono />}
+                {isLoading && <EuiLoadingChart size="m" />}
                 {isError && (
                   <span>
                     {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
@@ -245,71 +251,27 @@ export function DataPreviewChart({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {isSuccess && useGoodBadEventsChart && (
-            <GoodBadEventsChart
-              data={previewData || []}
-              bottomTitle={label || DEFAULT_LABEL}
-              isLoading={isPreviewLoading}
-              annotation={annotation}
-            />
-          )}
-          {isSuccess && !useGoodBadEventsChart && (
+
+          {isSuccess && (
             <Chart size={{ height: 160, width: '100%' }}>
               <Tooltip
                 type="vertical"
                 body={({ items }) => {
-                  const firstItem = items[0];
-                  const events = firstItem.datum.events;
-                  const rows = [items[0]];
-                  if (events) {
-                    rows.push({
-                      ...firstItem,
-                      formattedValue: events.good,
-                      value: events.good,
-                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.goodEvents', {
-                        defaultMessage: 'Good events',
-                      }),
-                    });
-                    rows.push({
-                      ...firstItem,
-                      value: events.total,
-                      formattedValue: events.total,
-                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.badEvents', {
-                        defaultMessage: 'Total events',
-                      }),
-                    });
-                  }
-
-                  return <TooltipTable columns={columns} items={rows} />;
+                  return <TooltipTable columns={columns} items={items} />;
                 }}
               />
               <Settings
                 baseTheme={baseTheme}
-                showLegend={false}
-                theme={[
-                  {
-                    lineSeriesStyle: {
-                      point: { visible: 'never' },
-                    },
-                  },
-                ]}
-                noResults={
-                  <EuiIcon
-                    type="visualizeApp"
-                    size="l"
-                    color="subdued"
-                    title={i18n.translate('xpack.slo.dataPreviewChart.noResultsLabel', {
-                      defaultMessage: 'no results',
-                    })}
-                  />
-                }
+                showLegend={true}
+                legendPosition={Position.Right}
+                theme={[{ lineSeriesStyle: { point: { visible: 'never' } } }]}
                 locale={i18n.getLocale()}
               />
 
               {annotation}
 
               <Axis
-                id="y-axis"
+                id="value"
                 title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.yTitle', {
                   defaultMessage: 'SLI',
                 })}
@@ -318,38 +280,46 @@ export function DataPreviewChart({
                 tickFormat={(d) => numeral(d).format(numberFormat)}
                 domain={domain}
               />
-
               <Axis
                 id="time"
-                title={label || DEFAULT_LABEL}
+                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
+                  defaultMessage: 'Last 24 hours',
+                })}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
-                timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
-                style={{
-                  tickLine: { size: 0, padding: 4, visible: true },
-                  tickLabel: {
-                    alignment: {
-                      horizontal: Position.Left,
-                      vertical: Position.Bottom,
-                    },
-                    padding: 0,
-                    offset: { x: 0, y: 0 },
-                  },
-                }}
               />
-              <AreaSeries
-                id="SLI"
+
+              <LineSeries
+                id="All groups"
+                // Defaults to multi layer time axis as of Elastic Charts v70
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="date"
                 yAccessors={['value']}
-                data={(previewData ?? []).map((datum) => ({
+                data={(previewData?.results ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
                   value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
                   events: datum.events,
                 }))}
               />
+
+              {map(previewData?.groups, (data, group) => (
+                <LineSeries
+                  key={group}
+                  id={group}
+                  // Defaults to multi layer time axis as of Elastic Charts v70
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="date"
+                  yAccessors={['value']}
+                  data={data.map((datum) => ({
+                    date: new Date(datum.date).getTime(),
+                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                    events: datum.events,
+                  }))}
+                />
+              ))}
             </Chart>
           )}
         </EuiPanel>
@@ -358,6 +328,17 @@ export function DataPreviewChart({
   );
 }
 
-const DEFAULT_LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
-  defaultMessage: 'Last hour',
-});
+function getChartDomain(previewData?: GetPreviewDataResponse, threshold?: number) {
+  const allGroupsValues = map(previewData?.results, (datum) => datum.sliValue);
+  const groupsValues = values(previewData?.groups)
+    .flat()
+    .map((datum) => datum.sliValue);
+  const maxValue = max(allGroupsValues.concat(groupsValues));
+  const minValue = min(allGroupsValues.concat(groupsValues));
+  const domain = {
+    fit: true,
+    min: min([threshold, minValue]) ?? NaN,
+    max: max([threshold, maxValue]) ?? NaN,
+  };
+  return { maxValue, minValue, domain };
+}

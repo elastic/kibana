@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { EnrichedDeprecationInfo, ResponseError } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
@@ -14,17 +14,20 @@ import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { DeprecationTableColumns, Status } from '../../../types';
 import { ClusterSettingsResolutionCell } from './resolution_table_cell';
 import { RemoveClusterSettingsFlyout, RemoveClusterSettingsFlyoutProps } from './flyout';
+import { ClusterSettingsActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 interface Props {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
+  index: number;
 }
 
 export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
   rowFieldNames,
   deprecation,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [status, setStatus] = useState<{
@@ -88,23 +91,30 @@ export const ClusterSettingsTableRow: React.FunctionComponent<Props> = ({
   ]);
 
   return (
-    <>
+    <EuiTableRow
+      data-test-subj="deprecationTableRow"
+      key={`deprecation-row-${index}`}
+      onClick={() => setShowFlyout(true)}
+    >
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
           <EuiTableRowCell
             key={field}
             truncateText={false}
             data-test-subj={`clusterSettingsTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
           >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<ClusterSettingsResolutionCell status={status} />}
+              actionsTableCell={
+                <ClusterSettingsActionsCell openFlyout={() => setShowFlyout(true)} />
+              }
             />
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };

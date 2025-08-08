@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlsIgnoreParentSettings } from '@kbn/controls-schemas';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap } from 'rxjs';
-import { ParentIgnoreSettings } from '../../../common';
+import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap, tap } from 'rxjs';
 
 export interface ControlGroupFetchContext {
   unifiedSearchFilters?: Filter[] | undefined;
@@ -20,10 +20,11 @@ export interface ControlGroupFetchContext {
 }
 
 export function controlGroupFetch$(
-  ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>,
+  ignoreParentSettings$: PublishingSubject<ControlsIgnoreParentSettings | undefined>,
   parentApi: Partial<PublishesUnifiedSearch> & {
     unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
-  }
+  },
+  onReload?: () => void
 ): Observable<ControlGroupFetchContext> {
   return ignoreParentSettings$.pipe(
     switchMap((parentIgnoreSettings) => {
@@ -40,7 +41,7 @@ export function controlGroupFetch$(
         observables.push(parentApi.timeRange$);
       }
       if (apiPublishesReload(parentApi)) {
-        observables.push(parentApi.reload$);
+        observables.push(onReload ? parentApi.reload$.pipe(tap(onReload)) : parentApi.reload$);
       }
       return observables.length ? merge(...observables) : new BehaviorSubject(undefined);
     }),

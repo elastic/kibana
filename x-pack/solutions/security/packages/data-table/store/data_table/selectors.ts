@@ -7,12 +7,15 @@
 
 import { getOr } from 'lodash/fp';
 import { createSelector } from 'reselect';
-import { tableDefaults, getDataTableManageDefaults } from './defaults';
-import type { DataTableState, TableById, DataTableModel } from './types';
+import { getDataTableManageDefaults, tableDefaults } from './defaults';
+import type { DataTableModel, DataTableState, TableById } from './types';
 
 const selectTableById = (state: DataTableState): TableById => state.dataTable.tableById;
 
 export const tableByIdSelector = createSelector(selectTableById, (tableById) => tableById);
+
+export const createTableSelector = (tableId: string) =>
+  createSelector(tableByIdSelector, (tableById: TableById) => tableById[tableId]);
 
 const selectTable = (state: DataTableState, tableId: string): DataTableModel =>
   state.dataTable.tableById[tableId];
@@ -32,7 +35,7 @@ const selectTGridById = (state: unknown, tableId: string): DataTableModel => {
 export const getManageDataTableById = () =>
   createSelector(
     selectTGridById,
-    ({
+    ({ dataViewId, defaultColumns, isLoading, loadingText, queryFields, title, selectAll }) => ({
       dataViewId,
       defaultColumns,
       isLoading,
@@ -40,15 +43,5 @@ export const getManageDataTableById = () =>
       queryFields,
       title,
       selectAll,
-      graphEventId,
-    }) => ({
-      dataViewId,
-      defaultColumns,
-      isLoading,
-      loadingText,
-      queryFields,
-      title,
-      selectAll,
-      graphEventId,
     })
   );

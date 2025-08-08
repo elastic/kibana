@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { TaskManagerPlugin, getElasticsearchAndSOAvailability } from './plugin';
+import { TaskManagerPlugin } from './plugin';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from './config';
-import { Subject } from 'rxjs';
-import { bufferCount, take } from 'rxjs';
-import { CoreStatus, ServiceStatusLevels } from '@kbn/core/server';
+import type { TaskManagerConfig } from './config';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskPollingLifecycle as TaskPollingLifecycleClass } from './polling_lifecycle';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 let mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
 jest.mock('./polling_lifecycle', () => {
@@ -143,6 +141,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -157,6 +156,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
@@ -173,6 +173,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
@@ -191,6 +192,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       await taskManagerPlugin.stop();
@@ -207,6 +209,7 @@ describe('TaskManagerPlugin', () => {
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       taskManagerPlugin.start(coreStart, {
         cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
       });
 
       discoveryIsStarted.mockReturnValueOnce(true);
@@ -215,99 +218,4 @@ describe('TaskManagerPlugin', () => {
       expect(deleteCurrentNodeSpy).toHaveBeenCalledTimes(1);
     });
   });
-
-  describe('getElasticsearchAndSOAvailability', () => {
-    test('returns true when both services are available', async () => {
-      const core$ = new Subject<CoreStatus>();
-
-      const availability = getElasticsearchAndSOAvailability(core$)
-        .pipe(take(1), bufferCount(1))
-        .toPromise();
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
-
-      expect(await availability).toEqual([true]);
-    });
-
-    test('returns false when both services are unavailable', async () => {
-      const core$ = new Subject<CoreStatus>();
-
-      const availability = getElasticsearchAndSOAvailability(core$)
-        .pipe(take(1), bufferCount(1))
-        .toPromise();
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
-
-      expect(await availability).toEqual([false]);
-    });
-
-    test('returns false when one service is unavailable but the other is available', async () => {
-      const core$ = new Subject<CoreStatus>();
-
-      const availability = getElasticsearchAndSOAvailability(core$)
-        .pipe(take(1), bufferCount(1))
-        .toPromise();
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
-
-      expect(await availability).toEqual([false]);
-    });
-
-    test('shift back and forth between values as status changes', async () => {
-      const core$ = new Subject<CoreStatus>();
-
-      const availability = getElasticsearchAndSOAvailability(core$)
-        .pipe(take(3), bufferCount(3))
-        .toPromise();
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
-
-      expect(await availability).toEqual([false, true, false]);
-    });
-
-    test(`skips values when the status hasn't changed`, async () => {
-      const core$ = new Subject<CoreStatus>();
-
-      const availability = getElasticsearchAndSOAvailability(core$)
-        .pipe(take(3), bufferCount(3))
-        .toPromise();
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: false }));
-
-      // still false, so shouldn't emit a second time
-      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: true }));
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
-
-      // shouldn't emit as already true
-      core$.next(mockCoreStatusAvailability({ elasticsearch: true, savedObjects: true }));
-
-      core$.next(mockCoreStatusAvailability({ elasticsearch: false, savedObjects: false }));
-
-      expect(await availability).toEqual([false, true, false]);
-    });
-  });
 });
-
-function mockCoreStatusAvailability({
-  elasticsearch,
-  savedObjects,
-}: {
-  elasticsearch: boolean;
-  savedObjects: boolean;
-}) {
-  return {
-    elasticsearch: {
-      level: elasticsearch ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
-      summary: '',
-    },
-    savedObjects: {
-      level: savedObjects ? ServiceStatusLevels.available : ServiceStatusLevels.unavailable,
-      summary: '',
-    },
-  };
-}

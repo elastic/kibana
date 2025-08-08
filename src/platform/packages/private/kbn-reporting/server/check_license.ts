@@ -8,6 +8,7 @@
  */
 
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ExportType } from '.';
 import { ExportTypesRegistry } from './export_types_registry';
 
@@ -60,6 +61,42 @@ const makeManagementFeature = (exportTypes: ExportType[]) => {
   };
 };
 
+const makeScheduledReportsFeature = () => {
+  return {
+    id: 'scheduledReports',
+    checkLicense: (license?: ILicense) => {
+      if (!license || !license.type) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getUnavailable(),
+        };
+      }
+
+      if (!license.isActive) {
+        return {
+          showLinks: true,
+          enableLinks: false,
+          message: messages.getExpired(license),
+        };
+      }
+
+      if (!SCHEDULED_REPORT_VALID_LICENSES.includes(license.type)) {
+        return {
+          showLinks: false,
+          enableLinks: false,
+          message: `Your ${license.type} license does not support Scheduled reports. Please upgrade your license.`,
+        };
+      }
+
+      return {
+        showLinks: true,
+        enableLinks: true,
+      };
+    },
+  };
+};
+
 const makeExportTypeFeature = (exportType: ExportType) => {
   return {
     id: exportType.id,
@@ -104,6 +141,7 @@ export function checkLicense(
   const reportingFeatures = [
     ...exportTypes.map(makeExportTypeFeature),
     makeManagementFeature(exportTypes),
+    makeScheduledReportsFeature(),
   ];
 
   return reportingFeatures.reduce((result, feature) => {

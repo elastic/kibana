@@ -13,12 +13,11 @@ import {
   RouteRenderer,
   RouterProvider,
 } from '@kbn/typed-react-router-config';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { streamsAppRouter } from '../../routes/config';
 import { StreamsAppStartDependencies } from '../../types';
 import { StreamsAppServices } from '../../services/types';
-import { HeaderMenuPortal } from '../header_menu';
+import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_context';
 
 export function AppRoot({
   coreStart,
@@ -47,31 +46,15 @@ export function AppRoot({
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
+        {/* @ts-expect-error upgrade typescript v5.4.5 */}
         <RouterProvider history={history} router={streamsAppRouter}>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          <KbnUrlStateStorageFromRouterProvider>
+            <BreadcrumbsContextProvider>
+              <RouteRenderer />
+            </BreadcrumbsContextProvider>
+          </KbnUrlStateStorageFromRouterProvider>
         </RouterProvider>
       </RedirectAppLinks>
     </StreamsAppContextProvider>
-  );
-}
-
-export function StreamsAppHeaderActionMenu({
-  appMountParameters,
-}: {
-  appMountParameters: AppMountParameters;
-}) {
-  const { setHeaderActionMenu, theme$ } = appMountParameters;
-
-  return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem>
-          <></>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </HeaderMenuPortal>
   );
 }

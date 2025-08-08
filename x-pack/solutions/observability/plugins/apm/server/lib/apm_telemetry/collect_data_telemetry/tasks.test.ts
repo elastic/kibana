@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { tasks } from './tasks';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT, AT_TIMESTAMP } from '../../../../common/es_fields/apm';
 import type { IndicesStatsResponse } from '../telemetry_client';
@@ -113,7 +113,7 @@ describe('data telemetry collection tasks', () => {
           let arrayLength = 1000;
           let nextAfter: Record<string, any> = { after_key: {} };
 
-          if (params.body.aggs.transaction_metric_groups.composite.after) {
+          if (params.aggs.transaction_metric_groups.composite.after) {
             arrayLength = 250;
             nextAfter = {};
           }
@@ -307,7 +307,7 @@ describe('data telemetry collection tasks', () => {
       const getTime = jest.spyOn(Date.prototype, 'getTime').mockReturnValue(1594330792957);
 
       const search = jest.fn().mockImplementation((params: any) => {
-        const isTotalHitsQuery = params?.body?.track_total_hits;
+        const isTotalHitsQuery = params?.track_total_hits;
 
         return Promise.resolve(
           isTotalHitsQuery
@@ -635,7 +635,7 @@ describe('data telemetry collection tasks', () => {
 
     it('returns cardinalities', async () => {
       const search = jest.fn().mockImplementation((params: any) => {
-        const isRumQuery = params.body.query.bool.filter.length === 2;
+        const isRumQuery = params.query.bool.filter.length === 2;
         if (isRumQuery) {
           return Promise.resolve({
             aggregations: {
@@ -879,7 +879,7 @@ describe('data telemetry collection tasks', () => {
 
     it('should return services per agent name', async () => {
       const search = jest.fn().mockImplementation((params: any) => {
-        const filter = params.body.query.bool.filter[0];
+        const filter = params.query.bool.filter[0];
         const queryKnownAgentNames = filter.term;
         const queryOtelAgentNames = filter.prefix;
         const queryServices = filter.exists;
@@ -920,6 +920,22 @@ describe('data telemetry collection tasks', () => {
                   {
                     key: 'opentelemetry/java/elastic',
                     services: { value: 6 },
+                  },
+                  {
+                    key: 'opentelemetry/nodejs/elastic',
+                    services: { value: 7 },
+                  },
+                  {
+                    key: 'opentelemetry/python/elastic',
+                    services: { value: 8 },
+                  },
+                  {
+                    key: 'opentelemetry/php/elastic',
+                    services: { value: 9 },
+                  },
+                  {
+                    key: 'opentelemetry/dotnet/elastic',
+                    services: { value: 10 },
                   },
                 ],
               },
@@ -975,7 +991,7 @@ describe('data telemetry collection tasks', () => {
           'service.runtime.version': { buckets: [{ key: '17.0.12', doc_count: 113 }] },
         };
 
-        const filter = params.body.query.bool.filter[0];
+        const filter = params.query.bool.filter[0];
         const queryKnownAgentNames = filter.term;
         const queryOtelAgentNames = filter.prefix;
 

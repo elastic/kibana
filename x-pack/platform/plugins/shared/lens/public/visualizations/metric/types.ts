@@ -12,6 +12,19 @@ import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 
+export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
+
+export type SecondaryTrend =
+  | { type: 'none' }
+  | { type: 'static'; color: string }
+  | {
+      type: 'dynamic';
+      visuals: 'icon' | 'value' | 'both';
+      paletteId: string;
+      reversed: boolean;
+      baselineValue: number | 'primary';
+    };
+
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LayerType;
@@ -24,6 +37,7 @@ export interface MetricVisualizationState {
   collapseFn?: CollapseFunction;
   subtitle?: string;
   secondaryPrefix?: string;
+  secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -16,6 +16,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { EnhancedRulesCallout } from './enhanced_rules_callout';
 
 export function RulePage() {
   const {
@@ -25,19 +26,25 @@ export function RulePage() {
     application,
     notifications,
     charts,
+    serverless,
     settings,
     data,
     dataViews,
     unifiedSearch,
-    serverless,
     actionTypeRegistry,
     ruleTypeRegistry,
     chrome,
+    contentManagement,
     ...startServices
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { returnApp, returnPath } = location.state || {};
+
+  const { id, ruleTypeId } = useParams<{
+    id?: string;
+    ruleTypeId?: string;
+  }>();
 
   useBreadcrumbs(
     [
@@ -54,11 +61,24 @@ export function RulePage() {
           defaultMessage: 'Rules',
         }),
       },
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-          defaultMessage: 'Create',
-        }),
-      },
+      ...(ruleTypeId
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+                defaultMessage: 'Create',
+              }),
+            },
+          ]
+        : []),
+      ...(id
+        ? [
+            {
+              text: i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
+                defaultMessage: 'Edit',
+              }),
+            },
+          ]
+        : []),
     ],
     { serverless }
   );
@@ -66,7 +86,9 @@ export function RulePage() {
   return (
     <ObservabilityPageTemplate data-test-subj="rulePage">
       <HeaderMenu />
+      <EnhancedRulesCallout ruleTypeId={ruleTypeId} />
       <RuleForm
+        key={ruleTypeId}
         plugins={{
           http,
           application,
@@ -79,11 +101,13 @@ export function RulePage() {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
+          contentManagement,
           ...startServices,
         }}
+        id={id}
+        ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
-        isServerless={!!serverless}
         onCancel={() => {
           if (returnApp && returnPath) {
             application.navigateToApp(returnApp, { path: returnPath });

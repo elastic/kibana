@@ -9,6 +9,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { JobStat } from '@kbn/ml-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {
   hasMLFeatureSelector,
@@ -30,7 +31,9 @@ export const MLIntegrationComponent = () => {
 
   const { lastRefresh, refreshApp } = useContext(UptimeRefreshContext);
 
-  const { notifications } = useKibana();
+  const {
+    services: { notifications, rendering },
+  } = useKibana();
 
   const monitorId = useMonitorId();
 
@@ -57,11 +60,17 @@ export const MLIntegrationComponent = () => {
   useEffect(() => {
     if (isConfirmDeleteJobOpen && jobDeletionSuccess?.[getMLJobId(monitorId as string)]?.deleted) {
       setIsConfirmDeleteJobOpen(false);
-      notifications.toasts.success({
-        title: <p data-test-subj="uptimeMLJobSuccessfullyDeleted">{labels.JOB_DELETION}</p>,
-        body: <p>{labels.JOB_DELETION_SUCCESS}</p>,
-        toastLifeTimeMs: 3000,
-      });
+      if (notifications && rendering) {
+        notifications.toasts.addSuccess({
+          title: toMountPoint(
+            <p data-test-subj="uptimeMLJobSuccessfullyDeleted">{labels.JOB_DELETION}</p>,
+            rendering
+          ),
+          text: toMountPoint(<p>{labels.JOB_DELETION_SUCCESS}</p>, rendering),
+          toastLifeTimeMs: 3000,
+        });
+      }
+
       dispatch(resetMLState());
 
       refreshApp();
@@ -75,8 +84,9 @@ export const MLIntegrationComponent = () => {
     jobDeletionSuccess,
     monitorId,
     refreshApp,
-    notifications.toasts,
+    notifications,
     dispatch,
+    rendering,
   ]);
 
   const onEnableJobClick = () => {

@@ -13,6 +13,7 @@ exports[`Package rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       iconType="document"
       isAggregatable={true}
+      scopeId="some_scope"
       value="package-name-123"
     />
   </TokensFlexItem>
@@ -27,6 +28,7 @@ exports[`Package rendering it renders against shallow snapshot 1`] = `
       fieldType="keyword"
       iconType="document"
       isAggregatable={true}
+      scopeId="some_scope"
       value="package-version-123"
     />
   </TokensFlexItem>
@@ -40,6 +42,7 @@ exports[`Package rendering it renders against shallow snapshot 1`] = `
       field="system.audit.package.summary"
       fieldType="keyword"
       isAggregatable={true}
+      scopeId="some_scope"
       value="package-summary-123"
     />
   </TokensFlexItem>

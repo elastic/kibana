@@ -9,7 +9,10 @@
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
-import { createExtract, createInject } from '../../common';
+import {
+  createExtract,
+  createInject,
+} from '../dashboard_saved_object/migrations/migrate_extract_panel_references/dashboard_container_references';
 
 export const dashboardPersistableStateServiceFactory = (
   persistableStateService: EmbeddablePersistableStateService

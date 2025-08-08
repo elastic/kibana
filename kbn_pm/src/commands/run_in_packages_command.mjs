@@ -53,7 +53,7 @@ export const command = {
         continue;
       }
 
-      log.debug(
+      log.info(
         `running [${scriptName}] script in [${pkg.name}]`,
         scriptArgs.length ? `with args [${scriptArgs.join(' ')}]` : ''
       );

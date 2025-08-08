@@ -53,10 +53,12 @@ export const CustomizePanelEditor = ({
   api,
   onClose,
   focusOnTitle,
+  ariaLabelledBy,
 }: {
   onClose: () => void;
   focusOnTitle?: boolean;
   api: CustomizePanelActionApi;
+  ariaLabelledBy?: string;
 }) => {
   /**
    * eventually the panel editor could be made to use state from the API instead (which will allow us to use a push flyout)
@@ -99,7 +101,13 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== api.title$?.value) api.setTitle?.(panelTitle);
+    // If the panel title matches the default title, we set api.title to undefined to indicate there's no custom title.
+    // This ensures the panel stays in sync with the centrally saved object's title and reflects any updates to its title.
+    if (panelTitle === api?.defaultTitle$?.value) {
+      api.setTitle?.(undefined);
+    } else if (panelTitle !== api.title$?.value) {
+      api.setTitle?.(panelTitle);
+    }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
@@ -289,7 +297,7 @@ export const CustomizePanelEditor = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={ariaLabelledBy}>
             <FormattedMessage
               id="presentationPanel.action.customizePanel.flyout.title"
               defaultMessage="Settings"

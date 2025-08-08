@@ -7,32 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand
+  | ESQLAstCompletionCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
   | ESQLColumn
-  | ESQLTimeInterval
+  | ESQLDatePeriodLiteral
+  | ESQLTimeDurationLiteral
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
-  | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
-  | ESQLUnknownItem;
+  | ESQLUnknownItem
+  | ESQLMap
+  | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
+ * ```
+ */
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -86,31 +110,36 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
-  sources: ESQLSource[];
-  aggregates?: ESQLAstField[];
-  grouping?: ESQLAstField[];
-}
-
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
 
+export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
+  value: ESQLColumn;
+  key?: ESQLColumn;
+  target?: {
+    type: ESQLColumn;
+    pvalue: ESQLColumn;
+  };
+}
+
+export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
+  prompt: ESQLAstExpression;
+  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+}
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  inferenceId: ESQLIdentifierOrParam;
+}
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
+
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
   args: ESQLAstItem[];
-}
-
-/**
- * Right now rename expressions ("clauses") are parsed as options in the
- * RENAME command.
- */
-export interface ESQLAstRenameExpression extends ESQLCommandOption {
-  name: 'as';
-}
-
-export interface ESQLCommandMode extends ESQLAstBaseItem {
-  type: 'mode';
 }
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
@@ -206,14 +235,20 @@ export type BinaryExpressionOperator =
   | BinaryExpressionComparisonOperator
   | BinaryExpressionRegexOperator
   | BinaryExpressionRenameOperator
-  | BinaryExpressionWhereOperator;
+  | BinaryExpressionWhereOperator
+  | BinaryExpressionMatchOperator
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
 export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<=' | '>' | '>=';
-export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
+export type BinaryExpressionRegexOperator = 'like' | 'not like' | 'rlike' | 'not rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
+export type BinaryExpressionMatchOperator = ':';
+export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
@@ -259,26 +294,20 @@ export interface ESQLUnknownItem extends ESQLAstBaseItem {
   type: 'unknown';
 }
 
-export interface ESQLTimeInterval extends ESQLAstBaseItem {
-  /** @todo For consistency with other literals, this should be `literal`, not `timeInterval`. */
-  type: 'timeInterval';
-  unit: string;
-  quantity: number;
-}
-
 export interface ESQLSource extends ESQLAstBaseItem {
   type: 'source';
   sourceType: 'index' | 'policy';
 
   /**
-   * Represents the cluster part of the source identifier. Empty string if not
-   * present.
+   * Represents the prefix part of the source identifier. Empty string if not
+   * present. Used in index pattern as the cluster identifier or as "mode" in
+   * enrich policy.
    *
    * ```
-   * FROM [<cluster>:]<index>
+   * FROM [<prefix>:]<index>
    * ```
    */
-  cluster?: string;
+  prefix?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.
@@ -287,7 +316,16 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  index?: string;
+  index?: ESQLStringLiteral | undefined;
+
+  /**
+   * Represents the selector (component) part of the source identifier.
+   *
+   * ```
+   * FROM <index>[::<selector>]
+   * ```
+   */
+  selector?: ESQLStringLiteral | undefined;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
@@ -320,9 +358,54 @@ export interface ESQLColumn extends ESQLAstBaseItem {
   quoted: boolean;
 }
 
+/**
+ * Represents list-like structures where elements are separated by commas.
+ *
+ * *Literal lists* use square brackets and can contain only
+ * string, number, or boolean literals and all elements must be of the same
+ * type:
+ *
+ * ```
+ * [1, 2, 3]
+ * ```
+ *
+ * *Tuple lists* use round brackets and can contain any type of expression.
+ * Tuple list are used in the `IN` expression:
+ *
+ * ```
+ * a IN ("abc", "def")
+ * ```
+ */
 export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
-  values: ESQLLiteral[];
+
+  /**
+   * The list can be a literal list (uses square brackets) or a tuple list (uses
+   * round brackets). If not specified, the list is assumed to be a literal list.
+   *
+   * @default 'literal'
+   */
+  subtype?: 'literal' | 'tuple';
+
+  values: ESQLAstExpression[];
+}
+
+/**
+ * Represents a ES|QL "map" object, normally used as the last argument of a
+ * function.
+ */
+export interface ESQLMap extends ESQLAstBaseItem {
+  type: 'map';
+  entries: ESQLMapEntry[];
+}
+
+/**
+ * Represents a key-value pair in a ES|QL map object.
+ */
+export interface ESQLMapEntry extends ESQLAstBaseItem {
+  type: 'map-entry';
+  key: ESQLStringLiteral;
+  value: ESQLAstExpression;
 }
 
 export type ESQLNumericLiteralType = 'double' | 'integer';
@@ -333,6 +416,8 @@ export type ESQLLiteral =
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
+  | ESQLTimeDurationLiteral
+  | ESQLDatePeriodLiteral
   | ESQLParamLiteral<string>;
 
 // Exporting here to prevent TypeScript error TS4058
@@ -368,36 +453,82 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
 
-  /** This really should be `string`, not `keyword`. */
   literalType: 'keyword';
 
   value: string;
   valueUnquoted: string;
+
+  /**
+   * Whether the string was parsed as "unqouted" and/or can be pretty-printed
+   * unquoted, i.e. in the source text it did not have any quotes (not single ",
+   * not triple """) quotes. This happens in FROM command source parsing, the
+   * cluster and selector can be unquoted strings:
+   *
+   * ```
+   * FROM <cluster>:index:<selector>
+   * ```
+   */
+  unquoted?: boolean;
 }
 
+export interface ESQLBaseTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
+  extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: T;
+  value: string;
+  unit: string;
+  quantity: number;
+}
+export type ESQLDatePeriodLiteral = ESQLBaseTimeSpanLiteral<'date_period'>;
+export type ESQLTimeDurationLiteral = ESQLBaseTimeSpanLiteral<'time_duration'>;
+export type ESQLTimeSpanLiteral = ESQLDatePeriodLiteral | ESQLTimeDurationLiteral;
+
 // @internal
-export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
+export interface ESQLParamLiteral<
+  ParamType extends string = string,
+  ParamKind extends ESQLParamKinds = ESQLParamKinds
+> extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
+  paramKind: ParamKind;
   paramType: ParamType;
   value: string | number;
 }
+
+export type ESQLParamKinds = '?' | '??';
 
 /**
  * *Unnamed* parameter is not named, just a question mark "?".
  *
  * @internal
  */
-export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
+export type ESQLUnnamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds> =
+  ESQLParamLiteral<'unnamed', ParamKind>;
 
 /**
  * *Named* parameter is a question mark followed by a name "?name".
  *
  * @internal
  */
-export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
+export interface ESQLNamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'named', ParamKind> {
   value: string;
 }
+
+/**
+ * *Positional* parameter is a question mark followed by a number "?1".
+ *
+ * @internal
+ */
+export interface ESQLPositionalParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'positional', ParamKind> {
+  value: number;
+}
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLIdentifier extends ESQLAstBaseItem {
   type: 'identifier';
@@ -407,19 +538,6 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
   (node as ESQLNamedParamLiteral).paramType === 'named';
-/**
- * *Positional* parameter is a question mark followed by a number "?1".
- *
- * @internal
- */
-export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
-  value: number;
-}
-
-export type ESQLParam =
-  | ESQLUnnamedParamLiteral
-  | ESQLNamedParamLiteral
-  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
@@ -427,13 +545,6 @@ export interface ESQLMessage {
   location: ESQLLocation;
   code: string;
 }
-
-export type AstProviderFn = (text: string | undefined) =>
-  | Promise<{
-      ast: ESQLAst;
-      errors: EditorError[];
-    }>
-  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;

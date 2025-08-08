@@ -42,7 +42,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Hosts Page', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await pageObjects.svlCommonPage.loginAsViewer();
 
       await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -52,7 +54,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
     });
 
     describe('#Single Host Flyout', () => {
@@ -189,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should load the Logs tab section when clicking on it', async () => {
-            await testSubjects.existOrFail('hostsView-logs');
+            await testSubjects.existOrFail('embeddedSavedSearchDocTable');
           });
         });
 

@@ -7,8 +7,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,27 +18,21 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { IntervalSchedule, RuleNotifyWhen } from '../../../../types';
+import type { IntervalSchedule } from '../../../../types';
+import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { RuleDomain } from '../../types';
+import type { RuleDomain } from '../../types';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -217,15 +211,11 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
       validLegacyConsumers: [],
-    });
-    (migrateLegacyActions as jest.Mock).mockResolvedValue({
-      hasLegacyActions: false,
-      resultedActions: [],
-      resultedReferences: [],
     });
   });
 
@@ -408,6 +398,12 @@ describe('update()', () => {
         "alertDelay": Object {
           "active": 5,
         },
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -478,6 +474,12 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -743,6 +745,10 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+          investigation_guide: { blob: '' },
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -797,6 +803,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -990,6 +1002,10 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+          investigation_guide: { blob: '' },
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -1026,6 +1042,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1101,6 +1123,7 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1200,6 +1223,10 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+          investigation_guide: { blob: '' },
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -1246,6 +1273,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1348,6 +1381,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1396,6 +1435,12 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -1528,6 +1573,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "executionStatus": Object {
@@ -1568,6 +1619,12 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -1683,6 +1740,7 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validLegacyConsumers: [],
     });
     await expect(
@@ -2185,6 +2243,7 @@ describe('update()', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2751,6 +2810,10 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+          investigation_guide: { blob: '' },
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -2787,6 +2850,12 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -3344,6 +3413,10 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+          investigation_guide: { blob: '' },
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -3366,68 +3439,6 @@ describe('update()', () => {
         version: '123',
       }
     );
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    beforeEach(() => {
-      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
-        id: '1',
-        type: RULE_SAVED_OBJECT_TYPE,
-        attributes: {
-          enabled: true,
-          schedule: { interval: '1m' },
-          params: {
-            bar: true,
-          },
-          actions: [],
-          notifyWhen: 'onActiveAlert',
-          scheduledTaskId: 'task-123',
-          executionStatus: {
-            lastExecutionDate: '2019-02-12T21:01:22.479Z',
-            status: 'pending',
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        references: [],
-      });
-    });
-
-    test('should call migrateLegacyActions', async () => {
-      const existingDecryptedSiemAlert = {
-        ...existingDecryptedAlert,
-        attributes: { ...existingDecryptedAlert.attributes, consumer: AlertConsumers.SIEM },
-      };
-
-      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce(
-        existingDecryptedSiemAlert
-      );
-
-      actionsClient.getBulk.mockReset();
-      actionsClient.isPreconfigured.mockReset();
-
-      await rulesClient.update({
-        id: '1',
-        data: {
-          schedule: { interval: '1m' },
-          name: 'abc',
-          tags: ['foo'],
-          params: {
-            bar: true,
-            risk_score: 40,
-            severity: 'low',
-          },
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-          actions: [],
-        },
-      });
-
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        ruleId: '1',
-        attributes: existingDecryptedSiemAlert.attributes,
-      });
-    });
   });
 
   it('calls the authentication API key function if the user is authenticated using an api key', async () => {
@@ -3520,6 +3531,12 @@ describe('update()', () => {
           },
         ],
         "apiKeyCreatedByUser": true,
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -3562,6 +3579,12 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
+        "artifacts": Object {
+          "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -3819,6 +3842,10 @@ describe('update()', () => {
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+            investigation_guide: { blob: '' },
+          },
           apiKeyCreatedByUser: null,
           consumer: 'myApp',
           enabled: true,
@@ -3855,6 +3882,12 @@ describe('update()', () => {
               "uuid": undefined,
             },
           ],
+          "artifacts": Object {
+            "dashboards": Array [],
+            "investigation_guide": Object {
+              "blob": "",
+            },
+          },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
           "executionStatus": Object {
@@ -4211,6 +4244,580 @@ describe('update()', () => {
           },
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute actions]`);
+    });
+  });
+
+  describe('artifacts', () => {
+    test('remove an existing dashboard', async () => {
+      const existingDashboards = [
+        {
+          refId: 'dashboard_0',
+        },
+        {
+          refId: 'dashboard_1',
+        },
+      ];
+
+      const existingRule = {
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fakeRuleName',
+          enabled: true,
+          tags: ['foo'],
+          alertTypeId: 'myType',
+          schedule: { interval: '1m' },
+          consumer: 'myApp',
+          revision: 0,
+          scheduledTaskId: 'task-123',
+          params: {},
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          muteAll: false,
+          legacyId: null,
+          snoozeSchedule: [],
+          mutedInstanceIds: [],
+          createdBy: 'elastic',
+          createdAt: '2019-02-12T21:01:22.479Z',
+          updatedBy: 'elastic',
+          updatedAt: '2019-02-12T21:01:22.479Z',
+          actions: [],
+          artifacts: {
+            dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
+          },
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
+          },
+        ],
+        version: '123',
+      };
+
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+            ],
+            investigation_guide: { blob: '' },
+          },
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+        ],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+          systemActions: [],
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
+            investigation_guide: { blob: '' },
+          },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+        1,
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+            ],
+            investigation_guide: { blob: '' },
+          },
+        }),
+        {
+          id: '1',
+          overwrite: true,
+          references: [{ id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' }],
+          version: '123',
+        }
+      );
+
+      expect(result?.artifacts).toEqual({
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+        ],
+        investigation_guide: { blob: '' },
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "actions": Array [],
+          "artifacts": Object {
+            "dashboards": Array [
+              Object {
+                "id": "dashboard-1",
+              },
+            ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
+          },
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+            "status": "pending",
+          },
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "revision": 1,
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "scheduledTaskId": "task-123",
+          "systemActions": Array [],
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        }
+      `);
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    test('adds a new linked dashboard', async () => {
+      const existingDashboards = [
+        {
+          refId: 'dashboard_0',
+        },
+        {
+          refId: 'dashboard_1',
+        },
+      ];
+
+      const existingRule = {
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fakeRuleName',
+          enabled: true,
+          tags: ['foo'],
+          alertTypeId: 'myType',
+          schedule: { interval: '1m' },
+          consumer: 'myApp',
+          revision: 0,
+          scheduledTaskId: 'task-123',
+          params: {},
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          muteAll: false,
+          legacyId: null,
+          snoozeSchedule: [],
+          mutedInstanceIds: [],
+          createdBy: 'elastic',
+          createdAt: '2019-02-12T21:01:22.479Z',
+          updatedBy: 'elastic',
+          updatedAt: '2019-02-12T21:01:22.479Z',
+          actions: [],
+          artifacts: {
+            dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
+          },
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
+          },
+        ],
+        version: '123',
+      };
+
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+              {
+                refId: 'dashboard_2',
+              },
+            ],
+          },
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
+          },
+          {
+            name: 'dashboard_2',
+            type: 'dashboard',
+            id: 'dashboard-3',
+          },
+        ],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+          systemActions: [],
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+              {
+                id: 'dashboard-2',
+              },
+              {
+                id: 'dashboard-3',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+        1,
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+              {
+                refId: 'dashboard_2',
+              },
+            ],
+            investigation_guide: { blob: '' },
+          },
+        }),
+        {
+          id: '1',
+          overwrite: true,
+          references: [
+            { id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' },
+            { id: 'dashboard-2', name: 'dashboard_1', type: 'dashboard' },
+            { id: 'dashboard-3', name: 'dashboard_2', type: 'dashboard' },
+          ],
+          version: '123',
+        }
+      );
+
+      expect(result?.artifacts).toEqual({
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+          {
+            id: 'dashboard-2',
+          },
+          {
+            id: 'dashboard-3',
+          },
+        ],
+        investigation_guide: { blob: '' },
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "actions": Array [],
+          "artifacts": Object {
+            "dashboards": Array [
+              Object {
+                "id": "dashboard-1",
+              },
+              Object {
+                "id": "dashboard-2",
+              },
+              Object {
+                "id": "dashboard-3",
+              },
+            ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
+          },
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+            "status": "pending",
+          },
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "revision": 1,
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "scheduledTaskId": "task-123",
+          "systemActions": Array [],
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        }
+      `);
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    test('gives updated investigation guide to saved objects client', async () => {
+      actionsClient.getBulk.mockReset();
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+      ]);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_1',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_2',
+              actionTypeId: 'test2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          alertDelay: {
+            active: 5,
+          },
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_1',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_2',
+            type: 'action',
+            id: '2',
+          },
+        ],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          artifacts: {
+            investigation_guide: { blob: 'new blob' },
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          alertDelay: {
+            active: 10,
+          },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(
+        (unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain).artifacts
+          ?.investigation_guide?.blob
+      ).toEqual('new blob');
+      expect(result.artifacts).toBeDefined();
     });
   });
 });

@@ -6,15 +6,16 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EuiTableRowCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
+import { useAppContext } from '../../../../app_context';
 import { EnrichedDeprecationInfo, MlAction } from '../../../../../../common/types';
 import { GlobalFlyout } from '../../../../../shared_imports';
-import { useAppContext } from '../../../../app_context';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { MlSnapshotsResolutionCell } from './resolution_table_cell';
 import { FixSnapshotsFlyout, FixSnapshotsFlyoutProps } from './flyout';
 import { MlSnapshotsStatusProvider, useMlSnapshotContext } from './context';
+import { MlSnapshotsActionsCell } from './actions_table_cell';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -22,11 +23,13 @@ interface TableRowProps {
   deprecation: EnrichedDeprecationInfo;
   rowFieldNames: DeprecationTableColumns[];
   mlUpgradeModeEnabled: boolean;
+  index: number;
 }
 
 export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
+  index,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const snapshotState = useMlSnapshotContext();
@@ -60,20 +63,25 @@ export const MlSnapshotsTableRowCells: React.FunctionComponent<TableRowProps> = 
   }, [snapshotState, addContentToGlobalFlyout, showFlyout, deprecation, closeFlyout]);
 
   return (
-    <>
+    <EuiTableRow data-test-subj="deprecationTableRow" key={`deprecation-row-${index}`}>
       {rowFieldNames.map((field: DeprecationTableColumns) => {
         return (
-          <EuiTableRowCell key={field} truncateText={false} data-test-subj={`mlTableCell-${field}`}>
+          <EuiTableRowCell
+            key={field}
+            truncateText={false}
+            data-test-subj={`mlTableCell-${field}`}
+            align={field === 'actions' ? 'right' : 'left'}
+          >
             <EsDeprecationsTableCells
               fieldName={field}
-              openFlyout={() => setShowFlyout(true)}
               deprecation={deprecation}
               resolutionTableCell={<MlSnapshotsResolutionCell />}
+              actionsTableCell={<MlSnapshotsActionsCell openFlyout={() => setShowFlyout(true)} />}
             />
           </EuiTableRowCell>
         );
       })}
-    </>
+    </EuiTableRow>
   );
 };
 

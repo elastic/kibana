@@ -8,12 +8,7 @@
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import type {
-  ColumnHeaderOptions,
-  SessionViewConfig,
-  SortColumnTable,
-  ViewSelection,
-} from '../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../common/types';
 
 export interface DataTableModelSettings {
   defaultColumns: Array<
@@ -44,8 +39,6 @@ export interface DataTableModel extends DataTableModelSettings {
   /** Events to not be rendered **/
   deletedEventIds: string[];
   filters?: Filter[];
-  /** When non-empty, display a graph view for this event */
-  graphEventId?: string;
   /** Uniquely identifies the data table */
   id: string;
   indexNames: string[];
@@ -61,7 +54,6 @@ export interface DataTableModel extends DataTableModelSettings {
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for bulk actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
   initialized?: boolean;
-  sessionViewConfig: SessionViewConfig | null;
   /** updated saved object timestamp */
   updated?: number;
   /** Total number of fetched events/alerts */
@@ -89,8 +81,6 @@ export type SubsetDataTableModel = Readonly<
     | 'showCheckboxes'
     | 'sort'
     | 'selectedEventIds'
-    | 'graphEventId'
-    | 'sessionViewConfig'
     | 'queryFields'
     | 'title'
     | 'initialized'

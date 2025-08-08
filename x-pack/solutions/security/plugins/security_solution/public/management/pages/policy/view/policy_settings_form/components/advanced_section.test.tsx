@@ -20,12 +20,12 @@ import { AdvancedPolicySchema } from '../../../models/advanced_policy_schema';
 import { within } from '@testing-library/react';
 import { set } from '@kbn/safer-lodash-set';
 
+jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 jest.mock('../../../../../../common/hooks/use_license');
 
 const useLicenseMock = _useLicense as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/205141
-describe.skip('Policy Advanced Settings section', () => {
+describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
   let formProps: AdvancedSectionProps;

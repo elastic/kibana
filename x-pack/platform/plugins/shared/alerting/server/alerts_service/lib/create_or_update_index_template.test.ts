@@ -8,52 +8,51 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import { createDataStreamAdapterMock } from './data_stream_adapter.mock';
-import { DataStreamAdapter } from './data_stream_adapter';
+import type { DataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = false) => ({
+const IndexTemplate = (namespace = 'default', useDataStream = false) => ({
   name: `.alerts-test.alerts-${namespace}-index-template`,
-  body: {
-    _meta: {
-      kibana: {
-        version: '8.6.1',
-      },
-      managed: true,
-      namespace,
+  _meta: {
+    kibana: {
+      version: '8.6.1',
     },
-    composed_of: ['mappings1', 'framework-mappings'],
-    index_patterns: [`.internal.alerts-test.alerts-${namespace}-*`],
-    template: {
-      mappings: {
-        _meta: {
-          kibana: {
-            version: '8.6.1',
-          },
-          managed: true,
-          namespace,
-        },
-        dynamic: false,
-      },
-      settings: {
-        auto_expand_replicas: '0-1',
-        hidden: true,
-        ...(useDataStream
-          ? {}
-          : {
-              'index.lifecycle': {
-                name: 'test-ilm-policy',
-                rollover_alias: `.alerts-test.alerts-${namespace}`,
-              },
-            }),
-        'index.mapping.ignore_malformed': true,
-        'index.mapping.total_fields.limit': 2500,
-      },
-    },
-    priority: namespace.length,
+    managed: true,
+    namespace,
   },
+  composed_of: ['mappings1', 'framework-mappings'],
+  index_patterns: [`.internal.alerts-test.alerts-${namespace}-*`],
+  template: {
+    mappings: {
+      _meta: {
+        kibana: {
+          version: '8.6.1',
+        },
+        managed: true,
+        namespace,
+      },
+      dynamic: false,
+    },
+    settings: {
+      auto_expand_replicas: '0-1',
+      hidden: true,
+      ...(useDataStream
+        ? {}
+        : {
+            'index.lifecycle': {
+              name: 'test-ilm-policy',
+              rollover_alias: `.alerts-test.alerts-${namespace}`,
+            },
+          }),
+      'index.mapping.ignore_malformed': true,
+      'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      'index.mapping.total_fields.limit': 2500,
+    },
+  },
+  priority: namespace.length,
 });
 
 const SimulateTemplateResponse = {

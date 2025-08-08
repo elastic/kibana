@@ -56,84 +56,82 @@ export async function getAnomalies({
   }
 
   const anomaliesResponse = await anomalySearch(mlClient.mlSystem.mlAnomalySearch, {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...apmMlAnomalyQuery({ serviceName, transactionType }),
-            ...rangeQuery(start, end, 'timestamp'),
-            ...apmMlJobsQuery(mlJobs),
-          ],
-        },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...apmMlAnomalyQuery({ serviceName, transactionType }),
+          ...rangeQuery(start, end, 'timestamp'),
+          ...apmMlJobsQuery(mlJobs),
+        ],
       },
-      aggs: {
-        by_timeseries_id: {
-          composite: {
-            size: 5000,
-            sources: asMutableArray([
-              {
-                jobId: {
-                  terms: {
-                    field: 'job_id',
+    },
+    aggs: {
+      by_timeseries_id: {
+        composite: {
+          size: 5000,
+          sources: asMutableArray([
+            {
+              jobId: {
+                terms: {
+                  field: 'job_id',
+                },
+              },
+            },
+            {
+              detectorIndex: {
+                terms: {
+                  field: 'detector_index',
+                },
+              },
+            },
+            {
+              serviceName: {
+                terms: {
+                  field: 'partition_field_value',
+                },
+              },
+            },
+            {
+              transactionType: {
+                terms: {
+                  field: 'by_field_value',
+                },
+              },
+            },
+          ] as const),
+        },
+        aggs: {
+          record_scores: {
+            filter: {
+              term: {
+                result_type: 'record',
+              },
+            },
+            aggs: {
+              top_anomaly: {
+                top_metrics: {
+                  metrics: asMutableArray([
+                    { field: 'record_score' },
+                    { field: 'actual' },
+                    { field: 'timestamp' },
+                  ] as const),
+                  size: 1,
+                  sort: {
+                    record_score: 'desc',
                   },
                 },
               },
-              {
-                detectorIndex: {
-                  terms: {
-                    field: 'detector_index',
-                  },
-                },
-              },
-              {
-                serviceName: {
-                  terms: {
-                    field: 'partition_field_value',
-                  },
-                },
-              },
-              {
-                transactionType: {
-                  terms: {
-                    field: 'by_field_value',
-                  },
-                },
-              },
-            ] as const),
+            },
           },
-          aggs: {
-            record_scores: {
-              filter: {
-                term: {
-                  result_type: 'record',
-                },
-              },
-              aggs: {
-                top_anomaly: {
-                  top_metrics: {
-                    metrics: asMutableArray([
-                      { field: 'record_score' },
-                      { field: 'actual' },
-                      { field: 'timestamp' },
-                    ] as const),
-                    size: 1,
-                    sort: {
-                      record_score: 'desc',
-                    },
-                  },
-                },
-              },
+          model_lower: {
+            min: {
+              field: 'model_lower',
             },
-            model_lower: {
-              min: {
-                field: 'model_lower',
-              },
-            },
-            model_upper: {
-              max: {
-                field: 'model_upper',
-              },
+          },
+          model_upper: {
+            max: {
+              field: 'model_upper',
             },
           },
         },
@@ -148,7 +146,7 @@ export async function getAnomalies({
     const job = maybe(jobsById[jobId]);
 
     if (!job) {
-      logger.warn(`Could not find job for id ${jobId}`);
+      logger.debug(`Could not find job for id ${jobId}`);
       return undefined;
     }
 

@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
-import { ContextAppFetchProps, useContextAppFetch } from './use_context_app_fetch';
+import type { ContextAppFetchProps } from './use_context_app_fetch';
+import { useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,
   mockPredecessorHits,
@@ -21,16 +21,13 @@ import {
 } from '../__mocks__/use_context_app_fetch';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
-import { createContextSearchSourceStub } from '../services/_stubs';
-import { DataView } from '@kbn/data-views-plugin/public';
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DiscoverTestProvider } from '../../../__mocks__/test_provider';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 const mockInterceptedWarning = {
   originalWarning: searchResponseIncompleteWarningLocalCluster,
 };
-
-const mockFilterManager = createFilterManagerMock();
 
 let mockOverrideInterceptedWarnings = false;
 
@@ -65,31 +62,14 @@ jest.mock('../services/anchor', () => ({
 
 const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id') => {
   const dangerNotification = jest.fn();
-  const mockSearchSource = createContextSearchSourceStub('timestamp');
+  const services = createDiscoverServicesMock();
 
-  const services = {
-    data: {
-      search: {
-        searchSource: {
-          createEmpty: jest.fn().mockImplementation(() => mockSearchSource),
-        },
-      },
-    },
-    toastNotifications: { addDanger: dangerNotification },
-    core: {
-      notifications: { toasts: [] },
-      theme: { theme$: themeServiceMock.createStartContract().theme$ },
-    },
-    history: () => {},
-    filterManager: mockFilterManager,
-    uiSettings: {
-      get: (key: string) => {
-        if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
-          return tieBreakerFields;
-        }
-      },
-    },
-  } as unknown as DiscoverServices;
+  services.toastNotifications.addDanger = dangerNotification;
+  services.uiSettings.get = ((key: string) => {
+    if (key === CONTEXT_TIE_BREAKER_FIELDS_SETTING) {
+      return tieBreakerFields;
+    }
+  }) as unknown as DiscoverServices['uiSettings']['get'];
 
   const props = {
     dangerNotification,
@@ -106,7 +86,7 @@ const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id
   return {
     result: renderHook(() => useContextAppFetch(props.props), {
       wrapper: ({ children }: React.PropsWithChildren) => (
-        <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
+        <DiscoverTestProvider services={services}>{children}</DiscoverTestProvider>
       ),
     }).result,
     dangerNotification,

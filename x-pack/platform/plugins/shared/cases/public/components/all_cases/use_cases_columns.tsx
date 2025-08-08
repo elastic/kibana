@@ -325,7 +325,7 @@ export const useCasesColumns = ({
           }
           return getEmptyCellValue();
         },
-        width: '70px',
+        width: '120px',
       },
     }),
     [assignCaseAction, casesColumnsConfig, connectors, isSelectorView, userProfiles]

@@ -12,6 +12,7 @@ import { EuiDescriptionList, EuiPanel, EuiTabbedContentTab, EuiTitle } from '@el
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import { JsonValue } from '@kbn/utility-types';
 import { AdditionalContext, FlyoutSectionProps } from '../types';
 import { defaultAlertsTableColumns } from '../configuration';
 import { DefaultCellValue } from './default_cell_value';
@@ -43,13 +44,17 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
         <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
           <EuiDescriptionList
             listItems={(columns ?? defaultAlertsTableColumns).map((column) => {
-              const value = alert[column.id]?.[0];
+              const value = (alert[column.id] as JsonValue[])?.[0];
 
               return {
                 title: (column.displayAsText as string) ?? column.id,
                 description:
                   value != null ? (
-                    <DefaultCellValue columnId={column.id} alert={props.alert} />
+                    <DefaultCellValue
+                      columnId={column.id}
+                      alert={props.alert}
+                      openLinksInNewTab={props.openLinksInNewTab}
+                    />
                   ) : (
                     '—'
                   ),

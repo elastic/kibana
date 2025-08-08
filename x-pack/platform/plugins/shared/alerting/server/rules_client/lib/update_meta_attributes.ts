@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { RulesClientContext } from '../types';
+import type { RawRule } from '../../types';
+import type { RulesClientContext } from '../types';
 
 export function updateMetaAttributes<T extends Partial<RawRule>>(
   context: RulesClientContext,

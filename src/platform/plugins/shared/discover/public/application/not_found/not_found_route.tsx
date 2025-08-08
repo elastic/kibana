@@ -34,7 +34,7 @@ export function NotFoundRoute() {
     bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
-        <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+        <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
           <p data-test-subj="invalidRouteMessage">
             <FormattedMessage
               id="discover.noMatchRoute.bannerText"

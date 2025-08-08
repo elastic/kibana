@@ -6,34 +6,48 @@
  */
 
 import { ecsFieldMap } from '@kbn/alerts-as-data-utils';
+import { Group } from './types';
 
-export interface Group {
-  field: string;
-  value: string;
-}
+const getEcsValue = (field: string, value: unknown): string | string[] | undefined => {
+  if (typeof value !== 'string') return;
+  const ecsField = ecsFieldMap[field];
+  if (!ecsField) return;
 
-export const getEcsGroups = (groups: Group[] = []): Record<string, string> => {
-  const ecsGroups = groups.filter((group) => {
-    const path = group.field;
-    const ecsField = ecsFieldMap[path as keyof typeof ecsFieldMap];
+  // we only allow keyword group values
+  if (ecsField.type !== 'keyword') return;
 
-    if (!Boolean(!!ecsField)) {
-      return false;
+  if (!ecsField.array) {
+    // if the ecs type is not an array, assign the value
+    return value;
+  } else {
+    // otherwise the ecs type is an array, create a 1-element array
+    return [value];
+  }
+};
+
+export const getEcsGroups = (groups: Group[] = []): Record<string, string | string[]> => {
+  const ecsGroup: Record<string, string | string[]> = {};
+
+  groups.forEach((group) => {
+    const ecsValue = getEcsValue(group.field, group.value);
+    if (ecsValue) {
+      ecsGroup[group.field] = ecsValue;
     }
-
-    // we only allow keyword group values
-    if (ecsField.type !== 'keyword') {
-      return false;
-    }
-
-    return true;
   });
 
-  const ecsGroup: Record<string, string> = {};
+  return ecsGroup;
+};
 
-  ecsGroups.forEach((group) => {
-    ecsGroup[group.field] = group.value;
+export const getEcsGroupsFromFlattenGrouping = (
+  flattenGrouping: Record<string, unknown> = {}
+): Record<string, string | string[]> => {
+  const ecsGroup: Record<string, string | string[]> = {};
+
+  Object.keys(flattenGrouping).forEach((flattenGroup) => {
+    const ecsValue = getEcsValue(flattenGroup, flattenGrouping[flattenGroup]);
+    if (ecsValue) {
+      ecsGroup[flattenGroup] = ecsValue;
+    }
   });
-
   return ecsGroup;
 };

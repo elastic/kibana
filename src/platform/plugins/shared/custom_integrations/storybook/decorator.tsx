@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { DecoratorFn } from '@storybook/react';
+import { Decorator } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common/eui_styled_components';
@@ -20,20 +20,18 @@ import { CustomIntegrationsServicesProvider } from '../public/services';
  * Returns a Storybook Decorator that provides both the `I18nProvider` and access to `PluginServices`
  * for components rendered in Storybook.
  */
-export const getCustomIntegrationsContextDecorator =
-  (): DecoratorFn =>
-  (story, { globals }) => {
-    const ContextProvider = getCustomIntegrationsContextProvider();
-    const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
+export const getCustomIntegrationsContextDecorator: Decorator = (story, { globals }) => {
+  const ContextProvider = getCustomIntegrationsContextProvider();
+  const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
 
-    return (
-      <I18nProvider>
-        <EuiThemeProvider darkMode={darkMode}>
-          <ContextProvider>{story()}</ContextProvider>
-        </EuiThemeProvider>
-      </I18nProvider>
-    );
-  };
+  return (
+    <I18nProvider>
+      <EuiThemeProvider darkMode={darkMode}>
+        <ContextProvider>{story()}</ContextProvider>
+      </EuiThemeProvider>
+    </I18nProvider>
+  );
+};
 
 /**
  * Prepares `PluginServices` for use in Storybook and returns a React `Context.Provider` element

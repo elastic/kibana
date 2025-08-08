@@ -6,13 +6,14 @@
  */
 
 import axios from 'axios';
-import { Logger } from '@kbn/core/server';
-import { ConnectorUsageCollector, Services } from '@kbn/actions-plugin/server/types';
+import type { Logger } from '@kbn/core/server';
+import type { Services } from '@kbn/actions-plugin/server/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { PostMessageParams, SlackApiConnectorType } from '../../../common/slack_api/types';
@@ -77,15 +78,21 @@ describe('validate params', () => {
   test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subAction]: expected value to equal [postMessage]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subAction]: expected value to equal [postMessage]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
   });
 
   test('should validate and pass when channels is used as a valid params for post message', () => {

@@ -10,23 +10,26 @@
     "browser": true,
     "configPath": ["xpack", "streamsApp"],
     "requiredPlugins": [
-      "streams",
+      "charts",
       "data",
-      "dataViews",
-      "unifiedSearch",
-      "share",
-      "savedObjectsTagging",
-      "navigation",
-      "fieldsMetadata",
       "datasetQuality",
+      "dataViews",
+      "discover",
+      "discoverShared",
+      "fieldFormats",
+      "fieldsMetadata",
       "licensing",
+      "indexManagement",
+      "ingestPipelines",
+      "navigation",
+      "savedObjectsTagging",
+      "share",
+      "streams",
+      "unifiedSearch",
+      "unifiedDocViewer"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "optionalPlugins": [
-      "observabilityAIAssistant"
-    ],
-    "extraPublicDirs": []
+    "optionalPlugins": ["observabilityAIAssistant"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
+    "extraPublicDirs": ["common"]
   }
 }

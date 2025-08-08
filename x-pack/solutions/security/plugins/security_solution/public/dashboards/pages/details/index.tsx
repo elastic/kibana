@@ -11,7 +11,7 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -31,11 +31,11 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 
+const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
+
 interface DashboardViewProps {
   initialViewMode: ViewMode;
 }
-
-const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
@@ -51,7 +51,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView } = useSourcererDataView();
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -70,12 +70,15 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+        <SiemSearchBar
+          id={InputsModelId.global}
+          sourcererDataView={oldSourcererDataView} // TODO: newDataViewPickerEnabled -  Can be removed when the new data view picker is released
+        />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup
           direction="column"
-          style={dashboardViewFlexGroupStyle}
+          css={dashboardViewFlexGroupStyle}
           gutterSize="none"
           data-test-subj="dashboard-view-wrapper"
         >

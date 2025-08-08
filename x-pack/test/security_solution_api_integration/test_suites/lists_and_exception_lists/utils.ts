@@ -33,8 +33,7 @@ import { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
-
-import { countDownTest } from '../../../common/utils/security_solution';
+import { countDownTest, withSpaceUrl } from '../../../common/utils/security_solution';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -207,10 +206,11 @@ export const binaryToString = (res: any, callback: any): void => {
  */
 export const deleteAllExceptions = async (
   supertest: SuperTest.Agent,
-  log: ToolingLog
+  log: ToolingLog,
+  spaceId?: string
 ): Promise<void> => {
-  await deleteAllExceptionsByType(supertest, log, 'single');
-  await deleteAllExceptionsByType(supertest, log, 'agnostic');
+  await deleteAllExceptionsByType(supertest, log, 'single', spaceId);
+  await deleteAllExceptionsByType(supertest, log, 'agnostic', spaceId);
 };
 
 /**
@@ -221,12 +221,15 @@ export const deleteAllExceptions = async (
 export const deleteAllExceptionsByType = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
-  type: NamespaceType
+  type: NamespaceType,
+  spaceId?: string
 ): Promise<void> => {
   await countDownTest(
     async () => {
       const { body } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find?per_page=9999&namespace_type=${type}`)
+        .get(
+          withSpaceUrl(`${EXCEPTION_LIST_URL}/_find?per_page=9999&namespace_type=${type}`, spaceId)
+        )
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
@@ -234,14 +237,14 @@ export const deleteAllExceptionsByType = async (
       const promises = ids.map((id) =>
         limiter(() =>
           supertest
-            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .delete(withSpaceUrl(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`, spaceId))
             .set('kbn-xsrf', 'true')
             .send()
         )
       );
       await Promise.all(promises);
       const { body: finalCheck } = await supertest
-        .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
+        .get(withSpaceUrl(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`, spaceId))
         .set('kbn-xsrf', 'true')
         .send();
       return {
@@ -594,7 +597,7 @@ export const createListsIndices = async (es: Client) => {
  */
 export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
   const createdAt = new Date().toISOString();
-  const body = {
+  const document = {
     created_at: createdAt,
     created_by: 'mock-user',
     description: 'mock-description',
@@ -608,7 +611,7 @@ export const createListBypassingChecks = async ({ es, id }: { es: Client; id: st
   };
 
   const response = await es.create({
-    body,
+    document,
     id,
     index: '.lists-default',
     refresh: 'wait_for',
@@ -617,7 +620,7 @@ export const createListBypassingChecks = async ({ es, id }: { es: Client; id: st
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...body,
+    ...document,
   };
 };
 
@@ -638,7 +641,7 @@ export const createListItemBypassingChecks = async ({
   value: string;
 }) => {
   const createdAt = new Date().toISOString();
-  const body = {
+  const document = {
     created_at: createdAt,
     created_by: 'mock-user',
     tie_breaker_id: uuidv4(),
@@ -649,7 +652,7 @@ export const createListItemBypassingChecks = async ({
   };
 
   const response = await es.create({
-    body,
+    document,
     id,
     index: '.items-default',
     refresh: 'wait_for',
@@ -658,7 +661,7 @@ export const createListItemBypassingChecks = async ({
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...body,
+    ...document,
   };
 };
 
@@ -718,13 +721,11 @@ const createReindexedBootstrapIndex = async (esClient: Client, index: string): P
     await esClient.indices.create(
       {
         index: `.reindexed-v8-${index}-000001`,
-        body: {
-          aliases: {
-            [`.${index}`]: {
-              is_write_index: true,
-            },
-            [`.${index}-000001`]: {},
+        aliases: {
+          [`.${index}`]: {
+            is_write_index: true,
           },
+          [`.${index}-000001`]: {},
         },
       },
       { meta: true }

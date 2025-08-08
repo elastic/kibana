@@ -189,7 +189,9 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               <EuiSpacer size="m" />
               <ConfiguredSettings
                 configuredSettings={AGENT_POLICY_ADVANCED_SETTINGS}
-                disabled={isDisabled || !!agentPolicy?.supports_agentless}
+                disabled={
+                  isDisabled || !!agentPolicy?.supports_agentless || !!agentPolicy?.is_managed
+                }
               />
             </>
             <EuiSpacer size="xl" />

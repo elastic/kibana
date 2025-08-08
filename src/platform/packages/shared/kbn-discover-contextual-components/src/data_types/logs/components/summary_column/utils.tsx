@@ -24,14 +24,16 @@ import {
   DataTableRecord,
   getFieldValue,
   INDEX_FIELD,
+  FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
+  TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
-import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import { TransactionNameIcon } from './icons/transaction_name_icon';
 
 type FieldKey = keyof DataTableRecord['flattened'];
 type FieldValue = NonNullable<DataTableRecord['flattened'][FieldKey]>;
@@ -70,16 +72,17 @@ const DurationIcon = () => {
   );
 };
 
-/**
- * createResourceFields definitions
- */
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
+
+const EventOutcomeBadge = (props: FieldBadgeWithActionsProps) =>
+  props.rawValue === 'failure' ? <FieldBadgeWithActions {...props} color="danger" /> : null;
 
 export interface ResourceFieldDescriptor {
   ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
   name: string;
   value: string;
+  property?: DataViewField;
   rawValue: unknown;
 }
 
@@ -88,13 +91,12 @@ const getResourceBadgeComponent = (
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
-  if (name === SERVICE_NAME_FIELD) {
-    return (props: FieldBadgeWithActionsProps) => (
-      <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-    );
+  switch (name) {
+    case EVENT_OUTCOME_FIELD:
+      return EventOutcomeBadge;
+    default:
+      return FieldBadgeWithActions;
   }
-
-  return FieldBadgeWithActions;
 };
 
 const getResourceBadgeIcon = (
@@ -115,28 +117,11 @@ const getResourceBadgeIcon = (
           />
         );
       };
-    case EVENT_OUTCOME_FIELD:
-      return () => {
-        const { euiTheme } = useEuiTheme();
-
-        const value = fields[name];
-
-        const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
-
-        return (
-          <EuiIcon
-            color={color}
-            type="dot"
-            size="s"
-            css={css`
-              margin-right: ${euiTheme.size.xs};
-            `}
-          />
-        );
-      };
     case TRANSACTION_DURATION_FIELD:
     case SPAN_DURATION_FIELD:
       return DurationIcon;
+    case TRANSACTION_NAME_FIELD:
+      return () => TransactionNameIcon(fields[AGENT_NAME_FIELD] as AgentName);
   }
 };
 
@@ -169,21 +154,21 @@ export const createResourceFields = ({
   const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => {
+    const property = dataView.getFieldByName(name);
     const value = formatFieldValue(
       resourceDoc[name],
       row.raw,
       fieldFormats,
       dataView,
-      dataView.getFieldByName(name),
-      'text'
+      property,
+      'html'
     );
 
     return {
       name,
       rawValue: resourceDoc[name],
-      // TODO: formatFieldValue doesn't actually return a string in certain circumstances, change
-      // this line below once it does.
-      value: typeof value === 'string' ? value : `${value}`,
+      value,
+      property,
       ResourceBadge: getResourceBadgeComponent(name, core, share),
       Icon: getResourceBadgeIcon(name, resourceDoc),
     };
@@ -223,5 +208,11 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   };
 };
 
-const isFieldAllowed = (field: string) =>
-  !FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));
+export const isFieldAllowed = (field: string): boolean => {
+  const isExactMatchExcluded = FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(field);
+  const isPrefixMatchExcluded = FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) =>
+    field.startsWith(prefix)
+  );
+
+  return !isExactMatchExcluded && !isPrefixMatchExcluded;
+};

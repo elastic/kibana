@@ -8,6 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getDashboard } from './api';
 import * as i18n from './translations';
 
@@ -22,7 +23,7 @@ export interface UseGetDashboard {
 }
 export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGetDashboard => {
   const {
-    dashboard,
+    share,
     http,
     notifications: { toasts },
     spaces,
@@ -50,7 +51,7 @@ export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGe
 
   const setUrl = useCallback(
     (dashboardId: string) => {
-      const url = dashboard?.locator?.getRedirectUrl({
+      const url = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
         query: {
           language: 'kuery',
           query: `kibana.saved_objects: { id  : ${connectorId} }`,
@@ -59,7 +60,7 @@ export const useGetDashboard = ({ connectorId, selectedProvider }: Props): UseGe
       });
       setDashboardUrl(url ?? null);
     },
-    [connectorId, dashboard?.locator]
+    [connectorId, share]
   );
 
   useEffect(() => {

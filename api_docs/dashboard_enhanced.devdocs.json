@@ -511,11 +511,11 @@
               },
               "<",
               {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardLocatorParams",
-                "text": "DashboardLocatorParams"
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">"
             ],
@@ -563,6 +563,14 @@
                 "docId": "kibDataPluginApi",
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
+              },
+              "; share: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               "; dashboard: ",
               {
@@ -639,46 +647,18 @@
           {
             "parentPluginId": "dashboardEnhanced",
             "id": "def-public.SetupDependencies.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,
@@ -712,6 +692,26 @@
                 "docId": "kibUiActionsEnhancedPluginApi",
                 "section": "def-public.StartContract",
                 "text": "StartContract"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardEnhanced",
+            "id": "def-public.StartDependencies.dashboard",
+            "type": "Object",
+            "tags": [],
+            "label": "dashboard",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.DashboardStart",
+                "text": "DashboardStart"
               }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
@@ -792,27 +792,9 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">): void; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboardEnhanced",
-            "id": "def-public.StartDependencies.dashboard",
-            "type": "Object",
-            "tags": [],
-            "label": "dashboard",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardStart",
-                "text": "DashboardStart"
-              }
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,

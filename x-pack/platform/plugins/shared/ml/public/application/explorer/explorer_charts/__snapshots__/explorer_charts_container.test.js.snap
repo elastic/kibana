@@ -1,0 +1,8 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartsContainer Minimal Initialization 1`] = `
+<div
+  class="euiFlexGrid emotion-euiFlexGrid-m-row-stretch-responsive"
+  data-test-subj="mlExplorerChartsContainer"
+/>
+`;

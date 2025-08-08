@@ -110,6 +110,7 @@ export type {
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
@@ -615,4 +616,6 @@ export type {
   RouteSecurityGetter,
   Privilege,
   PrivilegeSet,
+  AllRequiredCondition,
+  AnyRequiredCondition,
 } from '@kbn/core-http-server';

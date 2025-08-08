@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
+import { CoreSetup, Logger, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import {
   IoTsParamsObject,
   ServerRouteRepository,
@@ -50,7 +50,7 @@ export function registerRoutes({
         path: pathname,
         validate: passThroughValidationObject,
         options,
-        security: route.security,
+        security: route.security as RouteSecurity,
       },
       async (context, request, response) => {
         try {
@@ -79,14 +79,12 @@ export function registerRoutes({
           return response.ok({ body: data });
         } catch (error) {
           if (Boom.isBoom(error)) {
-            logger.error(error.output.payload.message);
+            logRouteError(logger, error);
             return response.customError({
               statusCode: error.output.statusCode,
               body: { message: error.output.payload.message },
             });
           }
-
-          logger.error(error);
 
           const opts = {
             statusCode: 500,
@@ -100,9 +98,25 @@ export function registerRoutes({
             opts.body.message = 'Client closed request';
           }
 
+          logRouteError(logger, opts);
+
           return response.customError(opts);
         }
       }
     );
   });
+}
+
+function logRouteError(
+  logger: Logger,
+  error: { statusCode: number; body: { message: string } } | Boom.Boom
+) {
+  const errorStatusCode = 'statusCode' in error ? error.statusCode : error.output.statusCode;
+  const errorMessage = Boom.isBoom(error) ? error.output.payload.message : error.body.message;
+
+  if (errorStatusCode >= 500) {
+    logger.error(errorMessage);
+  } else {
+    logger.debug(errorMessage);
+  }
 }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -18,11 +18,11 @@ export default {
   title: 'Components/FlyoutRiskSummary',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
@@ -37,11 +37,11 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const LinkEnabledInPreviewMode: Story<void> = () => {
+export const LinkEnabledInPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
@@ -57,11 +57,11 @@ export const LinkEnabledInPreviewMode: Story<void> = () => {
   );
 };
 
-export const LinkDisabled: Story<void> = () => {
+export const LinkDisabled: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}

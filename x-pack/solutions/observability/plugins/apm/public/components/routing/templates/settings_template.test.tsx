@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/testing-react';
+import { composeStories } from '@storybook/react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as stories from './settings_template.stories';

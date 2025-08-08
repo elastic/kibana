@@ -8,7 +8,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from './use_kibana';
-import { APIRoutes, ChatFormFields } from '../types';
+import { APIRoutes, PlaygroundFormFields } from '../types';
 
 interface UseApiKeyQueryParams {
   name: string;
@@ -27,7 +27,7 @@ export const useCreateApiKeyQuery = () => {
         body: JSON.stringify({
           name,
           expiresInDays,
-          indices: getValues(ChatFormFields.indices),
+          indices: getValues(PlaygroundFormFields.indices),
         }),
       });
 

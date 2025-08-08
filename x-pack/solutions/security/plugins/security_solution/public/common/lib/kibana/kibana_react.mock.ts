@@ -14,6 +14,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -44,7 +45,6 @@ import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { mockApm } from '../apm/service.mock';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
@@ -58,6 +58,8 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
+import { createSiemMigrationsMock } from '../../mock/mock_siem_migrations_service';
+import { KibanaServices } from './services';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -123,11 +125,11 @@ export const createStartServicesMock = (
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
   cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
-  const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
   const alerting = alertingPluginMock.createStartContract();
+  const siemMigrations = createSiemMigrationsMock();
 
   /*
    * Below mocks are needed by unified field list
@@ -213,6 +215,13 @@ export const createStartServicesMock = (
           showQueries: true,
           saveQuery: true,
         },
+        maintenanceWindow: {
+          show: true,
+          save: true,
+        },
+        actions: {
+          show: true,
+        },
       },
     },
     security,
@@ -244,7 +253,6 @@ export const createStartServicesMock = (
       fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
     },
     triggersActionsUi,
-    guidedOnboarding,
     cloud: {
       ...cloud,
       isCloudEnabled: false,
@@ -258,6 +266,13 @@ export const createStartServicesMock = (
     upselling: new UpsellingService(),
     timelineDataService,
     alerting,
+    siemMigrations,
+    sessionStorage: new Storage({
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    }),
   } as unknown as StartServices;
 };
 
@@ -272,6 +287,14 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
+
+  KibanaServices.init({
+    ...services,
+    kibanaBranch: 'test',
+    kibanaVersion: 'test',
+    buildFlavor: 'test',
+    prebuiltRulesPackageVersion: 'test',
+  });
 
   // eslint-disable-next-line react/display-name
   return ({

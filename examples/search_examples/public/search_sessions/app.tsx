@@ -707,10 +707,8 @@ function doSearch(
   const req = {
     params: {
       index: dataView.title,
-      body: {
-        aggs: aggsDsl,
-        query,
-      },
+      aggs: aggsDsl,
+      query,
     },
   };
 
@@ -791,7 +789,7 @@ function NoShardDelayCallout() {
         </>
       }
       color="warning"
-      iconType="help"
+      iconType="question"
     >
       <p>
         This demo works best with <EuiCode>shardDelay</EuiCode> aggregation which simulates slow
@@ -807,7 +805,7 @@ function NoShardDelayCallout() {
 
 function NoDataViewsCallout() {
   return (
-    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="help">
+    <EuiCallOut title={<>Missing data views!</>} color="warning" iconType="question">
       <p>This demo requires at least one data view.</p>
     </EuiCallOut>
   );

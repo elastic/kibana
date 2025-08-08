@@ -19,17 +19,19 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  describe('Overview Host', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/218282
+  describe.skip('Overview Host', () => {
     let supertest: TestAgent;
     let search: SearchService;
     describe('With auditbeat', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
         search = await utils.createSearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/overview');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/overview');
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/overview')
+        async () =>
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/overview')
       );
 
       const FROM = '2000-01-01T00:00:00.000Z';

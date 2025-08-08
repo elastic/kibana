@@ -10,12 +10,26 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { OnboardingCardPanel } from './onboarding_card_panel';
 import { CARD_COMPLETE_BADGE, EXPAND_CARD_BUTTON_LABEL } from './translations';
 import type { OnboardingCardId } from '../../constants';
+import { TestProviders } from '../../../common/mock/test_providers';
+
+const mockUseDarkMode = jest.fn(() => false);
+jest.mock('@kbn/react-kibana-context-theme', () => ({
+  ...jest.requireActual('@kbn/react-kibana-context-theme'),
+  useKibanaIsDarkMode: () => mockUseDarkMode(),
+}));
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiIcon: jest.fn(({ type }: { type: string }) => <div data-test-subj={`EuiIcon-${type}`} />),
+}));
 
 describe('OnboardingCardPanel Component', () => {
   const defaultProps = {
     id: 'card-1' as OnboardingCardId,
     title: 'Test Card',
     icon: 'testIcon',
+    iconDark: undefined,
+    badge: undefined,
     isExpanded: false,
     isComplete: false,
     onToggleExpanded: jest.fn(),
@@ -29,7 +43,8 @@ describe('OnboardingCardPanel Component', () => {
     render(
       <OnboardingCardPanel {...defaultProps}>
         <div>{'Test Card Content'}</div>
-      </OnboardingCardPanel>
+      </OnboardingCardPanel>,
+      { wrapper: TestProviders }
     );
 
     // Verify that the card title and icon are rendered
@@ -40,7 +55,8 @@ describe('OnboardingCardPanel Component', () => {
     render(
       <OnboardingCardPanel {...defaultProps} isComplete={true}>
         <div>{'Test Card Content'}</div>
-      </OnboardingCardPanel>
+      </OnboardingCardPanel>,
+      { wrapper: TestProviders }
     );
 
     // Verify that the complete badge is displayed
@@ -51,7 +67,8 @@ describe('OnboardingCardPanel Component', () => {
     render(
       <OnboardingCardPanel {...defaultProps} isComplete={false}>
         <div>{'Test Card Content'}</div>
-      </OnboardingCardPanel>
+      </OnboardingCardPanel>,
+      { wrapper: TestProviders }
     );
 
     // Verify that the complete badge is not displayed
@@ -62,7 +79,8 @@ describe('OnboardingCardPanel Component', () => {
     render(
       <OnboardingCardPanel {...defaultProps}>
         <div>{'Test Card Content'}</div>
-      </OnboardingCardPanel>
+      </OnboardingCardPanel>,
+      { wrapper: TestProviders }
     );
 
     // Click on the card header
@@ -76,7 +94,8 @@ describe('OnboardingCardPanel Component', () => {
     const { rerender } = render(
       <OnboardingCardPanel {...defaultProps} isExpanded={false}>
         <div>{'Test Card Content'}</div>
-      </OnboardingCardPanel>
+      </OnboardingCardPanel>,
+      { wrapper: TestProviders }
     );
 
     // Check the button icon when card is not expanded
@@ -93,5 +112,50 @@ describe('OnboardingCardPanel Component', () => {
 
     // Check the button icon when card is expanded
     expect(buttonIcon).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  describe('when badge is defined', () => {
+    it('should render the badge', () => {
+      render(
+        <OnboardingCardPanel {...defaultProps} badge={'beta'}>
+          <div>{'Test Card Content'}</div>
+        </OnboardingCardPanel>,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.getByTestId('onboardingCardBadge')).toBeInTheDocument();
+    });
+  });
+
+  describe('when iconDark is defined', () => {
+    const iconDark = 'testIconDark';
+
+    it('should render the dark icon with the dark theme', () => {
+      mockUseDarkMode.mockReturnValue(true);
+
+      render(
+        <OnboardingCardPanel {...defaultProps} iconDark={iconDark}>
+          <div>{'Test Card Content'}</div>
+        </OnboardingCardPanel>,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.queryByTestId('EuiIcon-testIconDark')).toBeInTheDocument();
+      expect(screen.queryByTestId('EuiIcon-testIcon')).not.toBeInTheDocument();
+    });
+
+    it('should not render the dark icon with the light theme', () => {
+      mockUseDarkMode.mockReturnValue(false);
+
+      render(
+        <OnboardingCardPanel {...defaultProps} iconDark={iconDark}>
+          <div>{'Test Card Content'}</div>
+        </OnboardingCardPanel>,
+        { wrapper: TestProviders }
+      );
+
+      expect(screen.queryByTestId('EuiIcon-testIconDark')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('EuiIcon-testIcon')).toBeInTheDocument();
+    });
   });
 });

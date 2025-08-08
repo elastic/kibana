@@ -9,7 +9,7 @@ import { AggregationsValueCountAggregate } from '@elastic/elasticsearch/lib/api/
 import {
   AggregationsSumAggregate,
   AggregationsTopHitsAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,

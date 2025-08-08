@@ -13,6 +13,7 @@ import {
   notificationServiceMock,
   httpServiceMock,
   docLinksServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
@@ -23,6 +24,9 @@ import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
 import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 const coreStart = coreMock.createStart();
 
@@ -42,10 +46,14 @@ export const serviceContextMock = {
         settings: new SettingsMock(storage),
         routeHistory: createMemoryHistory(),
         history: new HistoryMock(storage),
-        notifications: notificationServiceMock.createSetupContract(),
+        notifications: notificationServiceMock.createStartContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
         http,
         autocompleteInfo: new AutocompleteInfoMock(),
+        application: applicationServiceMock.createStartContract(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+        data: dataPluginMock.createStartContract(),
+        licensing: licensingMock.createStart(),
       },
       docLinkVersion: 'NA',
       docLinks: docLinksServiceMock.createStartContract().links,

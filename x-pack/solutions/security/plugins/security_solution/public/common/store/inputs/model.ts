@@ -10,6 +10,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InputsModelId } from './constants';
 import type { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import type { VisualizationTablesWithMeta } from '../../components/visualization_actions/types';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -59,6 +60,7 @@ export interface GlobalGenericQuery {
   selectedInspectIndex: number;
   invalidKqlQuery?: Error;
   searchSessionId?: string;
+  tables?: VisualizationTablesWithMeta;
 }
 
 export interface GlobalKqlQuery extends GlobalGenericQuery {
@@ -89,6 +91,7 @@ export type Inputs = InputsRange | InputsRangeTimeOnly;
 export interface InputsModel {
   global: InputsRange;
   timeline: InputsRange;
+  valueReport: InputsRangeTimeOnly;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
   socTrends?: InputsRangeTimeOnly;
 }
@@ -99,6 +102,8 @@ export interface UrlInputsModelInputs {
 export interface UrlInputsModel {
   global: UrlInputsModelInputs;
   timeline: UrlInputsModelInputs;
+  // serverless only
+  valueReport?: UrlInputsModelInputs;
   // TODO: remove ? when isSocTrendsEnabled feature flag is removed
   socTrends?: UrlInputsModelInputs;
 }

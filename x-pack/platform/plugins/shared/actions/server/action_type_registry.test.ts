@@ -8,14 +8,17 @@
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
-import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ActionType, ExecutorType } from './types';
-import { ActionExecutionSourceType, ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
+import type { ActionTypeRegistryOpts } from './action_type_registry';
+import { ActionTypeRegistry } from './action_type_registry';
+import type { ActionType, ExecutorType } from './types';
+import type { ILicenseState } from './lib';
+import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();
@@ -32,7 +35,12 @@ describe('actionTypeRegistry', () => {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
       taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOCanEncrypt: true }),
+        new ActionExecutor({
+          isESOCanEncrypt: true,
+          connectorRateLimiter: new ConnectorRateLimiter({
+            config: { email: { limit: 100, lookbackWindow: '1m' } },
+          }),
+        }),
         inMemoryMetrics
       ),
       actionsConfigUtils: mockedActionsConfig,

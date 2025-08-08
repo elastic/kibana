@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { map } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { either, Result, asOk, asErr, Ok, Err } from './result_type';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { Result, Ok, Err } from './result_type';
+import { either, asOk, asErr } from './result_type';
 
 export interface BufferOptions {
   bufferMaxDuration?: number;

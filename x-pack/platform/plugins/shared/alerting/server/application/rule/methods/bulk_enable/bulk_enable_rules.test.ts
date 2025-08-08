@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
@@ -16,13 +17,13 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { loggerMock } from '@kbn/logging-mocks';
-import { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server/task_scheduling';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   disabledRule1,
   disabledRule2,
@@ -38,21 +39,11 @@ import {
   enabledRuleForBulkOps2,
   returnedRuleForBulkOps1,
   returnedRuleForBulkOps2,
-  disabledRuleForBulkDisable1,
-  siemRuleForBulkOps1,
-  siemRuleForBulkOps2,
 } from '../../../../rules_client/tests/test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
-
-jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-  return {
-    migrateLegacyActions: jest.fn(),
-  };
-});
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -113,11 +104,6 @@ beforeEach(() => {
       } as unknown as BulkUpdateTaskResult)
   );
   (auditLogger.log as jest.Mock).mockClear();
-  (migrateLegacyActions as jest.Mock).mockResolvedValue({
-    hasLegacyActions: false,
-    resultedActions: [],
-    resultedReferences: [],
-  });
 });
 
 setGlobalDate();
@@ -872,51 +858,6 @@ describe('bulkEnableRules', () => {
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
-    });
-  });
-
-  describe('legacy actions migration for SIEM', () => {
-    test('should call migrateLegacyActions', async () => {
-      encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValueOnce({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield {
-              saved_objects: [
-                disabledRuleForBulkDisable1,
-                siemRuleForBulkOps1,
-                siemRuleForBulkOps2,
-              ],
-            };
-          },
-        });
-
-      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
-        saved_objects: [disabledRuleForBulkDisable1, siemRuleForBulkOps1, siemRuleForBulkOps2],
-      });
-
-      await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
-
-      expect(migrateLegacyActions).toHaveBeenCalledTimes(3);
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: disabledRuleForBulkDisable1.attributes,
-        ruleId: disabledRuleForBulkDisable1.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRuleForBulkOps1.id,
-        actions: [],
-        references: [],
-      });
-      expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
-        attributes: expect.objectContaining({ consumer: AlertConsumers.SIEM }),
-        ruleId: siemRuleForBulkOps2.id,
-        actions: [],
-        references: [],
-      });
     });
   });
 });

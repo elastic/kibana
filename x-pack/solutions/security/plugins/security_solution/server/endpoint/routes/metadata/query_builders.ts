@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -20,15 +20,7 @@ import {
 } from '../../../../common/endpoint/constants';
 import { buildStatusesKuery } from './support/agent_status';
 import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
-
-/**
- * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
- * 11111111-1111-1111-1111-111111111111 is Elastic Agent id sent by Endpoint when policy does not contain an id
- */
-const IGNORED_ELASTIC_AGENT_IDS = [
-  '00000000-0000-0000-0000-000000000000',
-  '11111111-1111-1111-1111-111111111111',
-];
+import { buildBaseEndpointMetadataFilter } from '../../../../common/endpoint/utils/endpoint_metadata_filter';
 
 export interface QueryBuilderOptions {
   page: number;
@@ -80,24 +72,22 @@ const getUnitedMetadataSortMethod = (
 
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { 'agent.id': agentID } },
-                  { term: { 'HostDetails.agent.id': agentID } },
-                ],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'agent.id': agentID } },
+                { term: { 'HostDetails.agent.id': agentID } },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
-      size: 1,
     },
+    sort: MetadataSortMethod,
+    size: 1,
     index: metadataCurrentIndexPattern,
   };
 }
@@ -106,50 +96,46 @@ export function getESQueryHostMetadataByFleetAgentIds(
   fleetAgentIds: string[]
 ): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
     },
+    sort: MetadataSortMethod,
     index: metadataCurrentIndexPattern,
   };
 }
 
-export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
+export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { terms: { 'agent.id': agentIDs } },
-                  { terms: { 'HostDetails.agent.id': agentIDs } },
-                ],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIDs } },
+                { terms: { 'HostDetails.agent.id': agentIDs } },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
     },
+    sort: MetadataSortMethod,
     index: metadataCurrentIndexPattern,
   };
 }
 
 const lastCheckinRuntimeField = {
   last_checkin: {
-    type: 'date',
+    type: 'date' as const,
     script: {
       lang: 'painless',
       source:
@@ -158,14 +144,10 @@ const lastCheckinRuntimeField = {
   },
 };
 
-interface BuildUnitedIndexQueryResponse {
-  body: {
-    query: Record<string, unknown>;
-    track_total_hits: boolean;
-    sort: estypes.SortCombinations[];
-    runtime_mappings: Record<string, unknown>;
-    fields?: string[];
-  };
+interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
+  track_total_hits: boolean;
+  sort: estypes.SortCombinations[];
+  fields?: string[];
   from: number;
   size: number;
   index: string;
@@ -186,46 +168,13 @@ export async function buildUnitedIndexQuery(
   } = queryOptions || {};
 
   const statusesKuery = buildStatusesKuery(hostStatuses);
+  const idFilter = buildBaseEndpointMetadataFilter(endpointPolicyIds);
 
-  const filterIgnoredAgents = {
-    must_not: { terms: { 'agent.id': IGNORED_ELASTIC_AGENT_IDS } },
-  };
-  const filterEndpointPolicyAgents = {
-    filter: [
-      // must contain an endpoint policy id
-      {
-        terms: { 'united.agent.policy_id': endpointPolicyIds },
-      },
-      // doc contains both agent and metadata
-      { exists: { field: 'united.endpoint.agent.id' } },
-      { exists: { field: 'united.agent.agent.id' } },
-      // agent is enrolled
-      {
-        term: {
-          'united.agent.active': {
-            value: true,
-          },
-        },
-      },
-    ],
-  };
-
-  const idFilter = {
-    bool: {
-      ...filterIgnoredAgents,
-      ...filterEndpointPolicyAgents,
-    },
-  };
-
-  let query: BuildUnitedIndexQueryResponse['body']['query'] = idFilter;
+  let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
   if (statusesKuery || kuery) {
     const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
-    const q = [];
-
-    if (filterIgnoredAgents || filterEndpointPolicyAgents) {
-      q.push(idFilter);
-    }
+    const q = [idFilter];
 
     if (statusesKuery) {
       q.push(toElasticsearchQuery(fromKueryExpression(statusesKuery)));
@@ -241,13 +190,11 @@ export async function buildUnitedIndexQuery(
 
   const fields = Object.keys(runtimeMappings);
   return {
-    body: {
-      query,
-      track_total_hits: true,
-      sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
-      fields,
-      runtime_mappings: runtimeMappings,
-    },
+    query,
+    track_total_hits: true,
+    sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
+    fields,
+    runtime_mappings: runtimeMappings,
     from: page * pageSize,
     size: pageSize,
     index: METADATA_UNITED_INDEX,

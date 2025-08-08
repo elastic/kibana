@@ -23,18 +23,26 @@ describe('AiAssistantSelectionPage', () => {
   const generateMockCapabilities = (hasPermission: boolean) =>
     ({
       observabilityAIAssistant: { show: hasPermission },
-      securitySolutionAssistant: { 'ai-assistant': hasPermission },
+      management: {
+        kibana: {
+          aiAssistantManagementSelection: hasPermission,
+        },
+      },
     } as unknown as CoreStart['application']['capabilities']);
 
   const testCapabilities = generateMockCapabilities(true);
 
-  const renderComponent = (capabilities: CoreStart['application']['capabilities']) => {
+  const renderComponent = (
+    capabilities: CoreStart['application']['capabilities'],
+    securityAIAssistantEnabled = true
+  ) => {
     (useAppContext as jest.Mock).mockReturnValue({
       capabilities,
       setBreadcrumbs,
       navigateToApp,
       kibanaBranch: 'main',
       buildFlavor: 'ess',
+      securityAIAssistantEnabled,
     });
     render(<AiAssistantSelectionPage />, {
       wrapper: I18nProvider,
@@ -93,13 +101,9 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-
-        expect(
-          screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink')
-        ).toHaveAttribute(
-          'href',
-          'https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html'
-        );
+        const docLink = screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink');
+        expect(docLink).toBeInTheDocument();
+        expect(docLink.getAttribute('href')).toContain('observability-ai-assistant');
       });
     });
   });
@@ -107,10 +111,12 @@ describe('AiAssistantSelectionPage', () => {
   describe('Security AI Assistant Card', () => {
     describe('when the feature is disabled', () => {
       it('displays the disabled callout', () => {
-        renderComponent(generateMockCapabilities(false));
+        const securityAIAssistantEnabled = false;
+        renderComponent(generateMockCapabilities(false), securityAIAssistantEnabled);
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageSecurityDocumentationCallout')
         ).toBeInTheDocument();
+        expect(screen.getByTestId('pluginsAiAssistantSelectionSecurityPageButton')).toBeDisabled();
       });
     });
 
@@ -139,13 +145,9 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-
-        expect(
-          screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink')
-        ).toHaveAttribute(
-          'href',
-          'https://www.elastic.co/guide/en/security/current/security-assistant.html'
-        );
+        const docLink = screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink');
+        expect(docLink).toBeInTheDocument();
+        expect(docLink.getAttribute('href')).toContain('ai-assistant');
       });
     });
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -21,6 +20,7 @@ import { SurveySection } from './components/survey_section';
 import { WaffleOptionsProvider } from './hooks/use_waffle_options';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
+import { InventoryViewsProvider } from './hooks/use_inventory_views';
 
 export const SnapshotPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
@@ -33,7 +33,7 @@ export const SnapshotPage = () => {
   ]);
 
   return (
-    <EuiErrorBoundary>
+    <InventoryViewsProvider>
       <WaffleOptionsProvider>
         <WaffleTimeProvider>
           <WaffleFiltersProvider>
@@ -59,6 +59,6 @@ export const SnapshotPage = () => {
           </WaffleFiltersProvider>
         </WaffleTimeProvider>
       </WaffleOptionsProvider>
-    </EuiErrorBoundary>
+    </InventoryViewsProvider>
   );
 };

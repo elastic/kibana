@@ -13,7 +13,7 @@ import { exporters } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import { ShareMenuItemV2, ShareMenuProviderV2 } from '@kbn/share-plugin/public/types';
+import { ExportShare } from '@kbn/share-plugin/public/types';
 import { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
@@ -105,48 +105,44 @@ interface DownloadPanelShareOpts {
   atLeastGold: () => boolean;
 }
 
-export const downloadCsvShareProvider = ({
+export const downloadCsvLensShareProvider = ({
   uiSettings,
   formatFactoryFn,
   atLeastGold,
-}: DownloadPanelShareOpts): ShareMenuProviderV2 => {
-  const getShareMenuItems: ShareMenuProviderV2['getShareMenuItems'] = ({
-    objectType,
-    sharingData,
-  }) => {
-    if ('lens' !== objectType) {
-      return [];
-    }
+}: DownloadPanelShareOpts): ExportShare => {
+  return {
+    shareType: 'integration',
+    id: 'csvDownloadLens',
+    groupId: 'export',
+    config({ sharingData }) {
+      // TODO fix sharingData types
+      const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
 
-    // TODO fix sharingData types
-    const { title, datatables, csvEnabled } = sharingData as unknown as CSVSharingData;
+      const panelTitle = i18n.translate(
+        'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
+        {
+          defaultMessage: 'CSV Download',
+        }
+      );
 
-    const panelTitle = i18n.translate(
-      'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
-      {
-        defaultMessage: 'CSV Download',
-      }
-    );
+      const downloadCSVHandler = () =>
+        downloadCSVs({
+          title,
+          formatFactory: formatFactoryFn(),
+          datatables,
+          uiSettings,
+        });
 
-    const downloadCSVHandler = () =>
-      downloadCSVs({
-        title,
-        formatFactory: formatFactoryFn(),
-        datatables,
-        uiSettings,
-      });
-
-    return [
-      {
-        shareMenuItem: {
-          name: panelTitle,
-          icon: 'document',
-          disabled: !csvEnabled,
-          sortOrder: 1,
-        },
-        label: 'CSV' as const,
-        reportType: 'lens_csv' as const,
-        generateExport: downloadCSVHandler,
+      return {
+        id: 'csvDownloadLens',
+        name: panelTitle,
+        icon: 'tableDensityNormal',
+        sortOrder: 1,
+        label: 'CSV',
+        exportType: 'lens_csv',
+        supportedLayoutOptions: ['print'],
+        requiresSavedState: false,
+        generateAssetExport: downloadCSVHandler,
         warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
@@ -161,16 +157,11 @@ export const downloadCsvShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateExportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
             }),
-      } satisfies ShareMenuItemV2,
-    ];
-  };
-
-  return {
-    id: 'csvDownloadLens',
-    getShareMenuItems,
+      };
+    },
   };
 };

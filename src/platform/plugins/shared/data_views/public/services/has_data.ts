@@ -155,14 +155,12 @@ export class HasData {
             ignore_unavailable: true,
             expand_wildcards: showAllIndices ? 'all' : 'open',
             index: pattern,
-            body: {
-              size: 0, // no hits
-              aggs: {
-                indices: {
-                  terms: {
-                    field: '_index',
-                    size: 200,
-                  },
+            size: 0, // no hits
+            aggs: {
+              indices: {
+                terms: {
+                  field: '_index',
+                  size: 200,
                 },
               },
             },

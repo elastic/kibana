@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/newsfeed-test-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "newsfeedTestPlugin",
+    "server": true,
+    "browser": false
+  }
+}

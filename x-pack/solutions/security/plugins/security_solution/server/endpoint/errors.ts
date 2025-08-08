@@ -7,7 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
+import { i18n } from '@kbn/i18n';
 import { EndpointError } from '../../common/endpoint/errors';
+
+export const ENDPOINT_AUTHZ_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.errors.noEndpointAuthzApiErrorMessage',
+  { defaultMessage: 'Endpoint authorization failure' }
+);
 
 export class NotFoundError extends EndpointError {}
 
@@ -25,6 +31,6 @@ export class EndpointAppContentServicesNotStartedError extends EndpointError {
 
 export class EndpointAuthorizationError extends EndpointError {
   constructor(meta?: unknown) {
-    super('Endpoint authorization failure', meta);
+    super(ENDPOINT_AUTHZ_ERROR_MESSAGE, meta);
   }
 }

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { KueryNode } from '@kbn/es-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { KueryNode } from '@kbn/es-query';
 import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { BulkEditResponse } from '../../../types';
+import type { BulkEditResponse } from '../../../types';
 
 export async function updateAPIKey({ id, http }: { id: string; http: HttpSetup }): Promise<string> {
   return http.post<string>(

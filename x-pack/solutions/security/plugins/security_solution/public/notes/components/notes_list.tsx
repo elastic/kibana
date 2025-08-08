@@ -107,7 +107,7 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
-      {isDeleteModalVisible && <DeleteConfirmModal />}
+      {isDeleteModalVisible && <DeleteConfirmModal refetch={false} />}
     </>
   );
 });

@@ -134,6 +134,21 @@ describe('indexpattern_datasource utils', () => {
         expect(setStateMock).toHaveBeenCalledTimes(1);
       });
 
+      test('should not render a fix link if no setState is provided', () => {
+        framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+        const warningMessages = getPrecisionErrorWarningMessages(
+          datatableUtilitites,
+          state,
+          framePublicAPI,
+          docLinks
+        );
+
+        render(<I18nProvider>{getLongMessage(warningMessages[0])}</I18nProvider>);
+        // Make sure the message is there before checking the absence of the link/button
+        expect(screen.getByText(/might be an approximation./)).toBeInTheDocument();
+        expect(screen.queryByText('Enable accuracy mode')).toBe(null);
+      });
+
       test('should other suggestions if accuracy mode already enabled', async () => {
         framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
         (state.layers.id.columns.col1 as TermsIndexPatternColumn).params.accuracyMode = true;
@@ -463,7 +478,6 @@ describe('indexpattern_datasource utils', () => {
                 params: {
                   emptyAsNull: true,
                 },
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
@@ -482,7 +496,6 @@ describe('indexpattern_datasource utils', () => {
                   isFormulaBroken: false,
                 },
                 references: ['62f73507-09c4-4bf9-9e6f-a9692e348d94X0'],
-                scale: 'ratio',
                 // here's the issue - this should not be here
                 sourceField: '___records___',
               },

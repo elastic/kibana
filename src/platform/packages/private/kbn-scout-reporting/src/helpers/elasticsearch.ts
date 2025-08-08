@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client as ESClient, ClientOptions as ESClientOptions } from '@elastic/elasticsearch';
+import {
+  Client as ESClient,
+  ClientOptions as ESClientOptions,
+  HttpConnection,
+} from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
 import { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
@@ -28,7 +32,11 @@ export async function getValidatedESClient(
   }
 ): Promise<ESClient> {
   const { log, cli = false } = helperSettings;
-  const es = new ESClient(esClientOptions);
+  const es = new ESClient({
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
+    ...esClientOptions,
+  });
 
   try {
     const esInfo = await es.info();

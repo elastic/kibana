@@ -10,7 +10,11 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { pick, range, sum } from 'lodash';
 import { Readable } from 'stream';
-import { ApmSynthtraceEsClient } from '../lib/apm/client/apm_synthtrace_es_client';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceEsClientImpl,
+} from '../lib/apm/client/apm_synthtrace_es_client';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe('Synthtrace ES Client indexer', () => {
   let apmEsClient: ApmSynthtraceEsClient;
@@ -48,9 +52,9 @@ describe('Synthtrace ES Client indexer', () => {
           },
         },
       },
-    } as unknown as ConstructorParameters<typeof ApmSynthtraceEsClient>[0];
+    } as unknown as ConstructorParameters<typeof ApmSynthtraceEsClientImpl>[0];
 
-    apmEsClient = new ApmSynthtraceEsClient(opts);
+    apmEsClient = new ApmSynthtraceEsClientImpl(opts);
   });
 
   it('indexes documents', async () => {
@@ -58,7 +62,8 @@ describe('Synthtrace ES Client indexer', () => {
 
     const generator = timerange(
       new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T01:00:01.000Z')
+      new Date('2022-01-01T01:00:01.000Z'),
+      {} as ToolingLog
     )
       .interval('30m')
       .generator((timestamp) => {
@@ -99,7 +104,11 @@ describe('Synthtrace ES Client indexer', () => {
     });
 
     const getGenerator = () =>
-      timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:59:59.999Z'))
+      timerange(
+        new Date('2022-01-01T00:00:00.000Z'),
+        new Date('2022-01-01T00:59:59.999Z'),
+        {} as ToolingLog
+      )
         .interval('20m')
         .rate(10)
         .generator(generatorCallback);
@@ -142,7 +151,8 @@ describe('Synthtrace ES Client indexer', () => {
 
     const generator = timerange(
       new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:06:59.999Z')
+      new Date('2022-01-01T00:06:59.999Z'),
+      {} as ToolingLog
     )
       .interval('1m')
       .rate(RATE)

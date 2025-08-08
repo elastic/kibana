@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Privilege Monitoring Users Common Schema
+  description: Common schema for Privileged Users
+  version: "1"
+paths: {}
+components:
+  schemas:
+    UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+              description: The name of the user.
+
+    MonitoredUserDoc:
+      type: object
+      properties:
+        id:
+          type: string
+
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
+
+        "@timestamp":
+          type: string
+          format: date-time
+
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            is_privileged:
+              type: boolean
+              description: Indicates if the user is privileged.
+        labels:
+          type: object
+          properties:
+            sources:
+              type: array
+              items:
+                enum:
+                  - csv
+                  - index_sync
+                  - api
+            source_indices:
+              type: array
+              items:
+                type: string
+            source_integrations:
+              type: array
+              items:
+                type: string
+
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  value:
+                    type: string
+                  source:
+                    type: string

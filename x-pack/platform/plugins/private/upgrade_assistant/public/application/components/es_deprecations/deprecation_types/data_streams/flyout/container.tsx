@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiDescriptionList,
   EuiFlexGroup,
@@ -18,12 +18,13 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import {
-  DataStreamReindexStatus,
+  DataStreamMigrationStatus,
   EnrichedDeprecationInfo,
 } from '../../../../../../../common/types';
 
-import { ReindexStateContext } from '../context';
+import { MigrationStateContext } from '../context';
 
 import { DeprecationBadge } from '../../../../shared';
 import {
@@ -33,14 +34,13 @@ import {
 } from '../../../../../lib/ui_metric';
 
 import { containerMessages } from './messages';
-import type { FlyoutStep } from './steps/types';
-import { InitializingFlyoutStep } from './steps/initializing';
-import { ConfirmReindexingFlyoutStep } from './steps/confirm';
-import { DataStreamDetailsFlyoutStep } from './steps/details';
+import { ConfirmMigrationReindexFlyoutStep } from './steps/confirm';
 import { ChecklistFlyoutStep } from './steps/checklist';
-import { ReindexingCompletedFlyoutStep } from './steps/completed';
+import { MigrationCompletedFlyoutStep } from './steps/completed';
+import { InitializingStep } from '../../../common/initializing_step';
+import { useMigrationStep } from '../use_migration_step';
 
-interface Props extends ReindexStateContext {
+interface Props extends MigrationStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
 }
@@ -51,46 +51,14 @@ const FILE_SIZE_DISPLAY_FORMAT = '0,0.[0] b';
 export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
   cancelReindex,
   loadDataStreamMetadata,
-  reindexState,
+  migrationState,
   startReindex,
   closeFlyout,
   deprecation,
 }) => {
-  const { status, reindexWarnings, errorMessage, meta } = reindexState;
+  const { status, migrationWarnings, errorMessage, resolutionType, meta } = migrationState;
   const { index } = deprecation;
-
-  const [flyoutStep, setFlyoutStep] = useState<FlyoutStep>('initializing');
-
-  const switchFlyoutStep = useCallback(() => {
-    switch (status) {
-      case DataStreamReindexStatus.notStarted: {
-        setFlyoutStep('notStarted');
-        return;
-      }
-      case DataStreamReindexStatus.failed:
-      case DataStreamReindexStatus.fetchFailed:
-      case DataStreamReindexStatus.cancelled:
-      case DataStreamReindexStatus.inProgress: {
-        setFlyoutStep('inProgress');
-        return;
-      }
-      case DataStreamReindexStatus.completed: {
-        setTimeout(() => {
-          // wait for 1.5 more seconds fur the UI to visually get to 100%
-          setFlyoutStep('completed');
-        }, 1500);
-        return;
-      }
-    }
-  }, [status]);
-
-  useMemo(async () => {
-    if (flyoutStep === 'initializing') {
-      await loadDataStreamMetadata();
-      switchFlyoutStep();
-    }
-  }, [loadDataStreamMetadata, switchFlyoutStep, flyoutStep]);
-  useMemo(() => switchFlyoutStep(), [switchFlyoutStep]);
+  const [flyoutStep, setFlyoutStep] = useMigrationStep(status, loadDataStreamMetadata);
 
   const onStartReindex = useCallback(async () => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_START_CLICK);
@@ -102,118 +70,115 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     await cancelReindex();
   }, [cancelReindex]);
 
-  const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
-    useMemo(() => {
-      if (!meta) {
-        return {
-          indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
-          docsSizeFormatted: containerMessages.unknownMessage,
-          lastIndexCreationDateFormatted: containerMessages.unknownMessage,
-        };
-      }
-
+  const {
+    docsSizeFormatted,
+    indicesRequiringUpgradeDocsCount,
+    lastIndexCreationDateFormatted,
+    oldestIncompatibleDocFormatted,
+  } = useMemo(() => {
+    if (!meta) {
       return {
-        indicesRequiringUpgradeDocsCount:
-          typeof meta.indicesRequiringUpgradeDocsCount === 'number'
-            ? `${meta.indicesRequiringUpgradeDocsCount}`
-            : 'Unknown',
-        docsSizeFormatted:
-          typeof meta.indicesRequiringUpgradeDocsSize === 'number'
-            ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
-            : 'Unknown',
-        lastIndexCreationDateFormatted:
-          typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
-            ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
-            : 'Unknown',
+        indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
+        docsSizeFormatted: containerMessages.unknownMessage,
+        lastIndexCreationDateFormatted: containerMessages.unknownMessage,
+        oldestIncompatibleDocFormatted: undefined,
       };
-    }, [meta]);
+    }
+
+    return {
+      indicesRequiringUpgradeDocsCount:
+        typeof meta.indicesRequiringUpgradeDocsCount === 'number'
+          ? `${meta.indicesRequiringUpgradeDocsCount}`
+          : 'Unknown',
+      docsSizeFormatted:
+        typeof meta.indicesRequiringUpgradeDocsSize === 'number'
+          ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
+          : 'Unknown',
+      lastIndexCreationDateFormatted:
+        typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
+          ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
+          : 'Unknown',
+      oldestIncompatibleDocFormatted:
+        typeof meta.oldestIncompatibleDocTimestamp === 'number'
+          ? `${moment(meta.oldestIncompatibleDocTimestamp).format(DATE_FORMAT)}`
+          : undefined,
+    };
+  }, [meta]);
 
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
       case 'initializing':
-        return <InitializingFlyoutStep errorMessage={errorMessage} />;
-      case 'notStarted': {
-        if (!meta) {
+        return <InitializingStep errorMessage={errorMessage} type="dataStream" mode="flyout" />;
+      case 'confirm': {
+        if (!meta || !resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+              type="dataStream"
+              mode="flyout"
             />
           );
         }
 
         return (
-          <DataStreamDetailsFlyoutStep
+          <ConfirmMigrationReindexFlyoutStep
+            warnings={(migrationWarnings ?? []).filter(
+              (warning) => warning.resolutionType === resolutionType
+            )}
+            meta={meta}
             closeFlyout={closeFlyout}
+            startAction={() => onStartReindex()}
             lastIndexCreationDateFormatted={lastIndexCreationDateFormatted}
-            meta={meta}
-            startReindex={() => {
-              setFlyoutStep('confirm');
-            }}
-            reindexState={reindexState}
-          />
-        );
-      }
-      case 'confirm': {
-        if (!meta) {
-          return (
-            <InitializingFlyoutStep
-              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
-            />
-          );
-        }
-        return (
-          <ConfirmReindexingFlyoutStep
-            warnings={reindexWarnings ?? []}
-            meta={meta}
-            hideWarningsStep={() => {
-              setFlyoutStep('notStarted');
-            }}
-            continueReindex={() => {
-              onStartReindex();
-            }}
           />
         );
       }
       case 'inProgress': {
-        if (!meta) {
+        if (!resolutionType) {
           return (
-            <InitializingFlyoutStep
+            <InitializingStep
               errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
+              type="dataStream"
+              mode="flyout"
             />
           );
         }
+
         return (
           <ChecklistFlyoutStep
             closeFlyout={closeFlyout}
-            startReindex={() => {
+            executeAction={() => {
               setFlyoutStep('confirm');
             }}
-            reindexState={reindexState}
-            cancelReindex={onStopReindex}
+            migrationState={migrationState}
+            cancelAction={() => onStopReindex()}
+            dataStreamName={index}
           />
         );
       }
       case 'completed': {
-        if (!meta) {
-          return (
-            <InitializingFlyoutStep
-              errorMessage={errorMessage || containerMessages.errorLoadingDataStreamInfo}
-            />
-          );
-        }
-        return <ReindexingCompletedFlyoutStep meta={meta} />;
+        return (
+          <MigrationCompletedFlyoutStep
+            meta={meta}
+            resolutionType={resolutionType}
+            close={closeFlyout}
+            dataStreamName={index}
+          />
+        );
       }
     }
   }, [
     flyoutStep,
-    reindexState,
-    closeFlyout,
-    onStartReindex,
-    onStopReindex,
-    lastIndexCreationDateFormatted,
-    reindexWarnings,
-    meta,
     errorMessage,
+    meta,
+    resolutionType,
+    migrationWarnings,
+    closeFlyout,
+    lastIndexCreationDateFormatted,
+    onStartReindex,
+    migrationState,
+    index,
+    setFlyoutStep,
+    onStopReindex,
   ]);
 
   return (
@@ -221,8 +186,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       {flyoutStep !== 'initializing' && (
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
-            isCritical={deprecation.isCritical}
-            isResolved={status === DataStreamReindexStatus.completed}
+            level={deprecation.level}
+            isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />
           <EuiTitle size="s" data-test-subj="flyoutTitle">
@@ -235,12 +200,34 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <EuiDescriptionList
                     textStyle="reverse"
-                    listItems={[
-                      {
-                        title: 'Reindexing required for indices created on or before',
-                        description: lastIndexCreationDateFormatted,
-                      },
-                    ]}
+                    data-test-subj="dataStreamLastIndexCreationDate"
+                    listItems={
+                      oldestIncompatibleDocFormatted
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.oldestIncompatibleDoc',
+                                {
+                                  defaultMessage:
+                                    'Migration required for data indexed on or before',
+                                }
+                              ),
+                              description: oldestIncompatibleDocFormatted,
+                            },
+                          ]
+                        : [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
+                                {
+                                  defaultMessage:
+                                    'Migration required for indices created on or before',
+                                }
+                              ),
+                              description: lastIndexCreationDateFormatted,
+                            },
+                          ]
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexGroup>
@@ -249,10 +236,16 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                       textStyle="reverse"
                       listItems={[
                         {
-                          title: 'Size',
+                          title: i18n.translate(
+                            'xpack.upgradeAssistant.dataStream.flyout.container.indicesDocsSize',
+                            {
+                              defaultMessage: 'Size',
+                            }
+                          ),
                           description: docsSizeFormatted,
                         },
                       ]}
+                      data-test-subj="dataStreamSize"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -260,10 +253,16 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                       textStyle="reverse"
                       listItems={[
                         {
-                          title: 'Document Count',
+                          title: i18n.translate(
+                            'xpack.upgradeAssistant.dataStream.flyout.container.indicesDocsCount',
+                            {
+                              defaultMessage: 'Document Count',
+                            }
+                          ),
                           description: indicesRequiringUpgradeDocsCount,
                         },
                       ]}
+                      data-test-subj="dataStreamDocumentCount"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

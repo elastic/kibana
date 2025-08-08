@@ -9,7 +9,7 @@ import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions, SessionViewConfig, SortColumnTable } from '../../common/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../common/types';
 import type { DataTablePersistInput, TableById } from './types';
 import type { DataTableModelSettings } from './model';
 
@@ -431,46 +431,6 @@ export const setSelectedTableEvents = ({
       ...dataTable,
       selectedEventIds,
       isSelectAllChecked,
-    },
-  };
-};
-
-export const updateTableGraphEventId = ({
-  id,
-  graphEventId,
-  tableById,
-}: {
-  id: string;
-  graphEventId: string;
-  tableById: TableById;
-}): TableById => {
-  const table = tableById[id];
-
-  return {
-    ...tableById,
-    [id]: {
-      ...table,
-      graphEventId,
-    },
-  };
-};
-
-export const updateTableSessionViewConfig = ({
-  id,
-  sessionViewConfig,
-  tableById,
-}: {
-  id: string;
-  sessionViewConfig: SessionViewConfig | null;
-  tableById: TableById;
-}): TableById => {
-  const table = tableById[id];
-
-  return {
-    ...tableById,
-    [id]: {
-      ...table,
-      sessionViewConfig,
     },
   };
 };

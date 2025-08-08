@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { APMIndices } from '../../../..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APMEventESSearchRequest } from '.';
 import { getRequestBase } from './get_request_base';
 
@@ -14,10 +14,8 @@ describe('getRequestBase', () => {
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
-      body: {
-        track_total_hits: false,
-        size: 0,
-      },
+      track_total_hits: false,
+      size: 0,
     } as APMEventESSearchRequest;
 
     const indices = {

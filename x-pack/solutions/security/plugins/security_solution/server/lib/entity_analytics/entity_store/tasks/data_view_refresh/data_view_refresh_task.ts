@@ -6,8 +6,12 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup, AuditLogger } from '@kbn/core/server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type Logger,
+  type AnalyticsServiceSetup,
+  type AuditLogger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -89,7 +93,9 @@ export const registerEntityStoreDataViewRefreshTask = ({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
 
-    const appClient = appClientFactory.create(await apiKeyManager.getRequestFromApiKey(apiKey));
+    const request = await apiKeyManager.getRequestFromApiKey(apiKey);
+
+    const appClient = appClientFactory.create(request);
 
     const entityStoreClient: EntityStoreDataClient = new EntityStoreDataClient({
       namespace,
@@ -104,9 +110,18 @@ export const registerEntityStoreDataViewRefreshTask = ({
       kibanaVersion,
       dataViewsService,
       config: entityStoreConfig,
+      security,
+      request,
+      uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
     });
 
-    await entityStoreClient.applyDataViewIndices();
+    const { errors } = await entityStoreClient.applyDataViewIndices();
+
+    if (errors.length > 0) {
+      logger.error(
+        `Errors applying data view changes to the entity store. Errors: \n${errors.join('\n\n')}`
+      );
+    }
   };
 
   taskManager.registerTaskDefinitions({

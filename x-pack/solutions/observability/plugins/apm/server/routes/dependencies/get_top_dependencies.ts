@@ -27,6 +27,7 @@ interface Options {
   offset?: string;
   kuery: string;
   randomSampler: RandomSampler;
+  withTimeseries: boolean;
 }
 
 interface TopDependenciesForTimeRange {
@@ -44,6 +45,7 @@ async function getTopDependenciesForTimeRange({
   offset,
   kuery,
   randomSampler,
+  withTimeseries,
 }: Options): Promise<TopDependenciesForTimeRange> {
   const { statsItems, sampled } = await getConnectionStats({
     apmEventClient,
@@ -54,6 +56,7 @@ async function getTopDependenciesForTimeRange({
     offset,
     collapseBy: 'downstream',
     randomSampler,
+    withTimeseries,
   });
 
   return {

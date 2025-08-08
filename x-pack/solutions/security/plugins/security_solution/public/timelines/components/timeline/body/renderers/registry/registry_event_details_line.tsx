@@ -26,6 +26,7 @@ interface Props {
   text: string;
   userDomain: string | null | undefined;
   userName: string | null | undefined;
+  scopeId: string;
 }
 
 const RegistryEventDetailsLineComponent: React.FC<Props> = ({
@@ -39,6 +40,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
   text,
   userDomain,
   userName,
+  scopeId,
 }) => {
   const registryKeyTooltipContent = useMemo(
     () => (
@@ -68,6 +70,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
     <>
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
         <UserHostWorkingDir
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           hostName={hostName}
@@ -83,6 +86,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
             </TokensFlexItem>
             <TokensFlexItem component="span" grow={false}>
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 eventId={id}
                 field="registry.key"
@@ -102,6 +106,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
             </TokensFlexItem>
             <TokensFlexItem component="span" grow={false}>
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 eventId={id}
                 field="registry.path"
@@ -120,6 +125,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
 
         <TokensFlexItem component="span" grow={false}>
           <ProcessDraggableWithNonExistentProcess
+            scopeId={scopeId}
             contextId={contextId}
             endgamePid={undefined}
             endgameProcessName={undefined}

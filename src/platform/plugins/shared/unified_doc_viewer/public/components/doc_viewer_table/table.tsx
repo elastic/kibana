@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './table.scss';
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -25,7 +24,8 @@ import {
   useResizeObserver,
   EuiSwitch,
   EuiSwitchEvent,
-  useEuiTheme,
+  type UseEuiTheme,
+  euiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -39,6 +39,8 @@ import {
   canPrependTimeFieldColumn,
 } from '@kbn/discover-utils';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+
 import { getUnifiedDocViewerServices } from '../../plugin';
 import {
   getFieldCellActions,
@@ -50,7 +52,12 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TableFilters, TableFiltersProps, useTableFilters } from './table_filters';
+import {
+  LOCAL_STORAGE_KEY_SEARCH_TERM,
+  TableFilters,
+  TableFiltersProps,
+  useTableFilters,
+} from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';
@@ -67,7 +74,7 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
-const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
+export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
 const GRID_COLUMN_FIELD_NAME = 'name';
@@ -130,10 +137,11 @@ export const DocViewerTable = ({
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
-  const { euiTheme } = useEuiTheme();
+  const styles = useMemoCss(componentStyles);
+
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -179,7 +187,10 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
-  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters(storage);
+  const { onFilterField, onFindSearchTermMatch, ...tableFiltersProps } = useTableFilters({
+    storage,
+    storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
+  });
 
   const fieldToItem = useCallback(
     (field: string, isPinned: boolean): FieldRow => {
@@ -330,8 +341,8 @@ export const DocViewerTable = ({
     [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
-    [rows, isEsqlMode, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
+    [rows, isEsqlMode, toasts, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -358,7 +369,7 @@ export const DocViewerTable = ({
           defaultMessage: 'Value',
         }),
         actions: false,
-        visibleCellActions: 2,
+        visibleCellActions: 3,
         cellActions: fieldValueCellActions,
       },
     ],
@@ -464,19 +475,21 @@ export const DocViewerTable = ({
           alignItems="center"
           gutterSize="m"
         >
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
-                defaultMessage: 'Selected only',
-                description: 'Switch label to show only selected fields in the table',
-              })}
-              checked={showOnlySelectedFields ?? false}
-              disabled={isShowOnlySelectedFieldsDisabled}
-              onChange={onShowOnlySelectedFieldsChange}
-              compressed
-              data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
-            />
-          </EuiFlexItem>
+          {filter && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                  defaultMessage: 'Selected only',
+                  description: 'Switch label to show only selected fields in the table',
+                })}
+                checked={showOnlySelectedFields ?? false}
+                disabled={isShowOnlySelectedFieldsDisabled}
+                onChange={onShowOnlySelectedFieldsChange}
+                compressed
+                data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+              />
+            </EuiFlexItem>
+          )}
           {isEsqlMode && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
@@ -499,7 +512,7 @@ export const DocViewerTable = ({
       </EuiFlexItem>
 
       {rows.length === 0 ? (
-        <EuiSelectableMessage css={{ minHeight: 300 }}>
+        <EuiSelectableMessage css={styles.noFieldsFound}>
           <p>
             <EuiI18n
               token="unifiedDocViewer.docViews.table.noFieldFound"
@@ -508,19 +521,7 @@ export const DocViewerTable = ({
           </p>
         </EuiSelectableMessage>
       ) : (
-        <EuiFlexItem
-          grow={Boolean(containerHeight)}
-          css={css`
-            min-block-size: 0;
-            display: block;
-            .euiDataGridRow {
-              &:hover {
-                // we keep using a deprecated shade until proper token is available
-                background-color: ${euiTheme.colors.lightestShade};
-              }
-            }
-          `}
-        >
+        <EuiFlexItem grow={Boolean(containerHeight)} css={styles.fieldsGridWrapper}>
           <EuiDataGrid
             key={`fields-table-${hit.id}`}
             {...GRID_PROPS}
@@ -528,6 +529,7 @@ export const DocViewerTable = ({
               defaultMessage: 'Field values',
             })}
             className="kbnDocViewer__fieldsGrid"
+            css={styles.fieldsGrid}
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}
@@ -540,4 +542,80 @@ export const DocViewerTable = ({
       )}
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minBlockSize: 0,
+      display: 'block',
+
+      '.euiDataGridRow': {
+        '&:hover': {
+          // we keep using a deprecated shade until proper token is available
+          backgroundColor: euiTheme.colors.lightestShade,
+        },
+      },
+    }),
+  fieldsGrid: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    return css({
+      '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+        borderTop: 'none',
+      },
+
+      '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+        borderBottom: euiTheme.border.thin,
+      },
+
+      '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+
+      '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
+        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
+      },
+
+      '.kbnDocViewer__fieldName': {
+        padding: euiTheme.size.xs,
+        paddingLeft: 0,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+
+        '.euiDataGridRowCell__popover &': {
+          fontSize,
+        },
+      },
+
+      '.kbnDocViewer__fieldName_icon': {
+        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
+
+      '.kbnDocViewer__fieldName_multiFieldBadge': {
+        margin: `${euiTheme.size.xs} 0`,
+        fontWeight: euiTheme.font.weight.regular,
+        fontFamily: euiTheme.font.family,
+      },
+
+      '.kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 0,
+      },
+
+      '& [data-gridcell-column-id="pin_field"]:focus-within': {
+        '.kbnDocViewer__fieldsGrid__pinAction': {
+          opacity: 1,
+        },
+      },
+
+      '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
+        opacity: 1,
+      },
+    });
+  },
+  noFieldsFound: css({
+    minHeight: 300,
+  }),
 };

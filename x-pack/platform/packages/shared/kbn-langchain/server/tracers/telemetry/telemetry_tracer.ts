@@ -6,7 +6,7 @@
  */
 
 import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
-import type { Run } from 'langsmith/schemas';
+import { Run } from 'langsmith/schemas';
 import { BaseTracer } from '@langchain/core/tracers/base';
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
@@ -21,7 +21,6 @@ export interface LangChainTracerFields extends BaseCallbackHandlerInput {
   elasticTools: string[];
   telemetry: AnalyticsServiceSetup;
   telemetryParams: TelemetryParams;
-  totalTools: number;
 }
 interface ToolRunStep {
   action: {
@@ -37,14 +36,12 @@ export class TelemetryTracer extends BaseTracer implements LangChainTracerFields
   elasticTools: string[];
   telemetry: AnalyticsServiceSetup;
   telemetryParams: TelemetryParams;
-  totalTools: number;
   constructor(fields: LangChainTracerFields, logger: Logger) {
     super(fields);
     this.logger = logger.get('telemetryTracer');
     this.elasticTools = fields.elasticTools;
     this.telemetry = fields.telemetry;
     this.telemetryParams = fields.telemetryParams;
-    this.totalTools = fields.totalTools;
   }
 
   async onChainEnd(run: Run): Promise<void> {

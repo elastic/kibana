@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { validateDurationSchema, parseDuration } from './lib';
 import { DEFAULT_CACHE_INTERVAL_MS } from './rules_settings';
 
@@ -73,8 +74,18 @@ export const configSchema = schema.object({
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
   }),
+  maintenanceWindow: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+  disabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
+  enabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

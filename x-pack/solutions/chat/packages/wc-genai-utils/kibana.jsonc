@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/wc-genai-utils",
+  "owner": [
+    "@elastic/search-kibana",
+    "@elastic/workchat-eng"
+  ],
+  "group": "chat",
+  "visibility": "private"
+}

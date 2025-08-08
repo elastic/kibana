@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import { EuiButtonEmpty, EuiPopover, EuiRadioGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useState, useCallback } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIcon,
+  EuiRadioGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
@@ -35,100 +43,70 @@ const COORDINATE_SYSTEM_OPTIONS = [
   },
 ];
 
-interface Props {
+interface SetViewFormProps {
   settings: MapSettings;
   zoom: number;
   center: MapCenter;
   onSubmit: (lat: number, lon: number, zoom: number) => void;
 }
 
-interface State {
-  isPopoverOpen: boolean;
-  coordinateSystem: string;
-}
+export const SetViewForm = React.memo<SetViewFormProps>(({ settings, zoom, center, onSubmit }) => {
+  const { euiTheme } = useEuiTheme();
+  const [coordinateSystem, setCoordinateSystem] = useState<string>(DEGREES_DECIMAL);
 
-export class SetViewForm extends Component<Props, State> {
-  state: State = {
-    coordinateSystem: DEGREES_DECIMAL,
-    isPopoverOpen: false,
-  };
+  const onCoordinateSystemChange = useCallback((optionId: string) => {
+    setCoordinateSystem(optionId);
+  }, []);
 
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _onCoordinateSystemChange = (optionId: string) => {
-    this._closePopover();
-    this.setState({
-      coordinateSystem: optionId,
-    });
-  };
-
-  _renderForm() {
-    if (this.state.coordinateSystem === MGRS) {
-      return (
-        <MgrsForm
-          settings={this.props.settings}
-          zoom={this.props.zoom}
-          center={this.props.center}
-          onSubmit={this.props.onSubmit}
-        />
-      );
+  const renderForm = () => {
+    switch (coordinateSystem) {
+      case MGRS:
+        return <MgrsForm settings={settings} zoom={zoom} center={center} onSubmit={onSubmit} />;
+      case UTM:
+        return <UtmForm settings={settings} zoom={zoom} center={center} onSubmit={onSubmit} />;
+      default:
+        return (
+          <DecimalDegreesForm settings={settings} zoom={zoom} center={center} onSubmit={onSubmit} />
+        );
     }
+  };
 
-    if (this.state.coordinateSystem === UTM) {
-      return (
-        <UtmForm
-          settings={this.props.settings}
-          zoom={this.props.zoom}
-          center={this.props.center}
-          onSubmit={this.props.onSubmit}
-        />
-      );
-    }
-
-    return (
-      <DecimalDegreesForm
-        settings={this.props.settings}
-        zoom={this.props.zoom}
-        center={this.props.center}
-        onSubmit={this.props.onSubmit}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <div data-test-subj="mapSetViewForm" style={{ width: 240 }}>
-        <EuiPopover
-          panelPaddingSize="s"
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this._closePopover}
-          button={
-            <EuiButtonEmpty iconType="controlsHorizontal" size="xs" onClick={this._togglePopover}>
+  return (
+    <div
+      data-test-subj="mapSetViewForm"
+      css={css`
+        width: 240px;
+      `}
+    >
+      <EuiFormRow
+        label={
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="controlsHorizontal" />
+            </EuiFlexItem>
+            <EuiFlexItem>
               <FormattedMessage
                 id="xpack.maps.setViewControl.changeCoordinateSystemButtonLabel"
                 defaultMessage="Coordinate system"
               />
-            </EuiButtonEmpty>
-          }
-        >
-          <EuiRadioGroup
-            options={COORDINATE_SYSTEM_OPTIONS}
-            idSelected={this.state.coordinateSystem}
-            onChange={this._onCoordinateSystemChange}
-          />
-        </EuiPopover>
-        {this._renderForm()}
-      </div>
-    );
-  }
-}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        css={css`
+          border-bottom: 1px solid ${euiTheme.colors.backgroundLightText};
+          margin-bottom: ${euiTheme.size.s};
+          padding-bottom: ${euiTheme.size.s};
+        `}
+      >
+        <EuiRadioGroup
+          options={COORDINATE_SYSTEM_OPTIONS}
+          idSelected={coordinateSystem}
+          onChange={onCoordinateSystemChange}
+        />
+      </EuiFormRow>
+      {renderForm()}
+    </div>
+  );
+});
+
+SetViewForm.displayName = 'SetViewForm';

@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { EditorError, ESQLMessage, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { ESQLCallbacks } from '../../shared/types';
 import { getCallbackMocks } from '../../__tests__/helpers';
 import { ValidationOptions } from '../types';
@@ -29,7 +28,7 @@ export const setup = async () => {
     opts: ValidationOptions = {},
     cb: ESQLCallbacks = callbacks
   ) => {
-    return await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
+    return await validateQuery(query, opts, cb);
   };
 
   const assertErrors = (errors: unknown[], expectedErrors: string[], query?: string) => {
@@ -66,7 +65,7 @@ export const setup = async () => {
     opts: ValidationOptions = {},
     cb: ESQLCallbacks = callbacks
   ) => {
-    const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, opts, cb);
+    const { errors, warnings } = await validateQuery(query, opts, cb);
     assertErrors(errors, expectedErrors, query);
     if (expectedWarnings) {
       assertErrors(warnings, expectedWarnings, query);

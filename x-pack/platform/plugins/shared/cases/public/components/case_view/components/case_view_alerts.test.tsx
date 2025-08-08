@@ -9,21 +9,20 @@ import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import type { CaseUI } from '../../../../common';
 import { CaseViewAlerts } from './case_view_alerts';
 import * as api from '../../../containers/api';
 import type { FeatureIdsResponse } from '../../../containers/types';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 jest.mock('../../../containers/api');
 
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+  AlertsTable: jest.fn(() => <div data-test-subj="alerts-table" />),
 }));
 const mockAlertsTable = jest.mocked(AlertsTable);
 
@@ -33,24 +32,19 @@ const caseData: CaseUI = {
 };
 
 describe('CaseUI View Page activity tab', () => {
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render the alerts table', async () => {
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />);
 
     expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
   });
 
   it('should call the alerts table with correct props for security solution', async () => {
-    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+    renderWithTestingProviders(<CaseViewAlerts caseData={caseData} />);
+
     await waitFor(async () => {
       expect(mockAlertsTable).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -77,7 +71,8 @@ describe('CaseUI View Page activity tab', () => {
         ruleTypeIds: { buckets: [{ doc_count: 1, key: 'log-threshold' }] },
       },
     } as unknown as FeatureIdsResponse);
-    appMockRender.render(
+
+    renderWithTestingProviders(
       <CaseViewAlerts
         caseData={{
           ...caseData,
@@ -106,7 +101,7 @@ describe('CaseUI View Page activity tab', () => {
 
   it('should call the getFeatureIds with the correct alert ID', async () => {
     const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
-    appMockRender.render(
+    renderWithTestingProviders(
       <CaseViewAlerts
         caseData={{
           ...caseData,
@@ -114,6 +109,7 @@ describe('CaseUI View Page activity tab', () => {
         }}
       />
     );
+
     await waitFor(async () => {
       expect(getFeatureIdsMock).toHaveBeenCalledWith({
         query: {
@@ -127,7 +123,7 @@ describe('CaseUI View Page activity tab', () => {
   });
 
   it('should show an empty prompt when the cases has no alerts', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <CaseViewAlerts
         caseData={{
           ...caseData,

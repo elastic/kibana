@@ -25,6 +25,7 @@ import {
 import { uniq } from 'lodash';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { css } from '@emotion/react';
 import { DOCUMENT_FIELD_NAME } from '../../../../../../common/constants';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType, OperationMetadata } from '../../../../../types';
@@ -136,6 +137,7 @@ export const termsOperation: OperationDefinition<
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  scale: () => 'ordinal',
   getCurrentFields: (targetColumn) => {
     return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
   },
@@ -237,7 +239,6 @@ export const termsOperation: OperationDefinition<
       label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       sourceField: field.name,
       isBucketed: true,
       params: {
@@ -774,7 +775,7 @@ The top values of a specified field ranked by the chosen metric.
                 }}
                 position="top"
                 size="s"
-                type="questionInCircle"
+                type="question"
               />
             </>
           }
@@ -1008,6 +1009,9 @@ The top values of a specified field ranked by the chosen metric.
           <>
             <EuiSpacer size="m" />
             <EuiAccordion
+              css={css`
+                color: ${euiTheme.colors.primary};
+              `}
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={
@@ -1093,7 +1097,7 @@ The top values of a specified field ranked by the chosen metric.
                       }}
                       position="top"
                       size="s"
-                      type="questionInCircle"
+                      type="question"
                     />
                   </EuiText>
                 }

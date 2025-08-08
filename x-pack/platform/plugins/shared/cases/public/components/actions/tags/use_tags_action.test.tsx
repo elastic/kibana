@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useTagsAction } from './use_tags_action';
 
 import * as api from '../../../containers/api';
 import { basicCase } from '../../../containers/mock';
+import { TestProviders } from '../../../common/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 
 jest.mock('../../../containers/api');
 
 describe('useTagsAction', () => {
-  let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -34,7 +33,7 @@ describe('useTagsAction', () => {
           isDisabled: false,
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -59,7 +58,7 @@ describe('useTagsAction', () => {
     const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -78,18 +77,20 @@ describe('useTagsAction', () => {
 
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith({
-        cases: [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
-      });
+    });
+
+    expect(onActionSuccess).toHaveBeenCalled();
+    expect(updateSpy).toHaveBeenCalledWith({
+      cases: [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
     });
   });
 
   it('shows the success toaster correctly when updating one case', async () => {
+    const coreStart = coreMock.createStart();
     const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -104,7 +105,7 @@ describe('useTagsAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Edited case',
         className: 'eui-textBreakWord',
       });
@@ -112,10 +113,11 @@ describe('useTagsAction', () => {
   });
 
   it('shows the success toaster correctly when updating multiple cases', async () => {
+    const coreStart = coreMock.createStart();
     const { result } = renderHook(
       () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
       }
     );
 
@@ -130,7 +132,7 @@ describe('useTagsAction', () => {
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Edited 2 cases',
         className: 'eui-textBreakWord',
       });

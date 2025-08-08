@@ -35,6 +35,8 @@ webpack_cli(
     "//src/platform/packages/shared/kbn-std",
     "//src/platform/packages/shared/kbn-safer-lodash-set",
     "//src/platform/packages/private/kbn-peggy",
+    "//src/platform/packages/private/kbn-dot-text",
+    "//src/platform/packages/private/kbn-dot-text-loader",
     "//packages/kbn-peggy-loader",
     "//src/platform/packages/shared/shared-ux/error_boundary",
     "//src/platform/packages/shared/kbn-rison",
@@ -44,6 +46,7 @@ webpack_cli(
     "//src/platform/packages/shared/react/kibana_context/render",
     "//src/platform/packages/shared/react/kibana_context/theme",
     "//src/platform/packages/shared/shared-ux/router/impl:shared-ux-router",
+    "//src/platform/packages/shared/react/kibana_mount:react-kibana-mount"
   ],
   output_dir = True,
   args = [
@@ -59,7 +62,7 @@ webpack_cli(
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "REACT_18": "$(REACT_18)",
+      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
   }),
   visibility = ["//visibility:public"],

@@ -75,8 +75,29 @@ export const onboardingHubStepFinishedEvent: OnboardingHubTelemetryEvent = {
   },
 };
 
+export const onboardingHubStepSelectorClickedEvent: OnboardingHubTelemetryEvent = {
+  eventType: OnboardingHubEventTypes.OnboardingHubStepSelectorClicked,
+  schema: {
+    originStepId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Active step ID',
+        optional: false,
+      },
+    },
+    selectorId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Clicked Selector ID',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const onboardingHubTelemetryEvents = [
   onboardingHubStepOpenEvent,
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepFinishedEvent,
+  onboardingHubStepSelectorClickedEvent,
 ];

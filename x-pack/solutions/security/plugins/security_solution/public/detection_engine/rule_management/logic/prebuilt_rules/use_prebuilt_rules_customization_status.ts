@@ -6,8 +6,6 @@
  */
 
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from './use_prebuilt_rule_customization_upselling_message';
 
 /**
@@ -17,23 +15,13 @@ import { usePrebuiltRuleCustomizationUpsellingMessage } from './use_prebuilt_rul
  * enabled and returns the reason why it's disabled if it's the case.
  */
 export const usePrebuiltRulesCustomizationStatus = (): PrebuiltRulesCustomizationStatus => {
-  const isFeatureFlagEnabled = useIsExperimentalFeatureEnabled('prebuiltRulesCustomizationEnabled');
   // Upselling message is returned when the license level is insufficient,
   // otherwise it's undefined
   const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
     'prebuilt_rule_customization'
   );
 
-  const isRulesCustomizationEnabled = isFeatureFlagEnabled && !upsellingMessage;
-  let customizationDisabledReason;
-  if (!isRulesCustomizationEnabled) {
-    customizationDisabledReason = !isFeatureFlagEnabled
-      ? PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-      : PrebuiltRulesCustomizationDisabledReason.License;
-  }
-
   return {
-    isRulesCustomizationEnabled,
-    customizationDisabledReason,
+    isRulesCustomizationEnabled: !upsellingMessage,
   };
 };

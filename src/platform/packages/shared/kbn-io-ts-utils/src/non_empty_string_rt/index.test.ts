@@ -8,7 +8,7 @@
  */
 
 import { nonEmptyStringRt } from '.';
-import { isLeft, isRight } from 'fp-ts/lib/Either';
+import { isLeft, isRight } from 'fp-ts/Either';
 
 describe('nonEmptyStringRt', () => {
   it('fails on empty strings', () => {

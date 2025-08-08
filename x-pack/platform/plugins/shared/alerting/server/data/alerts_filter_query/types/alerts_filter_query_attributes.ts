@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 
 export interface AlertsFilterAttributes {
   query?: Record<string, unknown>;

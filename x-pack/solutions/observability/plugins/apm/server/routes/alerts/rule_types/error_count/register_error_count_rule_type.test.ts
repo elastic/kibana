@@ -145,6 +145,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
@@ -170,6 +176,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo-2',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
@@ -195,6 +207,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
@@ -286,6 +304,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          transaction: {
+            name: 'tx-name-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, name: tx-name-foo. Alert when > 2.',
@@ -313,6 +340,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo-2',
+            name: 'foo',
+          },
+          transaction: {
+            name: 'tx-name-foo-2',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, name: tx-name-foo-2. Alert when > 2.',
@@ -340,6 +376,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          transaction: {
+            name: 'tx-name-bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, name: tx-name-bar. Alert when > 2.',
@@ -436,6 +481,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: 'error-key-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          error: {
+            grouping_key: 'error-key-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, error key: error-key-foo. Alert when > 2.',
@@ -461,6 +515,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: 'error-key-foo-2',
+        grouping: {
+          service: {
+            environment: 'env-foo-2',
+            name: 'foo',
+          },
+          error: {
+            grouping_key: 'error-key-foo-2',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, error key: error-key-foo-2. Alert when > 2.',
@@ -486,6 +549,15 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: 'error-key-bar',
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          error: {
+            grouping_key: 'error-key-bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, error key: error-key-bar. Alert when > 2.',
@@ -576,6 +648,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
@@ -601,6 +679,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo-2',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo-2',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2. Alert when > 2.',
@@ -626,6 +710,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
@@ -717,6 +807,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
@@ -724,7 +820,7 @@ describe('Error count alert', () => {
         threshold: 2,
         triggerValue: 5,
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED',
       payload: {
@@ -743,6 +839,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Not defined',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
@@ -750,7 +852,7 @@ describe('Error count alert', () => {
         threshold: 2,
         triggerValue: 4,
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED',
       payload: {
@@ -769,6 +871,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-bar',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar. Alert when > 2.',
@@ -864,6 +972,16 @@ describe('Error count alert', () => {
         environment: 'env-foo',
         errorGroupingKey: 'error-key-foo',
         errorGroupingName: 'error-name-foo',
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+          error: {
+            grouping_key: 'error-key-foo',
+            grouping_name: 'error-name-foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo, error key: error-key-foo, error name: error-name-foo. Alert when > 2.',
@@ -891,6 +1009,16 @@ describe('Error count alert', () => {
         environment: 'env-foo-2',
         errorGroupingKey: 'error-key-foo-2',
         errorGroupingName: 'error-name-foo2',
+        grouping: {
+          service: {
+            environment: 'env-foo-2',
+            name: 'foo',
+          },
+          error: {
+            grouping_key: 'error-key-foo-2',
+            grouping_name: 'error-name-foo2',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 4 in the last 5 mins for service: foo, env: env-foo-2, error key: error-key-foo-2, error name: error-name-foo2. Alert when > 2.',
@@ -918,6 +1046,16 @@ describe('Error count alert', () => {
         environment: 'env-bar',
         errorGroupingKey: 'error-key-bar',
         errorGroupingName: 'error-name-bar',
+        grouping: {
+          service: {
+            environment: 'env-bar',
+            name: 'bar',
+          },
+          error: {
+            grouping_key: 'error-key-bar',
+            grouping_name: 'error-name-bar',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 3 in the last 5 mins for service: bar, env: env-bar, error key: error-key-bar, error name: error-name-bar. Alert when > 2.',
@@ -1004,6 +1142,12 @@ describe('Error count alert', () => {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'env-foo',
         errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'env-foo',
+            name: 'foo',
+          },
+        },
         interval: '5 mins',
         reason:
           'Error count is 5 in the last 5 mins for service: foo, env: env-foo. Alert when > 2.',
@@ -1023,6 +1167,123 @@ describe('Error count alert', () => {
         'service.environment': 'env-foo',
         'service.name': 'foo',
       },
+    });
+  });
+  it('sends recovered alerts with their context', async () => {
+    const { services, dependencies, executor } = createRuleTypeMocks();
+
+    registerErrorCountRuleType(dependencies);
+
+    const params = {
+      threshold: 2,
+      windowSize: 5,
+      windowUnit: 'm',
+    };
+
+    services.scopedClusterClient.asCurrentUser.search.mockResponse({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 1,
+        },
+      },
+      aggregations: {
+        error_counts: {
+          buckets: [],
+        },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
+    services.alertsClient.getRecoveredAlerts.mockReturnValue([
+      {
+        alert: {
+          getId: jest.fn().mockReturnValue('test-id'),
+          getUuid: jest.fn().mockReturnValue('test-uuid'),
+          scheduledExecutionOptions: undefined,
+          meta: [],
+          state: [],
+          context: {},
+          id: 'synthtrace-high-cardinality-0_Synthtrace: many_errors',
+          alertAsData: undefined,
+        },
+        hit: {
+          'processor.event': 'error',
+          'kibana.alert.evaluation.value': 60568922,
+          'kibana.alert.evaluation.threshold': 24999998,
+          'kibana.alert.reason':
+            'Error count is 60568922 in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors. Alert when > 24999998.',
+          'agent.name': 'java',
+          'service.environment': 'Synthtrace: many_errors',
+          'service.name': 'synthtrace-high-cardinality-0',
+          'kibana.alert.rule.category': 'Error count threshold',
+          'kibana.alert.rule.consumer': 'alerts',
+          'kibana.alert.rule.execution.uuid': '8ecb0754-1220-4b6b-b95d-87b3594e925a',
+          'kibana.alert.rule.name': 'Error count threshold rule',
+          'kibana.alert.rule.parameters': {
+            groupBy: ['service.name', 'service.environment'],
+          },
+          'kibana.alert.rule.producer': 'apm',
+          'kibana.alert.rule.revision': 8,
+          'kibana.alert.rule.rule_type_id': 'apm.error_rate',
+          'kibana.alert.rule.tags': [],
+          'kibana.alert.rule.uuid': '63028cf5-c059-4a6b-b375-fd9007233223',
+          'kibana.space_ids': [],
+          '@timestamp': '2025-02-20T12:11:51.960Z',
+          'event.action': 'active',
+          'event.kind': 'signal',
+          'kibana.alert.rule.execution.timestamp': '2025-02-20T12:11:51.960Z',
+          'kibana.alert.action_group': 'threshold_met',
+          'kibana.alert.flapping': true,
+          'kibana.alert.flapping_history': [],
+          'kibana.alert.instance.id': 'synthtrace-high-cardinality-0_Synthtrace: many_errors',
+          'kibana.alert.maintenance_window_ids': [],
+          'kibana.alert.consecutive_matches': 2,
+          'kibana.alert.status': 'active',
+          'kibana.alert.uuid': '81617b97-02d2-413a-9f64-77161de80df4',
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.duration.us': 12012000,
+          'kibana.alert.start': '2025-02-20T12:11:39.948Z',
+          'kibana.alert.time_range': [],
+          'kibana.version': '9.1.0',
+          tags: [],
+          'kibana.alert.previous_action_group': 'threshold_met',
+        },
+      },
+    ]);
+
+    await executor({ params });
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
+
+    expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
+      context: {
+        alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
+        environment: 'Synthtrace: many_errors',
+        errorGroupingKey: undefined,
+        grouping: {
+          service: {
+            environment: 'Synthtrace: many_errors',
+            name: 'synthtrace-high-cardinality-0',
+          },
+        },
+        interval: '5 mins',
+        reason:
+          'Error count is 60568922 in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors. Alert when > 24999998.',
+        serviceName: 'synthtrace-high-cardinality-0',
+        threshold: 2,
+        triggerValue: 60568922,
+        viewInAppUrl:
+          'http://localhost:5601/eyr/app/apm/services/synthtrace-high-cardinality-0/errors?environment=Synthtrace%3A%20many_errors',
+      },
+      id: 'test-id',
     });
   });
 });

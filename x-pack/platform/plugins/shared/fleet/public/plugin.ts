@@ -47,13 +47,13 @@ import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { Subject } from 'rxjs';
 
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -76,7 +76,10 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import { createPackageSearchProvider } from './search_provider';
+import {
+  createCustomIntegrationsSearchProvider,
+  createPackageSearchProvider,
+} from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
@@ -89,6 +92,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 export type { FleetConfigType } from '../common/types';
 
@@ -136,7 +140,8 @@ export interface FleetStartDeps {
   automaticImport?: AutomaticImportPluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
+  embeddable: EmbeddableStart;
+  logsDataAccess: LogsDataAccessPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -148,7 +153,6 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -291,6 +295,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     if (deps.globalSearch) {
       deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
+      deps.globalSearch.registerResultProvider(
+        createCustomIntegrationsSearchProvider(deps.customIntegrations)
+      );
     }
 
     return {};

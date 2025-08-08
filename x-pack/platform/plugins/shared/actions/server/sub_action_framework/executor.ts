@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { ExecutorType } from '../types';
-import { ExecutorParams, SubActionConnectorType } from './types';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { ExecutorType } from '../types';
+import type { ExecutorParams, SubActionConnectorType } from './types';
 
 const isFunction = (v: unknown): v is Function => {
   return typeof v === 'function';

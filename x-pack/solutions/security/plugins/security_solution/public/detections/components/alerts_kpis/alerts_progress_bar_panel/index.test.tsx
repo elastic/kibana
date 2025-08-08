@@ -11,13 +11,19 @@ import { AlertsProgressBarPanel } from '.';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { STACK_BY_ARIA_LABEL } from '../common/translations';
 import type { GroupBySelection } from './types';
+import { useStackByFields } from '../common/hooks';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../common/hooks');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
+
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
 
 jest.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 const mockUseSummaryChartData = useSummaryChartData as jest.Mock;
@@ -33,74 +39,63 @@ describe('Alert by grouping', () => {
   };
 
   beforeEach(() => {
-    mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    mockUseSummaryChartData.mockReturnValue({ items: [], isLoading: false });
+    (useStackByFields as jest.Mock).mockReturnValue(jest.fn());
   });
 
-  test('renders correctly', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="alerts-progress-bar-panel"]')
-      ).toBeInTheDocument();
-    });
+  test('renders correctly', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('alerts-progress-bar-panel')).toBeInTheDocument();
   });
 
-  test('render HeaderSection', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector(`[data-test-subj="header-section"]`)).toBeInTheDocument();
-    });
+  test('render HeaderSection', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('header-section')).toBeInTheDocument();
   });
 
-  test('renders inspect button', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsProgressBarPanel {...defaultProps} />
-        </TestProviders>
-      );
-      expect(container.querySelector('[data-test-subj="inspect-icon-button"]')).toBeInTheDocument();
-    });
+  test('renders inspect button', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <AlertsProgressBarPanel {...defaultProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('inspect-icon-button')).toBeInTheDocument();
   });
 
   describe('combo box', () => {
     const setGroupBySelection = jest.fn();
 
-    test('renders combo box', async () => {
-      await act(async () => {
-        const { container } = render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} />
-          </TestProviders>
-        );
-        expect(container.querySelector('[data-test-subj="stackByComboBox"]')).toBeInTheDocument();
-      });
+    test('renders combo box', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect(getByTestId('stackByComboBox')).toBeInTheDocument();
     });
 
     test('combo box renders corrected options', async () => {
-      await act(async () => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      act(() => {
         if (comboBox) {
           comboBox.focus(); // display the combo box options
         }
       });
+
       const optionsFound = screen.getAllByRole('option').map((option) => option.textContent);
       options.forEach((option, i) => {
         expect(optionsFound[i]).toEqual(option);
@@ -109,19 +104,22 @@ describe('Alert by grouping', () => {
 
     test('it invokes setGroupBySelection when an option is selected', async () => {
       const toBeSelected = 'user.name';
-      await act(async () => {
-        render(
-          <TestProviders>
-            <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
-          </TestProviders>
-        );
-        const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      render(
+        <TestProviders>
+          <AlertsProgressBarPanel {...defaultProps} setGroupBySelection={setGroupBySelection} />
+        </TestProviders>
+      );
+      const comboBox = screen.getByRole('combobox', { name: STACK_BY_ARIA_LABEL });
+      act(() => {
         if (comboBox) {
           comboBox.focus(); // display the combo box options
         }
       });
+
       const button = await screen.findByText(toBeSelected);
-      fireEvent.click(button);
+      act(() => {
+        fireEvent.click(button);
+      });
 
       expect(setGroupBySelection).toBeCalledWith(toBeSelected);
     });

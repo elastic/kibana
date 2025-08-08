@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
-import { SanitizedRule, RawRule } from '../../../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -17,7 +17,7 @@ import { getMappedParams } from '../../../../rules_client/common/mapped_params_u
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import {
+import type {
   RulesClientContext,
   NormalizedAlertActionWithGeneratedValues,
 } from '../../../../rules_client/types';
@@ -27,14 +27,15 @@ import {
   addGeneratedActionValues,
   incrementRevision,
   createNewAPIKeySet,
-  migrateLegacyActions,
   updateMetaAttributes,
+  bulkMigrateLegacyActions,
 } from '../../../../rules_client/lib';
-import { RuleParams } from '../../types';
+import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
 import { createRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 
-import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
+import { validateScheduleLimit } from '../get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -301,22 +302,25 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   isSystemAction: (connectorId: string) => boolean;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
+  await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
   const originalRule = originalRuleSavedObject.attributes;
-  let updatedRule = { ...originalRule };
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
-  const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
+  const artifacts = updateRuleData.artifacts ?? {};
+  const ruleType = context.ruleTypeRegistry.get(originalRule.alertTypeId);
 
   // Extract saved object references for this rule
   const {
     references: extractedReferences,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await extractReferences(
     context,
     ruleType,
     allActions as NormalizedAlertActionWithGeneratedValues[],
-    validatedRuleTypeParams
+    validatedRuleTypeParams,
+    artifacts
   );
 
   // Increment revision if applicable field has changed
@@ -327,20 +331,6 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         updatedParams,
       })
     : originalRule.revision;
-
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-  const migratedActions = await migrateLegacyActions(context, {
-    ruleId: originalRuleSavedObject.id,
-    attributes: originalRule as RawRule,
-  });
-
-  if (migratedActions.hasLegacyActions) {
-    updatedRule = {
-      ...updatedRule,
-      notifyWhen: undefined,
-      throttle: undefined,
-    };
-  }
 
   const username = await context.getUserName();
 
@@ -358,8 +348,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   );
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
-    ...updatedRule,
-    ...omit(updateRuleData, 'actions', 'systemActions'),
+    ...originalRule,
+    ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
@@ -367,6 +357,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
+    artifacts: artifactsWithRefs,
   });
 
   const mappedParams = getMappedParams(updatedParams);

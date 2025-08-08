@@ -305,11 +305,9 @@ export function createAnnotationsClient(params: {
       return await esClient.deleteByQuery({
         index: readIndex,
         ignore_unavailable: true,
-        body: {
-          query: {
-            term: {
-              _id: id,
-            },
+        query: {
+          term: {
+            _id: id,
           },
         },
         refresh: true,

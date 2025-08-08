@@ -32,10 +32,11 @@ const sameClusterRestrictedPackages = [
  */
 export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPolicy>): string[] {
   const isRestrictedToSameClusterES =
-    agentPolicy.package_policies &&
-    agentPolicy.package_policies.some(
-      (p) => p.package?.name && sameClusterRestrictedPackages.includes(p.package?.name)
-    );
+    agentPolicy.has_fleet_server ||
+    (agentPolicy.package_policies &&
+      agentPolicy.package_policies.some(
+        (p) => p.package?.name && sameClusterRestrictedPackages.includes(p.package?.name)
+      ));
 
   if (isRestrictedToSameClusterES) {
     return [outputType.Elasticsearch];

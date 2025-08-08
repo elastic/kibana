@@ -21,8 +21,12 @@ export {
 } from './actions/constants';
 
 export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
-
 export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
+export type { DefaultControlApi } from './controls/types';
+export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
+export type { RangesliderControlApi } from './controls/data_controls/range_slider/types';
+export type { ESQLControlApi } from './controls/esql_control/types';
+export type { TimesliderControlApi } from './controls/timeslider_control/types';
 
 export {
   ControlGroupRenderer,
@@ -31,21 +35,15 @@ export {
   type ControlGroupRendererProps,
 } from './control_group/control_group_renderer';
 
-export {
-  CONTROL_GROUP_TYPE,
-  OPTIONS_LIST_CONTROL,
-  RANGE_SLIDER_CONTROL,
-  TIME_SLIDER_CONTROL,
-  ESQL_CONTROL,
-} from '../common';
 export type {
   ControlGroupRuntimeState,
-  ControlGroupSerializedState,
   ControlPanelState,
   ControlPanelsState,
   DefaultDataControlState,
 } from '../common';
 export type { OptionsListControlState } from '../common/options_list';
+
+export { serializeRuntimeState } from './control_group/utils/serialize_runtime_state';
 
 export function plugin() {
   return new ControlsPlugin();

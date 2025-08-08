@@ -10,6 +10,8 @@
 import React, { CSSProperties, useLayoutEffect } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
+import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
@@ -24,6 +26,7 @@ interface MetricVisValueProps {
 
 export const MetricVisValue = (props: MetricVisValueProps) => {
   const { style, metric, onFilter, labelConfig, colorFullBackground, autoScale } = props;
+
   const containerClassName = classNames('legacyMtrVis__container', {
     'legacyMtrVis__container--light': metric.lightText,
     'legacyMtrVis__container-isfilterable': onFilter,
@@ -38,11 +41,13 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   const metricComponent = (
     <div
       className={containerClassName}
+      css={styles.legacyMtrVisContainer}
       style={autoScale && colorFullBackground ? {} : { backgroundColor: metric.bgColor }}
     >
       <div
         data-test-subj="metric_value"
         className="legacyMtrVis__value"
+        css={styles.legacyMtrVisValue}
         style={{
           ...(style.spec as CSSProperties),
           ...(metric.color ? { color: metric.color } : {}),
@@ -74,6 +79,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   if (onFilter) {
     return (
       <button
+        data-test-subj="metric_value_button"
         css={{ display: 'block' }}
         onClick={() => onFilter()}
         title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
@@ -86,4 +92,43 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   }
 
   return metricComponent;
+};
+
+const styles = {
+  legacyMtrVisValue: ({ euiTheme }: UseEuiTheme) =>
+    css`
+      ${euiTextTruncate()};
+      font-weight: ${euiTheme.font.weight.bold};
+    `,
+  legacyMtrVisContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&.legacyMtrVis__container': {
+        textAlign: 'center',
+        padding: euiTheme.size.base,
+        display: 'flex',
+        flexDirection: 'column',
+      },
+      '&.legacyMtrVis__container--light': {
+        color: euiTheme.colors.emptyShade,
+      },
+      '&.legacyMtrVis__container-isfull': {
+        minHeight: '100%',
+        minWidth: 'max-content',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flex: '1 0 100%',
+      },
+      '&.legacyMtrVis__container-isfilterable': {
+        cursor: 'pointer',
+        transition: `transform ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        transform: 'translate(0, 0)',
+
+        '&:hover, &:focus': {
+          boxShadow: 'none',
+          transform: 'translate(0, -2px)',
+        },
+      },
+    }),
 };

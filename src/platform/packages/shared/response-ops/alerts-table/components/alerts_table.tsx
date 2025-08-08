@@ -43,7 +43,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
-import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
 import { Storage } from '../utils/storage';
@@ -170,6 +170,8 @@ const AlertsTableContent = typedForwardRef(
       ruleTypeIds,
       consumers,
       query,
+      minScore,
+      trackScores = false,
       initialSort = DEFAULT_SORT,
       initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
       leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -185,7 +187,8 @@ const AlertsTableContent = typedForwardRef(
       toolbarVisibility,
       shouldHighlightRow,
       dynamicRowHeight = false,
-      emptyStateHeight,
+      emptyState,
+      openLinksInNewTab = false,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -193,8 +196,11 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutHeader,
       renderFlyoutBody,
       renderFlyoutFooter,
+      flyoutOwnsFocus = false,
+      flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
+      configurationStorage = new Storage(window.localStorage),
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -206,9 +212,9 @@ const AlertsTableContent = typedForwardRef(
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
-    const storage = useRef(new Storage(window.localStorage));
+    const storageRef = useRef(configurationStorage);
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storage.current.get(
+    const localStorageAlertsTableConfig = storageRef.current.get(
       id
     ) as Partial<AlertsTablePersistedConfiguration>;
 
@@ -261,7 +267,7 @@ const AlertsTableContent = typedForwardRef(
     } = useColumns({
       ruleTypeIds,
       storageAlertsTable,
-      storage,
+      storage: storageRef,
       id,
       defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
       alertsFields: propBrowserFields,
@@ -277,6 +283,8 @@ const AlertsTableContent = typedForwardRef(
       runtimeMappings,
       pageIndex: 0,
       pageSize: initialPageSize,
+      minScore,
+      trackScores,
     });
 
     useEffect(() => {
@@ -287,6 +295,8 @@ const AlertsTableContent = typedForwardRef(
         query,
         sort,
         runtimeMappings,
+        minScore,
+        trackScores,
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
           ruleTypeIds,
@@ -300,7 +310,7 @@ const AlertsTableContent = typedForwardRef(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
       data: alertsData,
@@ -321,9 +331,9 @@ const AlertsTableContent = typedForwardRef(
 
     useEffect(() => {
       if (onLoaded && !isLoadingAlerts && isSuccess) {
-        onLoaded(alerts, columns);
+        onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
-    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded]);
+    }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -357,7 +367,7 @@ const AlertsTableContent = typedForwardRef(
         refetchAlerts();
       }
       queryClient.invalidateQueries(queryKeys.casesBulkGet(caseIds));
-      queryClient.invalidateQueries(alertsQueryKeys.mutedAlerts(ruleIds));
+      queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
       queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
     }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
 
@@ -388,22 +398,27 @@ const AlertsTableContent = typedForwardRef(
 
     const onSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
-        const newSort = _sort.map((sortItem) => {
-          return {
-            [sortItem.id]: {
-              order: sortItem.direction,
-            },
-          };
-        });
+        const newSort = _sort
+          .map((sortItem) => {
+            return {
+              [sortItem.id]: {
+                order: sortItem.direction,
+              },
+            };
+          })
+          .filter((entry) => {
+            const sortKey = Object.keys(entry)[0];
+            return visibleColumns.includes(sortKey);
+          });
 
         storageAlertsTable.current = {
           ...storageAlertsTable.current,
           sort: newSort,
         };
-        storage.current.set(id, storageAlertsTable.current);
+        storageRef.current.set(id, storageAlertsTable.current);
         setSort(newSort);
       },
-      [id]
+      [id, visibleColumns]
     );
 
     const CasesContext = useMemo(() => {
@@ -472,6 +487,9 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+          flyoutOwnsFocus,
+          flyoutPagination,
+          openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
       [
@@ -502,6 +520,9 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        flyoutOwnsFocus,
+        flyoutPagination,
+        openLinksInNewTab,
         memoizedServices,
       ]
     );
@@ -586,7 +607,10 @@ const AlertsTableContent = typedForwardRef(
               additionalToolbarControls={additionalToolbarControls}
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
-              height={emptyStateHeight}
+              messageTitle={emptyState?.messageTitle}
+              messageBody={emptyState?.messageBody}
+              height={emptyState?.height}
+              variant={emptyState?.variant}
             />
           </InspectButtonContainer>
         )}

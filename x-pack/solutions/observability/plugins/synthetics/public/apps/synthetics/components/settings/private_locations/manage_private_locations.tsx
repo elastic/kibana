@@ -8,15 +8,23 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { isEqual } from 'lodash';
+import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
-import { AddLocationFlyout, NewLocation } from './add_location_flyout';
+import { AddOrEditLocationFlyout, NewLocation } from './add_or_edit_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
-import { selectAddingNewPrivateLocation } from '../../../state/private_locations/selectors';
+import {
+  selectPrivateLocationFlyoutVisible,
+  selectPrivateLocationToEdit,
+} from '../../../state/private_locations/selectors';
 import { getServiceLocations } from '../../../state';
 import { getAgentPoliciesAction } from '../../../state/agent_policies';
-import { setIsCreatePrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
+import {
+  setIsPrivateLocationFlyoutVisible as setIsPrivateLocationFlyoutVisible,
+  setPrivateLocationToEdit,
+} from '../../../state/private_locations/actions';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
@@ -33,23 +41,53 @@ export const ManagePrivateLocations = () => {
     [spacesApi]
   );
 
-  const isAddingNew = useSelector(selectAddingNewPrivateLocation);
-  const setIsAddingNew = useCallback(
-    (val: boolean) => dispatch(setIsCreatePrivateLocationFlyoutVisible(val)),
+  const isPrivateLocationFlyoutVisible = useSelector(selectPrivateLocationFlyoutVisible);
+  const privateLocationToEdit = useSelector(selectPrivateLocationToEdit);
+  const setIsFlyoutOpen = useCallback(
+    (val: boolean) => dispatch(setIsPrivateLocationFlyoutVisible(val)),
     [dispatch]
   );
 
-  const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
+  const {
+    onCreateLocationAPI,
+    onEditLocationAPI,
+    loading,
+    privateLocations,
+    onDeleteLocationAPI,
+    deleteLoading,
+  } = usePrivateLocationsAPI();
 
   useEffect(() => {
     dispatch(getAgentPoliciesAction.get());
     dispatch(getServiceLocations());
     // make sure flyout is closed when first visiting the page
-    dispatch(setIsCreatePrivateLocationFlyoutVisible(false));
+    dispatch(setIsPrivateLocationFlyoutVisible(false));
   }, [dispatch]);
 
   const handleSubmit = (formData: NewLocation) => {
-    onSubmit(formData);
+    if (privateLocationToEdit) {
+      const isLabelChanged = formData.label !== privateLocationToEdit.label;
+      const areTagsChanged = !isEqual(formData.tags, privateLocationToEdit.tags);
+      if (!isLabelChanged && !areTagsChanged) {
+        onCloseFlyout();
+      } else {
+        onEditLocationAPI(privateLocationToEdit.id, { label: formData.label, tags: formData.tags });
+      }
+    } else {
+      onCreateLocationAPI(formData);
+    }
+  };
+
+  const onEditLocation = (privateLocation: PrivateLocation) => {
+    dispatch(setPrivateLocationToEdit(privateLocation));
+    setIsFlyoutOpen(true);
+  };
+
+  const onCloseFlyout = () => {
+    if (privateLocationToEdit) {
+      dispatch(setPrivateLocationToEdit(undefined));
+    }
+    setIsFlyoutOpen(false);
   };
 
   return (
@@ -57,20 +95,22 @@ export const ManagePrivateLocations = () => {
       {loading ? (
         <LoadingState />
       ) : (
-        <ManageEmptyState privateLocations={privateLocations} setIsAddingNew={setIsAddingNew}>
+        <ManageEmptyState privateLocations={privateLocations} setIsFlyoutOpen={setIsFlyoutOpen}>
           <PrivateLocationsTable
             privateLocations={privateLocations}
-            onDelete={onDelete}
+            onDelete={onDeleteLocationAPI}
+            onEdit={onEditLocation}
             deleteLoading={deleteLoading}
           />
         </ManageEmptyState>
       )}
 
-      {isAddingNew ? (
-        <AddLocationFlyout
-          setIsOpen={setIsAddingNew}
+      {isPrivateLocationFlyoutVisible ? (
+        <AddOrEditLocationFlyout
+          onCloseFlyout={onCloseFlyout}
           onSubmit={handleSubmit}
           privateLocations={privateLocations}
+          privateLocationToEdit={privateLocationToEdit}
         />
       ) : null}
     </SpacesContextProvider>

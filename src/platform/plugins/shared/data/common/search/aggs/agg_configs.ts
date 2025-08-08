@@ -8,12 +8,12 @@
  */
 
 import moment from 'moment-timezone';
-import _, { cloneDeep } from 'lodash';
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import { isRangeFilter, TimeRange, RangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { ISearchOptions, IEsSearchResponse } from '@kbn/search-types';
@@ -472,8 +472,8 @@ export class AggConfigs {
     if (!this.hasTimeShifts()) {
       return response;
     }
-    const transformedRawResponse = cloneDeep(response.rawResponse);
-    if (!transformedRawResponse.aggregations) {
+    const transformedRawResponse = structuredClone(response.rawResponse);
+    if (!response.rawResponse.aggregations) {
       transformedRawResponse.aggregations = {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };

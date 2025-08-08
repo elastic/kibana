@@ -13,14 +13,13 @@ import {
   EuiPanel,
   EuiWindowEvent,
   keys,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 
 import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 import { usePanel } from './context';
-import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
+import { navPanelStyles, panelWrapperStyles } from './styles';
 
 const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined => {
   if (!selectedNode) return;
@@ -32,15 +31,8 @@ const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined
   });
 };
 
-const getTargetTestSubj = (target: EventTarget | null): string | undefined => {
-  if (!target) return;
-
-  return (target as HTMLElement).dataset.testSubj;
-};
-
 export const NavigationPanel: FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const { isOpen, close, getContent, selectedNode } = usePanel();
+  const { isOpen, close, getContent, selectedNode, selectedNodeEl } = usePanel();
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -54,47 +46,44 @@ export const NavigationPanel: FC = () => {
 
   const onOutsideClick = useCallback(
     ({ target }: Event) => {
+      if (!target) {
+        close();
+        return;
+      }
+
       let doClose = true;
 
-      if (target) {
-        // Only close if we are not clicking on the currently selected nav node
-        const testSubj =
-          getTargetTestSubj(target) ?? getTargetTestSubj((target as HTMLElement).parentNode);
-
-        if (
-          testSubj?.includes(`nav-item-${selectedNode?.path}`) ||
-          testSubj?.includes(`panelOpener-${selectedNode?.path}`)
-        ) {
-          doClose = false;
-        }
+      // Do not close if clicking on the button (or child of the button) of the currently selected node,
+      // because we must defer to allowing the button's click handler to manage toggling.
+      if (selectedNodeEl && selectedNodeEl.current?.contains(target as Node)) {
+        doClose = false;
       }
 
       if (doClose) {
         close();
       }
     },
-    [close, selectedNode]
+    [close, selectedNodeEl]
   );
-
-  const panelWrapperClasses = getPanelWrapperStyles();
-  const sideNavPanelStyles = getNavPanelStyles(euiTheme);
-  const panelClasses = classNames('sideNavPanel', 'eui-yScroll', sideNavPanelStyles);
 
   if (!isOpen) {
     return null;
   }
 
+  const panelClasses = classNames('sideNavPanel', 'eui-yScroll');
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <div className={panelWrapperClasses}>
-        <EuiFocusTrap autoFocus css={{ height: '100%' }}>
+      <div css={panelWrapperStyles}>
+        <EuiFocusTrap autoFocus style={{ height: '100%' }}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
               className={panelClasses}
+              css={navPanelStyles}
               hasShadow
               borderRadius="none"
-              paddingSize="m"
+              paddingSize="none"
               data-test-subj={getTestSubj(selectedNode)}
             >
               {getContent()}

@@ -8,10 +8,10 @@
 import qs from 'query-string';
 import axios from 'axios';
 import stringify from 'json-stable-stringify';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { request } from './axios_utils';
-import { ActionsConfigurationUtilities } from '../actions_config';
-import { AsApiContract } from '../../common';
+import type { ActionsConfigurationUtilities } from '../actions_config';
+import type { AsApiContract } from '../../common';
 
 export interface OAuthTokenResponse {
   tokenType: string;

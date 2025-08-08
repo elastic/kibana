@@ -25,12 +25,21 @@ export {
   mockDatasourceStates,
   defaultState,
   makeLensStore,
-  mountWithProvider,
+  mountWithReduxStore,
   renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
 export { mockDataViewWithTimefield } from './dataview_mock';
 export { mockAllSuggestions } from './suggestions_mock';
+export {
+  getLensAttributesMock,
+  getLensApiMock,
+  getLensInternalApiMock,
+  getLensSerializedStateMock,
+  createParentApiMock,
+  createUnifiedSearchApi,
+  makeEmbeddableServices,
+} from '../react_embeddable/mocks';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 

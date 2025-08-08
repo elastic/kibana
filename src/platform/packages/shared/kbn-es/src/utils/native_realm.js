@@ -27,9 +27,7 @@ exports.NativeRealm = class NativeRealm {
         await this._client.security.changePassword({
           username,
           refresh: 'wait_for',
-          body: {
-            password,
-          },
+          password,
         });
       } catch (err) {
         const isAnonymousUserPasswordChangeError =

@@ -1470,7 +1470,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                   params: {
                     emptyAsNull: true,
                   },
-                  scale: 'ratio',
                 },
               },
               incompleteColumns: {},
@@ -1705,7 +1704,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: true,
                     },
-                    scale: 'ratio',
                     sourceField: 'timestamp',
                   },
                 },
@@ -1749,7 +1747,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: true,
                     },
-                    scale: 'ratio',
                     sourceField: 'timestamp',
                   },
                 },
@@ -1793,7 +1790,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: true,
                     },
-                    scale: 'ratio',
                     sourceField: 'timestamp',
                   },
                 },
@@ -1832,7 +1828,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: true,
                     },
-                    scale: 'ratio',
                     sourceField: 'timestamp',
                   },
                 },
@@ -1880,7 +1875,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       ],
                       type: 'histogram',
                     },
-                    scale: 'interval',
                     sourceField: 'bytes',
                   },
                 },
@@ -1897,7 +1891,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: true,
                     },
-                    scale: 'ratio',
                     sourceField: 'timestamp',
                   },
                 },
@@ -2051,7 +2044,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'count',
                       isBucketed: false,
-                      scale: 'ratio',
                       sourceField: '___records___',
                       customLabel: true,
                     },
@@ -2060,7 +2052,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'formula',
                       isBucketed: false,
-                      scale: 'ratio',
                       params: { formula: 'count()' },
                       references: ['firstColumnX0'],
                     } as FormulaIndexPatternColumn,
@@ -2076,7 +2067,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'count',
                       isBucketed: false,
-                      scale: 'ratio',
                       sourceField: '___records___',
                       customLabel: true,
                     },
@@ -2085,7 +2075,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       dataType: 'number',
                       operationType: 'formula',
                       isBucketed: false,
-                      scale: 'ratio',
                       params: { formula: 'count()' },
                       references: ['secondX0'],
                     } as FormulaIndexPatternColumn,
@@ -2140,7 +2129,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       isFormulaBroken: false,
                     },
                     references: ['newColumnX0'],
-                    scale: 'ratio',
                   },
                   newColumnX0: {
                     customLabel: true,
@@ -2152,7 +2140,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: false,
                     },
-                    scale: 'ratio',
                     sourceField: '___records___',
                     timeScale: undefined,
                     timeShift: undefined,
@@ -2198,7 +2185,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                       isFormulaBroken: false,
                     },
                     references: ['secondX0'],
-                    scale: 'ratio',
                   },
                   secondX0: {
                     customLabel: true,
@@ -2210,7 +2196,6 @@ describe('FormBasedDimensionEditorPanel: onDrop', () => {
                     params: {
                       emptyAsNull: false,
                     },
-                    scale: 'ratio',
                     sourceField: '___records___',
                     timeScale: undefined,
                     timeShift: undefined,

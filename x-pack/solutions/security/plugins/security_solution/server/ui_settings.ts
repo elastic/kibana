@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
+  DEFAULT_AI_CONNECTOR,
+  DEFAULT_ALERT_TAGS_KEY,
+  DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
@@ -19,29 +23,27 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_MAX_UNASSOCIATED_NOTES,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  ENABLE_NEWS_FEED_SETTING,
-  IP_REPUTATION_LINKS_SETTING,
-  IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  MAX_UNASSOCIATED_NOTES,
-  NEWS_FEED_URL_SETTING,
-  NEWS_FEED_URL_SETTING_DEFAULT,
+  ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
-  SHOW_RELATED_INTEGRATIONS_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-  DEFAULT_ALERT_TAGS_KEY,
-  DEFAULT_ALERT_TAGS_VALUE,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_NEWS_FEED_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
-  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
-  ENABLE_GRAPH_VISUALIZATION_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
+  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
+  IP_REPUTATION_LINKS_SETTING,
+  IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  NEWS_FEED_URL_SETTING,
+  NEWS_FEED_URL_SETTING_DEFAULT,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -65,12 +67,6 @@ export const initUiSettings = (
   experimentalFeatures: ExperimentalFeatures,
   validationsEnabled: boolean
 ) => {
-  const enableVisualizationsInFlyoutLabel = i18n.translate(
-    'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel',
-    {
-      defaultMessage: 'Enable visualizations in flyout',
-    }
-  );
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -95,7 +91,7 @@ export const initUiSettings = (
         value: schema.number(),
         pause: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
@@ -116,7 +112,7 @@ export const initUiSettings = (
         from: schema.string(),
         to: schema.string(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
@@ -135,7 +131,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 50 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -156,7 +152,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 10 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -175,7 +171,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
@@ -190,7 +186,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
       name: i18n.translate(
@@ -212,23 +208,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
-    },
-    [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
-      name: enableVisualizationsInFlyoutLabel,
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
-        {
-          defaultMessage:
-            'Enable visualizations (analyzer and session viewer) in document details flyout.',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
@@ -237,13 +217,7 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
         {
-          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.
-            <br/>Note: This feature requires the {visualizationFlyoutFeatureFlag} setting to be enabled.
-            <br/>Please ensure both settings are enabled to use graph visualizations in flyout.`,
-          values: {
-            em: (chunks) => `<em>${chunks}</em>`,
-            visualizationFlyoutFeatureFlag: `<code>${enableVisualizationsInFlyoutLabel}</code>`,
-          },
+          defaultMessage: `Enable the Graph Visualization feature within the Security Solution.`,
         }
       ),
       type: 'boolean',
@@ -251,7 +225,44 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_ASSET_INVENTORY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
+        defaultMessage: 'Enable Security Asset Inventory',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
+        {
+          defaultMessage: `Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
+    },
+    [ENABLE_CLOUD_CONNECTOR_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
+        defaultMessage: 'Enable Cloud Connector',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
+        {
+          defaultMessage: `Enable the Cloud Connector experience within the Security Solution. When enabled, you can access the new Cloud Connector feature through the setting up an Agentless CSPM or Asset Inventory Integration.`,
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+      technicalPreview: true,
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
@@ -276,7 +287,7 @@ export const initUiSettings = (
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
@@ -291,7 +302,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.string(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [IP_REPUTATION_LINKS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.ipReputationLinks', {
@@ -315,7 +326,7 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_CCS_READ_WARNING_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
@@ -330,7 +341,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: false,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
@@ -348,7 +359,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ALERT_TAGS_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertTagsLabel', {
@@ -364,29 +375,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-      solution: 'security',
-    },
-    [MAX_UNASSOCIATED_NOTES]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
-        defaultMessage: 'Maximum amount of unassociated notes',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription',
-        {
-          defaultMessage:
-            'Defines the maximum amount of unassociated notes (notes that are not assigned to a timeline) that can be created.',
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      schema: schema.number({
-        min: 1,
-        max: 1000,
-        defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      }),
-      category: [APP_ID],
-      requiresPageReload: false,
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
       name: i18n.translate(
@@ -411,8 +400,34 @@ export const initUiSettings = (
       value: [],
       category: [APP_ID],
       requiresPageReload: false,
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.privilegedUserMonitoringDisabled
+      ? {}
+      : {
+          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+              {
+                defaultMessage: 'Privileged user monitoring',
+              }
+            ),
+            value: false,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'security'],
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
@@ -435,7 +450,7 @@ export const initUiSettings = (
             value: true,
             category: [APP_ID],
             requiresPageReload: false,
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
@@ -510,7 +525,7 @@ export const initUiSettings = (
             },
             category: [APP_ID],
             requiresPageReload: false,
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
         }
       : {}),
@@ -518,3 +533,30 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
+export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+  connectors.length > 0
+    ? {
+        [DEFAULT_AI_CONNECTOR]: {
+          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
+            defaultMessage: 'Default AI Connector',
+          }),
+          // TODO, make Elastic LLM the default value once fully available in serverless
+          value: connectors[0].id,
+          description: i18n.translate(
+            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
+            {
+              // TODO update this copy, waiting on James Spiteri's input
+              defaultMessage:
+                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
+            }
+          ),
+          type: 'select',
+          options: connectors.map(({ id }) => id),
+          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
+          category: [APP_ID],
+          requiresPageReload: true,
+          schema: schema.string(),
+          solutionViews: ['classic', 'security'],
+        },
+      }
+    : null;

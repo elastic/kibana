@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { enrichEvents } from '.';
 import { searchEnrichments } from './search_enrichments';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
@@ -14,7 +12,8 @@ import { createAlert } from './__mocks__/alerts';
 
 import { isIndexExist } from './utils/is_index_exist';
 
-import { allowedExperimentalValues } from '../../../../../../common';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
@@ -112,13 +111,13 @@ const assetCriticalityServiceResponse = [
 
 describe('enrichEvents', () => {
   let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
   const createEntity = (entity: string, name: string) => ({
     [entity]: { name },
   });
   beforeEach(() => {
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-    alertServices = alertsMock.createRuleExecutorServices();
+    ruleServices = createPersistenceExecutorOptionsMock();
   });
   afterEach(() => {
     mockIsIndexExist.mockClear();
@@ -133,7 +132,7 @@ describe('enrichEvents', () => {
     ];
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events,
       spaceId: 'default',
     });
@@ -147,7 +146,7 @@ describe('enrichEvents', () => {
     const events = [createAlert('1'), createAlert('2')];
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events,
       spaceId: 'default',
     });
@@ -164,7 +163,7 @@ describe('enrichEvents', () => {
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
@@ -225,7 +224,7 @@ describe('enrichEvents', () => {
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),
@@ -235,7 +234,6 @@ describe('enrichEvents', () => {
         createAlert('2', createEntity('host', 'user name 1')),
       ],
       spaceId: 'default',
-      experimentalFeatures: allowedExperimentalValues,
     });
 
     expect(enrichedEvents).toEqual([
@@ -263,7 +261,7 @@ describe('enrichEvents', () => {
 
     const enrichedEvents = await enrichEvents({
       logger: ruleExecutionLogger,
-      services: alertServices,
+      services: ruleServices,
       events: [
         createAlert('1', {
           ...createEntity('host', 'host name 1'),

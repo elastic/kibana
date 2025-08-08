@@ -20,6 +20,7 @@ export function RootCauseAnalysisPanel({
 }) {
   const theme = useTheme();
 
+  const isSeverityColor = color === 'risk' || color === 'neutral';
   const panelClassName =
     color &&
     color !== 'transparent' &&
@@ -28,7 +29,10 @@ export function RootCauseAnalysisPanel({
     color !== 'highlighted'
       ? css`
           border: 1px solid;
-          border-color: ${rgba(theme.colors[color], 0.25)};
+          border-color: ${rgba(
+            isSeverityColor ? theme.colors.severity[color] : theme.colors[color],
+            0.25
+          )};
         `
       : undefined;
 

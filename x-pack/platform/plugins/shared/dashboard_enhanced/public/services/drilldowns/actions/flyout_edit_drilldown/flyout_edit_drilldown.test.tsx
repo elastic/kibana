@@ -5,40 +5,33 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
 import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
 import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { FlyoutEditDrilldownAction, FlyoutEditDrilldownParams } from './flyout_edit_drilldown';
+import { BehaviorSubject } from 'rxjs';
+import { flyoutEditDrilldownAction } from './flyout_edit_drilldown';
+import { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
 
-function createAction(overlays = coreMock.createStart().overlays) {
-  const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
-  const uiActions = uiActionsPlugin.doStart();
-  const params: FlyoutEditDrilldownParams = {
-    start: () => ({
-      core: {
-        overlays,
-        application: {
-          currentAppId$: new Subject(),
-        },
-        theme: {
-          theme$: new Subject(),
-        },
-      } as any,
-      plugins: {
-        uiActionsEnhanced: uiActions,
+jest.mock('../../../kibana_services', () => {
+  return {
+    coreServices: {
+      overlays: {
+        openFlyout: jest.fn(),
       },
-      self: {},
-    }),
+      application: {
+        currentAppId$: { pipe: () => ({ subscribe: () => {} }) },
+      },
+    } as any,
+    uiActionsEnhancedServices: {},
   };
-  return new FlyoutEditDrilldownAction(params);
-}
+});
+import { coreServices } from '../../../kibana_services';
+
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
   dynamicActions: { events: [{} as SerializedEvent] },
 });
@@ -71,23 +64,32 @@ beforeAll(async () => {
     ['VALUE_CLICK_TRIGGER']
   );
 });
+const context = {} as unknown as ActionDefinitionContext<EmbeddableApiContext>;
 
 test('title is a string', () => {
-  expect(typeof createAction().getDisplayName() === 'string').toBe(true);
+  expect(
+    flyoutEditDrilldownAction.getDisplayName &&
+      typeof flyoutEditDrilldownAction.getDisplayName(context) === 'string'
+  ).toBeTruthy();
 });
 
 test('icon exists', () => {
-  expect(typeof createAction().getIconType() === 'string').toBe(true);
+  expect(
+    flyoutEditDrilldownAction.getIconType &&
+      typeof flyoutEditDrilldownAction.getIconType(context) === 'string'
+  ).toBe(true);
 });
 
 test('MenuItem exists', () => {
-  expect(createAction().MenuItem).toBeDefined();
+  expect(flyoutEditDrilldownAction.MenuItem).toBeDefined();
 });
 
 describe('isCompatible', () => {
   test("compatible if dynamicUiActions enabled (with event), 'VALUE_CLICK_TRIGGER' is supported, in edit mode", async () => {
-    const action = createAction();
-    expect(await action.isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(true);
+    expect(
+      flyoutEditDrilldownAction.isCompatible &&
+        (await flyoutEditDrilldownAction.isCompatible({ embeddable: compatibleEmbeddableApi }))
+    ).toBe(true);
   });
 
   test('not compatible if no drilldowns', async () => {
@@ -104,8 +106,10 @@ describe('isCompatible', () => {
         newDynamicActionsState$.next(newDynamicActions);
       },
     };
-    const action = createAction();
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutEditDrilldownAction.isCompatible &&
+        (await flyoutEditDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 
   test('not compatible if embeddable is not enhanced', async () => {
@@ -113,8 +117,10 @@ describe('isCompatible', () => {
       ...compatibleEmbeddableApi,
       enhancements: undefined,
     };
-    const action = createAction();
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutEditDrilldownAction.isCompatible &&
+        (await flyoutEditDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 
   test('not compatible in view mode', async () => {
@@ -122,32 +128,31 @@ describe('isCompatible', () => {
       ...compatibleEmbeddableApi,
       viewMode$: new BehaviorSubject<ViewMode>('view'),
     };
-    const action = createAction();
-    expect(await action.isCompatible({ embeddable: embeddableApi })).toBe(false);
+    expect(
+      flyoutEditDrilldownAction.isCompatible &&
+        (await flyoutEditDrilldownAction.isCompatible({ embeddable: embeddableApi }))
+    ).toBe(false);
   });
 });
 
 describe('execute', () => {
   test('throws error if no dynamicUiActions', async () => {
-    const action = createAction();
     const embeddableApi = {
       ...compatibleEmbeddableApi,
       enhancements: undefined,
     };
     await expect(
-      action.execute({
+      flyoutEditDrilldownAction.execute({
         embeddable: embeddableApi,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action is incompatible"`);
   });
 
   test('should open flyout', async () => {
-    const overlays = coreMock.createStart().overlays;
-    const spy = jest.spyOn(overlays, 'openFlyout');
-    const action = createAction(overlays);
-    await action.execute({
+    await flyoutEditDrilldownAction.execute({
       embeddable: compatibleEmbeddableApi,
     });
-    expect(spy).toBeCalled();
+
+    expect(coreServices.overlays.openFlyout).toBeCalled();
   });
 });

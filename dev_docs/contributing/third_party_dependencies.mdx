@@ -67,6 +67,74 @@ on Github:
   [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
 </DocCallOut>
 
+### Dependency evaluation
+
+To manage workload effectively during this stopgap period, the evaluation is applicable only to new third-party dependencies. 
+Dependency upgrades are not considered, as reviewing them would be excessively time-consuming.
+
+1. **Justification and context**.
+    - What is this dependency used for? Briefly explain its role in your changes and the problem it solves.
+    - Why is adding this specific external dependency the best approach compared to other solutions?
+    - Were other options considered (e.g., using existing internal libraries/utilities, implementing the functionality directly)? If so, why was this dependency chosen over them?
+    - Does Kibana have a dependency providing similar functionality? If so, why is the new one preferred?
+  
+  Responsible: PR author
+
+2. **Snyk health check**. Setting the healthy threshold at 70 provides pragmatic balance: prioritizes maintenance, filters out major security risks and indicates acceptable quality. Score is calculated as a weighted mean based on maintenance, security, quality and popularity.
+    - Ensure a minimum health score is >= 70 in [Snyk Advisor](https://snyk.io/advisor).
+    - If the health score is below 70, a valid business justification must be provided.
+  
+  Responsible: PR author
+
+3. **Vulnerability assessment**. Check vulnerability reports from Snyk for the exact dependency version, available through [Snyk Advisor](https://snyk.io/advisor).
+    If vulnerabilities are present:
+
+    - **Critical (CVSS 9.0 - 10.0)**:
+      - **False positive:** Proceed to Step 4.
+      - **Confirmed vulnerability:** Reject dependency.
+
+    - **High (CVSS 7.0 - 8.9)**:
+      - **False positive:** Proceed to Step 4.
+      - **Confirmed vulnerability:** Reject dependency.
+
+    - **Medium/Low (CVSS 0.0 - 6.9)**:
+      - **False positive:** Proceed to Step 4.
+      - **Confirmed vulnerability:** Exception can be granted if the vulnerability is confirmed to be impossible to exploit and and there is no better alternative.
+  
+  Responsible: PR author
+
+4. **Handling false positives**. If a vulnerability is considered to be a false positive:
+    - Clearly document why the vulnerability is considered a false positive.
+    - Submit an exception request following the Vulnerability Exception Policy and Procedures.
+    - The exception request must be created **before merging** the dependency.
+    - Initial exception timeframe is suggested to be 30 days. If there would be no upgrade path available after a month, longer exception timeframe can be requested.
+  
+  Responsible: PR author
+
+5. **Approval**. Document the entire assessment clearly, including:
+    - Final health score.
+    - CVSS scores of identified issues if applicable.
+    - Justification for any accepted false positives if applicable.
+  
+  Responsible: AppEx Platform Security team
+
+    ```
+    ## Approval Summary
+
+    | **Dependency Name**   | `<dependency-name>`            |
+    |-----------------------|--------------------------------|
+    | **Version**           | `<version>`                    |
+    | **Snyk Health Score** | `95/100`                       |
+    | **CVSS Issues**       | None / High (CVSS 7.5, CVE-XXXX-XXXX) |
+    | **False Positives**   | [Yes/No](justification below)   |
+
+    ### Justification / Notes:
+    - Brief justification or context here
+    - Submitted CVE exception(s)? [Yes/No]
+
+    Status: [approved/rejected]
+    ```
+
 ## Using existing dependencies
 
 Using an existing dependency is typically preferred over adding a new one.
