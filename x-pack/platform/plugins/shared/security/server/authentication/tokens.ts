@@ -103,12 +103,12 @@ export class Tokens {
         this.logger.debug('Refresh token is either expired or already used.');
 
         if (isExpiredOrInvalidRefreshTokenError(err)) {
-          this.logger.warn(err.message);
+          this.logger.warn(getDetailedErrorMessage(err));
           throw InvalidGrantError.expiredOrInvalidRefreshToken();
         }
 
         if (isCredentialMismatchError(err)) {
-          this.logger.error(err.message);
+          this.logger.error(getDetailedErrorMessage(err));
 
           throw InvalidGrantError.credentialMismatch();
         }
