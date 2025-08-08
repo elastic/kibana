@@ -30,14 +30,14 @@ import {
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
-import { Minimap } from '../minimap';
+import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
-import { GRAPH_WRAPPER_ID } from '../test_ids';
+import { GRAPH_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -157,7 +157,7 @@ export const Graph = memo<GraphProps>(
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
-          data-test-subj={GRAPH_WRAPPER_ID}
+          data-test-subj={GRAPH_ID}
           fitView={true}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
@@ -200,7 +200,7 @@ export const Graph = memo<GraphProps>(
 
 Graph.displayName = 'Graph';
 
-const processGraph = (
+export const processGraph = (
   nodesModel: NodeViewModel[],
   edgesModel: EdgeViewModel[],
   interactive: boolean

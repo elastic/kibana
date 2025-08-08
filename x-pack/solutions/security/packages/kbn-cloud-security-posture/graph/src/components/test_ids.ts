@@ -35,7 +35,12 @@ export const GRAPH_CONTROLS_ZOOM_OUT_ID = `${GRAPH_INVESTIGATION_TEST_ID}ZoomOut
 export const GRAPH_CONTROLS_CENTER_ID = `${GRAPH_INVESTIGATION_TEST_ID}Center` as const;
 export const GRAPH_CONTROLS_FIT_VIEW_ID = `${GRAPH_INVESTIGATION_TEST_ID}FitView` as const;
 
-export const GRAPH_WRAPPER_ID = `${GRAPH_INVESTIGATION_TEST_ID}GraphWrapper` as const;
+export const GRAPH_ID = `${GRAPH_INVESTIGATION_TEST_ID}Graph` as const;
+export const GRAPH_ENTITY_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}EntityNode` as const;
+export const GRAPH_LABEL_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}LabelNode` as const;
+export const GRAPH_STACK_NODE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackNode` as const;
+export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
+
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;

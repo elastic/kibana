@@ -13,19 +13,25 @@ import {
   GRAPH_MINIMAP_ENTITY_NODE_ID,
   GRAPH_MINIMAP_LABEL_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
-} from './test_ids';
-import type { NodeViewModel } from './types';
-import { isEntityNode, isLabelNode, isStackNode } from './utils';
-import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from './node/styles';
+} from '../test_ids';
+import type { NodeViewModel } from '../types';
+import { isEntityNode, isLabelNode, isStackNode } from '../utils';
+import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
   data?: NodeViewModel;
 }
 
-const MiniMapNode = ({ x, y, width = 100, height = 100, data }: MiniMapNodeRenderedProps) => {
+const MiniMapNode = ({
+  x,
+  y,
+  width = NODE_WIDTH,
+  height = NODE_HEIGHT,
+  data,
+}: MiniMapNodeRenderedProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const getEuiFillColor = (fill: string) =>
+  const getEuiColor = (fill: string) =>
     typeof fill === 'string' && fill in euiTheme.colors
       ? (euiTheme.colors[fill as keyof typeof euiTheme.colors] as string)
       : euiTheme.colors.primary;
@@ -37,12 +43,13 @@ const MiniMapNode = ({ x, y, width = 100, height = 100, data }: MiniMapNodeRende
   if (isEntityNode(data)) {
     return (
       <rect
+        data-id={data.id}
         data-test-subj={GRAPH_MINIMAP_ENTITY_NODE_ID}
         x={x}
         y={y}
         height={NODE_HEIGHT}
         width={NODE_WIDTH}
-        fill={getEuiFillColor(data.color ?? 'primary')}
+        fill={getEuiColor(data.color ?? 'primary')}
       />
     );
   }
@@ -54,18 +61,15 @@ const MiniMapNode = ({ x, y, width = 100, height = 100, data }: MiniMapNodeRende
 
   // For label nodes, render a horizontal rectangle
   if (isLabelNode(data)) {
-    // If labels are based on documentsData:
-    //   const analysis = analyzeDocuments(data.documentsData);
-    //   const { backgroundColor } = getLabelColors(analysis, euiTheme);
-    //   fill={backgroundColor}
     return (
       <rect
+        data-id={data.id}
         data-test-subj={GRAPH_MINIMAP_LABEL_NODE_ID}
         x={x}
         y={y}
         height={NODE_LABEL_HEIGHT}
         width={NODE_LABEL_WIDTH}
-        fill={getEuiFillColor(data.color ?? 'primary')}
+        fill={getEuiColor(data.color ?? 'primary')}
       />
     );
   }
@@ -73,12 +77,14 @@ const MiniMapNode = ({ x, y, width = 100, height = 100, data }: MiniMapNodeRende
   // Fallback for unknown types
   return (
     <rect
+      data-id={`unknown-${x}-${y}`}
       data-test-subj={GRAPH_MINIMAP_UNKNOWN_NODE_ID}
       x={x}
       y={y}
       width={width}
       height={height}
-      fill={getEuiFillColor('primary')}
+      stroke={getEuiColor('shadow')}
+      fill={getEuiColor('backgroundBasePlain')}
     />
   );
 };
@@ -141,7 +147,7 @@ export const Minimap = ({
     [nodeDataMap]
   );
 
-  // Modified MiniMapNode component that uses the node id to get data
+  // Custom node renderer that finds the corresponding node data per id and renders MiniMapNode
   const NodeRenderer = React.useCallback(
     (props: MiniMapNodeProps) => {
       const nodeId = props.id;
@@ -156,7 +162,7 @@ export const Minimap = ({
   const defaultStyle: React.CSSProperties = {
     height: 120,
     width: 200,
-    // MiniMap's `bgColor` prop affects the mask so we need to pass it to `style`
+    // NOTE MiniMap's `bgColor` prop affects the mask so we need to pass our custom bgColor within the `style` prop
     backgroundColor: euiTheme.colors.backgroundBasePlain,
   };
 
