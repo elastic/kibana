@@ -51,10 +51,9 @@ function visitIs(node: KqlFunctionNode, context: Record<string, any>): boolean {
   }
 
   if ((rightLiteral.type as any) === KQL_NODE_TYPE_WILDCARD) {
-    // Handle wildcard matching
-    // const regex = new RegExp(`^${rightLiteral.value.replace('*', '.*')}$`);
-    // return regex.test(String(contextValue));
     return true;
+  } else if (typeof contextValue === 'string') {
+    return wildcardToRegex(rightLiteral.value as string).test(contextValue);
   }
 
   try {
@@ -112,11 +111,6 @@ function readContextPath(
       return { pathExists: false, value: undefined }; // Path not found in context
     }
 
-    if (result[segment] === undefined) {
-      // Path found, but value is undefined
-      result = undefined;
-      break;
-    }
     result = result[segment];
   }
 
@@ -137,4 +131,27 @@ function convertLiteralToValue(
     default:
       throw new Error(`Unsupported type: ${expectedType}`);
   }
+}
+
+function wildcardToRegex(value: string): RegExp {
+  const tokenized = value
+    // Temporarily replace escaped wildcards with placeholders
+    .replace(/\\\\/g, '__ESCAPED_BACKSLASH__') // handles \\ correctly
+    .replace(/\\\*/g, '__LITERAL_AST__')
+    .replace(/\\\?/g, '__LITERAL_Q__')
+
+    // Escape regex metacharacters (except wildcards)
+    .replace(/([.+^${}()|[\]\\])/g, '\\$1')
+
+    // Convert real wildcards
+    .replace(/\*/g, '.*')
+    .replace(/\?/g, '.')
+
+    // Restore literal wildcards
+    .replace(/__LITERAL_AST__/g, '\\*')
+    .replace(/__LITERAL_Q__/g, '\\?')
+    .replace(/__ESCAPED_BACKSLASH__/g, '\\\\');
+  const wildcardPattern = `^${tokenized}$`;
+
+  return new RegExp(wildcardPattern);
 }
