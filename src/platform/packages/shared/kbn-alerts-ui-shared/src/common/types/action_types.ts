@@ -28,6 +28,7 @@ export type ConnectorValidationFunc = () => Promise<ConnectorValidationError | v
 export interface ActionConnectorFieldsProps {
   readOnly: boolean;
   isEdit: boolean;
+  actionTypeModel: ActionTypeModel;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
 

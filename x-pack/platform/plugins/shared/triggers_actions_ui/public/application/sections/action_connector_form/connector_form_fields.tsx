@@ -62,6 +62,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               <FieldsComponent
                 readOnly={!canSave}
                 isEdit={isEdit}
+                actionTypeModel={actionTypeModel}
                 registerPreSubmitValidator={registerPreSubmitValidator}
               />
             </Suspense>
