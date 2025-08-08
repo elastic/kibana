@@ -559,14 +559,12 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return;
   }
 
-  const scoutGroups = pluginsWithScoutConfigs.flatMap((plugin) =>
-    Array.from({ length: 25 }, (_, pos) => pos + 1).map((index) => ({
-      title: `${plugin}-${index}`,
-      key: plugin,
-      usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
-      group: rawScoutConfigs[plugin].group,
-    }))
-  );
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
+    group: rawScoutConfigs[plugin].group,
+  }));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
