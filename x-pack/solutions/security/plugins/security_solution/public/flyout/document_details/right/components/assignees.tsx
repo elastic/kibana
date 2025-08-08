@@ -18,7 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
+import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/alert_assignment/use_set_alert_assignees';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
 import type { AssigneesApplyPanelProps } from '../../../../common/components/assignees/assignees_apply_panel';
