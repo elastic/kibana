@@ -61,22 +61,24 @@ export const runZeroDowntimeMigration = async (
   });
 
   return await Promise.all(
-    migratorConfigs.map((migratorConfig) => {
+    migratorConfigs.map(async (migratorConfig) => {
       const logger = createCustomLogger(options.logger);
       const dumpLogs = () => {
         logger.dump();
       };
       process.on('uncaughtExceptionMonitor', dumpLogs);
-      const promise = migrateIndex({
-        ...options,
-        ...migratorConfig,
-        logger,
-      });
-      promise.finally(() => {
+      try {
+        return await migrateIndex({
+          ...options,
+          ...migratorConfig,
+          logger,
+        });
+      } catch (error) {
+        logger.dump();
+        throw error;
+      } finally {
         process.removeListener('uncaughtExceptionMonitor', dumpLogs);
-      });
-
-      return promise;
+      }
     })
   );
 };
