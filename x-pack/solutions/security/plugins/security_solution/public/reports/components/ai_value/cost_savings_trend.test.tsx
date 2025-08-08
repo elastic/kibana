@@ -18,7 +18,6 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 const defaultProps = {
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
-  attackAlertIds: ['id1', 'id2'],
   minutesPerAlert: 10,
   analystHourlyRate: 100,
 };

@@ -315,3 +315,27 @@ export const EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE = i18n.translate(
 export const AI_FILTERED = i18n.translate('xpack.securitySolution.reports.aiValue.aiFiltered', {
   defaultMessage: 'AI filtered',
 });
+
+export const COST_CALCULATIONS = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costCalculations',
+  {
+    defaultMessage: 'Cost calculations',
+  }
+);
+
+export const COST_CALCULATION = ({
+  minutesPerAlert,
+  analystHourlyRate,
+}: {
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.costCalculation', {
+    defaultMessage:
+      'Value is calculated by multiplying the total number of alerts by {minutesPerAlert} minutes each and then multiplying the result by a ${analystHourlyRate} per hour analyst rate.',
+    values: { minutesPerAlert, analystHourlyRate },
+  });
+
+export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValue.changeRate', {
+  defaultMessage: 'Change rate in advanced settings',
+});
