@@ -1695,7 +1695,7 @@
     "@types/normalize-path": "^3.0.2",
     "@types/nunjucks": "^3.2.6",
     "@types/object-hash": "^3.0.6",
-    "@types/opn": "^5.1.0",
+    "@types/opn": "5.1.0",
     "@types/ora": "^1.3.5",
     "@types/papaparse": "^5.3.16",
     "@types/pbf": "3.0.2",
