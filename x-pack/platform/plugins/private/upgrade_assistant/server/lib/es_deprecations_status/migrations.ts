@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
+import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
@@ -21,7 +22,6 @@ import {
   getCorrectiveAction,
   isFrozenDeprecation,
 } from './get_corrective_actions';
-import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type

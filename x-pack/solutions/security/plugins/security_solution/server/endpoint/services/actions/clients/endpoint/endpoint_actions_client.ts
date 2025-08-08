@@ -28,7 +28,10 @@ import type {
   KillProcessRequestBody,
   UnisolationRouteRequestBody,
 } from '../../../../../../common/api/endpoint';
-import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import {
+  ResponseActionsClientImpl,
+  type ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
+} from '../lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
@@ -175,7 +178,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       actionId,
       command,
       comment,
-    });
+    } as ResponseActionsClientWriteActionRequestToEndpointIndexOptions);
 
     // Update cases
     await this.updateCases({
