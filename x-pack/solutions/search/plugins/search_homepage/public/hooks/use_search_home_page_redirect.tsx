@@ -16,20 +16,23 @@ import { generateRandomIndexName } from '../utils/indices';
 import { useKibana } from './use_kibana';
 
 export const useSearchHomePageRedirect = () => {
-  const { application, http } = useKibana().services;
+  const { application } = useKibana().services;
   const indexName = useMemo(() => generateRandomIndexName(), []);
   const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
   const skipGlobalEmptyState = useMemo(() => {
     return localStorage.getItem(GLOBAL_EMPTY_STATE_SKIP_KEY) === 'true';
   }, []);
-  const { data: indicesStatus, isLoading } = useIndicesStatusQuery(
-    undefined,
-    !skipGlobalEmptyState
-  );
+  const {
+    data: indicesStatus,
+    isLoading,
+    error,
+  } = useIndicesStatusQuery(undefined, !skipGlobalEmptyState);
 
-  const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
+  const [redirectChecked, setRedirectChecked] = useState(() => false);
+
   useEffect(() => {
-    if (hasDoneRedirect || skipGlobalEmptyState) {
+    if (skipGlobalEmptyState) {
+      setRedirectChecked(true);
       return;
     }
 
@@ -38,31 +41,23 @@ export const useSearchHomePageRedirect = () => {
     }
 
     if (userPrivileges?.privileges?.canManageIndex === false) {
-      setHasDoneRedirect(true);
+      setRedirectChecked(true);
       return;
     }
 
-    if (!indicesStatus) {
+    if (!indicesStatus || error) {
       return;
     }
     if (indicesStatus.indexNames.length === 0) {
-      application.navigateToApp('elasticsearchStart');
-      setHasDoneRedirect(true);
+      application.navigateToApp('elasticsearchStart').catch(() => {
+        setRedirectChecked(true);
+      });
       return;
     }
-
-    setHasDoneRedirect(true);
-  }, [
-    application,
-    http,
-    indicesStatus,
-    setHasDoneRedirect,
-    hasDoneRedirect,
-    userPrivileges,
-    skipGlobalEmptyState,
-  ]);
+    setRedirectChecked(true);
+  }, [application, indicesStatus, userPrivileges, skipGlobalEmptyState]);
 
   return {
-    isLoading: skipGlobalEmptyState ? false : isLoading,
+    isLoading: redirectChecked ? isLoading : true,
   };
 };
