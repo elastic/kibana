@@ -123,37 +123,10 @@ export const savedSearches = {
             highlightAll: true,
             version: true,
             query: {
-              query: '',
+              query: 'airline:A*',
               language: 'lucene',
             },
-            filter: [
-              {
-                meta: {
-                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
-                  negate: false,
-                  disabled: false,
-                  alias: null,
-                  type: 'phrase',
-                  key: 'airline',
-                  value: 'ASA',
-                  params: {
-                    query: 'ASA',
-                    type: 'phrase',
-                  },
-                },
-                query: {
-                  match: {
-                    airline: {
-                      query: 'ASA',
-                      type: 'phrase',
-                    },
-                  },
-                },
-                $state: {
-                  store: 'appState',
-                },
-              },
-            ],
+            filter: [],
             indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
           }),
         },
@@ -169,37 +142,10 @@ export const savedSearches = {
                   highlightAll: true,
                   version: true,
                   query: {
-                    query: '',
+                    query: 'airline:A*',
                     language: 'lucene',
                   },
-                  filter: [
-                    {
-                      meta: {
-                        index: 'INDEX_PATTERN_ID_PLACEHOLDER',
-                        negate: false,
-                        disabled: false,
-                        alias: null,
-                        type: 'phrase',
-                        key: 'airline',
-                        value: 'ASA',
-                        params: {
-                          query: 'ASA',
-                          type: 'phrase',
-                        },
-                      },
-                      query: {
-                        match: {
-                          airline: {
-                            query: 'ASA',
-                            type: 'phrase',
-                          },
-                        },
-                      },
-                      $state: {
-                        store: 'appState',
-                      },
-                    },
-                  ],
+                  filter: [],
                   indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                 }),
               },
