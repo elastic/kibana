@@ -355,6 +355,40 @@ describe('function validation', () => {
               getNoValidCallSignatureError('test', ['keyword']),
             ]);
           });
+
+          // This test may seem obvious, but it is here to guard against
+          // erroring because we are checking the types of signatures that
+          // haven't yet been correctly filtered by arity, which leads to
+          // a thrown error and no validation error message
+          it('correctly handles signatures of different lengths', async () => {
+            setTestFunctions([
+              {
+                name: 'test',
+                type: FunctionDefinitionTypes.SCALAR,
+                description: '',
+                locationsAvailable: [Location.EVAL],
+                signatures: [
+                  {
+                    params: [{ name: 'arg1', type: 'keyword' }],
+                    returnType: 'keyword',
+                  },
+                  {
+                    params: [
+                      { name: 'arg1', type: 'integer' },
+                      { name: 'arg2', type: 'integer' },
+                    ],
+                    returnType: 'integer',
+                  },
+                ],
+              },
+            ]);
+
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | EVAL TEST("", "")', [
+              getNoValidCallSignatureError('test', ['keyword', 'keyword']),
+            ]);
+          });
         });
       });
     });

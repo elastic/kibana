@@ -31,6 +31,7 @@ import {
   getExpressionType,
   getParamAtPosition,
   getSignaturesWithMatchingArity,
+  matchesArity,
 } from '../expressions';
 import { ColumnValidator } from './column';
 import { isArrayType } from '../operators';
@@ -125,7 +126,7 @@ class FunctionValidator {
       return;
     }
 
-    const S = getSignaturesMatchingTypes(this.definition, this.argTypes, this.argLiteralsMask);
+    const S = getSignaturesMatchingTypes(A, this.argTypes, this.argLiteralsMask);
 
     if (!S.length) {
       this.report(errors.noMatchingCallSignatures(this.fn, this.definition, this.argTypes));
@@ -230,13 +231,13 @@ export const PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING: FunctionParameter
  * @param types
  */
 function getSignaturesMatchingTypes(
-  definition: FunctionDefinition,
+  signatures: FunctionDefinition['signatures'],
   givenTypes: Array<SupportedDataType | 'unknown'>,
   // a boolean array indicating which args are literals
   literalMask: boolean[]
 ): FunctionDefinition['signatures'] {
-  return definition.signatures.filter((sig) => {
-    if (givenTypes.length < sig.params.filter(({ optional }) => !optional).length) {
+  return signatures.filter((sig) => {
+    if (!matchesArity(sig, givenTypes.length)) {
       return false;
     }
 

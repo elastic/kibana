@@ -28,16 +28,20 @@ export function getSignaturesWithMatchingArity(
   fnDef: FunctionDefinition,
   astFunction: ESQLFunction
 ) {
-  const arity = astFunction.args.length;
+  return fnDef.signatures.filter((sig) => matchesArity(sig, astFunction.args.length));
+}
 
-  return fnDef.signatures.filter((def) => {
-    if (def.minParams) {
-      return arity >= def.minParams;
-    }
-    return (
-      arity >= def.params.filter(({ optional }) => !optional).length && arity <= def.params.length
-    );
-  });
+export function matchesArity(
+  signature: FunctionDefinition['signatures'][number],
+  arity: number
+): boolean {
+  if (signature.minParams) {
+    return arity >= signature.minParams;
+  }
+  return (
+    arity >= signature.params.filter(({ optional }) => !optional).length &&
+    arity <= signature.params.length
+  );
 }
 
 /**
