@@ -13,7 +13,6 @@
     "@kbn/share-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/cloud-plugin",
     "@kbn/i18n",
     "@kbn/home-sample-data-tab",

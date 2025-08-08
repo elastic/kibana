@@ -38,6 +38,7 @@ export async function autocomplete(
     preferredExpressionType: 'boolean',
     context,
     hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
+    activeProduct: context?.activeProduct,
   });
 
   const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
