@@ -7,7 +7,8 @@
 
 import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
-import type { AlertMetadata } from '../../../common/types/domain';
+import { flattenObject } from '@kbn/object-utils';
+import type { CaseMetadata } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common/types/domain';
 import type { AttachmentAttributes } from '../../../common';
 import type { AlertInfo } from '../../common/types';
@@ -45,7 +46,7 @@ export const getAlerts = async (
 export const getAlertMetadataFromComments = async (
   comments: AttachmentAttributes[],
   clientArgs: CasesClientArgs
-): Promise<AlertMetadata[]> => {
+): Promise<CaseMetadata> => {
   const alertInfo: AlertInfo[] = comments.flatMap((c) => {
     if (c.type === AttachmentType.alert) {
       const { ids, indices } = getIDsAndIndicesAsArrays(c);
@@ -54,11 +55,24 @@ export const getAlertMetadataFromComments = async (
     return [];
   });
 
+  const metadata: { tags: string[]; [key: string]: unknown } = { tags: [] };
+
   const alertsDocs = await getAlerts(alertInfo, clientArgs);
 
-  return alertsDocs.map((alert) => ({
-    id: alert.id,
-    grouping: alert[ALERT_GROUPING],
-    tags: alert[TAGS],
-  }));
+  for (const alert of alertsDocs) {
+    metadata.tags.push(...(alert[TAGS] ?? []));
+    const grouping = alert[ALERT_GROUPING];
+    if (grouping) {
+      const flat = flattenObject(grouping);
+      for (const [key, value] of Object.entries(flat)) {
+        if (!(key in metadata)) {
+          metadata[key] = [value];
+        } else if (Array.isArray(metadata[key]) && typeof value === 'string') {
+          (metadata[key] as string[]).push(value);
+        }
+      }
+    }
+  }
+
+  return metadata;
 };

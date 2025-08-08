@@ -21,7 +21,6 @@ import type {
   Attachment,
   AttachmentAttributes,
   Case,
-  CaseMetadata,
   User,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
@@ -124,20 +123,17 @@ export const flattenCaseSavedObject = ({
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
-  metadata,
 }: {
   savedObject: CaseSavedObjectTransformed;
   comments?: Array<SavedObject<AttachmentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-  metadata?: CaseMetadata;
 }): Case => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
   totalComment,
   totalAlerts,
-  ...(metadata ? { metadata } : {}),
   ...savedObject.attributes,
 });
 

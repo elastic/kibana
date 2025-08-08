@@ -5,13 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
 import type {
-  SavedObject,
-  SavedObjectsFindResponse,
-  SavedObjectsResolveResponse,
-} from '@kbn/core/server';
-import type {
-  AttachmentAttributes,
+  Attachment,
   AttachmentTotals,
   Case,
   CaseAttributes,
@@ -173,17 +169,26 @@ const getCaseComments = async (id: string, clientArgs: CasesClientArgs) => {
   });
 };
 
-const getCaseMetadata = async (
-  theComments: SavedObjectsFindResponse<AttachmentAttributes>,
+/**
+ * The parameters for retrieving a case metadata
+ */
+export interface GetMetadataParams {
+  /**
+   * The comments for a case
+   */
+  theComments: Attachment[];
+}
+
+/**
+ * Retrieves a case metadata from the comments.
+ *
+ * @ignore
+ */
+export const getMetadata = async (
+  { theComments }: GetMetadataParams,
   clientArgs: CasesClientArgs
 ): Promise<CaseMetadata> => {
-  const alertMetadata = await getAlertMetadataFromComments(
-    theComments.saved_objects.map((comment) => comment.attributes),
-    clientArgs
-  );
-  return {
-    alerts: alertMetadata,
-  };
+  return getAlertMetadataFromComments(theComments, clientArgs);
 };
 
 /**
@@ -198,10 +203,6 @@ export interface GetParams {
    * Whether to include the attachments for a case in the response
    */
   includeComments?: boolean;
-  /**
-   * Whether to include the case metadata for a case in the response
-   */
-  includeMetadata?: boolean;
 }
 
 /**
@@ -210,7 +211,7 @@ export interface GetParams {
  * @ignore
  */
 export const get = async (
-  { id, includeComments, includeMetadata }: GetParams,
+  { id, includeComments }: GetParams,
   clientArgs: CasesClientArgs
 ): Promise<Case> => {
   const {
@@ -229,14 +230,6 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    let metadata: CaseMetadata | undefined;
-    let theComments: SavedObjectsFindResponse<AttachmentAttributes> | undefined;
-
-    if (includeMetadata) {
-      theComments = await getCaseComments(id, clientArgs);
-      metadata = await getCaseMetadata(theComments, clientArgs);
-    }
-
     if (!includeComments) {
       const commentStats = await attachmentService.getter.getCaseAttatchmentStats({
         caseIds: [theCase.id],
@@ -250,21 +243,17 @@ export const get = async (
                 totalComment: commentStats.get(theCase.id)?.userComments,
               }
             : {}),
-          metadata,
         })
       );
     }
 
-    if (!theComments) {
-      theComments = await getCaseComments(id, clientArgs);
-    }
+    const theComments = await getCaseComments(id, clientArgs);
 
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
       totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
-      metadata,
     });
 
     return decodeOrThrow(CaseRt)(res);
