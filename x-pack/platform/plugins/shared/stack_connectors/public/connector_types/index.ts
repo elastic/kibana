@@ -7,6 +7,7 @@
 
 import type { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
 import { getCasesWebhookConnectorType } from './cases_webhook';
 import { getEmailConnectorType } from './email';
@@ -68,6 +69,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
   connectorTypeRegistry.register(getOpsgenieConnectorType());
+  connectorTypeRegistry.register(getJiraServiceManagementConnectorType());
   connectorTypeRegistry.register(getOpenAIConnectorType());
   connectorTypeRegistry.register(getBedrockConnectorType());
   connectorTypeRegistry.register(getGeminiConnectorType());

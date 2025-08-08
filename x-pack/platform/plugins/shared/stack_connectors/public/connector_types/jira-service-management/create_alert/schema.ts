@@ -39,19 +39,11 @@ const CreateAlertSchemaOptionalProps = rt.partial(
   rt.type({
     alias: rt.string,
     description: rt.string,
-    responders: rt.array(
-      rt.union([
-        rt.strict({ name: rt.string, type: ResponderTypes }),
-        rt.strict({ id: rt.string, type: ResponderTypes }),
-        rt.strict({ username: rt.string, type: rt.literal('user') }),
-      ])
-    ),
+    responders: rt.array(rt.strict({ id: rt.string, type: ResponderTypes })),
     visibleTo: rt.array(
       rt.union([
-        rt.strict({ name: rt.string, type: rt.literal('team') }),
         rt.strict({ id: rt.string, type: rt.literal('team') }),
         rt.strict({ id: rt.string, type: rt.literal('user') }),
-        rt.strict({ username: rt.string, type: rt.literal('user') }),
       ])
     ),
     actions: rt.array(rt.string),
@@ -73,7 +65,7 @@ const CreateAlertSchemaOptionalProps = rt.partial(
 
 /**
  * This schema is duplicated from the server. The only difference is that it is using io-ts vs kbn-schema.
- * NOTE: This schema must be the same as defined here: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
+ * NOTE: This schema must be the same as defined here: x-pack/platform/plugins/shared/stack_connectors/server/connector_types/stack/jira-service-management/schema.ts
  *
  * The reason it is duplicated here is because the server uses kbn-schema which uses Joi under the hood. If we import
  * Joi on the frontend it will cause ~500KB of data to be loaded on page loads. To avoid this we'll use io-ts in the frontend.
@@ -81,7 +73,7 @@ const CreateAlertSchemaOptionalProps = rt.partial(
  *
  * Issue: https://github.com/elastic/kibana/issues/143891
  *
- * For more information on the Opsgenie create alert schema see: https://docs.opsgenie.com/docs/alert-api#create-alert
+ * For more information on the JSM create alert schema see: https://developer.atlassian.com/cloud/jira/service-desk-ops/rest/v1/api-group-integration-events/#api-jsm-ops-integration-v2-alerts-post
  */
 const CreateAlertSchema = rt.intersection([
   rt.strict({ message: MessageNonEmptyString }),
